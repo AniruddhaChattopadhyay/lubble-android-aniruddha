@@ -1,0 +1,45 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_margin="8dp"
+              android:orientation="vertical"
+              android:weightSum="10">
+
+    <TextView
+        android:id="@+id/tv_skipBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:text="@string/all_skip"/>
+
+    <TextView
+        android:id="@+id/tv_welcome_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/profile_pic_hint"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"/>
+
+    <ImageView
+        android:id="@+id/iv_welcome_dp"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_margin="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="10"
+        app:srcCompat="@drawable/ic_account_circle_black_no_padding"/>
+
+    <Button
+        android:id="@+id/btn_submit"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/all_lets_go"
+        android:theme="@style/PrimaryButton"
+        android:visibility="gone"
+        tools:visibility="visible"/>
+
+</LinearLayout>

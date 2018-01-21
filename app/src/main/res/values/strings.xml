@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Lubble</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    <!-- sep -->
+
+    <string name="new_post_hint">What\'s new in your locality?</string>
+    <string name="new_post_add_photo">Add Photo or Screenshot</string>
+    <string name="priority_normal">Normal</string>
+    <string name="priority_high">High</string>
+    <string name="new_post_priority_label">Priority:</string>
+    <string name="new_post_high_priority_info">High Priority posts are shown as notification</string>
+    <string name="no_internet_connection">Check Internet Connection</string>
+    <string name="unknown_error">Unknown Error</string>
+    <string name="unknown_sign_in_response">Unknown response</string>
+    <string name="sign_in_cancelled">Sign in cancelled</string>
+    <string name="profile_sign_out">Sign out</string>
+    <string name="profile_save">Save</string>
+    <string name="signup_welcome">Welcome! Please introduce yourself</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="btn_continue">Continue</string>
+    <string name="profile_pic_hint">Hi %1$s!\nAdd your photo to let your friends identify you</string>
+    <string name="all_skip">skip</string>
+    <string name="all_lets_go">Let\'s Go</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
