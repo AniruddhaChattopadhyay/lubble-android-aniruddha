@@ -16,10 +16,10 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.group.GroupActivity;
 import in.lubble.app.models.ProfileData;
 
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -87,7 +87,15 @@ public class MainActivity extends AppCompatActivity {
     private void uploadNewUserData(FirebaseUser currentUser) {
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("profile");
+
+        UserSharedPrefs.getInstance().setUserId(currentUser.getUid());
+        ProfileData profileData = new ProfileData();
+        profileData.setId(currentUser.getUid());
+        profileData.setName(currentUser.getDisplayName());
+        profileData.setLocality("C - Block");
+        profileData.setBio("Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend");
+
+        database.getReference("users").child(currentUser.getUid()).setValue(profileData);
     }
 
     private void authCompleted() {
@@ -122,6 +130,8 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_notifications:
                     mTextMessage.setText(R.string.title_notifications);
+                    final Intent intent = new Intent(MainActivity.this, GroupActivity.class);
+                    startActivity(intent);
                     return true;
             }
             return false;

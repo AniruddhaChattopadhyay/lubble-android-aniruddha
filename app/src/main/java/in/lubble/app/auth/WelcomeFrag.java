@@ -61,6 +61,9 @@ public class WelcomeFrag extends Fragment {
                 .add(new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER)
                         .setParams(params)
                         .build());
+        selectedProviders
+                .add(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER)
+                        .build());
 
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                 .setLogo(R.drawable.ic_android_black_24dp)
