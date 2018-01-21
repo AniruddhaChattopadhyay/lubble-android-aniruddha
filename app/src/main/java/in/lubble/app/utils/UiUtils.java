@@ -1,10 +1,12 @@
 package in.lubble.app.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 
 import in.lubble.app.R;
 
@@ -13,6 +15,19 @@ import in.lubble.app.R;
  */
 
 public class UiUtils {
+
+
+    public static void hideKeyboard(Context ctx) {
+        InputMethodManager inputManager = (InputMethodManager) ctx
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        // check if no view has focus:
+        View v = ((Activity) ctx).getCurrentFocus();
+        if (v == null)
+            return;
+
+        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+    }
 
     public static void animateFadeHide(Context context, View view) {
         if (view != null && view.getVisibility() == View.VISIBLE) {

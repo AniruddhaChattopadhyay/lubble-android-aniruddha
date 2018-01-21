@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -48,6 +49,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         messagesReference = firebaseDatabase.getReference("messages/lubbles/0/groups/0");
+
+        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     @Override
@@ -58,6 +61,22 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         chatRecyclerView = view.findViewById(R.id.rv_chat);
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.btn_send_message);
+
+        chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                if (bottom < oldBottom) {
+                    chatRecyclerView.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            chatRecyclerView.smoothScrollToPosition(
+                                    chatRecyclerView.getAdapter().getItemCount() - 1);
+                        }
+                    }, 100);
+                }
+            }
+        });
 
         setupTogglingOfSendBtn();
         sendBtn.setOnClickListener(this);
