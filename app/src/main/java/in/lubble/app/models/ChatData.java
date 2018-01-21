@@ -6,8 +6,17 @@ package in.lubble.app.models;
 
 public class ChatData {
 
+    private String authorUid;
     private String authorName;
     private String message;
+
+    public String getAuthorUid() {
+        return authorUid;
+    }
+
+    public void setAuthorUid(String authorUid) {
+        this.authorUid = authorUid;
+    }
 
     public String getAuthorName() {
         return authorName;
@@ -24,4 +33,5 @@ public class ChatData {
     public void setMessage(String message) {
         this.message = message;
     }
+
 }

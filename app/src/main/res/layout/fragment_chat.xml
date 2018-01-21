@@ -26,6 +26,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/et_new_message"
-        tools:listitem="@layout/item_chat" />
+        tools:listitem="@layout/item_recvd_chat" />
 
 </RelativeLayout>

@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,9 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -23,6 +27,7 @@ import in.lubble.app.models.ChatData;
 
 public class ChatFragment extends Fragment implements View.OnClickListener {
 
+    private static final String TAG = "ChatFragment";
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
     private Button sendBtn;
@@ -43,7 +48,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         messagesReference = firebaseDatabase.getReference("messages/lubbles/0/groups/0");
-
     }
 
     @Override
@@ -58,7 +62,40 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         setupTogglingOfSendBtn();
         sendBtn.setOnClickListener(this);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        chatRecyclerView.setAdapter(new ChatAdapter(getContext(), new ArrayList<ChatData>()));
+        final ChatAdapter chatAdapter = new ChatAdapter(getContext(), new ArrayList<ChatData>());
+        chatRecyclerView.setAdapter(chatAdapter);
+
+        messagesReference.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "onChildAdded: ");
+                final ChatData chatData = dataSnapshot.getValue(ChatData.class);
+                if (chatData != null) {
+                    chatAdapter.addChatData(chatData);
+                }
+                chatRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "onChildChanged: ");
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         return view;
     }
@@ -69,6 +106,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             case R.id.btn_send_message:
 
                 final ChatData chatData = new ChatData();
+                chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 chatData.setAuthorName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                 chatData.setMessage(newMessageEt.getText().toString());
 
