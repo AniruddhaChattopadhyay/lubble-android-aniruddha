@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -22,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.group.GroupActivity;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.profile.ProfileActivity;
 
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UserUtils.isNewUser;
@@ -142,4 +144,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    public void openProfile(MenuItem item) {
+        ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
+    }
 }

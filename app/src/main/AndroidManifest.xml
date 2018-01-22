@@ -33,8 +33,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity
-            android:name=".group.GroupActivity" />
+        <activity android:name=".group.GroupActivity" />
+
+        <activity android:name=".profile.ProfileActivity" />
     </application>
 
 </manifest>
