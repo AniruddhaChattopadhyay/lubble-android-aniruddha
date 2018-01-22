@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
     <color name="card_background">#EEEEEE</color>
@@ -12,4 +10,7 @@
     <color name="gray">#b1b1b1</color>
     <color name="light_gray">#d6d6d6</color>
     <color name="very_light_gray">#ededed</color>
+
+    <color name="dark_green">#078007</color>
+    <color name="darker_green">#004300</color>
 </resources>

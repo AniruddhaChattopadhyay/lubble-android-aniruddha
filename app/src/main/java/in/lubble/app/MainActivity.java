@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -48,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toolbar toolbar = findViewById(R.id.my_awesome_toolbar);
+        setSupportActionBar(toolbar);
+
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null || !isValidString(currentUser.getDisplayName())) {
@@ -87,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     private void uploadNewUserData(FirebaseUser currentUser) {
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-
+        database.setPersistenceEnabled(true);
         UserSharedPrefs.getInstance().setUserId(currentUser.getUid());
         ProfileData profileData = new ProfileData();
         profileData.setId(currentUser.getUid());
