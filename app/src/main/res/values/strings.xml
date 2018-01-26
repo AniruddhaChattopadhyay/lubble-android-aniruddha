@@ -31,4 +31,5 @@
     <string name="profile">Profile</string>
     <string name="clear_db">Clear DB</string>
     <string name="edit_profile">EDIT PROFILE</string>
+    <string name="all_save">Save</string>
 </resources>

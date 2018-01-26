@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
     private void uploadNewUserData(FirebaseUser currentUser) {
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        database.setPersistenceEnabled(true);
         UserSharedPrefs.getInstance().setUserId(currentUser.getUid());
         ProfileData profileData = new ProfileData();
         profileData.setId(currentUser.getUid());

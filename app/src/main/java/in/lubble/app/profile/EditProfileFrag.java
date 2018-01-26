@@ -1,6 +1,5 @@
 package in.lubble.app.profile;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,12 +12,17 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -46,6 +50,7 @@ public class EditProfileFrag extends Fragment {
     private TextInputLayout fullNameTil;
     private TextInputLayout localityTil;
     private TextInputLayout bioTil;
+    private Button saveBtn;
     private ProfileData profileData;
     private View rootView;
     private String currentPhotoPath;
@@ -77,15 +82,25 @@ public class EditProfileFrag extends Fragment {
         fullNameTil = rootView.findViewById(R.id.til_fullName);
         localityTil = rootView.findViewById(R.id.til_locality);
         bioTil = rootView.findViewById(R.id.til_bio);
+        saveBtn = rootView.findViewById(R.id.btn_save_profile);
 
         rootView.findViewById(R.id.linearLayout_cover_edit_container).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
 
-        //todo profileData = DbSingleton.getInstance().readProfileData(UserSharedPrefs.getInstance().getUserId());
+        FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ProfileData fetchedProfileData = dataSnapshot.getValue(ProfileData.class);
+                fullNameTil.getEditText().setText(fetchedProfileData.getName());
+                localityTil.getEditText().setText(fetchedProfileData.getLocality());
+                bioTil.getEditText().setText(fetchedProfileData.getBio());
+            }
 
-        /*fullNameTil.getEditText().setText(profileData.getName());
-        localityTil.getEditText().setText(profileData.getLocality());
-        bioTil.getEditText().setText(profileData.getBio());*/
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         coverPicIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,8 +114,15 @@ public class EditProfileFrag extends Fragment {
                 startPhotoPicker(REQUEST_CODE_DP);
             }
         });
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
 
-        /*GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getCoverPic())
+            }
+        });
+
+        /*todo set default profile n cover pics
+        GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getCoverPic())
                 .placeholder(R.drawable.cover_pic)
                 .into(coverPicIv);
         GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getDp())
@@ -160,10 +182,31 @@ public class EditProfileFrag extends Fragment {
                         }
                     });
 
-            //uploadProfileOrCoverPic(imageFile, requestCode);
-            //dispatchNewPicJob(imageFile, requestCode);
         }
     }
+
+    private void uploadPic(File imageFile) {
+        Uri file = Uri.fromFile(imageFile);
+        StorageReference riversRef = storageRef
+                .child("images/users/" + FirebaseAuth.getInstance().getUid() + "/dp.jpg");
+
+        riversRef.putFile(file)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get a URL to the uploaded content
+                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        // ...
+                    }
+                });
+    }
+
 /*
     private boolean isDataValid() {
         if (!isValidString(getStringFromTil(fullNameTil))) {
@@ -209,41 +252,6 @@ public class EditProfileFrag extends Fragment {
             }*/
         }
         return false;
-    }
-
-    private void uploadProfileEdit(ProfileData profileData) {
-
-        final ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setMessage("Updating Profile...");
-        progressDialog.show();
-
-        /*NetworkClient apiClient = createService();
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("name", profileData.getName());
-        params.put("locality", profileData.getLocality());
-        params.put("bio", profileData.getBio());
-        Call<Void> Call = apiClient.uploadProfileEdit(params);
-        Call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call call, Response response) {
-                progressDialog.dismiss();
-                if (response.isSuccessful()) {
-                    d(TAG, "onResponse: SUCCESS!");
-                    getFragmentManager().popBackStack();
-
-                } else {
-                    d(TAG, "onResponse: FAILURE!");
-                    Toast.makeText(getContext(), "Whoops", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call call, Throwable t) {
-                progressDialog.dismiss();
-                d(TAG, "onFailure: ");
-                Snackbar.make(rootView, "Check Connection", Snackbar.LENGTH_SHORT).show();
-            }
-        });*/
     }
 
 }
