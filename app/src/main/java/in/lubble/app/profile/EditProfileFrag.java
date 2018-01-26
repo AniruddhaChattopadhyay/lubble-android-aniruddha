@@ -55,6 +55,8 @@ public class EditProfileFrag extends Fragment {
     private View rootView;
     private String currentPhotoPath;
     private StorageReference storageRef;
+    private Uri newProfilePicUri = null;
+    private Uri newCoverPicUri = null;
 
     public EditProfileFrag() {
         // Required empty public constructor
@@ -87,7 +89,7 @@ public class EditProfileFrag extends Fragment {
         rootView.findViewById(R.id.linearLayout_cover_edit_container).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
 
-        FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getUid()).addValueEventListener(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getCurrentUser().ge).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileData fetchedProfileData = dataSnapshot.getValue(ProfileData.class);
@@ -117,7 +119,12 @@ public class EditProfileFrag extends Fragment {
         saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if (newProfilePicUri != null) {
+                    uploadPic(newProfilePicUri);
+                }
+                if (newCoverPicUri != null) {
+                    uploadPic(newCoverPicUri);
+                }
             }
         });
 
@@ -154,6 +161,13 @@ public class EditProfileFrag extends Fragment {
                 // from camera
                 imageFile = new File(currentPhotoPath);
             }
+
+            if (requestCode == REQUEST_CODE_DP) {
+                newProfilePicUri = Uri.fromFile(imageFile);
+            } else {
+                newCoverPicUri = Uri.fromFile(imageFile);
+            }
+
             GlideApp.with(getContext())
                     .load(imageFile)
                     .centerCrop()
@@ -161,36 +175,14 @@ public class EditProfileFrag extends Fragment {
                     .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
                     .into(requestCode == REQUEST_CODE_DP ? profilePicIv : coverPicIv);
 
-
-            Uri file = Uri.fromFile(imageFile);
-            StorageReference riversRef = storageRef
-                    .child("images/users/" + FirebaseAuth.getInstance().getUid() + "/dp.jpg");
-
-            riversRef.putFile(file)
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // Get a URL to the uploaded content
-                            Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Handle unsuccessful uploads
-                            // ...
-                        }
-                    });
-
         }
     }
 
-    private void uploadPic(File imageFile) {
-        Uri file = Uri.fromFile(imageFile);
+    private void uploadPic(Uri imageUri) {
         StorageReference riversRef = storageRef
                 .child("images/users/" + FirebaseAuth.getInstance().getUid() + "/dp.jpg");
 
-        riversRef.putFile(file)
+        riversRef.putFile(imageUri)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
