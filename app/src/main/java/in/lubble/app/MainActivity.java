@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null || !isValidString(currentUser.getDisplayName())) {
+        if (currentUser == null) {
             // user is not signed in, start login flow
             startActivity(new Intent(this, LoginActivity.class));
             finish();

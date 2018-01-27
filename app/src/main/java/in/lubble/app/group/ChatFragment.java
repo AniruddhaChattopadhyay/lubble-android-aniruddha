@@ -70,8 +70,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     chatRecyclerView.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            chatRecyclerView.smoothScrollToPosition(
-                                    chatRecyclerView.getAdapter().getItemCount() - 1);
+                            final int pos = Math.max(chatRecyclerView.getAdapter().getItemCount() - 1, 0);
+                            chatRecyclerView.smoothScrollToPosition(pos);
                         }
                     }, 100);
                 }

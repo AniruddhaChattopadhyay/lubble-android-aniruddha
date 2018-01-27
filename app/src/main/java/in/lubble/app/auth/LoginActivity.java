@@ -16,7 +16,6 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.addFrag;
-import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UserUtils.isNewUser;
 
 public class LoginActivity extends AppCompatActivity {
@@ -34,10 +33,6 @@ public class LoginActivity extends AppCompatActivity {
         rootLayout = findViewById(R.id.root_layout);
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser != null && isValidString(currentUser.getDisplayName())) {
-            startActivity(new Intent(this, MainActivity.class));
-            return;
-        }
         addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, WelcomeFrag.newInstance());
     }
 
