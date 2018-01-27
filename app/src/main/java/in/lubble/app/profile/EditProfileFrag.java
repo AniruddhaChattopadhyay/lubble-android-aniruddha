@@ -3,7 +3,6 @@ package in.lubble.app.profile;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -14,25 +13,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.UploadFileService;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.utils.StringUtils;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.utils.FileUtils.createImageFile;
@@ -57,6 +57,8 @@ public class EditProfileFrag extends Fragment {
     private StorageReference storageRef;
     private Uri newProfilePicUri = null;
     private Uri newCoverPicUri = null;
+    private DatabaseReference userRef;
+    private ProfileData fetchedProfileData;
 
     public EditProfileFrag() {
         // Required empty public constructor
@@ -89,10 +91,11 @@ public class EditProfileFrag extends Fragment {
         rootView.findViewById(R.id.linearLayout_cover_edit_container).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
 
-        FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getCurrentUser().ge).addValueEventListener(new ValueEventListener() {
+        userRef = FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileData fetchedProfileData = dataSnapshot.getValue(ProfileData.class);
+                fetchedProfileData = dataSnapshot.getValue(ProfileData.class);
                 fullNameTil.getEditText().setText(fetchedProfileData.getName());
                 localityTil.getEditText().setText(fetchedProfileData.getLocality());
                 bioTil.getEditText().setText(fetchedProfileData.getBio());
@@ -120,11 +123,21 @@ public class EditProfileFrag extends Fragment {
             @Override
             public void onClick(View view) {
                 if (newProfilePicUri != null) {
-                    uploadPic(newProfilePicUri);
+                    getContext().startService(new Intent(getContext(), UploadFileService.class)
+                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic.jpg")
+                            .putExtra(UploadFileService.EXTRA_FILE_URI, newProfilePicUri)
+                            .setAction(UploadFileService.ACTION_UPLOAD));
                 }
                 if (newCoverPicUri != null) {
-                    uploadPic(newCoverPicUri);
+                    getContext().startService(new Intent(getContext(), UploadFileService.class)
+                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "cover_pic.jpg")
+                            .putExtra(UploadFileService.EXTRA_FILE_URI, newCoverPicUri)
+                            .setAction(UploadFileService.ACTION_UPLOAD));
                 }
+
+                ProfileData updatedProfileData = fetchedProfileData;
+                updatedProfileData.setBio(StringUtils.getStringFromTil(bioTil));
+                userRef.setValue(updatedProfileData);
             }
         });
 
@@ -175,52 +188,10 @@ public class EditProfileFrag extends Fragment {
                     .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
                     .into(requestCode == REQUEST_CODE_DP ? profilePicIv : coverPicIv);
 
+        } else {
+            Toast.makeText(getContext(), "Failed to get photo", Toast.LENGTH_SHORT).show();
         }
     }
-
-    private void uploadPic(Uri imageUri) {
-        StorageReference riversRef = storageRef
-                .child("images/users/" + FirebaseAuth.getInstance().getUid() + "/dp.jpg");
-
-        riversRef.putFile(imageUri)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Get a URL to the uploaded content
-                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        // ...
-                    }
-                });
-    }
-
-/*
-    private boolean isDataValid() {
-        if (!isValidString(getStringFromTil(fullNameTil))) {
-            fullNameTil.setError("Name can't be blank");
-            return false;
-        } else {
-            fullNameTil.setError(null);
-        }
-        if (!isValidString(getStringFromTil(localityTil))) {
-            localityTil.setError("Locality can't be blank");
-            return false;
-        } else {
-            localityTil.setError(null);
-        }
-        if (!isValidString(getStringFromTil(bioTil))) {
-            bioTil.setError("Bio can't be blank");
-            return false;
-        } else {
-            bioTil.setError(null);
-        }
-        return true;
-    }*/
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {

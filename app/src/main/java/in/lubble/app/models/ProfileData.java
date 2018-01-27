@@ -1,7 +1,5 @@
 package in.lubble.app.models;
 
-import android.support.annotation.Nullable;
-
 import java.util.List;
 
 import static in.lubble.app.utils.StringUtils.getTitleCase;
@@ -18,8 +16,11 @@ public class ProfileData {
     private String coverPic;
     private String locality;
     private String bio;
-    @Nullable
-    private List<PostData> postDataList;
+    private String token;
+    private String profile_pic;
+    private String cover_pic;
+    private List<Object> lubbles;
+    private List<Object> groups;
 
     public String getId() {
         return id;
@@ -69,12 +70,43 @@ public class ProfileData {
         this.bio = bio;
     }
 
-    @Nullable
-    public List<PostData> getPostDataList() {
-        return postDataList;
+    public String getToken() {
+        return token;
     }
 
-    public void setPostDataList(@Nullable List<PostData> postDataList) {
-        this.postDataList = postDataList;
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public List<Object> getLubbles() {
+        return lubbles;
+    }
+
+    public void setLubbles(List<Object> lubbles) {
+        this.lubbles = lubbles;
+    }
+
+    public List<Object> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<Object> groups) {
+        this.groups = groups;
+    }
+
+    public String getProfile_pic() {
+        return profile_pic;
+    }
+
+    public void setProfile_pic(String profile_pic) {
+        this.profile_pic = profile_pic;
+    }
+
+    public String getCover_pic() {
+        return cover_pic;
+    }
+
+    public void setCover_pic(String cover_pic) {
+        this.cover_pic = cover_pic;
     }
 }

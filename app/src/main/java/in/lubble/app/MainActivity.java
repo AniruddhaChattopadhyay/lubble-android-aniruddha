@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.group.GroupActivity;
@@ -99,26 +100,15 @@ public class MainActivity extends AppCompatActivity {
         profileData.setName(currentUser.getDisplayName());
         profileData.setLocality("C - Block");
         profileData.setBio("Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend");
+        profileData.setToken(FirebaseInstanceId.getInstance().getToken());
 
         database.getReference("users").child(currentUser.getUid()).setValue(profileData);
+        database.getReference("users").child(currentUser.getUid()).child("lubbles/0").setValue("true");
     }
 
     private void authCompleted() {
         //todo switchFrag(HomeFragment.newInstance());
-        saveUserProfile();
-    }
-
-    private void saveUserProfile() {
-        if (UserSharedPrefs.getInstance().getUserId().equalsIgnoreCase(UserSharedPrefs.DEFAULT_USER_ID)) {
-            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-            UserSharedPrefs.getInstance().setUserId(currentUser.getUid());
-            ProfileData profileData = new ProfileData();
-            profileData.setId(currentUser.getUid());
-            profileData.setName(currentUser.getDisplayName());
-            profileData.setLocality("C - Block");
-            profileData.setBio("Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend");
-            // todo DbSingleton.getInstance().createProfileData(profileData);
-        }
+        //saveUserProfile();
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener

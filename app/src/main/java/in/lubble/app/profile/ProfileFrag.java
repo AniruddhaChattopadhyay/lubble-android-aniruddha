@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -110,7 +111,7 @@ public class ProfileFrag extends Fragment implements SwipeRefreshLayout.OnRefres
                 userName.setText(profileData.getName());
                 locality.setText(profileData.getLocality());
                 userBio.setText(profileData.getBio());
-                if (userId.equalsIgnoreCase(UserSharedPrefs.getInstance().getUserId())) {
+                if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                     editProfileTV.setVisibility(View.VISIBLE);
                 }
             }
