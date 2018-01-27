@@ -6,14 +6,18 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
+
+import static in.lubble.app.utils.StringUtils.isValidString;
 
 /**
  * Created by ishaan on 21/1/18.
@@ -67,6 +71,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         ChatData chatData = chatDataList.get(position);
 
         sentChatViewHolder.messageTv.setText(chatData.getMessage());
+
+        handleImage(sentChatViewHolder.chatIv, chatData);
+
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -75,6 +82,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         recvdChatViewHolder.authorNameTv.setText(chatData.getAuthorName());
         recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+
+        handleImage(recvdChatViewHolder.chatIv, chatData);
+
+    }
+
+    private void handleImage(ImageView imageView, ChatData chatData) {
+        if (isValidString(chatData.getImgUrl())) {
+            imageView.setVisibility(View.VISIBLE);
+            GlideApp.with(context)
+                    .load(chatData.getImgUrl())
+                    .centerCrop()
+                    //.signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified())) // What ? Why?
+                    .into(imageView);
+        } else {
+            imageView.setVisibility(View.GONE);
+        }
     }
 
     public void addChatData(@NonNull ChatData chatData) {
@@ -92,11 +115,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         private TextView authorNameTv;
         private TextView messageTv;
+        private ImageView chatIv;
 
         public RecvdChatViewHolder(View itemView) {
             super(itemView);
             authorNameTv = itemView.findViewById(R.id.tv_author);
             messageTv = itemView.findViewById(R.id.tv_message);
+            chatIv = itemView.findViewById(R.id.iv_chat_img);
         }
 
     }
@@ -104,10 +129,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class SentChatViewHolder extends RecyclerView.ViewHolder {
 
         private TextView messageTv;
+        private ImageView chatIv;
 
         public SentChatViewHolder(View itemView) {
             super(itemView);
             messageTv = itemView.findViewById(R.id.tv_message);
+            chatIv = itemView.findViewById(R.id.iv_chat_img);
         }
 
     }

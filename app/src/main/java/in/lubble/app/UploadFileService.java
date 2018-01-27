@@ -12,10 +12,14 @@ import android.util.Log;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+
+import in.lubble.app.models.ChatData;
 
 /**
  * Service to handle uploading files to Firebase Storage
@@ -24,8 +28,9 @@ import com.google.firebase.storage.UploadTask;
 
 public class UploadFileService extends BaseTaskService {
 
-
     private static final String TAG = "UploadFileService";
+    public static final int BUCKET_DEFAULT = 362;
+    public static final int BUCKET_CONVO = 491;
 
     /**
      * Intent Actions
@@ -39,20 +44,11 @@ public class UploadFileService extends BaseTaskService {
      **/
     public static final String EXTRA_FILE_NAME = "extra_file_name";
     public static final String EXTRA_FILE_URI = "extra_file_uri";
+    public static final String EXTRA_BUCKET = "extra_bucket";
+    public static final String EXTRA_UPLOAD_PATH = "extra_upload_path";
     public static final String EXTRA_DOWNLOAD_URL = "extra_download_url";
 
-    // [START declare_ref]
     private StorageReference mStorageRef;
-    // [END declare_ref]
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        // [START get_storage_ref]
-        mStorageRef = FirebaseStorage.getInstance("gs://lubble-in-default").getReference();
-        // [END get_storage_ref]
-    }
 
     @Nullable
     @Override
@@ -63,27 +59,35 @@ public class UploadFileService extends BaseTaskService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand:" + intent + ":" + startId);
+
+        final boolean isConvoBucket = intent.getIntExtra(EXTRA_BUCKET, BUCKET_DEFAULT) == BUCKET_CONVO;
+        if (isConvoBucket) {
+            mStorageRef = FirebaseStorage.getInstance("gs://lubble-in-convo").getReference();
+        } else {
+            mStorageRef = FirebaseStorage.getInstance("gs://lubble-in-default").getReference();
+        }
+
         if (ACTION_UPLOAD.equals(intent.getAction())) {
             Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
-            uploadFromUri(fileUri, intent.getStringExtra(EXTRA_FILE_NAME));
+            uploadFromUri(
+                    fileUri,
+                    intent.getStringExtra(EXTRA_FILE_NAME),
+                    intent.getStringExtra(EXTRA_UPLOAD_PATH),
+                    isConvoBucket
+            );
         }
 
         return START_REDELIVER_INTENT;
     }
 
-    // [START upload_from_uri]
-    private void uploadFromUri(final Uri fileUri, String fileName) {
+    private void uploadFromUri(final Uri fileUri, String fileName, String uploadPath, final boolean toTransmit) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
-        // [START_EXCLUDE]
         taskStarted();
-        showProgressNotification(getString(R.string.progress_uploading), 0, 0);
-        // [END_EXCLUDE]
 
-        // [START get_child_ref]
-        final StorageReference photoRef = mStorageRef.child("user_profile/" + FirebaseAuth.getInstance().getUid())
+        showProgressNotification(getString(R.string.progress_uploading), 0, 0);
+        final StorageReference photoRef = mStorageRef.child(uploadPath)
                 .child(fileName);
-        // [END get_child_ref]
 
         // Upload file to Firebase Storage
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
@@ -106,7 +110,7 @@ public class UploadFileService extends BaseTaskService {
                         Uri downloadUri = taskSnapshot.getMetadata().getDownloadUrl();
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(downloadUri, fileUri);
+                        broadcastUploadFinished(downloadUri, fileUri, toTransmit);
                         showUploadFinishedNotification(downloadUri, fileUri);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -119,7 +123,7 @@ public class UploadFileService extends BaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null, fileUri);
+                        broadcastUploadFinished(null, fileUri, toTransmit);
                         showUploadFinishedNotification(null, fileUri);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -133,7 +137,7 @@ public class UploadFileService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri) {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
@@ -141,8 +145,26 @@ public class UploadFileService extends BaseTaskService {
         Intent broadcast = new Intent(action)
                 .putExtra(EXTRA_DOWNLOAD_URL, downloadUrl)
                 .putExtra(EXTRA_FILE_URI, fileUri);
+
+        if (toTransmit) {
+            transmitMedia(downloadUrl);
+        }
+
         return LocalBroadcastManager.getInstance(getApplicationContext())
                 .sendBroadcast(broadcast);
+    }
+
+    private void transmitMedia(Uri downloadUrl) {
+
+        final DatabaseReference msgReference = FirebaseDatabase.getInstance().getReference("messages/lubbles/0/groups/0");
+
+        final ChatData chatData = new ChatData();
+        chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        chatData.setAuthorName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+        chatData.setMessage("caption placeholder");
+        chatData.setImgUrl(downloadUrl.toString());
+
+        msgReference.push().setValue(chatData);
     }
 
     /**

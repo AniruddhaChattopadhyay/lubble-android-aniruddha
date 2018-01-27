@@ -9,6 +9,7 @@ public class ChatData {
     private String authorUid;
     private String authorName;
     private String message;
+    private String imgUrl;
 
     public String getAuthorUid() {
         return authorUid;
@@ -34,4 +35,11 @@ public class ChatData {
         this.message = message;
     }
 
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
 }

@@ -11,15 +11,24 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="SEND" />
+        android:text="SEND"
+        android:theme="@style/PrimaryButton" />
+
+    <Button
+        android:id="@+id/btn_attach_media"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@id/btn_send_message"
+        android:text="MEDIA" />
 
     <EditText
         android:id="@+id/et_new_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@id/btn_send_message"
-        android:hint="What's new in your Lubble" />
+        android:layout_toLeftOf="@id/btn_attach_media"
+        android:hint="What's new" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_chat"

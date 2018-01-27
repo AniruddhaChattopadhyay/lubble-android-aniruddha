@@ -37,19 +37,20 @@
 
         <activity android:name=".profile.ProfileActivity" />
 
-        <service android:name=".UploadFileService"/>
+        <service android:name=".UploadFileService" />
 
-        <service
-            android:name=".firebase.FcmService">
+        <service android:name=".firebase.FcmService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <meta-data
+                    android:name="com.google.firebase.messaging.default_notification_channel_id"
+                    android:value="default" />
             </intent-filter>
         </service>
 
-        <service
-            android:name=".firebase.FcmInstanceIdService">
+        <service android:name=".firebase.FcmInstanceIdService">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
 

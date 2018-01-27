@@ -22,8 +22,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +52,6 @@ public class EditProfileFrag extends Fragment {
     private ProfileData profileData;
     private View rootView;
     private String currentPhotoPath;
-    private StorageReference storageRef;
     private Uri newProfilePicUri = null;
     private Uri newCoverPicUri = null;
     private DatabaseReference userRef;
@@ -72,7 +69,6 @@ public class EditProfileFrag extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        storageRef = FirebaseStorage.getInstance().getReference();
     }
 
     @Override
@@ -126,12 +122,14 @@ public class EditProfileFrag extends Fragment {
                     getContext().startService(new Intent(getContext(), UploadFileService.class)
                             .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic.jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, newProfilePicUri)
+                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "user_profile/" + FirebaseAuth.getInstance().getUid())
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
                 if (newCoverPicUri != null) {
                     getContext().startService(new Intent(getContext(), UploadFileService.class)
                             .putExtra(UploadFileService.EXTRA_FILE_NAME, "cover_pic.jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, newCoverPicUri)
+                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "user_profile/" + FirebaseAuth.getInstance().getUid())
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
 
