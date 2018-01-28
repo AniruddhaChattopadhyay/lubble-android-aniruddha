@@ -1,4 +1,4 @@
-package in.lubble.app.group;
+package in.lubble.app.chat;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package in.lubble.app.group;
+package in.lubble.app.chat;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
