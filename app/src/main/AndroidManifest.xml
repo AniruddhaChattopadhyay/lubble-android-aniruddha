@@ -34,11 +34,9 @@
         </provider>
 
         <activity android:name=".chat.ChatActivity" />
-
         <activity android:name=".profile.ProfileActivity" />
 
         <service android:name=".UploadFileService" />
-
         <service android:name=".firebase.FcmService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -55,7 +53,7 @@
             </intent-filter>
         </service>
 
-
+        <activity android:name=".groups.NewGroupActivity"></activity>
     </application>
 
 </manifest>
