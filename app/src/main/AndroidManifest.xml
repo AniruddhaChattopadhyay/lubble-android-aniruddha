@@ -21,7 +21,7 @@
         </activity>
         <activity
             android:name=".auth.LoginActivity"
-            android:launchMode="singleTop"></activity>
+            android:launchMode="singleTop" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -42,11 +42,12 @@
         <service android:name=".firebase.FcmService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
-                <meta-data
-                    android:name="com.google.firebase.messaging.default_notification_channel_id"
-                    android:value="default" />
             </intent-filter>
         </service>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default" />
 
         <service android:name=".firebase.FcmInstanceIdService">
             <intent-filter>
