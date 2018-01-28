@@ -6,9 +6,31 @@ package in.lubble.app.models;
 
 public class GroupData {
 
+    private String id;
     private String iconUrl;
-    private String subTitle;
     private String title;
+    private String description;
+
+    public GroupData() {}  // Needed for Firebase
+
+    public boolean equals(Object obj) {
+        if (obj instanceof GroupData) {
+            GroupData objectToCompare = (GroupData) obj;
+            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
+                return true;
+            }
+            return false;
+        }
+        return super.equals(obj);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getIconUrl() {
         return iconUrl;
@@ -26,12 +48,12 @@ public class GroupData {
         this.title = title;
     }
 
-    public String getSubTitle() {
-        return subTitle;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSubTitle(String subTitle) {
-        this.subTitle = subTitle;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }

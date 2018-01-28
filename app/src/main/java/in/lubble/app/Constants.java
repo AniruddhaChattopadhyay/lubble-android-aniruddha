@@ -14,4 +14,7 @@ public class Constants {
 
     public static final String DEFAULT_NOTIF_CHANNEL = "default";
 
+    public static final int DEFAULT_LUBBLE = 0;
+    public static final int DEFAULT_GROUP = 0;
+
 }

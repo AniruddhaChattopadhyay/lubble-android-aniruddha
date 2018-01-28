@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.GlideApp;
@@ -18,8 +19,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     private final List<GroupData> groupDataList;
     private final OnListFragmentInteractionListener mListener;
 
-    public GroupRecyclerAdapter(List<GroupData> items, OnListFragmentInteractionListener listener) {
-        groupDataList = items;
+    public GroupRecyclerAdapter(OnListFragmentInteractionListener listener) {
+        groupDataList = new ArrayList<>();
         mListener = listener;
     }
 
@@ -42,7 +43,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
                 .into(holder.iconIv);
 
         holder.titleTv.setText(groupData.getTitle());
-        holder.subtitleTv.setText(groupData.getSubTitle());
+        holder.subtitleTv.setText(groupData.getDescription());
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,17 +57,37 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         });
     }
 
+    public void addGroup(GroupData groupData) {
+        groupDataList.add(groupData);
+        notifyItemInserted(getItemCount());
+    }
+
+    public void updateGroup(GroupData newGroupData) {
+        for (GroupData groupData : groupDataList) {
+            if (newGroupData.equals(groupData)) {
+                final int pos = groupDataList.indexOf(groupData);
+                groupDataList.set(pos, newGroupData);
+                notifyItemChanged(pos);
+                return;
+            }
+        }
+    }
+
+    public void clearGroups() {
+        groupDataList.clear();
+    }
+
     @Override
     public int getItemCount() {
         return groupDataList.size();
     }
 
-    public class GroupViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final ImageView iconIv;
-        public final TextView titleTv;
-        public final TextView subtitleTv;
-        public GroupData groupData;
+    class GroupViewHolder extends RecyclerView.ViewHolder {
+        final View mView;
+        final ImageView iconIv;
+        final TextView titleTv;
+        final TextView subtitleTv;
+        GroupData groupData;
 
         public GroupViewHolder(View view) {
             super(view);
