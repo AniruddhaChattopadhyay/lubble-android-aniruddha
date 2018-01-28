@@ -23,6 +23,7 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
 
 import static in.lubble.app.Constants.DEFAULT_LUBBLE;
+import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
@@ -176,6 +177,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     @Override
     public void onListFragmentInteraction(GroupData groupData) {
         final Intent intent = new Intent(getContext(), ChatActivity.class);
+        intent.putExtra(EXTRA_GROUP_ID, groupData.getId());
         startActivity(intent);
     }
 

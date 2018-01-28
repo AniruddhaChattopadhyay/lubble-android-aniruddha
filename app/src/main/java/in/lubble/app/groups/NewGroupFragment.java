@@ -25,6 +25,7 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
 
 import static in.lubble.app.Constants.DEFAULT_LUBBLE;
+import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -86,7 +87,7 @@ public class NewGroupFragment extends Fragment {
         return view;
     }
 
-    private void confirmGroupDone(String pushId) {
+    private void confirmGroupDone(final String pushId) {
         userGroupRef.orderByKey().equalTo(pushId).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -96,7 +97,9 @@ public class NewGroupFragment extends Fragment {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 progressDialog.dismiss();
-                startActivity(new Intent(getContext(), ChatActivity.class));
+                final Intent intent = new Intent(getContext(), ChatActivity.class);
+                intent.putExtra(EXTRA_GROUP_ID, pushId);
+                startActivity(intent);
             }
 
             @Override

@@ -45,6 +45,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
+    private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
 
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
@@ -53,21 +54,29 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private FirebaseDatabase firebaseDatabase;
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
+    private String groupId;
 
     public ChatFragment() {
         // Required empty public constructor
     }
 
-    public static ChatFragment newInstance() {
-        return new ChatFragment();
+    public static ChatFragment newInstance(String groupId) {
+
+        Bundle args = new Bundle();
+        args.putString(KEY_GROUP_ID, groupId);
+        ChatFragment fragment = new ChatFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        groupId = getArguments().getString(KEY_GROUP_ID);
+
         firebaseDatabase = FirebaseDatabase.getInstance();
-        messagesReference = firebaseDatabase.getReference("messages/lubbles/0/groups/0");
+        messagesReference = firebaseDatabase.getReference("messages/lubbles/0/groups/" + groupId);
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         registerMediaUploadCallback();

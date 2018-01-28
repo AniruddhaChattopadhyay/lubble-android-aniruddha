@@ -40,6 +40,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
                 .load(groupData.getIconUrl())
                 .circleCrop()
                 .centerCrop()
+                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                .error(R.drawable.ic_account_circle_black_no_padding)
                 .into(holder.iconIv);
 
         holder.titleTv.setText(groupData.getTitle());
