@@ -15,8 +15,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
@@ -66,8 +68,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void syncUserGroupIds() {
         // gets list of group IDs joined by the user
-        FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
-                + "/lubbles/" + DEFAULT_LUBBLE + "/groups").addChildEventListener(new ChildEventListener() {
+        final DatabaseReference userGroupsRef = FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
+                + "/lubbles/" + DEFAULT_LUBBLE + "/groups");
+        userGroupsRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 syncJoinedGroups(dataSnapshot.getKey());
@@ -93,6 +96,18 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             }
         });
+        userGroupsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // all user groups have been synced now
+                syncAllPublicGroups();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void syncJoinedGroups(String groupId) {
@@ -104,14 +119,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                groupData.setId(dataSnapshot.getKey());
                 adapter.addGroup(groupData);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                groupData.setId(dataSnapshot.getKey());
                 adapter.updateGroup(groupData);
             }
 
@@ -134,25 +147,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void syncAllPublicGroups() {
         FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE
-                + "/groups").addChildEventListener(new ChildEventListener() {
+                + "/groups").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                adapter.addGroup(dataSnapshot.getValue(GroupData.class));
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot groupSnapshot : dataSnapshot.getChildren()) {
+                    final GroupData groupData = groupSnapshot.getValue(GroupData.class);
+                    adapter.addGroup(groupData);
+                }
             }
 
             @Override

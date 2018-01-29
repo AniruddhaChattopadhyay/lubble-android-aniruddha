@@ -60,19 +60,31 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     }
 
     public void addGroup(GroupData groupData) {
-        groupDataList.add(groupData);
-        notifyItemInserted(getItemCount());
+        if (getChildIndex(groupData) == -1) {
+            // child doesn't already exist
+            groupDataList.add(groupData);
+            notifyItemInserted(getItemCount());
+        } else {
+            // child exists already, do nothing.
+        }
     }
 
     public void updateGroup(GroupData newGroupData) {
-        for (GroupData groupData : groupDataList) {
-            if (newGroupData.equals(groupData)) {
-                final int pos = groupDataList.indexOf(groupData);
-                groupDataList.set(pos, newGroupData);
-                notifyItemChanged(pos);
-                return;
+        final int pos = getChildIndex(newGroupData);
+        if (pos != -1) {
+            groupDataList.set(pos, newGroupData);
+            notifyItemChanged(pos);
+        }
+    }
+
+    private int getChildIndex(GroupData groupDataToCompare) {
+        for (int i = 0; i < groupDataList.size(); i++) {
+            final GroupData groupData = groupDataList.get(i);
+            if (groupData.getId().equalsIgnoreCase(groupDataToCompare.getId())) {
+                return i;
             }
         }
+        return -1;
     }
 
     public void clearGroups() {
