@@ -8,9 +8,14 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
@@ -19,6 +24,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
 
     private final List<GroupData> groupDataList;
     private final OnListFragmentInteractionListener mListener;
+    private static int joinedSeparator = 0;
 
     public GroupRecyclerAdapter(OnListFragmentInteractionListener listener) {
         groupDataList = new ArrayList<>();
@@ -60,11 +66,28 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
                 }
             }
         });
+
+        holder.joinBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + Constants.DEFAULT_LUBBLE
+                        + "/users/" + FirebaseAuth.getInstance().getUid());
+                reference.child(groupData.getId()).setValue(true);
+                groupDataList.remove(holder.getAdapterPosition());
+                notifyItemRemoved(holder.getAdapterPosition());
+            }
+        });
     }
 
     public void addGroup(GroupData groupData) {
-        groupDataList.add(groupData);
-        notifyItemInserted(getItemCount());
+        if (groupData.isJoined()) {
+            groupDataList.add(joinedSeparator, groupData);
+            notifyItemInserted(joinedSeparator);
+            joinedSeparator++;
+        } else {
+            groupDataList.add(groupData);
+            notifyItemInserted(getItemCount());
+        }
     }
 
     public void updateGroup(GroupData newGroupData) {

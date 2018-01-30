@@ -99,7 +99,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             }
         });
-        userGroupsRef.orderByKey().addValueEventListener(new ValueEventListener() {
+        userGroupsRef.orderByKey().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // all user groups have been synced now
@@ -154,7 +154,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void syncAllPublicGroups(final ArrayList<String> joinedGroupIdList) {
         FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE
-                + "/groups").addValueEventListener(new ValueEventListener() {
+                + "/groups").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 List<GroupData> allGroupList = new ArrayList<>();
