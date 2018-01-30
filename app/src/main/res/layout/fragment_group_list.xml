@@ -28,13 +28,22 @@
             android:textAppearance="?attr/textAppearanceListItem"
             tools:text="@tools:sample/lorem" />
 
+        <Button
+            android:id="@+id/btn_join_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:text="Join" />
+
         <TextView
             android:id="@+id/tv_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_title"
+            android:layout_toLeftOf="@id/btn_join_group"
             android:layout_toRightOf="@id/iv_group_pic"
-            android:maxLines="1"
+            android:maxLines="2"
             android:textAppearance="?attr/textAppearanceListItem"
             android:textColor="@color/default_text_color"
             tools:text="@tools:sample/lorem/random" />

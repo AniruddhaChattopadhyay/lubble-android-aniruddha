@@ -4,6 +4,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -47,6 +48,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         holder.titleTv.setText(groupData.getTitle());
         holder.subtitleTv.setText(groupData.getDescription());
 
+        holder.joinBtn.setVisibility(groupData.isJoined() ? View.GONE : View.VISIBLE);
+
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,13 +63,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     }
 
     public void addGroup(GroupData groupData) {
-        if (getChildIndex(groupData) == -1) {
-            // child doesn't already exist
-            groupDataList.add(groupData);
-            notifyItemInserted(getItemCount());
-        } else {
-            // child exists already, do nothing.
-        }
+        groupDataList.add(groupData);
+        notifyItemInserted(getItemCount());
     }
 
     public void updateGroup(GroupData newGroupData) {
@@ -101,6 +99,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         final ImageView iconIv;
         final TextView titleTv;
         final TextView subtitleTv;
+        final Button joinBtn;
         GroupData groupData;
 
         public GroupViewHolder(View view) {
@@ -109,6 +108,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             iconIv = view.findViewById(R.id.iv_group_pic);
             titleTv = view.findViewById(R.id.tv_title);
             subtitleTv = view.findViewById(R.id.tv_subtitle);
+            joinBtn = view.findViewById(R.id.btn_join_group);
         }
     }
 }

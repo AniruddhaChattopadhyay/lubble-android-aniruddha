@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import in.lubble.app.Constants;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
@@ -37,6 +38,7 @@ public class NewGroupFragment extends Fragment {
     private EditText groupName;
     private EditText groupDesc;
     private DatabaseReference userGroupRef;
+    private DatabaseReference createJoinRef;
     private ProgressDialog progressDialog;
 
     public NewGroupFragment() {
@@ -52,6 +54,8 @@ public class NewGroupFragment extends Fragment {
         super.onCreate(savedInstanceState);
         userGroupRef = FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
                 + "/lubbles/" + DEFAULT_LUBBLE + "/groups");
+        createJoinRef = FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + Constants.DEFAULT_LUBBLE
+                + "/users/" + FirebaseAuth.getInstance().getUid());
     }
 
     @Override
@@ -78,7 +82,7 @@ public class NewGroupFragment extends Fragment {
                 groupData.setTitle(groupName.getText().toString());
                 groupData.setDescription(groupDesc.getText().toString());
 
-                DatabaseReference pushRef = userGroupRef.push();
+                DatabaseReference pushRef = createJoinRef.push();
                 pushRef.setValue(groupData);
                 confirmGroupDone(pushRef.getKey());
             }
@@ -91,15 +95,15 @@ public class NewGroupFragment extends Fragment {
         userGroupRef.orderByKey().equalTo(pushId).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 progressDialog.dismiss();
                 final Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra(EXTRA_GROUP_ID, pushId);
                 startActivity(intent);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override

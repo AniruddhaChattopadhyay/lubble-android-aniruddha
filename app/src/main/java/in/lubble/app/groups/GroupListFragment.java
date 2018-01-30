@@ -20,6 +20,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
@@ -96,11 +99,15 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             }
         });
-        userGroupsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        userGroupsRef.orderByKey().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // all user groups have been synced now
-                syncAllPublicGroups();
+                ArrayList<String> list = new ArrayList<>();
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    list.add(child.getKey());
+                }
+                syncAllPublicGroups(list);
             }
 
             @Override
@@ -145,14 +152,27 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         });
     }
 
-    private void syncAllPublicGroups() {
+    private void syncAllPublicGroups(final ArrayList<String> joinedGroupIdList) {
         FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE
                 + "/groups").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot groupSnapshot : dataSnapshot.getChildren()) {
-                    final GroupData groupData = groupSnapshot.getValue(GroupData.class);
-                    adapter.addGroup(groupData);
+                List<GroupData> allGroupList = new ArrayList<>();
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    allGroupList.add(child.getValue(GroupData.class));
+                }
+                for (GroupData groupData : allGroupList) {
+                    boolean isDuplicate = false;
+                    for (String joinedId : joinedGroupIdList) {
+                        if (groupData.getId().equalsIgnoreCase(joinedId)) {
+                            isDuplicate = true;
+                            break;
+                        }
+                    }
+                    if (!isDuplicate) {
+                        groupData.setJoined(false);
+                        adapter.addGroup(groupData);
+                    }
                 }
             }
 
