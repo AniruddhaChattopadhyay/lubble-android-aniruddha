@@ -9,10 +9,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import in.lubble.app.Constants;
@@ -24,7 +27,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
 
     private final List<GroupData> groupDataList;
     private final OnListFragmentInteractionListener mListener;
-    private static int joinedSeparator = 0;
 
     public GroupRecyclerAdapter(OnListFragmentInteractionListener listener) {
         groupDataList = new ArrayList<>();
@@ -70,24 +72,24 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         holder.joinBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                holder.joinBtn.setEnabled(false);
                 final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + Constants.DEFAULT_LUBBLE
                         + "/users/" + FirebaseAuth.getInstance().getUid());
-                reference.child(groupData.getId()).setValue(true);
-                groupDataList.remove(holder.getAdapterPosition());
-                notifyItemRemoved(holder.getAdapterPosition());
+                reference.child(groupData.getId()).setValue(true, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        groupDataList.remove(holder.getAdapterPosition());
+                        notifyItemRemoved(holder.getAdapterPosition());
+                    }
+                });
             }
         });
     }
 
     public void addGroup(GroupData groupData) {
-        if (groupData.isJoined()) {
-            groupDataList.add(joinedSeparator, groupData);
-            notifyItemInserted(joinedSeparator);
-            joinedSeparator++;
-        } else {
-            groupDataList.add(groupData);
-            notifyItemInserted(getItemCount());
-        }
+        groupDataList.add(groupData);
+        sortList();
+        notifyDataSetChanged();
     }
 
     public void updateGroup(GroupData newGroupData) {
@@ -96,6 +98,16 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             groupDataList.set(pos, newGroupData);
             notifyItemChanged(pos);
         }
+    }
+
+    private void sortList() {
+        Collections.sort(groupDataList, new Comparator<GroupData>() {
+            @Override
+            public int compare(GroupData lhs, GroupData rhs) {
+                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                return lhs.isJoined() && !rhs.isJoined() ? -1 : (!lhs.isJoined() && rhs.isJoined()) ? 1 : 0;
+            }
+        });
     }
 
     private int getChildIndex(GroupData groupDataToCompare) {
