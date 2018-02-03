@@ -105,6 +105,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void authCompleted() {
+        FirebaseDatabase.getInstance().getReference("users")
+                .child(FirebaseAuth.getInstance().getUid() + "/token")
+                .setValue(FirebaseInstanceId.getInstance().getToken());
         //switchFrag(HomeFragment.newInstance());
     }
 
