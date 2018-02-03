@@ -45,3 +45,5 @@ captures/
 
 # Custom Scripts
 *.sh
+
+release/
