@@ -15,7 +15,6 @@ import com.google.firebase.auth.FirebaseUserMetadata;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
-import in.lubble.app.UserSharedPrefs;
 import in.lubble.app.auth.LoginActivity;
 
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -41,8 +40,6 @@ public class UserUtils {
                 .signOut(activity)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     public void onComplete(@NonNull Task<Void> task) {
-                        //activity.deleteDatabase(SqliteHelper.DATABASE_NAME);
-                        UserSharedPrefs.getInstance().clearAll();
                         progressDialog.dismiss();
                         // user is now signed out
                         Intent intent = new Intent(activity, LoginActivity.class);

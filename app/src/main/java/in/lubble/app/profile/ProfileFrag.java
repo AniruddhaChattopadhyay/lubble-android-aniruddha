@@ -18,7 +18,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.R;
-import in.lubble.app.UserSharedPrefs;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.UiUtils;
@@ -75,7 +74,7 @@ public class ProfileFrag extends Fragment implements SwipeRefreshLayout.OnRefres
         swipeLayout.setOnRefreshListener(this);
         swipeLayout.setProgressViewOffset(false, 0, UiUtils.dpToPx(48));
 
-        if (userId.equalsIgnoreCase(UserSharedPrefs.getInstance().getUserId())) {
+        if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
             // todo fetch cached profile from DB
             /*ProfileData profileData = DbSingleton.getInstance().readProfileData(userId);
             updateProfileData(profileData);

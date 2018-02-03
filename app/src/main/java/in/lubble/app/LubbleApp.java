@@ -18,8 +18,6 @@ public class LubbleApp extends Application {
     public void onCreate() {
         super.onCreate();
 
-        UserSharedPrefs.initializeInstance(getApplicationContext());
-
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         if (BuildConfig.DEBUG) {
             FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);

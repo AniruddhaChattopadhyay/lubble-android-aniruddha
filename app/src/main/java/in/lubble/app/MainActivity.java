@@ -1,6 +1,5 @@
 package in.lubble.app;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,11 +13,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -27,9 +23,7 @@ import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.profile.ProfileActivity;
 
-import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UserUtils.isNewUser;
-import static in.lubble.app.utils.UserUtils.logout;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -65,24 +59,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (isNewUser(currentUser)) {
             uploadNewUserData(currentUser);
-        } else if (!isValidString(UserSharedPrefs.getInstance().getAuthToken())) {
-            // no token, fetch one and give it to server
-            final ProgressDialog progressDialog = new ProgressDialog(this);
-            progressDialog.setMessage("Signing in");
-            currentUser.getIdToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-                @Override
-                public void onComplete(@NonNull Task<GetTokenResult> task) {
-                    if (task.isSuccessful()) {
-                        String idToken = task.getResult().getToken();
-                        UserSharedPrefs.getInstance().setAuthToken(idToken);
-                    } else {
-                        //log the user out
-                        logout(MainActivity.this);
-                    }
-                }
-            });
         } else {
-            authCompleted();
+            syncFcmToken();
         }
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
@@ -92,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
     private void uploadNewUserData(FirebaseUser currentUser) {
         // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        UserSharedPrefs.getInstance().setUserId(currentUser.getUid());
         ProfileData profileData = new ProfileData();
         profileData.setId(currentUser.getUid());
         profileData.setName(currentUser.getDisplayName());
@@ -104,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         database.getReference("users").child(currentUser.getUid()).child("lubbles/0").setValue("true");
     }
 
-    private void authCompleted() {
+    private void syncFcmToken() {
         FirebaseDatabase.getInstance().getReference("users")
                 .child(FirebaseAuth.getInstance().getUid() + "/token")
                 .setValue(FirebaseInstanceId.getInstance().getToken());
