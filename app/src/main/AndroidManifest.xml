@@ -53,7 +53,10 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".groups.NewGroupActivity"></activity>
+        <activity android:name=".groups.NewGroupActivity"/>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="default"/>
     </application>
 
 </manifest>
