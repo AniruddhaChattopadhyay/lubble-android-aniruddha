@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -53,7 +54,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         RecyclerView groupsRecyclerView = view.findViewById(R.id.rv_groups);
         Button newGroupBtn = view.findViewById(R.id.btn_create_group);
-        Button newAnnouncementBtn = view.findViewById(R.id.btn_new_announcement);
+        final Button newAnnouncementBtn = view.findViewById(R.id.btn_new_announcement);
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         adapter = new GroupRecyclerAdapter(mListener);
@@ -68,6 +69,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             }
         });
 
+        toggleAnnouncementBtn(newAnnouncementBtn);
+
         newAnnouncementBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -76,6 +79,25 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         });
 
         return view;
+    }
+
+    private void toggleAnnouncementBtn(final Button newAnnouncementBtn) {
+        FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
+                + "/lubbles/" + DEFAULT_LUBBLE).child("isAdmin").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null && dataSnapshot.getValue(Boolean.class)) {
+                    newAnnouncementBtn.setVisibility(View.VISIBLE);
+                } else {
+                    newAnnouncementBtn.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getContext(), "ERROR: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void syncUserGroupIds() {

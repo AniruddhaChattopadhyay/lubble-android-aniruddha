@@ -20,7 +20,9 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/btn_create_group"
         android:text="Create New Announcement"
-        android:theme="@style/PrimaryButton" />
+        android:theme="@style/PrimaryButton"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_groups"
