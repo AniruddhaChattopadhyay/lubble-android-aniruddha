@@ -169,7 +169,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                             break;
                         }
                     }
-                    if (!isDuplicate) {
+                    if (!isDuplicate && !groupData.getIsPrivate()) {
                         groupData.setJoined(false);
                         adapter.addGroup(groupData);
                     }

@@ -11,8 +11,10 @@ public class GroupData {
     private String title;
     private String description;
     private boolean isJoined = true;
+    private boolean isPrivate;
 
-    public GroupData() {}  // Needed for Firebase
+    public GroupData() {
+    }  // Needed for Firebase
 
     public boolean equals(Object obj) {
         if (obj instanceof GroupData) {
@@ -64,4 +66,13 @@ public class GroupData {
     public void setJoined(boolean joined) {
         isJoined = joined;
     }
+
+    public boolean getIsPrivate() {
+        return this.isPrivate;
+    }
+
+    public void setIsPrivate(boolean aPrivate) {
+        this.isPrivate = aPrivate;
+    }
+
 }
