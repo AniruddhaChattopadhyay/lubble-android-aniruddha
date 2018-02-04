@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.R;
+import in.lubble.app.announcements.NewAnnouncementActivity;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
 
@@ -52,6 +53,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         RecyclerView groupsRecyclerView = view.findViewById(R.id.rv_groups);
         Button newGroupBtn = view.findViewById(R.id.btn_create_group);
+        Button newAnnouncementBtn = view.findViewById(R.id.btn_new_announcement);
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         adapter = new GroupRecyclerAdapter(mListener);
@@ -63,6 +65,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getContext(), NewGroupActivity.class));
+            }
+        });
+
+        newAnnouncementBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NewAnnouncementActivity.newInstance(getContext());
             }
         });
 

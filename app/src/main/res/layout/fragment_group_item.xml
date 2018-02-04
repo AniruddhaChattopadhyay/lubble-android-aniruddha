@@ -14,11 +14,19 @@
         android:layout_alignParentBottom="true"
         android:text="Create New Group" />
 
+    <Button
+        android:id="@+id/btn_new_announcement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btn_create_group"
+        android:text="Create New Announcement"
+        android:theme="@style/PrimaryButton" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_groups"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/btn_create_group"
+        android:layout_above="@id/btn_new_announcement"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginTop="4dp"
