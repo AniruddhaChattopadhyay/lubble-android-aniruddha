@@ -11,8 +11,6 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import in.lubble.app.Constants;
@@ -66,12 +64,8 @@ public class NewAnnouncementFragment extends Fragment {
 
     private void pushAnnouncement(AnnouncementData announcementData) {
         FirebaseDatabase.getInstance().getReference("messages/lubbles/" + Constants.DEFAULT_LUBBLE + "/announcements")
-                .push().setValue(announcementData, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                getActivity().finish();
-            }
-        });
+                .push().setValue(announcementData);
+        getActivity().finish();
     }
 
 }

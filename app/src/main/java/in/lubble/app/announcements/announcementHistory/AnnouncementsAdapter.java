@@ -37,8 +37,8 @@ public class AnnouncementsAdapter extends RecyclerView.Adapter<AnnouncementsAdap
     }
 
     public void addAnnouncement(AnnouncementData announcementData) {
-        announcementDataList.add(announcementData);
-        notifyItemInserted(announcementDataList.size() - 1);
+        announcementDataList.add(0,announcementData);
+        notifyItemInserted(0);
     }
 
     @Override
