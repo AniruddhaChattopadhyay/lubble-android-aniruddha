@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileData;
@@ -120,4 +121,9 @@ public class MainActivity extends AppCompatActivity {
     public void openProfile(MenuItem item) {
         ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
     }
+
+    public void openAnnouncements(MenuItem item) {
+        AnnouncementsActivity.newInstance(this);
+    }
+
 }

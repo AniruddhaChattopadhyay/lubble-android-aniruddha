@@ -1,4 +1,4 @@
-package in.lubble.app.announcements;
+package in.lubble.app.announcements.announcementHistory;
 
 import android.content.Context;
 import android.content.Intent;
@@ -9,19 +9,19 @@ import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 
-public class NewAnnouncementActivity extends AppCompatActivity {
+public class AnnouncementsActivity extends AppCompatActivity {
 
     public static void newInstance(Context context) {
-        final Intent intent = new Intent(context, NewAnnouncementActivity.class);
+        final Intent intent = new Intent(context, AnnouncementsActivity.class);
         context.startActivity(intent);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_announcement);
+        setContentView(R.layout.activity_announcements);
 
-        replaceFrag(getSupportFragmentManager(), NewAnnouncementFragment.newInstance(), R.id.frame_fragContainer);
+        replaceFrag(getSupportFragmentManager(), AnnouncementsFrag.newInstance(), R.id.frame_fragContainer);
 
     }
 }
