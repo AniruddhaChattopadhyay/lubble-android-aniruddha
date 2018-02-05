@@ -24,6 +24,8 @@
 -keep class com.bumptech.glide.GeneratedAppGlideModuleImpl
 # Add this global rule for firebase realtime db
 -keepattributes Signature
+# for firebase auth
+-keepattributes *Annotation*
 
 # --For firebase realtime db--
 # This rule will properly ProGuard all the model classes in
