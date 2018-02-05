@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "882107614936-76puvmcrdvqi2o7699ne69rl3g54vaga.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.lubble.app",
+            "certificate_hash": "28d93d40b69e07efe24b5def32a41296485b2602"
+          }
+        },
+        {
           "client_id": "882107614936-pjrpctciigel4tej1fl5ahi0f3tt2k7d.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
