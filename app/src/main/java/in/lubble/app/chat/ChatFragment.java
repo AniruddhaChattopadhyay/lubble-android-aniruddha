@@ -121,6 +121,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 Log.d(TAG, "onChildAdded: ");
                 final ChatData chatData = dataSnapshot.getValue(ChatData.class);
                 if (chatData != null) {
+                    chatData.setId(dataSnapshot.getKey());
                     chatAdapter.addChatData(chatData);
                 }
                 chatRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
@@ -129,6 +130,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildChanged: ");
+                final ChatData chatData = dataSnapshot.getValue(ChatData.class);
+                if (chatData != null) {
+                    chatData.setId(dataSnapshot.getKey());
+                    chatAdapter.updateChatData(chatData);
+                }
             }
 
             @Override

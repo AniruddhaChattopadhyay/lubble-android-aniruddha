@@ -3,13 +3,20 @@ package in.lubble.app.chat;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 
 import java.util.ArrayList;
 
@@ -17,6 +24,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 
+import static in.lubble.app.Constants.DEFAULT_LUBBLE;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 /**
@@ -25,6 +33,7 @@ import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class ChatAdapter extends RecyclerView.Adapter {
 
+    private static final String TAG = "ChatAdapter";
     private static final int TYPE_RECEIVED = 0;
     private static final int TYPE_SENT = 1;
 
@@ -71,6 +80,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         ChatData chatData = chatDataList.get(position);
 
         sentChatViewHolder.messageTv.setText(chatData.getMessage());
+        sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
+        if (chatData.getLubbers().containsKey(FirebaseAuth.getInstance().getUid())) {
+            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+        } else {
+            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+        }
 
         handleImage(sentChatViewHolder.chatIv, chatData);
 
@@ -82,6 +97,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         recvdChatViewHolder.authorNameTv.setText(chatData.getAuthorName());
         recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+        recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
+        if (chatData.getLubbers().containsKey(FirebaseAuth.getInstance().getUid())) {
+            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+        } else {
+            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+        }
 
         handleImage(recvdChatViewHolder.chatIv, chatData);
 
@@ -106,37 +127,101 @@ public class ChatAdapter extends RecyclerView.Adapter {
         notifyItemInserted(size + 1);
     }
 
+    public void updateChatData(@NonNull ChatData chatData) {
+        final int pos = chatDataList.indexOf(chatData);
+        chatDataList.set(pos, chatData);
+        notifyItemChanged(pos);
+    }
+
     @Override
     public int getItemCount() {
         return chatDataList.size();
     }
 
-    public class RecvdChatViewHolder extends RecyclerView.ViewHolder {
+    private void toggleLubb(int pos) {
+        FirebaseDatabase.getInstance().getReference("messages/lubbles/" + DEFAULT_LUBBLE + "/groups/0/").child(chatDataList.get(pos).getId())
+                .runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        ChatData chatData = mutableData.getValue(ChatData.class);
+                        if (chatData == null) {
+                            return Transaction.success(mutableData);
+                        }
+
+                        final String uid = FirebaseAuth.getInstance().getUid();
+                        if (chatData.getLubbers().containsKey(uid)) {
+                            // Unstar the message and remove self from lubbs
+                            chatData.setLubbCount(chatData.getLubbCount() - 1);
+                            chatData.getLubbers().remove(uid);
+                        } else {
+                            // Star the message and add self to lubbs
+                            chatData.setLubbCount(chatData.getLubbCount() + 1);
+                            chatData.getLubbers().put(uid, true);
+                        }
+
+                        // Set value and report transaction success
+                        mutableData.setValue(chatData);
+                        return Transaction.success(mutableData);
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                        // Transaction completed
+                        Log.d(TAG, "postTransaction:onComplete:" + databaseError);
+                    }
+                });
+    }
+
+    public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView authorNameTv;
         private TextView messageTv;
         private ImageView chatIv;
+        private LinearLayout lubbContainer;
+        private ImageView lubbIcon;
+        private TextView lubbCount;
 
         public RecvdChatViewHolder(View itemView) {
             super(itemView);
             authorNameTv = itemView.findViewById(R.id.tv_author);
             messageTv = itemView.findViewById(R.id.tv_message);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
+            lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
+            lubbIcon = itemView.findViewById(R.id.iv_lubb);
+            lubbCount = itemView.findViewById(R.id.tv_lubb_count);
+
+            lubbContainer.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View v) {
+            toggleLubb(getAdapterPosition());
+        }
     }
 
-    public class SentChatViewHolder extends RecyclerView.ViewHolder {
+    public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView messageTv;
         private ImageView chatIv;
+        private LinearLayout lubbContainer;
+        private ImageView lubbIcon;
+        private TextView lubbCount;
 
         public SentChatViewHolder(View itemView) {
             super(itemView);
             messageTv = itemView.findViewById(R.id.tv_message);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
+            lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
+            lubbIcon = itemView.findViewById(R.id.iv_lubb);
+            lubbCount = itemView.findViewById(R.id.tv_lubb_count);
+
+            lubbContainer.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View v) {
+            toggleLubb(getAdapterPosition());
+        }
     }
 
 }
