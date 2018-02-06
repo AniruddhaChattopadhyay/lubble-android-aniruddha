@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
             syncFcmToken();
         }
 
+        switchFrag(GroupListFragment.newInstance());
+
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
@@ -100,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_dashboard:
                     return true;
                 case R.id.navigation_notifications:
-                    switchFrag(GroupListFragment.newInstance());
                     return true;
             }
             return false;
