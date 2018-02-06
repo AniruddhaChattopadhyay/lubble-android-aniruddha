@@ -3,14 +3,13 @@ package in.lubble.app.groups;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -25,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.R;
-import in.lubble.app.announcements.NewAnnouncementActivity;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
 
@@ -53,8 +51,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         Context context = view.getContext();
 
         RecyclerView groupsRecyclerView = view.findViewById(R.id.rv_groups);
-        Button newGroupBtn = view.findViewById(R.id.btn_create_group);
-        final Button newAnnouncementBtn = view.findViewById(R.id.btn_new_announcement);
+        FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         adapter = new GroupRecyclerAdapter(mListener);
@@ -62,42 +59,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         syncUserGroupIds();
 
-        newGroupBtn.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getContext(), NewGroupActivity.class));
             }
         });
 
-        toggleAnnouncementBtn(newAnnouncementBtn);
-
-        newAnnouncementBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                NewAnnouncementActivity.newInstance(getContext());
-            }
-        });
-
         return view;
-    }
-
-    private void toggleAnnouncementBtn(final Button newAnnouncementBtn) {
-        FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
-                + "/lubbles/" + DEFAULT_LUBBLE).child("isAdmin").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null && dataSnapshot.getValue(Boolean.class)) {
-                    newAnnouncementBtn.setVisibility(View.VISIBLE);
-                } else {
-                    newAnnouncementBtn.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getContext(), "ERROR: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private void syncUserGroupIds() {
