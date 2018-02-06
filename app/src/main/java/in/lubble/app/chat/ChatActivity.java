@@ -2,6 +2,7 @@ package in.lubble.app.chat;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import in.lubble.app.R;
 
@@ -15,6 +16,9 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
+
+        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        setSupportActionBar(toolbar);
 
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
 

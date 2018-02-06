@@ -3,7 +3,9 @@ package in.lubble.app.announcements.announcementHistory;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 
 import in.lubble.app.R;
 
@@ -17,11 +19,15 @@ public class AnnouncementsActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_announcements);
 
-        replaceFrag(getSupportFragmentManager(), AnnouncementsFrag.newInstance(), R.id.frame_fragContainer);
+        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        setSupportActionBar(toolbar);
 
+        replaceFrag(getSupportFragmentManager(), AnnouncementsFrag.newInstance(), R.id.frame_fragContainer);
     }
+
 }

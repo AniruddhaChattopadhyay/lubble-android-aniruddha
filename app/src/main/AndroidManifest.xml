@@ -33,8 +33,12 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".chat.ChatActivity" />
-        <activity android:name=".profile.ProfileActivity" />
+        <activity
+            android:name=".chat.ChatActivity"
+            android:label="Chat" />
+        <activity
+            android:name=".profile.ProfileActivity"
+            android:label="Profile" />
 
         <service android:name=".UploadFileService" />
         <service android:name=".firebase.FcmService">
@@ -53,14 +57,20 @@
             </intent-filter>
         </service>
 
-        <activity android:name=".groups.NewGroupActivity" />
+        <activity
+            android:name=".groups.NewGroupActivity"
+            android:label="New Group" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="default" />
 
-        <activity android:name=".announcements.NewAnnouncementActivity" />
-        <activity android:name=".announcements.announcementHistory.AnnouncementsActivity"></activity>
+        <activity
+            android:name=".announcements.NewAnnouncementActivity"
+            android:label="New Announcement" />
+        <activity
+            android:name=".announcements.announcementHistory.AnnouncementsActivity"
+            android:label="Announcements"></activity>
     </application>
 
 </manifest>
