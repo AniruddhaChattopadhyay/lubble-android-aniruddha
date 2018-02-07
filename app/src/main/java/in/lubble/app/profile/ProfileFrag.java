@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -105,10 +106,13 @@ public class ProfileFrag extends Fragment {
                 GlideApp.with(getContext())
                         .load(profileData.getProfilePic())
                         .error(R.drawable.ic_account_circle_black_no_padding)
+                        .signature(new ObjectKey(System.currentTimeMillis()))
+                        .placeholder(R.drawable.ic_account_circle_black_no_padding)
                         .circleCrop()
                         .into(profilePicIv);
                 GlideApp.with(getContext())
                         .load(profileData.getCoverPic())
+                        .signature(new ObjectKey(System.currentTimeMillis()))
                         .into(coverPicIv);
             }
 

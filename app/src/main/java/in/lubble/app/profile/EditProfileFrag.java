@@ -96,10 +96,13 @@ public class EditProfileFrag extends Fragment {
                     GlideApp.with(getContext())
                             .load(fetchedProfileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
+                            .signature(new ObjectKey(System.currentTimeMillis()))
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .circleCrop()
                             .into(profilePicIv);
                     GlideApp.with(getContext())
                             .load(fetchedProfileData.getCoverPic())
+                            .signature(new ObjectKey(System.currentTimeMillis()))
                             .into(coverPicIv);
                 }
             }
@@ -175,16 +178,20 @@ public class EditProfileFrag extends Fragment {
 
             if (requestCode == REQUEST_CODE_DP) {
                 newProfilePicUri = Uri.fromFile(imageFile);
+                GlideApp.with(getContext())
+                        .load(imageFile)
+                        .centerCrop()
+                        .circleCrop()
+                        .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
+                        .into(profilePicIv);
             } else {
                 newCoverPicUri = Uri.fromFile(imageFile);
+                GlideApp.with(getContext())
+                        .load(imageFile)
+                        .centerCrop()
+                        .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
+                        .into(coverPicIv);
             }
-
-            GlideApp.with(getContext())
-                    .load(imageFile)
-                    .centerCrop()
-                    .circleCrop()
-                    .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
-                    .into(requestCode == REQUEST_CODE_DP ? profilePicIv : coverPicIv);
 
         } else {
             Toast.makeText(getContext(), "Failed to get photo", Toast.LENGTH_SHORT).show();
