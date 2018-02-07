@@ -2,7 +2,6 @@ package in.lubble.app.profile;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -17,17 +16,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
-import in.lubble.app.utils.UiUtils;
 
-public class ProfileFrag extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class ProfileFrag extends Fragment {
     private static final String TAG = "ProfileFrag";
     private static final String ARG_USER_ID = "arg_user_id";
 
     private View rootView;
-    private SwipeRefreshLayout swipeLayout;
     private String userId;
     private ImageView coverPicIv;
     private ImageView profilePicIv;
@@ -63,7 +61,6 @@ public class ProfileFrag extends Fragment implements SwipeRefreshLayout.OnRefres
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        swipeLayout = rootView.findViewById(R.id.swipeLayout_profile_feed);
         coverPicIv = rootView.findViewById(R.id.iv_cover);
         profilePicIv = rootView.findViewById(R.id.iv_profilePic);
         userName = rootView.findViewById(R.id.tv_name);
@@ -71,15 +68,7 @@ public class ProfileFrag extends Fragment implements SwipeRefreshLayout.OnRefres
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
         recyclerView = rootView.findViewById(R.id.rv_profile_feed);
-        swipeLayout.setOnRefreshListener(this);
-        swipeLayout.setProgressViewOffset(false, 0, UiUtils.dpToPx(48));
 
-        if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-            // todo fetch cached profile from DB
-            /*ProfileData profileData = DbSingleton.getInstance().readProfileData(userId);
-            updateProfileData(profileData);
-            editProfileTV.setVisibility(View.VISIBLE);*/
-        }
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setNestedScrollingEnabled(false);
         fetchProfileFeed();
@@ -103,7 +92,7 @@ public class ProfileFrag extends Fragment implements SwipeRefreshLayout.OnRefres
 
     private void fetchProfileFeed() {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        database.getReference("users").child(userId).addValueEventListener(new ValueEventListener() {
+        database.getReference("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
@@ -113,6 +102,14 @@ public class ProfileFrag extends Fragment implements SwipeRefreshLayout.OnRefres
                 if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                     editProfileTV.setVisibility(View.VISIBLE);
                 }
+                GlideApp.with(getContext())
+                        .load(profileData.getProfilePic())
+                        .error(R.drawable.ic_account_circle_black_no_padding)
+                        .circleCrop()
+                        .into(profilePicIv);
+                GlideApp.with(getContext())
+                        .load(profileData.getCoverPic())
+                        .into(coverPicIv);
             }
 
             @Override
@@ -120,60 +117,6 @@ public class ProfileFrag extends Fragment implements SwipeRefreshLayout.OnRefres
 
             }
         });
-        /*swipeLayout.setRefreshing(true);
-        NetworkClient apiClient = createService();
-        Call<ProfileData> profileCall = apiClient.getProfile(userId);
-        profileCall.enqueue(new Callback<ProfileData>() {
-            @Override
-            public void onResponse(Call<ProfileData> call, Response<ProfileData> response) {
-                swipeLayout.setRefreshing(false);
-                if (response.isSuccessful() && response.body() != null) {
-                    ProfileData profileData = response.body();
-                    DbSingleton.getInstance().createProfileData(profileData);
-                    updateProfileData(profileData);
-
-                    List<PostData> postDataList = profileData.getPostDataList();
-                    if (postDataList.isEmpty()) {
-                        //// TODO: 17/11/17 show empty layout
-                        return;
-                    }
-                    FeedAdapter feedAdapter = new FeedAdapter(getContext(), profileData);
-                    feedAdapter.addAll(postDataList);
-                    recyclerView.setAdapter(feedAdapter);
-                } else {
-                    Toast.makeText(getContext(), "Whoops!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ProfileData> call, Throwable t) {
-                swipeLayout.setRefreshing(false);
-                d(TAG, "onFailure: ");
-                Snackbar.make(rootView, "Check connection", Snackbar.LENGTH_SHORT).show();
-            }
-        });*/
     }
 
-    private void updateProfileData(ProfileData profileData) {
-        /*GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getCoverPic())
-                .placeholder(R.drawable.cover_pic)
-                .into(coverPicIv);
-        GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getDp())
-                .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                .into(profilePicIv);
-        userName.setText(profileData.getName());
-        locality.setText(profileData.getLocality());
-        String bio;
-        if (StringUtils.isValidString(profileData.getBio())) {
-            bio = profileData.getBio();
-        } else {
-            bio = getString(R.string.bio_default);
-        }
-        userBio.setText(bio);*/
-    }
-
-    @Override
-    public void onRefresh() {
-        fetchProfileFeed();
-    }
 }

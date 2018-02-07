@@ -9,7 +9,7 @@
     <ImageView
         android:id="@+id/iv_cover"
         android:layout_width="match_parent"
-        android:layout_height="192dp"
+        android:layout_height="240dp"
         android:background="@color/light_gray"
         android:scaleType="centerCrop" />
 
@@ -45,24 +45,24 @@
 
     <ImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/iv_profilePic"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="184dp"
+        android:layout_height="184dp"
         android:layout_below="@+id/iv_cover"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="-60dp"
+        android:layout_marginTop="-92dp"
         app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
     <ImageView
         android:id="@+id/iv_dp_edit_overlay"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="184dp"
+        android:layout_height="184dp"
         android:layout_alignBottom="@id/iv_profilePic"
         android:layout_alignTop="@id/iv_profilePic"
         android:layout_centerHorizontal="true"
-        android:alpha="0.65"
+        android:alpha="0.5"
         android:background="@drawable/circle"
         android:backgroundTint="@color/black"
-        android:padding="40dp"
+        android:padding="48dp"
         android:tint="@color/white"
         android:visibility="gone"
         app:srcCompat="@drawable/ic_edit_black_24dp"

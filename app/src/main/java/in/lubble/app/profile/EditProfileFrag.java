@@ -6,9 +6,6 @@ import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -49,7 +46,6 @@ public class EditProfileFrag extends Fragment {
     private TextInputLayout localityTil;
     private TextInputLayout bioTil;
     private Button saveBtn;
-    private ProfileData profileData;
     private View rootView;
     private String currentPhotoPath;
     private Uri newProfilePicUri = null;
@@ -95,6 +91,14 @@ public class EditProfileFrag extends Fragment {
                 fullNameTil.getEditText().setText(fetchedProfileData.getName());
                 localityTil.getEditText().setText(fetchedProfileData.getLocality());
                 bioTil.getEditText().setText(fetchedProfileData.getBio());
+                GlideApp.with(getContext())
+                        .load(fetchedProfileData.getProfilePic())
+                        .error(R.drawable.ic_account_circle_black_no_padding)
+                        .circleCrop()
+                        .into(profilePicIv);
+                GlideApp.with(getContext())
+                        .load(fetchedProfileData.getCoverPic())
+                        .into(coverPicIv);
             }
 
             @Override
@@ -143,7 +147,7 @@ public class EditProfileFrag extends Fragment {
         GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getCoverPic())
                 .placeholder(R.drawable.cover_pic)
                 .into(coverPicIv);
-        GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getDp())
+        GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getProfilePic())
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .into(profilePicIv);*/
 
@@ -189,30 +193,6 @@ public class EditProfileFrag extends Fragment {
         } else {
             Toast.makeText(getContext(), "Failed to get photo", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        menu.clear();
-        getActivity().getMenuInflater().inflate(R.menu.edit_profile_menu, menu);
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            /*case R.id.action_save_profile: {
-                if (isDataValid()) {
-                    //todo add dp n cover pic
-                    profileData.setName(getStringFromTil(fullNameTil));
-                    profileData.setLocality(getStringFromTil(localityTil));
-                    profileData.setBio(getStringFromTil(bioTil));
-                    uploadProfileEdit(profileData);
-                }
-                break;
-            }*/
-        }
-        return false;
     }
 
 }

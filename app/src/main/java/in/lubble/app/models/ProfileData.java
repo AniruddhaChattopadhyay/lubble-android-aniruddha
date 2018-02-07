@@ -1,5 +1,7 @@
 package in.lubble.app.models;
 
+import com.google.firebase.database.PropertyName;
+
 import java.util.List;
 
 import static in.lubble.app.utils.StringUtils.getTitleCase;
@@ -12,13 +14,11 @@ public class ProfileData {
 
     private String id;
     private String name;
-    private String dp;
+    private String profilePic;
     private String coverPic;
     private String locality;
     private String bio;
     private String token;
-    private String profile_pic;
-    private String cover_pic;
     private List<Object> lubbles;
     private List<Object> groups;
 
@@ -38,18 +38,22 @@ public class ProfileData {
         this.name = name;
     }
 
-    public String getDp() {
-        return dp;
+    @PropertyName("profile_pic")
+    public String getProfilePic() {
+        return profilePic;
     }
 
-    public void setDp(String dp) {
-        this.dp = dp;
+    @PropertyName("profile_pic")
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 
+    @PropertyName("cover_pic")
     public String getCoverPic() {
         return coverPic;
     }
 
+    @PropertyName("cover_pic")
     public void setCoverPic(String coverPic) {
         this.coverPic = coverPic;
     }
@@ -94,19 +98,4 @@ public class ProfileData {
         this.groups = groups;
     }
 
-    public String getProfile_pic() {
-        return profile_pic;
-    }
-
-    public void setProfile_pic(String profile_pic) {
-        this.profile_pic = profile_pic;
-    }
-
-    public String getCover_pic() {
-        return cover_pic;
-    }
-
-    public void setCover_pic(String cover_pic) {
-        this.cover_pic = cover_pic;
-    }
 }

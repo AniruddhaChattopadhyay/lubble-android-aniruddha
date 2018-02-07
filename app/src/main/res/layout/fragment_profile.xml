@@ -1,80 +1,73 @@
-<android.support.v4.widget.SwipeRefreshLayout
-    android:id="@+id/swipeLayout_profile_feed"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/card_background">
 
-    <android.support.v4.widget.NestedScrollView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:descendantFocusability="blocksDescendants">
 
-        <RelativeLayout
+        <include
+            android:id="@+id/layout_profile_header"
+            layout="@layout/profile_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_profile_header"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Shivam Gupta" />
+
+        <TextView
+            android:id="@+id/tv_locality"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_name"
+            android:layout_centerHorizontal="true"
+            android:textStyle="bold"
+            tools:text="C - Block" />
+
+        <TextView
+            android:id="@+id/tv_bio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_locality"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            tools:text="Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend" />
+
+        <TextView
+            android:id="@+id/tv_editProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_bio"
+            android:layout_centerHorizontal="true"
+            android:padding="8dp"
+            android:text="@string/edit_profile"
+            android:textColor="@color/link_blue"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_profile_feed"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:descendantFocusability="blocksDescendants">
+            android:layout_below="@id/tv_editProfile"
+            android:layout_marginTop="8dp"
+            android:background="@color/card_background"
+            android:paddingTop="8dp"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-            <include
-                android:id="@+id/layout_profile_header"
-                layout="@layout/profile_header"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/tv_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/layout_profile_header"
-                android:layout_centerHorizontal="true"
-                android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                tools:text="Shivam Gupta"/>
-
-            <TextView
-                android:id="@+id/tv_locality"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_name"
-                android:layout_centerHorizontal="true"
-                android:textStyle="bold"
-                tools:text="C - Block"/>
-
-            <TextView
-                android:id="@+id/tv_bio"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_locality"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="8dp"
-                android:gravity="center"
-                tools:text="Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend"/>
-
-            <TextView
-                android:id="@+id/tv_editProfile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/tv_bio"
-                android:layout_centerHorizontal="true"
-                android:padding="8dp"
-                android:text="@string/edit_profile"
-                android:textColor="@color/link_blue"
-                android:visibility="gone"
-                tools:visibility="visible"/>
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_profile_feed"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/tv_editProfile"
-                android:layout_marginTop="8dp"
-                android:background="@color/card_background"
-                android:paddingTop="8dp"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-
-        </RelativeLayout>
-    </android.support.v4.widget.NestedScrollView>
-</android.support.v4.widget.SwipeRefreshLayout>
+    </RelativeLayout>
+</android.support.v4.widget.NestedScrollView>
