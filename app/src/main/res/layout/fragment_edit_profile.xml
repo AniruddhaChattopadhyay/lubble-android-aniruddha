@@ -14,45 +14,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/til_fullName"
+        <TextView
+            android:id="@+id/tv_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/layout_profile_header"
             android:layout_marginTop="8dp"
-            android:hint="Full Name">
+            android:gravity="center"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+            tools:text="Full Name" />
 
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="false"
-                android:enabled="false"
-                android:focusable="false" />
-
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/til_locality"
+        <TextView
+            android:id="@+id/tv_lubble"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/til_fullName"
-            android:clickable="false"
-            android:enabled="false"
-            android:focusable="false"
-            android:layout_marginTop="8dp"
-            android:hint="Locality">
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </android.support.design.widget.TextInputLayout>
+            android:gravity="center"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
+            tools:text="Lubble Name" />
 
         <android.support.design.widget.TextInputLayout
             android:id="@+id/til_bio"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/til_locality"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
             android:hint="Bio">
 

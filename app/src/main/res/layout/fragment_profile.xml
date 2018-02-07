@@ -43,6 +43,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_locality"
             android:layout_centerHorizontal="true"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
             android:gravity="center"
             tools:text="Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend" />

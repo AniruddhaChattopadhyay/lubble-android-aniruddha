@@ -37,6 +37,7 @@
             android:name=".chat.ChatActivity"
             android:label="Chat" />
         <activity
+            android:windowSoftInputMode="adjustPan"
             android:name=".profile.ProfileActivity"
             android:label="Profile" />
 

@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
@@ -42,8 +43,8 @@ public class EditProfileFrag extends Fragment {
 
     private ImageView coverPicIv;
     private ImageView profilePicIv;
-    private TextInputLayout fullNameTil;
-    private TextInputLayout localityTil;
+    private TextView fullNameTv;
+    private TextView lubbleTv;
     private TextInputLayout bioTil;
     private Button saveBtn;
     private View rootView;
@@ -75,8 +76,8 @@ public class EditProfileFrag extends Fragment {
 
         coverPicIv = rootView.findViewById(R.id.iv_cover);
         profilePicIv = rootView.findViewById(R.id.iv_profilePic);
-        fullNameTil = rootView.findViewById(R.id.til_fullName);
-        localityTil = rootView.findViewById(R.id.til_locality);
+        fullNameTv = rootView.findViewById(R.id.tv_name);
+        lubbleTv = rootView.findViewById(R.id.tv_lubble);
         bioTil = rootView.findViewById(R.id.til_bio);
         saveBtn = rootView.findViewById(R.id.btn_save_profile);
 
@@ -84,21 +85,23 @@ public class EditProfileFrag extends Fragment {
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
 
         userRef = FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        userRef.addValueEventListener(new ValueEventListener() {
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                fetchedProfileData = dataSnapshot.getValue(ProfileData.class);
-                fullNameTil.getEditText().setText(fetchedProfileData.getName());
-                localityTil.getEditText().setText(fetchedProfileData.getLocality());
-                bioTil.getEditText().setText(fetchedProfileData.getBio());
-                GlideApp.with(getContext())
-                        .load(fetchedProfileData.getProfilePic())
-                        .error(R.drawable.ic_account_circle_black_no_padding)
-                        .circleCrop()
-                        .into(profilePicIv);
-                GlideApp.with(getContext())
-                        .load(fetchedProfileData.getCoverPic())
-                        .into(coverPicIv);
+                if (isAdded()) {
+                    fetchedProfileData = dataSnapshot.getValue(ProfileData.class);
+                    fullNameTv.setText(fetchedProfileData.getName());
+                    lubbleTv.setText(fetchedProfileData.getLocality());
+                    bioTil.getEditText().setText(fetchedProfileData.getBio());
+                    GlideApp.with(getContext())
+                            .load(fetchedProfileData.getProfilePic())
+                            .error(R.drawable.ic_account_circle_black_no_padding)
+                            .circleCrop()
+                            .into(profilePicIv);
+                    GlideApp.with(getContext())
+                            .load(fetchedProfileData.getCoverPic())
+                            .into(coverPicIv);
+                }
             }
 
             @Override
@@ -140,16 +143,9 @@ public class EditProfileFrag extends Fragment {
                 ProfileData updatedProfileData = fetchedProfileData;
                 updatedProfileData.setBio(StringUtils.getStringFromTil(bioTil));
                 userRef.setValue(updatedProfileData);
+                getFragmentManager().popBackStack();
             }
         });
-
-        /*todo set default profile n cover pics
-        GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getCoverPic())
-                .placeholder(R.drawable.cover_pic)
-                .into(coverPicIv);
-        GlideApp.with(getContext()).load(BASE_MEDIA_URL + profileData.getProfilePic())
-                .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                .into(profilePicIv);*/
 
         return rootView;
     }
