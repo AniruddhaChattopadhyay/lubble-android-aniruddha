@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.profile.ProfileActivity;
 
 import static in.lubble.app.Constants.DEFAULT_LUBBLE;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -189,13 +190,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
-
+            authorNameTv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            toggleLubb(getAdapterPosition());
+            switch (v.getId()) {
+                case R.id.tv_author:
+                    ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
+                    break;
+                case R.id.linearLayout_lubb_container:
+                    toggleLubb(getAdapterPosition());
+                    break;
+            }
         }
     }
 
