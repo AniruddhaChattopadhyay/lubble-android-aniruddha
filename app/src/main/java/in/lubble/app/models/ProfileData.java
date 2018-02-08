@@ -1,7 +1,5 @@
 package in.lubble.app.models;
 
-import com.google.firebase.database.PropertyName;
-
 import java.util.List;
 
 import static in.lubble.app.utils.StringUtils.getTitleCase;
@@ -38,22 +36,18 @@ public class ProfileData {
         this.name = name;
     }
 
-    @PropertyName("profile_pic")
     public String getProfilePic() {
         return profilePic;
     }
 
-    @PropertyName("profile_pic")
     public void setProfilePic(String profilePic) {
         this.profilePic = profilePic;
     }
 
-    @PropertyName("cover_pic")
     public String getCoverPic() {
         return coverPic;
     }
 
-    @PropertyName("cover_pic")
     public void setCoverPic(String coverPic) {
         this.coverPic = coverPic;
     }

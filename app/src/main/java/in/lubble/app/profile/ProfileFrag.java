@@ -10,10 +10,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -35,6 +35,8 @@ public class ProfileFrag extends Fragment {
     private TextView userBio;
     private TextView editProfileTV;
     private RecyclerView recyclerView;
+    private DatabaseReference userRef;
+    private ValueEventListener valueEventListener;
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -72,7 +74,6 @@ public class ProfileFrag extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setNestedScrollingEnabled(false);
-        fetchProfileFeed();
 
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,9 +92,15 @@ public class ProfileFrag extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        fetchProfileFeed();
+    }
+
     private void fetchProfileFeed() {
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        database.getReference("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+        valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
@@ -106,13 +113,11 @@ public class ProfileFrag extends Fragment {
                 GlideApp.with(getContext())
                         .load(profileData.getProfilePic())
                         .error(R.drawable.ic_account_circle_black_no_padding)
-                        .signature(new ObjectKey(System.currentTimeMillis()))
                         .placeholder(R.drawable.ic_account_circle_black_no_padding)
                         .circleCrop()
                         .into(profilePicIv);
                 GlideApp.with(getContext())
                         .load(profileData.getCoverPic())
-                        .signature(new ObjectKey(System.currentTimeMillis()))
                         .into(coverPicIv);
             }
 
@@ -120,7 +125,14 @@ public class ProfileFrag extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+        userRef.addValueEventListener(valueEventListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        userRef.removeEventListener(valueEventListener);
     }
 
 }

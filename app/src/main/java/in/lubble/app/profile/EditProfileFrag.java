@@ -96,13 +96,11 @@ public class EditProfileFrag extends Fragment {
                     GlideApp.with(getContext())
                             .load(fetchedProfileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
-                            .signature(new ObjectKey(System.currentTimeMillis()))
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .circleCrop()
                             .into(profilePicIv);
                     GlideApp.with(getContext())
                             .load(fetchedProfileData.getCoverPic())
-                            .signature(new ObjectKey(System.currentTimeMillis()))
                             .into(coverPicIv);
                 }
             }
@@ -130,14 +128,14 @@ public class EditProfileFrag extends Fragment {
             public void onClick(View view) {
                 if (newProfilePicUri != null) {
                     getContext().startService(new Intent(getContext(), UploadFileService.class)
-                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic.jpg")
+                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, newProfilePicUri)
                             .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "user_profile/" + FirebaseAuth.getInstance().getUid())
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
                 if (newCoverPicUri != null) {
                     getContext().startService(new Intent(getContext(), UploadFileService.class)
-                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "cover_pic.jpg")
+                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "cover_pic" + System.currentTimeMillis() + ".jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, newCoverPicUri)
                             .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "user_profile/" + FirebaseAuth.getInstance().getUid())
                             .setAction(UploadFileService.ACTION_UPLOAD));
