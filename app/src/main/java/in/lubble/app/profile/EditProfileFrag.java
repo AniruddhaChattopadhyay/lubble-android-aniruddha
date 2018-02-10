@@ -90,7 +90,7 @@ public class EditProfileFrag extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (isAdded()) {
                     fetchedProfileData = dataSnapshot.getValue(ProfileData.class);
-                    fullNameTv.setText(fetchedProfileData.getName());
+                    fullNameTv.setText(fetchedProfileData.getInfo().getName());
                     lubbleTv.setText(fetchedProfileData.getLocality());
                     bioTil.getEditText().setText(fetchedProfileData.getBio());
                     GlideApp.with(getContext())

@@ -10,7 +10,6 @@ public class ChatData {
 
     private String id;
     private String authorUid;
-    private String authorName;
     private String message;
     private String imgUrl;
     private int lubbCount = 0;
@@ -34,14 +33,6 @@ public class ChatData {
 
     public void setAuthorUid(String authorUid) {
         this.authorUid = authorUid;
-    }
-
-    public String getAuthorName() {
-        return authorName;
-    }
-
-    public void setAuthorName(String authorName) {
-        this.authorName = authorName;
     }
 
     public String getMessage() {

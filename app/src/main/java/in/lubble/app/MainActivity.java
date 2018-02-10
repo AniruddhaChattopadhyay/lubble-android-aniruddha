@@ -24,6 +24,7 @@ import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 
 import static in.lubble.app.utils.UserUtils.isNewUser;
@@ -80,7 +81,9 @@ public class MainActivity extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         ProfileData profileData = new ProfileData();
         profileData.setId(currentUser.getUid());
-        profileData.setName(currentUser.getDisplayName());
+        final ProfileInfo profileInfo = new ProfileInfo();
+        profileInfo.setName(currentUser.getDisplayName());
+        profileData.setInfo(profileInfo);
         profileData.setLocality("C - Block");
         profileData.setBio("Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend");
         profileData.setToken(FirebaseInstanceId.getInstance().getToken());

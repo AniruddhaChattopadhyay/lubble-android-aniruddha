@@ -2,8 +2,6 @@ package in.lubble.app.models;
 
 import java.util.List;
 
-import static in.lubble.app.utils.StringUtils.getTitleCase;
-
 /**
  * Created by ishaangarg on 01/11/17.
  */
@@ -11,7 +9,7 @@ import static in.lubble.app.utils.StringUtils.getTitleCase;
 public class ProfileData {
 
     private String id;
-    private String name;
+    private ProfileInfo info;
     private String profilePic;
     private String coverPic;
     private String locality;
@@ -26,14 +24,6 @@ public class ProfileData {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return getTitleCase(name);
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getProfilePic() {
@@ -90,6 +80,14 @@ public class ProfileData {
 
     public void setGroups(List<Object> groups) {
         this.groups = groups;
+    }
+
+    public ProfileInfo getInfo() {
+        return info;
+    }
+
+    public void setInfo(ProfileInfo profileInfo) {
+        this.info = profileInfo;
     }
 
 }

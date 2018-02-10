@@ -160,7 +160,6 @@ public class UploadFileService extends BaseTaskService {
 
         final ChatData chatData = new ChatData();
         chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        chatData.setAuthorName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
         chatData.setMessage("caption placeholder");
         chatData.setImgUrl(downloadUrl.toString());
 

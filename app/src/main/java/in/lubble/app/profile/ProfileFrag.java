@@ -104,7 +104,7 @@ public class ProfileFrag extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                userName.setText(profileData.getName());
+                userName.setText(profileData.getInfo().getName());
                 locality.setText(profileData.getLocality());
                 userBio.setText(profileData.getBio());
                 if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {

@@ -100,7 +100,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
-        recvdChatViewHolder.authorNameTv.setText(chatData.getAuthorName());
         recvdChatViewHolder.messageTv.setText(chatData.getMessage());
         recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbers().containsKey(FirebaseAuth.getInstance().getUid())) {
@@ -111,22 +110,21 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(recvdChatViewHolder.chatIv, chatData);
 
-        showDp(recvdChatViewHolder, chatData);
+        showDpAndName(recvdChatViewHolder, chatData);
     }
 
-    private void showDp(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
+    private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
         firebaseDatabase.getReference("users/" + chatData.getAuthorUid() + "/info").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                final String dpUrl;
                 if (map != null) {
-                    dpUrl = map.get("thumbnail");
-                    GlideApp.with(recvdChatViewHolder.itemView.getContext()).load(dpUrl)
+                    GlideApp.with(recvdChatViewHolder.itemView.getContext()).load(map.get("thumbnail"))
                             .circleCrop()
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(recvdChatViewHolder.dpIv);
+                    recvdChatViewHolder.authorNameTv.setText(map.get("name"));
                 }
             }
 

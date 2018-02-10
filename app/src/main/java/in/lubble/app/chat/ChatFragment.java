@@ -163,7 +163,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 final ChatData chatData = new ChatData();
                 chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
-                chatData.setAuthorName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                 chatData.setMessage(newMessageEt.getText().toString());
 
                 messagesReference.push().setValue(chatData);
