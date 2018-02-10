@@ -218,14 +218,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
             dpIv = itemView.findViewById(R.id.iv_dp);
-            authorNameTv.setOnClickListener(this);
+            dpIv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.tv_author:
+                case R.id.iv_dp:
                     ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
                     break;
                 case R.id.linearLayout_lubb_container:
