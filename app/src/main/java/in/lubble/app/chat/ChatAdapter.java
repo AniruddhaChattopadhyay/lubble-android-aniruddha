@@ -17,8 +17,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -40,9 +42,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private Context context;
     private ArrayList<ChatData> chatDataList;
+    private FirebaseDatabase firebaseDatabase;
 
     public ChatAdapter(Context context, ArrayList<ChatData> chatDataList) {
         this.context = context;
+        firebaseDatabase = FirebaseDatabase.getInstance();
         this.chatDataList = chatDataList;
     }
 
@@ -93,7 +97,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
-        RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
+        final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
         recvdChatViewHolder.authorNameTv.setText(chatData.getAuthorName());
@@ -107,6 +111,30 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(recvdChatViewHolder.chatIv, chatData);
 
+        showDp(recvdChatViewHolder, chatData);
+    }
+
+    private void showDp(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
+        firebaseDatabase.getReference("users/" + chatData.getAuthorUid() + "/info").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                final String dpUrl;
+                if (map != null) {
+                    dpUrl = map.get("thumbnail");
+                    GlideApp.with(recvdChatViewHolder.itemView.getContext()).load(dpUrl)
+                            .circleCrop()
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .error(R.drawable.ic_account_circle_black_no_padding)
+                            .into(recvdChatViewHolder.dpIv);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void handleImage(ImageView imageView, ChatData chatData) {
@@ -181,6 +209,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
+        private ImageView dpIv;
 
         public RecvdChatViewHolder(View itemView) {
             super(itemView);
@@ -190,6 +219,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
+            dpIv = itemView.findViewById(R.id.iv_dp);
             authorNameTv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
         }
