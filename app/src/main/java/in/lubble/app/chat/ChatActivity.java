@@ -19,6 +19,7 @@ public class ChatActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
 

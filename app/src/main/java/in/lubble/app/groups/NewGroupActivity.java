@@ -17,6 +17,7 @@ public class NewGroupActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         replaceFrag(getSupportFragmentManager(), NewGroupFragment.newInstance(), R.id.frame_fragContainer);
 

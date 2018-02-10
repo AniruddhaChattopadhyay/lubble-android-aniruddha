@@ -35,11 +35,13 @@
 
         <activity
             android:name=".chat.ChatActivity"
-            android:label="Chat" />
+            android:label="Chat"
+            android:parentActivityName=".MainActivity" />
         <activity
-            android:windowSoftInputMode="adjustPan"
             android:name=".profile.ProfileActivity"
-            android:label="Profile" />
+            android:label="Profile"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="adjustPan" />
 
         <service android:name=".UploadFileService" />
         <service android:name=".firebase.FcmService">
@@ -60,7 +62,8 @@
 
         <activity
             android:name=".groups.NewGroupActivity"
-            android:label="New Group" />
+            android:label="New Group"
+            android:parentActivityName=".MainActivity" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
@@ -71,10 +74,12 @@
 
         <activity
             android:name=".announcements.NewAnnouncementActivity"
-            android:label="New Announcement" />
+            android:label="New Announcement"
+            android:parentActivityName=".announcements.announcementHistory.AnnouncementsActivity" />
         <activity
             android:name=".announcements.announcementHistory.AnnouncementsActivity"
-            android:label="Announcements"></activity>
+            android:label="Announcements"
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest>

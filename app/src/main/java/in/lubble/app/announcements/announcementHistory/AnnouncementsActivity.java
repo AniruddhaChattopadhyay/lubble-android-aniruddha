@@ -26,6 +26,7 @@ public class AnnouncementsActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         replaceFrag(getSupportFragmentManager(), AnnouncementsFrag.newInstance(), R.id.frame_fragContainer);
     }
