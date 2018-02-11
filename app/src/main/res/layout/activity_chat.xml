@@ -7,7 +7,7 @@
     android:orientation="vertical"
     tools:context="in.lubble.app.chat.ChatActivity">
 
-    <include layout="@layout/lubble_toolbar" />
+    <include layout="@layout/icon_toolbar" />
 
     <FrameLayout
         android:id="@+id/frame_fragContainer"

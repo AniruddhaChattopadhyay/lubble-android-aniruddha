@@ -7,7 +7,8 @@ package in.lubble.app.models;
 public class GroupData {
 
     private String id;
-    private String iconUrl;
+    private String profilePic;
+    private String thumbnail;
     private String title;
     private String description;
     private boolean isJoined = true;
@@ -35,12 +36,12 @@ public class GroupData {
         this.id = id;
     }
 
-    public String getIconUrl() {
-        return iconUrl;
+    public String getProfilePic() {
+        return profilePic;
     }
 
-    public void setIconUrl(String iconUrl) {
-        this.iconUrl = iconUrl;
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 
     public String getTitle() {
@@ -75,4 +76,11 @@ public class GroupData {
         this.isPrivate = aPrivate;
     }
 
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
 }

@@ -118,8 +118,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                if (map != null) {
-                    GlideApp.with(recvdChatViewHolder.itemView.getContext()).load(map.get("thumbnail"))
+                if (map != null && recvdChatViewHolder.itemView.getContext() != null){
+                    GlideApp.with(recvdChatViewHolder.itemView.getContext())
+                            .load(map.get("thumbnail"))
                             .circleCrop()
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)

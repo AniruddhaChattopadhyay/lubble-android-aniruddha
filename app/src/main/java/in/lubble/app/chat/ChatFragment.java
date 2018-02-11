@@ -26,6 +26,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +35,10 @@ import java.util.ArrayList;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.models.GroupData;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.Constants.DEFAULT_LUBBLE;
 import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
@@ -52,6 +55,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private Button sendBtn;
     private Button attachMediaBtn;
     private FirebaseDatabase firebaseDatabase;
+    private DatabaseReference groupReference;
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
     private String groupId;
@@ -76,10 +80,30 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         groupId = getArguments().getString(KEY_GROUP_ID);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
+        groupReference = firebaseDatabase.getReference("lubbles/" + DEFAULT_LUBBLE + "/groups/" + groupId);
         messagesReference = firebaseDatabase.getReference("messages/lubbles/0/groups/" + groupId);
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         registerMediaUploadCallback();
+
+        syncGroupInfo();
+    }
+
+    private void syncGroupInfo() {
+        groupReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                if (groupData != null) {
+                    ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

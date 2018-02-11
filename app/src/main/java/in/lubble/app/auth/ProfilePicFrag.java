@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
 import com.firebase.ui.auth.IdpResponse;
@@ -132,32 +131,8 @@ public class ProfilePicFrag extends Fragment {
                     .circleCrop()
                     .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
                     .into(welcomeDpIv);
-            dispatchNewPicJob(imageFile);
             submitBtn.setVisibility(View.VISIBLE);
         }
-    }
-
-    private void dispatchNewPicJob(File imageFile) {
-        Toast.makeText(getContext(), "to do", Toast.LENGTH_SHORT).show();
-
-        /*Bundle bundle = new Bundle();
-        bundle.putString(FIREJOB_NEW_PIC_PATH, imageFile.getAbsolutePath());
-        bundle.putBoolean(FIREJOB_NEW_PIC_IS_DP, true);
-
-        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(getContext()));
-        Job myJob = dispatcher.newJobBuilder()
-                .setService(MyJobService.class)
-                .setTag(FIREJOB_CHANGE_PROFILE_PIC)
-                .setRecurring(false)
-                .setLifetime(Lifetime.FOREVER)
-                .setTrigger(Trigger.NOW)
-                .setReplaceCurrent(true)
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                .setConstraints(Constraint.ON_ANY_NETWORK)
-                .setExtras(bundle)
-                .build();
-
-        dispatcher.mustSchedule(myJob);*/
     }
 
 }
