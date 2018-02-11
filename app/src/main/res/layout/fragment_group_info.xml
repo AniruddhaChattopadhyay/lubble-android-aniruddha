@@ -1,0 +1,38 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="in.lubble.app.groups.group_info.GroupInfoFragment">
+
+    <ImageView
+        android:id="@+id/iv_group_image"
+        android:layout_width="match_parent"
+        android:layout_height="248dp"
+        android:background="@color/dark_gray" />
+
+    <TextView
+        android:id="@+id/tv_group_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+        tools:text="@tools:sample/lorem" />
+
+    <TextView
+        android:id="@+id/tv_group_desc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        tools:text="@tools:sample/lorem" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_group_members"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>

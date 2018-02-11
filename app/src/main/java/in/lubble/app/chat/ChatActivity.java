@@ -3,11 +3,13 @@ package in.lubble.app.chat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.groups.group_info.GroupInfoActivity;
 import in.lubble.app.utils.StringUtils;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
@@ -38,6 +40,12 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         replaceFrag(getSupportFragmentManager(), ChatFragment.newInstance(groupId), R.id.frame_fragContainer);
+        toolbar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                GroupInfoActivity.newInstance(ChatActivity.this, groupId);
+            }
+        });
     }
 
     public void setGroupMeta(String title, String thumbnailUrl) {

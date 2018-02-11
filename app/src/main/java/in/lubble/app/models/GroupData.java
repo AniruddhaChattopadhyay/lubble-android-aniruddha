@@ -1,5 +1,7 @@
 package in.lubble.app.models;
 
+import java.util.HashMap;
+
 /**
  * Created by ishaan on 28/1/18.
  */
@@ -13,6 +15,7 @@ public class GroupData {
     private String description;
     private boolean isJoined = true;
     private boolean isPrivate;
+    private HashMap<String, Boolean> members = new HashMap<>();
 
     public GroupData() {
     }  // Needed for Firebase
@@ -82,5 +85,13 @@ public class GroupData {
 
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
+    }
+
+    public HashMap<String, Boolean> getMembers() {
+        return members;
+    }
+
+    public void setMembers(HashMap<String, Boolean> members) {
+        this.members = members;
     }
 }
