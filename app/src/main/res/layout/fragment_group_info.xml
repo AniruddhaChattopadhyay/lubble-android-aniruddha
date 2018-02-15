@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context="in.lubble.app.groups.group_info.GroupInfoFragment">
 
@@ -9,7 +10,10 @@
         android:id="@+id/iv_group_image"
         android:layout_width="match_parent"
         android:layout_height="248dp"
-        android:background="@color/dark_gray" />
+        android:scaleType="centerCrop"
+        android:padding="56dp"
+        app:srcCompat="@drawable/ic_account_circle_black_no_padding"
+        android:background="@color/dark_gray"/>
 
     <TextView
         android:id="@+id/tv_group_title"

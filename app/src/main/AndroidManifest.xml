@@ -79,7 +79,9 @@
             android:name=".announcements.announcementHistory.AnnouncementsActivity"
             android:label="Announcements"
             android:parentActivityName=".MainActivity" />
-        <activity android:name=".groups.group_info.GroupInfoActivity"></activity>
+        <activity
+            android:name=".groups.group_info.GroupInfoActivity"
+            android:parentActivityName=".chat.ChatActivity"/>
     </application>
 
 </manifest>

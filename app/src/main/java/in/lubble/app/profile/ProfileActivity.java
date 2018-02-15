@@ -55,6 +55,9 @@ public class ProfileActivity extends AppCompatActivity {
                 //deleteDatabase(SqliteHelper.DATABASE_NAME);
                 break;
             }
+            case android.R.id.home:
+                onBackPressed();
+                return true;
         }
         return false;
     }
