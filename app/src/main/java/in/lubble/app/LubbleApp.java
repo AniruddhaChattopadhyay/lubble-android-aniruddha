@@ -5,8 +5,11 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
+
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by ishaan on 20/1/18.
@@ -22,6 +25,8 @@ public class LubbleApp extends Application {
         if (BuildConfig.DEBUG) {
             FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
         }
+
+        Fabric.with(this, new Crashlytics());
 
         createNotifChannel();
     }

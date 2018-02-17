@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="in.lubble.app">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".LubbleApp"
         android:allowBackup="false"
@@ -81,7 +83,11 @@
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".groups.group_info.GroupInfoActivity"
-            android:parentActivityName=".chat.ChatActivity"/>
+            android:parentActivityName=".chat.ChatActivity" />
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="6fd5a7acad385fd4a56944a42c164622f03560ca" />
     </application>
 
 </manifest>
