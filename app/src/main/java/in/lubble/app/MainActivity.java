@@ -78,6 +78,21 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        addDebugActivOpener(toolbar);
+    }
+
+    private void addDebugActivOpener(Toolbar toolbar) {
+        if (BuildConfig.DEBUG) {
+            toolbar.setOnLongClickListener(new View.OnLongClickListener() {
+
+                @Override
+                public boolean onLongClick(View v) {
+                    final Intent intent = new Intent(MainActivity.this, DebugActivity.class);
+                    startActivity(intent);
+                    return false;
+                }
+            });
+        }
     }
 
     private void logUser(FirebaseUser currentUser) {
@@ -98,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
         profileData.setLocality("C - Block");
         profileData.setBio("Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend");
         profileData.setToken(FirebaseInstanceId.getInstance().getToken());
+        profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
 
         getThisUserRef().setValue(profileData);
         getUserLubbleRef().setValue("true");

@@ -88,6 +88,11 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="6fd5a7acad385fd4a56944a42c164622f03560ca" />
+
+        <activity
+            android:name=".DebugActivity"
+            android:label="@string/title_activity_debug"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

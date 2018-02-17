@@ -25,6 +25,7 @@ public class LubbleApp extends Application {
         if (BuildConfig.DEBUG) {
             FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
         }
+        LubbleSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
 

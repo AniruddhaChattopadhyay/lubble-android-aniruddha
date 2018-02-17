@@ -15,6 +15,7 @@ public class ProfileData {
     private String locality;
     private String bio;
     private String token;
+    private String referredBy;
     private List<Object> lubbles;
     private List<Object> groups;
 
@@ -88,6 +89,14 @@ public class ProfileData {
 
     public void setInfo(ProfileInfo profileInfo) {
         this.info = profileInfo;
+    }
+
+    public String getReferredBy() {
+        return referredBy;
+    }
+
+    public void setReferredBy(String referredBy) {
+        this.referredBy = referredBy;
     }
 
 }

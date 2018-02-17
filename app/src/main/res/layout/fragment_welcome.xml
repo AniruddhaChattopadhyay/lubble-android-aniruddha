@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    android:id="@+id/root_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,6 +12,45 @@
         android:layout_alignParentBottom="true"
         android:layout_margin="8dp"
         android:text="Let's log in!"
-        android:theme="@style/PrimaryButton"/>
+        android:theme="@style/PrimaryButton" />
+
+    <LinearLayout
+        android:id="@+id/referrer_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btn_login"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/iv_referrer_dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/tv_referrer_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:gravity="center"
+            android:textColor="@color/black"
+            tools:text="Pikachu" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_referrer_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/referrer_container"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="4dp"
+        android:text="You were referred by"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 </RelativeLayout>

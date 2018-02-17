@@ -33,7 +33,7 @@ public class LoginActivity extends AppCompatActivity {
         rootLayout = findViewById(R.id.root_layout);
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, WelcomeFrag.newInstance());
+        addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, WelcomeFrag.newInstance(getIntent()));
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

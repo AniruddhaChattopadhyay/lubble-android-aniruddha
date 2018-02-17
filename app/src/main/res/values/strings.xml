@@ -37,4 +37,5 @@
     <string name="progress_uploading">Uploading</string>
     <string name="upload_success">Upload Complete!</string>
     <string name="upload_failure">Upload Failed!</string>
+    <string name="title_activity_debug">DebugActivity</string>
 </resources>
