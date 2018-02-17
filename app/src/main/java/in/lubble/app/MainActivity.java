@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -71,12 +72,20 @@ public class MainActivity extends AppCompatActivity {
         } else {
             syncFcmToken();
         }
+        logUser(currentUser);
 
         switchFrag(GroupListFragment.newInstance());
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
+
+    private void logUser(FirebaseUser currentUser) {
+        Crashlytics.setUserIdentifier(currentUser.getUid());
+        Crashlytics.setUserEmail(currentUser.getEmail());
+        Crashlytics.setUserName(currentUser.getDisplayName());
+    }
+
 
     private void uploadNewUserData(FirebaseUser currentUser) {
         // Write a message to the database
