@@ -18,16 +18,15 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class GroupInfoFragment extends Fragment {
@@ -79,7 +78,7 @@ public class GroupInfoFragment extends Fragment {
     }
 
     private void syncGroupInfo() {
-        FirebaseDatabase.getInstance().getReference("lubbles/" + Constants.DEFAULT_LUBBLE + "/groups/" + groupId)
+        getLubbleGroupsRef().child(groupId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {

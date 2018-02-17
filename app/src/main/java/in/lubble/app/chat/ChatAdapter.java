@@ -27,7 +27,8 @@ import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.profile.ProfileActivity;
 
-import static in.lubble.app.Constants.DEFAULT_LUBBLE;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 /**
@@ -114,11 +115,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
-        firebaseDatabase.getReference("users/" + chatData.getAuthorUid() + "/info").addValueEventListener(new ValueEventListener() {
+        getUserInfoRef(chatData.getAuthorUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                if (map != null && recvdChatViewHolder.itemView.getContext() != null){
+                if (map != null && recvdChatViewHolder.itemView.getContext() != null) {
                     GlideApp.with(recvdChatViewHolder.itemView.getContext())
                             .load(map.get("thumbnail"))
                             .circleCrop()
@@ -167,7 +168,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void toggleLubb(int pos) {
-        FirebaseDatabase.getInstance().getReference("messages/lubbles/" + DEFAULT_LUBBLE + "/groups/0/").child(chatDataList.get(pos).getId())
+        getMessagesRef().child("0").child(chatDataList.get(pos).getId())
                 .runTransaction(new Transaction.Handler() {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {

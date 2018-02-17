@@ -11,12 +11,11 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.FirebaseDatabase;
 
-import in.lubble.app.Constants;
 import in.lubble.app.R;
 import in.lubble.app.models.AnnouncementData;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class NewAnnouncementFragment extends Fragment {
@@ -63,8 +62,7 @@ public class NewAnnouncementFragment extends Fragment {
     }
 
     private void pushAnnouncement(AnnouncementData announcementData) {
-        FirebaseDatabase.getInstance().getReference("messages/lubbles/" + Constants.DEFAULT_LUBBLE + "/announcements")
-                .push().setValue(announcementData);
+        getAnnouncementsRef().push().setValue(announcementData);
         getActivity().finish();
     }
 

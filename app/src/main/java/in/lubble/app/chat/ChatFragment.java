@@ -25,7 +25,6 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
@@ -38,8 +37,9 @@ import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 
 import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.Constants.DEFAULT_LUBBLE;
 import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
@@ -54,7 +54,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private EditText newMessageEt;
     private Button sendBtn;
     private Button attachMediaBtn;
-    private FirebaseDatabase firebaseDatabase;
     private DatabaseReference groupReference;
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
@@ -79,9 +78,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         groupId = getArguments().getString(KEY_GROUP_ID);
 
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        groupReference = firebaseDatabase.getReference("lubbles/" + DEFAULT_LUBBLE + "/groups/" + groupId);
-        messagesReference = firebaseDatabase.getReference("messages/lubbles/0/groups/" + groupId);
+        groupReference = getLubbleGroupsRef().child(groupId);
+        messagesReference = getMessagesRef().child(groupId);
 
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         registerMediaUploadCallback();

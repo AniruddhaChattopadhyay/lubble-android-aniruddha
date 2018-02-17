@@ -17,8 +17,6 @@ import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
@@ -31,6 +29,7 @@ import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.StringUtils;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
@@ -51,7 +50,6 @@ public class EditProfileFrag extends Fragment {
     private String currentPhotoPath;
     private Uri newProfilePicUri = null;
     private Uri newCoverPicUri = null;
-    private DatabaseReference userRef;
     private ProfileData fetchedProfileData;
 
     public EditProfileFrag() {
@@ -84,8 +82,7 @@ public class EditProfileFrag extends Fragment {
         rootView.findViewById(R.id.linearLayout_cover_edit_container).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
 
-        userRef = FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        getThisUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (isAdded()) {
@@ -143,7 +140,7 @@ public class EditProfileFrag extends Fragment {
 
                 ProfileData updatedProfileData = fetchedProfileData;
                 updatedProfileData.setBio(StringUtils.getStringFromTil(bioTil));
-                userRef.setValue(updatedProfileData);
+                getThisUserRef().setValue(updatedProfileData);
                 getFragmentManager().popBackStack();
             }
         });

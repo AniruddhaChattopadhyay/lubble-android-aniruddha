@@ -8,20 +8,19 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdapter.GroupViewHolder> {
 
@@ -72,9 +71,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             @Override
             public void onClick(View v) {
                 holder.joinBtn.setEnabled(false);
-                final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + Constants.DEFAULT_LUBBLE
-                        + "/users/" + FirebaseAuth.getInstance().getUid());
-                reference.child(groupData.getId()).setValue(true, new DatabaseReference.CompletionListener() {
+                getCreateOrJoinGroupRef().child(groupData.getId()).setValue(true, new DatabaseReference.CompletionListener() {
                     @Override
                     public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                         groupDataList.remove(holder.getAdapterPosition());

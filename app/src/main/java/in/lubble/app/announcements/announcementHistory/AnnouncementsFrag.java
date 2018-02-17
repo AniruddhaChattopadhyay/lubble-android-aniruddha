@@ -10,17 +10,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.R;
 import in.lubble.app.announcements.NewAnnouncementActivity;
 import in.lubble.app.models.AnnouncementData;
 
-import static in.lubble.app.Constants.DEFAULT_LUBBLE;
+import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
 
 public class AnnouncementsFrag extends Fragment {
 
@@ -45,8 +44,7 @@ public class AnnouncementsFrag extends Fragment {
         final AnnouncementsAdapter adapter = new AnnouncementsAdapter();
         recyclerView.setAdapter(adapter);
 
-        FirebaseDatabase.getInstance().getReference("messages/lubbles/" + DEFAULT_LUBBLE + "/announcements")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+        getAnnouncementsRef().addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
@@ -73,8 +71,7 @@ public class AnnouncementsFrag extends Fragment {
 
 
     private void toggleAnnouncementBtn(final FloatingActionButton newAnnouncementBtn) {
-        FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
-                + "/lubbles/" + DEFAULT_LUBBLE).child("isAdmin").addListenerForSingleValueEvent(new ValueEventListener() {
+        getUserLubbleRef().child("isAdmin").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null && dataSnapshot.getValue(Boolean.class)) {

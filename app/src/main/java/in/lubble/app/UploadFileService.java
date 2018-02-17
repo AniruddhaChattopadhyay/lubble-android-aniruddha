@@ -13,13 +13,15 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import in.lubble.app.models.ChatData;
+
+import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
+import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
 /**
  * Service to handle uploading files to Firebase Storage
@@ -62,9 +64,9 @@ public class UploadFileService extends BaseTaskService {
 
         final boolean isConvoBucket = intent.getIntExtra(EXTRA_BUCKET, BUCKET_DEFAULT) == BUCKET_CONVO;
         if (isConvoBucket) {
-            mStorageRef = FirebaseStorage.getInstance("gs://lubble-in-convo").getReference();
+            mStorageRef = getConvoBucketRef();
         } else {
-            mStorageRef = FirebaseStorage.getInstance("gs://lubble-in-default").getReference();
+            mStorageRef = getDefaultBucketRef();
         }
 
         if (ACTION_UPLOAD.equals(intent.getAction())) {
@@ -156,7 +158,7 @@ public class UploadFileService extends BaseTaskService {
 
     private void transmitMedia(Uri downloadUrl) {
 
-        final DatabaseReference msgReference = FirebaseDatabase.getInstance().getReference("messages/lubbles/0/groups/0");
+        final DatabaseReference msgReference = getMessagesRef().child("0");
 
         final ChatData chatData = new ChatData();
         chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());

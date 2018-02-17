@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -17,6 +16,8 @@ import java.util.ArrayList;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 /**
  * Created by ishaan on 11/2/18.
@@ -41,7 +42,7 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
     public void onBindViewHolder(final MemberHolder holder, int position) {
         final String memberId = memberList.get(position);
 
-        FirebaseDatabase.getInstance().getReference("users/" + memberId + "/info").addListenerForSingleValueEvent(new ValueEventListener() {
+        getUserInfoRef(memberId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);

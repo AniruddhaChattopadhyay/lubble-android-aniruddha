@@ -15,17 +15,14 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 import java.io.File;
 import java.io.IOException;
 
-import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
@@ -35,6 +32,8 @@ import in.lubble.app.models.GroupData;
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.DEFAULT_LUBBLE;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
@@ -65,11 +64,8 @@ public class NewGroupFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        userGroupRef = firebaseDatabase.getReference("users/" + FirebaseAuth.getInstance().getUid()
-                + "/lubbles/" + DEFAULT_LUBBLE + "/groups");
-        createJoinRef = firebaseDatabase.getReference("create_join_group/lubbles/" + Constants.DEFAULT_LUBBLE
-                + "/users/" + FirebaseAuth.getInstance().getUid());
+        userGroupRef = getUserGroupsRef();
+        createJoinRef = getCreateOrJoinGroupRef();
     }
 
     @Override

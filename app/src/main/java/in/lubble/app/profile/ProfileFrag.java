@@ -14,13 +14,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 
 public class ProfileFrag extends Fragment {
     private static final String TAG = "ProfileFrag";
@@ -95,7 +96,7 @@ public class ProfileFrag extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        userRef = FirebaseDatabase.getInstance().getReference("users").child(userId);
+        userRef = getUserRef(userId);
         fetchProfileFeed();
     }
 

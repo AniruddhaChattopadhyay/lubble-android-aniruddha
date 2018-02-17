@@ -27,6 +27,8 @@ import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
 import static in.lubble.app.utils.UserUtils.isNewUser;
 
 public class MainActivity extends AppCompatActivity {
@@ -88,13 +90,12 @@ public class MainActivity extends AppCompatActivity {
         profileData.setBio("Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend");
         profileData.setToken(FirebaseInstanceId.getInstance().getToken());
 
-        database.getReference("users").child(currentUser.getUid()).setValue(profileData);
-        database.getReference("users").child(currentUser.getUid()).child("lubbles/0").setValue("true");
+        getThisUserRef().setValue(profileData);
+        getUserLubbleRef().setValue("true");
     }
 
     private void syncFcmToken() {
-        FirebaseDatabase.getInstance().getReference("users")
-                .child(FirebaseAuth.getInstance().getUid() + "/token")
+        getThisUserRef().child("token")
                 .setValue(FirebaseInstanceId.getInstance().getToken());
         //switchFrag(HomeFragment.newInstance());
     }
