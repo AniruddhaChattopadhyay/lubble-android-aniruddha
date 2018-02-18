@@ -1,20 +1,30 @@
 package in.lubble.app.profile;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -35,7 +45,8 @@ public class ProfileFrag extends Fragment {
     private TextView locality;
     private TextView userBio;
     private TextView editProfileTV;
-    private RecyclerView recyclerView;
+    private Button inviteBtn;
+    private CardView referralCard;
     private DatabaseReference userRef;
     private ValueEventListener valueEventListener;
 
@@ -71,10 +82,8 @@ public class ProfileFrag extends Fragment {
         locality = rootView.findViewById(R.id.tv_locality);
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
-        recyclerView = rootView.findViewById(R.id.rv_profile_feed);
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setNestedScrollingEnabled(false);
+        referralCard = rootView.findViewById(R.id.card_referral);
+        inviteBtn = rootView.findViewById(R.id.btn_invite);
 
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,6 +96,13 @@ public class ProfileFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 FragUtils.addFrag(getFragmentManager(), R.id.frameLayout_fragContainer, EditProfileFrag.newInstance());
+            }
+        });
+
+        inviteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onInviteClicked();
             }
         });
 
@@ -110,6 +126,7 @@ public class ProfileFrag extends Fragment {
                 userBio.setText(profileData.getBio());
                 if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                     editProfileTV.setVisibility(View.VISIBLE);
+                    referralCard.setVisibility(View.VISIBLE);
                 }
                 GlideApp.with(getContext())
                         .load(profileData.getProfilePic())
@@ -128,6 +145,57 @@ public class ProfileFrag extends Fragment {
             }
         };
         userRef.addValueEventListener(valueEventListener);
+    }
+
+
+    private void onInviteClicked() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        String link = "https://lubble.in/?invitedby=" + uid;
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse(link))
+                .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
+                        .setTitle("Join Saraswati Vihar Lubble")
+                        .setDescription("Click to open Lubble App!")
+                        .setImageUrl(Uri.parse("https://place-hold.it/300x200"))
+                        .build()
+                )
+                .setDynamicLinkDomain("bx5at.app.goo.gl")
+                .setAndroidParameters(
+                        new DynamicLink.AndroidParameters.Builder()
+                                .setMinimumVersion(1)
+                                .build())
+                .buildShortDynamicLink()
+                .addOnSuccessListener(new OnSuccessListener<ShortDynamicLink>() {
+                    @Override
+                    public void onSuccess(ShortDynamicLink shortDynamicLink) {
+                        Uri mInvitationUrl = shortDynamicLink.getShortLink();
+                        sendInvite(mInvitationUrl);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "onFailure: " + e.toString());
+                    }
+                });
+    }
+
+    private void sendInvite(Uri mInvitationUrl) {
+        String referrerName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        String subject = String.format("%s wants you to join Lubble!", referrerName);
+        String invitationLink = mInvitationUrl.toString();
+        String msg = "Join me on Lubble! Use my referrer link: "
+                + invitationLink;
+        try {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("text/plain");
+            i.putExtra(Intent.EXTRA_SUBJECT, subject);
+            i.putExtra(Intent.EXTRA_TEXT, msg);
+            startActivity(Intent.createChooser(i, "choose one"));
+        } catch (Exception e) {
+            Log.e(TAG, "sendInvite: " + e.toString());
+        }
     }
 
     @Override

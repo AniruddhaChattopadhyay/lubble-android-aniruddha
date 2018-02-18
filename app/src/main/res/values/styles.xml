@@ -23,6 +23,16 @@
         <item name="android:minHeight">48dp</item>
     </style>
 
+    <style name="WhiteButton" parent="Widget.AppCompat.Button.Colored">
+        <item name="colorButtonNormal">@color/white</item>
+        <item name="colorControlHighlight">@color/gray</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+
     <style name="AppTheme.ActionBar.Transparent" parent="AppTheme">
         <item name="android:windowContentOverlay">@null</item>
         <item name="windowActionBarOverlay">true</item>
