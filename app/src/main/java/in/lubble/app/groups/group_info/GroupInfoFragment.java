@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.load.DataSource;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.user_search.UserSearchActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -35,8 +37,10 @@ public class GroupInfoFragment extends Fragment {
     private ImageView groupIv;
     private TextView titleTv;
     private TextView descTv;
+    private LinearLayout inviteMembersContainer;
     private RecyclerView recyclerView;
     private GroupMembersAdapter adapter;
+    private ArrayList<String> memberList;
 
     public GroupInfoFragment() {
         // Required empty public constructor
@@ -67,12 +71,20 @@ public class GroupInfoFragment extends Fragment {
         groupIv = view.findViewById(R.id.iv_group_image);
         titleTv = view.findViewById(R.id.tv_group_title);
         descTv = view.findViewById(R.id.tv_group_desc);
+        inviteMembersContainer = view.findViewById(R.id.linearLayout_invite_container);
         recyclerView = view.findViewById(R.id.rv_group_members);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new GroupMembersAdapter();
         recyclerView.setAdapter(adapter);
 
         syncGroupInfo();
+
+        inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserSearchActivity.newInstance(getContext(), groupId);
+            }
+        });
 
         return view;
     }
@@ -103,7 +115,7 @@ public class GroupInfoFragment extends Fragment {
                                     }
                                 })
                                 .into(groupIv);
-                        final ArrayList<String> memberList = new ArrayList<>(groupData.getMembers().keySet());
+                        memberList = new ArrayList<>(groupData.getMembers().keySet());
                         adapter.addAllMembers(memberList);
                     }
 

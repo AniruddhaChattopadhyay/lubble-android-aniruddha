@@ -12,6 +12,13 @@ import static in.lubble.app.Constants.DEFAULT_LUBBLE;
 
 public class RealtimeDbHelper {
 
+    /**
+     * ArrayList<String> userList = new ArrayList<>();
+     * for (DataSnapshot child : dataSnapshot.getChildren()) {
+     * userList.add(child.getKey());
+     * }
+     */
+
     public static DatabaseReference getThisUserRef() {
         return FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid());
     }
@@ -31,6 +38,10 @@ public class RealtimeDbHelper {
 
     public static DatabaseReference getUserGroupsRef() {
         return getUserLubbleRef().child("groups");
+    }
+
+    public static DatabaseReference getLubbleMembersRef() {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE + "/members");
     }
 
     public static DatabaseReference getLubbleGroupsRef() {
