@@ -41,6 +41,7 @@
         android:layout_height="match_parent"
         android:layout_above="@id/btn_send"
         android:layout_below="@id/linearLayout_selected_members"
+        android:fadeScrollbars="false"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         app:layoutManager="LinearLayoutManager"

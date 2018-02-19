@@ -94,16 +94,34 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }
     }
 
+    public void deselectUser(String uid) {
+        if (checkedMap.get(uid) != null) {
+            checkedMap.put(uid, false);
+        }
+        final int position = membersList.indexOf(uid);
+        if (position != -1) {
+            notifyItemChanged(position);
+        }
+    }
+
     private void toggleView(String uid, String userId, ViewHolder holder) {
         if (checkedMap.get(userId) != null && checkedMap.get(userId)) {
-            holder.checkIv.setVisibility(View.GONE);
-            mListener.onUserDeSelected(uid);
-            checkedMap.put(uid, false);
+            deselectUser(uid, holder);
         } else {
-            holder.checkIv.setVisibility(View.VISIBLE);
-            mListener.onUserSelected(uid);
-            checkedMap.put(uid, true);
+            selectUser(uid, holder);
         }
+    }
+
+    private void deselectUser(String uid, ViewHolder holder) {
+        holder.checkIv.setVisibility(View.GONE);
+        mListener.onUserDeSelected(uid);
+        checkedMap.put(uid, false);
+    }
+
+    private void selectUser(String uid, ViewHolder holder) {
+        holder.checkIv.setVisibility(View.VISIBLE);
+        mListener.onUserSelected(uid);
+        checkedMap.put(uid, true);
     }
 
     @Override

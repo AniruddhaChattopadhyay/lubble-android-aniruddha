@@ -127,6 +127,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     @Override
     public void onUserDeSelected(String uid) {
         selectedUserAdapter.removeUser(uid);
+        userAdapter.deselectUser(uid);
     }
 
     @Override

@@ -46,7 +46,7 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 if (profileInfo != null) {
-                    holder.nameTv.setText(profileInfo.getName());
+                    holder.nameTv.setText(profileInfo.getName().split(" ")[0]);
                     GlideApp.with(holder.itemView.getContext())
                             .load(profileInfo.getThumbnail())
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -65,7 +65,7 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    mListener.onUserSelected(selectedUsersList.get(holder.getAdapterPosition()));
+                    mListener.onUserDeSelected(selectedUsersList.get(holder.getAdapterPosition()));
                 }
             }
         });
