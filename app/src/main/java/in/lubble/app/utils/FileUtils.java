@@ -134,7 +134,7 @@ public class FileUtils {
     }
 
     private static File createTemporalFile(Context context) {
-        return new File(context.getExternalCacheDir(), "tempFile.jpg"); // context needed
+        return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".jpg"); // context needed
     }
 
 }
