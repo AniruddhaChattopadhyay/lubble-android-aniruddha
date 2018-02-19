@@ -81,7 +81,7 @@ public class EditProfileFrag extends Fragment {
 
         rootView.findViewById(R.id.linearLayout_cover_edit_container).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
-
+        // single listener becoz data wudnt have changed going from profile to edit profile.
         getThisUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

@@ -42,6 +42,7 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
     public void onBindViewHolder(final MemberHolder holder, int position) {
         final String memberId = memberList.get(position);
 
+        // Single listener becoz it's difficult to keep track of multiple listeners in adapter....
         getUserInfoRef(memberId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

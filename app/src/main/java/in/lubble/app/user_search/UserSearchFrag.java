@@ -97,7 +97,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     }
 
     private void fetchGroupUsers() {
-        //keep this as singleEventListener
+        // keep this as singleEventListener to avoid over complications
         getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

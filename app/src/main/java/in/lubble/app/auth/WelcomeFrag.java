@@ -123,11 +123,6 @@ public class WelcomeFrag extends Fragment {
                         if (pendingDynamicLinkData != null) {
                             deepLink = pendingDynamicLinkData.getLink();
                         }
-                        //
-                        // If the user isn't signed in and the pending Dynamic Link is
-                        // an invitation, sign in the user anonymously, and record the
-                        // referrer's UID.
-                        //
                         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                         if (user == null && deepLink != null
                                 && deepLink.getBooleanQueryParameter("invitedby", false)) {
@@ -135,6 +130,9 @@ public class WelcomeFrag extends Fragment {
                             String referrerUid = deepLink.getQueryParameter("invitedby");
                             LubbleSharedPrefs.getInstance().setReferrerUid(referrerUid);
 
+                            // single listener as the user is new, has no cache.
+                            // referrer profile will be fetched via network, there wudnt be any cache hits.
+                            // Even if its cached, dsnt matter really, just shows who referred you, an outdated dp wont do much harm..
                             RealtimeDbHelper.getUserInfoRef(referrerUid).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {

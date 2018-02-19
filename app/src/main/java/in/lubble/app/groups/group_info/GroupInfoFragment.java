@@ -91,39 +91,46 @@ public class GroupInfoFragment extends Fragment {
 
     private void syncGroupInfo() {
         getLubbleGroupsRef().child(groupId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-
-                        titleTv.setText(groupData.getTitle());
-                        descTv.setText(groupData.getDescription());
-                        GlideApp.with(getContext())
-                                .load(groupData.getProfilePic())
-                                .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                                .listener(new RequestListener<Drawable>() {
-                                    @Override
-                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                        groupIv.setPadding(dpToPx(56), dpToPx(56), dpToPx(56), dpToPx(56));
-                                        return false;
-                                    }
-
-                                    @Override
-                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                        groupIv.setPadding(0, 0, 0, 0);
-                                        return false;
-                                    }
-                                })
-                                .into(groupIv);
-                        memberList = new ArrayList<>(groupData.getMembers().keySet());
-                        adapter.addAllMembers(memberList);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                .addValueEventListener(groupInfoEventListener);
     }
 
+    final ValueEventListener groupInfoEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+
+            titleTv.setText(groupData.getTitle());
+            descTv.setText(groupData.getDescription());
+            GlideApp.with(getContext())
+                    .load(groupData.getProfilePic())
+                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            groupIv.setPadding(dpToPx(56), dpToPx(56), dpToPx(56), dpToPx(56));
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            groupIv.setPadding(0, 0, 0, 0);
+                            return false;
+                        }
+                    })
+                    .into(groupIv);
+            memberList = new ArrayList<>(groupData.getMembers().keySet());
+            adapter.addAllMembers(memberList);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getLubbleGroupsRef().child(groupId).removeEventListener(groupInfoEventListener);
+    }
 }

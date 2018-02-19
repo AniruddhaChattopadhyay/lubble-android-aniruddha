@@ -23,6 +23,8 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
 
 public class AnnouncementsFrag extends Fragment {
 
+    private AnnouncementsAdapter announcementsAdapter;
+
     public static AnnouncementsFrag newInstance() {
         return new AnnouncementsFrag();
     }
@@ -30,7 +32,6 @@ public class AnnouncementsFrag extends Fragment {
     public AnnouncementsFrag() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,22 +42,10 @@ public class AnnouncementsFrag extends Fragment {
         final RecyclerView recyclerView = view.findViewById(R.id.rv_announcements);
         final FloatingActionButton fab = view.findViewById(R.id.fab_new_announcement);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        final AnnouncementsAdapter adapter = new AnnouncementsAdapter();
-        recyclerView.setAdapter(adapter);
+        announcementsAdapter = new AnnouncementsAdapter();
+        recyclerView.setAdapter(announcementsAdapter);
 
-        getAnnouncementsRef().addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            adapter.addAnnouncement(child.getValue(AnnouncementData.class));
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+        getAnnouncementsRef().addValueEventListener(announcementEventListener);
 
         toggleAnnouncementBtn(fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -69,8 +58,22 @@ public class AnnouncementsFrag extends Fragment {
         return view;
     }
 
+    final ValueEventListener announcementEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                announcementsAdapter.addAnnouncement(child.getValue(AnnouncementData.class));
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    };
 
     private void toggleAnnouncementBtn(final FloatingActionButton newAnnouncementBtn) {
+        // single listener as user won't have admin role updated frequently
         getUserLubbleRef().child("isAdmin").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -88,5 +91,9 @@ public class AnnouncementsFrag extends Fragment {
         });
     }
 
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        getAnnouncementsRef().removeEventListener(announcementEventListener);
+    }
 }
