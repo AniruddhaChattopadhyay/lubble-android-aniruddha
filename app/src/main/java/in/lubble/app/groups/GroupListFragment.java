@@ -34,7 +34,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private OnListFragmentInteractionListener mListener;
     private GroupRecyclerAdapter adapter;
-    private HashMap<Query, ValueEventListener> map;
+    private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private ChildEventListener joinedGroupListener;
     private ChildEventListener unjoinedGroupListener;
 
@@ -122,8 +122,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         final ValueEventListener joinedGroupListener = getLubbleGroupsRef().orderByKey().equalTo(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                adapter.addGroup(groupData);
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    GroupData groupData = child.getValue(GroupData.class);
+                    adapter.addGroup(groupData);
+                }
             }
 
             @Override
