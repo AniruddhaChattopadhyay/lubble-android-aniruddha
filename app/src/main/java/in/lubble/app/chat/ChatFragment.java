@@ -134,7 +134,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        final ChatAdapter chatAdapter = new ChatAdapter(getContext(), new ArrayList<ChatData>());
+        final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>());
         chatRecyclerView.setAdapter(chatAdapter);
 
         messagesReference.addChildEventListener(new ChildEventListener() {

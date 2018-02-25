@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +27,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.utils.FullScreenImageActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -41,11 +43,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private static final int TYPE_RECEIVED = 0;
     private static final int TYPE_SENT = 1;
 
+    private Activity activity;
     private Context context;
     private ArrayList<ChatData> chatDataList;
     private FirebaseDatabase firebaseDatabase;
 
-    public ChatAdapter(Context context, ArrayList<ChatData> chatDataList) {
+    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList) {
+        this.activity = activity;
         this.context = context;
         firebaseDatabase = FirebaseDatabase.getInstance();
         this.chatDataList = chatDataList;
@@ -222,6 +226,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             dpIv = itemView.findViewById(R.id.iv_dp);
             dpIv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
+            chatIv.setOnClickListener(this);
         }
 
         @Override
@@ -232,6 +237,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.linearLayout_lubb_container:
                     toggleLubb(getAdapterPosition());
+                    break;
+                case R.id.iv_chat_img:
+                    String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
+                    if (isValidString(imgUrl)) {
+                        FullScreenImageActivity.open(activity, context, imgUrl, chatIv);
+                    }
                     break;
             }
         }
@@ -254,11 +265,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
 
             lubbContainer.setOnClickListener(this);
+            chatIv.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            toggleLubb(getAdapterPosition());
+            switch (v.getId()) {
+                case R.id.linearLayout_lubb_container:
+                    toggleLubb(getAdapterPosition());
+                    break;
+                case R.id.iv_chat_img:
+                    String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
+                    if (isValidString(imgUrl)) {
+                        FullScreenImageActivity.open(activity, context, imgUrl, chatIv);
+                    }
+                    break;
+            }
         }
     }
 
