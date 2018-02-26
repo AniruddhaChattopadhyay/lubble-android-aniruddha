@@ -19,6 +19,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +53,8 @@ public class NewGroupFragment extends Fragment {
     private DatabaseReference createJoinRef;
     private ProgressDialog progressDialog;
     private Uri picUri = null;
+    private Query query;
+    private ChildEventListener childEventListener;
 
     public NewGroupFragment() {
         // Required empty public constructor
@@ -144,7 +147,8 @@ public class NewGroupFragment extends Fragment {
     }
 
     private void confirmGroupDone(final String pushId) {
-        userGroupRef.orderByKey().equalTo(pushId).addChildEventListener(new ChildEventListener() {
+        query = userGroupRef.orderByKey().equalTo(pushId);
+        childEventListener = query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
@@ -185,4 +189,9 @@ public class NewGroupFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        query.removeEventListener(childEventListener);
+    }
 }

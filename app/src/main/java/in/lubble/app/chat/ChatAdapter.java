@@ -119,7 +119,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
-        getUserInfoRef(chatData.getAuthorUid()).addValueEventListener(new ValueEventListener() {
+        // single as its very difficult otherwise to keep track of all listeners for every user
+        // plus we don't really need realtime updation of user DP and/or name in chat
+        getUserInfoRef(chatData.getAuthorUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();

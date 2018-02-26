@@ -34,6 +34,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private RecyclerView usersRecyclerView;
     private UserAdapter userAdapter;
     private SelectedUserAdapter selectedUserAdapter;
+    private ValueEventListener lubbleMembersListener;
 
     public UserSearchFrag() {
     }
@@ -77,7 +78,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     }
 
     private void fetchAllLubbleUsers() {
-        RealtimeDbHelper.getLubbleMembersRef().addValueEventListener(new ValueEventListener() {
+        lubbleMembersListener = RealtimeDbHelper.getLubbleMembersRef().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ArrayList<String> userList = new ArrayList<>();
@@ -142,4 +143,11 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         mListener = null;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        RealtimeDbHelper.getLubbleMembersRef().removeEventListener(lubbleMembersListener);
+        userAdapter.removeAllListeners();
+        selectedUserAdapter.removeAllListeners();
+    }
 }

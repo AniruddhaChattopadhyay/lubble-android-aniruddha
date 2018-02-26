@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -26,6 +27,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     private final OnUserSelectedListener mListener;
     private HashMap<String, Boolean> checkedMap;
     private HashMap<String, Boolean> groupMembersMap;
+    private HashMap<Query, ValueEventListener> listenerMap = new HashMap<>();
 
     public UserAdapter(List<String> items, OnUserSelectedListener listener) {
         membersList = items;
@@ -50,7 +52,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final String userId = membersList.get(position);
 
-        getUserInfoRef(userId).addValueEventListener(new ValueEventListener() {
+        ValueEventListener valueEventListener = getUserInfoRef(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
@@ -74,6 +76,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
             }
         });
+
+        listenerMap.put(getUserInfoRef(userId), valueEventListener);
 
         if (groupMembersMap.get(userId) != null && groupMembersMap.get(userId)) {
             holder.mView.setOnClickListener(null);
@@ -122,6 +126,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         holder.checkIv.setVisibility(View.VISIBLE);
         mListener.onUserSelected(uid);
         checkedMap.put(uid, true);
+    }
+
+    void removeAllListeners() {
+        for (Query query : listenerMap.keySet()) {
+            query.removeEventListener(listenerMap.get(query));
+        }
     }
 
     @Override

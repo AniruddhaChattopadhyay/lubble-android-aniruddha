@@ -58,6 +58,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
     private String groupId;
+    private ChildEventListener msgChildListener;
+    private ValueEventListener groupInfoListener;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -88,7 +90,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void syncGroupInfo() {
-        groupReference.addValueEventListener(new ValueEventListener() {
+        groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
@@ -137,7 +139,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>());
         chatRecyclerView.setAdapter(chatAdapter);
 
-        messagesReference.addChildEventListener(new ChildEventListener() {
+        msgChildListener = messagesReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildAdded: ");
@@ -271,5 +273,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 sendBtn.setEnabled(editable.length() > 0);
             }
         });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        messagesReference.removeEventListener(msgChildListener);
+        groupReference.removeEventListener(groupInfoListener);
     }
 }

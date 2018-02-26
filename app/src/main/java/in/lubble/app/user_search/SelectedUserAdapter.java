@@ -9,9 +9,11 @@ import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import in.lubble.app.GlideApp;
@@ -24,6 +26,7 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
 
     private final List<String> selectedUsersList;
     private final OnUserSelectedListener mListener;
+    private HashMap<Query, ValueEventListener> listenerMap = new HashMap<>();
 
     public SelectedUserAdapter(OnUserSelectedListener listener) {
         selectedUsersList = new ArrayList<>();
@@ -41,7 +44,7 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final String userId = selectedUsersList.get(position);
 
-        getUserInfoRef(userId).addValueEventListener(new ValueEventListener() {
+        ValueEventListener valueEventListener = getUserInfoRef(userId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
@@ -60,6 +63,8 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
 
             }
         });
+
+        listenerMap.put(getUserInfoRef(userId), valueEventListener);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,6 +90,12 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
             // only remove if user exists in list already
             selectedUsersList.remove(uid);
             notifyItemRemoved(position);
+        }
+    }
+
+    void removeAllListeners() {
+        for (Query query : listenerMap.keySet()) {
+            query.removeEventListener(listenerMap.get(query));
         }
     }
 
