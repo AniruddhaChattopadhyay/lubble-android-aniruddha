@@ -11,6 +11,7 @@ public class Constants {
      */
     public static final int PROGRESS_NOTIFICATION_ID = 100;
     public static final int FINISHED_NOTIFICATION_ID = 101;
+    public static final int CHAT_NOTIFICATION_ID = 102;
 
     public static final String DEFAULT_NOTIF_CHANNEL = "default";
 
