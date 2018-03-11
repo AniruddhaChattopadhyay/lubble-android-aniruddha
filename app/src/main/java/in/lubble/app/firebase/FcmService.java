@@ -50,7 +50,6 @@ public class FcmService extends FirebaseMessagingService {
             Gson gson = new Gson();
             JsonElement jsonElement = gson.toJsonTree(dataMap);
             NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
-            notifData.setTimestamp(System.currentTimeMillis());
 
             NotifUtils.updateChatNotifs(this, notifData);
         }

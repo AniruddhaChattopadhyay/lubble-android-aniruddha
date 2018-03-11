@@ -26,7 +26,8 @@ public class NotifData {
     private String messageBody;
     @SerializedName("notification_channel")
     private String notifChannel;
-    private long timestamp;
+    @SerializedName("timestamp")
+    private String timestamp;
 
     public String getMessageId() {
         return messageId;
@@ -101,10 +102,10 @@ public class NotifData {
     }
 
     public long getTimestamp() {
-        return timestamp;
+        return Long.parseLong(timestamp);
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 

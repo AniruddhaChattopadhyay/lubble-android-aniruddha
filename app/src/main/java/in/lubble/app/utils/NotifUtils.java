@@ -10,6 +10,8 @@ import android.util.Log;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,9 +40,20 @@ public class NotifUtils {
 
         persistNewMessage(notifData);
         ArrayList<NotifData> msgList = getAllMsgs();
+        sortListByTime(msgList);
         Log.d(TAG, "read notif count: " + msgList.size());
         sendAllNotifs(context, msgList);
 
+    }
+
+    private static void sortListByTime(ArrayList<NotifData> msgList) {
+        Collections.sort(msgList, new Comparator<NotifData>() {
+            @Override
+            public int compare(NotifData o1, NotifData o2) {
+                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                return o1.getTimestamp() < o2.getTimestamp() ? -1 : (o1.getTimestamp() > o2.getTimestamp()) ? 1 : 0;
+            }
+        });
     }
 
     private static void sendAllNotifs(Context context, ArrayList<NotifData> notifDataList) {
@@ -52,7 +65,7 @@ public class NotifUtils {
             int notifId = getNotifId(notifData);
             final Notification notification = buildNotification(context, getMessagingStyle(notifId), notifData, GROUP_KEY);
             notificationManager.notify(notifId, notification);
-            Notification summary = buildSummary(context, GROUP_KEY);
+            Notification summary = buildSummary(context, GROUP_KEY, notifData.getTimestamp());
             notificationManager.notify(SUMMARY_ID, summary);
         }
     }
@@ -87,12 +100,12 @@ public class NotifUtils {
                 .build();
     }
 
-    private static Notification buildSummary(Context context, String groupKey) {
+    private static Notification buildSummary(Context context, String groupKey, long timestamp) {
         return new NotificationCompat.Builder(context, Constants.DEFAULT_NOTIF_CHANNEL)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Nougat Messenger")
                 .setContentText("You have unread messages")
-                //.setWhen(message.timestamp())
+                .setWhen(timestamp)
                 .setSmallIcon(R.drawable.ic_upload)
                 .setShowWhen(true)
                 .setGroup(groupKey)
