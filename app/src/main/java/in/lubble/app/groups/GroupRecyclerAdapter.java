@@ -107,7 +107,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             @Override
             public int compare(GroupData lhs, GroupData rhs) {
                 // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                return lhs.isJoined() && !rhs.isJoined() ? -1 : (!lhs.isJoined() && rhs.isJoined()) ? 1 : 0;
+                return lhs.isJoined() && !rhs.isJoined() ? -1 : (!lhs.isJoined() && rhs.isJoined()) ? 1 :
+                        (lhs.getLastMessageTimestamp() > rhs.getLastMessageTimestamp()) ? -1 : 1;
             }
         });
     }

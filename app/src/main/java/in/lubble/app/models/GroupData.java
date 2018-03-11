@@ -17,6 +17,7 @@ public class GroupData {
     private boolean isPrivate;
     private HashMap<String, Boolean> members = new HashMap<>();
     private String lastMessage;
+    private long lastMessageTimestamp = 0;
 
     public GroupData() {
     }  // Needed for Firebase
@@ -102,5 +103,13 @@ public class GroupData {
 
     public void setLastMessage(String lastMessage) {
         this.lastMessage = lastMessage;
+    }
+
+    public long getLastMessageTimestamp() {
+        return lastMessageTimestamp;
+    }
+
+    public void setLastMessageTimestamp(long lastMessageTimestamp) {
+        this.lastMessageTimestamp = lastMessageTimestamp;
     }
 }
