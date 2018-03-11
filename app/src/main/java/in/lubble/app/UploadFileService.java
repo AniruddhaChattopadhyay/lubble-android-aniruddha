@@ -13,6 +13,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -164,6 +165,8 @@ public class UploadFileService extends BaseTaskService {
         chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
         chatData.setMessage("caption placeholder");
         chatData.setImgUrl(downloadUrl.toString());
+        chatData.setCreatedTimestamp(System.currentTimeMillis());
+        chatData.setServerTimestamp(ServerValue.TIMESTAMP);
 
         msgReference.push().setValue(chatData);
     }

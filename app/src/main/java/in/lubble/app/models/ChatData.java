@@ -1,5 +1,7 @@
 package in.lubble.app.models;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.HashMap;
 
 /**
@@ -14,6 +16,8 @@ public class ChatData {
     private String imgUrl;
     private int lubbCount = 0;
     private HashMap<String, Boolean> lubbers = new HashMap<>();
+    private long createdTimestamp;
+    private Object serverTimestamp;
 
     @Override
     public boolean equals(Object obj) {
@@ -74,4 +78,26 @@ public class ChatData {
     public void setId(String id) {
         this.id = id;
     }
+
+    public long getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(long createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
+    }
+
+    public Object getServerTimestamp() {
+        return serverTimestamp;
+    }
+
+    public void setServerTimestamp(Object serverTimestamp) {
+        this.serverTimestamp = serverTimestamp;
+    }
+
+    @Exclude
+    public Long getServerTimestampInLong() {
+        return (Long) this.serverTimestamp;
+    }
+
 }

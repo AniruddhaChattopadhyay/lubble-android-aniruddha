@@ -25,6 +25,7 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
@@ -188,6 +189,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 final ChatData chatData = new ChatData();
                 chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
                 chatData.setMessage(newMessageEt.getText().toString());
+                chatData.setCreatedTimestamp(System.currentTimeMillis());
+                chatData.setServerTimestamp(ServerValue.TIMESTAMP);
 
                 messagesReference.push().setValue(chatData);
 
