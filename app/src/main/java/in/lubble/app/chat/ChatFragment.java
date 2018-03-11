@@ -88,7 +88,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         registerMediaUploadCallback();
 
-        syncGroupInfo();
     }
 
     private void syncGroupInfo() {
