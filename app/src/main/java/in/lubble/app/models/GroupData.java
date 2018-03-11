@@ -16,6 +16,7 @@ public class GroupData {
     private boolean isJoined = true;
     private boolean isPrivate;
     private HashMap<String, Boolean> members = new HashMap<>();
+    private String lastMessage;
 
     public GroupData() {
     }  // Needed for Firebase
@@ -93,5 +94,13 @@ public class GroupData {
 
     public void setMembers(HashMap<String, Boolean> members) {
         this.members = members;
+    }
+
+    public String getLastMessage() {
+        return lastMessage;
+    }
+
+    public void setLastMessage(String lastMessage) {
+        this.lastMessage = lastMessage;
     }
 }

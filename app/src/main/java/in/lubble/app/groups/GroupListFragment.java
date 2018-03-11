@@ -34,9 +34,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private OnListFragmentInteractionListener mListener;
     private GroupRecyclerAdapter adapter;
-    private HashMap<Query, ValueEventListener> map = new HashMap<>();
+    private HashMap<Query, ChildEventListener> map = new HashMap<>();
     private ChildEventListener joinedGroupListener;
     private ChildEventListener unjoinedGroupListener;
+    private RecyclerView groupsRecyclerView;
 
     public GroupListFragment() {
     }
@@ -51,7 +52,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         View view = inflater.inflate(R.layout.fragment_group_item, container, false);
         Context context = view.getContext();
 
-        RecyclerView groupsRecyclerView = view.findViewById(R.id.rv_groups);
+        groupsRecyclerView = view.findViewById(R.id.rv_groups);
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -119,13 +120,28 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void syncJoinedGroups(String groupId) {
         // get meta data of the groups joined by the user
-        final ValueEventListener joinedGroupListener = getLubbleGroupsRef().orderByKey().equalTo(groupId).addValueEventListener(new ValueEventListener() {
+        final ChildEventListener joinedGroupListener = getLubbleGroupsRef().orderByKey().equalTo(groupId).addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    GroupData groupData = child.getValue(GroupData.class);
-                    adapter.addGroup(groupData);
-                }
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                adapter.addGroup(groupData);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                adapter.updateGroup(groupData);
+                groupsRecyclerView.scrollToPosition(0);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override

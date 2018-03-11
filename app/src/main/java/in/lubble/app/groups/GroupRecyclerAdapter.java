@@ -21,6 +21,7 @@ import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdapter.GroupViewHolder> {
 
@@ -52,8 +53,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
                 .into(holder.iconIv);
 
         holder.titleTv.setText(groupData.getTitle());
-        holder.subtitleTv.setText(groupData.getDescription());
-
+        if (isValidString(groupData.getLastMessage())) {
+            holder.subtitleTv.setText(groupData.getLastMessage());
+        } else {
+            holder.subtitleTv.setText(groupData.getDescription());
+        }
         holder.joinBtn.setVisibility(groupData.isJoined() ? View.GONE : View.VISIBLE);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
@@ -91,8 +95,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     public void updateGroup(GroupData newGroupData) {
         final int pos = getChildIndex(newGroupData);
         if (pos != -1) {
-            groupDataList.set(pos, newGroupData);
+            groupDataList.remove(pos);
+            groupDataList.add(0, newGroupData);
             notifyItemChanged(pos);
+            notifyItemMoved(pos, 0);
         }
     }
 
