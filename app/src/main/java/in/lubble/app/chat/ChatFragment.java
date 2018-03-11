@@ -44,6 +44,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 
 public class ChatFragment extends Fragment implements View.OnClickListener {
 
@@ -136,11 +137,25 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         setupTogglingOfSendBtn();
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
+
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        syncGroupInfo();
         chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>());
         chatRecyclerView.setAdapter(chatAdapter);
+        msgChildListener = msgListener(chatAdapter);
 
-        msgChildListener = messagesReference.addChildEventListener(new ChildEventListener() {
+        deleteUnreadMsgsForGroupId(groupId, getContext());
+    }
+
+    private ChildEventListener msgListener(final ChatAdapter chatAdapter) {
+        return messagesReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildAdded: ");
@@ -177,8 +192,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             }
         });
-
-        return view;
     }
 
     @Override

@@ -17,7 +17,9 @@ import java.util.Map;
 
 import in.lubble.app.Constants;
 import in.lubble.app.R;
+import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.NotifData;
+import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 
 /**
  * Created by ishaan on 11/3/18.
@@ -30,13 +32,9 @@ public class NotifUtils {
     private static final int SUMMARY_ID = 1325;
 
     private static HashMap<Integer, NotificationCompat.MessagingStyle> messagingStyleMap;
-    private static SharedPreferences chatSharedPrefs;
-    private static SharedPreferences groupMappingSharedPrefs;
 
     public static void updateChatNotifs(Context context, NotifData notifData) {
         messagingStyleMap = new HashMap<>();
-        chatSharedPrefs = context.getSharedPreferences("chats2", Context.MODE_PRIVATE);
-        groupMappingSharedPrefs = context.getSharedPreferences("group_mapping2", Context.MODE_PRIVATE);
 
         persistNewMessage(notifData);
         ArrayList<NotifData> msgList = getAllMsgs();
@@ -62,7 +60,7 @@ public class NotifUtils {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         for (NotifData notifData : notifDataList) {
-            int notifId = getNotifId(notifData);
+            int notifId = getNotifId(notifData.getGroupId());
             final Notification notification = buildNotification(context, getMessagingStyle(notifId), notifData, GROUP_KEY);
             notificationManager.notify(notifId, notification);
             Notification summary = buildSummary(context, GROUP_KEY, notifData.getTimestamp());
@@ -70,8 +68,8 @@ public class NotifUtils {
         }
     }
 
-    private static int getNotifId(NotifData notifData) {
-        final int notifID = groupMappingSharedPrefs.getInt(notifData.getGroupId(), -1);
+    private static int getNotifId(String groupId) {
+        final int notifID = GroupMappingSharedPrefs.getInstance().getPreferences().getInt(groupId, -1);
         if (notifID == -1) {
             Log.e(TAG, "getNotifId: is not found");
         }
@@ -115,18 +113,19 @@ public class NotifUtils {
 
 
     private static void persistNewMessage(NotifData notifData) {
-        chatSharedPrefs.edit().putString(notifData.getMessageId(), new Gson().toJson(notifData)).commit();
+        UnreadChatsSharedPrefs.getInstance().getPreferences().edit().putString(notifData.getMessageId(), new Gson().toJson(notifData)).commit();
         Log.d(TAG, "persistNewMessage: DONE: " + notifData.getMessageBody());
         addGroupIdMapping(notifData);
     }
 
     private static void addGroupIdMapping(NotifData notifData) {
         final String groupId = notifData.getGroupId();
-        final int savedGroupInt = groupMappingSharedPrefs.getInt(groupId, -1);
+        final SharedPreferences groupPrefs = GroupMappingSharedPrefs.getInstance().getPreferences();
+        final int savedGroupInt = groupPrefs.getInt(groupId, -1);
         if (savedGroupInt == -1) {
-            final int lastInt = groupMappingSharedPrefs.getInt(Constants.LAST_GROUP_MAPPING_ID, 500);
-            groupMappingSharedPrefs.edit().putInt(groupId, lastInt + 1).commit();
-            groupMappingSharedPrefs.edit().putInt(Constants.LAST_GROUP_MAPPING_ID, lastInt + 1).commit();
+            final int lastInt = groupPrefs.getInt(Constants.LAST_GROUP_MAPPING_ID, 500);
+            groupPrefs.edit().putInt(groupId, lastInt + 1).commit();
+            groupPrefs.edit().putInt(Constants.LAST_GROUP_MAPPING_ID, lastInt + 1).commit();
             Log.d(TAG, "Added new map ID: " + lastInt + 1);
         } else {
             Log.d(TAG, "Map ID exists: " + savedGroupInt);
@@ -137,12 +136,36 @@ public class NotifUtils {
 
         final ArrayList<NotifData> notifDataList = new ArrayList<>();
 
-        final Map<String, String> all = (Map<String, String>) chatSharedPrefs.getAll();
+        final Map<String, String> all = (Map<String, String>) UnreadChatsSharedPrefs.getInstance().getPreferences().getAll();
         for (String jsonStr : all.values()) {
             final NotifData readNotifData = new Gson().fromJson(jsonStr, NotifData.class);
             notifDataList.add(readNotifData);
         }
         return notifDataList;
+    }
+
+    public static void deleteUnreadMsgsForGroupId(String groupId, Context context) {
+        // cancel notification
+        final NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(getNotifId(groupId));
+
+        // clear sharedPrefs
+        GroupMappingSharedPrefs.getInstance().getPreferences().edit().remove(groupId).commit();
+        final SharedPreferences chatSharedPrefs = UnreadChatsSharedPrefs.getInstance().getPreferences();
+
+        final Map<String, String> chatsMap = (Map<String, String>) chatSharedPrefs.getAll();
+        for (Map.Entry<String, String> chatEntry : chatsMap.entrySet()) {
+            final NotifData notifData = new Gson().fromJson(chatEntry.getValue(), NotifData.class);
+            if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                Log.d(TAG, "Removing msg: " + notifData.getMessageBody());
+                chatSharedPrefs.edit().remove(chatEntry.getKey()).commit();
+            }
+        }
+
+        if (chatSharedPrefs.getAll().size() == 0) {
+            notificationManager.cancel(SUMMARY_ID);
+        }
     }
 
 }

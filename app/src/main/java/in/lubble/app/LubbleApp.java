@@ -9,6 +9,8 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 
+import in.lubble.app.notifications.GroupMappingSharedPrefs;
+import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -26,6 +28,8 @@ public class LubbleApp extends Application {
             FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
         }
         LubbleSharedPrefs.initializeInstance(getApplicationContext());
+        GroupMappingSharedPrefs.initializeInstance(getApplicationContext());
+        UnreadChatsSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
 
