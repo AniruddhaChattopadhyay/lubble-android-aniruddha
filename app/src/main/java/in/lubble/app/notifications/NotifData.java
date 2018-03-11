@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class NotifData {
 
+    @SerializedName("messageId")
+    private String messageId;
     @SerializedName("authorId")
     private String authorId;
     @SerializedName("authorName")
@@ -24,6 +26,15 @@ public class NotifData {
     private String messageBody;
     @SerializedName("notification_channel")
     private String notifChannel;
+    private long timestamp;
+
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
 
     public String getAuthorId() {
         return authorId;
@@ -88,4 +99,13 @@ public class NotifData {
     public void setGroupDpUrl(String groupDpUrl) {
         this.groupDpUrl = groupDpUrl;
     }
+
+    public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
 }

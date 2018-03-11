@@ -28,6 +28,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.notifications.NotifData;
+import in.lubble.app.utils.NotifUtils;
 
 import static in.lubble.app.Constants.CHAT_NOTIFICATION_ID;
 
@@ -49,8 +50,9 @@ public class FcmService extends FirebaseMessagingService {
             Gson gson = new Gson();
             JsonElement jsonElement = gson.toJsonTree(dataMap);
             NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
+            notifData.setTimestamp(System.currentTimeMillis());
 
-            sendNotification(notifData);
+            NotifUtils.updateChatNotifs(this, notifData);
         }
     }
 
