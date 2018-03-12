@@ -27,6 +27,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.user_search.UserSearchActivity;
+import in.lubble.app.utils.FullScreenImageActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -120,6 +121,14 @@ public class GroupInfoFragment extends Fragment {
                     .into(groupIv);
             memberList = new ArrayList<>(groupData.getMembers().keySet());
             adapter.addAllMembers(memberList);
+
+
+            groupIv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FullScreenImageActivity.open(getActivity(), getContext(), groupData.getProfilePic(), groupIv, true);
+                }
+            });
         }
 
         @Override
