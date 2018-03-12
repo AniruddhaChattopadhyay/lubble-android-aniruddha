@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/card_background">
+    android:background="@color/white">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_groups"
@@ -27,6 +27,7 @@
         android:layout_margin="16dp"
         app:elevation="6dp"
         app:fabSize="normal"
+        android:tint="@color/white"
         app:srcCompat="@drawable/ic_add_black_24dp" />
 
 </RelativeLayout>
