@@ -62,8 +62,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL);
         groupsRecyclerView.addItemDecoration(itemDecor);
 
-        syncUserGroupIds();
-
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -72,6 +70,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         });
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        syncUserGroupIds();
     }
 
     private void syncUserGroupIds() {

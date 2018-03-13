@@ -87,18 +87,21 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     }
 
     public void addGroup(GroupData groupData) {
-        groupDataList.add(groupData);
-        sortList();
-        notifyDataSetChanged();
+        if (getChildIndex(groupData) == -1) {
+            groupDataList.add(groupData);
+            sortList();
+            notifyDataSetChanged();
+        } else {
+            updateGroup(groupData);
+        }
     }
 
     public void updateGroup(GroupData newGroupData) {
         final int pos = getChildIndex(newGroupData);
         if (pos != -1) {
-            groupDataList.remove(pos);
-            groupDataList.add(0, newGroupData);
-            notifyItemChanged(pos);
-            notifyItemMoved(pos, 0);
+            groupDataList.set(pos, newGroupData);
+            sortList();
+            notifyDataSetChanged();
         }
     }
 

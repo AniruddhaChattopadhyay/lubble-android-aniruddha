@@ -243,7 +243,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 case R.id.iv_chat_img:
                     String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
                     if (isValidString(imgUrl)) {
-                        FullScreenImageActivity.open(activity, context, imgUrl, chatIv, false);
+                        FullScreenImageActivity.open(activity, context, imgUrl, chatIv, null);
                     }
                     break;
             }
@@ -279,7 +279,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 case R.id.iv_chat_img:
                     String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
                     if (isValidString(imgUrl)) {
-                        FullScreenImageActivity.open(activity, context, imgUrl, chatIv, false);
+                        FullScreenImageActivity.open(activity, context, imgUrl, chatIv, null);
                     }
                     break;
             }

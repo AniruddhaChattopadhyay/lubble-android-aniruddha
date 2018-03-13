@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.UploadFileService;
 
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
@@ -30,16 +32,17 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_GROUP_DP = 418;
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";
-    private static final String EXTRA_ALLOW_EDIT = BuildConfig.APPLICATION_ID + "_EXTRA_ALLOW_EDIT";
+    private static final String EXTRA_UPLOAD_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_UPLOAD_PATH";
 
     private String currentPhotoPath;
     private TouchImageView touchImageView;
-    private boolean canEdit;
+    @Nullable
+    private String uploadPath;
 
-    public static void open(Activity activity, Context context, String imgPath, ImageView chatIv, boolean allowEdit) {
+    public static void open(Activity activity, Context context, String imgPath, ImageView chatIv, @Nullable String uploadPath) {
         Intent intent = new Intent(context, FullScreenImageActivity.class);
         intent.putExtra(EXTRA_IMG_PATH, imgPath);
-        intent.putExtra(EXTRA_ALLOW_EDIT, allowEdit);
+        intent.putExtra(EXTRA_UPLOAD_PATH, uploadPath);
         Bundle bundle = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, chatIv, chatIv.getTransitionName()).toBundle();
@@ -61,7 +64,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
         if (getIntent() != null) {
             String imgPath = getIntent().getStringExtra(EXTRA_IMG_PATH);
-            canEdit = getIntent().getBooleanExtra(EXTRA_ALLOW_EDIT, false);
+            uploadPath = getIntent().getStringExtra(EXTRA_UPLOAD_PATH);
             GlideApp.with(this)
                     .load(imgPath)
                     .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -71,7 +74,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
     }
 
     public void editGroupDp(MenuItem item) {
-        if (canEdit) {
+        if (uploadPath != null) {
             startPhotoPicker(REQUEST_CODE_GROUP_DP);
         }
     }
@@ -106,7 +109,11 @@ public class FullScreenImageActivity extends AppCompatActivity {
                     .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
                     .into(touchImageView);
 
-            // todo upload pic
+            startService(new Intent(this, UploadFileService.class)
+                    .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
+                    .putExtra(UploadFileService.EXTRA_FILE_URI, newProfilePicUri)
+                    .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, uploadPath)
+                    .setAction(UploadFileService.ACTION_UPLOAD));
 
         } else {
             Toast.makeText(this, "Failed to get photo", Toast.LENGTH_SHORT).show();
@@ -115,7 +122,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (canEdit) {
+        if (uploadPath != null) {
             getMenuInflater().inflate(R.menu.full_screen_img_menu, menu);
         }
         return true;
