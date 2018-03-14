@@ -16,6 +16,7 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 
 import com.bumptech.glide.request.target.Target;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
@@ -31,6 +32,7 @@ import in.lubble.app.notifications.NotifData;
 import in.lubble.app.utils.NotifUtils;
 
 import static in.lubble.app.Constants.CHAT_NOTIFICATION_ID;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
 /**
  * Created by ishaan on 26/1/18.
@@ -52,7 +54,15 @@ public class FcmService extends FirebaseMessagingService {
             NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
 
             NotifUtils.updateChatNotifs(this, notifData);
+            //sendDeliveryReceipt(notifData);
         }
+    }
+
+    private void sendDeliveryReceipt(NotifData notifData) {
+        getMessagesRef().child(notifData.getGroupId()).child(notifData.getMessageId())
+                .child("deliveryReceipts")
+                .child(FirebaseAuth.getInstance().getUid())
+                .setValue(System.currentTimeMillis());
     }
 
     private void sendNotification(NotifData notifData) {

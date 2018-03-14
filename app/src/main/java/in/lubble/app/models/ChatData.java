@@ -18,6 +18,8 @@ public class ChatData {
     private HashMap<String, Boolean> lubbers = new HashMap<>();
     private long createdTimestamp;
     private Object serverTimestamp;
+    private HashMap<String, Long> deliveryReceipts = new HashMap<>();
+    private HashMap<String, Long> readReceipts = new HashMap<>();
 
     @Override
     public boolean equals(Object obj) {
@@ -100,4 +102,19 @@ public class ChatData {
         return (Long) this.serverTimestamp;
     }
 
+    public HashMap<String, Long> getDeliveryReceipts() {
+        return deliveryReceipts;
+    }
+
+    public void setDeliveryReceipts(HashMap<String, Long> deliveryReceipts) {
+        this.deliveryReceipts = deliveryReceipts;
+    }
+
+    public HashMap<String, Long> getReadReceipts() {
+        return readReceipts;
+    }
+
+    public void setReadReceipts(HashMap<String, Long> readReceipts) {
+        this.readReceipts = readReceipts;
+    }
 }

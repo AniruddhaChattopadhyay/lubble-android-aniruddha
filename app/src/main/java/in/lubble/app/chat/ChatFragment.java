@@ -160,8 +160,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 Log.d(TAG, "onChildAdded: ");
                 final ChatData chatData = dataSnapshot.getValue(ChatData.class);
                 if (chatData != null) {
+                    Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
                     chatData.setId(dataSnapshot.getKey());
                     chatAdapter.addChatData(chatData);
+                    sendReadReceipt(chatData);
                 }
                 chatRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
             }
@@ -178,7 +180,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                Log.d(TAG, "onChildRemoved: ");
             }
 
             @Override
@@ -191,6 +193,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             }
         });
+    }
+
+    private void sendReadReceipt(ChatData chatData) {
+        if (chatData.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
+            getMessagesRef().child(groupId).child(chatData.getId())
+                    .child("readReceipts")
+                    .child(FirebaseAuth.getInstance().getUid())
+                    .setValue(System.currentTimeMillis());
+        }
     }
 
     @Override

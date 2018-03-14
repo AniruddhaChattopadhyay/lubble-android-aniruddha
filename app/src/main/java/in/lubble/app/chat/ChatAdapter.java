@@ -164,8 +164,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public void updateChatData(@NonNull ChatData chatData) {
         final int pos = chatDataList.indexOf(chatData);
-        chatDataList.set(pos, chatData);
-        notifyItemChanged(pos);
+        if (pos != -1) {
+            chatDataList.set(pos, chatData);
+            notifyItemChanged(pos);
+        }
     }
 
     @Override
