@@ -18,11 +18,16 @@ import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
@@ -38,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String EXTRA_IDP_RESPONSE = "extra_idp_response";
 
     private FirebaseAuth firebaseAuth;
+    private DatabaseReference connectedReference;
+    private ValueEventListener presenceValueListener;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -79,6 +86,36 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handlePresence();
+    }
+
+    private void handlePresence() {
+        connectedReference = RealtimeDbHelper.getConnectedInfoRef();
+        presenceValueListener = connectedReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                boolean connected = dataSnapshot.getValue(Boolean.class);
+                if (connected) {
+                    final DatabaseReference presenceRef = RealtimeDbHelper.getPresenceRef()
+                            .child(FirebaseAuth.getInstance().getUid());
+
+                    // when this device disconnects, remove it
+                    presenceRef.onDisconnect().setValue(Boolean.FALSE);
+
+                    presenceRef.setValue(Boolean.TRUE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.err.println("Listener was cancelled at .info/connected");
+            }
+        });
     }
 
     private void addDebugActivOpener(Toolbar toolbar) {
@@ -123,6 +160,12 @@ public class MainActivity extends AppCompatActivity {
         getThisUserRef().child("token")
                 .setValue(FirebaseInstanceId.getInstance().getToken());
         //switchFrag(HomeFragment.newInstance());
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        connectedReference.removeEventListener(presenceValueListener);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener

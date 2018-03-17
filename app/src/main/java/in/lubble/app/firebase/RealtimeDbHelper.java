@@ -61,4 +61,12 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("messages/lubbles/" + DEFAULT_LUBBLE + "/announcements");
     }
 
+    public static DatabaseReference getConnectedInfoRef() {
+        return FirebaseDatabase.getInstance().getReference(".info/connected");
+    }
+
+    public static DatabaseReference getPresenceRef() {
+        return FirebaseDatabase.getInstance().getReference("presence");
+    }
+
 }
