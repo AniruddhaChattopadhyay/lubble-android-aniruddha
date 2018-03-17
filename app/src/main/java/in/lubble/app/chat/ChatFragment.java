@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 
@@ -151,6 +152,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         msgChildListener = msgListener(chatAdapter);
 
         deleteUnreadMsgsForGroupId(groupId, getContext());
+        resetUnreadCount();
+    }
+
+    private void resetUnreadCount() {
+        RealtimeDbHelper.getUserGroupsRef().child(groupId)
+                .child("unreadCount").setValue(0);
     }
 
     private ChildEventListener msgListener(final ChatAdapter chatAdapter) {

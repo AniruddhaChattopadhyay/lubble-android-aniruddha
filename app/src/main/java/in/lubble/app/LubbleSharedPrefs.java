@@ -14,6 +14,7 @@ public class LubbleSharedPrefs {
     private final String LUBBLE_SHARED_PREFERENCE_KEY = "in.lubble.mainSharedPrefs";
 
     private final String REFERRER_UID = "referrer_uid";
+    private final String CURRENT_ACTIVE_GROUP = "CURRENT_ACTIVE_GROUP";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -53,6 +54,15 @@ public class LubbleSharedPrefs {
     public boolean setReferrerUid(String uid) {
 
         return preferences.edit().putString(REFERRER_UID, uid).commit();
+    }
+
+    public String getCurrentActiveGroupId() {
+        return preferences.getString(CURRENT_ACTIVE_GROUP, "");
+    }
+
+    public boolean setCurrentActiveGroupId(String gid) {
+
+        return preferences.edit().putString(CURRENT_ACTIVE_GROUP, gid).commit();
     }
 
 }

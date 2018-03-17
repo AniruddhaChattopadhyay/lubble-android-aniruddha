@@ -17,6 +17,9 @@ import android.util.Log;
 
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
@@ -26,6 +29,7 @@ import java.util.Map;
 
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.notifications.NotifData;
@@ -53,9 +57,46 @@ public class FcmService extends FirebaseMessagingService {
             JsonElement jsonElement = gson.toJsonTree(dataMap);
             NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
 
-            NotifUtils.updateChatNotifs(this, notifData);
-            //sendDeliveryReceipt(notifData);
+            if (!notifData.getGroupId().equalsIgnoreCase(LubbleSharedPrefs.getInstance().getCurrentActiveGroupId())) {
+                NotifUtils.updateChatNotifs(this, notifData);
+                updateUnreadCounter(notifData);
+                pullNewMsgs(notifData);
+                //sendDeliveryReceipt(notifData);
+            }
         }
+    }
+
+    private void pullNewMsgs(NotifData notifData) {
+        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "Pulled: " + dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void updateUnreadCounter(NotifData notifData) {
+        RealtimeDbHelper.getUserGroupsRef().child(notifData.getGroupId())
+                .child("unreadCount").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Integer oldCount = 0;
+                if (dataSnapshot.getValue() != null) {
+                    oldCount = dataSnapshot.getValue(Integer.class);
+                }
+                dataSnapshot.getRef().setValue(++oldCount);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void sendDeliveryReceipt(NotifData notifData) {
@@ -118,5 +159,11 @@ public class FcmService extends FirebaseMessagingService {
     public void onDeletedMessages() {
         super.onDeletedMessages();
         //todo
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy: ");
     }
 }

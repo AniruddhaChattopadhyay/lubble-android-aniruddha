@@ -8,8 +8,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,6 +20,7 @@ import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
@@ -84,6 +87,27 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
                 });
             }
         });
+        RealtimeDbHelper.getUserGroupsRef().child(groupData.getId()).child("unreadCount").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    final Integer unreadCount = dataSnapshot.getValue(Integer.class);
+                    if (unreadCount > 0) {
+                        holder.unreadCountTv.setVisibility(View.VISIBLE);
+                        holder.unreadCountTv.setText(String.valueOf(unreadCount));
+                    } else {
+                        holder.unreadCountTv.setVisibility(View.GONE);
+                    }
+                } else {
+                    holder.unreadCountTv.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     public void addGroup(GroupData groupData) {
@@ -141,6 +165,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         final TextView titleTv;
         final TextView subtitleTv;
         final Button joinBtn;
+        final TextView unreadCountTv;
         GroupData groupData;
 
         public GroupViewHolder(View view) {
@@ -150,6 +175,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             titleTv = view.findViewById(R.id.tv_title);
             subtitleTv = view.findViewById(R.id.tv_subtitle);
             joinBtn = view.findViewById(R.id.btn_join_group);
+            unreadCountTv = view.findViewById(R.id.tv_unread_count);
         }
     }
 }

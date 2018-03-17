@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.groups.group_info.GroupInfoActivity;
 import in.lubble.app.utils.StringUtils;
@@ -49,6 +50,12 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LubbleSharedPrefs.getInstance().setCurrentActiveGroupId(getIntent().getStringExtra(EXTRA_GROUP_ID));
+    }
+
     public void setGroupMeta(String title, String thumbnailUrl) {
         toolbarTv.setText(title);
         if (StringUtils.isValidString(thumbnailUrl)) {
@@ -56,6 +63,11 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LubbleSharedPrefs.getInstance().setCurrentActiveGroupId("");
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
