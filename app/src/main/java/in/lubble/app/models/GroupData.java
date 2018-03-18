@@ -21,8 +21,8 @@ public class GroupData {
     private HashMap<String, Boolean> members = new HashMap<>();
     private String lastMessage;
     private long lastMessageTimestamp = 0;
-    @Exclude
-    private boolean isJoined;
+    private String createdBy;
+    private HashMap<String, Boolean> admins;
     @Exclude
     private Set<String> invitedBy;
 
@@ -77,11 +77,6 @@ public class GroupData {
         return getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
     }
 
-    @Exclude
-    public void setJoined(boolean joined) {
-        isJoined = joined;
-    }
-
     public boolean getIsPrivate() {
         return this.isPrivate;
     }
@@ -130,5 +125,21 @@ public class GroupData {
     @Exclude
     public void setInvitedBy(Set<String> invitedBy) {
         this.invitedBy = invitedBy;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public HashMap<String, Boolean> getAdmins() {
+        return admins;
+    }
+
+    public void setAdmins(HashMap<String, Boolean> admins) {
+        this.admins = admins;
     }
 }

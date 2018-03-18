@@ -17,6 +17,7 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -25,6 +26,7 @@ import com.google.firebase.database.Query;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -100,6 +102,10 @@ public class NewGroupFragment extends Fragment {
                 groupData.setTitle(groupName.getText().toString());
                 groupData.setDescription(groupDesc.getText().toString());
                 groupData.setIsPrivate(privateGroupSwitch.isChecked());
+                groupData.setCreatedBy(FirebaseAuth.getInstance().getUid());
+                final HashMap<String, Boolean> creatorMap = new HashMap<>();
+                creatorMap.put(FirebaseAuth.getInstance().getUid(), Boolean.TRUE);
+                groupData.setAdmins(creatorMap);
 
                 Log.d(TAG, "onClick: ");
                 DatabaseReference pushRef = createJoinRef.push();
