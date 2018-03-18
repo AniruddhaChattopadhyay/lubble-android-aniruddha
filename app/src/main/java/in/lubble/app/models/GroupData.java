@@ -1,5 +1,6 @@
 package in.lubble.app.models;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.Exclude;
 
 import java.util.HashMap;
@@ -73,7 +74,7 @@ public class GroupData {
 
     @Exclude
     public boolean isJoined() {
-        return isJoined;
+        return getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
     }
 
     @Exclude

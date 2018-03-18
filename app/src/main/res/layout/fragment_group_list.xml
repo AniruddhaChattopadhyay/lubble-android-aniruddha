@@ -27,9 +27,9 @@
         android:id="@+id/tv_unread_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"
+        android:visibility="gone" />
 
     <Button
         android:id="@+id/btn_join_group"
@@ -38,6 +38,20 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:text="Join" />
+
+    <TextView
+        android:id="@+id/tv_reject_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/btn_join_group"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/btn_join_group"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="Reject"
+        android:textColor="@color/red"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/tv_subtitle"

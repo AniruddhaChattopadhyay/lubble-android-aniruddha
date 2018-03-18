@@ -191,6 +191,8 @@ public class NewGroupFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        query.removeEventListener(childEventListener);
+        if (query != null) {
+            query.removeEventListener(childEventListener);
+        }
     }
 }

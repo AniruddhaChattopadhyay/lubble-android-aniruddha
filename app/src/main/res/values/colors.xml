@@ -7,6 +7,7 @@
 
     <color name="card_background">#EEEEEE</color>
     <color name="black">#000000</color>
+    <color name="red">#b41a1a</color>
     <color name="white">#FFFFFF</color>
     <color name="default_text_color">#808080</color>
     <color name="darker_gray">#484848</color>

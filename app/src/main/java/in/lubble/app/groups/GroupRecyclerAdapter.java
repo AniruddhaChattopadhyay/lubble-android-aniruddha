@@ -71,8 +71,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             }
             holder.subtitleTv.setText("Amantran by " + inviters);
             holder.joinBtn.setText("Accept");
+            holder.rejectTv.setVisibility(View.VISIBLE);
         } else {
             holder.joinBtn.setText("Join");
+            holder.rejectTv.setVisibility(View.GONE);
         }
         holder.joinBtn.setVisibility(groupData.isJoined() ? View.GONE : View.VISIBLE);
 
@@ -100,6 +102,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
                 });
             }
         });
+
+        holder.rejectTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RealtimeDbHelper.getUserGroupsRef().child(groupData.getId()).removeValue();
+            }
+        });
+
         RealtimeDbHelper.getUserGroupsRef().child(groupData.getId()).child("unreadCount").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -179,6 +189,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         final TextView subtitleTv;
         final Button joinBtn;
         final TextView unreadCountTv;
+        final TextView rejectTv;
         GroupData groupData;
 
         public GroupViewHolder(View view) {
@@ -187,6 +198,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             iconIv = view.findViewById(R.id.iv_group_pic);
             titleTv = view.findViewById(R.id.tv_title);
             subtitleTv = view.findViewById(R.id.tv_subtitle);
+            rejectTv = view.findViewById(R.id.tv_reject_group);
             joinBtn = view.findViewById(R.id.btn_join_group);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
         }

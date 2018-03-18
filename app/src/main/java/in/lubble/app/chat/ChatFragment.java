@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -53,6 +54,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private static final int REQUEST_CODE_IMG = 789;
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
 
+    @Nullable
+    private GroupData groupData;
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
     private Button sendBtn;
@@ -95,9 +98,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                groupData = dataSnapshot.getValue(GroupData.class);
                 if (groupData != null) {
                     ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
+                    resetUnreadCount();
                 }
             }
 
@@ -152,12 +156,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         msgChildListener = msgListener(chatAdapter);
 
         deleteUnreadMsgsForGroupId(groupId, getContext());
-        resetUnreadCount();
     }
 
     private void resetUnreadCount() {
-        RealtimeDbHelper.getUserGroupsRef().child(groupId)
-                .child("unreadCount").setValue(0);
+        if (groupData != null && groupData.isJoined()) {
+            RealtimeDbHelper.getUserGroupsRef().child(groupId)
+                    .child("unreadCount").setValue(0);
+        }
     }
 
     private ChildEventListener msgListener(final ChatAdapter chatAdapter) {

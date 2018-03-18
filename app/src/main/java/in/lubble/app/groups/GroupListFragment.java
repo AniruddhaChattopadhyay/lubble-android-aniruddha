@@ -89,20 +89,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         joinedGroupListener = getUserGroupsRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                /*if (dataSnapshot.getValue() != Boolean.TRUE) {
-                    final HashMap<String, Object> groupDataMap = (HashMap<String, Object>) dataSnapshot.getValue();
-                    final Object isJoined = groupDataMap.get("joined");
-                    if (isJoined != null && isJoined == Boolean.TRUE) {
-                        syncJoinedGroups(dataSnapshot.getKey());
-                    } else if (groupDataMap.get("invitedBy") != null) {
-                        syncInvitedGroups();
-                    } else {
-                        syncJoinedGroups(dataSnapshot.getKey());
-                    }
-                } else {
-                    //todo remove
-                    syncJoinedGroups(dataSnapshot.getKey());
-                }*/
                 if (dataSnapshot.getValue() == Boolean.TRUE) {
                     syncJoinedGroups(dataSnapshot.getKey());
                 } else {
@@ -161,7 +147,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                groupData.setJoined(true);
                 adapter.addGroup(groupData);
             }
 
@@ -198,8 +183,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 if (groupData.getMembers().get(FirebaseAuth.getInstance().getUid()) == null) {
                     groupData.setInvitedBy(groupInvitedByMap.get(groupData.getId()));
-                } else {
-                    groupData.setJoined(true);
                 }
                 adapter.addGroup(groupData);
             }
