@@ -6,12 +6,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
@@ -48,6 +50,7 @@ public class NewGroupFragment extends Fragment {
     private ImageView groupIv;
     private EditText groupName;
     private EditText groupDesc;
+    private Switch privateGroupSwitch;
     private String currentPhotoPath;
     private DatabaseReference userGroupRef;
     private DatabaseReference createJoinRef;
@@ -80,6 +83,7 @@ public class NewGroupFragment extends Fragment {
         groupIv = view.findViewById(R.id.iv_new_group);
         groupName = view.findViewById(R.id.et_group_title);
         groupDesc = view.findViewById(R.id.et_group_desc);
+        privateGroupSwitch = view.findViewById(R.id.switch_pvt_group);
         Button createBtn = view.findViewById(R.id.btn_create_group);
 
         createBtn.setOnClickListener(new View.OnClickListener() {
@@ -95,7 +99,9 @@ public class NewGroupFragment extends Fragment {
                 final GroupData groupData = new GroupData();
                 groupData.setTitle(groupName.getText().toString());
                 groupData.setDescription(groupDesc.getText().toString());
+                groupData.setIsPrivate(privateGroupSwitch.isChecked());
 
+                Log.d(TAG, "onClick: ");
                 DatabaseReference pushRef = createJoinRef.push();
                 pushRef.setValue(groupData);
                 confirmGroupDone(pushRef.getKey());

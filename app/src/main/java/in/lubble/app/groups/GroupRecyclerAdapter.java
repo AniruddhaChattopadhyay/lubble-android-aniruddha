@@ -69,7 +69,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             for (String s : invitedBy) {
                 inviters += s + " ";
             }
-            holder.subtitleTv.setText("Amantran by " + inviters);
+            holder.subtitleTv.setText("Invited by " + inviters);
             holder.joinBtn.setText("Accept");
             holder.rejectTv.setVisibility(View.VISIBLE);
         } else {
