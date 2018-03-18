@@ -99,6 +99,10 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
         }
     }
 
+    public List<String> getSelectedUidList() {
+        return selectedUsersList;
+    }
+
     @Override
     public int getItemCount() {
         return selectedUsersList.size();

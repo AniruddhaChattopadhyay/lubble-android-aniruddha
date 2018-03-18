@@ -9,13 +9,17 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -31,6 +35,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
     private int lubbleId;
     private String groupId;
+    private Button sendBtn;
     private RecyclerView usersRecyclerView;
     private UserAdapter userAdapter;
     private SelectedUserAdapter selectedUserAdapter;
@@ -64,6 +69,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         View view = inflater.inflate(R.layout.fragment_user_search, container, false);
 
         usersRecyclerView = view.findViewById(R.id.rv_users);
+        sendBtn = view.findViewById(R.id.btn_send);
         RecyclerView selectedUsersRecyclerView = view.findViewById(R.id.rv_selected_users);
 
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -73,6 +79,28 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         selectedUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), OrientationHelper.HORIZONTAL, false));
         selectedUserAdapter = new SelectedUserAdapter(mListener);
         selectedUsersRecyclerView.setAdapter(selectedUserAdapter);
+
+        sendBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final List<String> selectedUidList = selectedUserAdapter.getSelectedUidList();
+                if (selectedUidList.size() > 0) {
+                    final DatabaseReference inviteesRef = RealtimeDbHelper.getUserGroupsRef().child(groupId).child("invitees");
+                    for (String uid : selectedUidList) {
+                        //inviteesRef.child(uid).setValue(Boolean.TRUE);
+                        inviteesRef.child(uid).setValue(Boolean.TRUE, new DatabaseReference.CompletionListener() {
+                            @Override
+                            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                Toast.makeText(getContext(), "Invites Sent", Toast.LENGTH_SHORT).show();
+                                getActivity().finish();
+                            }
+                        });
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Please select users to invite", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         return view;
     }

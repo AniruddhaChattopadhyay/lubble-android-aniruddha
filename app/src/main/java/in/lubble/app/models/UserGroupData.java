@@ -11,7 +11,7 @@ public class UserGroupData {
     private int unreadCount;
     private boolean joined;
     private HashMap<String, Boolean> invitedBy;
-    private HashMap<String, Boolean> invited;
+    private HashMap<String, Boolean> invitees;
 
     public int getUnreadCount() {
         return unreadCount;
@@ -38,11 +38,11 @@ public class UserGroupData {
     }
 
     public HashMap<String, Boolean> getInvited() {
-        return invited;
+        return invitees;
     }
 
-    public void setInvited(HashMap<String, Boolean> invited) {
-        this.invited = invited;
+    public void setInvited(HashMap<String, Boolean> invitees) {
+        this.invitees = invitees;
     }
 
 }
