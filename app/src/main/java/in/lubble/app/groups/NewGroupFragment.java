@@ -94,7 +94,6 @@ public class NewGroupFragment extends Fragment {
 
                 final GroupData groupData = new GroupData();
                 groupData.setTitle(groupName.getText().toString());
-                groupData.setTitle(groupName.getText().toString());
                 groupData.setDescription(groupDesc.getText().toString());
 
                 DatabaseReference pushRef = createJoinRef.push();

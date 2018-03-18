@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -60,6 +61,18 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             holder.subtitleTv.setText(groupData.getLastMessage());
         } else {
             holder.subtitleTv.setText(groupData.getDescription());
+        }
+
+        if (groupData.getInvitedBy() != null && groupData.getInvitedBy().size() != 0) {
+            final Set<String> invitedBy = groupData.getInvitedBy();
+            String inviters = "";
+            for (String s : invitedBy) {
+                inviters += s + " ";
+            }
+            holder.subtitleTv.setText("Amantran by " + inviters);
+            holder.joinBtn.setText("Accept");
+        } else {
+            holder.joinBtn.setText("Join");
         }
         holder.joinBtn.setVisibility(groupData.isJoined() ? View.GONE : View.VISIBLE);
 

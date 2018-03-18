@@ -1,6 +1,9 @@
 package in.lubble.app.models;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Created by ishaan on 28/1/18.
@@ -13,11 +16,14 @@ public class GroupData {
     private String thumbnail;
     private String title;
     private String description;
-    private boolean isJoined = true;
     private boolean isPrivate;
     private HashMap<String, Boolean> members = new HashMap<>();
     private String lastMessage;
     private long lastMessageTimestamp = 0;
+    @Exclude
+    private boolean isJoined;
+    @Exclude
+    private Set<String> invitedBy;
 
     public GroupData() {
     }  // Needed for Firebase
@@ -65,10 +71,12 @@ public class GroupData {
         this.description = description;
     }
 
+    @Exclude
     public boolean isJoined() {
         return isJoined;
     }
 
+    @Exclude
     public void setJoined(boolean joined) {
         isJoined = joined;
     }
@@ -111,5 +119,15 @@ public class GroupData {
 
     public void setLastMessageTimestamp(long lastMessageTimestamp) {
         this.lastMessageTimestamp = lastMessageTimestamp;
+    }
+
+    @Exclude
+    public Set<String> getInvitedBy() {
+        return invitedBy;
+    }
+
+    @Exclude
+    public void setInvitedBy(Set<String> invitedBy) {
+        this.invitedBy = invitedBy;
     }
 }

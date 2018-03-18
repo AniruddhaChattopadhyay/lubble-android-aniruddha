@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -20,10 +21,12 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.UserGroupData;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
@@ -39,6 +42,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private ChildEventListener joinedGroupListener;
     private ChildEventListener unjoinedGroupListener;
     private RecyclerView groupsRecyclerView;
+    private HashMap<String, Set<String>> groupInvitedByMap;
 
     public GroupListFragment() {
     }
@@ -55,6 +59,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
+        groupInvitedByMap = new HashMap<>();
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         adapter = new GroupRecyclerAdapter(mListener);
@@ -84,7 +89,31 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         joinedGroupListener = getUserGroupsRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                syncJoinedGroups(dataSnapshot.getKey());
+                /*if (dataSnapshot.getValue() != Boolean.TRUE) {
+                    final HashMap<String, Object> groupDataMap = (HashMap<String, Object>) dataSnapshot.getValue();
+                    final Object isJoined = groupDataMap.get("joined");
+                    if (isJoined != null && isJoined == Boolean.TRUE) {
+                        syncJoinedGroups(dataSnapshot.getKey());
+                    } else if (groupDataMap.get("invitedBy") != null) {
+                        syncInvitedGroups();
+                    } else {
+                        syncJoinedGroups(dataSnapshot.getKey());
+                    }
+                } else {
+                    //todo remove
+                    syncJoinedGroups(dataSnapshot.getKey());
+                }*/
+                if (dataSnapshot.getValue() == Boolean.TRUE) {
+                    syncJoinedGroups(dataSnapshot.getKey());
+                } else {
+                    final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                    if (userGroupData.isJoined() || userGroupData.getInvitedBy() == null) {
+                        syncJoinedGroups(dataSnapshot.getKey());
+                    } else {
+                        groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
+                        syncInvitedGroups(dataSnapshot.getKey(), userGroupData.getInvitedBy());
+                    }
+                }
             }
 
             @Override
@@ -132,6 +161,46 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                groupData.setJoined(true);
+                adapter.addGroup(groupData);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                adapter.updateGroup(groupData);
+                groupsRecyclerView.scrollToPosition(0);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        map.put(getLubbleGroupsRef().orderByKey().equalTo(groupId), joinedGroupListener);
+    }
+
+    private void syncInvitedGroups(final String groupId, HashMap<String, Boolean> invitedBy) {
+        // get meta data of the groups joined by the user
+        final ChildEventListener joinedGroupListener = getLubbleGroupsRef().orderByKey().equalTo(groupId).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                if (groupData.getMembers().get(FirebaseAuth.getInstance().getUid()) == null) {
+                    groupData.setInvitedBy(groupInvitedByMap.get(groupData.getId()));
+                } else {
+                    groupData.setJoined(true);
+                }
                 adapter.addGroup(groupData);
             }
 
@@ -166,7 +235,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final GroupData unjoinedGroup = dataSnapshot.getValue(GroupData.class);
                 if (!joinedGroupIdList.contains(unjoinedGroup.getId()) && !unjoinedGroup.getIsPrivate()) {
-                    unjoinedGroup.setJoined(false);
                     adapter.addGroup(unjoinedGroup);
                 }
             }
