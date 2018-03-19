@@ -15,6 +15,7 @@ public class LubbleSharedPrefs {
 
     private final String REFERRER_UID = "referrer_uid";
     private final String CURRENT_ACTIVE_GROUP = "CURRENT_ACTIVE_GROUP";
+    private final String IS_PUBLIC_GROUP_INFO_SHOWN = "IS_PUBLIC_GROUP_INFO_SHOWN";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -63,6 +64,15 @@ public class LubbleSharedPrefs {
     public boolean setCurrentActiveGroupId(String gid) {
 
         return preferences.edit().putString(CURRENT_ACTIVE_GROUP, gid).commit();
+    }
+
+    public boolean getIsPublicGroupInfoShown() {
+        return preferences.getBoolean(IS_PUBLIC_GROUP_INFO_SHOWN, false);
+    }
+
+    public boolean setIsPublicGroupInfoShown(boolean isShown) {
+
+        return preferences.edit().putBoolean(IS_PUBLIC_GROUP_INFO_SHOWN, isShown).commit();
     }
 
 }

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -142,7 +145,29 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
 
+        showPublicGroupWarning();
+
         return view;
+    }
+
+    private void showPublicGroupWarning() {
+        if(!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown() && groupId.equalsIgnoreCase("0")) {
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity());
+            View sheetView = getActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_info, null);
+            bottomSheetDialog.setContentView(sheetView);
+            bottomSheetDialog.setCancelable(false);
+            bottomSheetDialog.setCanceledOnTouchOutside(false);
+            bottomSheetDialog.show();
+
+            final TextView gotItTv = sheetView.findViewById(R.id.tv_got_it);
+            gotItTv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    LubbleSharedPrefs.getInstance().setIsPublicGroupInfoShown(true);
+                    bottomSheetDialog.dismiss();
+                }
+            });
+        }
     }
 
     @Override
