@@ -22,6 +22,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -42,7 +44,6 @@ public class GroupInfoFragment extends Fragment {
     private LinearLayout inviteMembersContainer;
     private RecyclerView recyclerView;
     private GroupMembersAdapter adapter;
-    private ArrayList<String> memberList;
 
     public GroupInfoFragment() {
         // Required empty public constructor
@@ -124,8 +125,10 @@ public class GroupInfoFragment extends Fragment {
                         }
                     })
                     .into(groupIv);
-            memberList = new ArrayList<>(groupData.getMembers().keySet());
-            adapter.addAllMembers(memberList);
+
+            List<Map.Entry> memberEntryList = new ArrayList<Map.Entry>(groupData.getMembers().entrySet());
+            adapter.clear();
+            adapter.addAllMembers(memberEntryList);
 
 
             groupIv.setOnClickListener(new View.OnClickListener() {

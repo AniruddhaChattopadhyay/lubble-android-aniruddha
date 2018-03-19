@@ -12,6 +12,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -25,7 +28,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapter.MemberHolder> {
 
-    private final ArrayList<String> memberList;
+    private final List<Map.Entry> memberList;
 
     public GroupMembersAdapter() {
         memberList = new ArrayList<>();
@@ -40,7 +43,8 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
 
     @Override
     public void onBindViewHolder(final MemberHolder holder, int position) {
-        final String memberId = memberList.get(position);
+        final Map.Entry memberEntry = memberList.get(position);
+        final String memberId = (String) memberEntry.getKey();
 
         // Single listener becoz it's difficult to keep track of multiple listeners in adapter....
         getUserInfoRef(memberId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -62,9 +66,13 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
 
             }
         });
+
+        final HashMap memberPropertyMap = (HashMap) memberEntry.getValue();
+        holder.infoTv.setVisibility(memberPropertyMap.get("admin") == Boolean.TRUE ? View.VISIBLE : View.GONE);
+
     }
 
-    public void addAllMembers(ArrayList<String> memberList) {
+    public void addAllMembers(List<Map.Entry> memberList) {
         this.memberList.addAll(memberList);
         notifyDataSetChanged();
     }
@@ -81,11 +89,13 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
     class MemberHolder extends RecyclerView.ViewHolder {
         final ImageView iconIv;
         final TextView titleTv;
+        final TextView infoTv;
 
         public MemberHolder(View view) {
             super(view);
             iconIv = view.findViewById(R.id.iv_icon);
             titleTv = view.findViewById(R.id.tv_title);
+            infoTv = view.findViewById(R.id.tv_info);
         }
     }
 

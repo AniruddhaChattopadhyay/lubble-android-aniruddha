@@ -18,11 +18,10 @@ public class GroupData {
     private String title;
     private String description;
     private boolean isPrivate;
-    private HashMap<String, Boolean> members = new HashMap<>();
+    private HashMap<String, Object> members = new HashMap<>();
     private String lastMessage;
     private long lastMessageTimestamp = 0;
     private String createdBy;
-    private HashMap<String, Boolean> admins;
     @Exclude
     private Set<String> invitedBy;
 
@@ -93,11 +92,11 @@ public class GroupData {
         this.thumbnail = thumbnail;
     }
 
-    public HashMap<String, Boolean> getMembers() {
+    public HashMap<String, Object> getMembers() {
         return members;
     }
 
-    public void setMembers(HashMap<String, Boolean> members) {
+    public void setMembers(HashMap<String, Object> members) {
         this.members = members;
     }
 
@@ -135,11 +134,4 @@ public class GroupData {
         this.createdBy = createdBy;
     }
 
-    public HashMap<String, Boolean> getAdmins() {
-        return admins;
-    }
-
-    public void setAdmins(HashMap<String, Boolean> admins) {
-        this.admins = admins;
-    }
 }

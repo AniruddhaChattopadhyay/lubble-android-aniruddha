@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:orientation="horizontal">
+    android:layout_margin="8dp">
 
     <ImageView
         android:id="@+id/iv_icon"
@@ -14,12 +13,23 @@
         app:srcCompat="@drawable/ic_account_no_padding" />
 
     <TextView
-        android:id="@+id/tv_title"
+        android:id="@+id/tv_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="Admin" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="8dp"
+        android:layout_toLeftOf="@id/tv_info"
+        android:layout_toRightOf="@id/iv_icon"
+        android:maxLines="1"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
         tools:text="@tools:sample/lorem" />
 
-</LinearLayout>
+</RelativeLayout>
