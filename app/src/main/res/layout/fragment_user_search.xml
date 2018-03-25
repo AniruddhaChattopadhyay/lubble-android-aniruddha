@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:animateLayoutChanges="true"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true">
 
     <Button
         android:id="@+id/btn_send"
@@ -14,10 +14,17 @@
         android:text="Send Invitations"
         android:theme="@style/PrimaryButton" />
 
+    <EditText
+        android:id="@+id/et_user_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Search" />
+
     <LinearLayout
         android:id="@+id/linearLayout_selected_members"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/et_user_search"
         android:background="@color/white"
         android:elevation="4dp"
         android:orientation="horizontal">
@@ -41,9 +48,9 @@
         android:layout_height="match_parent"
         android:layout_above="@id/btn_send"
         android:layout_below="@id/linearLayout_selected_members"
-        android:fadeScrollbars="false"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
+        android:fadeScrollbars="false"
         app:layoutManager="LinearLayoutManager"
         tools:context="in.lubble.app.user_search.UserSearchFrag"
         tools:listitem="@layout/item_user_search" />

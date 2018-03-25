@@ -4,6 +4,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -12,6 +14,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -21,16 +24,17 @@ import in.lubble.app.models.ProfileInfo;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> implements Filterable {
 
-    private final List<String> membersList;
+    private List<ProfileInfo> membersList;
     private final OnUserSelectedListener mListener;
     private HashMap<String, Boolean> checkedMap;
     private HashMap<String, Boolean> groupMembersMap;
     private HashMap<Query, ValueEventListener> listenerMap = new HashMap<>();
+    private UserFilter filter;
 
-    public UserAdapter(List<String> items, OnUserSelectedListener listener) {
-        membersList = items;
+    UserAdapter(OnUserSelectedListener listener) {
+        membersList = new ArrayList<>();
         mListener = listener;
         checkedMap = new HashMap<>();
         groupMembersMap = new HashMap<>();
@@ -43,14 +47,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         return new ViewHolder(view);
     }
 
-    public void addGroupMembersList(HashMap<String, Boolean> groupMembersMap) {
+    void addGroupMembersList(HashMap<String, Boolean> groupMembersMap) {
         this.groupMembersMap = groupMembersMap;
         notifyDataSetChanged();
     }
 
+    void addMemberProfile(ProfileInfo profileInfo) {
+        membersList.add(profileInfo);
+        notifyItemInserted(membersList.size());
+    }
+
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final String userId = membersList.get(position);
+        final String userId = membersList.get(position).getId();
 
         ValueEventListener valueEventListener = getUserInfoRef(userId).addValueEventListener(new ValueEventListener() {
             @Override
@@ -90,7 +99,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 @Override
                 public void onClick(View v) {
                     if (null != mListener) {
-                        final String uid = membersList.get(holder.getAdapterPosition());
+                        final String uid = membersList.get(holder.getAdapterPosition()).getId();
                         toggleView(uid, userId, holder);
                     }
                 }
@@ -98,7 +107,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         }
     }
 
-    public void deselectUser(String uid) {
+    void deselectUser(String uid) {
         if (checkedMap.get(uid) != null) {
             checkedMap.put(uid, false);
         }
@@ -137,6 +146,22 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return membersList.size();
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (filter == null) {
+            filter = new UserFilter(this, membersList);
+        }
+        return filter;
+    }
+
+    public void clear() {
+        membersList.clear();
+    }
+
+    void addAllMembers(ArrayList<ProfileInfo> filteredMembersList) {
+        membersList.addAll(filteredMembersList);
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

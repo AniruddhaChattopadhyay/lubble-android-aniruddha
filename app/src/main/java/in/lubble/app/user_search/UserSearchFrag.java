@@ -6,10 +6,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -24,8 +27,10 @@ import java.util.List;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileInfo;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
@@ -71,9 +76,12 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         usersRecyclerView = view.findViewById(R.id.rv_users);
         sendBtn = view.findViewById(R.id.btn_send);
         RecyclerView selectedUsersRecyclerView = view.findViewById(R.id.rv_selected_users);
+        EditText searchEt = view.findViewById(R.id.et_user_search);
 
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        userAdapter = new UserAdapter(mListener);
+        usersRecyclerView.setAdapter(userAdapter);
         fetchAllLubbleUsers();
 
         selectedUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), OrientationHelper.HORIZONTAL, false));
@@ -102,7 +110,29 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
             }
         });
 
+        handleSearch(searchEt);
+
         return view;
+    }
+
+    private void handleSearch(EditText searchEt) {
+        searchEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // filter your list from your input
+                userAdapter.getFilter().filter(s.toString());
+            }
+        });
     }
 
     private void fetchAllLubbleUsers() {
@@ -112,10 +142,10 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
                 ArrayList<String> userList = new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     userList.add(child.getKey());
-                }
-                userAdapter = new UserAdapter(userList, mListener);
-                usersRecyclerView.setAdapter(userAdapter);
+                }/*
+                */
                 fetchGroupUsers();
+                fetchAllLubbleMembersProfile(userList);
             }
 
             @Override
@@ -123,6 +153,26 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
             }
         });
+    }
+
+    private void fetchAllLubbleMembersProfile(ArrayList<String> userList) {
+        for (String uid : userList) {
+            ValueEventListener valueEventListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                    if (profileInfo != null) {
+                        profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                        userAdapter.addMemberProfile(profileInfo);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
     }
 
     private void fetchGroupUsers() {
