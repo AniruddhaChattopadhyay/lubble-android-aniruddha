@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -20,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,6 +61,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     @Nullable
     private GroupData groupData;
+    private RelativeLayout joinContainer;
+    private CardView composeCardView;
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
     private Button sendBtn;
@@ -97,29 +101,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     }
 
-    private void syncGroupInfo() {
-        groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                groupData = dataSnapshot.getValue(GroupData.class);
-                if (groupData != null) {
-                    ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
-                    resetUnreadCount();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
+        composeCardView = view.findViewById(R.id.compose_container);
+        joinContainer = view.findViewById(R.id.relativeLayout_join_container);
         chatRecyclerView = view.findViewById(R.id.rv_chat);
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.btn_send_message);
@@ -150,8 +138,53 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        syncGroupInfo();
+        chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>());
+        chatRecyclerView.setAdapter(chatAdapter);
+        msgChildListener = msgListener(chatAdapter);
+
+        deleteUnreadMsgsForGroupId(groupId, getContext());
+    }
+
+    private void syncGroupInfo() {
+        groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                groupData = dataSnapshot.getValue(GroupData.class);
+                if (groupData != null) {
+                    ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
+                    resetUnreadCount();
+                    showBottomBar(groupData);
+                } else {
+                    Toast.makeText(getContext(), "Something's wrong :(", Toast.LENGTH_SHORT).show();
+                    getFragmentManager().popBackStackImmediate();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void showBottomBar(GroupData groupData) {
+        if (groupData.isJoined()) {
+            composeCardView.setVisibility(View.VISIBLE);
+            joinContainer.setVisibility(View.GONE);
+        } else {
+            composeCardView.setVisibility(View.GONE);
+            joinContainer.setVisibility(View.VISIBLE);
+        }
+    }
+
     private void showPublicGroupWarning() {
-        if(!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown() && groupId.equalsIgnoreCase("0")) {
+        if (!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown() && groupId.equalsIgnoreCase("0")) {
             final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity());
             View sheetView = getActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_info, null);
             bottomSheetDialog.setContentView(sheetView);
@@ -168,19 +201,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 }
             });
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        syncGroupInfo();
-        chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>());
-        chatRecyclerView.setAdapter(chatAdapter);
-        msgChildListener = msgListener(chatAdapter);
-
-        deleteUnreadMsgsForGroupId(groupId, getContext());
     }
 
     private void resetUnreadCount() {
