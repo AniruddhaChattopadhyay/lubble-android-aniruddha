@@ -76,7 +76,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private String groupId;
     private ChildEventListener msgChildListener;
     private ValueEventListener groupInfoListener;
-    private HashMap<String, Object> groupMembersMap;
+    private HashMap<String, ProfileInfo> groupMembersMap;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -116,6 +116,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.btn_send_message);
         attachMediaBtn = view.findViewById(R.id.btn_attach_media);
+
+        groupMembersMap = new HashMap<>();
 
         chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
@@ -160,7 +162,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 groupData = dataSnapshot.getValue(GroupData.class);
-                groupMembersMap = groupData.getMembers();
+                // fetchMembersProfile(groupData.getMembers()); to be used for tagging
                 if (groupData != null) {
                     ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
                     resetUnreadCount();
@@ -178,23 +180,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         });
     }
 
-    private void fetchMembersProfile(String uid) {
-        // todo remove listener
-        ValueEventListener valueEventListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                if (profileInfo != null) {
-                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                    groupMembersMap.put(dataSnapshot.getRef().getParent().getKey(), profileInfo);
+    private void fetchMembersProfile(HashMap<String, Object> membersMap) {
+        for (String uid : membersMap.keySet()) {
+            ValueEventListener valueEventListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                    if (profileInfo != null) {
+                        profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                        groupMembersMap.put(dataSnapshot.getRef().getParent().getKey(), profileInfo);
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     private void showBottomBar(GroupData groupData) {
@@ -378,10 +381,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void afterTextChanged(Editable editable) {
                 sendBtn.setEnabled(editable.length() > 0);
-                if (editable.toString().contains("@")) {
-                    String userName = editable.toString().split("@")[1].split(" ")[0].trim();
-                    Log.d(TAG, "afterTextChanged: username = " + userName);
-                }
             }
         });
     }

@@ -46,7 +46,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private UserAdapter userAdapter;
     private SelectedUserAdapter selectedUserAdapter;
     private ValueEventListener lubbleMembersListener;
-    private HashMap<DatabaseReference, ValueEventListener> map = new HashMap<DatabaseReference, ValueEventListener>();
+    private HashMap<DatabaseReference, ValueEventListener> map = new HashMap<>();
 
     public UserSearchFrag() {
     }
