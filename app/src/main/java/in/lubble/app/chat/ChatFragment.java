@@ -36,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -43,11 +44,13 @@ import in.lubble.app.UploadFileService;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileInfo;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
@@ -73,6 +76,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private String groupId;
     private ChildEventListener msgChildListener;
     private ValueEventListener groupInfoListener;
+    private HashMap<String, Object> groupMembersMap;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -156,6 +160,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 groupData = dataSnapshot.getValue(GroupData.class);
+                groupMembersMap = groupData.getMembers();
                 if (groupData != null) {
                     ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
                     resetUnreadCount();
@@ -163,6 +168,25 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 } else {
                     Toast.makeText(getContext(), "Something's wrong :(", Toast.LENGTH_SHORT).show();
                     getFragmentManager().popBackStackImmediate();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void fetchMembersProfile(String uid) {
+        // todo remove listener
+        ValueEventListener valueEventListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                if (profileInfo != null) {
+                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                    groupMembersMap.put(dataSnapshot.getRef().getParent().getKey(), profileInfo);
                 }
             }
 
@@ -354,6 +378,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void afterTextChanged(Editable editable) {
                 sendBtn.setEnabled(editable.length() > 0);
+                if (editable.toString().contains("@")) {
+                    String userName = editable.toString().split("@")[1].split(" ")[0].trim();
+                    Log.d(TAG, "afterTextChanged: username = " + userName);
+                }
             }
         });
     }

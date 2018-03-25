@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private UserAdapter userAdapter;
     private SelectedUserAdapter selectedUserAdapter;
     private ValueEventListener lubbleMembersListener;
+    private HashMap<DatabaseReference, ValueEventListener> map = new HashMap<DatabaseReference, ValueEventListener>();
 
     public UserSearchFrag() {
     }
@@ -157,7 +159,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
     private void fetchAllLubbleMembersProfile(ArrayList<String> userList) {
         for (String uid : userList) {
-            ValueEventListener valueEventListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
+            ValueEventListener membersProfileListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
@@ -172,6 +174,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
                 }
             });
+            map.put(getUserInfoRef(uid), membersProfileListener);
         }
     }
 
@@ -225,6 +228,9 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     public void onPause() {
         super.onPause();
         RealtimeDbHelper.getLubbleMembersRef().removeEventListener(lubbleMembersListener);
+        for (Query query : map.keySet()) {
+            query.removeEventListener(map.get(query));
+        }
         userAdapter.removeAllListeners();
         selectedUserAdapter.removeAllListeners();
     }
