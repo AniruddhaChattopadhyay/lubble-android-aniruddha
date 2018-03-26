@@ -27,6 +27,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.domestic_directory.DomesticDirectoryActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileData;
@@ -177,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_home:
                     return true;
                 case R.id.navigation_dashboard:
+                    DomesticDirectoryActivity.newInstance(MainActivity.this);
                     return true;
                 case R.id.navigation_notifications:
                     return true;

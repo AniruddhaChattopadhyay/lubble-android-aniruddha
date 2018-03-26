@@ -44,6 +44,10 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE + "/members");
     }
 
+    public static DatabaseReference getLubbleDomesticRef() {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE + "/domesticDirectory");
+    }
+
     public static DatabaseReference getLubbleGroupsRef() {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE + "/groups");
     }
