@@ -13,10 +13,4 @@
         android:layout_marginLeft="8dp"
         tools:text="Electricians" />
 
-    <View
-        android:layout_marginTop="8dp"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/gray" />
-
 </LinearLayout>
