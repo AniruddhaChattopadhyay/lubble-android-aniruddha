@@ -25,9 +25,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
+import in.lubble.app.announcements.announcementHistory.AnnouncementsFrag;
 import in.lubble.app.auth.LoginActivity;
-import in.lubble.app.domestic_directory.DomesticDirectoryActivity;
+import in.lubble.app.domestic_directory.DomesticDirectoryFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileData;
@@ -175,12 +175,14 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.navigation_home:
+                case R.id.navigation_chats:
+                    switchFrag(GroupListFragment.newInstance());
                     return true;
-                case R.id.navigation_dashboard:
-                    DomesticDirectoryActivity.newInstance(MainActivity.this);
+                case R.id.navigation_notices:
+                    switchFrag(AnnouncementsFrag.newInstance());
                     return true;
-                case R.id.navigation_notifications:
+                case R.id.navigation_domestic_help:
+                    switchFrag(DomesticDirectoryFrag.newInstance());
                     return true;
             }
             return false;
@@ -200,10 +202,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void openProfile(MenuItem item) {
         ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
-    }
-
-    public void openAnnouncements(MenuItem item) {
-        AnnouncementsActivity.newInstance(this);
     }
 
 }
