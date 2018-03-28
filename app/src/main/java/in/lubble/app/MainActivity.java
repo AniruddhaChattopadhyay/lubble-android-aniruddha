@@ -12,6 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
@@ -62,9 +63,17 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
+        ImageView profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setElevation(10);
         TextView toolbarTitle = findViewById(R.id.lubble_toolbar_title);
         toolbarTitle.setVisibility(View.VISIBLE);
+        profileIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openProfile();
+            }
+        });
 
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
@@ -200,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    public void openProfile(MenuItem item) {
+    private void openProfile() {
         ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
     }
 

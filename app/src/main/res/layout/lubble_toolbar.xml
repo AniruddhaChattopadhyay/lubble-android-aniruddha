@@ -4,23 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/lubble_toolbar"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorPrimaryDark"
-    android:elevation="2dp"
-    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    android:minHeight="?attr/actionBarSize">
+    android:layout_height="?attr/actionBarSize"
+    app:elevation="12dp">
+
+    <ImageView
+        android:id="@+id/iv_toolbar_profile"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/lubble_toolbar_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/molle_regular"
-        android:text="Lubble"
-        android:textColor="@color/white"
-        android:textSize="32sp"
+        android:layout_gravity="center"
+        android:text="Saraswati vihar"
+        android:textAllCaps="true"
+        android:textColor="@color/darker_gray"
         android:visibility="gone"
-        tools:fontFamily="@font/molle_regular"
-        tools:text="Lubble"
+        tools:text="Saraswati vihar"
         tools:visibility="visible" />
 
 </android.support.v7.widget.Toolbar>

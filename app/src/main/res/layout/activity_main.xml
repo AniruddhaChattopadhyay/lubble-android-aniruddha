@@ -9,7 +9,9 @@
     android:orientation="vertical"
     tools:context="in.lubble.app.MainActivity">
 
-    <include layout="@layout/lubble_toolbar" />
+    <include
+        android:id="@+id/lubble_toolbar"
+        layout="@layout/lubble_toolbar" />
 
     <android.support.design.widget.BottomNavigationView
         android:id="@+id/navigation"
@@ -18,7 +20,9 @@
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="0dp"
         android:layout_marginStart="0dp"
-        android:background="@android:color/white"
+        android:background="@color/white"
+        app:itemIconTint="@color/bottom_nav_selector"
+        app:itemTextColor="@color/bottom_nav_selector"
         app:menu="@menu/navigation" />
 
     <FrameLayout
@@ -27,5 +31,11 @@
         android:layout_height="match_parent"
         android:layout_above="@id/navigation"
         android:layout_below="@id/lubble_toolbar" />
+
+    <include
+        layout="@layout/layout_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@+id/lubble_toolbar" />
 
 </RelativeLayout>
