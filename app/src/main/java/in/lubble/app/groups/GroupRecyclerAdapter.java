@@ -189,6 +189,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         final TextView subtitleTv;
         final Button joinBtn;
         final TextView unreadCountTv;
+        final TextView timestampTv;
         final TextView rejectTv;
         GroupData groupData;
 
@@ -201,6 +202,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             rejectTv = view.findViewById(R.id.tv_reject_group);
             joinBtn = view.findViewById(R.id.btn_join_group);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
+            timestampTv = view.findViewById(R.id.tv_last_msg_time);
         }
     }
 }

@@ -27,18 +27,26 @@
         android:textAppearance="?attr/textAppearanceListItem"
         tools:text="@tools:sample/lorem" />
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/right_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true">
+        android:layout_centerVertical="true"
+        android:gravity="right"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_last_msg_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            tools:text="a min ago" />
 
         <TextView
             android:id="@+id/tv_unread_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:background="@drawable/blue_circle"
             android:gravity="center"
             android:textColor="@color/white"
@@ -66,7 +74,7 @@
             android:textColor="@color/red"
             android:visibility="gone" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_subtitle"
