@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
@@ -45,6 +46,8 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.network.LinkMetaAsyncTask;
+import in.lubble.app.network.LinkMetaListener;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
@@ -66,6 +69,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private GroupData groupData;
     private RelativeLayout joinContainer;
     private CardView composeCardView;
+    private CardView linkInfoCard;
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
     private Button sendBtn;
@@ -116,6 +120,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.btn_send_message);
         attachMediaBtn = view.findViewById(R.id.btn_attach_media);
+        linkInfoCard = view.findViewById(R.id.cardview_link_container);
 
         groupMembersMap = new HashMap<>();
 
@@ -381,8 +386,37 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void afterTextChanged(Editable editable) {
                 sendBtn.setEnabled(editable.length() > 0);
+                if (editable.toString().contains("http")) {
+                    final String linkStr = editable.toString();
+                    final String[] split = linkStr.split(" ");
+                    if (split.length >= 2) {
+                        // link is now complete
+                        String linkUrl = split[0];
+                        new LinkMetaAsyncTask(linkUrl, getLinkMetaListener())
+                                .execute();
+                    }
+                }
             }
         });
+    }
+
+    @NonNull
+    private LinkMetaListener getLinkMetaListener() {
+        return new LinkMetaListener() {
+            @Override
+            public void onMetaFetched(final String title, final String desc) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        linkInfoCard.setVisibility(View.VISIBLE);
+                        TextView linkTitle = linkInfoCard.findViewById(R.id.tv_link_title);
+                        TextView linkDesc = linkInfoCard.findViewById(R.id.tv_link_desc);
+                        linkTitle.setText(title);
+                        linkDesc.setText(desc);
+                    }
+                });
+            }
+        };
     }
 
     @Override
