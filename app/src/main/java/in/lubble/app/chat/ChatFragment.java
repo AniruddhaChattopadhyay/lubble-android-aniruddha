@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.Group;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -69,11 +70,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private GroupData groupData;
     private RelativeLayout joinContainer;
     private CardView composeCardView;
-    private CardView linkInfoCard;
+    private Group linkMetaContainer;
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
     private ImageView sendBtn;
     private ImageView attachMediaBtn;
+    private TextView linkTitle;
+    private TextView linkDesc;
     private DatabaseReference groupReference;
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
@@ -120,7 +123,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.iv_send_btn);
         attachMediaBtn = view.findViewById(R.id.iv_attach);
-        linkInfoCard = view.findViewById(R.id.cardview_link_container);
+        linkMetaContainer = view.findViewById(R.id.group_link_meta);
+        linkTitle = view.findViewById(R.id.tv_link_title);
+        linkDesc = view.findViewById(R.id.tv_link_desc);
 
         groupMembersMap = new HashMap<>();
 
@@ -408,9 +413,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        linkInfoCard.setVisibility(View.VISIBLE);
-                        TextView linkTitle = linkInfoCard.findViewById(R.id.tv_link_title);
-                        TextView linkDesc = linkInfoCard.findViewById(R.id.tv_link_desc);
+                        linkMetaContainer.setVisibility(View.VISIBLE);
                         linkTitle.setText(title);
                         linkDesc.setText(desc);
                     }
