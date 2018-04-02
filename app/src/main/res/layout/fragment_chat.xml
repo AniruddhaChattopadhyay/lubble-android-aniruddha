@@ -47,7 +47,10 @@
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@id/iv_attach"
                 android:background="@android:color/transparent"
-                android:hint="What's new" />
+                android:gravity="top|left"
+                android:hint="What's new"
+                android:maxLines="10"
+                android:scrollbars="vertical" />
 
         </RelativeLayout>
 
