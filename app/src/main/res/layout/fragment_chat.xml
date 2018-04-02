@@ -17,30 +17,35 @@
         app:cardCornerRadius="24dp">
 
         <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp">
 
-            <Button
-                android:id="@+id/btn_send_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:id="@+id/iv_send_btn"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_alignParentRight="true"
-                android:text="SEND"
-                android:theme="@style/PrimaryButton" />
+                android:background="@drawable/blue_circle"
+                android:padding="12dp"
+                app:srcCompat="@drawable/ic_send_white_24dp" />
 
-            <Button
-                android:id="@+id/btn_attach_media"
+            <ImageView
+                android:id="@+id/iv_attach"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/btn_send_message"
-                android:text="MEDIA" />
+                android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
+                android:layout_toLeftOf="@id/iv_send_btn"
+                android:padding="10dp"
+                app:srcCompat="@drawable/ic_attach_file_black_24dp" />
 
             <EditText
                 android:id="@+id/et_new_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/btn_attach_media"
+                android:layout_toLeftOf="@id/iv_attach"
                 android:background="@android:color/transparent"
                 android:hint="What's new" />
 

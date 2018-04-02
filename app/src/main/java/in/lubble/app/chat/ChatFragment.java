@@ -20,8 +20,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -72,8 +72,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private CardView linkInfoCard;
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
-    private Button sendBtn;
-    private Button attachMediaBtn;
+    private ImageView sendBtn;
+    private ImageView attachMediaBtn;
     private DatabaseReference groupReference;
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
@@ -118,8 +118,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         joinContainer = view.findViewById(R.id.relativeLayout_join_container);
         chatRecyclerView = view.findViewById(R.id.rv_chat);
         newMessageEt = view.findViewById(R.id.et_new_message);
-        sendBtn = view.findViewById(R.id.btn_send_message);
-        attachMediaBtn = view.findViewById(R.id.btn_attach_media);
+        sendBtn = view.findViewById(R.id.iv_send_btn);
+        attachMediaBtn = view.findViewById(R.id.iv_attach);
         linkInfoCard = view.findViewById(R.id.cardview_link_container);
 
         groupMembersMap = new HashMap<>();
@@ -296,7 +296,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.btn_send_message:
+            case R.id.iv_send_btn:
 
                 final ChatData chatData = new ChatData();
                 chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
@@ -308,7 +308,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 newMessageEt.setText("");
                 break;
-            case R.id.btn_attach_media:
+            case R.id.iv_attach:
                 startPhotoPicker(REQUEST_CODE_IMG);
                 break;
         }
