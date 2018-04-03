@@ -2,8 +2,11 @@ package in.lubble.app.chat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -253,6 +256,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             dpIv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(this);
+            linkContainer.setOnClickListener(this);
         }
 
         @Override
@@ -268,6 +272,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
                     if (isValidString(imgUrl)) {
                         FullScreenImageActivity.open(activity, context, imgUrl, chatIv, null);
+                    }
+                    break;
+                case R.id.link_meta_container:
+                    final URLSpan[] urls = messageTv.getUrls();
+                    final String url = urls[0].getURL();
+                    if (isValidString(url)) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(url));
+                        context.startActivity(i);
                     }
                     break;
             }
@@ -295,7 +308,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
-
+            linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(this);
         }
@@ -310,6 +323,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
                     if (isValidString(imgUrl)) {
                         FullScreenImageActivity.open(activity, context, imgUrl, chatIv, null);
+                    }
+                    break;
+                case R.id.link_meta_container:
+                    final URLSpan[] urls = messageTv.getUrls();
+                    final String url = urls[0].getURL();
+                    if (isValidString(url)) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(url));
+                        context.startActivity(i);
                     }
                     break;
             }
