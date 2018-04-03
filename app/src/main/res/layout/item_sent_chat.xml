@@ -24,8 +24,8 @@
                 android:layout_width="240dp"
                 android:layout_height="240dp"
                 android:layout_marginBottom="4dp"
-                android:transitionName="chat_image"
                 android:scaleType="centerCrop"
+                android:transitionName="chat_image"
                 android:visibility="gone"
                 tools:src="@tools:sample/backgrounds/scenic"
                 tools:visibility="visible" />
@@ -34,6 +34,7 @@
                 android:id="@+id/tv_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:autoLink="web"
                 android:textColor="@color/black"
                 android:textIsSelectable="true"
                 tools:text="Pikachu! I choose you!" />

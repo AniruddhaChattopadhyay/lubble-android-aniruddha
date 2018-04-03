@@ -2,12 +2,17 @@ package in.lubble.app.utils;
 
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.util.Patterns;
+
+import java.util.regex.Matcher;
 
 /**
  * Created by ishaangarg on 11/11/17.
  */
 
 public class StringUtils {
+
+    private static final String TAG = "StringUtils";
 
     public static boolean isValidString(String string) {
         return string != null && !string.equalsIgnoreCase("") && !string.equalsIgnoreCase("null");
@@ -44,6 +49,16 @@ public class StringUtils {
         }
 
         return builder.toString();
+    }
+
+    @Nullable
+    public static String extractFirstLink(String text) {
+        Matcher m = Patterns.WEB_URL.matcher(text);
+        if (m.find()) {
+            return m.group();
+        }
+
+        return null;
     }
 
 }

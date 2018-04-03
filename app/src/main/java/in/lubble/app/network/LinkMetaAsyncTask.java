@@ -11,7 +11,7 @@ import java.io.IOException;
  * Created by shadow-admin on 31/7/17.
  */
 
-public class LinkMetaAsyncTask extends AsyncTask<Void, Void, Boolean> {
+public class LinkMetaAsyncTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = "LinkMetaAsyncTask";
 
@@ -24,25 +24,25 @@ public class LinkMetaAsyncTask extends AsyncTask<Void, Void, Boolean> {
     }
 
     @Override
-    protected Boolean doInBackground(Void... params) {
+    protected Void doInBackground(Void... params) {
         try {
-            Document doc = Jsoup.connect(url).get();
+            Document doc = Jsoup.connect(url).timeout(30 * 1000).get();
             String title = doc.title();
             String description = doc.select("meta[name=description]").attr("content");
             listener.onMetaFetched(title, description);
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            listener.onMetaFailed();
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            listener.onMetaFailed();
         }
+        return null;
     }
 
     @Override
-    protected void onPostExecute(Boolean isSuccess) {
-        super.onPostExecute(isSuccess);
+    protected void onPostExecute(Void a) {
+        super.onPostExecute(a);
     }
 
 }

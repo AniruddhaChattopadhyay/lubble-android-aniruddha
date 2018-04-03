@@ -59,6 +59,7 @@ import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
+import static in.lubble.app.utils.StringUtils.extractFirstLink;
 
 public class ChatFragment extends Fragment implements View.OnClickListener {
 
@@ -84,6 +85,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ChildEventListener msgChildListener;
     private ValueEventListener groupInfoListener;
     private HashMap<String, ProfileInfo> groupMembersMap;
+    private String prevUrl = "";
 
     public ChatFragment() {
         // Required empty public constructor
@@ -391,15 +393,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void afterTextChanged(Editable editable) {
                 sendBtn.setEnabled(editable.length() > 0);
-                if (editable.toString().contains("http")) {
-                    final String linkStr = editable.toString();
-                    final String[] split = linkStr.split(" ");
-                    if (split.length >= 2) {
-                        // link is now complete
-                        String linkUrl = split[0];
-                        new LinkMetaAsyncTask(linkUrl, getLinkMetaListener())
-                                .execute();
-                    }
+                final String extractedUrl = extractFirstLink(editable.toString());
+                if (extractedUrl != null && (!prevUrl.equalsIgnoreCase(extractedUrl))) {
+                    prevUrl = extractedUrl;
+                    new LinkMetaAsyncTask(prevUrl, getLinkMetaListener())
+                            .execute();
+                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE) {
+                    linkMetaContainer.setVisibility(View.GONE);
+                    prevUrl = "";
                 }
             }
         });
@@ -419,12 +420,23 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     }
                 });
             }
+
+            @Override
+            public void onMetaFailed() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        linkMetaContainer.setVisibility(View.GONE);
+                    }
+                });
+            }
         };
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        prevUrl = "";
         messagesReference.removeEventListener(msgChildListener);
         groupReference.removeEventListener(groupInfoListener);
     }

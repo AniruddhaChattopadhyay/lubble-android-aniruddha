@@ -51,6 +51,7 @@
                 android:layout_marginLeft="8dp"
                 android:textColor="@color/black"
                 android:textIsSelectable="true"
+                android:autoLink="web"
                 tools:text="Pikachu! I choose you!" />
 
             <LinearLayout

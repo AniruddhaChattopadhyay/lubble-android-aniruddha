@@ -8,4 +8,5 @@ public interface LinkMetaListener {
 
     void onMetaFetched(String title, String desc);
 
+    void onMetaFailed();
 }
