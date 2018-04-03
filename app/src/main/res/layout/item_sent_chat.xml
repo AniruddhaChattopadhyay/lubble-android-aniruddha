@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginLeft="64dp"
     android:layout_gravity="right"
     android:gravity="right">
 
@@ -27,8 +28,33 @@
                 android:scaleType="centerCrop"
                 android:transitionName="chat_image"
                 android:visibility="gone"
-                tools:src="@tools:sample/backgrounds/scenic"
-                tools:visibility="visible" />
+                tools:src="@tools:sample/backgrounds/scenic" />
+
+            <LinearLayout
+                android:id="@+id/link_meta_container"
+                android:layout_width="wrap_content"
+                android:padding="8dp"
+                android:background="@color/very_light_gray"
+                android:layout_marginBottom="8dp"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_link_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:text="LINK TITLE"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_link_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:text="Link description goes here" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_message"
@@ -45,6 +71,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="left"
                 android:layout_marginTop="4dp"
+                android:visibility="gone"
                 android:gravity="center"
                 android:orientation="horizontal">
 

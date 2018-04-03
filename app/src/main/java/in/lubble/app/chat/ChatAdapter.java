@@ -97,6 +97,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
 
+        if (chatData.getType().equalsIgnoreCase("LINK")) {
+            sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
+            sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+        } else {
+            sentChatViewHolder.linkContainer.setVisibility(View.GONE);
+        }
+
         handleImage(sentChatViewHolder.chatIv, chatData);
 
     }
@@ -111,6 +119,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
         } else {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+        }
+
+        if (chatData.getType().equalsIgnoreCase("LINK")) {
+            recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
+            recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+        } else {
+            recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
 
         handleImage(recvdChatViewHolder.chatIv, chatData);
@@ -213,6 +229,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         private TextView authorNameTv;
         private TextView messageTv;
+        private LinearLayout linkContainer;
+        private TextView linkTitleTv;
+        private TextView linkDescTv;
         private ImageView chatIv;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
@@ -223,6 +242,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             super(itemView);
             authorNameTv = itemView.findViewById(R.id.tv_author);
             messageTv = itemView.findViewById(R.id.tv_message);
+            linkContainer = itemView.findViewById(R.id.link_meta_container);
+            linkTitleTv = itemView.findViewById(R.id.tv_link_title);
+            linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
@@ -255,14 +277,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         private TextView messageTv;
+        private LinearLayout linkContainer;
+        private TextView linkTitleTv;
+        private TextView linkDescTv;
         private ImageView chatIv;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
 
-        public SentChatViewHolder(View itemView) {
+        SentChatViewHolder(View itemView) {
             super(itemView);
             messageTv = itemView.findViewById(R.id.tv_message);
+            linkContainer = itemView.findViewById(R.id.link_meta_container);
+            linkTitleTv = itemView.findViewById(R.id.tv_link_title);
+            linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);

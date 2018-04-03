@@ -60,6 +60,7 @@ import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
+import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class ChatFragment extends Fragment implements View.OnClickListener {
 
@@ -310,6 +311,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 chatData.setMessage(newMessageEt.getText().toString());
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
+
+                if (isValidString(linkTitle.getText().toString())) {
+                    chatData.setType("LINK");
+                    chatData.setLinkTitle(linkTitle.getText().toString());
+                    chatData.setLinkDesc(linkDesc.getText().toString());
+                }
 
                 messagesReference.push().setValue(chatData);
 

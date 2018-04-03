@@ -38,20 +38,46 @@
                 android:layout_height="240dp"
                 android:layout_marginBottom="4dp"
                 android:layout_marginTop="4dp"
-                android:transitionName="chat_image"
                 android:scaleType="centerCrop"
+                android:transitionName="chat_image"
                 android:visibility="gone"
-                tools:src="@tools:sample/backgrounds/scenic"
-                tools:visibility="visible" />
+                tools:src="@tools:sample/backgrounds/scenic" />
+
+            <LinearLayout
+                android:id="@+id/link_meta_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/very_light_gray"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <TextView
+                    android:id="@+id/tv_link_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:text="LINK TITLE"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_link_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:text="Link description goes here" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
+                android:autoLink="web"
                 android:textColor="@color/black"
                 android:textIsSelectable="true"
-                android:autoLink="web"
                 tools:text="Pikachu! I choose you!" />
 
             <LinearLayout
@@ -61,7 +87,8 @@
                 android:layout_gravity="right"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/iv_lubb"

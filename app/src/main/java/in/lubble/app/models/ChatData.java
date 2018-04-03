@@ -20,6 +20,9 @@ public class ChatData {
     private Object serverTimestamp;
     private HashMap<String, Long> deliveryReceipts = new HashMap<>();
     private HashMap<String, Long> readReceipts = new HashMap<>();
+    private String type = "";
+    private String linkTitle;
+    private String linkDesc;
 
     @Override
     public boolean equals(Object obj) {
@@ -116,5 +119,29 @@ public class ChatData {
 
     public void setReadReceipts(HashMap<String, Long> readReceipts) {
         this.readReceipts = readReceipts;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getLinkTitle() {
+        return linkTitle;
+    }
+
+    public void setLinkTitle(String linkTitle) {
+        this.linkTitle = linkTitle;
+    }
+
+    public String getLinkDesc() {
+        return linkDesc;
+    }
+
+    public void setLinkDesc(String linkDesc) {
+        this.linkDesc = linkDesc;
     }
 }
