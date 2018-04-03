@@ -26,20 +26,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="link desc goes here"
                 app:layout_constraintBottom_toTopOf="@+id/view_separator"
-                app:layout_constraintStart_toStartOf="@+id/et_new_message" />
+                app:layout_constraintStart_toStartOf="@+id/et_new_message"
+                tools:text="link desc goes here" />
 
             <TextView
                 android:id="@+id/tv_link_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Link Title"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@+id/tv_link_desc"
                 app:layout_constraintStart_toStartOf="@+id/tv_link_desc"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Link Title" />
 
             <View
                 android:id="@+id/view_separator"
