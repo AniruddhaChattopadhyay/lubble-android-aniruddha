@@ -95,6 +95,7 @@ public class NotifUtils {
                 .setSmallIcon(R.drawable.ic_upload)
                 .setShowWhen(true)
                 .setGroup(groupKey)
+                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
                 .build();
     }
 
@@ -108,6 +109,7 @@ public class NotifUtils {
                 .setShowWhen(true)
                 .setGroup(groupKey)
                 .setGroupSummary(true)
+                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
                 .build();
     }
 
