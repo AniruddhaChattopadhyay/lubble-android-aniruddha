@@ -100,6 +100,7 @@ public class NotifUtils {
     }
 
     private static Notification buildSummary(Context context, String groupKey, long timestamp) {
+        //todo this must be inbox style becoz on < M only this notif is shown
         return new NotificationCompat.Builder(context, Constants.DEFAULT_NOTIF_CHANNEL)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Nougat Messenger")
