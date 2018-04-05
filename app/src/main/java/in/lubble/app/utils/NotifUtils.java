@@ -61,11 +61,23 @@ public class NotifUtils {
 
         for (NotifData notifData : notifDataList) {
             int notifId = getNotifId(notifData.getGroupId());
-            final Notification notification = buildNotification(context, getMessagingStyle(notifId), notifData, GROUP_KEY);
-            notificationManager.notify(notifId, notification);
-            Notification summary = buildSummary(context, GROUP_KEY, notifData.getTimestamp());
-            notificationManager.notify(SUMMARY_ID, summary);
+            buildGroupNotification(context, getMessagingStyle(notifId), notifData, GROUP_KEY);
         }
+
+        for (Map.Entry<Integer, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
+            final Integer notifId = map.getKey();
+            final Notification notification = new NotificationCompat.Builder(context, Constants.DEFAULT_NOTIF_CHANNEL)
+                    .setStyle(map.getValue())
+                    .setSmallIcon(R.drawable.ic_upload)
+                    .setShowWhen(true)
+                    .setGroup(GROUP_KEY)
+                    .setDefaults(0)
+                    .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
+                    .build();
+            notificationManager.notify(notifId, notification);
+        }
+        Notification summary = buildSummary(context, GROUP_KEY, notifDataList.get(notifDataList.size()-1).getTimestamp());
+        notificationManager.notify(SUMMARY_ID, summary);
     }
 
     private static int getNotifId(String groupId) {
@@ -86,17 +98,11 @@ public class NotifUtils {
         return messagingStyle;
     }
 
-    private static Notification buildNotification(Context context, NotificationCompat.MessagingStyle messagingStyle, NotifData notifData, String groupKey) {
+    private static void buildGroupNotification(Context context, NotificationCompat.MessagingStyle messagingStyle, NotifData notifData, String groupKey) {
         messagingStyle.setConversationTitle(notifData.getGroupName());
 
         messagingStyle.addMessage(notifData.getMessageBody(), notifData.getTimestamp(), notifData.getAuthorName());
-        return new NotificationCompat.Builder(context, Constants.DEFAULT_NOTIF_CHANNEL)
-                .setStyle(messagingStyle)
-                .setSmallIcon(R.drawable.ic_upload)
-                .setShowWhen(true)
-                .setGroup(groupKey)
-                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
-                .build();
+        messagingStyleMap.put(getNotifId(notifData.getGroupId()), messagingStyle);
     }
 
     private static Notification buildSummary(Context context, String groupKey, long timestamp) {
