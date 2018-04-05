@@ -2,7 +2,9 @@ package in.lubble.app.utils;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -16,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import in.lubble.app.Constants;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.NotifData;
@@ -72,11 +75,13 @@ public class NotifUtils {
                     .setShowWhen(true)
                     .setGroup(GROUP_KEY)
                     .setDefaults(0)
+                    .setContentIntent(PendingIntent.getActivity(context, 0,
+                            new Intent(context, MainActivity.class), 0))
                     .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
                     .build();
             notificationManager.notify(notifId, notification);
         }
-        Notification summary = buildSummary(context, GROUP_KEY, notifDataList.get(notifDataList.size()-1).getTimestamp());
+        Notification summary = buildSummary(context, GROUP_KEY, notifDataList.get(notifDataList.size() - 1).getTimestamp());
         notificationManager.notify(SUMMARY_ID, summary);
     }
 
