@@ -97,8 +97,7 @@
         <activity android:name=".user_search.UserSearchActivity" />
         <activity android:name=".utils.FullScreenImageActivity" />
         <activity
-            android:name=".chat.AttachImageActivity"
-            android:windowSoftInputMode="adjustResize"/>
+            android:name=".chat.AttachImageActivity"/>
     </application>
 
 </manifest>
