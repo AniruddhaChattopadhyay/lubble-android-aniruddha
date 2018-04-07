@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@layout/transparent_toolbar" />
+
+    <ImageView
+        android:id="@+id/iv_send_btn"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="8dp"
+        android:background="@drawable/blue_circle"
+        android:padding="12dp"
+        app:srcCompat="@drawable/ic_send_white_24dp" />
+
+    <EditText
+        android:id="@+id/et_img_caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_toLeftOf="@id/iv_send_btn"
+        android:hint="Add a caption" />
+
+    <in.lubble.app.utils.TouchImageView
+        android:id="@+id/tiv_new_img"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/iv_send_btn"
+        tools:src="@tools:sample/avatars" />
+
+</RelativeLayout>

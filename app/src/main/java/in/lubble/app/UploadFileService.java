@@ -50,6 +50,8 @@ public class UploadFileService extends BaseTaskService {
     public static final String EXTRA_BUCKET = "extra_bucket";
     public static final String EXTRA_UPLOAD_PATH = "extra_upload_path";
     public static final String EXTRA_DOWNLOAD_URL = "extra_download_url";
+    public static final String EXTRA_CAPTION = "extra_caption";
+    public static final String EXTRA_GROUP_ID = "extra_group_id";
 
     private StorageReference mStorageRef;
 
@@ -76,6 +78,8 @@ public class UploadFileService extends BaseTaskService {
                     fileUri,
                     intent.getStringExtra(EXTRA_FILE_NAME),
                     intent.getStringExtra(EXTRA_UPLOAD_PATH),
+                    intent.getStringExtra(EXTRA_CAPTION),
+                    intent.getStringExtra(EXTRA_GROUP_ID),
                     isConvoBucket
             );
         }
@@ -83,7 +87,7 @@ public class UploadFileService extends BaseTaskService {
         return START_REDELIVER_INTENT;
     }
 
-    private void uploadFromUri(final Uri fileUri, String fileName, String uploadPath, final boolean toTransmit) {
+    private void uploadFromUri(final Uri fileUri, String fileName, String uploadPath, final String caption, final String groupId, final boolean toTransmit) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         taskStarted();
@@ -113,7 +117,7 @@ public class UploadFileService extends BaseTaskService {
                         Uri downloadUri = taskSnapshot.getMetadata().getDownloadUrl();
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(downloadUri, fileUri, toTransmit);
+                        broadcastUploadFinished(downloadUri, fileUri, toTransmit, caption, groupId);
                         showUploadFinishedNotification(downloadUri, fileUri);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -126,7 +130,7 @@ public class UploadFileService extends BaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null, fileUri, toTransmit);
+                        broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId);
                         showUploadFinishedNotification(null, fileUri);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -140,7 +144,7 @@ public class UploadFileService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit) {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit, String caption, String groupId) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
@@ -149,21 +153,21 @@ public class UploadFileService extends BaseTaskService {
                 .putExtra(EXTRA_DOWNLOAD_URL, downloadUrl)
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
-        if (toTransmit) {
-            transmitMedia(downloadUrl);
+        if (toTransmit && success) {
+            transmitMedia(downloadUrl, caption, groupId);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())
                 .sendBroadcast(broadcast);
     }
 
-    private void transmitMedia(Uri downloadUrl) {
+    private void transmitMedia(Uri downloadUrl, String caption, String groupId) {
 
-        final DatabaseReference msgReference = getMessagesRef().child("0");
+        final DatabaseReference msgReference = getMessagesRef().child(groupId);
 
         final ChatData chatData = new ChatData();
         chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        chatData.setMessage("caption placeholder");
+        chatData.setMessage(caption);
         chatData.setImgUrl(downloadUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);

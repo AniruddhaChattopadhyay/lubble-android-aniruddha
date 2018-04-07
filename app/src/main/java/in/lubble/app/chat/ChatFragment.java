@@ -51,7 +51,6 @@ import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 
 import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -354,12 +353,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
 
             final Uri fileUri = Uri.fromFile(imageFile);
-            getContext().startService(new Intent(getContext(), UploadFileService.class)
+            AttachImageActivity.open(getContext(), fileUri, groupId);
+            /*getContext().startService(new Intent(getContext(), UploadFileService.class)
                     .putExtra(UploadFileService.EXTRA_BUCKET, UploadFileService.BUCKET_CONVO)
                     .putExtra(UploadFileService.EXTRA_FILE_NAME, fileUri.getLastPathSegment())
                     .putExtra(EXTRA_FILE_URI, fileUri)
                     .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/0/groups/0")
-                    .setAction(UploadFileService.ACTION_UPLOAD));
+                    .setAction(UploadFileService.ACTION_UPLOAD));*/
 
         } else {
             Toast.makeText(getContext(), "Failed to get photo", Toast.LENGTH_SHORT).show();

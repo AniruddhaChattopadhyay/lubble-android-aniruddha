@@ -67,7 +67,6 @@ public class FullScreenImageActivity extends AppCompatActivity {
             uploadPath = getIntent().getStringExtra(EXTRA_UPLOAD_PATH);
             GlideApp.with(this)
                     .load(imgPath)
-                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
                     .fitCenter()
                     .into(touchImageView);
         }
