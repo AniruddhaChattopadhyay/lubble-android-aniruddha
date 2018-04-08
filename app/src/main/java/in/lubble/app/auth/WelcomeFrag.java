@@ -25,6 +25,7 @@ import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -99,15 +100,15 @@ public class WelcomeFrag extends Fragment {
                 .add(new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER)
                         .setParams(params)
                         .build());
-        selectedProviders
-                .add(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER)
-                        .build());
-
+        if (BuildConfig.DEBUG) {
+            selectedProviders
+                    .add(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER)
+                            .build());
+        }
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                 .setLogo(R.drawable.ic_android_black_24dp)
                 .setAvailableProviders(selectedProviders)
                 .setIsSmartLockEnabled(true, true)
-                .setAllowNewEmailAccounts(true)
                 .build();
         getActivity().startActivityForResult(intent, RC_SIGN_IN);
     }

@@ -11,7 +11,7 @@
         android:layout_height="48dp"
         android:layout_alignParentBottom="true"
         android:layout_margin="8dp"
-        android:text="Let's log in!"
+        android:text="LOG IN / SIGN UP"
         android:theme="@style/PrimaryButton" />
 
     <LinearLayout
