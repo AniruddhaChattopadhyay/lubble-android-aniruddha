@@ -52,6 +52,10 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE + "/groups");
     }
 
+    public static DatabaseReference getLubbleBlocksRef() {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE + "/blocks");
+    }
+
     public static DatabaseReference getCreateOrJoinGroupRef() {
         return FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + DEFAULT_LUBBLE
                 + "/users/" + FirebaseAuth.getInstance().getUid());

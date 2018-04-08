@@ -22,7 +22,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
@@ -31,13 +30,10 @@ import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.domestic_directory.DomesticDirectoryFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
-import in.lubble.app.models.ProfileData;
-import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.utils.StringUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
-import static in.lubble.app.utils.UserUtils.isNewUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -77,18 +73,14 @@ public class MainActivity extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null) {
+        if (currentUser == null || !StringUtils.isValidString(currentUser.getDisplayName())) {
             // user is not signed in, start login flow
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
 
-        if (isNewUser(currentUser)) {
-            uploadNewUserData(currentUser);
-        } else {
-            syncFcmToken();
-        }
+        syncFcmToken();
         logUser(currentUser);
 
         switchFrag(GroupListFragment.newInstance());
@@ -146,24 +138,6 @@ public class MainActivity extends AppCompatActivity {
         Crashlytics.setUserIdentifier(currentUser.getUid());
         Crashlytics.setUserEmail(currentUser.getEmail());
         Crashlytics.setUserName(currentUser.getDisplayName());
-    }
-
-
-    private void uploadNewUserData(FirebaseUser currentUser) {
-        // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        ProfileData profileData = new ProfileData();
-        profileData.setId(currentUser.getUid());
-        final ProfileInfo profileInfo = new ProfileInfo();
-        profileInfo.setName(currentUser.getDisplayName());
-        profileData.setInfo(profileInfo);
-        profileData.setLocality("C - Block");
-        profileData.setBio("Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend");
-        profileData.setToken(FirebaseInstanceId.getInstance().getToken());
-        profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
-
-        getThisUserRef().setValue(profileData);
-        getUserLubbleRef().setValue("true");
     }
 
     private void syncFcmToken() {

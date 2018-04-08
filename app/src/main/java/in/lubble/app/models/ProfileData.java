@@ -18,6 +18,7 @@ public class ProfileData {
     private String referredBy;
     private List<Object> lubbles;
     private List<Object> groups;
+    private boolean isOwner;
 
     public String getId() {
         return id;
@@ -99,4 +100,11 @@ public class ProfileData {
         this.referredBy = referredBy;
     }
 
+    public boolean isOwner() {
+        return isOwner;
+    }
+
+    public void setOwner(boolean owner) {
+        isOwner = owner;
+    }
 }
