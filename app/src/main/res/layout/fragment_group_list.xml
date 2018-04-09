@@ -84,7 +84,8 @@
         android:layout_marginRight="8dp"
         android:layout_toLeftOf="@id/right_container"
         android:layout_toRightOf="@id/iv_group_pic"
-        android:maxLines="1"
+        android:ellipsize="end"
+        android:singleLine="true"
         android:textAppearance="?attr/textAppearanceListItem"
         android:textColor="@color/default_text_color"
         tools:text="@tools:sample/lorem/random" />
