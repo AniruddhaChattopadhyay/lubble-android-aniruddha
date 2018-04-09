@@ -103,13 +103,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             }
         });
 
-        holder.rejectTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                RealtimeDbHelper.getUserGroupsRef().child(groupData.getId()).removeValue();
-            }
-        });
-
         RealtimeDbHelper.getUserGroupsRef().child(groupData.getId()).child("unreadCount").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

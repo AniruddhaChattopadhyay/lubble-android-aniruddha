@@ -6,156 +6,162 @@
     android:background="#18005293"
     android:orientation="vertical">
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/compose_container"
+    <RelativeLayout
+        android:id="@+id/bottom_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
-        app:cardCornerRadius="24dp">
+        android:layout_height="wrap_content">
 
-        <android.support.constraint.ConstraintLayout
+        <android.support.v7.widget.CardView
+            android:id="@+id/compose_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp">
+            android:layout_marginBottom="4dp"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:visibility="gone"
+            app:cardCornerRadius="24dp">
 
-            <TextView
-                android:id="@+id/tv_link_desc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:layout_constraintBottom_toTopOf="@+id/view_separator"
-                app:layout_constraintStart_toStartOf="@+id/et_new_message"
-                tools:text="link desc goes here" />
-
-            <TextView
-                android:id="@+id/tv_link_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/tv_link_desc"
-                app:layout_constraintStart_toStartOf="@+id/tv_link_desc"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Link Title" />
-
-            <View
-                android:id="@+id/view_separator"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="16dp"
-                android:layout_marginRight="16dp"
-                android:background="@color/light_gray"
-                app:layout_constraintBottom_toTopOf="@+id/et_new_message" />
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp">
 
-            <ImageView
-                android:id="@+id/iv_send_btn"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                <TextView
+                    android:id="@+id/tv_link_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    app:layout_constraintBottom_toTopOf="@+id/view_separator"
+                    app:layout_constraintStart_toStartOf="@+id/et_new_message"
+                    tools:text="link desc goes here" />
+
+                <TextView
+                    android:id="@+id/tv_link_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/tv_link_desc"
+                    app:layout_constraintStart_toStartOf="@+id/tv_link_desc"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Link Title" />
+
+                <View
+                    android:id="@+id/view_separator"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginRight="16dp"
+                    android:background="@color/light_gray"
+                    app:layout_constraintBottom_toTopOf="@+id/et_new_message" />
+
+                <ImageView
+                    android:id="@+id/iv_send_btn"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_alignParentRight="true"
+                    android:background="@drawable/blue_circle"
+                    android:padding="12dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:srcCompat="@drawable/ic_send_white_24dp" />
+
+                <ImageView
+                    android:id="@+id/iv_attach"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toLeftOf="@id/iv_send_btn"
+                    android:padding="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/iv_send_btn"
+                    app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
+                    app:srcCompat="@drawable/ic_attach_file_black_24dp" />
+
+                <EditText
+                    android:id="@+id/et_new_message"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toLeftOf="@id/iv_attach"
+                    android:background="@android:color/transparent"
+                    android:gravity="top|left"
+                    android:hint="What's new"
+                    android:maxLines="8"
+                    android:scrollbars="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/iv_attach"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/iv_send_btn" />
+
+                <android.support.constraint.Group
+                    android:id="@+id/group_link_meta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title"
+                    tools:visibility="visible" />
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.v7.widget.CardView>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout_join_container"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@color/colorPrimary"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/tv_decline"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/blue_circle"
-                android:padding="12dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:srcCompat="@drawable/ic_send_white_24dp" />
-
-            <ImageView
-                android:id="@+id/iv_attach"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_toLeftOf="@id/iv_send_btn"
-                android:padding="10dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/iv_send_btn"
-                app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
-                app:srcCompat="@drawable/ic_attach_file_black_24dp" />
+                android:gravity="center"
+                android:paddingRight="8dp"
+                android:text="Reject"
+                android:textColor="@color/white" />
 
-            <EditText
-                android:id="@+id/et_new_message"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginBottom="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_toLeftOf="@id/iv_attach"
-                android:background="@android:color/transparent"
-                android:gravity="top|left"
-                android:hint="What's new"
-                android:maxLines="8"
-                android:scrollbars="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/iv_attach"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/iv_send_btn" />
-
-            <android.support.constraint.Group
-                android:id="@+id/group_link_meta"
+            <Button
+                android:id="@+id/btn_join"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title"
-                tools:visibility="visible" />
+                android:layout_centerVertical="true"
+                android:layout_gravity="right"
+                android:layout_marginRight="8dp"
+                android:layout_toLeftOf="@id/tv_decline"
+                android:text="JOIN"
+                android:theme="@style/AccentButton" />
 
-        </android.support.constraint.ConstraintLayout>
+            <TextView
+                android:id="@+id/tv_join_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:layout_toLeftOf="@id/btn_join"
+                android:textColor="@color/white"
+                tools:text="You were invited by Ashish Gadha" />
 
-    </android.support.v7.widget.CardView>
-
-    <RelativeLayout
-        android:id="@+id/relativeLayout_join_container"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true"
-        android:background="@color/colorPrimary"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/tv_decline"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:gravity="center"
-            android:paddingRight="8dp"
-            android:text="Reject"
-            android:textColor="@color/white" />
-
-        <Button
-            android:id="@+id/btn_join"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_gravity="right"
-            android:layout_marginRight="8dp"
-            android:layout_toLeftOf="@id/tv_decline"
-            android:text="JOIN"
-            android:theme="@style/AccentButton" />
-
-        <TextView
-            android:id="@+id/tv_join_desc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="8dp"
-            android:layout_toLeftOf="@id/btn_join"
-            android:text="You were invited by Ashish Gadha"
-            android:textColor="@color/white" />
-
+        </RelativeLayout>
     </RelativeLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/compose_container"
+        android:layout_above="@id/bottom_container"
         tools:listitem="@layout/item_recvd_chat" />
 
 </RelativeLayout>

@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -47,10 +48,12 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -70,6 +73,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     @Nullable
     private GroupData groupData;
     private RelativeLayout joinContainer;
+    private TextView joinDescTv;
+    private Button joinBtn;
+    private TextView declineTv;
     private CardView composeCardView;
     private Group linkMetaContainer;
     private RecyclerView chatRecyclerView;
@@ -121,6 +127,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         composeCardView = view.findViewById(R.id.compose_container);
         joinContainer = view.findViewById(R.id.relativeLayout_join_container);
+        joinDescTv = view.findViewById(R.id.tv_join_desc);
+        joinBtn = view.findViewById(R.id.btn_join);
+        declineTv = view.findViewById(R.id.tv_decline);
         chatRecyclerView = view.findViewById(R.id.rv_chat);
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.iv_send_btn);
@@ -150,6 +159,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         setupTogglingOfSendBtn();
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
+        joinBtn.setOnClickListener(this);
+        declineTv.setOnClickListener(this);
 
         showPublicGroupWarning();
 
@@ -213,13 +224,45 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showBottomBar(GroupData groupData) {
-        if (groupData.isJoined()) {
-            composeCardView.setVisibility(View.VISIBLE);
-            joinContainer.setVisibility(View.GONE);
-        } else {
-            composeCardView.setVisibility(View.GONE);
-            joinContainer.setVisibility(View.VISIBLE);
-        }
+
+        RealtimeDbHelper.getUserGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                if (userGroupData.isJoined()) {
+                    composeCardView.setVisibility(View.VISIBLE);
+                    joinContainer.setVisibility(View.GONE);
+                } else if (userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
+                    final HashMap<String, Boolean> invitedBy = userGroupData.getInvitedBy();
+                    String inviter = (String) invitedBy.keySet().toArray()[0];
+                    RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                            joinDescTv.setText("Invited by " + profileInfo.getName());
+                            declineTv.setVisibility(View.VISIBLE);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                    composeCardView.setVisibility(View.GONE);
+                    joinContainer.setVisibility(View.VISIBLE);
+                } else {
+                    joinDescTv.setText("Join group to send messages");
+                    declineTv.setVisibility(View.GONE);
+                    composeCardView.setVisibility(View.GONE);
+                    joinContainer.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void showPublicGroupWarning() {
@@ -323,6 +366,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 break;
             case R.id.iv_attach:
                 startPhotoPicker(REQUEST_CODE_IMG);
+                break;
+            case R.id.btn_join:
+                getCreateOrJoinGroupRef().child(groupId).setValue(true, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        composeCardView.setVisibility(View.VISIBLE);
+                        joinContainer.setVisibility(View.GONE);
+                    }
+                });
+                break;
+            case R.id.tv_decline:
+                RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue();
+                getActivity().finish();
                 break;
         }
     }
