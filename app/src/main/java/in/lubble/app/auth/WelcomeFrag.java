@@ -108,6 +108,7 @@ public class WelcomeFrag extends Fragment {
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                 .setLogo(R.drawable.ic_android_black_24dp)
                 .setAvailableProviders(selectedProviders)
+                .setTheme(R.style.AppTheme)
                 .setIsSmartLockEnabled(true, true)
                 .build();
         getActivity().startActivityForResult(intent, RC_SIGN_IN);
