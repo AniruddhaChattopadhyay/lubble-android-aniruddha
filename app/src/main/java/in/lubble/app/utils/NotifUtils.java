@@ -69,7 +69,7 @@ public class NotifUtils {
 
         for (Map.Entry<Integer, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
             final Integer notifId = map.getKey();
-            final Notification notification = new NotificationCompat.Builder(context, Constants.DEFAULT_NOTIF_CHANNEL)
+            final Notification notification = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                     .setStyle(map.getValue())
                     .setSmallIcon(R.drawable.ic_upload)
                     .setShowWhen(true)
@@ -112,7 +112,7 @@ public class NotifUtils {
 
     private static Notification buildSummary(Context context, String groupKey, long timestamp) {
         //todo this must be inbox style becoz on < M only this notif is shown
-        return new NotificationCompat.Builder(context, Constants.DEFAULT_NOTIF_CHANNEL)
+        return new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Nougat Messenger")
                 .setContentText("You have unread messages")

@@ -8,9 +8,9 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import static in.lubble.app.Constants.DEFAULT_NOTIF_CHANNEL;
 import static in.lubble.app.Constants.FINISHED_NOTIFICATION_ID;
 import static in.lubble.app.Constants.PROGRESS_NOTIFICATION_ID;
+import static in.lubble.app.Constants.SENDING_MEDIA_NOTIF_CHANNEL;
 
 /**
  * Base class for Services that keep track of the number of active jobs and self-stop when the
@@ -51,12 +51,13 @@ public abstract class BaseTaskService extends Service {
             percentComplete = (int) (100 * completedUnits / totalUnits);
         }
         //todo change icon
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, DEFAULT_NOTIF_CHANNEL)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, SENDING_MEDIA_NOTIF_CHANNEL)
                 .setSmallIcon(R.drawable.ic_upload)
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(caption)
                 .setProgress(100, percentComplete, false)
                 .setOngoing(true)
+                .setChannelId(SENDING_MEDIA_NOTIF_CHANNEL)
                 .setAutoCancel(false);
 
         NotificationManager manager =
@@ -76,9 +77,10 @@ public abstract class BaseTaskService extends Service {
         //todo change icons
         int icon = success ? R.drawable.ic_upload : R.drawable.ic_upload;
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, DEFAULT_NOTIF_CHANNEL)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, SENDING_MEDIA_NOTIF_CHANNEL)
                 .setSmallIcon(icon)
                 .setContentTitle(getString(R.string.app_name))
+                .setChannelId(SENDING_MEDIA_NOTIF_CHANNEL)
                 .setContentText(caption)
                 .setAutoCancel(true);
 

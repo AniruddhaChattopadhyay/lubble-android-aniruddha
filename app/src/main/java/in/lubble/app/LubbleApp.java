@@ -42,9 +42,30 @@ public class LubbleApp extends Application {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mNotifyMgr.createNotificationChannel(
                     new NotificationChannel(
-                            Constants.DEFAULT_NOTIF_CHANNEL,
-                            "Default",
+                            Constants.CHAT_NOTIF_CHANNEL,
+                            "Chat Notifications",
                             NotificationManager.IMPORTANCE_HIGH));
+
+            final NotificationChannel mediaChannel = new NotificationChannel(
+                    Constants.SENDING_MEDIA_NOTIF_CHANNEL,
+                    "Send Media",
+                    NotificationManager.IMPORTANCE_HIGH);
+            mediaChannel.setSound(null, null);
+            mNotifyMgr.createNotificationChannel(
+                    mediaChannel);
+
+            mNotifyMgr.createNotificationChannel(
+                    new NotificationChannel(
+                            Constants.NOTICE_NOTIF_CHANNEL,
+                            "Notice Notifications",
+                            NotificationManager.IMPORTANCE_HIGH));
+
+            mNotifyMgr.createNotificationChannel(
+                    new NotificationChannel(
+                            Constants.APP_NOTIF_CHANNEL,
+                            "App Notifications",
+                            NotificationManager.IMPORTANCE_HIGH));
+
         }
     }
 }
