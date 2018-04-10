@@ -54,26 +54,6 @@
             tools:text="5"
             tools:visibility="visible" />
 
-        <Button
-            android:id="@+id/btn_join_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:text="Join"
-            tools:visibility="gone" />
-
-        <TextView
-            android:id="@+id/tv_reject_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@id/btn_join_group"
-            android:layout_below="@id/btn_join_group"
-            android:layout_marginTop="8dp"
-            android:gravity="center"
-            android:text="Reject"
-            android:textColor="@color/red"
-            android:visibility="gone" />
-
     </LinearLayout>
 
     <TextView

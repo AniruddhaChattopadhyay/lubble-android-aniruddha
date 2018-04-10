@@ -4,27 +4,23 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdapter.GroupViewHolder> {
@@ -63,21 +59,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             holder.subtitleTv.setText(groupData.getDescription());
         }
 
-        if (groupData.getInvitedBy() != null && groupData.getInvitedBy().size() != 0) {
-            final Set<String> invitedBy = groupData.getInvitedBy();
-            String inviters = "";
-            for (String s : invitedBy) {
-                inviters += s + " ";
-            }
-            holder.subtitleTv.setText("Invited by " + inviters);
-            holder.joinBtn.setText("Accept");
-            holder.rejectTv.setVisibility(View.VISIBLE);
-        } else {
-            holder.joinBtn.setText("Join");
-            holder.rejectTv.setVisibility(View.GONE);
-        }
-        holder.joinBtn.setVisibility(groupData.isJoined() ? View.GONE : View.VISIBLE);
-
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,20 +67,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
                     // fragment is attached to one) that an item has been selected.
                     mListener.onListFragmentInteraction(holder.groupData);
                 }
-            }
-        });
-
-        holder.joinBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                holder.joinBtn.setEnabled(false);
-                getCreateOrJoinGroupRef().child(groupData.getId()).setValue(true, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        groupDataList.remove(holder.getAdapterPosition());
-                        notifyItemRemoved(holder.getAdapterPosition());
-                    }
-                });
             }
         });
 
@@ -180,10 +147,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         final ImageView iconIv;
         final TextView titleTv;
         final TextView subtitleTv;
-        final Button joinBtn;
         final TextView unreadCountTv;
         final TextView timestampTv;
-        final TextView rejectTv;
         GroupData groupData;
 
         public GroupViewHolder(View view) {
@@ -192,8 +157,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             iconIv = view.findViewById(R.id.iv_group_pic);
             titleTv = view.findViewById(R.id.tv_title);
             subtitleTv = view.findViewById(R.id.tv_subtitle);
-            rejectTv = view.findViewById(R.id.tv_reject_group);
-            joinBtn = view.findViewById(R.id.btn_join_group);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
         }
