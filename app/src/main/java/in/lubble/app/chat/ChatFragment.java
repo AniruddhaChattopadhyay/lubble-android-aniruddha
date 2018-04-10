@@ -223,38 +223,40 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void showBottomBar(GroupData groupData) {
+    private void showBottomBar(final GroupData groupData) {
 
         RealtimeDbHelper.getUserGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
-                if (userGroupData.isJoined()) {
+                if (groupData.isJoined()) {
                     composeCardView.setVisibility(View.VISIBLE);
                     joinContainer.setVisibility(View.GONE);
-                } else if (userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
-                    final HashMap<String, Boolean> invitedBy = userGroupData.getInvitedBy();
-                    String inviter = (String) invitedBy.keySet().toArray()[0];
-                    RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                            joinDescTv.setText("Invited by " + profileInfo.getName());
-                            declineTv.setVisibility(View.VISIBLE);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                    composeCardView.setVisibility(View.GONE);
-                    joinContainer.setVisibility(View.VISIBLE);
                 } else {
-                    joinDescTv.setText("Join group to send messages");
-                    declineTv.setVisibility(View.GONE);
-                    composeCardView.setVisibility(View.GONE);
-                    joinContainer.setVisibility(View.VISIBLE);
+                    final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                    if (userGroupData != null && userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
+                        final HashMap<String, Boolean> invitedBy = userGroupData.getInvitedBy();
+                        String inviter = (String) invitedBy.keySet().toArray()[0];
+                        RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                joinDescTv.setText("Invited by " + profileInfo.getName());
+                                declineTv.setVisibility(View.VISIBLE);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+                        composeCardView.setVisibility(View.GONE);
+                        joinContainer.setVisibility(View.VISIBLE);
+                    } else {
+                        joinDescTv.setText("Join group to send messages");
+                        declineTv.setVisibility(View.GONE);
+                        composeCardView.setVisibility(View.GONE);
+                        joinContainer.setVisibility(View.VISIBLE);
+                    }
                 }
             }
 
