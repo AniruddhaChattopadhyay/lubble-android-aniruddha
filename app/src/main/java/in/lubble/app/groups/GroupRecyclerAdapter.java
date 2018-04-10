@@ -94,7 +94,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     }
 
     public void addGroup(GroupData groupData) {
-        if (getChildIndex(groupData) == -1) {
+        if (getChildIndex(groupData.getId()) == -1) {
             groupDataList.add(groupData);
             sortList();
             notifyDataSetChanged();
@@ -104,9 +104,18 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     }
 
     public void updateGroup(GroupData newGroupData) {
-        final int pos = getChildIndex(newGroupData);
+        final int pos = getChildIndex(newGroupData.getId());
         if (pos != -1) {
             groupDataList.set(pos, newGroupData);
+            sortList();
+            notifyDataSetChanged();
+        }
+    }
+
+    public void removeGroup(String groupId) {
+        final int pos = getChildIndex(groupId);
+        if (pos != -1) {
+            groupDataList.remove(pos);
             sortList();
             notifyDataSetChanged();
         }
@@ -123,10 +132,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
         });
     }
 
-    private int getChildIndex(GroupData groupDataToCompare) {
+    private int getChildIndex(String groupIdToFind) {
         for (int i = 0; i < groupDataList.size(); i++) {
             final GroupData groupData = groupDataList.get(i);
-            if (groupData.getId().equalsIgnoreCase(groupDataToCompare.getId())) {
+            if (groupData.getId().equalsIgnoreCase(groupIdToFind)) {
                 return i;
             }
         }
@@ -135,6 +144,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
 
     public void clearGroups() {
         groupDataList.clear();
+        notifyDataSetChanged();
     }
 
     @Override

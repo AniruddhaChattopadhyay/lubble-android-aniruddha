@@ -81,6 +81,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     public void onResume() {
         super.onResume();
 
+        adapter.clearGroups();
         syncUserGroupIds();
     }
 
@@ -109,7 +110,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-
+                if (dataSnapshot.getKey() != null) {
+                    // remove from list
+                    adapter.removeGroup(dataSnapshot.getKey());
+                }
             }
 
             @Override
@@ -191,7 +195,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 adapter.updateGroup(groupData);
-                groupsRecyclerView.scrollToPosition(0);
             }
 
             @Override
