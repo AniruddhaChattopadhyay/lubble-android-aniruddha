@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 
 import com.bumptech.glide.request.target.Target;
@@ -24,11 +25,13 @@ import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
-import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.NotifData;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
+
+import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 
 /**
  * Created by ishaan on 11/3/18.
@@ -73,9 +76,15 @@ public class NotifUtils {
         }
 
         for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
-            final Integer notifId = getNotifId(map.getKey());
+            final String groupId = map.getKey();
+            final Integer notifId = getNotifId(groupId);
 
-            String groupDpUrl = getGroupDp(notifDataList, map.getKey());
+            String groupDpUrl = getGroupDp(notifDataList, groupId);
+
+            Intent intent = new Intent(context, ChatActivity.class);
+            intent.putExtra(EXTRA_GROUP_ID, groupId);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            stackBuilder.addNextIntentWithParentStack(intent);
 
             final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                     .setStyle(map.getValue())
@@ -83,8 +92,7 @@ public class NotifUtils {
                     .setShowWhen(true)
                     .setGroup(GROUP_KEY)
                     .setDefaults(0)
-                    .setContentIntent(PendingIntent.getActivity(context, 0,
-                            new Intent(context, MainActivity.class), 0))
+                    .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
                     .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
 
             try {
