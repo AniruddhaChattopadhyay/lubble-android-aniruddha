@@ -6,9 +6,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -16,8 +20,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.Constants;
+import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
@@ -34,7 +40,7 @@ public class NotifUtils {
     private static final String GROUP_KEY = "1337";
     private static final int SUMMARY_ID = 1325;
 
-    private static HashMap<Integer, NotificationCompat.MessagingStyle> messagingStyleMap;
+    private static HashMap<String, NotificationCompat.MessagingStyle> messagingStyleMap;
 
     public static void updateChatNotifs(Context context, NotifData notifData) {
         messagingStyleMap = new HashMap<>();
@@ -63,13 +69,15 @@ public class NotifUtils {
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         for (NotifData notifData : notifDataList) {
-            int notifId = getNotifId(notifData.getGroupId());
-            buildGroupNotification(context, getMessagingStyle(notifId), notifData, GROUP_KEY);
+            buildGroupNotification(getMessagingStyle(notifData.getGroupId()), notifData);
         }
 
-        for (Map.Entry<Integer, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
-            final Integer notifId = map.getKey();
-            final Notification notification = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
+        for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
+            final Integer notifId = getNotifId(map.getKey());
+
+            String groupDpUrl = getGroupDp(notifDataList, map.getKey());
+
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                     .setStyle(map.getValue())
                     .setSmallIcon(R.drawable.ic_upload)
                     .setShowWhen(true)
@@ -77,12 +85,35 @@ public class NotifUtils {
                     .setDefaults(0)
                     .setContentIntent(PendingIntent.getActivity(context, 0,
                             new Intent(context, MainActivity.class), 0))
-                    .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
-                    .build();
-            notificationManager.notify(notifId, notification);
+                    .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
+
+            try {
+                if (StringUtils.isValidString(groupDpUrl)) {
+                    final Bitmap bitmap = GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
+                    builder.setLargeIcon(bitmap);
+                } else {
+                    builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } finally {
+                notificationManager.notify(notifId, builder.build());
+            }
         }
         Notification summary = buildSummary(context, GROUP_KEY, notifDataList.get(notifDataList.size() - 1).getTimestamp());
         notificationManager.notify(SUMMARY_ID, summary);
+    }
+
+    @Nullable
+    private static String getGroupDp(ArrayList<NotifData> notifDataList, String groupId) {
+        for (NotifData notifData : notifDataList) {
+            if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                return notifData.getGroupDpUrl();
+            }
+        }
+        return null;
     }
 
     private static int getNotifId(String groupId) {
@@ -93,21 +124,21 @@ public class NotifUtils {
         return notifID;
     }
 
-    private static NotificationCompat.MessagingStyle getMessagingStyle(int notifId) {
-        NotificationCompat.MessagingStyle messagingStyle = messagingStyleMap.get(notifId);
+    private static NotificationCompat.MessagingStyle getMessagingStyle(String groupId) {
+        NotificationCompat.MessagingStyle messagingStyle = messagingStyleMap.get(groupId);
         if (messagingStyle == null) {
             final NotificationCompat.MessagingStyle newMsgStyle = new NotificationCompat.MessagingStyle("Me");
-            messagingStyleMap.put(notifId, newMsgStyle);
+            messagingStyleMap.put(groupId, newMsgStyle);
             messagingStyle = newMsgStyle;
         }
         return messagingStyle;
     }
 
-    private static void buildGroupNotification(Context context, NotificationCompat.MessagingStyle messagingStyle, NotifData notifData, String groupKey) {
+    private static void buildGroupNotification(NotificationCompat.MessagingStyle messagingStyle, NotifData notifData) {
         messagingStyle.setConversationTitle(notifData.getGroupName());
 
         messagingStyle.addMessage(notifData.getMessageBody(), notifData.getTimestamp(), notifData.getAuthorName());
-        messagingStyleMap.put(getNotifId(notifData.getGroupId()), messagingStyle);
+        messagingStyleMap.put(notifData.getGroupId(), messagingStyle);
     }
 
     private static Notification buildSummary(Context context, String groupKey, long timestamp) {
