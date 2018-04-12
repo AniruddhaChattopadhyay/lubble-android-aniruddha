@@ -13,8 +13,8 @@
 #}
 
 # Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# debugging stack traces. (for crashlytics)
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
@@ -36,3 +36,5 @@
 -keepclassmembers class in.lubble.app.models.** {
   *;
 }
+# crashlytics
+-keep public class * extends java.lang.Exception
