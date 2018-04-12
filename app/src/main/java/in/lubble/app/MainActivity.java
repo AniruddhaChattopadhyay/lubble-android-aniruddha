@@ -30,10 +30,12 @@ import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.domestic_directory.DomesticDirectoryFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.StringUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth firebaseAuth;
     private DatabaseReference connectedReference;
     private ValueEventListener presenceValueListener;
+    private ImageView profileIcon;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -59,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
-        ImageView profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
+        profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setElevation(10);
         TextView toolbarTitle = findViewById(R.id.lubble_toolbar_title);
@@ -80,6 +83,12 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        setDp();
+        GlideApp.with(this).load(currentUser.getPhotoUrl())
+                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                .circleCrop()
+                .into(profileIcon);
+
         syncFcmToken();
         logUser(currentUser);
 
@@ -88,6 +97,26 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
+    }
+
+    private void setDp() {
+        getUserInfoRef(firebaseAuth.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                GlideApp.with(MainActivity.this)
+                        .load(profileInfo == null ? "" : profileInfo.getThumbnail())
+                        .circleCrop()
+                        .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                        .error(R.drawable.ic_account_circle_black_no_padding)
+                        .into(profileIcon);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

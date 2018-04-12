@@ -9,8 +9,8 @@
 
     <ImageView
         android:id="@+id/iv_toolbar_profile"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
     <android.support.v7.widget.AppCompatTextView
