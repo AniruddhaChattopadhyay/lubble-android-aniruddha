@@ -100,11 +100,11 @@ public class ProfileData {
         this.referredBy = referredBy;
     }
 
-    public boolean isOwner() {
+    public boolean getIsOwner() {
         return isOwner;
     }
 
-    public void setOwner(boolean owner) {
+    public void setIsOwner(boolean owner) {
         isOwner = owner;
     }
 }

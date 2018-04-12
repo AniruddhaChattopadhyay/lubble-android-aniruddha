@@ -212,7 +212,7 @@ public class UserNameFrag extends Fragment {
         profileInfo.setName(fullName);
         profileData.setInfo(profileInfo);
         profileData.setLocality(getSelectedBlock());
-        profileData.setOwner(isOwner);
+        profileData.setIsOwner(isOwner);
         profileData.setBio("");
         profileData.setToken(FirebaseInstanceId.getInstance().getToken());
         profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
