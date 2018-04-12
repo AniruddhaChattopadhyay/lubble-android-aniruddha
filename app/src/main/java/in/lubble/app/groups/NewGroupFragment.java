@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -50,6 +51,7 @@ public class NewGroupFragment extends Fragment {
     private ImageView groupIv;
     private EditText groupName;
     private EditText groupDesc;
+    private RelativeLayout switchContainer;
     private Switch privateGroupSwitch;
     private String currentPhotoPath;
     private DatabaseReference userGroupRef;
@@ -83,8 +85,16 @@ public class NewGroupFragment extends Fragment {
         groupIv = view.findViewById(R.id.iv_new_group);
         groupName = view.findViewById(R.id.et_group_title);
         groupDesc = view.findViewById(R.id.et_group_desc);
+        switchContainer = view.findViewById(R.id.pvt_group_switch_container);
         privateGroupSwitch = view.findViewById(R.id.switch_pvt_group);
         Button createBtn = view.findViewById(R.id.btn_create_group);
+
+        switchContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                privateGroupSwitch.toggle();
+            }
+        });
 
         createBtn.setOnClickListener(new View.OnClickListener() {
             @Override

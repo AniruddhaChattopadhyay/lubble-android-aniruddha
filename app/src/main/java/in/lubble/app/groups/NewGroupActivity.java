@@ -16,7 +16,7 @@ public class NewGroupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_group);
 
-        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

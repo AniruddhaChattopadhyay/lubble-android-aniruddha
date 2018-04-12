@@ -1,51 +1,84 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="8dp"
     android:orientation="vertical">
 
     <ImageView
         android:id="@+id/iv_new_group"
         android:layout_width="72dp"
         android:layout_height="72dp"
+        android:layout_centerHorizontal="true"
         android:layout_gravity="center"
-        android:layout_margin="8dp"
+        android:layout_marginTop="8dp"
         app:srcCompat="@drawable/ic_account_no_padding" />
+
+    <TextView
+        android:id="@+id/tv_hint_choose_photo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/iv_new_group"
+        android:layout_centerHorizontal="true"
+        android:text="Choose photo" />
 
     <EditText
         android:id="@+id/et_group_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/tv_hint_choose_photo"
         android:hint="Group Name" />
 
     <EditText
         android:id="@+id/et_group_desc"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/et_group_title"
+        android:layout_marginTop="9dp"
         android:hint="Group Description" />
 
-    <Switch
-        android:id="@+id/switch_pvt_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
-    <TextView
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/pvt_group_switch_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Private Group"
-        android:textStyle="bold" />
+        android:layout_below="@id/et_group_desc"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Private groups are only visible to its members" />
+        <Switch
+            android:id="@+id/switch_pvt_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="8dp" />
+
+        <TextView
+            android:id="@+id/tv_pvt_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:text="Private Group"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/tv_pvt_title"
+            android:layout_toLeftOf="@id/switch_pvt_group"
+            android:text="Only visible to the group members" />
+
+    </RelativeLayout>
 
     <Button
         android:id="@+id/btn_create_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/pvt_group_switch_container"
         android:text="create new group"
-        android:theme="@style/PrimaryButton" />
+        android:theme="@style/AccentButton" />
 
-</LinearLayout>
+</RelativeLayout>
