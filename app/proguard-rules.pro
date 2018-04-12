@@ -32,8 +32,7 @@
 
 # --For firebase realtime db--
 # This rule will properly ProGuard all the model classes in
-# the package in.lubble.models. Modify to fit the structure
-# of your app.
--keepclassmembers class in.lubble.models.** {
+# the package in.lubble.app.models
+-keepclassmembers class in.lubble.app.models.** {
   *;
 }
