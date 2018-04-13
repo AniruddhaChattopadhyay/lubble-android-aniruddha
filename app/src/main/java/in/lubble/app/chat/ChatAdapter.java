@@ -18,7 +18,6 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
@@ -48,14 +47,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private Activity activity;
     private Context context;
+    private RecyclerView recyclerView;
     private ArrayList<ChatData> chatDataList;
-    private FirebaseDatabase firebaseDatabase;
 
-    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList) {
+    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList, RecyclerView recyclerView) {
         this.activity = activity;
         this.context = context;
-        firebaseDatabase = FirebaseDatabase.getInstance();
         this.chatDataList = chatDataList;
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -178,7 +177,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void addChatData(@NonNull ChatData chatData) {
         final int size = chatDataList.size();
         chatDataList.add(chatData);
-        notifyItemInserted(size + 1);
+        notifyItemInserted(size);
     }
 
     public void updateChatData(@NonNull ChatData chatData) {
@@ -187,6 +186,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             chatDataList.set(pos, chatData);
             notifyItemChanged(pos);
         }
+    }
+
+    public ChatData getChatMsgAt(int pos) {
+        return chatDataList.get(pos);
     }
 
     @Override

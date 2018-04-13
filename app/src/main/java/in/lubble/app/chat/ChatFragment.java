@@ -94,6 +94,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ValueEventListener groupInfoListener;
     private HashMap<String, ProfileInfo> groupMembersMap;
     private String prevUrl = "";
+    private boolean foundFirstUnreadMsg;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -151,7 +152,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         @Override
                         public void run() {
                             final int pos = Math.max(chatRecyclerView.getAdapter().getItemCount() - 1, 0);
-                            chatRecyclerView.smoothScrollToPosition(pos);
+                            //chatRecyclerView.smoothScrollToPosition(pos);
                         }
                     }, 100);
                 }
@@ -174,12 +175,41 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onResume();
 
         syncGroupInfo();
-        chatRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>());
+        final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        chatRecyclerView.setLayoutManager(layoutManager);
+        final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>(), chatRecyclerView);
         chatRecyclerView.setAdapter(chatAdapter);
         msgChildListener = msgListener(chatAdapter);
 
         deleteUnreadMsgsForGroupId(groupId, getContext());
+        foundFirstUnreadMsg = false;
+        chatAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                int msgCount = chatAdapter.getItemCount();
+                int lastVisiblePosition =
+                        layoutManager.findLastCompletelyVisibleItemPosition();
+                // If the recycler view is initially being loaded
+                if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
+                    final int pos = msgCount - 1;
+                    final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
+                    if (chatMsg.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
+                        // unread msg found
+                        chatRecyclerView.scrollToPosition(pos);
+                        foundFirstUnreadMsg = true;
+                    } else {
+                        // all msgs read, scroll to last msg
+                        chatRecyclerView.scrollToPosition(positionStart);
+                    }
+                } else if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                        lastVisiblePosition == (positionStart - 1))) {
+                    // If the user is at the bottom of the list, scroll to the bottom
+                    // of the list to show the newly added message.
+                    chatRecyclerView.scrollToPosition(positionStart);
+                }
+            }
+        });
     }
 
     private void syncGroupInfo() {
@@ -308,7 +338,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     chatAdapter.addChatData(chatData);
                     sendReadReceipt(chatData);
                 }
-                chatRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+                // chatRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
             }
 
             @Override
