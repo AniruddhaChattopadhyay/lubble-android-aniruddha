@@ -95,6 +95,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private HashMap<String, ProfileInfo> groupMembersMap;
     private String prevUrl = "";
     private boolean foundFirstUnreadMsg;
+    private RelativeLayout bottomContainer;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -140,6 +141,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         linkMetaContainer = view.findViewById(R.id.group_link_meta);
         linkTitle = view.findViewById(R.id.tv_link_title);
         linkDesc = view.findViewById(R.id.tv_link_desc);
+        bottomContainer = view.findViewById(R.id.bottom_container);
 
         groupMembersMap = new HashMap<>();
 
@@ -256,7 +258,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showBottomBar(final GroupData groupData) {
-
+        bottomContainer.setVisibility(View.VISIBLE);
         RealtimeDbHelper.getUserGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
