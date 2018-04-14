@@ -1,5 +1,7 @@
 package in.lubble.app.models;
 
+import android.support.annotation.Nullable;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.Exclude;
 
@@ -117,6 +119,7 @@ public class GroupData {
     }
 
     @Exclude
+    @Nullable
     public Set<String> getInvitedBy() {
         return invitedBy;
     }

@@ -1,15 +1,12 @@
 package in.lubble.app.groups;
 
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,7 +16,6 @@ import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
-import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
@@ -77,7 +73,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                     .into(groupViewHolder.iconIv);
 
             groupViewHolder.titleTv.setText(groupData.getTitle());
-            if (isValidString(groupData.getLastMessage())) {
+            if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
+                groupViewHolder.subtitleTv.setText("Invitation Pending");
+            } else if (isValidString(groupData.getLastMessage())) {
                 groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
             } else {
                 groupViewHolder.subtitleTv.setText(groupData.getDescription());
@@ -120,49 +118,33 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-    public void addGroup(GroupData groupData) {
+    public void addGroup(GroupData groupData, UserGroupData userGroupData) {
         if (getChildIndex(groupData.getId()) == -1) {
             groupDataList.add(groupData);
-            addUserGroupDataListener(groupData.getId());
+            userGroupDataMap.put(groupData.getId(), userGroupData);
             sortList();
             notifyDataSetChanged();
         } else {
-            updateGroup(groupData);
+            updateGroup(groupData, userGroupData);
         }
     }
 
     public void addPublicGroup(GroupData groupData) {
         if (getChildIndex(groupData.getId()) == -1) {
             groupDataList.add(groupData);
-            addUserGroupDataListener(groupData.getId());
             notifyDataSetChanged();
         } else {
-            updateGroup(groupData);
+            updateGroup(groupData, null);
         }
     }
 
-    private void addUserGroupDataListener(String groupId) {
-        RealtimeDbHelper.getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
-                if (userGroupData != null) {
-                    userGroupDataMap.put(dataSnapshot.getKey(), userGroupData);
-                    notifyDataSetChanged();
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    public void updateGroup(GroupData newGroupData) {
+    public void updateGroup(GroupData newGroupData, @Nullable UserGroupData userGroupData) {
         final int pos = getChildIndex(newGroupData.getId());
         if (pos != -1) {
             groupDataList.set(pos, newGroupData);
+            if (userGroupData != null) {
+                userGroupDataMap.put(newGroupData.getId(), userGroupData);
+            }
             sortList();
             notifyDataSetChanged();
         }
@@ -182,7 +164,25 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             @Override
             public int compare(GroupData lhs, GroupData rhs) {
                 // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                return (lhs.getLastMessageTimestamp() > rhs.getLastMessageTimestamp()) ? -1 : 1;
+                long lhsTs = 0;
+                long rhsTs = 0;
+                if (!lhs.isJoined()) {
+                    final UserGroupData userGroupData = userGroupDataMap.get(lhs.getId());
+                    if (userGroupData != null) {
+                        lhsTs = userGroupData.getInvitedTimeStamp();
+                    }
+                } else {
+                    lhsTs = lhs.getLastMessageTimestamp();
+                }
+                if (!rhs.isJoined()) {
+                    final UserGroupData userGroupData = userGroupDataMap.get(rhs.getId());
+                    if (userGroupData != null) {
+                        rhsTs = userGroupData.getInvitedTimeStamp();
+                    }
+                } else {
+                    rhsTs = rhs.getLastMessageTimestamp();
+                }
+                return (lhsTs > rhsTs) ? -1 : 1;
             }
         });
     }

@@ -225,9 +225,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
                     resetUnreadCount();
                     showBottomBar(groupData);
-                } else {
-                    Toast.makeText(getContext(), "Something's wrong :(", Toast.LENGTH_SHORT).show();
-                    getFragmentManager().popBackStackImmediate();
                 }
             }
 

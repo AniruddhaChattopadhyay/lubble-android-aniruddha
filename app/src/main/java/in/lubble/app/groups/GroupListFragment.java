@@ -43,6 +43,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private ChildEventListener unjoinedGroupListener;
     private RecyclerView groupsRecyclerView;
     private HashMap<String, Set<String>> groupInvitedByMap;
+    private HashMap<String, UserGroupData> userGroupDataMap;
 
     public GroupListFragment() {
     }
@@ -60,6 +61,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
         groupInvitedByMap = new HashMap<>();
+        userGroupDataMap = new HashMap<>();
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         adapter = new GroupRecyclerAdapter(mListener);
@@ -81,7 +83,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     public void onResume() {
         super.onResume();
 
-        adapter.clearGroups();
+        groupsRecyclerView.setVisibility(View.INVISIBLE);
         syncUserGroupIds();
     }
 
@@ -91,6 +93,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                userGroupDataMap.put(dataSnapshot.getKey(), userGroupData);
                 if (userGroupData.isJoined()) {
                     syncJoinedGroups(dataSnapshot.getKey());
                 } else {
@@ -101,7 +104,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                userGroupDataMap.put(dataSnapshot.getKey(), userGroupData);
+                if (userGroupData.isJoined()) {
+                    syncJoinedGroups(dataSnapshot.getKey());
+                } else {
+                    groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
+                    syncInvitedGroups(dataSnapshot.getKey());
+                }
             }
 
             @Override
@@ -147,7 +157,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                adapter.addGroup(groupData);
+                final UserGroupData userGroupData = userGroupDataMap.get(dataSnapshot.getKey());
+                adapter.addGroup(groupData, userGroupData);
                 groupsRecyclerView.scrollToPosition(0);
             }
 
@@ -169,7 +180,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         if (groupData.getMembers().get(FirebaseAuth.getInstance().getUid()) == null) {
                             groupData.setInvitedBy(groupInvitedByMap.get(groupData.getId()));
                         }
-                        adapter.addGroup(groupData);
+                        final UserGroupData userGroupData = userGroupDataMap.get(dataSnapshot.getKey());
+                        adapter.addGroup(groupData, userGroupData);
                     }
 
                     @Override
@@ -203,6 +215,17 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        getLubbleGroupsRef().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                groupsRecyclerView.setVisibility(View.VISIBLE);
             }
 
             @Override
