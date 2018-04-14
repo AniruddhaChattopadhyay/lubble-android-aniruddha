@@ -131,6 +131,16 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
+    public void addPublicGroup(GroupData groupData) {
+        if (getChildIndex(groupData.getId()) == -1) {
+            groupDataList.add(groupData);
+            addUserGroupDataListener(groupData.getId());
+            notifyDataSetChanged();
+        } else {
+            updateGroup(groupData);
+        }
+    }
+
     private void addUserGroupDataListener(String groupId) {
         RealtimeDbHelper.getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
@@ -172,8 +182,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             @Override
             public int compare(GroupData lhs, GroupData rhs) {
                 // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                return lhs.isJoined() && !rhs.isJoined() ? -1 : (!lhs.isJoined() && rhs.isJoined()) ? 1 :
-                        (lhs.getLastMessageTimestamp() > rhs.getLastMessageTimestamp()) ? -1 : 1;
+                return (lhs.getLastMessageTimestamp() > rhs.getLastMessageTimestamp()) ? -1 : 1;
             }
         });
     }

@@ -38,7 +38,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private OnListFragmentInteractionListener mListener;
     private GroupRecyclerAdapter adapter;
-    private HashMap<Query, ChildEventListener> map = new HashMap<>();
+    private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private ChildEventListener joinedGroupListener;
     private ChildEventListener unjoinedGroupListener;
     private RecyclerView groupsRecyclerView;
@@ -143,72 +143,41 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void syncJoinedGroups(String groupId) {
         // get meta data of the groups joined by the user
-        final ChildEventListener joinedGroupListener = getLubbleGroupsRef().orderByKey().equalTo(groupId).addChildEventListener(new ChildEventListener() {
+        final ValueEventListener joinedGroupListener = getLubbleGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 adapter.addGroup(groupData);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                adapter.updateGroup(groupData);
                 groupsRecyclerView.scrollToPosition(0);
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
         });
-        map.put(getLubbleGroupsRef().orderByKey().equalTo(groupId), joinedGroupListener);
+        map.put(getLubbleGroupsRef().child(groupId), joinedGroupListener);
     }
 
     private void syncInvitedGroups(final String groupId) {
         // get meta data of the groups joined by the user
-        final ChildEventListener joinedGroupListener = getLubbleGroupsRef().orderByKey().equalTo(groupId).addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                if (groupData.getMembers().get(FirebaseAuth.getInstance().getUid()) == null) {
-                    groupData.setInvitedBy(groupInvitedByMap.get(groupData.getId()));
-                }
-                adapter.addGroup(groupData);
-            }
+        final ValueEventListener joinedGroupListener = getLubbleGroupsRef().child(groupId)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                        if (groupData.getMembers().get(FirebaseAuth.getInstance().getUid()) == null) {
+                            groupData.setInvitedBy(groupInvitedByMap.get(groupData.getId()));
+                        }
+                        adapter.addGroup(groupData);
+                    }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                adapter.updateGroup(groupData);
-            }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        map.put(getLubbleGroupsRef().orderByKey().equalTo(groupId), joinedGroupListener);
+                    }
+                });
+        map.put(getLubbleGroupsRef().child(groupId), joinedGroupListener);
     }
 
     private void syncAllPublicGroups(final ArrayList<String> joinedGroupIdList) {
@@ -217,7 +186,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final GroupData unjoinedGroup = dataSnapshot.getValue(GroupData.class);
                 if (!joinedGroupIdList.contains(unjoinedGroup.getId()) && !unjoinedGroup.getIsPrivate()) {
-                    adapter.addGroup(unjoinedGroup);
+                    adapter.addPublicGroup(unjoinedGroup);
                 }
             }
 
