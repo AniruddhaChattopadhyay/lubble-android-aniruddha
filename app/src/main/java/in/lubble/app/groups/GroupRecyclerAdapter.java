@@ -14,22 +14,28 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.UserGroupData;
+import in.lubble.app.utils.DateTimeUtils;
 
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdapter.GroupViewHolder> {
 
     private final List<GroupData> groupDataList;
+    // <GroupID, UserGroupData>
+    private final HashMap<String, UserGroupData> userGroupDataMap;
     private final OnListFragmentInteractionListener mListener;
 
     public GroupRecyclerAdapter(OnListFragmentInteractionListener listener) {
         groupDataList = new ArrayList<>();
+        userGroupDataMap = new HashMap<>();
         mListener = listener;
     }
 
@@ -70,19 +76,48 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             }
         });
 
-        RealtimeDbHelper.getUserGroupsRef().child(groupData.getId()).child("unreadCount").addValueEventListener(new ValueEventListener() {
+        final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
+        if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
+            holder.unreadCountTv.setVisibility(View.VISIBLE);
+            holder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
+        } else {
+            holder.unreadCountTv.setVisibility(View.GONE);
+        }
+        handleTimestamp(holder.timestampTv, groupData, userGroupData);
+    }
+
+    private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
+
+        if (groupData.isJoined() && groupData.getLastMessageTimestamp() > 0) {
+            timestampTv.setVisibility(View.VISIBLE);
+            timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getLastMessageTimestamp()));
+        } else if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
+            timestampTv.setVisibility(View.VISIBLE);
+            timestampTv.setText(DateTimeUtils.getHumanTimestamp(userGroupData.getInvitedTimeStamp()));
+        } else {
+            timestampTv.setVisibility(View.GONE);
+        }
+    }
+
+    public void addGroup(GroupData groupData) {
+        if (getChildIndex(groupData.getId()) == -1) {
+            groupDataList.add(groupData);
+            addUserGroupDataListener(groupData.getId());
+            sortList();
+            notifyDataSetChanged();
+        } else {
+            updateGroup(groupData);
+        }
+    }
+
+    private void addUserGroupDataListener(String groupId) {
+        RealtimeDbHelper.getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    final Integer unreadCount = dataSnapshot.getValue(Integer.class);
-                    if (unreadCount > 0) {
-                        holder.unreadCountTv.setVisibility(View.VISIBLE);
-                        holder.unreadCountTv.setText(String.valueOf(unreadCount));
-                    } else {
-                        holder.unreadCountTv.setVisibility(View.GONE);
-                    }
-                } else {
-                    holder.unreadCountTv.setVisibility(View.GONE);
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                if (userGroupData != null) {
+                    userGroupDataMap.put(dataSnapshot.getKey(), userGroupData);
+                    notifyDataSetChanged();
                 }
             }
 
@@ -91,16 +126,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
 
             }
         });
-    }
-
-    public void addGroup(GroupData groupData) {
-        if (getChildIndex(groupData.getId()) == -1) {
-            groupDataList.add(groupData);
-            sortList();
-            notifyDataSetChanged();
-        } else {
-            updateGroup(groupData);
-        }
     }
 
     public void updateGroup(GroupData newGroupData) {
