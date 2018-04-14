@@ -12,6 +12,7 @@ public class UserGroupData {
     private boolean joined;
     private HashMap<String, Boolean> invitedBy;
     private HashMap<String, Boolean> invitees;
+    private long invitedTimeStamp;
 
     public int getUnreadCount() {
         return unreadCount;
@@ -45,4 +46,11 @@ public class UserGroupData {
         this.invitees = invitees;
     }
 
+    public long getInvitedTimeStamp() {
+        return invitedTimeStamp;
+    }
+
+    public void setInvitedTimeStamp(long invitedTimeStamp) {
+        this.invitedTimeStamp = invitedTimeStamp;
+    }
 }

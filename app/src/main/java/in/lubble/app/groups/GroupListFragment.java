@@ -90,16 +90,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         joinedGroupListener = getUserGroupsRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (dataSnapshot.getValue() == Boolean.TRUE) {
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                if (userGroupData.isJoined()) {
                     syncJoinedGroups(dataSnapshot.getKey());
                 } else {
-                    final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
-                    if (userGroupData.isJoined() || userGroupData.getInvitedBy() == null) {
-                        syncJoinedGroups(dataSnapshot.getKey());
-                    } else {
-                        groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
-                        syncInvitedGroups(dataSnapshot.getKey(), userGroupData.getInvitedBy());
-                    }
+                    groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
+                    syncInvitedGroups(dataSnapshot.getKey());
                 }
             }
 
@@ -179,7 +175,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         map.put(getLubbleGroupsRef().orderByKey().equalTo(groupId), joinedGroupListener);
     }
 
-    private void syncInvitedGroups(final String groupId, HashMap<String, Boolean> invitedBy) {
+    private void syncInvitedGroups(final String groupId) {
         // get meta data of the groups joined by the user
         final ChildEventListener joinedGroupListener = getLubbleGroupsRef().orderByKey().equalTo(groupId).addChildEventListener(new ChildEventListener() {
             @Override
