@@ -59,6 +59,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
@@ -391,7 +392,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
 
                 if (isValidString(linkTitle.getText().toString())) {
-                    chatData.setType("LINK");
+                    chatData.setType(LINK);
                     chatData.setLinkTitle(linkTitle.getText().toString());
                     chatData.setLinkDesc(linkDesc.getText().toString());
                 }

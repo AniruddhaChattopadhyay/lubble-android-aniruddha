@@ -10,6 +10,11 @@ import java.util.HashMap;
 
 public class ChatData {
 
+    /*POST TYPES*/
+    public static final String LINK = "LINK";
+    public static final String HIDDEN = "HIDDEN";
+    public static final String SYSTEM = "SYSTEM";
+
     private String id;
     private String authorUid;
     private String message;

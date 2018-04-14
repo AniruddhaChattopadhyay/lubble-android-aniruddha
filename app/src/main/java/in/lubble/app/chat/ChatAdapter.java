@@ -33,6 +33,8 @@ import in.lubble.app.utils.FullScreenImageActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.models.ChatData.HIDDEN;
+import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 /**
@@ -99,7 +101,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
 
-        if (chatData.getType().equalsIgnoreCase("LINK")) {
+        if (chatData.getType().equalsIgnoreCase(LINK)) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
@@ -123,7 +125,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
 
-        if (chatData.getType().equalsIgnoreCase("LINK")) {
+        if (chatData.getType().equalsIgnoreCase(LINK)) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
@@ -175,16 +177,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     public void addChatData(@NonNull ChatData chatData) {
-        final int size = chatDataList.size();
-        chatDataList.add(chatData);
-        notifyItemInserted(size);
+        if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
+            final int size = chatDataList.size();
+            chatDataList.add(chatData);
+            notifyItemInserted(size);
+        }
     }
 
     public void updateChatData(@NonNull ChatData chatData) {
-        final int pos = chatDataList.indexOf(chatData);
-        if (pos != -1) {
-            chatDataList.set(pos, chatData);
-            notifyItemChanged(pos);
+        if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
+            final int pos = chatDataList.indexOf(chatData);
+            if (pos != -1) {
+                chatDataList.set(pos, chatData);
+                notifyItemChanged(pos);
+            }
         }
     }
 

@@ -26,7 +26,10 @@ import in.lubble.app.utils.DateTimeUtils;
 
 import static in.lubble.app.utils.StringUtils.isValidString;
 
-public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdapter.GroupViewHolder> {
+public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int TYPE_GROUP = 74;
+    private static final int TYPE_SEPARATOR = 58;
 
     private final List<GroupData> groupDataList;
     // <GroupID, UserGroupData>
@@ -40,50 +43,68 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
     }
 
     @Override
-    public GroupViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_group_list, parent, false);
-        return new GroupViewHolder(view);
+    public int getItemViewType(int position) {
+        if (!isValidString(groupDataList.get(position).getTitle())) {
+            return TYPE_SEPARATOR;
+        } else {
+            return TYPE_GROUP;
+        }
     }
 
     @Override
-    public void onBindViewHolder(final GroupViewHolder holder, int position) {
-        final GroupData groupData = groupDataList.get(position);
-        holder.groupData = groupData;
-
-        GlideApp.with(holder.mView)
-                .load(groupData.getThumbnail())
-                .circleCrop()
-                .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                .error(R.drawable.ic_account_circle_black_no_padding)
-                .into(holder.iconIv);
-
-        holder.titleTv.setText(groupData.getTitle());
-        if (isValidString(groupData.getLastMessage())) {
-            holder.subtitleTv.setText(groupData.getLastMessage());
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        if (viewType == TYPE_SEPARATOR) {
+            return new PublicGroupHeaderViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_public_group_header, parent, false));
         } else {
-            holder.subtitleTv.setText(groupData.getDescription());
+            return new GroupViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.fragment_group_list, parent, false));
         }
+    }
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.groupData);
-                }
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof GroupViewHolder) {
+            final GroupViewHolder groupViewHolder = (GroupViewHolder) holder;
+            final GroupData groupData = groupDataList.get(position);
+            groupViewHolder.groupData = groupData;
+
+            GlideApp.with(groupViewHolder.mView)
+                    .load(groupData.getThumbnail())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                    .error(R.drawable.ic_account_circle_black_no_padding)
+                    .into(groupViewHolder.iconIv);
+
+            groupViewHolder.titleTv.setText(groupData.getTitle());
+            if (isValidString(groupData.getLastMessage())) {
+                groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
+            } else {
+                groupViewHolder.subtitleTv.setText(groupData.getDescription());
             }
-        });
 
-        final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
-        if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
-            holder.unreadCountTv.setVisibility(View.VISIBLE);
-            holder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
+            groupViewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mListener) {
+                        // Notify the active callbacks interface (the activity, if the
+                        // fragment is attached to one) that an item has been selected.
+                        mListener.onListFragmentInteraction(groupViewHolder.groupData);
+                    }
+                }
+            });
+
+            final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
+            if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
+                groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
+                groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
+            } else {
+                groupViewHolder.unreadCountTv.setVisibility(View.GONE);
+            }
+            handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
         } else {
-            holder.unreadCountTv.setVisibility(View.GONE);
+            //todo
         }
-        handleTimestamp(holder.timestampTv, groupData, userGroupData);
     }
 
     private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
@@ -194,6 +215,13 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<GroupRecyclerAdap
             subtitleTv = view.findViewById(R.id.tv_subtitle);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
+        }
+    }
+
+    class PublicGroupHeaderViewHolder extends RecyclerView.ViewHolder {
+
+        public PublicGroupHeaderViewHolder(View view) {
+            super(view);
         }
     }
 }
