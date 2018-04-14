@@ -111,7 +111,9 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
         if (checkedMap.get(uid) != null) {
             checkedMap.put(uid, false);
         }
-        final int position = membersList.indexOf(uid);
+        final ProfileInfo profileInfo = new ProfileInfo();
+        profileInfo.setId(uid);
+        final int position = membersList.indexOf(profileInfo);
         if (position != -1) {
             notifyItemChanged(position);
         }

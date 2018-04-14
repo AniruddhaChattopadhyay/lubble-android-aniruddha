@@ -13,6 +13,18 @@ public class ProfileInfo {
     private String name;
     private String thumbnail;
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ProfileInfo) {
+            ProfileInfo objectToCompare = (ProfileInfo) obj;
+            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
+                return true;
+            }
+            return false;
+        }
+        return super.equals(obj);
+    }
+
     @Exclude
     public String getId() {
         return id;
