@@ -10,6 +10,9 @@ public class DomesticHelpData {
     private long phone = 0;
     private String category;
 
+    public DomesticHelpData() {
+    }
+
     public String getName() {
         return name;
     }

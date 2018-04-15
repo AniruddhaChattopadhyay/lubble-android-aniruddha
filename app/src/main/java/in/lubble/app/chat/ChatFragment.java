@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -72,6 +73,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
+    private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
 
     @Nullable
     private GroupData groupData;
@@ -91,21 +93,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
     private String groupId;
+    private boolean isJoining;
     private ChildEventListener msgChildListener;
     private ValueEventListener groupInfoListener;
     private HashMap<String, ProfileInfo> groupMembersMap;
     private String prevUrl = "";
     private boolean foundFirstUnreadMsg;
     private RelativeLayout bottomContainer;
+    private ProgressDialog joiningProgressDialog;
 
     public ChatFragment() {
         // Required empty public constructor
     }
 
-    public static ChatFragment newInstance(String groupId) {
+    public static ChatFragment newInstance(String groupId, boolean isJoining) {
 
         Bundle args = new Bundle();
         args.putString(KEY_GROUP_ID, groupId);
+        args.putBoolean(KEY_IS_JOINING, isJoining);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
@@ -116,6 +121,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         groupId = getArguments().getString(KEY_GROUP_ID);
+        isJoining = getArguments().getBoolean(KEY_IS_JOINING);
 
         groupReference = getLubbleGroupsRef().child(groupId);
         messagesReference = getMessagesRef().child(groupId);
@@ -162,6 +168,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             }
         });
 
+        if (isJoining) {
+            showJoiningDialog();
+        }
+
         setupTogglingOfSendBtn();
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
@@ -171,6 +181,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         showPublicGroupWarning();
 
         return view;
+    }
+
+    private void showJoiningDialog() {
+        joiningProgressDialog = new ProgressDialog(getContext());
+        joiningProgressDialog.setTitle("Joining");
+        joiningProgressDialog.setMessage("BSDK wait kr");
+        joiningProgressDialog.show();
     }
 
     @Override
@@ -256,13 +273,20 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showBottomBar(final GroupData groupData) {
-        bottomContainer.setVisibility(View.VISIBLE);
+        if (!isJoining) {
+            bottomContainer.setVisibility(View.VISIBLE);
+        }
         RealtimeDbHelper.getUserGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (groupData.isJoined()) {
                     composeCardView.setVisibility(View.VISIBLE);
                     joinContainer.setVisibility(View.GONE);
+                    if (joiningProgressDialog != null && isJoining) {
+                        bottomContainer.setVisibility(View.VISIBLE);
+                        joiningProgressDialog.dismiss();
+                        isJoining = false;
+                    }
                 } else {
                     final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                     if (userGroupData != null && userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
@@ -402,13 +426,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 startPhotoPicker(REQUEST_CODE_IMG);
                 break;
             case R.id.btn_join:
-                getCreateOrJoinGroupRef().child(groupId).setValue(true, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        composeCardView.setVisibility(View.VISIBLE);
-                        joinContainer.setVisibility(View.GONE);
-                    }
-                });
+                getCreateOrJoinGroupRef().child(groupId).setValue(true);
+                isJoining = true;
+                showJoiningDialog();
                 break;
             case R.id.tv_decline:
                 RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {

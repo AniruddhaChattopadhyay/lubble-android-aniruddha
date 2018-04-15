@@ -29,6 +29,7 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 
@@ -83,6 +84,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     public void onResume() {
         super.onResume();
 
+        adapter.clearGroups();
         groupsRecyclerView.setVisibility(View.INVISIBLE);
         syncUserGroupIds();
     }
@@ -258,9 +260,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     }
 
     @Override
-    public void onListFragmentInteraction(GroupData groupData) {
+    public void onListFragmentInteraction(String groupId, boolean isJoining) {
         final Intent intent = new Intent(getContext(), ChatActivity.class);
-        intent.putExtra(EXTRA_GROUP_ID, groupData.getId());
+        intent.putExtra(EXTRA_GROUP_ID, groupId);
+        intent.putExtra(EXTRA_IS_JOINING, isJoining);
         startActivity(intent);
     }
 

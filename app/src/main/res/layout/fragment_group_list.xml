@@ -54,6 +54,16 @@
             tools:text="5"
             tools:visibility="visible" />
 
+        <Button
+            android:id="@+id/btn_join_group"
+            android:layout_width="64dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:background="@drawable/pill_button"
+            android:text="JOIN"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+
     </LinearLayout>
 
     <TextView

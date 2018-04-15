@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,6 +21,7 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -87,7 +89,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                     if (null != mListener) {
                         // Notify the active callbacks interface (the activity, if the
                         // fragment is attached to one) that an item has been selected.
-                        mListener.onListFragmentInteraction(groupViewHolder.groupData);
+                        mListener.onListFragmentInteraction(groupViewHolder.groupData.getId(), false);
                     }
                 }
             });
@@ -100,6 +102,13 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 groupViewHolder.unreadCountTv.setVisibility(View.GONE);
             }
             handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
+
+            if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
+                groupViewHolder.joinBtn.setVisibility(View.VISIBLE);
+            } else {
+                groupViewHolder.joinBtn.setVisibility(View.GONE);
+            }
+
         } else {
             //todo
         }
@@ -207,13 +216,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         return groupDataList.size();
     }
 
-    class GroupViewHolder extends RecyclerView.ViewHolder {
+    class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View mView;
         final ImageView iconIv;
         final TextView titleTv;
         final TextView subtitleTv;
         final TextView unreadCountTv;
         final TextView timestampTv;
+        final Button joinBtn;
         GroupData groupData;
 
         public GroupViewHolder(View view) {
@@ -224,6 +234,18 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             subtitleTv = view.findViewById(R.id.tv_subtitle);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
+            joinBtn = view.findViewById(R.id.btn_join_group);
+            joinBtn.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.btn_join_group:
+                    getCreateOrJoinGroupRef().child(groupData.getId()).setValue(true);
+                    mListener.onListFragmentInteraction(groupData.getId(), true);
+                    break;
+            }
         }
     }
 
