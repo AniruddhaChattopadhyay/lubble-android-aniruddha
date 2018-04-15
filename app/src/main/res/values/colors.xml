@@ -30,7 +30,7 @@
     <color name="mute_purple">#5e3c58</color>
     <color name="mute_orange">#a74b22</color>
     <color name="mute_yellow">#c3a770</color>
-    <color name="mute_yellow_light">#ACB9C5</color>
+    <color name="mute_yellow_light">#8fa1b3</color>
     <color name="mute_green">#D9F8C8</color>
     <color name="mute_green_dark">#CEECBE</color>
 </resources>
