@@ -115,10 +115,13 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
-
-        if (groupData.isJoined() && groupData.getLastMessageTimestamp() > 0) {
+        if (groupData.isJoined()) {
             timestampTv.setVisibility(View.VISIBLE);
-            timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getLastMessageTimestamp()));
+            if (groupData.getJoinedTimestamp() > groupData.getLastMessageTimestamp()) {
+                timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getJoinedTimestamp()));
+            } else {
+                timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getLastMessageTimestamp()));
+            }
         } else if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
             timestampTv.setVisibility(View.VISIBLE);
             timestampTv.setText(DateTimeUtils.getHumanTimestamp(userGroupData.getInvitedTimeStamp()));
@@ -181,7 +184,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                         lhsTs = userGroupData.getInvitedTimeStamp();
                     }
                 } else {
-                    lhsTs = lhs.getLastMessageTimestamp();
+                    if (lhs.getJoinedTimestamp() > lhs.getLastMessageTimestamp()) {
+                        lhsTs = lhs.getJoinedTimestamp();
+                    } else {
+                        lhsTs = lhs.getLastMessageTimestamp();
+                    }
                 }
                 if (!rhs.isJoined()) {
                     final UserGroupData userGroupData = userGroupDataMap.get(rhs.getId());
@@ -189,7 +196,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                         rhsTs = userGroupData.getInvitedTimeStamp();
                     }
                 } else {
-                    rhsTs = rhs.getLastMessageTimestamp();
+                    if (rhs.getJoinedTimestamp() > rhs.getLastMessageTimestamp()) {
+                        rhsTs = rhs.getJoinedTimestamp();
+                    } else {
+                        rhsTs = rhs.getLastMessageTimestamp();
+                    }
                 }
                 return (lhsTs > rhsTs) ? -1 : 1;
             }

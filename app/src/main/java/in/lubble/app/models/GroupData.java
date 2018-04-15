@@ -137,4 +137,13 @@ public class GroupData {
         this.createdBy = createdBy;
     }
 
+    @Exclude
+    public long getJoinedTimestamp() {
+        if (isJoined()) {
+            return (Long) ((HashMap) getMembers().get(FirebaseAuth.getInstance().getUid())).get("joinedTimestamp");
+        } else {
+            return 0;
+        }
+    }
+
 }
