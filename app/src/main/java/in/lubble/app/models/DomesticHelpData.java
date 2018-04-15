@@ -1,4 +1,4 @@
-package in.lubble.app.domestic_directory;
+package in.lubble.app.models;
 
 /**
  * Created by ishaan on 25/3/18.

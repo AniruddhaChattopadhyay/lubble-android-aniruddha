@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.R;
+import in.lubble.app.models.DomesticHelpData;
 
 public class DomesticAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
