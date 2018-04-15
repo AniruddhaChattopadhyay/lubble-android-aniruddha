@@ -107,8 +107,6 @@ public class GroupInfoFragment extends Fragment {
             }
         });
 
-        toggleLeaveGroupVisibility();
-
         leaveGroupTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -146,25 +144,6 @@ public class GroupInfoFragment extends Fragment {
             muteSwitch.setChecked(true);
             Toast.makeText(getContext(), "MUTED", Toast.LENGTH_SHORT).show();
         }
-    }
-
-    private void toggleLeaveGroupVisibility() {
-        RealtimeDbHelper.getLubbleDefaultGroupRef().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final String defaultGroup = dataSnapshot.getValue(String.class);
-                if (groupId.equalsIgnoreCase(defaultGroup)) {
-                    leaveGroupTV.setVisibility(View.GONE);
-                } else {
-                    leaveGroupTV.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void showConfirmationDialog() {
@@ -253,6 +232,9 @@ public class GroupInfoFragment extends Fragment {
             adapter.clear();
             adapter.addAllMembers(memberEntryList);
 
+            toggleLeaveGroupVisibility(groupData);
+            toggleMemberElements(groupData.isJoined());
+
 
             groupIv.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -272,6 +254,34 @@ public class GroupInfoFragment extends Fragment {
 
         }
     };
+
+    private void toggleMemberElements(boolean isJoined) {
+        muteNotifsContainer.setVisibility(isJoined ? View.VISIBLE : View.GONE);
+        inviteMembersContainer.setVisibility(isJoined ? View.VISIBLE : View.GONE);
+    }
+
+    private void toggleLeaveGroupVisibility(final GroupData groupData) {
+        RealtimeDbHelper.getLubbleDefaultGroupRef().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final String defaultGroup = dataSnapshot.getValue(String.class);
+                if (groupId.equalsIgnoreCase(defaultGroup)) {
+                    leaveGroupTV.setVisibility(View.GONE);
+                } else {
+                    if (groupData != null && groupData.isJoined()) {
+                        leaveGroupTV.setVisibility(View.VISIBLE);
+                    } else {
+                        leaveGroupTV.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     @Override
     public void onPause() {

@@ -543,7 +543,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     public void openGroupInfo() {
-        if (groupData.isJoined()) {
+        if (groupData.isJoined() || !groupData.getIsPrivate()) {
             GroupInfoActivity.newInstance(getContext(), groupId);
         }
     }
