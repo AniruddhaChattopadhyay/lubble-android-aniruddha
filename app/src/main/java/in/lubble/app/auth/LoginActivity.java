@@ -12,6 +12,7 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 
@@ -35,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         replaceFrag(getSupportFragmentManager(), WelcomeFrag.newInstance(getIntent()), R.id.frame_fragContainer);
+        LubbleSharedPrefs.getInstance().setIsLogoutPending(false);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

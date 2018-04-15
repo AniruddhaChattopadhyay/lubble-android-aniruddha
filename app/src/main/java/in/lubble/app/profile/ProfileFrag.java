@@ -14,11 +14,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -31,9 +28,9 @@ import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
-import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
+import in.lubble.app.utils.UserUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 
@@ -115,17 +112,7 @@ public class ProfileFrag extends Fragment {
         logoutTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AuthUI.getInstance()
-                        .signOut(getContext())
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            public void onComplete(@NonNull Task<Void> task) {
-                                final Intent intent = new Intent(getContext(), LoginActivity.class);
-                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                                startActivity(intent);
-                                getActivity().finishAffinity();
-                            }
-                        });
-
+                UserUtils.logout(getActivity());
             }
         });
 

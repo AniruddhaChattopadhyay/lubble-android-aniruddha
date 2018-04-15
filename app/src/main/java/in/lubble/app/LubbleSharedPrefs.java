@@ -16,6 +16,7 @@ public class LubbleSharedPrefs {
     private final String REFERRER_UID = "referrer_uid";
     private final String CURRENT_ACTIVE_GROUP = "CURRENT_ACTIVE_GROUP";
     private final String IS_PUBLIC_GROUP_INFO_SHOWN = "IS_PUBLIC_GROUP_INFO_SHOWN";
+    private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -73,6 +74,15 @@ public class LubbleSharedPrefs {
     public boolean setIsPublicGroupInfoShown(boolean isShown) {
 
         return preferences.edit().putBoolean(IS_PUBLIC_GROUP_INFO_SHOWN, isShown).commit();
+    }
+
+    public boolean getIsLogoutPending() {
+        return preferences.getBoolean(IS_LOGOUT_PENDING, false);
+    }
+
+    public boolean setIsLogoutPending(boolean isLogoutPending) {
+
+        return preferences.edit().putBoolean(IS_LOGOUT_PENDING, isLogoutPending).commit();
     }
 
 }

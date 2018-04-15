@@ -5,12 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.WindowManager;
 
 import in.lubble.app.R;
-import in.lubble.app.utils.UserUtils;
 
 
 public class ProfileActivity extends AppCompatActivity {
@@ -36,30 +33,6 @@ public class ProfileActivity extends AppCompatActivity {
                 .replace(R.id.frameLayout_fragContainer,
                         ProfileFrag.newInstance(getIntent().getStringExtra(KEY_USER_ID)))
                 .commit();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.profile_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_sign_out: {
-                UserUtils.logout(ProfileActivity.this);
-                break;
-            }
-            case R.id.action_clear_db: {
-                //deleteDatabase(SqliteHelper.DATABASE_NAME);
-                break;
-            }
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-        }
-        return false;
     }
 
 }

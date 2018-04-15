@@ -1,5 +1,7 @@
 package in.lubble.app.firebase;
 
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -16,6 +18,7 @@ import java.util.Map;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.notifications.NotifData;
 import in.lubble.app.utils.NotifUtils;
+import in.lubble.app.utils.StringUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
@@ -26,6 +29,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 public class FcmService extends FirebaseMessagingService {
 
     private static final String TAG = "FcmService";
+    public static final String LOGOUT_ACTION = "LOGOUT_ACTION";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -34,15 +38,26 @@ public class FcmService extends FirebaseMessagingService {
         if (dataMap.size() > 0) {
             Log.d(TAG, "Message data payload: " + dataMap);
 
-            Gson gson = new Gson();
-            JsonElement jsonElement = gson.toJsonTree(dataMap);
-            NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
+            final String type = dataMap.get("type");
+            if (StringUtils.isValidString(type) && type.equalsIgnoreCase("deleteUser")
+                    && dataMap.get("uid").equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
 
-            if (!notifData.getGroupId().equalsIgnoreCase(LubbleSharedPrefs.getInstance().getCurrentActiveGroupId())) {
-                NotifUtils.updateChatNotifs(this, notifData);
-                updateUnreadCounter(notifData);
-                pullNewMsgs(notifData);
-                //sendDeliveryReceipt(notifData);
+                LubbleSharedPrefs.getInstance().setIsLogoutPending(true);
+                Intent intent = new Intent(LOGOUT_ACTION);
+                intent.putExtra("UID", dataMap.get("uid"));
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            } else {
+                // create chat notif
+                Gson gson = new Gson();
+                JsonElement jsonElement = gson.toJsonTree(dataMap);
+                NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
+
+                if (!notifData.getGroupId().equalsIgnoreCase(LubbleSharedPrefs.getInstance().getCurrentActiveGroupId())) {
+                    NotifUtils.updateChatNotifs(this, notifData);
+                    updateUnreadCounter(notifData);
+                    pullNewMsgs(notifData);
+                    //sendDeliveryReceipt(notifData);
+                }
             }
         }
     }

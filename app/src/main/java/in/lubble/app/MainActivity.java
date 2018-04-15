@@ -1,12 +1,15 @@
 package in.lubble.app;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -33,7 +36,9 @@ import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.UserUtils;
 
+import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
@@ -83,6 +88,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        if (LubbleSharedPrefs.getInstance().getIsLogoutPending()) {
+            UserUtils.logout(this);
+            return;
+        }
+
         setDp();
         GlideApp.with(this).load(currentUser.getPhotoUrl())
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -97,7 +107,22 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
+
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
     }
+
+    public BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                String uid = intent.getStringExtra("UID");
+                if (uid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                    UserUtils.logout(MainActivity.this);
+                }
+            }
+        }
+    };
 
     private void setDp() {
         getUserInfoRef(firebaseAuth.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -216,4 +241,9 @@ public class MainActivity extends AppCompatActivity {
         ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
+    }
 }
