@@ -16,23 +16,40 @@
         android:transitionName="group_info_dp"
         app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
-    <TextView
-        android:id="@+id/tv_group_title"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-        tools:text="@tools:sample/lorem" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/tv_group_desc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        tools:text="@tools:sample/lorem" />
+        <TextView
+            android:id="@+id/tv_group_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/tv_group_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_group_title"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            tools:text="@tools:sample/lorem" />
+
+        <TextView
+            android:id="@+id/tv_leave_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            android:text="Leave Group"
+            android:textColor="@color/dk_red" />
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout_invite_container"

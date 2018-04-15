@@ -197,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
     private void syncFcmToken() {
         getThisUserRef().child("token")
                 .setValue(FirebaseInstanceId.getInstance().getToken());
-        //switchFrag(HomeFragment.newInstance());
     }
 
     @Override

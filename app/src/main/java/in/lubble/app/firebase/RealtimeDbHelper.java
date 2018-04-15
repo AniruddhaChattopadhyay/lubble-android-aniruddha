@@ -36,6 +36,14 @@ public class RealtimeDbHelper {
                 + "/lubbles/" + DEFAULT_LUBBLE);
     }
 
+    public static String getUserGroupPath() {
+        return "users/" + FirebaseAuth.getInstance().getUid() + "/lubbles/" + DEFAULT_LUBBLE + "/groups";
+    }
+
+    public static String getLubbleGroupPath() {
+        return "lubbles/" + DEFAULT_LUBBLE + "/groups";
+    }
+
     public static DatabaseReference getUserGroupsRef() {
         return getUserLubbleRef().child("groups");
     }
