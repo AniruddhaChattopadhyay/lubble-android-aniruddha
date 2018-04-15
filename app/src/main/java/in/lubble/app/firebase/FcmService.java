@@ -16,6 +16,7 @@ import com.google.gson.JsonElement;
 import java.util.Map;
 
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.notifications.NotifData;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
@@ -53,7 +54,10 @@ public class FcmService extends FirebaseMessagingService {
                 NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
 
                 if (!notifData.getGroupId().equalsIgnoreCase(LubbleSharedPrefs.getInstance().getCurrentActiveGroupId())) {
-                    NotifUtils.updateChatNotifs(this, notifData);
+                    // only show notif if that group is not in foreground & the group's notifs are not muted
+                    if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
+                        NotifUtils.updateChatNotifs(this, notifData);
+                    }
                     updateUnreadCounter(notifData);
                     pullNewMsgs(notifData);
                     //sendDeliveryReceipt(notifData);

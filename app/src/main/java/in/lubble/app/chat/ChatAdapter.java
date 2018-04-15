@@ -64,7 +64,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         final ChatData chatData = chatDataList.get(position);
-        if (chatData.getType().equalsIgnoreCase(SYSTEM)) {
+        if (isValidString(chatData.getType()) && chatData.getType().equalsIgnoreCase(SYSTEM)) {
             return TYPE_SYSTEM;
         } else if (chatData.getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
             return TYPE_SENT;

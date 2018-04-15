@@ -12,6 +12,7 @@ import com.instabug.library.Instabug;
 import com.instabug.library.invocation.InstabugInvocationEvent;
 
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
+import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import io.fabric.sdk.android.Fabric;
 
@@ -32,6 +33,7 @@ public class LubbleApp extends Application {
         LubbleSharedPrefs.initializeInstance(getApplicationContext());
         GroupMappingSharedPrefs.initializeInstance(getApplicationContext());
         UnreadChatsSharedPrefs.initializeInstance(getApplicationContext());
+        MutedChatsSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
 

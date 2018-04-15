@@ -10,12 +10,15 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -38,6 +41,7 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.FullScreenImageActivity;
 
@@ -54,6 +58,8 @@ public class GroupInfoFragment extends Fragment {
     private LinearLayout inviteMembersContainer;
     private RecyclerView recyclerView;
     private TextView leaveGroupTV;
+    private RelativeLayout muteNotifsContainer;
+    private SwitchCompat muteSwitch;
     private GroupMembersAdapter adapter;
 
     public GroupInfoFragment() {
@@ -88,6 +94,8 @@ public class GroupInfoFragment extends Fragment {
         inviteMembersContainer = view.findViewById(R.id.linearLayout_invite_container);
         recyclerView = view.findViewById(R.id.rv_group_members);
         leaveGroupTV = view.findViewById(R.id.tv_leave_group);
+        muteNotifsContainer = view.findViewById(R.id.mute_container);
+        muteSwitch = view.findViewById(R.id.switch_mute);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new GroupMembersAdapter();
         recyclerView.setAdapter(adapter);
@@ -108,7 +116,36 @@ public class GroupInfoFragment extends Fragment {
             }
         });
 
+        boolean isMuted = MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(groupId, false);
+        muteSwitch.setChecked(isMuted);
+
+        muteSwitch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleMuteNotifs();
+            }
+        });
+        muteNotifsContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleMuteNotifs();
+            }
+        });
+
         return view;
+    }
+
+    private void toggleMuteNotifs() {
+        boolean isMuted = MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(groupId, false);
+        if (isMuted) {
+            MutedChatsSharedPrefs.getInstance().getPreferences().edit().remove(groupId).apply();
+            muteSwitch.setChecked(false);
+            Toast.makeText(getContext(), "UN-MUTED", Toast.LENGTH_SHORT).show();
+        } else {
+            MutedChatsSharedPrefs.getInstance().getPreferences().edit().putBoolean(groupId, true).apply();
+            muteSwitch.setChecked(true);
+            Toast.makeText(getContext(), "MUTED", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void toggleLeaveGroupVisibility() {
