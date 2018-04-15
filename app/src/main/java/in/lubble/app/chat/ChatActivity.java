@@ -11,7 +11,6 @@ import android.widget.TextView;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
-import in.lubble.app.groups.group_info.GroupInfoActivity;
 import in.lubble.app.utils.StringUtils;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
@@ -19,6 +18,7 @@ import static in.lubble.app.utils.FragUtils.replaceFrag;
 public class ChatActivity extends AppCompatActivity {
 
     public static final String EXTRA_GROUP_ID = "chat_activ_group_id";
+    // if we need to show joining progress dialog
     public static final String EXTRA_IS_JOINING = "chat_activ_is_joining";
     private ImageView toolbarIcon;
     private TextView toolbarTv;
@@ -43,11 +43,12 @@ public class ChatActivity extends AppCompatActivity {
             throw new RuntimeException("No Group ID passed");
         }
 
-        replaceFrag(getSupportFragmentManager(), ChatFragment.newInstance(groupId, isJoining), R.id.frame_fragContainer);
+        final ChatFragment targetFrag = ChatFragment.newInstance(groupId, isJoining);
+        replaceFrag(getSupportFragmentManager(), targetFrag, R.id.frame_fragContainer);
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GroupInfoActivity.newInstance(ChatActivity.this, groupId);
+                targetFrag.openGroupInfo();
             }
         });
     }
