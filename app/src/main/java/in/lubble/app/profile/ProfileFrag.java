@@ -14,8 +14,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -28,6 +31,7 @@ import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
 
@@ -46,6 +50,7 @@ public class ProfileFrag extends Fragment {
     private TextView userBio;
     private TextView editProfileTV;
     private Button inviteBtn;
+    private TextView logoutTv;
     private CardView referralCard;
     private DatabaseReference userRef;
     private ValueEventListener valueEventListener;
@@ -84,6 +89,7 @@ public class ProfileFrag extends Fragment {
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
         referralCard = rootView.findViewById(R.id.card_referral);
         inviteBtn = rootView.findViewById(R.id.btn_invite);
+        logoutTv = rootView.findViewById(R.id.tv_logout);
 
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -103,6 +109,23 @@ public class ProfileFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 onInviteClicked();
+            }
+        });
+
+        logoutTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AuthUI.getInstance()
+                        .signOut(getContext())
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            public void onComplete(@NonNull Task<Void> task) {
+                                final Intent intent = new Intent(getContext(), LoginActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                startActivity(intent);
+                                getActivity().finishAffinity();
+                            }
+                        });
+
             }
         });
 

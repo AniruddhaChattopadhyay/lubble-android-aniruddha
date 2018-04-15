@@ -113,5 +113,17 @@
 
         </android.support.v7.widget.CardView>
 
+        <TextView
+            android:id="@+id/tv_logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/card_referral"
+            android:background="@color/white"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:padding="8dp"
+            android:text="LOG OUT"
+            android:textColor="@color/dk_red" />
+
     </RelativeLayout>
 </android.support.v4.widget.NestedScrollView>
