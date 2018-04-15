@@ -162,7 +162,7 @@ public class NewGroupFragment extends Fragment {
     }
 
     private void confirmGroupDone(final String pushId) {
-        query = userGroupRef.orderByKey().equalTo(pushId);
+        query = userGroupRef.child(pushId);
         childEventListener = query.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
