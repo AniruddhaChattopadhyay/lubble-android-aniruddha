@@ -47,7 +47,9 @@
             android:layout_centerVertical="true"
             android:padding="8dp"
             android:text="Leave Group"
-            android:textColor="@color/dk_red" />
+            android:textColor="@color/dk_red"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </RelativeLayout>
 

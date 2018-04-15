@@ -99,6 +99,8 @@ public class GroupInfoFragment extends Fragment {
             }
         });
 
+        toggleLeaveGroupVisibility();
+
         leaveGroupTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,6 +109,25 @@ public class GroupInfoFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void toggleLeaveGroupVisibility() {
+        RealtimeDbHelper.getLubbleDefaultGroupRef().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final String defaultGroup = dataSnapshot.getValue(String.class);
+                if (groupId.equalsIgnoreCase(defaultGroup)) {
+                    leaveGroupTV.setVisibility(View.GONE);
+                } else {
+                    leaveGroupTV.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void showConfirmationDialog() {
