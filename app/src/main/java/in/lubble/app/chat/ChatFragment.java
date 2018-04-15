@@ -152,22 +152,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         groupMembersMap = new HashMap<>();
 
-        chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                if (bottom < oldBottom) {
-                    chatRecyclerView.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            final int pos = Math.max(chatRecyclerView.getAdapter().getItemCount() - 1, 0);
-                            //chatRecyclerView.smoothScrollToPosition(pos);
-                        }
-                    }, 100);
-                }
-            }
-        });
-
         if (isJoining) {
             showJoiningDialog();
         }
@@ -196,6 +180,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setStackFromEnd(true);
         chatRecyclerView.setLayoutManager(layoutManager);
         final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>(), chatRecyclerView);
         chatRecyclerView.setAdapter(chatAdapter);
@@ -226,6 +211,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         lastVisiblePosition == (positionStart - 1))) {
                     // If the user is at the bottom of the list, scroll to the bottom
                     // of the list to show the newly added message.
+                    chatRecyclerView.scrollToPosition(positionStart);
+                } else if (chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                     chatRecyclerView.scrollToPosition(positionStart);
                 }
             }
