@@ -179,11 +179,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                        if (groupData.getMembers().get(FirebaseAuth.getInstance().getUid()) == null) {
-                            groupData.setInvitedBy(groupInvitedByMap.get(groupData.getId()));
+                        if (groupData != null) {
+                            if (groupData.getMembers().get(FirebaseAuth.getInstance().getUid()) == null) {
+                                groupData.setInvitedBy(groupInvitedByMap.get(groupData.getId()));
+                            }
+                            final UserGroupData userGroupData = userGroupDataMap.get(dataSnapshot.getKey());
+                            adapter.addGroup(groupData, userGroupData);
                         }
-                        final UserGroupData userGroupData = userGroupDataMap.get(dataSnapshot.getKey());
-                        adapter.addGroup(groupData, userGroupData);
                     }
 
                     @Override
