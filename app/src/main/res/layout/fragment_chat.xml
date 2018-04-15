@@ -164,6 +164,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_container"
-        tools:listitem="@layout/item_recvd_chat" />
+        android:visibility="invisible"
+        tools:listitem="@layout/item_recvd_chat"
+        tools:visibility="visible" />
+
+    <include
+        android:id="@+id/view_pvt_sys_msg"
+        layout="@layout/item_system"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottom_container"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 </RelativeLayout>

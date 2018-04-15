@@ -101,6 +101,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private String prevUrl = "";
     private boolean foundFirstUnreadMsg;
     private RelativeLayout bottomContainer;
+    private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
 
     public ChatFragment() {
@@ -150,6 +151,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         linkTitle = view.findViewById(R.id.tv_link_title);
         linkDesc = view.findViewById(R.id.tv_link_desc);
         bottomContainer = view.findViewById(R.id.bottom_container);
+        pvtSystemMsg = view.findViewById(R.id.view_pvt_sys_msg);
 
         groupMembersMap = new HashMap<>();
 
@@ -227,6 +229,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 groupData = dataSnapshot.getValue(GroupData.class);
                 // fetchMembersProfile(groupData.getMembers()); to be used for tagging
                 if (groupData != null) {
+                    if (!groupData.isJoined() && groupData.getIsPrivate()) {
+                        chatRecyclerView.setVisibility(View.GONE);
+                        pvtSystemMsg.setVisibility(View.VISIBLE);
+                        ((TextView) pvtSystemMsg.findViewById(R.id.tv_system_msg)).setText("Messages are hidden in private groups until you join");
+                    } else {
+                        chatRecyclerView.setVisibility(View.VISIBLE);
+                        pvtSystemMsg.setVisibility(View.GONE);
+                    }
                     ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
                     resetUnreadCount();
                     showBottomBar(groupData);
