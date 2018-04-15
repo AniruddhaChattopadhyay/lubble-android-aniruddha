@@ -185,8 +185,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     private void showJoiningDialog() {
         joiningProgressDialog = new ProgressDialog(getContext());
-        joiningProgressDialog.setTitle("Joining");
-        joiningProgressDialog.setMessage("BSDK wait kr");
+        joiningProgressDialog.setTitle("Joining group");
+        joiningProgressDialog.setMessage("Please Wait...");
         joiningProgressDialog.show();
     }
 

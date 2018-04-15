@@ -35,6 +35,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 /**
@@ -46,6 +47,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private static final String TAG = "ChatAdapter";
     private static final int TYPE_RECEIVED = 0;
     private static final int TYPE_SENT = 1;
+    private static final int TYPE_SYSTEM = 2;
 
     private Activity activity;
     private Context context;
@@ -62,10 +64,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Override
     public int getItemViewType(int position) {
         final ChatData chatData = chatDataList.get(position);
-        if (chatData.getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+        if (chatData.getType().equalsIgnoreCase(SYSTEM)) {
+            return TYPE_SYSTEM;
+        } else if (chatData.getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
             return TYPE_SENT;
+        } else {
+            return TYPE_RECEIVED;
         }
-        return TYPE_RECEIVED;
     }
 
     @Override
@@ -75,6 +80,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 return new RecvdChatViewHolder(LayoutInflater.from(context).inflate(R.layout.item_recvd_chat, parent, false));
             case TYPE_SENT:
                 return new SentChatViewHolder(LayoutInflater.from(context).inflate(R.layout.item_sent_chat, parent, false));
+            case TYPE_SYSTEM:
+                return new SystemChatViewHolder(LayoutInflater.from(context).inflate(R.layout.item_system, parent, false));
             default:
                 return new RecvdChatViewHolder(LayoutInflater.from(context).inflate(R.layout.item_recvd_chat, parent, false));
         }
@@ -84,6 +91,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof SentChatViewHolder) {
             bindSentChatViewHolder(holder, position);
+        } else if (holder instanceof SystemChatViewHolder) {
+            bindSystemViewHolder(holder, position);
         } else {
             bindRecvdChatViewHolder(holder, position);
         }
@@ -136,6 +145,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.chatIv, chatData);
 
         showDpAndName(recvdChatViewHolder, chatData);
+    }
+
+    private void bindSystemViewHolder(RecyclerView.ViewHolder holder, int position) {
+        final SystemChatViewHolder systemChatViewHolder = (SystemChatViewHolder) holder;
+        ChatData chatData = chatDataList.get(position);
+        if (chatData.getType().equalsIgnoreCase(SYSTEM)) {
+            systemChatViewHolder.messageTv.setText(chatData.getMessage());
+        }
     }
 
     private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
@@ -344,6 +361,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     }
                     break;
             }
+        }
+    }
+
+    public class SystemChatViewHolder extends RecyclerView.ViewHolder {
+
+        private TextView messageTv;
+
+        SystemChatViewHolder(View itemView) {
+            super(itemView);
+            messageTv = itemView.findViewById(R.id.tv_system_msg);
         }
     }
 
