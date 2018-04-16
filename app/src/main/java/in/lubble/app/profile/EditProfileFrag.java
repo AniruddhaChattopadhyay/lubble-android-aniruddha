@@ -138,9 +138,7 @@ public class EditProfileFrag extends Fragment {
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
 
-                ProfileData updatedProfileData = fetchedProfileData;
-                updatedProfileData.setBio(StringUtils.getStringFromTil(bioTil));
-                getThisUserRef().setValue(updatedProfileData);
+                getThisUserRef().child("bio").setValue(StringUtils.getStringFromTil(bioTil));
                 getFragmentManager().popBackStack();
             }
         });

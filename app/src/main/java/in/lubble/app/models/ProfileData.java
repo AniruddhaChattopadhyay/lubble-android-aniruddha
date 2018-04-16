@@ -1,7 +1,5 @@
 package in.lubble.app.models;
 
-import java.util.List;
-
 /**
  * Created by ishaangarg on 01/11/17.
  */
@@ -16,8 +14,6 @@ public class ProfileData {
     private String bio;
     private String token;
     private String referredBy;
-    private List<Object> lubbles;
-    private List<Object> groups;
     private boolean isOwner;
 
     public String getId() {
@@ -66,22 +62,6 @@ public class ProfileData {
 
     public void setToken(String token) {
         this.token = token;
-    }
-
-    public List<Object> getLubbles() {
-        return lubbles;
-    }
-
-    public void setLubbles(List<Object> lubbles) {
-        this.lubbles = lubbles;
-    }
-
-    public List<Object> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(List<Object> groups) {
-        this.groups = groups;
     }
 
     public ProfileInfo getInfo() {
