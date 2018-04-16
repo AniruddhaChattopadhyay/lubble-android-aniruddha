@@ -233,7 +233,7 @@ public class LocationActivity extends AppCompatActivity {
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        final String lubbleId = (String) dataSnapshot.getValue();
+                        final String lubbleId = dataSnapshot.getValue(String.class);
                         if (StringUtils.isValidString(lubbleId)) {
                             LubbleSharedPrefs.getInstance().setLubbleId(lubbleId);
                             locationCheckSuccess();
