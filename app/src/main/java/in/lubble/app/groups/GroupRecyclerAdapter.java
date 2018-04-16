@@ -77,10 +77,13 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             groupViewHolder.titleTv.setText(groupData.getTitle());
             if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
                 groupViewHolder.subtitleTv.setText("Invitation Pending");
+                groupViewHolder.inviteIcon.setVisibility(View.VISIBLE);
             } else if (isValidString(groupData.getLastMessage())) {
                 groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
+                groupViewHolder.inviteIcon.setVisibility(View.GONE);
             } else {
                 groupViewHolder.subtitleTv.setText(groupData.getDescription());
+                groupViewHolder.inviteIcon.setVisibility(View.GONE);
             }
 
             groupViewHolder.mView.setOnClickListener(new View.OnClickListener() {
@@ -123,8 +126,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getLastMessageTimestamp()));
             }
         } else if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
-            timestampTv.setVisibility(View.VISIBLE);
-            timestampTv.setText(DateTimeUtils.getHumanTimestamp(userGroupData.getInvitedTimeStamp()));
+            timestampTv.setVisibility(View.GONE);
         } else {
             timestampTv.setVisibility(View.GONE);
         }
@@ -235,6 +237,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final TextView unreadCountTv;
         final TextView timestampTv;
         final Button joinBtn;
+        final ImageView inviteIcon;
         GroupData groupData;
 
         public GroupViewHolder(View view) {
@@ -246,6 +249,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
             joinBtn = view.findViewById(R.id.btn_join_group);
+            inviteIcon = view.findViewById(R.id.ic_invite);
             joinBtn.setOnClickListener(this);
         }
 
