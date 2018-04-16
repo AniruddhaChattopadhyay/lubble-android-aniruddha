@@ -1,5 +1,6 @@
 package in.lubble.app.auth;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.StringRes;
@@ -18,11 +19,13 @@ import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.addFrag;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
+import static in.lubble.app.utils.FragUtils.replaceStack;
 import static in.lubble.app.utils.UserUtils.isNewUser;
 
 public class LoginActivity extends AppCompatActivity {
 
     public static final int RC_SIGN_IN = 777;
+    private static final int REQUEST_LOCATION = 636;
 
     private FirebaseAuth firebaseAuth;
     private View rootLayout;
@@ -49,8 +52,9 @@ public class LoginActivity extends AppCompatActivity {
                 FirebaseUser currentUser = firebaseAuth.getCurrentUser();
                 if (currentUser != null && isNewUser(currentUser)) {
                     // start registration flow
-                    UserNameFrag userNameFrag = UserNameFrag.newInstance(response);
-                    addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);
+                    final Intent intent = new Intent(this, LocationActivity.class);
+                    intent.putExtra("idpResponse", response);
+                    startActivityForResult(intent, REQUEST_LOCATION);
                 } else {
                     startActivity(MainActivity.createIntent(LoginActivity.this, response));
                     finish();
@@ -75,6 +79,13 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
             showSnackbar(R.string.unknown_sign_in_response);
+        } else if (requestCode == REQUEST_LOCATION) {
+            if (resultCode == Activity.RESULT_OK && data != null) {
+                UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
+                addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);
+            } else {
+                replaceStack(this, WelcomeFrag.newInstance(getIntent()), R.id.frame_fragContainer);
+            }
         }
     }
 

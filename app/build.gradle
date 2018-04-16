@@ -5,7 +5,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "in.lubble.app"
-        minSdkVersion 16
+        minSdkVersion 17
         targetSdkVersion 26
         versionCode 27
         versionName "1.8.7"
@@ -61,6 +61,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:11.8.0'
     implementation 'com.android.support:support-v4:26.1.0'
     implementation 'com.google.firebase:firebase-invites:11.8.0'
+    implementation 'com.google.android.gms:play-services-location:11.8.0'
     implementation 'com.google.code.gson:gson:2.8.1'
     implementation 'com.instabug.library:instabug:4.12.1'
     implementation 'org.jsoup:jsoup:1.10.1'
