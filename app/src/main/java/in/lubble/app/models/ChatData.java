@@ -14,6 +14,7 @@ public class ChatData {
     public static final String LINK = "LINK";
     public static final String HIDDEN = "HIDDEN";
     public static final String SYSTEM = "SYSTEM";
+    public static final String UNREAD = "UNREAD";
 
     private String id;
     private String authorUid;

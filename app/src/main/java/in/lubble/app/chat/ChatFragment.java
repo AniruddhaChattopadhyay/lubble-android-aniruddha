@@ -63,6 +63,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
@@ -184,7 +185,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        layoutManager.setStackFromEnd(true);
         chatRecyclerView.setLayoutManager(layoutManager);
         final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>(), chatRecyclerView);
         chatRecyclerView.setAdapter(chatAdapter);
@@ -205,8 +205,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
                     if (chatMsg.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
                         // unread msg found
-                        chatRecyclerView.scrollToPosition(pos);
                         foundFirstUnreadMsg = true;
+                        final ChatData unreadChatData = new ChatData();
+                        unreadChatData.setType(UNREAD);
+                        chatAdapter.addChatData(pos, unreadChatData);
+                        chatRecyclerView.scrollToPosition(pos-1);
                     } else {
                         // all msgs read, scroll to last msg
                         chatRecyclerView.scrollToPosition(positionStart);
@@ -216,8 +219,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     // If the user is at the bottom of the list, scroll to the bottom
                     // of the list to show the newly added message.
                     chatRecyclerView.scrollToPosition(positionStart);
-                } else if (chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
+                        chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                     chatRecyclerView.scrollToPosition(positionStart);
+                }
+            }
+        });
+
+        chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+            @Override
+            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                if (bottom < oldBottom) {
+                    chatRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
                 }
             }
         });
