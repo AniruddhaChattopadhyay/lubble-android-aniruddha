@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference connectedReference;
     private ValueEventListener presenceValueListener;
     private ImageView profileIcon;
+    private TextView toolbarTitle;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -74,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
         profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setElevation(10);
-        TextView toolbarTitle = findViewById(R.id.lubble_toolbar_title);
+        toolbarTitle = findViewById(R.id.lubble_toolbar_title);
         toolbarTitle.setVisibility(View.VISIBLE);
         profileIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,12 +207,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateDefaultGroupId() {
-        RealtimeDbHelper.getLubbleDefaultGroupRef().addListenerForSingleValueEvent(new ValueEventListener() {
+        RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null) {
-                    LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.getValue(String.class));
-                }
+                toolbarTitle.setText(dataSnapshot.child("title").getValue(String.class));
+                LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
             }
 
             @Override

@@ -48,8 +48,8 @@ public class RealtimeDbHelper {
         return getUserLubbleRef().child("groups");
     }
 
-    public static DatabaseReference getLubbleDefaultGroupRef() {
-        return FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE + "/defaultGroup");
+    public static DatabaseReference getLubbleRef() {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + DEFAULT_LUBBLE);
     }
 
     public static DatabaseReference getLubbleMembersRef() {

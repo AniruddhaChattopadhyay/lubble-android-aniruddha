@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -261,26 +262,16 @@ public class GroupInfoFragment extends Fragment {
     }
 
     private void toggleLeaveGroupVisibility(final GroupData groupData) {
-        RealtimeDbHelper.getLubbleDefaultGroupRef().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final String defaultGroup = dataSnapshot.getValue(String.class);
-                if (groupId.equalsIgnoreCase(defaultGroup)) {
-                    leaveGroupTV.setVisibility(View.GONE);
-                } else {
-                    if (groupData != null && groupData.isJoined()) {
-                        leaveGroupTV.setVisibility(View.VISIBLE);
-                    } else {
-                        leaveGroupTV.setVisibility(View.GONE);
-                    }
-                }
+        final String defaultGroupId = LubbleSharedPrefs.getInstance().getDefaultGroupId();
+        if (groupId.equalsIgnoreCase(defaultGroupId)) {
+            leaveGroupTV.setVisibility(View.GONE);
+        } else {
+            if (groupData != null && groupData.isJoined()) {
+                leaveGroupTV.setVisibility(View.VISIBLE);
+            } else {
+                leaveGroupTV.setVisibility(View.GONE);
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        }
     }
 
     @Override
