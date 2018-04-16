@@ -2,14 +2,17 @@ package in.lubble.app;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -17,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
@@ -148,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        checkMinAppVersion();
         handlePresence();
     }
 
@@ -206,6 +211,52 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null) {
                     LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.getValue(String.class));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void checkMinAppVersion() {
+        RealtimeDbHelper.getAppInfoRef().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    Integer minAppVersion = child.getValue(Integer.class);
+                    minAppVersion = minAppVersion == null ? 27 : minAppVersion;
+
+                    if (BuildConfig.VERSION_CODE < minAppVersion) {
+                        // block app
+                        Toast.makeText(MainActivity.this, "Update Lubble App", Toast.LENGTH_SHORT).show();
+                        final AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+                        alertDialog.setTitle("Please Update App");
+                        alertDialog.setMessage("You haven't updated Lubble app in a while. Please download the latest update from play store.");
+                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "UPDATE", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                alertDialog.dismiss();
+                                final String appPackageName = getPackageName();
+                                try {
+                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                                } catch (android.content.ActivityNotFoundException anfe) {
+                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                                }
+                            }
+                        });
+                        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Re-check", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                alertDialog.dismiss();
+                                checkMinAppVersion();
+                            }
+                        });
+                        alertDialog.setCancelable(false);
+                        alertDialog.show();
+                    }
                 }
             }
 
