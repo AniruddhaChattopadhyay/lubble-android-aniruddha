@@ -22,6 +22,7 @@ import java.io.IOException;
 import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.UploadFileService;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.utils.FileUtils.createImageFile;
@@ -38,6 +39,7 @@ public class ProfilePicFrag extends Fragment {
     private String currentPhotoPath;
     private ImageView welcomeDpIv;
     private Button submitBtn;
+    private File imageFile;
 
     public ProfilePicFrag() {
         // Required empty public constructor
@@ -91,6 +93,11 @@ public class ProfilePicFrag extends Fragment {
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getContext().startService(new Intent(getContext(), UploadFileService.class)
+                        .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
+                        .putExtra(UploadFileService.EXTRA_FILE_URI, Uri.fromFile(imageFile))
+                        .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "user_profile/" + FirebaseAuth.getInstance().getUid())
+                        .setAction(UploadFileService.ACTION_UPLOAD));
                 startMain();
             }
         });
@@ -118,7 +125,6 @@ public class ProfilePicFrag extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_DP && resultCode == RESULT_OK) {
-            File imageFile;
             if (data != null && data.getData() != null) {
                 Uri uri = data.getData();
                 imageFile = getFileFromInputStreamUri(getContext(), uri);

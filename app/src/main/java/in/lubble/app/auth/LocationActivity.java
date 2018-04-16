@@ -227,7 +227,7 @@ public class LocationActivity extends AppCompatActivity {
         String backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
         if (backdoorKey == null && BuildConfig.DEBUG) {
             // just for ishaan's emulator to allow email ID
-            backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+            backdoorKey = FirebaseAuth.getInstance().getUid();
         }
         RealtimeDbHelper.getBackdoorRef().child(backdoorKey)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
