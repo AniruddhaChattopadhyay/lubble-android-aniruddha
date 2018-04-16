@@ -39,7 +39,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private static final String ARG_LUBBLE_ID = "UserSearchFrag_ARG_LUBBLE_ID";
     private static final String ARG_GROUP_ID = "UserSearchFrag_ARG_GROUP_ID";
 
-    private int lubbleId;
+    private String lubbleId;
     private String groupId;
     private Button sendBtn;
     private RecyclerView usersRecyclerView;
@@ -51,10 +51,10 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     public UserSearchFrag() {
     }
 
-    public static UserSearchFrag newInstance(int lubbleId, String groupId) {
+    public static UserSearchFrag newInstance(String lubbleId, String groupId) {
         UserSearchFrag fragment = new UserSearchFrag();
         Bundle args = new Bundle();
-        args.putInt(ARG_LUBBLE_ID, lubbleId);
+        args.putString(ARG_LUBBLE_ID, lubbleId);
         args.putString(ARG_GROUP_ID, groupId);
         fragment.setArguments(args);
         return fragment;
@@ -65,7 +65,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            lubbleId = getArguments().getInt(ARG_LUBBLE_ID);
+            lubbleId = getArguments().getString(ARG_LUBBLE_ID);
             groupId = getArguments().getString(ARG_GROUP_ID);
         }
     }

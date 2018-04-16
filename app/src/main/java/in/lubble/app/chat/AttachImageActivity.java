@@ -13,6 +13,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import in.lubble.app.BuildConfig;
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
@@ -62,7 +63,7 @@ public class AttachImageActivity extends AppCompatActivity {
                         .putExtra(UploadFileService.EXTRA_BUCKET, UploadFileService.BUCKET_CONVO)
                         .putExtra(UploadFileService.EXTRA_FILE_NAME, imgUri.getLastPathSegment())
                         .putExtra(EXTRA_FILE_URI, imgUri)
-                        .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/0/groups/" + groupId)
+                        .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + Constants.DEFAULT_LUBBLE + "/groups/" + groupId)
                         .putExtra(UploadFileService.EXTRA_CAPTION, captionEt.getText().toString())
                         .putExtra(UploadFileService.EXTRA_GROUP_ID, groupId)
                         .setAction(UploadFileService.ACTION_UPLOAD));

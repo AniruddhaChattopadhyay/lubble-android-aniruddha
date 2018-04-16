@@ -18,8 +18,8 @@ public class Constants {
     public static final String NOTICE_NOTIF_CHANNEL = "Notice Notifications";
     public static final String APP_NOTIF_CHANNEL = "App Notifications";
 
-    public static final int DEFAULT_LUBBLE = 0;
-    public static final int DEFAULT_GROUP = 0;
+    public static final String DEFAULT_LUBBLE = LubbleSharedPrefs.getInstance().getLubbleId();
+    public static final String DEFAULT_GROUP = LubbleSharedPrefs.getInstance().getDefaultGroupId();
 
     public static final String LAST_GROUP_MAPPING_ID = "LAST_GROUP_MAPPING_ID";
 

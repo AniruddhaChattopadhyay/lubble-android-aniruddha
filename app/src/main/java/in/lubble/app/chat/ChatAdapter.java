@@ -220,8 +220,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         return chatDataList.size();
     }
 
-    private void toggleLubb(int pos) {
-        getMessagesRef().child("0").child(chatDataList.get(pos).getId())
+    private void toggleLubb(int pos, String groupId) {
+        getMessagesRef().child(groupId).child(chatDataList.get(pos).getId())
                 .runTransaction(new Transaction.Handler() {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {
@@ -292,7 +292,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
                     break;
                 case R.id.linearLayout_lubb_container:
-                    toggleLubb(getAdapterPosition());
+                    toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
                     break;
                 case R.id.iv_chat_img:
                     String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
@@ -343,7 +343,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.linearLayout_lubb_container:
-                    toggleLubb(getAdapterPosition());
+                    toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
                     break;
                 case R.id.iv_chat_img:
                     String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();

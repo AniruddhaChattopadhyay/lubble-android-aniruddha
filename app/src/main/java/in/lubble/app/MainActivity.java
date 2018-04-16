@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
+        updateDefaultGroupId();
     }
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -197,6 +198,22 @@ public class MainActivity extends AppCompatActivity {
     private void syncFcmToken() {
         getThisUserRef().child("token")
                 .setValue(FirebaseInstanceId.getInstance().getToken());
+    }
+
+    private void updateDefaultGroupId() {
+        RealtimeDbHelper.getLubbleDefaultGroupRef().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null) {
+                    LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.getValue(String.class));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

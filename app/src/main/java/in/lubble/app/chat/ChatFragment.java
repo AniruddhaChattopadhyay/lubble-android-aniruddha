@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import in.lubble.app.Constants;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
@@ -322,7 +323,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showPublicGroupWarning() {
-        if (!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown() && groupId.equalsIgnoreCase("0")) {
+        if (!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown() && groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
             final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity());
             View sheetView = getActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_info, null);
             bottomSheetDialog.setContentView(sheetView);

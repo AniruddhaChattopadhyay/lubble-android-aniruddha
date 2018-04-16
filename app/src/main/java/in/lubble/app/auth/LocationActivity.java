@@ -33,10 +33,18 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.TimeUnit;
 
+import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.utils.StringUtils;
 
 public class LocationActivity extends AppCompatActivity {
 
@@ -209,14 +217,49 @@ public class LocationActivity extends AppCompatActivity {
         centralLocation.setLatitude(28.696660);
         centralLocation.setLongitude(77.124772);
         if (location.distanceTo(centralLocation) < 700) {
-            Intent intent = new Intent();
-            intent.putExtra("idpResponse", idpResponse);
-            setResult(RESULT_OK, intent);
-            finish();
+            locationCheckSuccess();
         } else {
-            locHintTv.setVisibility(View.GONE);
-            invalidLocContainer.setVisibility(View.VISIBLE);
+            checkBackdoorAccess();
         }
+    }
+
+    private void checkBackdoorAccess() {
+        String backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+        if (backdoorKey == null && BuildConfig.DEBUG) {
+            // just for ishaan's emulator to allow email ID
+            backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        }
+        RealtimeDbHelper.getBackdoorRef().child(backdoorKey)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        final String lubbleId = (String) dataSnapshot.getValue();
+                        if (StringUtils.isValidString(lubbleId)) {
+                            LubbleSharedPrefs.getInstance().setLubbleId(lubbleId);
+                            locationCheckSuccess();
+                        } else {
+                            locationCheckFailed();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        // user has NO backdoor access
+                        locationCheckFailed();
+                    }
+                });
+    }
+
+    private void locationCheckSuccess() {
+        Intent intent = new Intent();
+        intent.putExtra("idpResponse", idpResponse);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
+
+    private void locationCheckFailed() {
+        locHintTv.setVisibility(View.GONE);
+        invalidLocContainer.setVisibility(View.VISIBLE);
     }
 
     private LocationRequest getLocationRequest() {

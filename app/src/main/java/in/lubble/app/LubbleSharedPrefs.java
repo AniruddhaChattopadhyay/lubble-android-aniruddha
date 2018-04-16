@@ -15,6 +15,8 @@ public class LubbleSharedPrefs {
 
     private final String REFERRER_UID = "referrer_uid";
     private final String CURRENT_ACTIVE_GROUP = "CURRENT_ACTIVE_GROUP";
+    private final String LUBBLE_ID = "LUBBLE_ID";
+    private final String DEFAULT_GROUP_ID = "DEFAULT_GROUP_ID";
     private final String IS_PUBLIC_GROUP_INFO_SHOWN = "IS_PUBLIC_GROUP_INFO_SHOWN";
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
 
@@ -65,6 +67,23 @@ public class LubbleSharedPrefs {
     public boolean setCurrentActiveGroupId(String gid) {
 
         return preferences.edit().putString(CURRENT_ACTIVE_GROUP, gid).commit();
+    }
+
+    public String getLubbleId() {
+        return preferences.getString(LUBBLE_ID, "STAGING");
+    }
+
+    public boolean setLubbleId(String lubbleId) {
+
+        return preferences.edit().putString(LUBBLE_ID, lubbleId).commit();
+    }
+
+    public String getDefaultGroupId() {
+        return preferences.getString(DEFAULT_GROUP_ID, "MYLUBBLE");
+    }
+
+    public boolean setDefaultGroupId(String defaultGroupId) {
+        return preferences.edit().putString(DEFAULT_GROUP_ID, defaultGroupId).commit();
     }
 
     public boolean getIsPublicGroupInfoShown() {

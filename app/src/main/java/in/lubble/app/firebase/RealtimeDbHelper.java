@@ -89,4 +89,8 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("presence");
     }
 
+    public static DatabaseReference getBackdoorRef() {
+        return FirebaseDatabase.getInstance().getReference("backdoor");
+    }
+
 }
