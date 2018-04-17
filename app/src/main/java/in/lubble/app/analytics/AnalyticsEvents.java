@@ -10,5 +10,6 @@ public class AnalyticsEvents {
      *  String value must be separated with UNDERSCORES (_)
      */
     public static final String LOGOUT_SUCCESS_EVENT = "LOGOUT_SUCCESS_EVENT";
+    public static final String LOC_CHECK_FAILED = "LOC_CHECK_FAILED";
 
 }

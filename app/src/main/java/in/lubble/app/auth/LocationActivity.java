@@ -43,6 +43,8 @@ import java.util.concurrent.TimeUnit;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.utils.StringUtils;
 
@@ -260,6 +262,7 @@ public class LocationActivity extends AppCompatActivity {
     private void locationCheckFailed() {
         locHintTv.setVisibility(View.GONE);
         invalidLocContainer.setVisibility(View.VISIBLE);
+        Analytics.triggerEvent(AnalyticsEvents.LOC_CHECK_FAILED, this);
     }
 
     private LocationRequest getLocationRequest() {
