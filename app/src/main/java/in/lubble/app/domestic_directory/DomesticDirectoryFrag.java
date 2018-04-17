@@ -25,6 +25,7 @@ public class DomesticDirectoryFrag extends Fragment {
 
     private RecyclerView domesticHelpRecyclerView;
     private DomesticAdapter domesticAdapter;
+    private ValueEventListener valueEventListener;
 
     public DomesticDirectoryFrag() {
         // Required empty public constructor
@@ -52,7 +53,7 @@ public class DomesticDirectoryFrag extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        getLubbleDomesticRef().orderByChild("category").addValueEventListener(new ValueEventListener() {
+        valueEventListener = getLubbleDomesticRef().orderByChild("category").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ArrayList<DomesticHelpData> domesticHelpList = new ArrayList<>();
@@ -87,6 +88,6 @@ public class DomesticDirectoryFrag extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-
+        getLubbleDomesticRef().orderByChild("category").removeEventListener(valueEventListener);
     }
 }
