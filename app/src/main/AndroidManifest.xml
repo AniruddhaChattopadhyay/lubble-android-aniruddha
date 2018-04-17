@@ -58,7 +58,7 @@
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="default" />
+            android:value="Notice Notifications" />
 
         <service android:name=".firebase.FcmInstanceIdService">
             <intent-filter>
@@ -71,9 +71,6 @@
             android:label="New Group"
             android:parentActivityName=".MainActivity" />
 
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="default" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

@@ -27,16 +27,19 @@ public class IntroActivity extends AppIntro {
         sliderPage1.setTitle("The private social network for you & your neighbours");
         sliderPage1.setDescription("Lubble lets you connect with verified people living in your locality");
         sliderPage1.setBgColor(ContextCompat.getColor(this, R.color.colorAccent));
+        sliderPage1.setImageDrawable(R.drawable.slide1);
 
         final SliderPage sliderPage2 = new SliderPage();
-        sliderPage2.setTitle("Connect with verified neighbours");
-        sliderPage2.setDescription("Form interest groups, plan stuff together with your neighbours in your locality");
+        sliderPage2.setTitle("Engage with the people around you");
+        sliderPage2.setDescription("Join interest groups, plan stuff together with your neighbours in your locality");
         sliderPage2.setBgColor(ContextCompat.getColor(this, R.color.colorAccent));
+        sliderPage2.setImageDrawable(R.drawable.slide2);
 
         final SliderPage sliderPage3 = new SliderPage();
         sliderPage3.setTitle("Stay informed about your locality");
-        sliderPage3.setDescription("See announcements, alerts, safety tips for your locality.");
+        sliderPage3.setDescription("See announcements, alerts and safety tips for your neighbourhood.");
         sliderPage3.setBgColor(ContextCompat.getColor(this, R.color.colorAccent));
+        sliderPage3.setImageDrawable(R.drawable.slide3);
 
         addSlide(AppIntroFragment.newInstance(sliderPage1));
         addSlide(AppIntroFragment.newInstance(sliderPage2));
