@@ -25,6 +25,7 @@ import java.io.IOException;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.StringUtils;
 
@@ -81,6 +82,9 @@ public class EditProfileFrag extends Fragment {
 
         rootView.findViewById(R.id.linearLayout_cover_edit_container).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
+
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
+
         // single listener becoz data wudnt have changed going from profile to edit profile.
         getThisUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override

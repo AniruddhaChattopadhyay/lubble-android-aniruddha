@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.os.Build;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 import com.instabug.library.Instabug;
@@ -38,7 +39,7 @@ public class LubbleApp extends Application {
         Fabric.with(this, new Crashlytics());
 
         createNotifChannel();
-
+        FirebaseAnalytics.getInstance(this);
         new Instabug.Builder(this, "c9851f7c648d4bacfb0d4d420d4f4863")
                 .setInvocationEvent(InstabugInvocationEvent.SHAKE)
                 .build();

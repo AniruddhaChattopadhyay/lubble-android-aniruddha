@@ -23,6 +23,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
+import in.lubble.app.analytics.Analytics;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.utils.FileUtils.createImageFile;
@@ -71,6 +72,7 @@ public class ProfilePicFrag extends Fragment {
         dpHint = rootView.findViewById(R.id.tv_welcome_name);
         TextView skipTv = rootView.findViewById(R.id.tv_skipBtn);
         welcomeDpIv = rootView.findViewById(R.id.iv_welcome_dp);
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
         dpHint.setText(
                 String.format(getString(R.string.profile_pic_hint)
                         , FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0])
@@ -106,6 +108,7 @@ public class ProfilePicFrag extends Fragment {
     }
 
     private void startMain() {
+        Analytics.triggerSignUpEvent(getContext());
         startActivity(MainActivity.createIntent(getContext(), ((IdpResponse) idpResponse)));
         getActivity().finishAffinity();
     }

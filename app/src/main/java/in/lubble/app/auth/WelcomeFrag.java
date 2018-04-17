@@ -29,6 +29,7 @@ import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileInfo;
 
@@ -77,6 +78,7 @@ public class WelcomeFrag extends Fragment {
         referrerNameTv = rootView.findViewById(R.id.tv_referrer_name);
         referrerDpIv = rootView.findViewById(R.id.iv_referrer_dp);
 
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
         rootView.findViewById(R.id.btn_login).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

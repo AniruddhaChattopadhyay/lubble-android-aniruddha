@@ -15,6 +15,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.announcements.NewAnnouncementActivity;
 import in.lubble.app.models.AnnouncementData;
 
@@ -45,6 +46,7 @@ public class AnnouncementsFrag extends Fragment {
         announcementsAdapter = new AnnouncementsAdapter();
         recyclerView.setAdapter(announcementsAdapter);
 
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
         getAnnouncementsRef().addValueEventListener(announcementEventListener);
 
         toggleAnnouncementBtn(fab);

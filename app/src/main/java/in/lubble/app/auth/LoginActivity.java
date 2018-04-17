@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 
 import static in.lubble.app.utils.FragUtils.addFrag;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
@@ -56,6 +57,7 @@ public class LoginActivity extends AppCompatActivity {
                     intent.putExtra("idpResponse", response);
                     startActivityForResult(intent, REQUEST_LOCATION);
                 } else {
+                    Analytics.triggerLoginEvent(this);
                     startActivity(MainActivity.createIntent(LoginActivity.this, response));
                     finish();
                 }

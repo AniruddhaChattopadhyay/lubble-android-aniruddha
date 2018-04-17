@@ -15,6 +15,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.DomesticHelpData;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleDomesticRef;
@@ -47,6 +48,7 @@ public class DomesticDirectoryFrag extends Fragment {
         domesticHelpRecyclerView.setAdapter(domesticAdapter);
         /*DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL);
         domesticHelpRecyclerView.addItemDecoration(itemDecor);*/
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
         return view;
     }
 

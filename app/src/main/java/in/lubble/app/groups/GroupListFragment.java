@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
@@ -63,6 +64,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
         groupInvitedByMap = new HashMap<>();
         userGroupDataMap = new HashMap<>();
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         adapter = new GroupRecyclerAdapter(mListener);

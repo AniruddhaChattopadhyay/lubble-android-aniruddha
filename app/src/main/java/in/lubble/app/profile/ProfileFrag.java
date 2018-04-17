@@ -28,6 +28,7 @@ import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.UserUtils;
@@ -112,6 +113,7 @@ public class ProfileFrag extends Fragment {
         logoutTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerLogoutEvent(getContext());
                 UserUtils.logout(getActivity());
             }
         });

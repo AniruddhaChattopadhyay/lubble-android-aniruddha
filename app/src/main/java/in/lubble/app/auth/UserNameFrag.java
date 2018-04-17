@@ -33,6 +33,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
@@ -101,6 +102,7 @@ public class UserNameFrag extends Fragment {
         tenantTv = rootView.findViewById(R.id.tv_tenant);
         submitBtn = rootView.findViewById(R.id.btn_submit);
 
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         RealtimeDbHelper.getLubbleBlocksRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
