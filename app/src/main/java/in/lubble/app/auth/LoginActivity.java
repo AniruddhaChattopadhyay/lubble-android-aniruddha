@@ -39,6 +39,11 @@ public class LoginActivity extends AppCompatActivity {
         rootLayout = findViewById(R.id.root_layout);
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+
+        if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
+            startActivity(new Intent(this, IntroActivity.class));
+        }
+
         replaceFrag(getSupportFragmentManager(), WelcomeFrag.newInstance(getIntent()), R.id.frame_fragContainer);
         LubbleSharedPrefs.getInstance().setIsLogoutPending(false);
     }

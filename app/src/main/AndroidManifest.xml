@@ -102,7 +102,10 @@
         <activity android:name=".user_search.UserSearchActivity" />
         <activity android:name=".utils.FullScreenImageActivity" />
         <activity android:name=".chat.AttachImageActivity" />
-        <activity android:name=".auth.LocationActivity"></activity>
+        <activity android:name=".auth.LocationActivity" />
+        <activity
+            android:name=".auth.IntroActivity"
+            android:theme="@style/BlueAppTheme" />
     </application>
 
 </manifest>

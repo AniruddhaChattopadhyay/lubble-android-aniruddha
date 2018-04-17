@@ -13,6 +13,7 @@ public class LubbleSharedPrefs {
     private final SharedPreferences preferences;
     private final String LUBBLE_SHARED_PREFERENCE_KEY = "in.lubble.mainSharedPrefs";
 
+    private final String IS_APP_INTRO_SHOWN = "is_app_intro_shown";
     private final String REFERRER_UID = "referrer_uid";
     private final String CURRENT_ACTIVE_GROUP = "CURRENT_ACTIVE_GROUP";
     private final String LUBBLE_ID = "LUBBLE_ID";
@@ -50,6 +51,14 @@ public class LubbleSharedPrefs {
     }
 
     //******************************************/
+
+    public boolean getIsAppIntroShown() {
+        return preferences.getBoolean(IS_APP_INTRO_SHOWN, false);
+    }
+
+    public boolean setIsAppIntroShown(boolean isAppIntroShown) {
+        return preferences.edit().putBoolean(IS_APP_INTRO_SHOWN, isAppIntroShown).commit();
+    }
 
     public String getReferrerUid() {
         return preferences.getString(REFERRER_UID, "");
