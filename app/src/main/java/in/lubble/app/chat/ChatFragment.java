@@ -27,7 +27,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -481,7 +480,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 imageFile = new File(currentPhotoPath);
             }
 
-
             final Uri fileUri = Uri.fromFile(imageFile);
             AttachImageActivity.open(getContext(), fileUri, groupId);
             /*getContext().startService(new Intent(getContext(), UploadFileService.class)
@@ -491,8 +489,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/0/groups/0")
                     .setAction(UploadFileService.ACTION_UPLOAD));*/
 
-        } else {
-            Toast.makeText(getContext(), "Failed to get photo", Toast.LENGTH_SHORT).show();
         }
     }
 
