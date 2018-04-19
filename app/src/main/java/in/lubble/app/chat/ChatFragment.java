@@ -160,7 +160,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         if (isJoining) {
             showJoiningDialog();
         }
-
+        sendBtn.setEnabled(false);
         setupTogglingOfSendBtn();
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
