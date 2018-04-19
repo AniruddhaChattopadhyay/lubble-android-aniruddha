@@ -232,7 +232,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 if (bottom < oldBottom) {
                     int position = chatAdapter.getItemCount() - 1;
                     if (position != -1) {
-                        chatRecyclerView.scrollToPosition(position);
+                        // scrollToPosition() doesn't work here. why?
+                        chatRecyclerView.smoothScrollToPosition(position);
                     }
                 }
             }
