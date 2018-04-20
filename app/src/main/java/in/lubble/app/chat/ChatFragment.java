@@ -209,7 +209,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         final ChatData unreadChatData = new ChatData();
                         unreadChatData.setType(UNREAD);
                         chatAdapter.addChatData(pos, unreadChatData);
-                        chatRecyclerView.scrollToPosition(pos-1);
+                        chatRecyclerView.scrollToPosition(pos - 1);
                     } else {
                         // all msgs read, scroll to last msg
                         chatRecyclerView.scrollToPosition(positionStart);
@@ -230,7 +230,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 if (bottom < oldBottom) {
-                    chatRecyclerView.smoothScrollToPosition(chatAdapter.getItemCount() - 1);
+                    int position = chatAdapter.getItemCount() - 1;
+                    if (position != -1) {
+                        chatRecyclerView.scrollToPosition(position);
+                    }
                 }
             }
         });

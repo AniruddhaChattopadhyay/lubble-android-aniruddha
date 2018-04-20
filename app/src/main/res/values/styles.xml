@@ -8,6 +8,15 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!--For Blue Status Bar in some activities-->
+    <style name="BlueAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+
     <style name="AccentButton" parent="ThemeOverlay.AppCompat.Dark">
         <item name="colorControlHighlight">@color/white</item>
         <item name="colorButtonNormal">@color/colorAccent</item>

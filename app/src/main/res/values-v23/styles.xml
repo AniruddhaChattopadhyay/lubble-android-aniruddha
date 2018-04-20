@@ -9,7 +9,7 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <!--For Black Status Bar in some activities-->
+    <!--For Blue Status Bar in some activities-->
     <style name="BlueAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>

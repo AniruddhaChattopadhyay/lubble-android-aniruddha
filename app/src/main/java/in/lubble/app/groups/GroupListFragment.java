@@ -250,8 +250,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     @Override
     public void onPause() {
         super.onPause();
-        getUserGroupsRef().removeEventListener(joinedGroupListener);
-        getLubbleGroupsRef().removeEventListener(unjoinedGroupListener);
+        if (joinedGroupListener != null) {
+            getUserGroupsRef().removeEventListener(joinedGroupListener);
+        }
+        if (unjoinedGroupListener != null) {
+            getLubbleGroupsRef().removeEventListener(unjoinedGroupListener);
+        }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
         }
