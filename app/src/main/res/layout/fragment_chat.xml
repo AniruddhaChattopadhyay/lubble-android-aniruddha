@@ -96,7 +96,7 @@
                     android:background="@android:color/transparent"
                     android:gravity="top|left"
                     android:hint="What's new"
-                    android:maxLines="8"
+                    android:maxLines="5"
                     android:scrollbars="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/iv_attach"

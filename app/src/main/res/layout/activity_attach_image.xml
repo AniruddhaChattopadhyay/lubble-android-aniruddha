@@ -5,7 +5,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/transparent_toolbar" />
+    <include layout="@layout/text_toolbar" />
+
+    <in.lubble.app.utils.TouchImageView
+        android:id="@+id/tiv_new_img"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:src="@tools:sample/avatars" />
+
+    <View
+        android:layout_alignTop="@id/et_img_caption"
+        android:layout_alignParentBottom="true"
+        android:background="#c2ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
 
     <ImageView
         android:id="@+id/iv_send_btn"
@@ -22,17 +35,14 @@
         android:id="@+id/et_img_caption"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="top|left"
+        android:scrollbars="vertical"
+        android:maxLines="15"
+        tools:text="@tools:sample/lorem/random"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_toLeftOf="@id/iv_send_btn"
         android:hint="Add a caption" />
-
-    <in.lubble.app.utils.TouchImageView
-        android:id="@+id/tiv_new_img"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/iv_send_btn"
-        tools:src="@tools:sample/avatars" />
 
 </RelativeLayout>
