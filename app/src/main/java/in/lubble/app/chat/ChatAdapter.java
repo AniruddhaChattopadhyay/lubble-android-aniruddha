@@ -3,18 +3,26 @@ package in.lubble.app.chat;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -126,7 +134,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
 
-        handleImage(sentChatViewHolder.chatIv, chatData);
+        handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData);
 
     }
 
@@ -150,7 +158,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
 
-        handleImage(recvdChatViewHolder.chatIv, chatData);
+        handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
 
         showDpAndName(recvdChatViewHolder, chatData);
     }
@@ -188,16 +196,28 @@ public class ChatAdapter extends RecyclerView.Adapter {
         });
     }
 
-    private void handleImage(ImageView imageView, ChatData chatData) {
+    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar, ImageView imageView, ChatData chatData) {
         if (isValidString(chatData.getImgUrl())) {
-            imageView.setVisibility(View.VISIBLE);
+            imgContainer.setVisibility(View.VISIBLE);
             GlideApp.with(context)
                     .load(chatData.getImgUrl())
                     .centerCrop()
-                    //.signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified())) // What ? Why?
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            progressBar.setVisibility(View.GONE);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            progressBar.setVisibility(View.GONE);
+                            return false;
+                        }
+                    })
                     .into(imageView);
         } else {
-            imageView.setVisibility(View.GONE);
+            imgContainer.setVisibility(View.GONE);
         }
     }
 
@@ -276,6 +296,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout linkContainer;
         private TextView linkTitleTv;
         private TextView linkDescTv;
+        private FrameLayout imgContainer;
+        private ProgressBar progressBar;
         private ImageView chatIv;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
@@ -289,6 +311,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
+            imgContainer = itemView.findViewById(R.id.img_container);
+            progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
@@ -334,6 +358,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout linkContainer;
         private TextView linkTitleTv;
         private TextView linkDescTv;
+        private FrameLayout imgContainer;
+        private ProgressBar progressBar;
         private ImageView chatIv;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
@@ -345,6 +371,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
+            imgContainer = itemView.findViewById(R.id.img_container);
+            progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);

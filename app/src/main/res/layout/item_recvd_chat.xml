@@ -32,16 +32,30 @@
                 android:layout_height="wrap_content"
                 tools:text="@tools:sample/full_names" />
 
-            <ImageView
-                android:id="@+id/iv_chat_img"
+            <FrameLayout
+                android:id="@+id/img_container"
                 android:layout_width="240dp"
                 android:layout_height="240dp"
-                android:layout_marginBottom="4dp"
-                android:layout_marginTop="4dp"
-                android:scaleType="centerCrop"
-                android:transitionName="chat_image"
                 android:visibility="gone"
-                tools:src="@tools:sample/backgrounds/scenic" />
+                tools:visibility="visible">
+
+                <ProgressBar
+                    android:id="@+id/progressbar_img"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+
+                <ImageView
+                    android:id="@+id/iv_chat_img"
+                    android:layout_width="240dp"
+                    android:layout_height="240dp"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginTop="4dp"
+                    android:scaleType="centerCrop"
+                    android:transitionName="chat_image"
+                    tools:src="@tools:sample/backgrounds/scenic" />
+
+            </FrameLayout>
 
             <LinearLayout
                 android:id="@+id/link_meta_container"
@@ -49,10 +63,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp"
-                android:visibility="gone"
                 android:background="@color/very_light_gray"
                 android:orientation="vertical"
-                android:padding="8dp">
+                android:padding="8dp"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/tv_link_title"

@@ -42,7 +42,7 @@ repositories {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:recyclerview-v7:26.1.0'
-    compile('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
         transitive = true;
     }
     implementation 'com.android.support:appcompat-v7:26.1.0'
@@ -63,7 +63,6 @@ dependencies {
     implementation 'com.google.firebase:firebase-invites:11.8.0'
     implementation 'com.google.android.gms:play-services-location:11.8.0'
     implementation 'com.google.code.gson:gson:2.8.1'
-    implementation 'com.instabug.library:instabug:4.12.1'
     implementation 'org.jsoup:jsoup:1.10.1'
     implementation 'com.github.apl-devs:appintro:v4.2.3'
     implementation 'com.google.firebase:firebase-core:11.8.0'
