@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -44,6 +45,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private ChildEventListener joinedGroupListener;
     private ChildEventListener unjoinedGroupListener;
     private RecyclerView groupsRecyclerView;
+    private ProgressBar progressBar;
     private HashMap<String, Set<String>> groupInvitedByMap;
     private HashMap<String, UserGroupData> userGroupDataMap;
 
@@ -61,6 +63,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         Context context = view.getContext();
 
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
+        progressBar = view.findViewById(R.id.progressBar_groups);
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
         groupInvitedByMap = new HashMap<>();
         userGroupDataMap = new HashMap<>();
@@ -141,6 +144,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // all user groups have been synced now
+                if (progressBar.getVisibility() == View.VISIBLE) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 ArrayList<String> list = new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     list.add(child.getKey());
