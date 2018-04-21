@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +54,7 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 public class GroupInfoFragment extends Fragment {
     private static final String ARG_GROUP_ID = "GroupInfoFragment_GroupId";
     private String groupId;
+    private ProgressBar dpProgressBar;
     private ImageView groupIv;
     private TextView titleTv;
     private TextView descTv;
@@ -89,6 +91,7 @@ public class GroupInfoFragment extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_group_info, container, false);
 
+        dpProgressBar = view.findViewById(R.id.progressBar_groupInfo);
         groupIv = view.findViewById(R.id.iv_group_image);
         titleTv = view.findViewById(R.id.tv_group_title);
         descTv = view.findViewById(R.id.tv_group_desc);
@@ -100,6 +103,7 @@ public class GroupInfoFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new GroupMembersAdapter();
         recyclerView.setAdapter(adapter);
+        groupIv.setOnClickListener(null);
 
         inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -213,17 +217,26 @@ public class GroupInfoFragment extends Fragment {
             descTv.setText(groupData.getDescription());
             GlideApp.with(getContext())
                     .load(groupData.getProfilePic())
-                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                    .placeholder(R.drawable.circle)
+                    .error(R.drawable.ic_group_24dp)
                     .listener(new RequestListener<Drawable>() {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                             groupIv.setPadding(dpToPx(56), dpToPx(56), dpToPx(56), dpToPx(56));
+                            dpProgressBar.setVisibility(View.GONE);
+                            groupIv.setOnClickListener(null);
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            groupIv.setPadding(0, 0, 0, 0);
+                            dpProgressBar.setVisibility(View.GONE);
+                            groupIv.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    openDpInFullScreen(groupData);
+                                }
+                            });
                             return false;
                         }
                     })
@@ -236,18 +249,6 @@ public class GroupInfoFragment extends Fragment {
             toggleLeaveGroupVisibility(groupData);
             toggleMemberElements(groupData.isJoined());
 
-
-            groupIv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FullScreenImageActivity.open(getActivity(),
-                            getContext(),
-                            groupData.getProfilePic(),
-                            groupIv,
-                            "lubbles/" + DEFAULT_LUBBLE + "/groups/" + groupId
-                    );
-                }
-            });
         }
 
         @Override
@@ -255,6 +256,15 @@ public class GroupInfoFragment extends Fragment {
 
         }
     };
+
+    private void openDpInFullScreen(GroupData groupData) {
+        FullScreenImageActivity.open(getActivity(),
+                getContext(),
+                groupData.getProfilePic(),
+                groupIv,
+                "lubbles/" + DEFAULT_LUBBLE + "/groups/" + groupId
+        );
+    }
 
     private void toggleMemberElements(boolean isJoined) {
         muteNotifsContainer.setVisibility(isJoined ? View.VISIBLE : View.GONE);
