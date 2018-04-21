@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +26,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
 public class AnnouncementsFrag extends Fragment {
 
     private AnnouncementsAdapter announcementsAdapter;
+    private ProgressBar progressBar;
 
     public static AnnouncementsFrag newInstance() {
         return new AnnouncementsFrag();
@@ -40,6 +42,7 @@ public class AnnouncementsFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_announcements, container, false);
 
+        progressBar = view.findViewById(R.id.progressBar_notices);
         final RecyclerView recyclerView = view.findViewById(R.id.rv_announcements);
         final FloatingActionButton fab = view.findViewById(R.id.fab_new_announcement);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -63,6 +66,9 @@ public class AnnouncementsFrag extends Fragment {
     final ValueEventListener announcementEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
+            if (progressBar.getVisibility() == View.VISIBLE) {
+                progressBar.setVisibility(View.GONE);
+            }
             for (DataSnapshot child : dataSnapshot.getChildren()) {
                 announcementsAdapter.addAnnouncement(child.getValue(AnnouncementData.class));
             }

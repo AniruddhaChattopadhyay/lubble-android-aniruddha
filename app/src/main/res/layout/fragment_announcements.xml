@@ -6,6 +6,12 @@
     android:background="@color/card_background"
     tools:context="in.lubble.app.announcements.announcementHistory.AnnouncementsFrag">
 
+    <ProgressBar
+        android:id="@+id/progressBar_notices"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_announcements"
         android:layout_width="match_parent"

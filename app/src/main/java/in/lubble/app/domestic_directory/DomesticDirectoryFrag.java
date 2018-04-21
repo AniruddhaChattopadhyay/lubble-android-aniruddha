@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,6 +28,7 @@ public class DomesticDirectoryFrag extends Fragment {
     private RecyclerView domesticHelpRecyclerView;
     private DomesticAdapter domesticAdapter;
     private ValueEventListener valueEventListener;
+    private ProgressBar progressBar;
 
     public DomesticDirectoryFrag() {
         // Required empty public constructor
@@ -42,6 +44,7 @@ public class DomesticDirectoryFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_domestic_directory, container, false);
 
+        progressBar = view.findViewById(R.id.progressBar_directory);
         domesticHelpRecyclerView = view.findViewById(R.id.rv_domestic_help);
         domesticHelpRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         domesticAdapter = new DomesticAdapter(getContext());
@@ -58,6 +61,9 @@ public class DomesticDirectoryFrag extends Fragment {
         valueEventListener = getLubbleDomesticRef().orderByChild("category").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if (progressBar.getVisibility() == View.VISIBLE) {
+                    progressBar.setVisibility(View.GONE);
+                }
                 ArrayList<DomesticHelpData> domesticHelpList = new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     domesticHelpList.add(child.getValue(DomesticHelpData.class));
