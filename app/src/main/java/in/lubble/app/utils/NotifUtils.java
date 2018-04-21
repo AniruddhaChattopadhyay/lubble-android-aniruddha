@@ -110,7 +110,7 @@ public class NotifUtils {
                 notificationManager.notify(notifId, builder.build());
             }
         }
-        Notification summary = buildSummary(context, GROUP_KEY, notifDataList.get(notifDataList.size() - 1).getTimestamp());
+        Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
         notificationManager.notify(SUMMARY_ID, summary);
     }
 
@@ -149,19 +149,27 @@ public class NotifUtils {
         messagingStyleMap.put(notifData.getGroupId(), messagingStyle);
     }
 
-    private static Notification buildSummary(Context context, String groupKey, long timestamp) {
-        //todo this must be inbox style becoz on < M only this notif is shown
-        return new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
+    private static Notification buildSummary(Context context, String groupKey, ArrayList<NotifData> notifDataList) {
+
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
-                .setContentTitle("Nougat Messenger")
-                .setContentText("You have unread messages")
-                .setWhen(timestamp)
+                .setContentTitle("Lubble")
+                .setWhen(notifDataList.get(notifDataList.size() - 1).getTimestamp())
                 .setSmallIcon(R.drawable.ic_upload)
                 .setShowWhen(true)
                 .setGroup(groupKey)
                 .setGroupSummary(true)
-                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY)
-                .build();
+                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
+
+        NotificationCompat.InboxStyle inbox = new NotificationCompat.InboxStyle();
+        for (NotifData notifData : notifDataList) {
+            inbox.addLine(notifData.getMessageBody());
+        }
+
+        inbox.setSummaryText(String.format("+ %d", notifDataList.size()));
+
+        builder.setStyle(inbox);
+        return builder.build();
     }
 
 

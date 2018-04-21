@@ -2,6 +2,8 @@ package in.lubble.app.notifications;
 
 import com.google.gson.annotations.SerializedName;
 
+import in.lubble.app.utils.StringUtils;
+
 /**
  * Created by ishaan on 10/3/18.
  */
@@ -28,6 +30,8 @@ public class NotifData {
     private String notifChannel;
     @SerializedName("timestamp")
     private String timestamp;
+    @SerializedName("isImage")
+    private String hasImage;
 
     public String getMessageId() {
         return messageId;
@@ -78,7 +82,11 @@ public class NotifData {
     }
 
     public String getMessageBody() {
-        return messageBody;
+        if (StringUtils.isValidString(hasImage) && hasImage.equalsIgnoreCase("True")) {
+            return "\uD83D\uDCF7 " + messageBody;
+        } else {
+            return messageBody;
+        }
     }
 
     public void setMessageBody(String messageBody) {
@@ -109,4 +117,11 @@ public class NotifData {
         this.timestamp = timestamp;
     }
 
+    public String getHasImage() {
+        return hasImage;
+    }
+
+    public void setHasImage(String hasImage) {
+        this.hasImage = hasImage;
+    }
 }
