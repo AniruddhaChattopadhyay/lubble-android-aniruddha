@@ -19,6 +19,7 @@ import java.util.Map;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.profile.ProfileActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
@@ -86,7 +87,7 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
         return memberList.size();
     }
 
-    class MemberHolder extends RecyclerView.ViewHolder {
+    class MemberHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView iconIv;
         final TextView titleTv;
         final TextView infoTv;
@@ -96,6 +97,12 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
             iconIv = view.findViewById(R.id.iv_icon);
             titleTv = view.findViewById(R.id.tv_title);
             infoTv = view.findViewById(R.id.tv_info);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            ProfileActivity.open(v.getContext(), (String) memberList.get(getAdapterPosition()).getKey());
         }
     }
 
