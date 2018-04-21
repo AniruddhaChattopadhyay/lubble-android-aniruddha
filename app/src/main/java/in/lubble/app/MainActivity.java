@@ -143,12 +143,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                GlideApp.with(MainActivity.this)
-                        .load(profileInfo == null ? "" : profileInfo.getThumbnail())
-                        .circleCrop()
-                        .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                        .error(R.drawable.ic_account_circle_black_no_padding)
-                        .into(profileIcon);
+                try {
+                    GlideApp.with(MainActivity.this)
+                            .load(profileInfo == null ? "" : profileInfo.getThumbnail())
+                            .circleCrop()
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .error(R.drawable.ic_account_circle_black_no_padding)
+                            .into(profileIcon);
+                } catch (IllegalArgumentException e) {
+                    Crashlytics.logException(e);
+                }
             }
 
             @Override
