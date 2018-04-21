@@ -139,6 +139,11 @@ public class ProfileFrag extends Fragment {
                 if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                     editProfileTV.setVisibility(View.VISIBLE);
                     referralCard.setVisibility(View.VISIBLE);
+                    logoutTv.setVisibility(View.VISIBLE);
+                } else {
+                    editProfileTV.setVisibility(View.GONE);
+                    referralCard.setVisibility(View.GONE);
+                    logoutTv.setVisibility(View.GONE);
                 }
                 GlideApp.with(getContext())
                         .load(profileData.getProfilePic())

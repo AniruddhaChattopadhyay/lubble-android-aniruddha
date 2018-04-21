@@ -118,12 +118,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/card_referral"
+            android:layout_marginTop="8dp"
             android:background="@color/white"
             android:gravity="center"
-            android:layout_marginTop="8dp"
             android:padding="8dp"
             android:text="LOG OUT"
-            android:textColor="@color/dk_red" />
+            android:textColor="@color/dk_red"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </RelativeLayout>
 </android.support.v4.widget.NestedScrollView>
