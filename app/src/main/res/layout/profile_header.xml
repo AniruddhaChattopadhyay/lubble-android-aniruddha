@@ -43,14 +43,25 @@
 
     </LinearLayout>
 
+    <!--transition name is different because we need circular reveal transition animation-->
     <ImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/iv_profilePic"
         android:layout_width="184dp"
         android:layout_height="184dp"
+        android:transitionName="nahi_chaiye"
         android:layout_below="@+id/iv_cover"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="-92dp"
-        app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
+        app:srcCompat="@drawable/circle" />
+
+    <ProgressBar
+        android:id="@+id/progressBar_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/iv_profilePic"
+        android:layout_alignTop="@id/iv_profilePic"
+        android:layout_below="@+id/iv_cover"
+        android:layout_centerHorizontal="true" />
 
     <ImageView
         android:id="@+id/iv_dp_edit_overlay"

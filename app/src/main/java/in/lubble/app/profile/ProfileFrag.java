@@ -1,9 +1,11 @@
 package in.lubble.app.profile;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -12,8 +14,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +38,8 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
+import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
@@ -49,9 +58,12 @@ public class ProfileFrag extends Fragment {
     private TextView editProfileTV;
     private Button inviteBtn;
     private TextView logoutTv;
+    private ProgressBar progressBar;
     private CardView referralCard;
     private DatabaseReference userRef;
     private ValueEventListener valueEventListener;
+    @Nullable
+    private ProfileData profileData;
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -88,11 +100,19 @@ public class ProfileFrag extends Fragment {
         referralCard = rootView.findViewById(R.id.card_referral);
         inviteBtn = rootView.findViewById(R.id.btn_invite);
         logoutTv = rootView.findViewById(R.id.tv_logout);
+        progressBar = rootView.findViewById(R.id.progressBar_profile);
 
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //// TODO: 21/11/17 open pic full screen with edit option if its user's profile
+                final String profilePicUrl = profileData.getProfilePic();
+                if (StringUtils.isValidString(profilePicUrl)) {
+                    String uploadPath = null;
+                    if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                        uploadPath = "user_profile/" + FirebaseAuth.getInstance().getUid();
+                    }
+                    FullScreenImageActivity.open(getActivity(), getContext(), profilePicUrl, profilePicIv, uploadPath);
+                }
             }
         });
 
@@ -132,7 +152,8 @@ public class ProfileFrag extends Fragment {
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                profileData = dataSnapshot.getValue(ProfileData.class);
+                assert profileData != null;
                 userName.setText(profileData.getInfo().getName());
                 locality.setText(profileData.getLocality());
                 userBio.setText(profileData.getBio());
@@ -148,7 +169,20 @@ public class ProfileFrag extends Fragment {
                 GlideApp.with(getContext())
                         .load(profileData.getProfilePic())
                         .error(R.drawable.ic_account_circle_black_no_padding)
-                        .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                        .placeholder(R.drawable.circle)
+                        .listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                progressBar.setVisibility(View.GONE);
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                progressBar.setVisibility(View.GONE);
+                                return false;
+                            }
+                        })
                         .circleCrop()
                         .into(profilePicIv);
                 GlideApp.with(getContext())

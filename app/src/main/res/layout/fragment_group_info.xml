@@ -13,7 +13,7 @@
         android:background="@color/dark_gray"
         android:padding="56dp"
         android:scaleType="centerCrop"
-        android:transitionName="group_info_dp"
+        android:transitionName="fullscreen_image"
         app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
     <RelativeLayout

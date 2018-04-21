@@ -39,6 +39,14 @@ public class FullScreenImageActivity extends AppCompatActivity {
     @Nullable
     private String uploadPath;
 
+    /**
+     *
+     * @param activity
+     * @param context
+     * @param imgPath
+     * @param chatIv
+     * @param uploadPath storage Ref path
+     */
     public static void open(Activity activity, Context context, String imgPath, ImageView chatIv, @Nullable String uploadPath) {
         Intent intent = new Intent(context, FullScreenImageActivity.class);
         intent.putExtra(EXTRA_IMG_PATH, imgPath);
