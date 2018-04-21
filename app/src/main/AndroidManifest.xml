@@ -98,7 +98,10 @@
             android:theme="@style/AppTheme" />
         <activity android:name=".user_search.UserSearchActivity" />
         <activity android:name=".utils.FullScreenImageActivity" />
-        <activity android:name=".chat.AttachImageActivity" />
+        <activity
+            android:parentActivityName=".chat.ChatActivity"
+            android:name=".chat.AttachImageActivity"
+            android:windowSoftInputMode="adjustPan" />
         <activity android:name=".auth.LocationActivity" />
         <activity
             android:name=".auth.IntroActivity"

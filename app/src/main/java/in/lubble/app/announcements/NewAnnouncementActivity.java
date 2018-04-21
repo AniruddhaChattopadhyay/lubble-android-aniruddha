@@ -23,9 +23,10 @@ public class NewAnnouncementActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_announcement);
 
-        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("New Notice");
 
         replaceFrag(getSupportFragmentManager(), NewAnnouncementFragment.newInstance(), R.id.frame_fragContainer);
 
