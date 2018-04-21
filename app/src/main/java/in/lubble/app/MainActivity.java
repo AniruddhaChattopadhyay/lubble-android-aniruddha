@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private ValueEventListener presenceValueListener;
     private ImageView profileIcon;
     private TextView toolbarTitle;
+    private ValueEventListener dpEventListener;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -98,7 +99,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        setDp();
         GlideApp.with(this).load(currentUser.getPhotoUrl())
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .circleCrop()
@@ -130,8 +130,16 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkMinAppVersion();
+        handlePresence();
+        setDp();
+    }
+
     private void setDp() {
-        getUserInfoRef(firebaseAuth.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        dpEventListener = getUserInfoRef(firebaseAuth.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
@@ -148,13 +156,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        checkMinAppVersion();
-        handlePresence();
     }
 
     private void handlePresence() {
@@ -271,6 +272,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         connectedReference.removeEventListener(presenceValueListener);
+        getUserInfoRef(firebaseAuth.getUid()).removeEventListener(dpEventListener);
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
