@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:orientation="vertical"
     tools:context="in.lubble.app.announcements.NewAnnouncementFragment">
 
@@ -16,17 +17,20 @@
         android:id="@+id/et_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="top|left"
         android:layout_margin="8dp"
         android:gravity="left"
         android:hint="Message"
-        android:inputType="textMultiLine" />
+        android:inputType="textMultiLine"
+        android:maxLines="8"
+        android:scrollbars="vertical" />
 
     <Button
         android:id="@+id/btn_send"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="Send Announcement"
+        android:text="Publish Notice"
         android:theme="@style/PrimaryButton" />
 
 </LinearLayout>
