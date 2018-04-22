@@ -7,10 +7,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-import in.lubble.app.Constants;
 import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
+import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 public class UserSearchActivity extends AppCompatActivity {
 
@@ -33,7 +33,7 @@ public class UserSearchActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
-        replaceFrag(getSupportFragmentManager(), UserSearchFrag.newInstance(Constants.DEFAULT_LUBBLE, groupId), R.id.frame_fragContainer);
+        replaceFrag(getSupportFragmentManager(), UserSearchFrag.newInstance(getLubbleId(), groupId), R.id.frame_fragContainer);
 
     }
 

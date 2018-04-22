@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.auth.LoginActivity;
 
@@ -57,6 +58,10 @@ public class UserUtils {
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .circleCrop()
                 .into(imageView);
+    }
+
+    public static String getLubbleId() {
+        return LubbleSharedPrefs.getInstance().getLubbleId();
     }
 
 }

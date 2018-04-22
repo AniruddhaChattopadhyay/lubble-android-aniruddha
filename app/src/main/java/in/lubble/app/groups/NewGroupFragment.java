@@ -34,13 +34,13 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
 
 import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.Constants.DEFAULT_LUBBLE;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 
 public class NewGroupFragment extends Fragment {
@@ -171,7 +171,7 @@ public class NewGroupFragment extends Fragment {
                     getContext().startService(new Intent(getContext(), UploadFileService.class)
                             .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
-                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + DEFAULT_LUBBLE + "/groups/" + pushId)
+                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + getLubbleId() + "/groups/" + pushId)
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
 

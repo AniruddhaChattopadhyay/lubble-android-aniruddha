@@ -47,9 +47,9 @@ import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.FullScreenImageActivity;
 
-import static in.lubble.app.Constants.DEFAULT_LUBBLE;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
+import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 public class GroupInfoFragment extends Fragment {
     private static final String ARG_GROUP_ID = "GroupInfoFragment_GroupId";
@@ -262,7 +262,7 @@ public class GroupInfoFragment extends Fragment {
                 getContext(),
                 groupData.getProfilePic(),
                 groupIv,
-                "lubbles/" + DEFAULT_LUBBLE + "/groups/" + groupId
+                "lubbles/" + getLubbleId() + "/groups/" + groupId
         );
     }
 

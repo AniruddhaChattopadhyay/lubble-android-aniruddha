@@ -12,9 +12,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bumptech.glide.load.DataSource;
@@ -34,8 +37,10 @@ import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
@@ -146,6 +151,7 @@ public class ProfileFrag extends Fragment {
         super.onStart();
         userRef = getUserRef(userId);
         fetchProfileFeed();
+        fetchDevMenu();
     }
 
     private void fetchProfileFeed() {
@@ -196,6 +202,53 @@ public class ProfileFrag extends Fragment {
             }
         };
         userRef.addValueEventListener(valueEventListener);
+    }
+
+    private void fetchDevMenu() {
+        RealtimeDbHelper.getDevRef().child(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null && dataSnapshot.getValue(Boolean.class)) {
+                    toggleDevMenu(true);
+                } else {
+                    toggleDevMenu(false);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void toggleDevMenu(boolean isDev) {
+        Spinner envoSpinner = rootView.findViewById(R.id.spinner_envo);
+        envoSpinner.setVisibility(isDev ? View.VISIBLE : View.GONE);
+        String[] envos = new String[3];
+        envos[0] = "Select Environment";
+        envos[1] = "DEV";
+        envos[2] = "STAGING";
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, envos);
+
+        envoSpinner.setAdapter(adapter);
+        envoSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 1) {
+                    LubbleSharedPrefs.getInstance().setLubbleId("DEV");
+                    UserUtils.logout(getActivity());
+                } else if (position == 2) {
+                    LubbleSharedPrefs.getInstance().setLubbleId("STAGING");
+                    UserUtils.logout(getActivity());
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
 
 
