@@ -196,8 +196,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         });
     }
 
-    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar, ImageView imageView, ChatData chatData) {
+    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
         if (isValidString(chatData.getImgUrl())) {
+            imageView.setOnClickListener(null);
             imgContainer.setVisibility(View.VISIBLE);
             GlideApp.with(context)
                     .load(chatData.getImgUrl())
@@ -206,12 +207,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         @Override
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                             progressBar.setVisibility(View.GONE);
+                            imageView.setOnClickListener(null);
                             return false;
                         }
 
                         @Override
                         public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                             progressBar.setVisibility(View.GONE);
+
+                            imageView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    if (isValidString(chatData.getImgUrl())) {
+                                        FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null);
+                                    }
+                                }
+                            });
                             return false;
                         }
                     })
@@ -320,7 +331,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             dpIv = itemView.findViewById(R.id.iv_dp);
             dpIv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
-            chatIv.setOnClickListener(this);
+            chatIv.setOnClickListener(null);
             linkContainer.setOnClickListener(this);
         }
 
@@ -332,12 +343,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.linearLayout_lubb_container:
                     //toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
-                    break;
-                case R.id.iv_chat_img:
-                    String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
-                    if (isValidString(imgUrl)) {
-                        FullScreenImageActivity.open(activity, context, imgUrl, chatIv, null);
-                    }
                     break;
                 case R.id.link_meta_container:
                     final URLSpan[] urls = messageTv.getUrls();
@@ -379,7 +384,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
-            chatIv.setOnClickListener(this);
+            chatIv.setOnClickListener(null);
         }
 
         @Override
@@ -387,12 +392,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             switch (v.getId()) {
                 case R.id.linearLayout_lubb_container:
                     //toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
-                    break;
-                case R.id.iv_chat_img:
-                    String imgUrl = chatDataList.get(getAdapterPosition()).getImgUrl();
-                    if (isValidString(imgUrl)) {
-                        FullScreenImageActivity.open(activity, context, imgUrl, chatIv, null);
-                    }
                     break;
                 case R.id.link_meta_container:
                     final URLSpan[] urls = messageTv.getUrls();
