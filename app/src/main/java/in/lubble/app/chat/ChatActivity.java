@@ -34,7 +34,7 @@ public class ChatActivity extends AppCompatActivity {
         toolbarIcon = toolbar.findViewById(R.id.iv_toolbar);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         setTitle("");
-        toolbarIcon.setImageResource(R.drawable.ic_account_circle_black_no_padding);
+        toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);

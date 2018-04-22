@@ -13,7 +13,7 @@
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:layout_marginTop="8dp"
-        app:srcCompat="@drawable/ic_account_no_padding" />
+        app:srcCompat="@drawable/ic_circle_group_24dp" />
 
     <TextView
         android:id="@+id/tv_hint_choose_photo"

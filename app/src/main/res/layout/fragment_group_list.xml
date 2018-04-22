@@ -15,6 +15,7 @@
         android:layout_height="64dp"
         android:layout_centerVertical="true"
         android:layout_marginRight="8dp"
+        android:background="@drawable/circle"
         tools:src="@tools:sample/avatars" />
 
     <TextView

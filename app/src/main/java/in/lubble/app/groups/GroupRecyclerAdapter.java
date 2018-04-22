@@ -69,9 +69,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             GlideApp.with(groupViewHolder.mView)
                     .load(groupData.getThumbnail())
+                    .placeholder(R.drawable.ic_circle_group_24dp)
+                    .error(R.drawable.ic_circle_group_24dp)
                     .circleCrop()
-                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                    .error(R.drawable.ic_account_circle_black_no_padding)
                     .into(groupViewHolder.iconIv);
 
             groupViewHolder.titleTv.setText(groupData.getTitle());
