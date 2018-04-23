@@ -142,7 +142,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
-        recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+        if (isValidString(chatData.getMessage())) {
+            recvdChatViewHolder.messageTv.setVisibility(View.VISIBLE);
+            recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+        } else {
+            recvdChatViewHolder.messageTv.setVisibility(View.GONE);
+        }
         recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbers().containsKey(FirebaseAuth.getInstance().getUid())) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
