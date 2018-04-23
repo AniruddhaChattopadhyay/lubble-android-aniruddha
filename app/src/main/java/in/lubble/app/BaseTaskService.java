@@ -57,6 +57,7 @@ public abstract class BaseTaskService extends Service {
                 .setContentText(caption)
                 .setProgress(100, percentComplete, false)
                 .setOngoing(true)
+                .setOnlyAlertOnce(true)
                 .setChannelId(SENDING_MEDIA_NOTIF_CHANNEL)
                 .setAutoCancel(false);
 
