@@ -133,7 +133,7 @@
                         android:layout_marginRight="4dp"
                         android:gravity="right"
                         android:maxLines="1"
-                        android:text="14:23pm"
+                        tools:text="14:23pm"
                         android:textSize="12sp" />
 
                     <!--<include

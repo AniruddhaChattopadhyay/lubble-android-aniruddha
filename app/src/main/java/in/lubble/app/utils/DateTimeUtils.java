@@ -18,6 +18,7 @@ import java.util.TimeZone;
 public class DateTimeUtils {
 
     public static final String SERVER_DATE_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
+    public static final String APP_SHORT_TIME = "h:mm a";
 
     public static String currTimestampInString() {
         Calendar c = Calendar.getInstance();
@@ -47,6 +48,13 @@ public class DateTimeUtils {
         }
 
         return dateTimeInMilliSec;
+    }
+
+    @NonNull
+    public static String getTimeFromLong(long timeInMillis) {
+        SimpleDateFormat sdf = new SimpleDateFormat(APP_SHORT_TIME);
+        Date resultDate = new Date(timeInMillis);
+        return sdf.format(resultDate);
     }
 
     @NonNull

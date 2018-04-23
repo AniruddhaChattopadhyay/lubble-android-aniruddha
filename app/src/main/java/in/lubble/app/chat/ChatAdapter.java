@@ -37,6 +37,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
@@ -148,6 +149,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }
+        recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getCreatedTimestamp()));
         recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbers().containsKey(FirebaseAuth.getInstance().getUid())) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
@@ -315,6 +317,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private FrameLayout imgContainer;
         private ProgressBar progressBar;
         private ImageView chatIv;
+        private TextView dateTv;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
@@ -330,6 +333,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             imgContainer = itemView.findViewById(R.id.img_container);
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
+            dateTv = itemView.findViewById(R.id.tv_date);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
