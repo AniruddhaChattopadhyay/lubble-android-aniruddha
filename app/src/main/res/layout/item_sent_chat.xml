@@ -19,6 +19,7 @@
             android:layout_height="wrap_content"
             android:background="@color/mute_green"
             android:orientation="vertical"
+            android:layout_gravity="right|center_vertical"
             android:padding="8dp">
 
             <FrameLayout
@@ -72,14 +73,55 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tv_message"
+            <in.lubble.app.utils.MsgFlexBoxLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:autoLink="web"
-                android:textColor="@color/black"
-                android:textIsSelectable="true"
-                tools:text="Pikachu! I choose you!" />
+                android:layout_gravity="right|bottom"
+                android:gravity="left|center_vertical"
+                app:viewPartMain="@+id/tv_message"
+                app:viewPartSlave="@+id/msg_status_container">
+
+                <TextView
+                    android:id="@+id/tv_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:autoLink="web"
+                    android:textColor="@color/black"
+                    android:textIsSelectable="true"
+                    tools:text="Pikachu! I choose you!" />
+
+                <LinearLayout
+                    android:id="@+id/msg_status_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:gravity="right"
+                    android:minWidth="60dp">
+
+                    <TextView
+                        android:id="@+id/tv_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_gravity="right|bottom"
+                        android:layout_marginRight="4dp"
+                        android:gravity="right"
+                        android:maxLines="1"
+                        android:textSize="12sp"
+                        tools:text="14:23pm" />
+
+                    <!--<include
+                        android:id="@+id/msg_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginRight="5dp"
+                        android:minWidth="40dp"
+                        android:visibility="gone" />-->
+
+                </LinearLayout>
+
+            </in.lubble.app.utils.MsgFlexBoxLayout>
 
             <LinearLayout
                 android:id="@+id/linearLayout_lubb_container"

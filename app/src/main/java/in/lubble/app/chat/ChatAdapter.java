@@ -127,6 +127,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
 
+        sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getCreatedTimestamp()));
         if (chatData.getType().equalsIgnoreCase(LINK)) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
@@ -375,6 +376,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private FrameLayout imgContainer;
         private ProgressBar progressBar;
         private ImageView chatIv;
+        private TextView dateTv;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
@@ -388,6 +390,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             imgContainer = itemView.findViewById(R.id.img_container);
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
+            dateTv = itemView.findViewById(R.id.tv_date);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
