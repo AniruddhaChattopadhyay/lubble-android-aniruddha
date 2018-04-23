@@ -118,7 +118,7 @@ public class UploadFileService extends BaseTaskService {
 
                         // [START_EXCLUDE]
                         broadcastUploadFinished(downloadUri, fileUri, toTransmit, caption, groupId);
-                        showUploadFinishedNotification(downloadUri, fileUri);
+                        showUploadFinishedNotification(downloadUri, fileUri, toTransmit);
                         taskCompleted();
                         // [END_EXCLUDE]
                     }
@@ -131,7 +131,7 @@ public class UploadFileService extends BaseTaskService {
 
                         // [START_EXCLUDE]
                         broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId);
-                        showUploadFinishedNotification(null, fileUri);
+                        showUploadFinishedNotification(null, fileUri, toTransmit);
                         taskCompleted();
                         // [END_EXCLUDE]
                     }
@@ -178,9 +178,14 @@ public class UploadFileService extends BaseTaskService {
     /**
      * Show a notification for a finished upload.
      */
-    private void showUploadFinishedNotification(@Nullable Uri downloadUrl, @Nullable Uri fileUri) {
+    private void showUploadFinishedNotification(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean isConvo) {
         // Hide the progress notification
         dismissProgressNotification();
+        if (isConvo) {
+            // img uploaded for chat convo, just dismiss the progress notif
+            // do NOT show complete noif
+            return;
+        }
 
         // Make Intent to MainActivity
         Intent intent = new Intent(this, MainActivity.class)
@@ -200,6 +205,5 @@ public class UploadFileService extends BaseTaskService {
 
         return filter;
     }
-
 
 }
