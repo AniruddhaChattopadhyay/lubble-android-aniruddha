@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_marginRight="64dp"
     android:orientation="horizontal">
 
     <ImageView
@@ -24,7 +25,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="8dp">
+            android:paddingBottom="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="8dp">
 
             <TextView
                 android:id="@+id/tv_author"
@@ -32,80 +36,88 @@
                 android:layout_height="wrap_content"
                 tools:text="@tools:sample/full_names" />
 
-            <FrameLayout
-                android:id="@+id/img_container"
-                android:layout_width="240dp"
-                android:layout_height="240dp"
-                android:visibility="gone"
-                tools:visibility="gone">
-
-                <ProgressBar
-                    android:id="@+id/progressbar_img"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center" />
-
-                <ImageView
-                    android:id="@+id/iv_chat_img"
-                    android:layout_width="240dp"
-                    android:layout_height="240dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_marginTop="4dp"
-                    android:scaleType="centerCrop"
-                    android:transitionName="fullscreen_image"
-                    tools:src="@tools:sample/backgrounds/scenic" />
-
-            </FrameLayout>
-
-            <LinearLayout
-                android:id="@+id/link_meta_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
-                android:background="@color/very_light_gray"
-                android:orientation="vertical"
-                android:padding="8dp"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/tv_link_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxLines="2"
-                    android:text="LINK TITLE"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_link_desc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:maxLines="2"
-                    android:text="Link description goes here" />
-
-            </LinearLayout>
-
             <in.lubble.app.utils.MsgFlexBoxLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:viewPartMain="@+id/tv_message"
+                app:viewPartMain="@+id/msg_content_container"
                 app:viewPartSlave="@+id/msg_status_container">
 
-                <TextView
-                    android:id="@+id/tv_message"
+                <LinearLayout
+                    android:id="@+id/msg_content_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:autoLink="web"
-                    android:textColor="@color/black"
-                    android:textIsSelectable="true"
-                    tools:text="Pikachu! I choose you!" />
+                    android:orientation="vertical">
+
+                    <FrameLayout
+                        android:id="@+id/img_container"
+                        android:layout_width="240dp"
+                        android:layout_height="240dp"
+                        android:visibility="gone"
+                        tools:visibility="gone">
+
+                        <ProgressBar
+                            android:id="@+id/progressbar_img"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center" />
+
+                        <ImageView
+                            android:id="@+id/iv_chat_img"
+                            android:layout_width="240dp"
+                            android:layout_height="240dp"
+                            android:layout_marginBottom="4dp"
+                            android:layout_marginTop="4dp"
+                            android:scaleType="centerCrop"
+                            android:transitionName="fullscreen_image"
+                            tools:src="@tools:sample/backgrounds/scenic" />
+
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:id="@+id/link_meta_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/very_light_gray"
+                        android:orientation="vertical"
+                        android:padding="8dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/tv_link_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="2"
+                            android:text="LINK TITLE"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_link_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="2"
+                            android:text="Link description goes here" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:autoLink="web"
+                        android:textColor="@color/black"
+                        android:textIsSelectable="true"
+                        android:textSize="16sp"
+                        tools:text="Pikachu! I choose you!" />
+
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/msg_status_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginLeft="4dp"
                     android:gravity="right"
                     android:minWidth="60dp">
 
@@ -115,10 +127,11 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
                         android:layout_gravity="right|bottom"
-                        android:layout_marginRight="5dp"
+                        android:layout_marginRight="4dp"
                         android:gravity="right"
                         android:maxLines="1"
-                        android:text="14:23pm" />
+                        android:text="14:23pm"
+                        android:textSize="12sp" />
 
                     <!--<include
                         android:id="@+id/msg_status"

@@ -14,7 +14,7 @@ import in.lubble.app.R;
  */
 
 public class MsgFlexBoxLayout extends RelativeLayout {
-    private TextView viewPartMain;
+    private View viewPartMain;
     private View viewPartSlave;
 
     private TypedArray a;
@@ -72,8 +72,9 @@ public class MsgFlexBoxLayout extends RelativeLayout {
         viewPartSlaveWidth = viewPartSlave.getMeasuredWidth() + viewPartSlaveLayoutParams.leftMargin + viewPartSlaveLayoutParams.rightMargin;
         viewPartSlaveHeight = viewPartSlave.getMeasuredHeight() + viewPartSlaveLayoutParams.topMargin + viewPartSlaveLayoutParams.bottomMargin;
 
-        int viewPartMainLineCount = viewPartMain.getLineCount();
-        float viewPartMainLastLineWitdh = viewPartMainLineCount > 0 ? viewPartMain.getLayout().getLineWidth(viewPartMainLineCount - 1) : 0;
+        final TextView textView = viewPartMain.findViewById(R.id.tv_message);
+        int viewPartMainLineCount = textView.getLineCount();
+        float viewPartMainLastLineWitdh = viewPartMainLineCount > 0 ? textView.getLayout().getLineWidth(viewPartMainLineCount - 1) : 0;
 
         widthSize = getPaddingLeft() + getPaddingRight();
         heightSize = getPaddingTop() + getPaddingBottom();
