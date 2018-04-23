@@ -51,8 +51,9 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:gravity="center"
-                tools:text="Android developer and tech enthusiast.\nFitness freak on weekdays,\nparty animal by the weekend" />
+                tools:text="Edit Profile to add a bio" />
 
             <TextView
                 android:id="@+id/tv_editProfile"
@@ -60,6 +61,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tv_bio"
                 android:layout_centerHorizontal="true"
+                android:textStyle="bold"
                 android:padding="8dp"
                 android:text="@string/edit_profile"
                 android:textColor="@color/link_blue"
@@ -82,7 +84,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/gradient_blue"
+                android:background="@color/very_dk_blue"
                 android:orientation="vertical"
                 android:padding="8dp">
 
@@ -115,25 +117,64 @@
 
         <Spinner
             android:id="@+id/spinner_envo"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/card_referral"
             android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
+            android:background="@drawable/rectangle_border"
             android:visibility="gone"
             tools:visibility="visible" />
+
+        <RelativeLayout
+            android:id="@+id/feedback_container"
+            android:layout_width="match_parent"
+            android:background="@drawable/rectangle_border"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/spinner_envo"
+            android:layout_margin="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:padding="14dp"
+                android:text="Send Feedback"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="8dp"
+                android:layout_centerVertical="true"
+                app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_version_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/feedback_container"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            tools:text="v0.9.3" />
 
         <TextView
             android:id="@+id/tv_logout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/spinner_envo"
+            android:layout_below="@id/tv_version_name"
             android:layout_marginTop="8dp"
             android:background="@color/white"
             android:gravity="center"
-            android:padding="8dp"
+            android:padding="12dp"
             android:text="LOG OUT"
             android:textColor="@color/dk_red"
+            android:textStyle="bold"
             android:visibility="gone"
             tools:visibility="visible" />
 

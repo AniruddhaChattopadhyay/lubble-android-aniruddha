@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -36,6 +37,7 @@ import com.google.firebase.dynamiclinks.DynamicLink;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -44,10 +46,10 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
-import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
+import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class ProfileFrag extends Fragment {
     private static final String TAG = "ProfileFrag";
@@ -106,12 +108,14 @@ public class ProfileFrag extends Fragment {
         inviteBtn = rootView.findViewById(R.id.btn_invite);
         logoutTv = rootView.findViewById(R.id.tv_logout);
         progressBar = rootView.findViewById(R.id.progressBar_profile);
+        TextView versionTv = rootView.findViewById(R.id.tv_version_name);
+        RelativeLayout feedbackView = rootView.findViewById(R.id.feedback_container);
 
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 final String profilePicUrl = profileData.getProfilePic();
-                if (StringUtils.isValidString(profilePicUrl)) {
+                if (isValidString(profilePicUrl)) {
                     String uploadPath = null;
                     if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                         uploadPath = "user_profile/" + FirebaseAuth.getInstance().getUid();
@@ -143,6 +147,24 @@ public class ProfileFrag extends Fragment {
             }
         });
 
+        versionTv.setVisibility(FirebaseAuth.getInstance().getUid().equalsIgnoreCase(userId) ? View.VISIBLE : View.GONE);
+        feedbackView.setVisibility(FirebaseAuth.getInstance().getUid().equalsIgnoreCase(userId) ? View.VISIBLE : View.GONE);
+
+        versionTv.setText(BuildConfig.VERSION_NAME);
+        feedbackView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setType("message/rfc822");
+                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"ayush@mittalsoft.com"});
+                intent.putExtra(Intent.EXTRA_SUBJECT, "Lubble Feedback");
+                intent.putExtra(Intent.EXTRA_TEXT, "Thanks for taking out time to write to us!\n\n" +
+                        "We're here to listen & improve Lubble for you, please write your feedback below:\n\n\n\n");
+                Intent mailer = Intent.createChooser(intent, null);
+                startActivity(mailer);
+            }
+        });
+
         return rootView;
     }
 
@@ -162,7 +184,13 @@ public class ProfileFrag extends Fragment {
                 assert profileData != null;
                 userName.setText(profileData.getInfo().getName());
                 locality.setText(profileData.getLocality());
-                userBio.setText(profileData.getBio());
+                if (isValidString(profileData.getBio())) {
+                    userBio.setText(profileData.getBio());
+                } else if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                    userBio.setText("Edit Profile to add a bio");
+                } else {
+                    userBio.setText("This user has no bio :(");
+                }
                 if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                     editProfileTV.setVisibility(View.VISIBLE);
                     referralCard.setVisibility(View.VISIBLE);
@@ -226,7 +254,7 @@ public class ProfileFrag extends Fragment {
         Spinner envoSpinner = rootView.findViewById(R.id.spinner_envo);
         envoSpinner.setVisibility(isDev ? View.VISIBLE : View.GONE);
         String[] envos = new String[3];
-        envos[0] = "Select Environment";
+        envos[0] = "Select Environment...";
         envos[1] = "DEV";
         envos[2] = "STAGING";
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, envos);
