@@ -55,6 +55,7 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
+import in.lubble.app.utils.DateTimeUtils;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
@@ -62,6 +63,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
@@ -373,11 +375,30 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 final ChatData chatData = dataSnapshot.getValue(ChatData.class);
                 if (chatData != null) {
                     Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
+                    checkAndInsertDate(chatData);
                     chatData.setId(dataSnapshot.getKey());
                     chatAdapter.addChatData(chatData);
                     sendReadReceipt(chatData);
                 }
-                // chatRecyclerView.scrollToPosition(chatAdapter.getItemCount() - 1);
+            }
+
+            private void checkAndInsertDate(ChatData chatData) {
+                final int lastPos = chatAdapter.getItemCount() - 1;
+                ChatData lastMsg = null;
+                if (lastPos > -1) {
+                    lastMsg = chatAdapter.getChatMsgAt(lastPos);
+                }
+                if (lastMsg == null || !DateTimeUtils.getDateFromLong(lastMsg.getCreatedTimestamp())
+                        .equalsIgnoreCase(DateTimeUtils.getDateFromLong(chatData.getCreatedTimestamp()))) {
+                    // different date, insert date divider
+                    final ChatData dateChatData = new ChatData();
+                    dateChatData.setMessage(DateTimeUtils.getDateFromLong(chatData.getCreatedTimestamp()));
+                    dateChatData.setType(SYSTEM);
+                    final HashMap<String, Long> readMap = new HashMap<>();
+                    readMap.put(FirebaseAuth.getInstance().getUid(), 0L);
+                    dateChatData.setReadReceipts(readMap);
+                    chatAdapter.addChatData(dateChatData);
+                }
             }
 
             @Override
