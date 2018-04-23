@@ -116,7 +116,7 @@ public class ProfileFrag extends Fragment {
                     if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                         uploadPath = "user_profile/" + FirebaseAuth.getInstance().getUid();
                     }
-                    FullScreenImageActivity.open(getActivity(), getContext(), profilePicUrl, profilePicIv, uploadPath);
+                    FullScreenImageActivity.open(getActivity(), getContext(), profilePicUrl, profilePicIv, uploadPath, R.drawable.ic_account_circle_black_no_padding);
                 }
             }
         });

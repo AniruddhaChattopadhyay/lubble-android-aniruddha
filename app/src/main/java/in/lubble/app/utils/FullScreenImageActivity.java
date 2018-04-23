@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -33,6 +34,7 @@ public class FullScreenImageActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_GROUP_DP = 418;
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";
     private static final String EXTRA_UPLOAD_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_UPLOAD_PATH";
+    private static final String EXTRA_ERROR_PIC = BuildConfig.APPLICATION_ID + "_EXTRA_ERROR_PIC";
 
     private String currentPhotoPath;
     private TouchImageView touchImageView;
@@ -40,17 +42,18 @@ public class FullScreenImageActivity extends AppCompatActivity {
     private String uploadPath;
 
     /**
-     *
      * @param activity
      * @param context
      * @param imgPath
      * @param chatIv
      * @param uploadPath storage Ref path
+     * @param errorPic
      */
-    public static void open(Activity activity, Context context, String imgPath, ImageView chatIv, @Nullable String uploadPath) {
+    public static void open(Activity activity, Context context, String imgPath, ImageView chatIv, @Nullable String uploadPath, @DrawableRes int errorPic) {
         Intent intent = new Intent(context, FullScreenImageActivity.class);
         intent.putExtra(EXTRA_IMG_PATH, imgPath);
         intent.putExtra(EXTRA_UPLOAD_PATH, uploadPath);
+        intent.putExtra(EXTRA_ERROR_PIC, errorPic);
         Bundle bundle = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, chatIv, chatIv.getTransitionName()).toBundle();
@@ -72,9 +75,11 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
         if (getIntent() != null) {
             String imgPath = getIntent().getStringExtra(EXTRA_IMG_PATH);
+            int errorPic = getIntent().getIntExtra(EXTRA_ERROR_PIC, R.drawable.ic_cancel_black_24dp);
             uploadPath = getIntent().getStringExtra(EXTRA_UPLOAD_PATH);
             GlideApp.with(this)
                     .load(imgPath)
+                    .error(errorPic)
                     .fitCenter()
                     .into(touchImageView);
         }

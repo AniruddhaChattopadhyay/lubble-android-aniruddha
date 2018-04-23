@@ -227,7 +227,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                 @Override
                                 public void onClick(View v) {
                                     if (isValidString(chatData.getImgUrl())) {
-                                        FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null);
+                                        FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
                                     }
                                 }
                             });

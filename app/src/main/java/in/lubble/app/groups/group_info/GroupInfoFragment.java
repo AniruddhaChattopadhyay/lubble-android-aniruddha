@@ -224,7 +224,12 @@ public class GroupInfoFragment extends Fragment {
                         public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                             groupIv.setPadding(dpToPx(56), dpToPx(56), dpToPx(56), dpToPx(56));
                             dpProgressBar.setVisibility(View.GONE);
-                            groupIv.setOnClickListener(null);
+                            groupIv.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    openDpInFullScreen(groupData);
+                                }
+                            });
                             return false;
                         }
 
@@ -262,8 +267,8 @@ public class GroupInfoFragment extends Fragment {
                 getContext(),
                 groupData.getProfilePic(),
                 groupIv,
-                "lubbles/" + getLubbleId() + "/groups/" + groupId
-        );
+                "lubbles/" + getLubbleId() + "/groups/" + groupId,
+                R.drawable.ic_circle_group_24dp);
     }
 
     private void toggleMemberElements(boolean isJoined) {

@@ -1,8 +1,10 @@
 package in.lubble.app.profile;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,8 +13,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -49,6 +56,7 @@ public class EditProfileFrag extends Fragment {
     private Button saveBtn;
     private View rootView;
     private String currentPhotoPath;
+    private ProgressBar progressBar;
     private Uri newProfilePicUri = null;
     private Uri newCoverPicUri = null;
     private ProfileData fetchedProfileData;
@@ -79,6 +87,7 @@ public class EditProfileFrag extends Fragment {
         lubbleTv = rootView.findViewById(R.id.tv_lubble);
         bioTil = rootView.findViewById(R.id.til_bio);
         saveBtn = rootView.findViewById(R.id.btn_save_profile);
+        progressBar = rootView.findViewById(R.id.progressBar_profile);
 
         rootView.findViewById(R.id.linearLayout_cover_edit_container).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
@@ -98,6 +107,19 @@ public class EditProfileFrag extends Fragment {
                             .load(fetchedProfileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .listener(new RequestListener<Drawable>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                    progressBar.setVisibility(View.GONE);
+                                    return false;
+                                }
+
+                                @Override
+                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                    progressBar.setVisibility(View.GONE);
+                                    return false;
+                                }
+                            })
                             .circleCrop()
                             .into(profilePicIv);
                     GlideApp.with(getContext())
