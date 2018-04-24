@@ -154,13 +154,13 @@ public class ProfileFrag extends Fragment {
         feedbackView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_SEND);
-                intent.setType("message/rfc822");
+                Intent intent = new Intent(Intent.ACTION_SENDTO);
+                intent.setData(Uri.parse("mailto:"));
                 intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"ayush@mittalsoft.com"});
                 intent.putExtra(Intent.EXTRA_SUBJECT, "Lubble Feedback");
                 intent.putExtra(Intent.EXTRA_TEXT, "Thanks for taking out time to write to us!\n\n" +
                         "We're here to listen & improve Lubble for you, please write your feedback below:\n\n\n\n");
-                Intent mailer = Intent.createChooser(intent, null);
+                Intent mailer = Intent.createChooser(intent, "Choose an email app");
                 startActivity(mailer);
             }
         });
