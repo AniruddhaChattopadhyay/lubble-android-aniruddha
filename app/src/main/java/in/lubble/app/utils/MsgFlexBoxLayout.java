@@ -89,8 +89,13 @@ public class MsgFlexBoxLayout extends RelativeLayout {
             widthSize += viewPartMain.getMeasuredWidth();
             heightSize += viewPartMainHeight + viewPartSlaveHeight;
         } else {
-            widthSize += viewPartMainWidth + viewPartSlaveWidth;
-            heightSize += viewPartMainHeight;
+            if (viewPartMainWidth + viewPartSlaveWidth >= availableWidth) {
+                widthSize += viewPartMain.getMeasuredWidth();
+                heightSize += viewPartMainHeight + viewPartSlaveHeight;
+            } else {
+                widthSize += viewPartMainWidth + viewPartSlaveWidth;
+                heightSize += viewPartMainHeight;
+            }
         }
 
         this.setMeasuredDimension(widthSize, heightSize);
