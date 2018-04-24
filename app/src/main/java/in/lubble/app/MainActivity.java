@@ -149,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
                     bottomNavigation.setSelectedItemId(R.id.navigation_domestic_help);
                     break;
             }
+            getIntent().removeExtra(EXTRA_TAB_NAME);
         }
     }
 

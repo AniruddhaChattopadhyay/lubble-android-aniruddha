@@ -28,6 +28,7 @@ public class AnnouncementsFrag extends Fragment {
 
     private AnnouncementsAdapter announcementsAdapter;
     private ProgressBar progressBar;
+    private RecyclerView recyclerView;
 
     public static AnnouncementsFrag newInstance() {
         return new AnnouncementsFrag();
@@ -44,14 +45,13 @@ public class AnnouncementsFrag extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_announcements, container, false);
 
         progressBar = view.findViewById(R.id.progressBar_notices);
-        final RecyclerView recyclerView = view.findViewById(R.id.rv_announcements);
+        recyclerView = view.findViewById(R.id.rv_announcements);
         final FloatingActionButton fab = view.findViewById(R.id.fab_new_announcement);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         announcementsAdapter = new AnnouncementsAdapter();
         recyclerView.setAdapter(announcementsAdapter);
 
         Analytics.triggerScreenEvent(getContext(), this.getClass());
-        getAnnouncementsRef().addValueEventListener(announcementEventListener);
 
         toggleAnnouncementBtn(fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -64,12 +64,19 @@ public class AnnouncementsFrag extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        getAnnouncementsRef().addValueEventListener(announcementEventListener);
+    }
+
     final ValueEventListener announcementEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             if (progressBar.getVisibility() == View.VISIBLE) {
                 progressBar.setVisibility(View.GONE);
             }
+            announcementsAdapter.clear();
             for (DataSnapshot child : dataSnapshot.getChildren()) {
                 announcementsAdapter.addAnnouncement(child.getValue(AnnouncementData.class));
                 AppNotifUtils.deleteAppNotif(getContext(), child.getKey());
