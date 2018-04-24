@@ -55,6 +55,7 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
+import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.DateTimeUtils;
 
 import static android.app.Activity.RESULT_OK;
@@ -106,6 +107,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private RelativeLayout bottomContainer;
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
+    private ValueEventListener bottomBarListener;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -192,6 +194,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         msgChildListener = msgListener(chatAdapter);
 
         deleteUnreadMsgsForGroupId(groupId, getContext());
+        AppNotifUtils.deleteAppNotif(getContext(), groupId);
         foundFirstUnreadMsg = false;
         chatAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
@@ -293,7 +296,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         if (!isJoining) {
             bottomContainer.setVisibility(View.VISIBLE);
         }
-        RealtimeDbHelper.getUserGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+
+        bottomBarListener = RealtimeDbHelper.getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (groupData.isJoined()) {
@@ -599,5 +603,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         prevUrl = "";
         messagesReference.removeEventListener(msgChildListener);
         groupReference.removeEventListener(groupInfoListener);
+        RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
     }
 }

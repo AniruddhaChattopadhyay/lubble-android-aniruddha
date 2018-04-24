@@ -11,6 +11,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
+import in.lubble.app.notifications.KeyMappingSharedPrefs;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import io.fabric.sdk.android.Fabric;
@@ -33,6 +34,7 @@ public class LubbleApp extends Application {
         GroupMappingSharedPrefs.initializeInstance(getApplicationContext());
         UnreadChatsSharedPrefs.initializeInstance(getApplicationContext());
         MutedChatsSharedPrefs.initializeInstance(getApplicationContext());
+        KeyMappingSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
 

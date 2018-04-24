@@ -65,6 +65,10 @@ public class DateTimeUtils {
         return sdf.format(resultDate);
     }
 
+    public static int getTimeBasedUniqueInt() {
+        return (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+    }
+
     @NonNull
     public static String getHumanTimestamp(@NonNull String timestamp) {
         long time = convertStringDateTimeToLong(timestamp, SERVER_DATE_TIME, SERVER_DATE_TIME, true);

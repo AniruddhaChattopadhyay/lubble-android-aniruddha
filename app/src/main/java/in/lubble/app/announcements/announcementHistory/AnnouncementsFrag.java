@@ -19,6 +19,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.announcements.NewAnnouncementActivity;
 import in.lubble.app.models.AnnouncementData;
+import in.lubble.app.utils.AppNotifUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
@@ -71,6 +72,7 @@ public class AnnouncementsFrag extends Fragment {
             }
             for (DataSnapshot child : dataSnapshot.getChildren()) {
                 announcementsAdapter.addAnnouncement(child.getValue(AnnouncementData.class));
+                AppNotifUtils.deleteAppNotif(getContext(), child.getKey());
             }
         }
 

@@ -51,12 +51,15 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final String EXTRA_IDP_RESPONSE = "extra_idp_response";
 
+    public static final String EXTRA_TAB_NAME = "extra_tab_name";
+
     private FirebaseAuth firebaseAuth;
     private DatabaseReference connectedReference;
     private ValueEventListener presenceValueListener;
     private ImageView profileIcon;
     private TextView toolbarTitle;
     private ValueEventListener dpEventListener;
+    private BottomNavigationView bottomNavigation;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -109,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
 
         switchFrag(GroupListFragment.newInstance());
 
-        BottomNavigationView navigation = findViewById(R.id.navigation);
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        bottomNavigation = findViewById(R.id.navigation);
+        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
@@ -136,6 +139,27 @@ public class MainActivity extends AppCompatActivity {
         checkMinAppVersion();
         handlePresence();
         setDp();
+
+        if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
+            switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
+                case "notice":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_notices);
+                    break;
+                case "directory":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_domestic_help);
+                    break;
+            }
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        /*
+        When MainActivity is called via Server Notification, if it's already open then onResume will be called but
+        it'll have the old intent, so here we reset it. onNewIntent() is called before onResume.
+        */
+        setIntent(intent);
     }
 
     private void setDp() {
