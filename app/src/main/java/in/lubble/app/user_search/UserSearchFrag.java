@@ -158,6 +158,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     }
 
     private void fetchAllLubbleMembersProfile(ArrayList<String> userList) {
+        userAdapter.clear();
         for (String uid : userList) {
             ValueEventListener membersProfileListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
                 @Override
