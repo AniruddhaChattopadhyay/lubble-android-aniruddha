@@ -48,7 +48,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.groups.group_info.GroupInfoActivity;
+import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
@@ -593,7 +593,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     public void openGroupInfo() {
         if (groupData.isJoined() || !groupData.getIsPrivate()) {
-            GroupInfoActivity.newInstance(getContext(), groupId);
+            ScrollingGroupInfoActivity.open(getContext(), groupId);
         }
     }
 
