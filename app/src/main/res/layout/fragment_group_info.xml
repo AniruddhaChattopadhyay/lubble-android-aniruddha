@@ -119,7 +119,7 @@
             android:id="@+id/iv_icon"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:tint="@color/colorPrimary"
+            android:tint="@color/dk_colorAccent"
             app:srcCompat="@drawable/ic_person_add_24dp" />
 
         <TextView
@@ -130,7 +130,7 @@
             android:layout_marginLeft="8dp"
             android:text="Invite Members from Saraswati Vihar"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead"
-            android:textColor="@color/colorPrimary" />
+            android:textColor="@color/dk_colorAccent" />
 
     </LinearLayout>
 
