@@ -189,7 +189,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         chatRecyclerView.setLayoutManager(layoutManager);
-        final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>(), chatRecyclerView);
+        final ChatAdapter chatAdapter = new ChatAdapter(
+                getActivity(),
+                getContext(),
+                new ArrayList<ChatData>(),
+                chatRecyclerView,
+                this);
         chatRecyclerView.setAdapter(chatAdapter);
         msgChildListener = msgListener(chatAdapter);
 
@@ -591,6 +596,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         };
     }
 
+    public void addReplyFor(@NonNull String selectedChatId) {
+        linkMetaContainer.setVisibility(View.VISIBLE);
+
+        messagesReference.child(selectedChatId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                linkTitle.setText("Reply");
+                linkDesc.setText(quotedChatData.getMessage());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     public void openGroupInfo() {
         if (groupData.isJoined() || !groupData.getIsPrivate()) {
             GroupInfoActivity.newInstance(getContext(), groupId);
@@ -605,4 +628,5 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         groupReference.removeEventListener(groupInfoListener);
         RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
     }
+
 }

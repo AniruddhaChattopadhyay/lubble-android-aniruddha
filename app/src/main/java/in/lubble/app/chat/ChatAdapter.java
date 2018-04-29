@@ -7,10 +7,14 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -64,12 +68,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private Context context;
     private RecyclerView recyclerView;
     private ArrayList<ChatData> chatDataList;
+    private ChatFragment chatFragment;
+    private String selectedChatId = null;
 
-    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList, RecyclerView recyclerView) {
+    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList, RecyclerView recyclerView, ChatFragment chatFragment) {
         this.activity = activity;
         this.context = context;
         this.chatDataList = chatDataList;
         this.recyclerView = recyclerView;
+        this.chatFragment = chatFragment;
     }
 
     @Override
@@ -343,7 +350,45 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
             linkContainer.setOnClickListener(this);
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+                    ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                    return true;
+                }
+            });
+
         }
+
+        private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_reply:
+                        chatFragment.addReplyFor(selectedChatId);
+                        break;
+                }
+                mode.finish();
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                selectedChatId = null;
+            }
+        };
 
         @Override
         public void onClick(View v) {
