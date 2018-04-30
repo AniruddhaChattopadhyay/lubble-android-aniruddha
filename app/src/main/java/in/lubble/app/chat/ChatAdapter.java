@@ -48,6 +48,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.REPLY;
 import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -126,7 +127,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
-        sentChatViewHolder.messageTv.setText(chatData.getMessage());
+        if (isValidString(chatData.getMessage())) {
+            sentChatViewHolder.messageTv.setVisibility(View.VISIBLE);
+            sentChatViewHolder.messageTv.setText(chatData.getMessage());
+        } else {
+            sentChatViewHolder.messageTv.setVisibility(View.GONE);
+        }
         sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbers().containsKey(FirebaseAuth.getInstance().getUid())) {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
@@ -139,12 +145,26 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+        } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
+            sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            addReplyData(chatData.getReplyMsgId(), sentChatViewHolder);
         } else {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData);
 
+    }
+
+    private void addReplyData(String replyMsgId, SentChatViewHolder sentChatViewHolder) {
+        ChatData emptyReplyChatData = new ChatData();
+        emptyReplyChatData.setId(replyMsgId);
+        int index = chatDataList.indexOf(emptyReplyChatData);
+        if (index > -1) {
+            ChatData quotedChatData = chatDataList.get(index);
+            sentChatViewHolder.linkDescTv.setText(quotedChatData.getMessage());
+            showName(sentChatViewHolder.linkTitleTv, quotedChatData.getAuthorUid());
+        }
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -169,6 +189,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+        } else if (chatData.getType().equalsIgnoreCase(REPLY)) {
+            recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            recvdChatViewHolder.linkTitleTv.setVisibility(View.GONE);
+            recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
         } else {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -184,6 +208,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (chatData.getType().equalsIgnoreCase(SYSTEM)) {
             systemChatViewHolder.messageTv.setText(chatData.getMessage());
         }
+    }
+
+    private void showName(final TextView authorNameTv, String authorUid) {
+        getUserInfoRef(authorUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                if (map != null) {
+                    authorNameTv.setText(map.get("name"));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {

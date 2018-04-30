@@ -1,5 +1,7 @@
 package in.lubble.app.models;
 
+import android.support.annotation.Nullable;
+
 import com.google.firebase.database.Exclude;
 
 import java.util.HashMap;
@@ -15,6 +17,7 @@ public class ChatData {
     public static final String HIDDEN = "HIDDEN";
     public static final String SYSTEM = "SYSTEM";
     public static final String UNREAD = "UNREAD";
+    public static final String REPLY = "REPLY";
 
     private String id;
     private String authorUid;
@@ -29,12 +32,14 @@ public class ChatData {
     private String type = "";
     private String linkTitle;
     private String linkDesc;
+    @Nullable
+    private String replyMsgId = null;
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ChatData) {
             ChatData objectToCompare = (ChatData) obj;
-            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
+            if (this.id != null && objectToCompare.getId() != null && this.id.equalsIgnoreCase(objectToCompare.getId())) {
                 return true;
             }
             return false;
@@ -149,5 +154,14 @@ public class ChatData {
 
     public void setLinkDesc(String linkDesc) {
         this.linkDesc = linkDesc;
+    }
+
+    @Nullable
+    public String getReplyMsgId() {
+        return replyMsgId;
+    }
+
+    public void setReplyMsgId(@Nullable String replyMsgId) {
+        this.replyMsgId = replyMsgId;
     }
 }
