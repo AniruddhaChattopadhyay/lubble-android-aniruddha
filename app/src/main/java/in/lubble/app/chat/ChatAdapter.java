@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,6 +44,7 @@ import in.lubble.app.models.ChatData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.MsgFlexBoxLayout;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -148,6 +150,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv);
+            sentChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    sentChatViewHolder.itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    final int textWidth = sentChatViewHolder.textContainer.getWidth();
+                    if (textWidth > sentChatViewHolder.linkContainer.getWidth()) {
+                        final ViewGroup.LayoutParams layoutParams = sentChatViewHolder.linkContainer.getLayoutParams();
+                        layoutParams.width = textWidth;
+                        sentChatViewHolder.linkContainer.setLayoutParams(layoutParams);
+                    }
+                }
+            });
         } else {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -181,6 +195,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             addReplyData(chatData.getReplyMsgId(), recvdChatViewHolder.linkTitleTv, recvdChatViewHolder.linkDescTv);
+            recvdChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    recvdChatViewHolder.itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    final int textWidth = recvdChatViewHolder.textContainer.getWidth();
+                    if (textWidth > recvdChatViewHolder.linkContainer.getWidth()) {
+                        final ViewGroup.LayoutParams layoutParams = recvdChatViewHolder.linkContainer.getLayoutParams();
+                        layoutParams.width = textWidth;
+                        recvdChatViewHolder.linkContainer.setLayoutParams(layoutParams);
+                    }
+                }
+            });
         } else {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -366,6 +392,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar progressBar;
         private ImageView chatIv;
         private TextView dateTv;
+        private MsgFlexBoxLayout textContainer;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
@@ -382,6 +409,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);
+            textContainer = itemView.findViewById(R.id.msgFlexBox_text);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
@@ -462,6 +490,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar progressBar;
         private ImageView chatIv;
         private TextView dateTv;
+        private MsgFlexBoxLayout textContainer;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
@@ -476,6 +505,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);
+            textContainer = itemView.findViewById(R.id.msgFlexBox_text);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);

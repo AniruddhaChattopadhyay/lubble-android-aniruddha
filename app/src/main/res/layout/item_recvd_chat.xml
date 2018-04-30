@@ -61,11 +61,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="2"
-                    android:text="Link description goes here" />
+                    android:text="Link description" />
 
             </LinearLayout>
 
             <in.lubble.app.utils.MsgFlexBoxLayout
+                android:id="@+id/msgFlexBox_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:viewPartMain="@+id/msg_content_container"
