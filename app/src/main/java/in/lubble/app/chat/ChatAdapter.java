@@ -147,24 +147,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
-            addReplyData(chatData.getReplyMsgId(), sentChatViewHolder);
+            addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv);
         } else {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData);
 
-    }
-
-    private void addReplyData(String replyMsgId, SentChatViewHolder sentChatViewHolder) {
-        ChatData emptyReplyChatData = new ChatData();
-        emptyReplyChatData.setId(replyMsgId);
-        int index = chatDataList.indexOf(emptyReplyChatData);
-        if (index > -1) {
-            ChatData quotedChatData = chatDataList.get(index);
-            sentChatViewHolder.linkDescTv.setText(quotedChatData.getMessage());
-            showName(sentChatViewHolder.linkTitleTv, quotedChatData.getAuthorUid());
-        }
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -189,10 +178,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
-        } else if (chatData.getType().equalsIgnoreCase(REPLY)) {
+        } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
-            recvdChatViewHolder.linkTitleTv.setVisibility(View.GONE);
-            recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            addReplyData(chatData.getReplyMsgId(), recvdChatViewHolder.linkTitleTv, recvdChatViewHolder.linkDescTv);
         } else {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -200,6 +188,17 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
 
         showDpAndName(recvdChatViewHolder, chatData);
+    }
+
+    private void addReplyData(String replyMsgId, TextView linkTitleTv, TextView linkDescTv) {
+        ChatData emptyReplyChatData = new ChatData();
+        emptyReplyChatData.setId(replyMsgId);
+        int index = chatDataList.indexOf(emptyReplyChatData);
+        if (index > -1) {
+            ChatData quotedChatData = chatDataList.get(index);
+            linkDescTv.setText(quotedChatData.getMessage());
+            showName(linkTitleTv, quotedChatData.getAuthorUid());
+        }
     }
 
     private void bindSystemViewHolder(RecyclerView.ViewHolder holder, int position) {
