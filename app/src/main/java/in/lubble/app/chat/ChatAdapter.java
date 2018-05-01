@@ -47,6 +47,7 @@ import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.MsgFlexBoxLayout;
+import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -76,6 +77,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private ChatFragment chatFragment;
     private String selectedChatId = null;
     private int highlightedPos = -1;
+    private int posToFlash = -1;
 
     public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList, RecyclerView recyclerView, ChatFragment chatFragment) {
         this.activity = activity;
@@ -138,6 +140,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
 
+        if (posToFlash == position) {
+            UiUtils.animateColor(sentChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
+        } else {
+            sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
         if (isValidString(chatData.getMessage())) {
             sentChatViewHolder.messageTv.setVisibility(View.VISIBLE);
             sentChatViewHolder.messageTv.setText(chatData.getMessage());
@@ -185,6 +194,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+        } else {
+            recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (posToFlash == position) {
+            UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
@@ -508,6 +524,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         int pos = chatDataList.indexOf(emptyReplyChatData);
                         if (pos != -1) {
                             recyclerView.smoothScrollToPosition(pos);
+                            posToFlash = pos;
+                            notifyItemChanged(pos);
                         }
                     }
                     break;
@@ -618,6 +636,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         int pos = chatDataList.indexOf(emptyReplyChatData);
                         if (pos != -1) {
                             recyclerView.smoothScrollToPosition(pos);
+                            posToFlash = pos;
+                            notifyItemChanged(pos);
                         }
                     }
                     break;
