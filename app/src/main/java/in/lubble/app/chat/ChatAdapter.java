@@ -1,6 +1,8 @@
 package in.lubble.app.chat;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -41,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.profile.ProfileActivity;
@@ -484,6 +487,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     case R.id.action_reply:
                         chatFragment.addReplyFor(selectedChatId);
                         break;
+                    case R.id.action_copy:
+                        ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
+                        clipboard.setPrimaryClip(clip);
+                        break;
                 }
                 mode.finish();
                 return true;
@@ -598,6 +607,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 switch (item.getItemId()) {
                     case R.id.action_reply:
                         chatFragment.addReplyFor(selectedChatId);
+                        break;
+                    case R.id.action_copy:
+                        ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
+                        clipboard.setPrimaryClip(clip);
                         break;
                 }
                 mode.finish();
