@@ -468,12 +468,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     //toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
                     break;
                 case R.id.link_meta_container:
-                    final URLSpan[] urls = messageTv.getUrls();
-                    final String url = urls[0].getURL();
-                    if (isValidString(url)) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(url));
-                        context.startActivity(i);
+                    ChatData chatData = chatDataList.get(getAdapterPosition());
+                    if (LINK.equalsIgnoreCase(chatData.getType())) {
+                        final URLSpan[] urls = messageTv.getUrls();
+                        final String url = urls[0].getURL();
+                        if (isValidString(url)) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
+                        }
+                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                        ChatData emptyReplyChatData = new ChatData();
+                        emptyReplyChatData.setId(chatData.getReplyMsgId());
+                        int pos = chatDataList.indexOf(emptyReplyChatData);
+                        if (pos != -1) {
+                            recyclerView.smoothScrollToPosition(pos);
+                        }
                     }
                     break;
             }
@@ -521,12 +531,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     //toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
                     break;
                 case R.id.link_meta_container:
-                    final URLSpan[] urls = messageTv.getUrls();
-                    final String url = urls[0].getURL();
-                    if (isValidString(url)) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(url));
-                        context.startActivity(i);
+                    ChatData chatData = chatDataList.get(getAdapterPosition());
+                    if (LINK.equalsIgnoreCase(chatData.getType())) {
+                        final URLSpan[] urls = messageTv.getUrls();
+                        final String url = urls[0].getURL();
+                        if (isValidString(url)) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
+                        }
+                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                        ChatData emptyReplyChatData = new ChatData();
+                        emptyReplyChatData.setId(chatData.getReplyMsgId());
+                        int pos = chatDataList.indexOf(emptyReplyChatData);
+                        if (pos != -1) {
+                            recyclerView.smoothScrollToPosition(pos);
+                        }
                     }
                     break;
             }
