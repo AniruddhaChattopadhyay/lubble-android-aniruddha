@@ -523,7 +523,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         emptyReplyChatData.setId(chatData.getReplyMsgId());
                         int pos = chatDataList.indexOf(emptyReplyChatData);
                         if (pos != -1) {
-                            recyclerView.smoothScrollToPosition(pos);
+                            recyclerView.scrollToPosition(pos);
                             posToFlash = pos;
                             notifyItemChanged(pos);
                         }
@@ -635,7 +635,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         emptyReplyChatData.setId(chatData.getReplyMsgId());
                         int pos = chatDataList.indexOf(emptyReplyChatData);
                         if (pos != -1) {
-                            recyclerView.smoothScrollToPosition(pos);
+                            recyclerView.scrollToPosition(pos);
                             posToFlash = pos;
                             notifyItemChanged(pos);
                         }
