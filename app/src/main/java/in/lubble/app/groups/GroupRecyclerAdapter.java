@@ -40,6 +40,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         mListener = listener;
     }
 
+    private void addInfoItem() {
+        groupDataList.add(0, null);
+    }
+
     @Override
     public int getItemViewType(int position) {
         if (!isValidString(groupDataList.get(position).getTitle())) {
@@ -221,6 +225,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void clearGroups() {
         groupDataList.clear();
+        addInfoItem();
         notifyDataSetChanged();
     }
 
