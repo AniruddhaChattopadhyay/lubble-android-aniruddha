@@ -32,8 +32,16 @@ public class ChatActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbarIcon = toolbar.findViewById(R.id.iv_toolbar);
+        TextView toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         setTitle("");
+        if (!LubbleSharedPrefs.getInstance().getIsGroupInfoOpened()) {
+            toolbarInviteHint.setVisibility(View.VISIBLE);
+            toolbarInviteHint.setHorizontallyScrolling(true);
+            toolbarInviteHint.setSelected(true);
+        } else {
+            toolbarInviteHint.setVisibility(View.GONE);
+        }
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);

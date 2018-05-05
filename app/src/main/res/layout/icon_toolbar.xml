@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/icon_toolbar"
     android:layout_width="match_parent"
-    android:background="@color/white"
     android:layout_height="?attr/actionBarSize"
+    android:background="@color/white"
     app:contentInsetStartWithNavigation="0dp"
     app:elevation="12dp">
 
@@ -17,11 +17,34 @@
         android:padding="8dp"
         tools:src="@tools:sample/avatars" />
 
-    <TextView
-        android:id="@+id/tv_toolbar_title"
-        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Group Name" />
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Group Name"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_invite_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:freezesText="true"
+            android:marqueeRepeatLimit="1"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="Click here to invite people &amp; view group info"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
 </app:android.support.v7.widget.Toolbar>
