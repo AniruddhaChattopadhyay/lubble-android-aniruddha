@@ -95,6 +95,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ImageView attachMediaBtn;
     private TextView linkTitle;
     private TextView linkDesc;
+    private ImageView linkCancel;
     private DatabaseReference groupReference;
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
@@ -158,6 +159,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         linkMetaContainer = view.findViewById(R.id.group_link_meta);
         linkTitle = view.findViewById(R.id.tv_link_title);
         linkDesc = view.findViewById(R.id.tv_link_desc);
+        linkCancel = view.findViewById(R.id.iv_link_cancel);
         bottomContainer = view.findViewById(R.id.bottom_container);
         pvtSystemMsg = view.findViewById(R.id.view_pvt_sys_msg);
 
@@ -172,6 +174,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         attachMediaBtn.setOnClickListener(this);
         joinBtn.setOnClickListener(this);
         declineTv.setOnClickListener(this);
+        linkCancel.setOnClickListener(this);
 
         showPublicGroupWarning();
 
@@ -492,6 +495,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         getActivity().finish();
                     }
                 });
+                break;
+            case R.id.iv_link_cancel:
+                linkTitle.setText("");
+                linkDesc.setText("");
+                prevUrl = "";
+                linkMetaContainer.setVisibility(View.GONE);
+                replyMsgId = null;
                 break;
         }
     }
