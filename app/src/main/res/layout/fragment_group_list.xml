@@ -24,10 +24,12 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/iv_group_pic"
         android:layout_marginTop="8dp"
+        android:layout_toLeftOf="@id/right_container"
         android:layout_toRightOf="@id/iv_group_pic"
         android:maxLines="1"
+        android:ellipsize="end"
         android:textAppearance="?attr/textAppearanceListItem"
-        tools:text="@tools:sample/lorem" />
+        tools:text="jsah shsgd sgfsyd fgsyd fgusydgfysg" />
 
     <LinearLayout
         android:id="@+id/right_container"
@@ -70,8 +72,8 @@
             android:id="@+id/ic_invite"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            app:srcCompat="@drawable/ic_invite"
             android:visibility="gone"
+            app:srcCompat="@drawable/ic_invite"
             tools:visibility="gone" />
 
     </LinearLayout>
