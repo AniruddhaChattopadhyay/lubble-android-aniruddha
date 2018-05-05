@@ -21,7 +21,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -171,9 +170,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv);
-            sentChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            /*sentChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
+                    // to have the link container fill whole chat bubble
                     sentChatViewHolder.itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     final int textWidth = sentChatViewHolder.textContainer.getWidth();
                     if (textWidth > sentChatViewHolder.linkContainer.getWidth()) {
@@ -182,7 +182,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         sentChatViewHolder.linkContainer.setLayoutParams(layoutParams);
                     }
                 }
-            });
+            });*/
         } else {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -229,18 +229,25 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             addReplyData(chatData.getReplyMsgId(), recvdChatViewHolder.linkTitleTv, recvdChatViewHolder.linkDescTv);
-            recvdChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            /*recvdChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
+                    // to have the link container fill whole chat bubble
                     recvdChatViewHolder.itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                     final int textWidth = recvdChatViewHolder.textContainer.getWidth();
                     if (textWidth > recvdChatViewHolder.linkContainer.getWidth()) {
                         final ViewGroup.LayoutParams layoutParams = recvdChatViewHolder.linkContainer.getLayoutParams();
                         layoutParams.width = textWidth;
                         recvdChatViewHolder.linkContainer.setLayoutParams(layoutParams);
+                    } else {
+                        final ViewGroup.LayoutParams layoutParams = recvdChatViewHolder.linkContainer.getLayoutParams();
+                        layoutParams.width = recvdChatViewHolder.linkTitleTv.getWidth() > recvdChatViewHolder.linkDescTv.getWidth()
+                                ? recvdChatViewHolder.linkTitleTv.getWidth()
+                                : recvdChatViewHolder.linkDescTv.getWidth();
+                        recvdChatViewHolder.linkContainer.setLayoutParams(layoutParams);
                     }
                 }
-            });
+            });*/
         } else {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
