@@ -256,7 +256,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
         int index = chatDataList.indexOf(emptyReplyChatData);
         if (index > -1) {
             ChatData quotedChatData = chatDataList.get(index);
-            linkDescTv.setText(quotedChatData.getMessage());
+            String desc = "";
+            if (isValidString(quotedChatData.getImgUrl())) {
+                desc = desc.concat("\uD83D\uDCF7 ");
+                if (!isValidString(quotedChatData.getMessage())) {
+                    // add the word photo if there is no caption
+                    desc = desc.concat("Photo ");
+                }
+            }
+            desc = desc.concat(quotedChatData.getMessage());
+            linkDescTv.setText(desc);
             showName(linkTitleTv, quotedChatData.getAuthorUid());
         }
     }

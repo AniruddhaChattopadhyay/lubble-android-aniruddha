@@ -629,7 +629,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                         linkTitle.setText(profileInfo.getName());
-                        linkDesc.setText(quotedChatData.getMessage());
+                        String desc = "";
+                        if (isValidString(quotedChatData.getImgUrl())) {
+                            desc = desc.concat("\uD83D\uDCF7 ");
+                            if (!isValidString(quotedChatData.getMessage())) {
+                                // add the word photo if there is no caption
+                                desc = desc.concat("Photo ");
+                            }
+                        }
+                        desc = desc.concat(quotedChatData.getMessage());
+                        linkDesc.setText(desc);
                     }
 
                     @Override
