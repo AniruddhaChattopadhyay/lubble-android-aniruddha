@@ -369,6 +369,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 @Override
                 public void onClick(View v) {
                     LubbleSharedPrefs.getInstance().setIsPublicGroupInfoShown(true);
+                    LubbleSharedPrefs.getInstance().setShowPvtGroupInfo(true);
                     bottomSheetDialog.dismiss();
                 }
             });
