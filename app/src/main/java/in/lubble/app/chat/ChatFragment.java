@@ -64,6 +64,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.REPLY;
 import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.FileUtils.createImageFile;
@@ -108,6 +109,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
     private ValueEventListener bottomBarListener;
+    @Nullable
+    private String replyMsgId = null;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -189,7 +192,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         chatRecyclerView.setLayoutManager(layoutManager);
-        final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>(), chatRecyclerView);
+        final ChatAdapter chatAdapter = new ChatAdapter(
+                getActivity(),
+                getContext(),
+                new ArrayList<ChatData>(),
+                chatRecyclerView,
+                this);
         chatRecyclerView.setAdapter(chatAdapter);
         msgChildListener = msgListener(chatAdapter);
 
@@ -452,7 +460,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
 
-                if (isValidString(linkTitle.getText().toString())) {
+                if (isValidString(replyMsgId)) {
+                    chatData.setType(REPLY);
+                    chatData.setReplyMsgId(replyMsgId);
+                } else if (isValidString(linkTitle.getText().toString())) {
                     chatData.setType(LINK);
                     chatData.setLinkTitle(linkTitle.getText().toString());
                     chatData.setLinkDesc(linkDesc.getText().toString());
@@ -461,6 +472,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 messagesReference.push().setValue(chatData);
 
                 newMessageEt.setText("");
+                linkTitle.setText("");
+                linkDesc.setText("");
+                linkMetaContainer.setVisibility(View.GONE);
+                replyMsgId = null;
                 break;
             case R.id.iv_attach:
                 startPhotoPicker(REQUEST_CODE_IMG);
@@ -556,7 +571,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     prevUrl = extractedUrl;
                     new LinkMetaAsyncTask(prevUrl, getLinkMetaListener())
                             .execute();
-                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE) {
+                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId)) {
                     linkMetaContainer.setVisibility(View.GONE);
                     prevUrl = "";
                 }
@@ -591,6 +606,36 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         };
     }
 
+    public void addReplyFor(@NonNull String selectedChatId) {
+        linkMetaContainer.setVisibility(View.VISIBLE);
+        replyMsgId = selectedChatId;
+
+        messagesReference.child(selectedChatId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                RealtimeDbHelper.getUserInfoRef(quotedChatData.getAuthorUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                        linkTitle.setText(profileInfo.getName());
+                        linkDesc.setText(quotedChatData.getMessage());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     public void openGroupInfo() {
         if (groupData.isJoined() || !groupData.getIsPrivate()) {
             GroupInfoActivity.newInstance(getContext(), groupId);
@@ -605,4 +650,5 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         groupReference.removeEventListener(groupInfoListener);
         RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
     }
+
 }

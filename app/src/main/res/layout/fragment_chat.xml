@@ -1,10 +1,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#18005293"
-    android:orientation="vertical">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#18005293"
+                android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/bottom_container"
@@ -35,7 +35,7 @@
                     android:layout_marginBottom="8dp"
                     app:layout_constraintBottom_toTopOf="@+id/view_separator"
                     app:layout_constraintStart_toStartOf="@+id/et_new_message"
-                    tools:text="link desc goes here" />
+                    tools:text="link desc goes here"/>
 
                 <TextView
                     android:id="@+id/tv_link_title"
@@ -46,7 +46,7 @@
                     app:layout_constraintBottom_toTopOf="@+id/tv_link_desc"
                     app:layout_constraintStart_toStartOf="@+id/tv_link_desc"
                     app:layout_constraintTop_toTopOf="parent"
-                    tools:text="Link Title" />
+                    tools:text="Link Title"/>
 
                 <View
                     android:id="@+id/view_separator"
@@ -66,7 +66,7 @@
                     android:padding="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:srcCompat="@drawable/ic_send_white_24dp" />
+                    app:srcCompat="@drawable/ic_send_white_24dp"/>
 
                 <ImageView
                     android:id="@+id/iv_attach"
@@ -81,7 +81,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/iv_send_btn"
                     app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
-                    app:srcCompat="@drawable/ic_attach_file_black_24dp" />
+                    app:srcCompat="@drawable/ic_attach_file_black_24dp"/>
 
                 <EditText
                     android:id="@+id/et_new_message"
@@ -101,7 +101,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/iv_attach"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/iv_send_btn" />
+                    app:layout_constraintTop_toTopOf="@+id/iv_send_btn"/>
 
                 <android.support.constraint.Group
                     android:id="@+id/group_link_meta"
@@ -131,7 +131,7 @@
                 android:gravity="center"
                 android:paddingRight="8dp"
                 android:text="Reject"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"/>
 
             <Button
                 android:id="@+id/btn_join"
@@ -143,7 +143,7 @@
                 android:layout_marginRight="8dp"
                 android:layout_toLeftOf="@id/tv_decline"
                 android:text="JOIN"
-                android:theme="@style/AccentButton" />
+                android:theme="@style/AccentButton"/>
 
             <TextView
                 android:id="@+id/tv_join_desc"
@@ -154,7 +154,7 @@
                 android:layout_marginLeft="8dp"
                 android:layout_toLeftOf="@id/btn_join"
                 android:textColor="@color/white"
-                tools:text="You were invited by Ashish Gadha" />
+                tools:text="You were invited by Ashish Gadha"/>
 
         </RelativeLayout>
     </RelativeLayout>
@@ -166,7 +166,7 @@
         android:layout_above="@id/bottom_container"
         android:visibility="invisible"
         tools:listitem="@layout/item_recvd_chat"
-        tools:visibility="visible" />
+        tools:visibility="visible"/>
 
     <include
         android:id="@+id/view_pvt_sys_msg"
@@ -176,6 +176,6 @@
         android:layout_above="@id/bottom_container"
         android:layout_centerHorizontal="true"
         android:visibility="gone"
-        tools:visibility="visible" />
+        tools:visibility="visible"/>
 
 </RelativeLayout>
