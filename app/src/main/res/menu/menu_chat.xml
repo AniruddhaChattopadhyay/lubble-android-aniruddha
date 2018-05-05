@@ -6,4 +6,10 @@
         android:icon="@drawable/ic_reply_black_24dp"
         android:title="Reply"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_copy"
+        android:icon="@drawable/ic_content_copy_black_24dp"
+        android:title="Copy"
+        app:showAsAction="always" />
 </menu>

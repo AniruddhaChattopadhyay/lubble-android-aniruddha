@@ -22,6 +22,8 @@ import io.fabric.sdk.android.Fabric;
 
 public class LubbleApp extends Application {
 
+    private static LubbleApp appContext;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -30,6 +32,9 @@ public class LubbleApp extends Application {
         if (BuildConfig.DEBUG) {
             FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
         }
+
+        appContext = this;
+
         LubbleSharedPrefs.initializeInstance(getApplicationContext());
         GroupMappingSharedPrefs.initializeInstance(getApplicationContext());
         UnreadChatsSharedPrefs.initializeInstance(getApplicationContext());
@@ -40,6 +45,10 @@ public class LubbleApp extends Application {
 
         createNotifChannel();
         FirebaseAnalytics.getInstance(this);
+    }
+
+    public static LubbleApp getAppContext() {
+        return appContext;
     }
 
     private void createNotifChannel() {

@@ -614,8 +614,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                linkTitle.setText("Reply");
-                linkDesc.setText(quotedChatData.getMessage());
+                RealtimeDbHelper.getUserInfoRef(quotedChatData.getAuthorUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                        linkTitle.setText(profileInfo.getName());
+                        linkDesc.setText(quotedChatData.getMessage());
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             @Override

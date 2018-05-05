@@ -1,12 +1,16 @@
 package in.lubble.app.chat;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
@@ -39,12 +43,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.MsgFlexBoxLayout;
+import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -73,6 +79,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private ArrayList<ChatData> chatDataList;
     private ChatFragment chatFragment;
     private String selectedChatId = null;
+    private int highlightedPos = -1;
+    private int posToFlash = -1;
 
     public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList, RecyclerView recyclerView, ChatFragment chatFragment) {
         this.activity = activity;
@@ -129,6 +137,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
+        if (highlightedPos == position) {
+            sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+        } else {
+            sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (posToFlash == position) {
+            UiUtils.animateColor(sentChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
+        } else {
+            sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
         if (isValidString(chatData.getMessage())) {
             sentChatViewHolder.messageTv.setVisibility(View.VISIBLE);
             sentChatViewHolder.messageTv.setText(chatData.getMessage());
@@ -173,6 +194,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
+
+        if (highlightedPos == position) {
+            recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+        } else {
+            recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (posToFlash == position) {
+            UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
+        } else {
+            recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
 
         if (isValidString(chatData.getMessage())) {
             recvdChatViewHolder.messageTv.setVisibility(View.VISIBLE);
@@ -398,7 +432,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView lubbCount;
         private ImageView dpIv;
 
-        public RecvdChatViewHolder(View itemView) {
+        public RecvdChatViewHolder(final View itemView) {
             super(itemView);
             authorNameTv = itemView.findViewById(R.id.tv_author);
             messageTv = itemView.findViewById(R.id.tv_message);
@@ -421,6 +455,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                    if (highlightedPos != -1) {
+                        // another item was highlighted, remove its highlight
+                        notifyItemChanged(highlightedPos);
+                    }
+                    highlightedPos = getAdapterPosition();
                     selectedChatId = chatDataList.get(getAdapterPosition()).getId();
                     ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
                     return true;
@@ -447,6 +487,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     case R.id.action_reply:
                         chatFragment.addReplyFor(selectedChatId);
                         break;
+                    case R.id.action_copy:
+                        ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
+                        clipboard.setPrimaryClip(clip);
+                        break;
                 }
                 mode.finish();
                 return true;
@@ -455,6 +501,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
+                if (highlightedPos != -1) {
+                    notifyItemChanged(highlightedPos);
+                    highlightedPos = -1;
+                }
             }
         };
 
@@ -468,12 +518,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     //toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
                     break;
                 case R.id.link_meta_container:
-                    final URLSpan[] urls = messageTv.getUrls();
-                    final String url = urls[0].getURL();
-                    if (isValidString(url)) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(url));
-                        context.startActivity(i);
+                    ChatData chatData = chatDataList.get(getAdapterPosition());
+                    if (LINK.equalsIgnoreCase(chatData.getType())) {
+                        final URLSpan[] urls = messageTv.getUrls();
+                        final String url = urls[0].getURL();
+                        if (isValidString(url)) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
+                        }
+                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                        ChatData emptyReplyChatData = new ChatData();
+                        emptyReplyChatData.setId(chatData.getReplyMsgId());
+                        int pos = chatDataList.indexOf(emptyReplyChatData);
+                        if (pos != -1) {
+                            recyclerView.scrollToPosition(pos);
+                            posToFlash = pos;
+                            notifyItemChanged(pos);
+                        }
                     }
                     break;
             }
@@ -495,7 +557,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView lubbIcon;
         private TextView lubbCount;
 
-        SentChatViewHolder(View itemView) {
+        SentChatViewHolder(final View itemView) {
             super(itemView);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
@@ -512,7 +574,60 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                    if (highlightedPos != -1) {
+                        // another item was highlighted, remove its highlight
+                        notifyItemChanged(highlightedPos);
+                    }
+                    highlightedPos = getAdapterPosition();
+                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+                    ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                    return true;
+                }
+            });
         }
+
+        private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_reply:
+                        chatFragment.addReplyFor(selectedChatId);
+                        break;
+                    case R.id.action_copy:
+                        ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
+                        clipboard.setPrimaryClip(clip);
+                        break;
+                }
+                mode.finish();
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                selectedChatId = null;
+                if (highlightedPos != -1) {
+                    notifyItemChanged(highlightedPos);
+                    highlightedPos = -1;
+                }
+            }
+        };
 
         @Override
         public void onClick(View v) {
@@ -521,12 +636,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     //toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
                     break;
                 case R.id.link_meta_container:
-                    final URLSpan[] urls = messageTv.getUrls();
-                    final String url = urls[0].getURL();
-                    if (isValidString(url)) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(url));
-                        context.startActivity(i);
+                    ChatData chatData = chatDataList.get(getAdapterPosition());
+                    if (LINK.equalsIgnoreCase(chatData.getType())) {
+                        final URLSpan[] urls = messageTv.getUrls();
+                        final String url = urls[0].getURL();
+                        if (isValidString(url)) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
+                        }
+                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                        ChatData emptyReplyChatData = new ChatData();
+                        emptyReplyChatData.setId(chatData.getReplyMsgId());
+                        int pos = chatDataList.indexOf(emptyReplyChatData);
+                        if (pos != -1) {
+                            recyclerView.scrollToPosition(pos);
+                            posToFlash = pos;
+                            notifyItemChanged(pos);
+                        }
                     }
                     break;
             }
