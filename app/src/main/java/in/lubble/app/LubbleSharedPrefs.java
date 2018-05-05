@@ -18,6 +18,7 @@ public class LubbleSharedPrefs {
     private final String CURRENT_ACTIVE_GROUP = "CURRENT_ACTIVE_GROUP";
     private final String LUBBLE_ID = "LUBBLE_ID";
     private final String DEFAULT_GROUP_ID = "DEFAULT_GROUP_ID";
+    private final String IS_DEFAULT_GROUP_INFO_SHOWN = "IS_DEFAULT_GROUP_INFO_SHOWN";
     private final String IS_PUBLIC_GROUP_INFO_SHOWN = "IS_PUBLIC_GROUP_INFO_SHOWN";
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
     private final String SHOW_PVT_GROUP_INFO = "SHOW_PVT_GROUP_INFO";
@@ -96,6 +97,15 @@ public class LubbleSharedPrefs {
         return preferences.edit().putString(DEFAULT_GROUP_ID, defaultGroupId).commit();
     }
 
+    public boolean getIsDefaultGroupInfoShown() {
+        return preferences.getBoolean(IS_DEFAULT_GROUP_INFO_SHOWN, false);
+    }
+
+    public boolean setIsDefaultGroupInfoShown(boolean isShown) {
+
+        return preferences.edit().putBoolean(IS_DEFAULT_GROUP_INFO_SHOWN, isShown).commit();
+    }
+
     public boolean getIsPublicGroupInfoShown() {
         return preferences.getBoolean(IS_PUBLIC_GROUP_INFO_SHOWN, false);
     }
@@ -116,7 +126,7 @@ public class LubbleSharedPrefs {
 
 
     public boolean getShowPvtGroupInfo() {
-        return preferences.getBoolean(SHOW_PVT_GROUP_INFO, BuildConfig.DEBUG);
+        return preferences.getBoolean(SHOW_PVT_GROUP_INFO, false);
     }
 
     public boolean setShowPvtGroupInfo(boolean toShow) {
