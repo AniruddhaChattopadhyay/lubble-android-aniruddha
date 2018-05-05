@@ -135,6 +135,8 @@ public class GroupInfoFragment extends Fragment {
             }
         });
 
+        LubbleSharedPrefs.getInstance().setIsGroupInfoOpened(true);
+
         return view;
     }
 

@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.Group;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
@@ -73,6 +72,7 @@ import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 
 public class ChatFragment extends Fragment implements View.OnClickListener {
 
@@ -176,8 +176,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         declineTv.setOnClickListener(this);
         linkCancel.setOnClickListener(this);
 
-        showPublicGroupWarning();
-
         return view;
     }
 
@@ -273,6 +271,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
                     resetUnreadCount();
                     showBottomBar(groupData);
+                    showPublicGroupWarning();
                 }
             }
 
@@ -356,22 +355,46 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showPublicGroupWarning() {
-        if (!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown() && groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
-            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity());
-            View sheetView = getActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_info, null);
-            bottomSheetDialog.setContentView(sheetView);
-            bottomSheetDialog.setCancelable(false);
-            bottomSheetDialog.setCanceledOnTouchOutside(false);
-            bottomSheetDialog.show();
-
-            final TextView gotItTv = sheetView.findViewById(R.id.tv_got_it);
-            gotItTv.setOnClickListener(new View.OnClickListener() {
+        if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+            RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onClick(View v) {
-                    LubbleSharedPrefs.getInstance().setIsPublicGroupInfoShown(true);
-                    bottomSheetDialog.dismiss();
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String lubbleName = dataSnapshot.child("title").getValue(String.class);
+                    showBottomSheetAlert(getContext(), getLayoutInflater(),
+                            "Welcome to " + lubbleName + " Group",
+                            "All your neighbors in " + lubbleName + " are a member of this group" +
+                                    "\n\nMessages you send here are visible to everyone.",
+                            R.drawable.ic_public_black_24dp, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
+                                    if (!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown()) {
+                                        LubbleSharedPrefs.getInstance().setShowPvtGroupInfo(true);
+                                    }
+                                }
+                            });
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
                 }
             });
+
+        } else if (groupData != null && !LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown()
+                && !groupData.getIsPrivate()) {
+            showBottomSheetAlert(getContext(), getLayoutInflater(),
+                    "This is a public group!",
+                    "Messages you send here are visible to everyone.",
+                    R.drawable.ic_public_black_24dp, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            LubbleSharedPrefs.getInstance().setIsPublicGroupInfoShown(true);
+                            if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown()) {
+                                LubbleSharedPrefs.getInstance().setShowPvtGroupInfo(true);
+                            }
+                        }
+                    });
         }
     }
 

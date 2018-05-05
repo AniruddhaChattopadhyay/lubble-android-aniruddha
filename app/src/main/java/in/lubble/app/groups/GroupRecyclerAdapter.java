@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
@@ -28,6 +29,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     private static final int TYPE_GROUP = 74;
     private static final int TYPE_SEPARATOR = 58;
+    private static final int TYPE_INFO_ITEM = 813;
 
     private final List<GroupData> groupDataList;
     // <GroupID, UserGroupData>
@@ -40,9 +42,22 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         mListener = listener;
     }
 
+    private void addInfoItem() {
+        if (LubbleSharedPrefs.getInstance().getShowPvtGroupInfo()) {
+            groupDataList.add(0, new GroupData());
+        }
+    }
+
+    private void removeInfoItem() {
+        groupDataList.remove(0);
+        notifyItemRemoved(0);
+    }
+
     @Override
     public int getItemViewType(int position) {
-        if (!isValidString(groupDataList.get(position).getTitle())) {
+        if (position == 0 && LubbleSharedPrefs.getInstance().getShowPvtGroupInfo()) {
+            return TYPE_INFO_ITEM;
+        } else if (!isValidString(groupDataList.get(position).getTitle())) {
             return TYPE_SEPARATOR;
         } else {
             return TYPE_GROUP;
@@ -54,6 +69,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (viewType == TYPE_SEPARATOR) {
             return new PublicGroupHeaderViewHolder(LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_public_group_header, parent, false));
+        } else if (viewType == TYPE_INFO_ITEM) {
+            return new InfoViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_group_info, parent, false));
         } else {
             return new GroupViewHolder(LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.fragment_group_list, parent, false));
@@ -178,6 +196,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             @Override
             public int compare(GroupData lhs, GroupData rhs) {
                 // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                if (lhs.getId() == null || rhs.getId() == null) {
+                    return 0;
+                }
                 long lhsTs = 0;
                 long rhsTs = 0;
                 if (!lhs.isJoined()) {
@@ -212,7 +233,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     private int getChildIndex(String groupIdToFind) {
         for (int i = 0; i < groupDataList.size(); i++) {
             final GroupData groupData = groupDataList.get(i);
-            if (groupData.getId().equalsIgnoreCase(groupIdToFind)) {
+            if (groupIdToFind.equalsIgnoreCase(groupData.getId())) {
                 return i;
             }
         }
@@ -221,6 +242,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void clearGroups() {
         groupDataList.clear();
+        addInfoItem();
         notifyDataSetChanged();
     }
 
@@ -268,6 +290,27 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         public PublicGroupHeaderViewHolder(View view) {
             super(view);
+        }
+    }
+
+    class InfoViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        private TextView infoOkTv;
+
+        public InfoViewHolder(View view) {
+            super(view);
+            infoOkTv = view.findViewById(R.id.tv_info_ok);
+            infoOkTv.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            switch (v.getId()) {
+                case R.id.tv_info_ok:
+                    LubbleSharedPrefs.getInstance().setShowPvtGroupInfo(false);
+                    removeInfoItem();
+                    break;
+            }
         }
     }
 }

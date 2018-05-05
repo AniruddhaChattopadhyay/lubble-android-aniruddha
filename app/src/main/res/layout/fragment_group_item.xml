@@ -17,8 +17,6 @@
         android:id="@+id/rv_groups"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="4dp"
-        android:layout_marginRight="4dp"
         app:layoutManager="LinearLayoutManager"
         tools:context="in.lubble.app.groups.GroupListFragment"
         tools:listitem="@layout/fragment_group_list" />

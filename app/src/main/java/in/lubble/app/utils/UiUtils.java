@@ -6,10 +6,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
+import android.support.design.widget.BottomSheetDialog;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import in.lubble.app.R;
 
@@ -67,5 +72,33 @@ public class UiUtils {
         });
         colorAnimation.start();
     }
+
+    public static BottomSheetDialog showBottomSheetAlert(Context context, LayoutInflater layoutInflater, String title, String subTitle, @DrawableRes int iconId, final View.OnClickListener listener) {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        View sheetView = layoutInflater.inflate(R.layout.bottom_sheet_info, null);
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.setCancelable(false);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        bottomSheetDialog.show();
+
+        final TextView gotItTv = sheetView.findViewById(R.id.tv_got_it);
+        final ImageView iconIv = sheetView.findViewById(R.id.iv_bottom_sheet_icon);
+        final TextView titleTv = sheetView.findViewById(R.id.tv_bottom_sheet_title);
+        final TextView subTitleTv = sheetView.findViewById(R.id.tv_bottom_sheet_subtitle);
+
+        iconIv.setImageResource(iconId);
+        titleTv.setText(title);
+        subTitleTv.setText(subTitle);
+
+        gotItTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetDialog.dismiss();
+                listener.onClick(v);
+            }
+        });
+        return bottomSheetDialog;
+    }
+
 
 }
