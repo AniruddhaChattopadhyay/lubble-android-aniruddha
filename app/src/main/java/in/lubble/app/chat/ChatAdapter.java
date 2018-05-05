@@ -494,7 +494,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_reply:
-                        chatFragment.addReplyFor(selectedChatId);
+                        if (null != selectedChatId) {
+                            chatFragment.addReplyFor(selectedChatId);
+                        }
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
