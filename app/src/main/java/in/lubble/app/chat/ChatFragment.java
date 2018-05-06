@@ -268,7 +268,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         chatRecyclerView.setVisibility(View.VISIBLE);
                         pvtSystemMsg.setVisibility(View.GONE);
                     }
-                    ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
+                    ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
                     resetUnreadCount();
                     showBottomBar(groupData);
                     showPublicGroupWarning();

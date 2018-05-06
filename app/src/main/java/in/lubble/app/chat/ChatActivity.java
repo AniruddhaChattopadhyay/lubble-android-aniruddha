@@ -21,6 +21,7 @@ public class ChatActivity extends AppCompatActivity {
     // if we need to show joining progress dialog
     public static final String EXTRA_IS_JOINING = "chat_activ_is_joining";
     private ImageView toolbarIcon;
+    private ImageView toolbarLockIcon;
     private TextView toolbarTv;
 
     @Override
@@ -32,6 +33,7 @@ public class ChatActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbarIcon = toolbar.findViewById(R.id.iv_toolbar);
+        toolbarLockIcon = toolbar.findViewById(R.id.iv_lock_icon);
         TextView toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         setTitle("");
@@ -67,11 +69,12 @@ public class ChatActivity extends AppCompatActivity {
         LubbleSharedPrefs.getInstance().setCurrentActiveGroupId(getIntent().getStringExtra(EXTRA_GROUP_ID));
     }
 
-    public void setGroupMeta(String title, String thumbnailUrl) {
+    public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate) {
         toolbarTv.setText(title);
         if (StringUtils.isValidString(thumbnailUrl)) {
             GlideApp.with(this).load(thumbnailUrl).circleCrop().into(toolbarIcon);
         }
+        toolbarLockIcon.setVisibility(isPrivate ? View.VISIBLE : View.GONE);
     }
 
     @Override

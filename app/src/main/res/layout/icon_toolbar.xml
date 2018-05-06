@@ -9,13 +9,34 @@
     app:contentInsetStartWithNavigation="0dp"
     app:elevation="12dp">
 
-    <ImageView
-        android:id="@+id/iv_toolbar"
-        android:layout_width="?attr/actionBarSize"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginLeft="-16dp"
-        android:padding="8dp"
-        tools:src="@tools:sample/avatars" />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="-16dp">
+
+        <ImageView
+            android:id="@+id/iv_toolbar"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:padding="8dp"
+            tools:src="@tools:sample/avatars" />
+
+        <ImageView
+            android:id="@+id/iv_lock_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_alignBottom="@id/iv_toolbar"
+            android:layout_alignRight="@id/iv_toolbar"
+            android:layout_marginBottom="4dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/circle_white"
+            android:padding="2dp"
+            android:tint="@color/dark_gray"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_lock_black_24dp"
+            tools:visibility="visible" />
+
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
