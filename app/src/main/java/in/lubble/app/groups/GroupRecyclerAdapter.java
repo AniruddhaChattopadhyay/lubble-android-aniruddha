@@ -92,6 +92,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                     .circleCrop()
                     .into(groupViewHolder.iconIv);
 
+            groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
+
             groupViewHolder.titleTv.setText(groupData.getTitle());
             if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
                 groupViewHolder.subtitleTv.setText("Invitation Pending");
@@ -254,6 +256,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View mView;
         final ImageView iconIv;
+        final ImageView lockIv;
         final TextView titleTv;
         final TextView subtitleTv;
         final TextView unreadCountTv;
@@ -266,6 +269,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             super(view);
             mView = view;
             iconIv = view.findViewById(R.id.iv_group_pic);
+            lockIv = view.findViewById(R.id.iv_lock_icon);
             titleTv = view.findViewById(R.id.tv_title);
             subtitleTv = view.findViewById(R.id.tv_subtitle);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
