@@ -45,12 +45,35 @@
 
         <TextView
             android:id="@+id/tv_group_desc"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_group_title"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@id/tv_leave_group"
             tools:text="@tools:sample/lorem" />
+
+        <ImageView
+            android:id="@+id/iv_privacy_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_below="@id/tv_group_desc"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="4dp"
+            android:tint="@color/dark_gray"
+            app:srcCompat="@drawable/ic_public_black_24dp" />
+
+        <TextView
+            android:id="@+id/tv_privacy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/iv_privacy_icon"
+            android:layout_below="@id/tv_group_desc"
+            android:layout_marginLeft="4dp"
+            android:layout_marginTop="4dp"
+            android:layout_toRightOf="@id/iv_privacy_icon"
+            android:gravity="center_vertical"
+            tools:text="Public Group" />
 
         <TextView
             android:id="@+id/tv_leave_group"

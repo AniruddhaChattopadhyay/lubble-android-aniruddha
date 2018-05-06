@@ -58,6 +58,8 @@ public class GroupInfoFragment extends Fragment {
     private ImageView groupIv;
     private TextView titleTv;
     private TextView descTv;
+    private ImageView privacyIcon;
+    private TextView privacyTv;
     private LinearLayout inviteMembersContainer;
     private RecyclerView recyclerView;
     private TextView leaveGroupTV;
@@ -95,6 +97,8 @@ public class GroupInfoFragment extends Fragment {
         groupIv = view.findViewById(R.id.iv_group_image);
         titleTv = view.findViewById(R.id.tv_group_title);
         descTv = view.findViewById(R.id.tv_group_desc);
+        privacyIcon = view.findViewById(R.id.iv_privacy_icon);
+        privacyTv = view.findViewById(R.id.tv_privacy);
         inviteMembersContainer = view.findViewById(R.id.linearLayout_invite_container);
         recyclerView = view.findViewById(R.id.rv_group_members);
         leaveGroupTV = view.findViewById(R.id.tv_leave_group);
@@ -249,6 +253,8 @@ public class GroupInfoFragment extends Fragment {
             toggleLeaveGroupVisibility(groupData);
             toggleMemberElements(groupData.isJoined());
 
+            privacyIcon.setImageResource(groupData.getIsPrivate() ? R.drawable.ic_lock_black_24dp : R.drawable.ic_public_black_24dp);
+            privacyTv.setText(groupData.getIsPrivate() ? "Private Group" : "Public Group");
         }
 
         @Override
