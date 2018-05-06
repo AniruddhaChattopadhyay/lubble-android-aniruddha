@@ -382,7 +382,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             });
 
         } else if (groupData != null && !LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown()
-                && !groupData.getIsPrivate()) {
+                && !groupData.getIsPrivate() && !groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
             showBottomSheetAlert(getContext(), getLayoutInflater(),
                     "This is a public group!",
                     "Messages you send here are visible to everyone.",
