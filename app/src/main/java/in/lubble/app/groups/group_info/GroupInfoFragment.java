@@ -105,13 +105,6 @@ public class GroupInfoFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         groupIv.setOnClickListener(null);
 
-        inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                UserSearchActivity.newInstance(getContext(), groupId);
-            }
-        });
-
         leaveGroupTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -275,7 +268,23 @@ public class GroupInfoFragment extends Fragment {
 
     private void toggleMemberElements(boolean isJoined) {
         muteNotifsContainer.setVisibility(isJoined ? View.VISIBLE : View.GONE);
-        inviteMembersContainer.setVisibility(isJoined ? View.VISIBLE : View.GONE);
+        if (isJoined) {
+            inviteMembersContainer.setAlpha(1f);
+            inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    UserSearchActivity.newInstance(getContext(), groupId);
+                }
+            });
+        } else {
+            inviteMembersContainer.setAlpha(0.5f);
+            inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), "Join the group to invite people", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void toggleLeaveGroupVisibility(final GroupData groupData) {
