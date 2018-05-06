@@ -78,7 +78,7 @@ public class DateTimeUtils {
     @NonNull
     public static String getHumanTimestamp(long time) {
         String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString();
-        if (humanTime.equalsIgnoreCase("0 minutes ago") || humanTime.equalsIgnoreCase("In 0 minutes")) {
+        if (humanTime.equalsIgnoreCase("0 mins ago") || humanTime.equalsIgnoreCase("In 0 mins")) {
             return "Just now";
         }
         return humanTime;
