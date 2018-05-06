@@ -10,6 +10,7 @@ public class AnnouncementData {
     private String authorName;
     private String title;
     private String message;
+    private long createdTimestamp = 0L;
 
     public String getAuthorUid() {
         return authorUid;
@@ -41,5 +42,13 @@ public class AnnouncementData {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public long getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    public void setCreatedTimestamp(long createdTimestamp) {
+        this.createdTimestamp = createdTimestamp;
     }
 }

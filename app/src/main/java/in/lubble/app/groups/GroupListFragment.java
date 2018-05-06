@@ -104,8 +104,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (userGroupData.isJoined()) {
                     syncJoinedGroups(dataSnapshot.getKey());
                 } else {
-                    groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
-                    syncInvitedGroups(dataSnapshot.getKey());
+                    if (userGroupData.getInvitedBy() != null) {
+                        groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
+                        syncInvitedGroups(dataSnapshot.getKey());
+                    }
                 }
             }
 
