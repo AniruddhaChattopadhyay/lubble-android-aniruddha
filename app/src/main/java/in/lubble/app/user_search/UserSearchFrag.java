@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
@@ -79,12 +80,12 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        userAdapter = new UserAdapter(mListener);
+        userAdapter = new UserAdapter(mListener, GlideApp.with(getContext()));
         usersRecyclerView.setAdapter(userAdapter);
         fetchAllLubbleUsers();
 
         selectedUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), OrientationHelper.HORIZONTAL, false));
-        selectedUserAdapter = new SelectedUserAdapter(mListener);
+        selectedUserAdapter = new SelectedUserAdapter(mListener, GlideApp.with(getContext()));
         selectedUsersRecyclerView.setAdapter(selectedUserAdapter);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {

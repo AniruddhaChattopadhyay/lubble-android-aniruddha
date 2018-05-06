@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
@@ -74,6 +75,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private Activity activity;
     private Context context;
+    private final GlideRequests glide;
     private RecyclerView recyclerView;
     private ArrayList<ChatData> chatDataList;
     private ChatFragment chatFragment;
@@ -81,12 +83,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private int highlightedPos = -1;
     private int posToFlash = -1;
 
-    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList, RecyclerView recyclerView, ChatFragment chatFragment) {
+    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList,
+                       RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
         this.activity = activity;
         this.context = context;
         this.chatDataList = chatDataList;
         this.recyclerView = recyclerView;
         this.chatFragment = chatFragment;
+        this.glide = glide;
     }
 
     @Override
@@ -309,9 +313,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                if (map != null && recvdChatViewHolder.itemView.getContext() != null) {
-                    GlideApp.with(recvdChatViewHolder.itemView.getContext())
-                            .load(map.get("thumbnail"))
+                if (map != null) {
+                    glide.load(map.get("thumbnail"))
                             .circleCrop()
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)

@@ -105,7 +105,7 @@ public class GroupInfoFragment extends Fragment {
         muteNotifsContainer = view.findViewById(R.id.mute_container);
         muteSwitch = view.findViewById(R.id.switch_mute);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new GroupMembersAdapter();
+        adapter = new GroupMembersAdapter(GlideApp.with(getContext()));
         recyclerView.setAdapter(adapter);
         groupIv.setOnClickListener(null);
 

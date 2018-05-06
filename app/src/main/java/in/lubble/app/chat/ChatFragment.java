@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.Constants;
+import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
@@ -198,7 +199,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 getContext(),
                 new ArrayList<ChatData>(),
                 chatRecyclerView,
-                this);
+                this,
+                GlideApp.with(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
         msgChildListener = msgListener(chatAdapter);
 
