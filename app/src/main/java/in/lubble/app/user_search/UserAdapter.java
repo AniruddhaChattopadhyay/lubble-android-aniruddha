@@ -56,7 +56,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
 
     void addMemberProfile(ProfileInfo profileInfo) {
         membersList.add(profileInfo);
-        notifyItemInserted(membersList.size());
+        notifyDataSetChanged();
     }
 
     @Override

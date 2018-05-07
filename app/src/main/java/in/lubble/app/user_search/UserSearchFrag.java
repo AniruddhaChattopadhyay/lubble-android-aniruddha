@@ -136,14 +136,14 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     }
 
     private void fetchAllLubbleUsers() {
-        RealtimeDbHelper.getLubbleMembersRef().addListenerForSingleValueEvent(new ValueEventListener() {
+        RealtimeDbHelper.getLubbleMembersRef().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ArrayList<String> userList = new ArrayList<>();
+                final ArrayList<String> userList = new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     userList.add(child.getKey());
                 }
-
+                userAdapter.clear();
                 fetchGroupUsers();
                 fetchAllLubbleMembersProfile(userList);
             }
