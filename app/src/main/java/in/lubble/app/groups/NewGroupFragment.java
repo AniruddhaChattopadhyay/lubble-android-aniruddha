@@ -10,11 +10,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.Switch;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
@@ -51,8 +51,7 @@ public class NewGroupFragment extends Fragment {
     private ImageView groupIv;
     private EditText groupName;
     private EditText groupDesc;
-    private RelativeLayout switchContainer;
-    private Switch privateGroupSwitch;
+    private Spinner spinner;
     private String currentPhotoPath;
     private DatabaseReference userGroupRef;
     private DatabaseReference createJoinRef;
@@ -60,6 +59,7 @@ public class NewGroupFragment extends Fragment {
     private Uri picUri = null;
     private Query query;
     private ChildEventListener childEventListener;
+    private boolean isPvt;
 
     public NewGroupFragment() {
         // Required empty public constructor
@@ -85,16 +85,8 @@ public class NewGroupFragment extends Fragment {
         groupIv = view.findViewById(R.id.iv_new_group);
         groupName = view.findViewById(R.id.et_group_title);
         groupDesc = view.findViewById(R.id.et_group_desc);
-        switchContainer = view.findViewById(R.id.pvt_group_switch_container);
-        privateGroupSwitch = view.findViewById(R.id.switch_pvt_group);
+        spinner = view.findViewById(R.id.spinner_privacy);
         Button createBtn = view.findViewById(R.id.btn_create_group);
-
-        switchContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                privateGroupSwitch.toggle();
-            }
-        });
 
         createBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,7 +101,7 @@ public class NewGroupFragment extends Fragment {
                 final GroupData groupData = new GroupData();
                 groupData.setTitle(groupName.getText().toString());
                 groupData.setDescription(groupDesc.getText().toString());
-                groupData.setIsPrivate(privateGroupSwitch.isChecked());
+                groupData.setIsPrivate(isPvt);
 
                 Log.d(TAG, "onClick: ");
                 DatabaseReference pushRef = createJoinRef.push();
@@ -122,6 +114,20 @@ public class NewGroupFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 startPhotoPicker(REQUEST_CODE_GROUP_PIC);
+            }
+        });
+
+        final MySpinnerAdapter mySpinnerAdapter = new MySpinnerAdapter(getContext(), R.layout.item_privacy_spinner, new String[2]);
+        spinner.setAdapter(mySpinnerAdapter);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                isPvt = position == 1;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
 

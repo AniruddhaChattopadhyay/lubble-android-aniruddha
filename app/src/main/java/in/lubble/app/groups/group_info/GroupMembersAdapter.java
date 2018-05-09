@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
@@ -30,9 +30,11 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapter.MemberHolder> {
 
     private final List<Map.Entry> memberList;
+    private final GlideRequests glide;
 
-    public GroupMembersAdapter() {
+    public GroupMembersAdapter(GlideRequests glide) {
         memberList = new ArrayList<>();
+        this.glide = glide;
     }
 
     @Override
@@ -54,8 +56,7 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 if (profileInfo != null) {
                     holder.titleTv.setText(profileInfo.getName());
-                    GlideApp.with(holder.itemView.getContext())
-                            .load(profileInfo.getThumbnail())
+                    glide.load(profileInfo.getThumbnail())
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .circleCrop()
                             .into(holder.iconIv);

@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.bumptech.glide.request.target.Target;
@@ -88,10 +89,11 @@ public class NotifUtils {
 
             final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                     .setStyle(map.getValue())
-                    .setSmallIcon(R.drawable.ic_upload)
+                    .setSmallIcon(R.drawable.ic_lubble_notif)
                     .setShowWhen(true)
                     .setGroup(GROUP_KEY)
                     .setDefaults(0)
+                    .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                     .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
                     .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
 
@@ -155,8 +157,9 @@ public class NotifUtils {
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Lubble")
                 .setWhen(notifDataList.get(notifDataList.size() - 1).getTimestamp())
-                .setSmallIcon(R.drawable.ic_upload)
+                .setSmallIcon(R.drawable.ic_lubble_notif)
                 .setShowWhen(true)
+                .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                 .setGroup(groupKey)
                 .setGroupSummary(true)
                 .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);

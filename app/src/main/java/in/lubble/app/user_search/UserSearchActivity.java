@@ -28,7 +28,7 @@ public class UserSearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user_search);
 
 
-        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

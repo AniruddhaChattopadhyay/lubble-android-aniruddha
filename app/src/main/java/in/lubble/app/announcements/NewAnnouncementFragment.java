@@ -49,6 +49,7 @@ public class NewAnnouncementFragment extends Fragment {
                     final AnnouncementData announcementData = new AnnouncementData();
                     announcementData.setAuthorUid(currentUser.getUid());
                     announcementData.setAuthorName(currentUser.getDisplayName());
+                    announcementData.setCreatedTimestamp(System.currentTimeMillis());
                     announcementData.setTitle(titleEt.getText().toString());
                     announcementData.setMessage(msgEt.getText().toString());
                     pushAnnouncement(announcementData);

@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.Group;
-import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
@@ -44,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.Constants;
+import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
@@ -64,6 +64,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.REPLY;
 import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.FileUtils.createImageFile;
@@ -72,6 +73,7 @@ import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 
 public class ChatFragment extends Fragment implements View.OnClickListener {
 
@@ -94,6 +96,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ImageView attachMediaBtn;
     private TextView linkTitle;
     private TextView linkDesc;
+    private ImageView linkCancel;
     private DatabaseReference groupReference;
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
@@ -108,6 +111,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
     private ValueEventListener bottomBarListener;
+    @Nullable
+    private String replyMsgId = null;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -155,6 +160,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         linkMetaContainer = view.findViewById(R.id.group_link_meta);
         linkTitle = view.findViewById(R.id.tv_link_title);
         linkDesc = view.findViewById(R.id.tv_link_desc);
+        linkCancel = view.findViewById(R.id.iv_link_cancel);
         bottomContainer = view.findViewById(R.id.bottom_container);
         pvtSystemMsg = view.findViewById(R.id.view_pvt_sys_msg);
 
@@ -169,8 +175,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         attachMediaBtn.setOnClickListener(this);
         joinBtn.setOnClickListener(this);
         declineTv.setOnClickListener(this);
-
-        showPublicGroupWarning();
+        linkCancel.setOnClickListener(this);
 
         return view;
     }
@@ -189,7 +194,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         chatRecyclerView.setLayoutManager(layoutManager);
-        final ChatAdapter chatAdapter = new ChatAdapter(getActivity(), getContext(), new ArrayList<ChatData>(), chatRecyclerView);
+        final ChatAdapter chatAdapter = new ChatAdapter(
+                getActivity(),
+                getContext(),
+                new ArrayList<ChatData>(),
+                chatRecyclerView,
+                this,
+                GlideApp.with(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
         msgChildListener = msgListener(chatAdapter);
 
@@ -259,9 +270,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         chatRecyclerView.setVisibility(View.VISIBLE);
                         pvtSystemMsg.setVisibility(View.GONE);
                     }
-                    ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail());
+                    ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
                     resetUnreadCount();
                     showBottomBar(groupData);
+                    showPublicGroupWarning();
                 }
             }
 
@@ -345,22 +357,46 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void showPublicGroupWarning() {
-        if (!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown() && groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
-            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity());
-            View sheetView = getActivity().getLayoutInflater().inflate(R.layout.bottom_sheet_info, null);
-            bottomSheetDialog.setContentView(sheetView);
-            bottomSheetDialog.setCancelable(false);
-            bottomSheetDialog.setCanceledOnTouchOutside(false);
-            bottomSheetDialog.show();
-
-            final TextView gotItTv = sheetView.findViewById(R.id.tv_got_it);
-            gotItTv.setOnClickListener(new View.OnClickListener() {
+        if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+            RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
-                public void onClick(View v) {
-                    LubbleSharedPrefs.getInstance().setIsPublicGroupInfoShown(true);
-                    bottomSheetDialog.dismiss();
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    String lubbleName = dataSnapshot.child("title").getValue(String.class);
+                    showBottomSheetAlert(getContext(), getLayoutInflater(),
+                            "Welcome to " + lubbleName + " Group",
+                            "All your neighbors in " + lubbleName + " are a member of this group" +
+                                    "\n\nMessages you send here are visible to everyone.",
+                            R.drawable.ic_public_black_24dp, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
+                                    if (!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown()) {
+                                        LubbleSharedPrefs.getInstance().setShowPvtGroupInfo(true);
+                                    }
+                                }
+                            });
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
                 }
             });
+
+        } else if (groupData != null && !LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown()
+                && !groupData.getIsPrivate() && !groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+            showBottomSheetAlert(getContext(), getLayoutInflater(),
+                    "This is a public group!",
+                    "Messages you send here are visible to everyone.",
+                    R.drawable.ic_public_black_24dp, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            LubbleSharedPrefs.getInstance().setIsPublicGroupInfoShown(true);
+                            if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown()) {
+                                LubbleSharedPrefs.getInstance().setShowPvtGroupInfo(true);
+                            }
+                        }
+                    });
         }
     }
 
@@ -452,7 +488,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
 
-                if (isValidString(linkTitle.getText().toString())) {
+                if (isValidString(replyMsgId)) {
+                    chatData.setType(REPLY);
+                    chatData.setReplyMsgId(replyMsgId);
+                } else if (isValidString(linkTitle.getText().toString())) {
                     chatData.setType(LINK);
                     chatData.setLinkTitle(linkTitle.getText().toString());
                     chatData.setLinkDesc(linkDesc.getText().toString());
@@ -461,6 +500,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 messagesReference.push().setValue(chatData);
 
                 newMessageEt.setText("");
+                linkTitle.setText("");
+                linkDesc.setText("");
+                linkMetaContainer.setVisibility(View.GONE);
+                replyMsgId = null;
                 break;
             case R.id.iv_attach:
                 startPhotoPicker(REQUEST_CODE_IMG);
@@ -477,6 +520,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         getActivity().finish();
                     }
                 });
+                break;
+            case R.id.iv_link_cancel:
+                linkTitle.setText("");
+                linkDesc.setText("");
+                prevUrl = "";
+                linkMetaContainer.setVisibility(View.GONE);
+                replyMsgId = null;
                 break;
         }
     }
@@ -556,7 +606,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     prevUrl = extractedUrl;
                     new LinkMetaAsyncTask(prevUrl, getLinkMetaListener())
                             .execute();
-                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE) {
+                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId)) {
                     linkMetaContainer.setVisibility(View.GONE);
                     prevUrl = "";
                 }
@@ -591,6 +641,45 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         };
     }
 
+    public void addReplyFor(@NonNull String selectedChatId) {
+        linkMetaContainer.setVisibility(View.VISIBLE);
+        replyMsgId = selectedChatId;
+
+        messagesReference.child(selectedChatId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                RealtimeDbHelper.getUserInfoRef(quotedChatData.getAuthorUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                        linkTitle.setText(profileInfo.getName());
+                        String desc = "";
+                        if (isValidString(quotedChatData.getImgUrl())) {
+                            desc = desc.concat("\uD83D\uDCF7 ");
+                            if (!isValidString(quotedChatData.getMessage())) {
+                                // add the word photo if there is no caption
+                                desc = desc.concat("Photo ");
+                            }
+                        }
+                        desc = desc.concat(quotedChatData.getMessage());
+                        linkDesc.setText(desc);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     public void openGroupInfo() {
         if (groupData.isJoined() || !groupData.getIsPrivate()) {
             ScrollingGroupInfoActivity.open(getContext(), groupId);
@@ -605,4 +694,5 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         groupReference.removeEventListener(groupInfoListener);
         RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
     }
+
 }

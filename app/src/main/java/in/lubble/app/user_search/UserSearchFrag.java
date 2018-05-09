@@ -18,13 +18,13 @@ import android.widget.Toast;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
@@ -45,8 +45,6 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private RecyclerView usersRecyclerView;
     private UserAdapter userAdapter;
     private SelectedUserAdapter selectedUserAdapter;
-    private ValueEventListener lubbleMembersListener;
-    private HashMap<DatabaseReference, ValueEventListener> map = new HashMap<>();
 
     public UserSearchFrag() {
     }
@@ -82,12 +80,12 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        userAdapter = new UserAdapter(mListener);
+        userAdapter = new UserAdapter(mListener, GlideApp.with(getContext()));
         usersRecyclerView.setAdapter(userAdapter);
         fetchAllLubbleUsers();
 
         selectedUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), OrientationHelper.HORIZONTAL, false));
-        selectedUserAdapter = new SelectedUserAdapter(mListener);
+        selectedUserAdapter = new SelectedUserAdapter(mListener, GlideApp.with(getContext()));
         selectedUsersRecyclerView.setAdapter(selectedUserAdapter);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
@@ -138,14 +136,14 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     }
 
     private void fetchAllLubbleUsers() {
-        lubbleMembersListener = RealtimeDbHelper.getLubbleMembersRef().addValueEventListener(new ValueEventListener() {
+        RealtimeDbHelper.getLubbleMembersRef().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ArrayList<String> userList = new ArrayList<>();
+                final ArrayList<String> userList = new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     userList.add(child.getKey());
-                }/*
-                */
+                }
+                userAdapter.clear();
                 fetchGroupUsers();
                 fetchAllLubbleMembersProfile(userList);
             }
@@ -158,8 +156,9 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     }
 
     private void fetchAllLubbleMembersProfile(ArrayList<String> userList) {
+        userAdapter.clear();
         for (String uid : userList) {
-            ValueEventListener membersProfileListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
+            getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
@@ -174,7 +173,6 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
                 }
             });
-            map.put(getUserInfoRef(uid), membersProfileListener);
         }
     }
 
@@ -227,10 +225,6 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     @Override
     public void onPause() {
         super.onPause();
-        RealtimeDbHelper.getLubbleMembersRef().removeEventListener(lubbleMembersListener);
-        for (Query query : map.keySet()) {
-            query.removeEventListener(map.get(query));
-        }
         userAdapter.removeAllListeners();
         selectedUserAdapter.removeAllListeners();
     }

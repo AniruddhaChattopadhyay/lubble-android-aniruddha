@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorAccent"
     android:orientation="vertical"
     android:padding="16dp"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
@@ -14,33 +15,42 @@
         android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/iv_bottom_sheet_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:tint="@color/white"
             app:srcCompat="@drawable/ic_public_black_24dp" />
 
         <TextView
+            android:id="@+id/tv_bottom_sheet_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
             android:text="This is a public group!"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tv_bottom_sheet_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Messages you send here are visible to everyone." />
+        android:layout_marginTop="8dp"
+        android:text="Messages you send here are visible to everyone."
+        android:textColor="@color/white"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/tv_got_it"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:layout_marginTop="40dp"
+        android:padding="14dp"
         android:text="Got It"
         android:textAllCaps="true"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-        android:textColor="@color/colorAccent" />
+        android:textColor="@color/white"
+        android:textSize="16sp" />
 
 </LinearLayout>

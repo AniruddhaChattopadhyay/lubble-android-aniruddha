@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="8dp"
-    android:orientation="vertical">
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="8dp">
 
     <ImageView
         android:id="@+id/iv_new_group"
@@ -38,46 +39,20 @@
         android:layout_marginTop="9dp"
         android:hint="Group Description" />
 
-
-    <RelativeLayout
-        android:id="@+id/pvt_group_switch_container"
+    <Spinner
+        android:id="@+id/spinner_privacy"
         android:layout_width="match_parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/et_group_desc"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp">
-
-        <Switch
-            android:id="@+id/switch_pvt_group"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="8dp" />
-
-        <TextView
-            android:id="@+id/tv_pvt_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:text="Private Group"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/tv_pvt_title"
-            android:layout_toLeftOf="@id/switch_pvt_group"
-            android:text="Only visible to the group members" />
-
-    </RelativeLayout>
+        android:layout_below="@id/et_group_desc" />
 
     <Button
         android:id="@+id/btn_create_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/pvt_group_switch_container"
+        android:layout_below="@id/spinner_privacy"
+        android:layout_marginTop="8dp"
         android:text="create new group"
         android:theme="@style/AccentButton" />
 

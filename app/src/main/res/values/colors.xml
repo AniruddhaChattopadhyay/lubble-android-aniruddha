@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorAccent">#008CF9</color>
+    <color name="trans_colorAccent">#7a008cf9</color>
+    <color name="dk_colorAccent">#047ad6</color>
     <color name="transparent">#00ffffff</color>
 
     <color name="card_background">#EEEEEE</color>

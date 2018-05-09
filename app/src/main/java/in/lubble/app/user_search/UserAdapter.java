@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
 
@@ -30,14 +30,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
     private final OnUserSelectedListener mListener;
     private HashMap<String, Boolean> checkedMap;
     private HashMap<String, Boolean> groupMembersMap;
+    private final GlideRequests glide;
     private HashMap<Query, ValueEventListener> listenerMap = new HashMap<>();
     private UserFilter filter;
 
-    UserAdapter(OnUserSelectedListener listener) {
+    UserAdapter(OnUserSelectedListener listener, GlideRequests glide) {
         membersList = new ArrayList<>();
         mListener = listener;
         checkedMap = new HashMap<>();
         groupMembersMap = new HashMap<>();
+        this.glide = glide;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
 
     void addMemberProfile(ProfileInfo profileInfo) {
         membersList.add(profileInfo);
-        notifyItemInserted(membersList.size());
+        notifyDataSetChanged();
     }
 
     @Override
@@ -67,8 +69,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 if (profileInfo != null) {
                     holder.nameTv.setText(profileInfo.getName());
-                    GlideApp.with(holder.itemView.getContext())
-                            .load(profileInfo.getThumbnail())
+                    glide.load(profileInfo.getThumbnail())
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .circleCrop()
                             .into(holder.iconIv);

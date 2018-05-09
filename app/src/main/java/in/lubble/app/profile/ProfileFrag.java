@@ -287,9 +287,9 @@ public class ProfileFrag extends Fragment {
         FirebaseDynamicLinks.getInstance().createDynamicLink()
                 .setLink(Uri.parse(link))
                 .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
-                        .setTitle("Join Saraswati Vihar Lubble")
-                        .setDescription("Click to open Lubble App!")
-                        .setImageUrl(Uri.parse("https://place-hold.it/300x200"))
+                        .setTitle("Join Saraswati Vihar community")
+                        .setDescription("Get the Lubble App now")
+                        .setImageUrl(Uri.parse("https://i.imgur.com/JFsrCOs.png"))
                         .build()
                 )
                 .setDynamicLinkDomain("bx5at.app.goo.gl")
@@ -317,7 +317,7 @@ public class ProfileFrag extends Fragment {
         String referrerName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
         String subject = String.format("%s wants you to join Lubble!", referrerName);
         String invitationLink = mInvitationUrl.toString();
-        String msg = "Join me on Lubble! Use my referrer link: "
+        String msg = "Join me & others in the Saraswati Vihar community on Lubble.\nGet the Lubble app now: "
                 + invitationLink;
         try {
             Intent i = new Intent(Intent.ACTION_SEND);

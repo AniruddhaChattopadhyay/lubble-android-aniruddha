@@ -4,24 +4,68 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/icon_toolbar"
     android:layout_width="match_parent"
-    android:background="@color/white"
     android:layout_height="?attr/actionBarSize"
+    android:background="@color/white"
     app:contentInsetStartWithNavigation="0dp"
     app:elevation="12dp">
 
-    <ImageView
-        android:id="@+id/iv_toolbar"
-        android:layout_width="?attr/actionBarSize"
-        android:layout_height="?attr/actionBarSize"
-        android:layout_marginLeft="-16dp"
-        android:padding="8dp"
-        tools:src="@tools:sample/avatars" />
-
-    <TextView
-        android:id="@+id/tv_toolbar_title"
-        style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Group Name" />
+        android:layout_marginLeft="-16dp">
+
+        <ImageView
+            android:id="@+id/iv_toolbar"
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
+            android:padding="8dp"
+            tools:src="@tools:sample/avatars" />
+
+        <ImageView
+            android:id="@+id/iv_lock_icon"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_alignBottom="@id/iv_toolbar"
+            android:layout_alignRight="@id/iv_toolbar"
+            android:layout_marginBottom="4dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/circle_white"
+            android:padding="2dp"
+            android:tint="@color/dark_gray"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_lock_black_24dp"
+            tools:visibility="visible" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Group Name"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_invite_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:freezesText="true"
+            android:marqueeRepeatLimit="1"
+            android:scrollHorizontally="true"
+            android:singleLine="true"
+            android:text="Click here to invite people &amp; view group info"
+            android:visibility="gone" />
+
+    </LinearLayout>
 
 </app:android.support.v7.widget.Toolbar>

@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:visibility="invisible">
+        android:visibility="visible">
 
         <android.support.v7.widget.CardView
             android:id="@+id/compose_container"
@@ -20,7 +20,7 @@
             android:layout_marginBottom="4dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
-            android:visibility="invisible"
+            android:visibility="visible"
             app:cardCornerRadius="24dp">
 
             <android.support.constraint.ConstraintLayout
@@ -33,20 +33,38 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
+                    android:maxLines="2"
                     app:layout_constraintBottom_toTopOf="@+id/view_separator"
                     app:layout_constraintStart_toStartOf="@+id/et_new_message"
                     tools:text="link desc goes here" />
 
                 <TextView
                     android:id="@+id/tv_link_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toTopOf="@+id/tv_link_desc"
+                    app:layout_constraintEnd_toStartOf="@+id/iv_link_cancel"
+                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="@+id/tv_link_desc"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:text="Link Title" />
+
+                <ImageView
+                    android:id="@+id/iv_link_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:paddingRight="4dp"
+                    android:paddingTop="4dp"
+                    app:layout_constraintBottom_toTopOf="@+id/tv_link_desc"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_close_black_24dp" />
 
                 <View
                     android:id="@+id/view_separator"
@@ -108,7 +126,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title"
+                    app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title,iv_link_cancel"
                     tools:visibility="visible" />
 
             </android.support.constraint.ConstraintLayout>
@@ -120,7 +138,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:background="@color/colorPrimary"
-            android:visibility="invisible">
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/tv_decline"

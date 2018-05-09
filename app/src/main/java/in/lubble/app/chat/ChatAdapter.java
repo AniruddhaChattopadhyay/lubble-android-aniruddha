@@ -1,16 +1,24 @@
 package in.lubble.app.chat;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -34,16 +42,21 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.MsgFlexBoxLayout;
+import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.REPLY;
 import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -62,14 +75,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private Activity activity;
     private Context context;
+    private final GlideRequests glide;
     private RecyclerView recyclerView;
     private ArrayList<ChatData> chatDataList;
+    private ChatFragment chatFragment;
+    private String selectedChatId = null;
+    private int highlightedPos = -1;
+    private int posToFlash = -1;
 
-    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList, RecyclerView recyclerView) {
+    public ChatAdapter(Activity activity, Context context, ArrayList<ChatData> chatDataList,
+                       RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
         this.activity = activity;
         this.context = context;
         this.chatDataList = chatDataList;
         this.recyclerView = recyclerView;
+        this.chatFragment = chatFragment;
+        this.glide = glide;
     }
 
     @Override
@@ -119,7 +140,25 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
-        sentChatViewHolder.messageTv.setText(chatData.getMessage());
+        if (highlightedPos == position) {
+            sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+        } else {
+            sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (posToFlash == position) {
+            UiUtils.animateColor(sentChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
+        } else {
+            sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (isValidString(chatData.getMessage())) {
+            sentChatViewHolder.messageTv.setVisibility(View.VISIBLE);
+            sentChatViewHolder.messageTv.setText(chatData.getMessage());
+        } else {
+            sentChatViewHolder.messageTv.setVisibility(View.GONE);
+        }
         sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbers().containsKey(FirebaseAuth.getInstance().getUid())) {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
@@ -132,6 +171,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+        } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
+            sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv);
+            /*sentChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    // to have the link container fill whole chat bubble
+                    sentChatViewHolder.itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    final int textWidth = sentChatViewHolder.textContainer.getWidth();
+                    if (textWidth > sentChatViewHolder.linkContainer.getWidth()) {
+                        final ViewGroup.LayoutParams layoutParams = sentChatViewHolder.linkContainer.getLayoutParams();
+                        layoutParams.width = textWidth;
+                        sentChatViewHolder.linkContainer.setLayoutParams(layoutParams);
+                    }
+                }
+            });*/
         } else {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -143,6 +198,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
+
+        if (highlightedPos == position) {
+            recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+        } else {
+            recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (posToFlash == position) {
+            UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
+        } else {
+            recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
 
         if (isValidString(chatData.getMessage())) {
             recvdChatViewHolder.messageTv.setVisibility(View.VISIBLE);
@@ -162,6 +230,28 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+        } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
+            recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            addReplyData(chatData.getReplyMsgId(), recvdChatViewHolder.linkTitleTv, recvdChatViewHolder.linkDescTv);
+            /*recvdChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    // to have the link container fill whole chat bubble
+                    recvdChatViewHolder.itemView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    final int textWidth = recvdChatViewHolder.textContainer.getWidth();
+                    if (textWidth > recvdChatViewHolder.linkContainer.getWidth()) {
+                        final ViewGroup.LayoutParams layoutParams = recvdChatViewHolder.linkContainer.getLayoutParams();
+                        layoutParams.width = textWidth;
+                        recvdChatViewHolder.linkContainer.setLayoutParams(layoutParams);
+                    } else {
+                        final ViewGroup.LayoutParams layoutParams = recvdChatViewHolder.linkContainer.getLayoutParams();
+                        layoutParams.width = recvdChatViewHolder.linkTitleTv.getWidth() > recvdChatViewHolder.linkDescTv.getWidth()
+                                ? recvdChatViewHolder.linkTitleTv.getWidth()
+                                : recvdChatViewHolder.linkDescTv.getWidth();
+                        recvdChatViewHolder.linkContainer.setLayoutParams(layoutParams);
+                    }
+                }
+            });*/
         } else {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -169,6 +259,26 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
 
         showDpAndName(recvdChatViewHolder, chatData);
+    }
+
+    private void addReplyData(String replyMsgId, TextView linkTitleTv, TextView linkDescTv) {
+        ChatData emptyReplyChatData = new ChatData();
+        emptyReplyChatData.setId(replyMsgId);
+        int index = chatDataList.indexOf(emptyReplyChatData);
+        if (index > -1) {
+            ChatData quotedChatData = chatDataList.get(index);
+            String desc = "";
+            if (isValidString(quotedChatData.getImgUrl())) {
+                desc = desc.concat("\uD83D\uDCF7 ");
+                if (!isValidString(quotedChatData.getMessage())) {
+                    // add the word photo if there is no caption
+                    desc = desc.concat("Photo ");
+                }
+            }
+            desc = desc.concat(quotedChatData.getMessage());
+            linkDescTv.setText(desc);
+            showName(linkTitleTv, quotedChatData.getAuthorUid());
+        }
     }
 
     private void bindSystemViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -179,6 +289,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private void showName(final TextView authorNameTv, String authorUid) {
+        getUserInfoRef(authorUid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                if (map != null) {
+                    authorNameTv.setText(map.get("name"));
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
         // single as its very difficult otherwise to keep track of all listeners for every user
         // plus we don't really need realtime updation of user DP and/or name in chat
@@ -186,9 +313,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                if (map != null && recvdChatViewHolder.itemView.getContext() != null) {
-                    GlideApp.with(recvdChatViewHolder.itemView.getContext())
-                            .load(map.get("thumbnail"))
+                if (map != null) {
+                    glide.load(map.get("thumbnail"))
                             .circleCrop()
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)
@@ -319,12 +445,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar progressBar;
         private ImageView chatIv;
         private TextView dateTv;
+        private MsgFlexBoxLayout textContainer;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
         private ImageView dpIv;
 
-        public RecvdChatViewHolder(View itemView) {
+        public RecvdChatViewHolder(final View itemView) {
             super(itemView);
             authorNameTv = itemView.findViewById(R.id.tv_author);
             messageTv = itemView.findViewById(R.id.tv_message);
@@ -335,6 +462,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);
+            textContainer = itemView.findViewById(R.id.msgFlexBox_text);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
@@ -343,7 +471,63 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
             linkContainer.setOnClickListener(this);
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                    if (highlightedPos != -1) {
+                        // another item was highlighted, remove its highlight
+                        notifyItemChanged(highlightedPos);
+                    }
+                    highlightedPos = getAdapterPosition();
+                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+                    ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                    return true;
+                }
+            });
+
         }
+
+        private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_reply:
+                        if (null != selectedChatId) {
+                            chatFragment.addReplyFor(selectedChatId);
+                        }
+                        break;
+                    case R.id.action_copy:
+                        ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
+                        clipboard.setPrimaryClip(clip);
+                        break;
+                }
+                mode.finish();
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                selectedChatId = null;
+                if (highlightedPos != -1) {
+                    notifyItemChanged(highlightedPos);
+                    highlightedPos = -1;
+                }
+            }
+        };
 
         @Override
         public void onClick(View v) {
@@ -355,12 +539,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     //toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
                     break;
                 case R.id.link_meta_container:
-                    final URLSpan[] urls = messageTv.getUrls();
-                    final String url = urls[0].getURL();
-                    if (isValidString(url)) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(url));
-                        context.startActivity(i);
+                    ChatData chatData = chatDataList.get(getAdapterPosition());
+                    if (LINK.equalsIgnoreCase(chatData.getType())) {
+                        final URLSpan[] urls = messageTv.getUrls();
+                        final String url = urls[0].getURL();
+                        if (isValidString(url)) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
+                        }
+                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                        ChatData emptyReplyChatData = new ChatData();
+                        emptyReplyChatData.setId(chatData.getReplyMsgId());
+                        int pos = chatDataList.indexOf(emptyReplyChatData);
+                        if (pos != -1) {
+                            recyclerView.scrollToPosition(pos);
+                            posToFlash = pos;
+                            notifyItemChanged(pos);
+                        }
                     }
                     break;
             }
@@ -377,11 +573,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar progressBar;
         private ImageView chatIv;
         private TextView dateTv;
+        private MsgFlexBoxLayout textContainer;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
 
-        SentChatViewHolder(View itemView) {
+        SentChatViewHolder(final View itemView) {
             super(itemView);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
@@ -391,13 +588,67 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);
+            textContainer = itemView.findViewById(R.id.msgFlexBox_text);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                    if (highlightedPos != -1) {
+                        // another item was highlighted, remove its highlight
+                        notifyItemChanged(highlightedPos);
+                    }
+                    highlightedPos = getAdapterPosition();
+                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+                    ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                    return true;
+                }
+            });
         }
+
+        private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_reply:
+                        chatFragment.addReplyFor(selectedChatId);
+                        break;
+                    case R.id.action_copy:
+                        ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
+                        clipboard.setPrimaryClip(clip);
+                        break;
+                }
+                mode.finish();
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                selectedChatId = null;
+                if (highlightedPos != -1) {
+                    notifyItemChanged(highlightedPos);
+                    highlightedPos = -1;
+                }
+            }
+        };
 
         @Override
         public void onClick(View v) {
@@ -406,12 +657,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     //toggleLubb(getAdapterPosition(), chatDataList.get(getAdapterPosition()).getId());
                     break;
                 case R.id.link_meta_container:
-                    final URLSpan[] urls = messageTv.getUrls();
-                    final String url = urls[0].getURL();
-                    if (isValidString(url)) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(url));
-                        context.startActivity(i);
+                    ChatData chatData = chatDataList.get(getAdapterPosition());
+                    if (LINK.equalsIgnoreCase(chatData.getType())) {
+                        final URLSpan[] urls = messageTv.getUrls();
+                        final String url = urls[0].getURL();
+                        if (isValidString(url)) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
+                        }
+                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                        ChatData emptyReplyChatData = new ChatData();
+                        emptyReplyChatData.setId(chatData.getReplyMsgId());
+                        int pos = chatDataList.indexOf(emptyReplyChatData);
+                        if (pos != -1) {
+                            recyclerView.scrollToPosition(pos);
+                            posToFlash = pos;
+                            notifyItemChanged(pos);
+                        }
                     }
                     break;
             }

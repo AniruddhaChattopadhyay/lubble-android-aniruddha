@@ -66,7 +66,7 @@ public class DateTimeUtils {
     }
 
     public static int getTimeBasedUniqueInt() {
-        return (int)((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
+        return (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE);
     }
 
     @NonNull
@@ -77,8 +77,8 @@ public class DateTimeUtils {
 
     @NonNull
     public static String getHumanTimestamp(long time) {
-        String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS).toString();
-        if (humanTime.equalsIgnoreCase("0 minutes ago") || humanTime.equalsIgnoreCase("In 0 minutes")) {
+        String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString();
+        if (humanTime.equalsIgnoreCase("0 min. ago") || humanTime.equalsIgnoreCase("In 0 min.")) {
             return "Just now";
         }
         return humanTime;

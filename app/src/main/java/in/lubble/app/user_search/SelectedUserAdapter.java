@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
 
@@ -26,11 +26,13 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
 
     private final List<String> selectedUsersList;
     private final OnUserSelectedListener mListener;
+    private final GlideRequests glide;
     private HashMap<Query, ValueEventListener> listenerMap = new HashMap<>();
 
-    public SelectedUserAdapter(OnUserSelectedListener listener) {
+    public SelectedUserAdapter(OnUserSelectedListener listener, GlideRequests glide) {
         selectedUsersList = new ArrayList<>();
         mListener = listener;
+        this.glide = glide;
     }
 
     @Override
@@ -50,8 +52,7 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 if (profileInfo != null) {
                     holder.nameTv.setText(profileInfo.getName().split(" ")[0]);
-                    GlideApp.with(holder.itemView.getContext())
-                            .load(profileInfo.getThumbnail())
+                    glide.load(profileInfo.getThumbnail())
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .circleCrop()
                             .into(holder.iconIv);

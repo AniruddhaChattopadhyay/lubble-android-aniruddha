@@ -60,6 +60,8 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
     private ImageView groupIv;
     private TextView titleTv;
     private TextView descTv;
+    private ImageView privacyIcon;
+    private TextView privacyTv;
     private LinearLayout inviteMembersContainer;
     private RecyclerView recyclerView;
     private TextView leaveGroupTV;
@@ -86,6 +88,8 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
         groupIv = findViewById(R.id.iv_group_image);
         titleTv = findViewById(R.id.tv_group_title);
         descTv = findViewById(R.id.tv_group_desc);
+        privacyIcon = findViewById(R.id.iv_privacy_icon);
+        privacyTv = findViewById(R.id.tv_privacy);
         inviteMembersContainer = findViewById(R.id.linearLayout_invite_container);
         recyclerView = findViewById(R.id.rv_group_members);
         leaveGroupTV = findViewById(R.id.tv_leave_group);
@@ -93,16 +97,9 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
         muteSwitch = findViewById(R.id.switch_mute);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new GroupMembersAdapter();
+        adapter = new GroupMembersAdapter(GlideApp.with(this));
         recyclerView.setAdapter(adapter);
         groupIv.setOnClickListener(null);
-
-        inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                UserSearchActivity.newInstance(ScrollingGroupInfoActivity.this, groupId);
-            }
-        });
 
         leaveGroupTV.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,6 +124,7 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
             }
         });
 
+        LubbleSharedPrefs.getInstance().setIsGroupInfoOpened(true);
     }
 
     private void toggleMuteNotifs() {
@@ -245,6 +243,8 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
             toggleLeaveGroupVisibility(groupData);
             toggleMemberElements(groupData.isJoined());
 
+            privacyIcon.setImageResource(groupData.getIsPrivate() ? R.drawable.ic_lock_black_24dp : R.drawable.ic_public_black_24dp);
+            privacyTv.setText(groupData.getIsPrivate() ? "Private Group" : "Public Group");
         }
 
         @Override
@@ -264,7 +264,23 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
 
     private void toggleMemberElements(boolean isJoined) {
         muteNotifsContainer.setVisibility(isJoined ? View.VISIBLE : View.GONE);
-        inviteMembersContainer.setVisibility(isJoined ? View.VISIBLE : View.GONE);
+        if (isJoined) {
+            inviteMembersContainer.setAlpha(1f);
+            inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    UserSearchActivity.newInstance(getContext(), groupId);
+                }
+            });
+        } else {
+            inviteMembersContainer.setAlpha(0.5f);
+            inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), "Join the group to invite people", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private void toggleLeaveGroupVisibility(final GroupData groupData) {
