@@ -3,9 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:paddingLeft="16dp"
     android:paddingRight="16dp"
-    android:background="@color/white"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout
@@ -24,9 +24,9 @@
                 android:id="@+id/tv_group_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_group_title"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
+                android:layout_marginTop="8dp"
                 android:layout_toLeftOf="@id/tv_leave_group"
                 tools:text="@tools:sample/lorem" />
 
