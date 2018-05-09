@@ -43,11 +43,13 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.FullScreenImageActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
@@ -238,7 +240,13 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
 
             List<Map.Entry> memberEntryList = new ArrayList<Map.Entry>(groupData.getMembers().entrySet());
             adapter.clear();
-            adapter.addAllMembers(memberEntryList);
+            for (Map.Entry entry : memberEntryList) {
+                final HashMap map = (HashMap) entry.getValue();
+                if (map.get("admin") == Boolean.TRUE) {
+                    adapter.addAdminId((String) entry.getKey());
+                }
+                fetchProfileInfo((String) entry.getKey());
+            }
 
             toggleLeaveGroupVisibility(groupData);
             toggleMemberElements(groupData.isJoined());
@@ -252,6 +260,24 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
 
         }
     };
+
+    private void fetchProfileInfo(String uid) {
+        getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                if (profileInfo != null) {
+                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                    adapter.addProfile(profileInfo);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     private void openDpInFullScreen(GroupData groupData) {
         FullScreenImageActivity.open(this,
