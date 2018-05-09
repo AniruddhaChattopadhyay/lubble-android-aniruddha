@@ -59,6 +59,7 @@ public class LocationActivity extends AppCompatActivity {
     private TextView locHintTv;
     private Button okBtn;
     private Parcelable idpResponse;
+    private Location currLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -215,6 +216,7 @@ public class LocationActivity extends AppCompatActivity {
     }
 
     private void validateUserLocation(Location location) {
+        currLocation = location;
         final Location centralLocation = new Location("Saraswati Vihar");
         centralLocation.setLatitude(28.696660);
         centralLocation.setLongitude(77.124772);
@@ -262,7 +264,13 @@ public class LocationActivity extends AppCompatActivity {
     private void locationCheckFailed() {
         locHintTv.setVisibility(View.GONE);
         invalidLocContainer.setVisibility(View.VISIBLE);
-        Analytics.triggerEvent(AnalyticsEvents.LOC_CHECK_FAILED, this);
+        final Bundle bundle = new Bundle();
+        if (currLocation != null) {
+            bundle.putDouble("lati", currLocation.getLatitude());
+            bundle.putDouble("longi", currLocation.getLongitude());
+            bundle.putDouble("accuracy", currLocation.getAccuracy());
+        }
+        Analytics.triggerEvent(AnalyticsEvents.LOC_CHECK_FAILED, bundle, this);
     }
 
     private LocationRequest getLocationRequest() {
