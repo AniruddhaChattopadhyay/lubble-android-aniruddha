@@ -36,7 +36,7 @@ public class AppNotifUtils {
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.APP_NOTIF_CHANNEL)
                 .setContentTitle(notification.getTitle())
-                .setSmallIcon(R.drawable.ic_upload)
+                .setSmallIcon(R.drawable.ic_lubble_notif)
                 .setAutoCancel(true)
                 .setChannelId(Constants.APP_NOTIF_CHANNEL)
                 .setColor(ContextCompat.getColor(context, R.color.colorAccent))
@@ -62,7 +62,7 @@ public class AppNotifUtils {
 
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, notifChannel)
                 .setContentTitle(appNotifData.getTitle())
-                .setSmallIcon(R.drawable.ic_upload)
+                .setSmallIcon(R.drawable.ic_lubble_notif)
                 .setAutoCancel(true)
                 .setChannelId(notifChannel)
                 .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
