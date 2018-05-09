@@ -80,9 +80,6 @@
             android:name=".announcements.announcementHistory.AnnouncementsActivity"
             android:label="Announcements"
             android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".groups.group_info.GroupInfoActivity"
-            android:parentActivityName=".chat.ChatActivity" />
         <activity android:name=".domestic_directory.DomesticDirectoryActivity" />
 
         <meta-data
@@ -97,13 +94,17 @@
             android:label="Invite People" />
         <activity android:name=".utils.FullScreenImageActivity" />
         <activity
-            android:parentActivityName=".chat.ChatActivity"
             android:name=".chat.AttachImageActivity"
+            android:parentActivityName=".chat.ChatActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".auth.LocationActivity" />
         <activity
             android:name=".auth.IntroActivity"
             android:theme="@style/BlueAppTheme" />
+        <activity
+            android:name=".groups.group_info.ScrollingGroupInfoActivity"
+            android:label="@string/title_activity_scrolling_group_info"
+            android:theme="@style/AppTheme"></activity>
     </application>
 
 </manifest>

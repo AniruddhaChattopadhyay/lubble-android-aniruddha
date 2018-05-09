@@ -1,19 +1,19 @@
 package in.lubble.app.groups.group_info;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
-import android.view.LayoutInflater;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -53,8 +53,10 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
-public class GroupInfoFragment extends Fragment {
-    private static final String ARG_GROUP_ID = "GroupInfoFragment_GroupId";
+public class ScrollingGroupInfoActivity extends AppCompatActivity {
+
+    private static final String EXTRA_GROUP_ID = "GroupInfoActivity_GroupId";
+
     private String groupId;
     private ProgressBar dpProgressBar;
     private ImageView groupIv;
@@ -69,45 +71,35 @@ public class GroupInfoFragment extends Fragment {
     private SwitchCompat muteSwitch;
     private GroupMembersAdapter adapter;
 
-    public GroupInfoFragment() {
-        // Required empty public constructor
-    }
-
-    public static GroupInfoFragment newInstance(String groupId) {
-        GroupInfoFragment fragment = new GroupInfoFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_GROUP_ID, groupId);
-        fragment.setArguments(args);
-        return fragment;
+    public static void open(Context context, String groupId) {
+        final Intent intent = new Intent(context, ScrollingGroupInfoActivity.class);
+        intent.putExtra(EXTRA_GROUP_ID, groupId);
+        context.startActivity(intent);
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            groupId = getArguments().getString(ARG_GROUP_ID);
-        }
-    }
+        setContentView(R.layout.activity_scrolling_group_info);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.fragment_group_info, container, false);
+        groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
 
-        dpProgressBar = view.findViewById(R.id.progressBar_groupInfo);
-        groupIv = view.findViewById(R.id.iv_group_image);
-        titleTv = view.findViewById(R.id.tv_group_title);
-        descTv = view.findViewById(R.id.tv_group_desc);
-        privacyIcon = view.findViewById(R.id.iv_privacy_icon);
-        privacyTv = view.findViewById(R.id.tv_privacy);
-        inviteMembersContainer = view.findViewById(R.id.linearLayout_invite_container);
-        recyclerView = view.findViewById(R.id.rv_group_members);
-        leaveGroupTV = view.findViewById(R.id.tv_leave_group);
-        muteNotifsContainer = view.findViewById(R.id.mute_container);
-        muteSwitch = view.findViewById(R.id.switch_mute);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new GroupMembersAdapter(GlideApp.with(getContext()));
+        dpProgressBar = findViewById(R.id.progressBar_groupInfo);
+        groupIv = findViewById(R.id.iv_group_image);
+        titleTv = findViewById(R.id.tv_group_title);
+        descTv = findViewById(R.id.tv_group_desc);
+        privacyIcon = findViewById(R.id.iv_privacy_icon);
+        privacyTv = findViewById(R.id.tv_privacy);
+        inviteMembersContainer = findViewById(R.id.linearLayout_invite_container);
+        recyclerView = findViewById(R.id.rv_group_members);
+        leaveGroupTV = findViewById(R.id.tv_leave_group);
+        muteNotifsContainer = findViewById(R.id.mute_container);
+        muteSwitch = findViewById(R.id.switch_mute);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new GroupMembersAdapter(GlideApp.with(this));
         recyclerView.setAdapter(adapter);
         groupIv.setOnClickListener(null);
 
@@ -135,8 +127,6 @@ public class GroupInfoFragment extends Fragment {
         });
 
         LubbleSharedPrefs.getInstance().setIsGroupInfoOpened(true);
-
-        return view;
     }
 
     private void toggleMuteNotifs() {
@@ -144,16 +134,16 @@ public class GroupInfoFragment extends Fragment {
         if (isMuted) {
             MutedChatsSharedPrefs.getInstance().getPreferences().edit().remove(groupId).apply();
             muteSwitch.setChecked(false);
-            Toast.makeText(getContext(), "UN-MUTED", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "UN-MUTED", Toast.LENGTH_SHORT).show();
         } else {
             MutedChatsSharedPrefs.getInstance().getPreferences().edit().putBoolean(groupId, true).apply();
             muteSwitch.setChecked(true);
-            Toast.makeText(getContext(), "MUTED", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "MUTED", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showConfirmationDialog() {
-        final AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setTitle("Are you sure?");
         alertDialog.setMessage("You will no longer be a part of this group");
         alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Leave Group", new DialogInterface.OnClickListener() {
@@ -173,7 +163,7 @@ public class GroupInfoFragment extends Fragment {
     }
 
     private void leaveGroup() {
-        final ProgressDialog progressDialog = new ProgressDialog(getContext());
+        final ProgressDialog progressDialog = new ProgressDialog(this);
         progressDialog.setTitle("Leaving Group");
         progressDialog.setMessage("Please Wait...");
         progressDialog.show();
@@ -187,12 +177,12 @@ public class GroupInfoFragment extends Fragment {
         FirebaseDatabase.getInstance().getReference().updateChildren(childUpdates, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if (isAdded()) {
+                if (!isFinishing() && !isDestroyed()) {
                     progressDialog.dismiss();
-                    final Intent intent = new Intent(getContext(), MainActivity.class);
+                    final Intent intent = new Intent(ScrollingGroupInfoActivity.this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
-                    getActivity().finishAffinity();
+                    finishAffinity();
                 }
             }
         });
@@ -216,7 +206,7 @@ public class GroupInfoFragment extends Fragment {
 
             titleTv.setText(groupData.getTitle());
             descTv.setText(groupData.getDescription());
-            GlideApp.with(getContext())
+            GlideApp.with(ScrollingGroupInfoActivity.this)
                     .load(groupData.getProfilePic())
                     .placeholder(R.drawable.circle)
                     .error(R.drawable.ic_group_24dp)
@@ -290,8 +280,8 @@ public class GroupInfoFragment extends Fragment {
     }
 
     private void openDpInFullScreen(GroupData groupData) {
-        FullScreenImageActivity.open(getActivity(),
-                getContext(),
+        FullScreenImageActivity.open(this,
+                this,
                 groupData.getProfilePic(),
                 groupIv,
                 "lubbles/" + getLubbleId() + "/groups/" + groupId,
@@ -305,7 +295,7 @@ public class GroupInfoFragment extends Fragment {
             inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    UserSearchActivity.newInstance(getContext(), groupId);
+                    UserSearchActivity.newInstance(ScrollingGroupInfoActivity.this, groupId);
                 }
             });
         } else {
@@ -313,7 +303,7 @@ public class GroupInfoFragment extends Fragment {
             inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), "Join the group to invite people", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ScrollingGroupInfoActivity.this, "Join the group to invite people", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -337,4 +327,5 @@ public class GroupInfoFragment extends Fragment {
         super.onPause();
         getLubbleGroupsRef().child(groupId).removeEventListener(groupInfoEventListener);
     }
+
 }
