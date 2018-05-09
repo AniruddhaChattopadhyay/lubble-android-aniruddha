@@ -13,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -60,7 +61,6 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
     private String groupId;
     private ProgressBar dpProgressBar;
     private ImageView groupIv;
-    private TextView titleTv;
     private TextView descTv;
     private ImageView privacyIcon;
     private TextView privacyTv;
@@ -83,12 +83,13 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_scrolling_group_info);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("");
 
         groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
 
         dpProgressBar = findViewById(R.id.progressBar_groupInfo);
         groupIv = findViewById(R.id.iv_group_image);
-        titleTv = findViewById(R.id.tv_group_title);
         descTv = findViewById(R.id.tv_group_desc);
         privacyIcon = findViewById(R.id.iv_privacy_icon);
         privacyTv = findViewById(R.id.tv_privacy);
@@ -203,8 +204,7 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-
-            titleTv.setText(groupData.getTitle());
+            setTitle(groupData.getTitle());
             descTv.setText(groupData.getDescription());
             GlideApp.with(ScrollingGroupInfoActivity.this)
                     .load(groupData.getProfilePic())
@@ -320,6 +320,17 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
                 leaveGroupTV.setVisibility(View.GONE);
             }
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
