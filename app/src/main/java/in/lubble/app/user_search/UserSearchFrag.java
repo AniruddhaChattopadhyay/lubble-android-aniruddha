@@ -225,7 +225,6 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     @Override
     public void onPause() {
         super.onPause();
-        userAdapter.removeAllListeners();
         selectedUserAdapter.removeAllListeners();
     }
 }

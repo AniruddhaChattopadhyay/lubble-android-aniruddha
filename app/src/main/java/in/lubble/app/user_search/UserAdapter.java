@@ -9,11 +9,6 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +17,6 @@ import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
-
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> implements Filterable {
 
     private List<ProfileInfo> membersList;
@@ -31,7 +24,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
     private HashMap<String, Boolean> checkedMap;
     private HashMap<String, Boolean> groupMembersMap;
     private final GlideRequests glide;
-    private HashMap<Query, ValueEventListener> listenerMap = new HashMap<>();
     private UserFilter filter;
 
     UserAdapter(OnUserSelectedListener listener, GlideRequests glide) {
@@ -61,33 +53,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final String userId = membersList.get(position).getId();
+        final ProfileInfo profileInfo = membersList.get(position);
+        final String userId = profileInfo.getId();
 
-        ValueEventListener valueEventListener = getUserInfoRef(userId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                if (profileInfo != null) {
-                    holder.nameTv.setText(profileInfo.getName());
-                    glide.load(profileInfo.getThumbnail())
-                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                            .circleCrop()
-                            .into(holder.iconIv);
-                    if (checkedMap.get(userId) != null && checkedMap.get(userId)) {
-                        holder.checkIv.setVisibility(View.VISIBLE);
-                    } else {
-                        holder.checkIv.setVisibility(View.GONE);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        listenerMap.put(getUserInfoRef(userId), valueEventListener);
+        holder.nameTv.setText(profileInfo.getName());
+        glide.load(profileInfo.getThumbnail())
+                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                .circleCrop()
+                .into(holder.iconIv);
+        if (checkedMap.get(userId) != null && checkedMap.get(userId)) {
+            holder.checkIv.setVisibility(View.VISIBLE);
+        } else {
+            holder.checkIv.setVisibility(View.GONE);
+        }
 
         if (groupMembersMap.get(userId) != null && groupMembersMap.get(userId)) {
             holder.mView.setOnClickListener(null);
@@ -138,12 +116,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
         holder.checkIv.setVisibility(View.VISIBLE);
         mListener.onUserSelected(uid);
         checkedMap.put(uid, true);
-    }
-
-    void removeAllListeners() {
-        for (Query query : listenerMap.keySet()) {
-            query.removeEventListener(listenerMap.get(query));
-        }
     }
 
     @Override
