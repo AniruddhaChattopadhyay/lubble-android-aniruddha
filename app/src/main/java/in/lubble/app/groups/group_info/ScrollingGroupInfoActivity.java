@@ -295,7 +295,7 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
             inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    UserSearchActivity.newInstance(getContext(), groupId);
+                    UserSearchActivity.newInstance(ScrollingGroupInfoActivity.this, groupId);
                 }
             });
         } else {
@@ -303,7 +303,7 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
             inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), "Join the group to invite people", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ScrollingGroupInfoActivity.this, "Join the group to invite people", Toast.LENGTH_SHORT).show();
                 }
             });
         }
