@@ -52,6 +52,7 @@ public class UserNameFrag extends Fragment {
 
     private TextInputLayout firstNameTil;
     private TextInputLayout lastNameTil;
+    private TextInputLayout bioTil;
     private ProgressBar progressBar;
     private Spinner blockSpinner;
     private LinearLayout ownerContainer;
@@ -92,6 +93,7 @@ public class UserNameFrag extends Fragment {
 
         firstNameTil = rootView.findViewById(R.id.til_fname);
         lastNameTil = rootView.findViewById(R.id.til_lname);
+        bioTil = rootView.findViewById(R.id.til_bio);
         progressBar = rootView.findViewById(R.id.progressBar);
         blockSpinner = rootView.findViewById(R.id.spinner_block);
         ownerContainer = rootView.findViewById(R.id.linearLayout_owner_container);
@@ -215,7 +217,7 @@ public class UserNameFrag extends Fragment {
         profileData.setInfo(profileInfo);
         profileData.setLocality(getSelectedBlock());
         profileData.setIsOwner(isOwner);
-        profileData.setBio("");
+        profileData.setBio(bioTil.getEditText().getText().toString());
         profileData.setToken(FirebaseInstanceId.getInstance().getToken());
         profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
 
