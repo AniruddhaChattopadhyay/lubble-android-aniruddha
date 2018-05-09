@@ -133,6 +133,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
 
     public void clear() {
         membersList.clear();
+        notifyDataSetChanged();
     }
 
     void addAllMembers(ArrayList<ProfileInfo> filteredMembersList) {
