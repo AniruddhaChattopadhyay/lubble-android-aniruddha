@@ -7,21 +7,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
-
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 /**
  * Created by ishaan on 11/2/18.
@@ -29,11 +22,13 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapter.MemberHolder> {
 
-    private final List<Map.Entry> memberList;
+    private final List<ProfileInfo> memberList;
+    private final HashMap<String, String> adminList;
     private final GlideRequests glide;
 
     public GroupMembersAdapter(GlideRequests glide) {
         memberList = new ArrayList<>();
+        adminList = new HashMap<>();
         this.glide = glide;
     }
 
@@ -46,46 +41,40 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
 
     @Override
     public void onBindViewHolder(final MemberHolder holder, int position) {
-        final Map.Entry memberEntry = memberList.get(position);
-        final String memberId = (String) memberEntry.getKey();
+        final ProfileInfo profileInfo = memberList.get(position);
 
-        // Single listener becoz it's difficult to keep track of multiple listeners in adapter....
-        getUserInfoRef(memberId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                if (profileInfo != null) {
-                    holder.titleTv.setText(profileInfo.getName());
-                    glide.load(profileInfo.getThumbnail())
-                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                            .circleCrop()
-                            .into(holder.iconIv);
-                }
-            }
+        holder.titleTv.setText(profileInfo.getName());
+        glide.load(profileInfo.getThumbnail())
+                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                .circleCrop()
+                .into(holder.iconIv);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        final HashMap memberPropertyMap = (HashMap) memberEntry.getValue();
-        holder.infoTv.setVisibility(memberPropertyMap.get("admin") == Boolean.TRUE ? View.VISIBLE : View.GONE);
-
-    }
-
-    public void addAllMembers(List<Map.Entry> memberList) {
-        this.memberList.addAll(memberList);
-        notifyDataSetChanged();
+        if (adminList.containsKey(profileInfo.getId())) {
+            holder.infoTv.setVisibility(View.VISIBLE);
+        } else {
+            holder.infoTv.setVisibility(View.GONE);
+        }
     }
 
     public void clear() {
         memberList.clear();
+        adminList.clear();
+        notifyDataSetChanged();
     }
 
     @Override
     public int getItemCount() {
         return memberList.size();
+    }
+
+    public void addProfile(ProfileInfo profileInfo) {
+        memberList.add(profileInfo);
+        notifyDataSetChanged();
+    }
+
+    public void addAdminId(String adminId) {
+        adminList.put(adminId, "true");
+        notifyDataSetChanged();
     }
 
     class MemberHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -103,7 +92,7 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
 
         @Override
         public void onClick(View v) {
-            ProfileActivity.open(v.getContext(), (String) memberList.get(getAdapterPosition()).getKey());
+            ProfileActivity.open(v.getContext(), (String) memberList.get(getAdapterPosition()).getId());
         }
     }
 

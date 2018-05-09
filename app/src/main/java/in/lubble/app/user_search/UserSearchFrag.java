@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -83,6 +84,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         userAdapter = new UserAdapter(mListener, GlideApp.with(getContext()));
         usersRecyclerView.setAdapter(userAdapter);
         fetchAllLubbleUsers();
+        fetchGroupUsers();
 
         selectedUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), OrientationHelper.HORIZONTAL, false));
         selectedUserAdapter = new SelectedUserAdapter(mListener, GlideApp.with(getContext()));
@@ -136,16 +138,26 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     }
 
     private void fetchAllLubbleUsers() {
-        RealtimeDbHelper.getLubbleMembersRef().addValueEventListener(new ValueEventListener() {
+        userAdapter.clear();
+        RealtimeDbHelper.getLubbleMembersRef().addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final ArrayList<String> userList = new ArrayList<>();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    userList.add(child.getKey());
-                }
-                userAdapter.clear();
-                fetchGroupUsers();
-                fetchAllLubbleMembersProfile(userList);
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                fetchLubbleMembersProfile(dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override
@@ -155,25 +167,22 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         });
     }
 
-    private void fetchAllLubbleMembersProfile(ArrayList<String> userList) {
-        userAdapter.clear();
-        for (String uid : userList) {
-            getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                    if (profileInfo != null) {
-                        profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                        userAdapter.addMemberProfile(profileInfo);
-                    }
+    private void fetchLubbleMembersProfile(String uid) {
+        getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                if (profileInfo != null) {
+                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                    userAdapter.addMemberProfile(profileInfo);
                 }
+            }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-                }
-            });
-        }
+            }
+        });
     }
 
     private void fetchGroupUsers() {
@@ -225,7 +234,6 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     @Override
     public void onPause() {
         super.onPause();
-        userAdapter.removeAllListeners();
         selectedUserAdapter.removeAllListeners();
     }
 }
