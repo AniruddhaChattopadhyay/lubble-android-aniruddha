@@ -8,6 +8,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -69,12 +71,23 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
 
     public void addProfile(ProfileInfo profileInfo) {
         memberList.add(profileInfo);
+        sort();
         notifyDataSetChanged();
     }
 
     public void addAdminId(String adminId) {
         adminList.put(adminId, "true");
         notifyDataSetChanged();
+    }
+
+    private void sort() {
+        Collections.sort(memberList, new Comparator<ProfileInfo>() {
+            @Override
+            public int compare(ProfileInfo o1, ProfileInfo o2) {
+                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                return o1.getName().compareToIgnoreCase(o2.getName());
+            }
+        });
     }
 
     class MemberHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
