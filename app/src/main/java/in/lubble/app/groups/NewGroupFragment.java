@@ -99,7 +99,7 @@ public class NewGroupFragment extends Fragment {
                 progressDialog.show();
 
                 final GroupData groupData = new GroupData();
-                groupData.setTitle(groupName.getText().toString());
+                groupData.setTitle(groupName.getText().toString().trim());
                 groupData.setDescription(groupDesc.getText().toString());
                 groupData.setIsPrivate(isPvt);
 
