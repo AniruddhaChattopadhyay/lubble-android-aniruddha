@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1026945729202",
+    "firebase_url": "https://lubble-dev.firebaseio.com",
+    "project_id": "lubble-dev",
+    "storage_bucket": "lubble-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1026945729202:android:f434486a0da5b819",
+        "android_client_info": {
+          "package_name": "in.lubble.app.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1026945729202-1v4opj3rpp20td09op79nm8vpmm771o2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.lubble.app.dev",
+            "certificate_hash": "47f64686ed0314e426bbdff1226769ebf8ae582f"
+          }
+        },
+        {
+          "client_id": "1026945729202-meki4u986i4324eblimkh11ohjpenkm1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAm-zSP2xikWnxfRbi6lftuueg_4Subbhs"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1026945729202-meki4u986i4324eblimkh11ohjpenkm1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

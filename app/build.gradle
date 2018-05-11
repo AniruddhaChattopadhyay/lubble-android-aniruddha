@@ -18,6 +18,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    flavorDimensions("type")
+    productFlavors {
+        dev {
+            applicationIdSuffix = ".dev"
+            dimension = "type"
+        }
+        prod {
+            dimension = "type"
+        }
+    }
 }
 
 buildscript {
