@@ -1,0 +1,97 @@
+package in.lubble.app.summer_camp;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ProgressBar;
+
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+
+import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.models.GroupData;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+
+public class SummerCampFrag extends Fragment {
+
+    private static final String TAG = "SummerCampFrag";
+
+    private RecyclerView summerCampRecyclerView;
+    private SummerCampAdapter adapter;
+    ChildEventListener childEventListener;
+    private ProgressBar progressBar;
+
+    public SummerCampFrag() {
+        // Required empty public constructor
+    }
+
+    public static SummerCampFrag newInstance() {
+        return new SummerCampFrag();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        final View view = inflater.inflate(R.layout.fragment_summer_camp, container, false);
+
+        progressBar = view.findViewById(R.id.progressBar_summer_camp);
+        summerCampRecyclerView = view.findViewById(R.id.rv_summer_camp);
+        summerCampRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, RecyclerView.VERTICAL));
+        adapter = new SummerCampAdapter(getContext());
+        summerCampRecyclerView.setAdapter(adapter);
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        progressBar.setVisibility(View.VISIBLE);
+        adapter.clear();
+        childEventListener = getLubbleGroupsRef().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                final GroupData publicGroup = dataSnapshot.getValue(GroupData.class);
+                adapter.addGroup(publicGroup);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getLubbleGroupsRef().removeEventListener(childEventListener);
+    }
+}

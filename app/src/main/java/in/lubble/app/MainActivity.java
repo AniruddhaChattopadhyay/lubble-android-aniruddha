@@ -39,6 +39,7 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.summer_camp.SummerCampFrag;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 
@@ -318,6 +319,9 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case R.id.navigation_domestic_help:
                     switchFrag(DomesticDirectoryFrag.newInstance());
+                    return true;
+                case R.id.navigation_summer_camp:
+                    switchFrag(SummerCampFrag.newInstance());
                     return true;
             }
             return false;
