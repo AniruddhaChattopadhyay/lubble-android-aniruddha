@@ -1,11 +1,13 @@
 package in.lubble.app.utils;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -24,11 +26,19 @@ import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 
+@RuntimePermissions
 public class FullScreenImageActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_GROUP_DP = 418;
@@ -87,11 +97,13 @@ public class FullScreenImageActivity extends AppCompatActivity {
 
     public void editGroupDp(MenuItem item) {
         if (uploadPath != null) {
-            startPhotoPicker(REQUEST_CODE_GROUP_DP);
+            FullScreenImageActivityPermissionsDispatcher
+                    .startPhotoPickerWithPermissionCheck(FullScreenImageActivity.this, REQUEST_CODE_GROUP_DP);
         }
     }
 
-    private void startPhotoPicker(int REQUEST_CODE) {
+    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    public void startPhotoPicker(int REQUEST_CODE) {
         try {
             File cameraPic = createImageFile(this);
             currentPhotoPath = cameraPic.getAbsolutePath();
@@ -149,6 +161,28 @@ public class FullScreenImageActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        FullScreenImageActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showRationaleForCamera(final PermissionRequest request) {
+        showStoragePermRationale(this, request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        Toast.makeText(this, "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        Toast.makeText(this, "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
     }
 
 }

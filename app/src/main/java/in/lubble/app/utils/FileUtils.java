@@ -1,6 +1,7 @@
 package in.lubble.app.utils;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 
 import in.lubble.app.BuildConfig;
+import permissions.dispatcher.PermissionRequest;
 
 /**
  * Created by ishaangarg on 17/11/17.
@@ -135,6 +138,27 @@ public class FileUtils {
 
     private static File createTemporalFile(Context context) {
         return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".jpg"); // context needed
+    }
+
+    public static void showStoragePermRationale(Context context, final PermissionRequest request) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setTitle("Please allow storage permission");
+        alertDialog.setMessage("Without permission we cannot upload your photos");
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Allow", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.dismiss();
+                request.proceed();
+            }
+        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Deny", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.dismiss();
+                request.cancel();
+            }
+        });
+        alertDialog.show();
     }
 
 }

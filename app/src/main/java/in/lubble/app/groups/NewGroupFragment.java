@@ -1,9 +1,11 @@
 package in.lubble.app.groups;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -32,6 +34,12 @@ import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.GroupData;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
@@ -40,9 +48,10 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
-
+@RuntimePermissions
 public class NewGroupFragment extends Fragment {
 
     private static final String TAG = "NewGroupFragment";
@@ -113,7 +122,8 @@ public class NewGroupFragment extends Fragment {
         groupIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startPhotoPicker(REQUEST_CODE_GROUP_PIC);
+                NewGroupFragmentPermissionsDispatcher
+                        .startPhotoPickerWithPermissionCheck(NewGroupFragment.this, REQUEST_CODE_GROUP_PIC);
             }
         });
 
@@ -134,8 +144,8 @@ public class NewGroupFragment extends Fragment {
         return view;
     }
 
-
-    private void startPhotoPicker(int REQUEST_CODE) {
+    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    public void startPhotoPicker(int REQUEST_CODE) {
         try {
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
@@ -217,4 +227,27 @@ public class NewGroupFragment extends Fragment {
             query.removeEventListener(childEventListener);
         }
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        NewGroupFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showRationaleForCamera(final PermissionRequest request) {
+        showStoragePermRationale(getContext(), request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        Toast.makeText(getContext(), "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        Toast.makeText(getContext(), "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
+    }
+
 }

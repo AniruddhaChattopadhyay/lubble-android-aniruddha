@@ -1,9 +1,11 @@
 package in.lubble.app.auth;
 
+import android.Manifest;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
 import com.firebase.ui.auth.IdpResponse;
@@ -24,12 +27,20 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 
+@RuntimePermissions
 public class ProfilePicFrag extends Fragment {
 
     private static final String ARG_PROFILE_PIC_IDP_RESPONSE = "arg_dp_idp_resposne";
@@ -88,7 +99,8 @@ public class ProfilePicFrag extends Fragment {
         welcomeDpIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startPhotoPicker(REQUEST_CODE_DP);
+                ProfilePicFragPermissionsDispatcher
+                        .startPhotoPickerWithPermissionCheck(ProfilePicFrag.this, REQUEST_CODE_DP);
             }
         });
 
@@ -113,7 +125,8 @@ public class ProfilePicFrag extends Fragment {
         getActivity().finishAffinity();
     }
 
-    private void startPhotoPicker(int REQUEST_CODE) {
+    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    public void startPhotoPicker(int REQUEST_CODE) {
         try {
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
@@ -142,6 +155,28 @@ public class ProfilePicFrag extends Fragment {
                     .into(welcomeDpIv);
             submitBtn.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        ProfilePicFragPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showRationaleForCamera(final PermissionRequest request) {
+        showStoragePermRationale(getContext(), request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        Toast.makeText(getContext(), "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        Toast.makeText(getContext(), "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
     }
 
 }
