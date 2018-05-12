@@ -1,9 +1,11 @@
 package in.lubble.app.profile;
 
+import android.Manifest;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
@@ -15,6 +17,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -35,13 +38,21 @@ import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.StringUtils;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 
+@RuntimePermissions
 public class EditProfileFrag extends Fragment {
 
     private static final String TAG = "EditProfileFrag";
@@ -137,13 +148,15 @@ public class EditProfileFrag extends Fragment {
         coverPicIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startPhotoPicker(REQUEST_CODE_COVER_PIC);
+                EditProfileFragPermissionsDispatcher
+                        .startPhotoPickerWithPermissionCheck(EditProfileFrag.this, REQUEST_CODE_COVER_PIC);
             }
         });
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startPhotoPicker(REQUEST_CODE_DP);
+                EditProfileFragPermissionsDispatcher
+                        .startPhotoPickerWithPermissionCheck(EditProfileFrag.this, REQUEST_CODE_DP);
             }
         });
         saveBtn.setOnClickListener(new View.OnClickListener() {
@@ -172,7 +185,8 @@ public class EditProfileFrag extends Fragment {
         return rootView;
     }
 
-    private void startPhotoPicker(int REQUEST_CODE) {
+    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    public void startPhotoPicker(int REQUEST_CODE) {
         try {
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
@@ -215,6 +229,28 @@ public class EditProfileFrag extends Fragment {
         } else {
             Log.e(TAG, "onActivityResult: Failed to get photo");
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        EditProfileFragPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showRationaleForCamera(final PermissionRequest request) {
+        showStoragePermRationale(getContext(), request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        Toast.makeText(getContext(), "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        Toast.makeText(getContext(), "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
     }
 
 }

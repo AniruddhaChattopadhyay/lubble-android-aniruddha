@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -57,6 +59,12 @@ import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.DateTimeUtils;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
@@ -70,11 +78,13 @@ import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 
+@RuntimePermissions
 public class ChatFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "ChatFragment";
@@ -506,7 +516,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 replyMsgId = null;
                 break;
             case R.id.iv_attach:
-                startPhotoPicker(REQUEST_CODE_IMG);
+                ChatFragmentPermissionsDispatcher
+                        .startPhotoPickerWithPermissionCheck(ChatFragment.this, REQUEST_CODE_IMG);
                 break;
             case R.id.btn_join:
                 getCreateOrJoinGroupRef().child(groupId).setValue(true);
@@ -531,7 +542,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private void startPhotoPicker(int REQUEST_CODE) {
+    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    public void startPhotoPicker(int REQUEST_CODE) {
         try {
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
@@ -693,6 +705,28 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         messagesReference.removeEventListener(msgChildListener);
         groupReference.removeEventListener(groupInfoListener);
         RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        ChatFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showRationaleForCamera(final PermissionRequest request) {
+        showStoragePermRationale(getContext(), request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        Toast.makeText(getContext(), "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        Toast.makeText(getContext(), "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
     }
 
 }
