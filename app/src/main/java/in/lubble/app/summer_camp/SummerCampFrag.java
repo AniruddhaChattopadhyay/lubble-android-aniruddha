@@ -7,25 +7,37 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
 
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.GroupData;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleRef;
 
 public class SummerCampFrag extends Fragment {
 
     private static final String TAG = "SummerCampFrag";
 
     private RecyclerView summerCampRecyclerView;
+    private LinearLayout campOverContainer;
+    private ImageView campOverIv;
+    private TextView campOverTitleTv;
+    private TextView campOverDescTv;
     private SummerCampAdapter adapter;
-    ChildEventListener childEventListener;
+    private ChildEventListener childEventListener;
+    private ValueEventListener campCheckListener;
     private ProgressBar progressBar;
 
     public SummerCampFrag() {
@@ -44,6 +56,11 @@ public class SummerCampFrag extends Fragment {
 
         progressBar = view.findViewById(R.id.progressBar_summer_camp);
         summerCampRecyclerView = view.findViewById(R.id.rv_summer_camp);
+        campOverContainer = view.findViewById(R.id.container_camp_over);
+        campOverIv = view.findViewById(R.id.iv_camp_over);
+        campOverTitleTv = view.findViewById(R.id.tv_camp_over_title);
+        campOverDescTv = view.findViewById(R.id.tv_camp_over_desc);
+
         summerCampRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, RecyclerView.VERTICAL));
         adapter = new SummerCampAdapter(getContext());
         summerCampRecyclerView.setAdapter(adapter);
@@ -56,6 +73,31 @@ public class SummerCampFrag extends Fragment {
         super.onResume();
 
         progressBar.setVisibility(View.VISIBLE);
+
+        campCheckListener = getLubbleRef().child("summerCampCheck").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                if (map != null) {
+                    final Boolean isEnabled = (Boolean) map.get("isEnabled");
+                    if (!isEnabled) {
+                        campOverTitleTv.setText((String) map.get("title"));
+                        campOverDescTv.setText((String) map.get("desc"));
+                        summerCampRecyclerView.setVisibility(View.GONE);
+                        campOverContainer.setVisibility(View.VISIBLE);
+                    } else {
+                        summerCampRecyclerView.setVisibility(View.VISIBLE);
+                        campOverContainer.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         adapter.clear();
         childEventListener = getLubbleGroupsRef().addChildEventListener(new ChildEventListener() {
             @Override
@@ -93,5 +135,7 @@ public class SummerCampFrag extends Fragment {
     public void onPause() {
         super.onPause();
         getLubbleGroupsRef().removeEventListener(childEventListener);
+        getLubbleRef().child("summerCampCheck").removeEventListener(campCheckListener);
+
     }
 }
