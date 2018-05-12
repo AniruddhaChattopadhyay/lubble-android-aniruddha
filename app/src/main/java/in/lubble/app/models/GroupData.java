@@ -26,6 +26,7 @@ public class GroupData {
     private String createdBy;
     @Exclude
     private Set<String> invitedBy;
+    private String summerCampDesc;
 
     public GroupData() {
     }  // Needed for Firebase
@@ -146,4 +147,11 @@ public class GroupData {
         }
     }
 
+    public String getSummerCampDesc() {
+        return summerCampDesc;
+    }
+
+    public void setSummerCampDesc(String summerCampDesc) {
+        this.summerCampDesc = summerCampDesc;
+    }
 }

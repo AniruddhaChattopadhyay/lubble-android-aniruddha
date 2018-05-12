@@ -104,10 +104,7 @@ public class SummerCampAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         @Override
         public void onClick(View v) {
-            /*final long phoneNo = groupDataList.get(getAdapterPosition()).getPhone();
-            Intent intent = new Intent(Intent.ACTION_DIAL);
-            intent.setData(Uri.parse("tel:" + String.valueOf(phoneNo)));
-            context.startActivity(intent);*/
+            SummerCampInfoActivity.open(context, groupDataList.get(getAdapterPosition()).getId());
         }
     }
 

@@ -2,10 +2,11 @@
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinator_summer_camp_info"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="in.lubble.app.groups.group_info.ScrollingGroupInfoActivity">
+    tools:context="in.lubble.app.summer_camp.SummerCampInfoActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
@@ -36,8 +37,8 @@
                     android:layout_gravity="center"
                     android:background="@color/very_light_gray"
                     android:scaleType="centerCrop"
-                    tools:src="@drawable/city"
-                    android:transitionName="nahi_chaiye" />
+                    android:transitionName="chaiye"
+                    tools:src="@drawable/city" />
 
                 <View
                     android:layout_width="match_parent"
@@ -70,6 +71,32 @@
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/fragment_group_info" />
+    <include layout="@layout/content_summer_camp_info" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/colorAccent"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/btn_join"
+            android:text="Interested? Join the Group to chat with Instructor"
+            android:textColor="@color/white" />
+
+        <Button
+            android:id="@+id/btn_join"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Join"
+            android:theme="@style/WhiteButton" />
+
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

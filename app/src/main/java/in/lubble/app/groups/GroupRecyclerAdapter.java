@@ -1,6 +1,8 @@
 package in.lubble.app.groups;
 
+import android.graphics.Color;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,7 @@ import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
+import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -35,6 +38,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     // <GroupID, UserGroupData>
     private final HashMap<String, UserGroupData> userGroupDataMap;
     private final OnListFragmentInteractionListener mListener;
+    private int posToFlash = -1;
 
     public GroupRecyclerAdapter(OnListFragmentInteractionListener listener) {
         groupDataList = new ArrayList<>();
@@ -132,6 +136,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 groupViewHolder.joinBtn.setVisibility(View.GONE);
             }
 
+            if (posToFlash == position) {
+                UiUtils.animateColor(groupViewHolder.itemView, ContextCompat.getColor(groupViewHolder.mView.getContext(),
+                        R.color.trans_colorAccent), Color.TRANSPARENT);
+                posToFlash = -1;
+            } else {
+                groupViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            }
+
         } else {
             //todo
         }
@@ -191,6 +203,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             sortList();
             notifyDataSetChanged();
         }
+    }
+
+    public void flashPos(int pos) {
+        posToFlash = pos;
+        notifyItemChanged(pos);
     }
 
     private void sortList() {

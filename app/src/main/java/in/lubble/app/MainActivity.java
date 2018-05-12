@@ -149,6 +149,9 @@ public class MainActivity extends AppCompatActivity {
                 case "directory":
                     bottomNavigation.setSelectedItemId(R.id.navigation_domestic_help);
                     break;
+                case "summer":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_summer_camp);
+                    break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
         }
