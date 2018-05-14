@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,121 +7,180 @@
     android:background="@color/white"
     tools:context="in.lubble.app.summer_camp.new_camp.NewCampActivity">
 
-    <RelativeLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <ImageView
-            android:id="@+id/iv_class_image"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/summer_camp_img_height"
-            android:background="#B3C8E8"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_city_play" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/iv_class_image"
-            android:layout_alignTop="@id/tv_change_pic"
-            android:layout_toLeftOf="@id/tv_change_pic"
-            android:background="@color/white"
-            android:paddingLeft="4dp"
-            app:srcCompat="@drawable/ic_edit_black_24dp" />
-
-        <TextView
-            android:id="@+id/tv_change_pic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/iv_class_image"
-            android:layout_alignRight="@id/iv_class_image"
-            android:background="@color/white"
-            android:padding="4dp"
-            android:text="CHANGE PICTURE" />
+        android:layout_height="match_parent">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/iv_class_image"
-            android:layout_margin="8dp">
+            android:layout_height="wrap_content">
 
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/til_class_name"
+            <ImageView
+                android:id="@+id/iv_class_image"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/summer_camp_img_height"
+                android:background="#B3C8E8"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/ic_city_play" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/iv_class_image"
+                android:layout_alignTop="@id/tv_change_pic"
+                android:layout_toLeftOf="@id/tv_change_pic"
+                android:background="@color/white"
+                android:paddingLeft="4dp"
+                app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+            <TextView
+                android:id="@+id/tv_change_pic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/iv_class_image"
+                android:layout_alignRight="@id/iv_class_image"
+                android:background="@color/white"
+                android:padding="4dp"
+                android:text="CHANGE PICTURE" />
+
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Class Name">
+                android:layout_below="@id/iv_class_image"
+                android:layout_margin="8dp">
 
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
+                <ImageView
+                    android:id="@+id/iv_class_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/til_class_name"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_edit_black_24dp" />
 
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/til_class_desc"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/til_class_name"
-                android:hint="About the class">
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/til_class_number"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/til_class_desc"
-                android:hint="Contact Number">
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </android.support.design.widget.TextInputLayout>
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/til_class_timings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/til_class_number"
-                android:hint="Timings">
-
-                <EditText
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_class_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="left|top"
-                    android:lines="3" />
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@id/iv_class_name"
+                    android:hint="Class Name">
 
-            </android.support.design.widget.TextInputLayout>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
 
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/till_class_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/til_class_timings"
-                android:hint="Address">
+                </android.support.design.widget.TextInputLayout>
 
-                <EditText
+                <ImageView
+                    android:id="@+id/iv_class_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/til_class_desc"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_format_align_left_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_class_desc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="left|top"
-                    android:lines="3" />
+                    android:layout_below="@id/til_class_name"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@id/iv_class_desc"
+                    android:hint="About the class">
 
-            </android.support.design.widget.TextInputLayout>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
 
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/iv_class_contact"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/til_class_number"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_call_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_class_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_class_desc"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@id/iv_class_contact"
+                    android:hint="Contact Number">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/iv_class_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/til_class_timings"
+                    android:layout_marginTop="20dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_access_time_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_class_timings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_class_number"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@+id/iv_class_time"
+                    android:hint="Timings">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="left|top"
+                        android:lines="3" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/iv_class_address"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/till_class_address"
+                    android:layout_marginTop="20dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_location_city_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/till_class_address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_class_timings"
+                    android:layout_marginBottom="34dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@+id/iv_class_address"
+                    android:hint="Address">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="left|top"
+                        android:lines="3" />
+
+                </android.support.design.widget.TextInputLayout>
+            </RelativeLayout>
         </RelativeLayout>
+    </ScrollView>
 
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="8dp"
-            android:text="Submit"
-            android:theme="@style/AccentButton" />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Submit"
+        android:theme="@style/AccentButton" />
 
-    </RelativeLayout>
-</ScrollView>
+</RelativeLayout>
