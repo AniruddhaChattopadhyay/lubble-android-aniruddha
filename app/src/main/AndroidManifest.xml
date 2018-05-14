@@ -115,6 +115,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.MainActivity" />
         </activity>
+        <activity android:name=".summer_camp.new_camp.NewCampActivity"></activity>
     </application>
 
 </manifest>

@@ -1,9 +1,10 @@
 package in.lubble.app.summer_camp;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.summer_camp.new_camp.NewCampActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleRef;
@@ -35,6 +37,7 @@ public class SummerCampFrag extends Fragment {
     private ImageView campOverIv;
     private TextView campOverTitleTv;
     private TextView campOverDescTv;
+    private FloatingActionButton fab;
     private SummerCampAdapter adapter;
     private ChildEventListener childEventListener;
     private ValueEventListener campCheckListener;
@@ -59,12 +62,21 @@ public class SummerCampFrag extends Fragment {
         campOverContainer = view.findViewById(R.id.container_camp_over);
         campOverIv = view.findViewById(R.id.iv_camp_over);
         campOverTitleTv = view.findViewById(R.id.tv_camp_over_title);
+        fab = view.findViewById(R.id.fab_new_camp);
         campOverDescTv = view.findViewById(R.id.tv_camp_over_desc);
 
-        summerCampRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, RecyclerView.VERTICAL));
+        summerCampRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new SummerCampAdapter(getContext());
         summerCampRecyclerView.setAdapter(adapter);
         Analytics.triggerScreenEvent(getContext(), this.getClass());
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NewCampActivity.open(getContext());
+            }
+        });
+
         return view;
     }
 

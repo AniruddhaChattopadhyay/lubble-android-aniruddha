@@ -27,6 +27,7 @@ public class SummerCampAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public SummerCampAdapter(Context context) {
         groupDataList = new ArrayList<>();
         this.context = context;
+        //addNewGroupCard();
     }
 
     @Override
@@ -39,18 +40,28 @@ public class SummerCampAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         final GroupData groupData = groupDataList.get(position);
         final SummerCampViewHolder viewHolder = (SummerCampViewHolder) holder;
+        if (groupData != null) {
 
-        GlideApp.with(viewHolder.mView)
-                .load(groupData.getProfilePic())
-                .placeholder(R.drawable.ic_wb_sunny_black_24dp)
-                .error(R.drawable.ic_wb_sunny_black_24dp)
-                .transform(new RoundedCornersTransformation(dpToPx(16), 0))
-                .into(viewHolder.iconIv);
+            GlideApp.with(viewHolder.mView)
+                    .load(groupData.getProfilePic())
+                    .placeholder(R.drawable.ic_wb_sunny_black_24dp)
+                    .error(R.drawable.ic_wb_sunny_black_24dp)
+                    .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                    .into(viewHolder.iconIv);
 
-        viewHolder.titleTv.setText(groupData.getTitle());
-        viewHolder.descTv.setText(groupData.getDescription());
-        viewHolder.card.setCardBackgroundColor(getVariableColor(position));
+            viewHolder.titleTv.setText(groupData.getTitle());
+            viewHolder.descTv.setText(groupData.getDescription());
+        } else {
+            viewHolder.iconIv.setImageResource(R.drawable.ic_add_circle_black_24dp);
+            viewHolder.titleTv.setText("Add your class");
+            viewHolder.descTv.setText("Submit your Summer Camp class to have it appear here");
+        }
     }
+
+    /*private void addNewGroupCard() {
+        groupDataList.add(0, null);
+        notifyDataSetChanged();
+    }*/
 
     void addGroup(GroupData groupData) {
         groupDataList.add(groupData);
@@ -78,6 +89,7 @@ public class SummerCampAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     public void clear() {
         groupDataList.clear();
         notifyDataSetChanged();
+        //addNewGroupCard();
     }
 
     @Override

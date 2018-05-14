@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context="in.lubble.app.summer_camp.new_camp.NewCampActivity">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/iv_class_image"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/summer_camp_img_height"
+            android:background="#B3C8E8"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/ic_city_play" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/iv_class_image"
+            android:layout_alignTop="@id/tv_change_pic"
+            android:layout_toLeftOf="@id/tv_change_pic"
+            android:background="@color/white"
+            android:paddingLeft="4dp"
+            app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+        <TextView
+            android:id="@+id/tv_change_pic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/iv_class_image"
+            android:layout_alignRight="@id/iv_class_image"
+            android:background="@color/white"
+            android:padding="4dp"
+            android:text="CHANGE PICTURE" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/iv_class_image"
+            android:layout_margin="8dp">
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_class_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Class Name">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_class_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_class_name"
+                android:hint="About the class">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_class_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_class_desc"
+                android:hint="Contact Number">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_class_timings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_class_number"
+                android:hint="Timings">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left|top"
+                    android:lines="3" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/till_class_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_class_timings"
+                android:hint="Address">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left|top"
+                    android:lines="3" />
+
+            </android.support.design.widget.TextInputLayout>
+
+        </RelativeLayout>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="8dp"
+            android:text="Submit"
+            android:theme="@style/AccentButton" />
+
+    </RelativeLayout>
+</ScrollView>

@@ -53,4 +53,15 @@
 
     </LinearLayout>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_new_camp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/ic_add_black_24dp" />
+
 </RelativeLayout>
