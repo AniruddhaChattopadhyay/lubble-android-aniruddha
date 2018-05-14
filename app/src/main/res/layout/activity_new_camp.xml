@@ -9,7 +9,8 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_above="@id/btn_submit">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -87,6 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/til_class_name"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_toRightOf="@id/iv_class_desc"
                     android:hint="About the class">
 
@@ -111,6 +113,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/til_class_desc"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_toRightOf="@id/iv_class_contact"
                     android:hint="Contact Number">
 
@@ -135,6 +138,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/til_class_number"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_toRightOf="@+id/iv_class_time"
                     android:hint="Timings">
 
@@ -145,6 +149,27 @@
                         android:lines="3" />
 
                 </android.support.design.widget.TextInputLayout>
+
+                <fragment
+                    android:id="@+id/map"
+                    android:name="com.google.android.gms.maps.SupportMapFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_below="@id/til_class_timings"
+                    android:layout_marginTop="8dp"
+                    app:liteMode="true"
+                    tools:context="com.example.mapwithmarker.MapsMarkerActivity" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/map"
+                    android:layout_alignTop="@id/map"
+                    android:background="@color/trans_gray"
+                    android:gravity="center"
+                    android:text="Update location on map"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white" />
 
                 <ImageView
                     android:id="@+id/iv_class_address"
@@ -159,9 +184,9 @@
                     android:id="@+id/till_class_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/til_class_timings"
-                    android:layout_marginBottom="34dp"
+                    android:layout_below="@id/map"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
                     android:layout_toRightOf="@+id/iv_class_address"
                     android:hint="Address">
 
@@ -177,6 +202,7 @@
     </ScrollView>
 
     <Button
+        android:id="@+id/btn_submit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
