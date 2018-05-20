@@ -214,6 +214,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
+
                 final UserGroupData userGroupData = userGroupDataMap.get(dataSnapshot.getKey());
                 adapter.addGroup(groupData, userGroupData);
                 groupsRecyclerView.scrollToPosition(0);

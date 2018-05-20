@@ -22,8 +22,6 @@ import java.util.HashMap;
 
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.models.GroupData;
-import in.lubble.app.summer_camp.new_camp.NewCampActivity;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleRef;
@@ -38,7 +36,7 @@ public class SummerCampFrag extends Fragment {
     private TextView campOverTitleTv;
     private TextView campOverDescTv;
     private FloatingActionButton fab;
-    private SummerCampAdapter adapter;
+    //private SummerCampAdapter adapter;
     private ChildEventListener childEventListener;
     private ValueEventListener campCheckListener;
     private ProgressBar progressBar;
@@ -55,27 +53,27 @@ public class SummerCampFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.fragment_summer_camp, container, false);
+        final View view = inflater.inflate(R.layout.fragment_events, container, false);
 
-        progressBar = view.findViewById(R.id.progressBar_summer_camp);
-        summerCampRecyclerView = view.findViewById(R.id.rv_summer_camp);
-        campOverContainer = view.findViewById(R.id.container_camp_over);
+        progressBar = view.findViewById(R.id.progressBar_events);
+        summerCampRecyclerView = view.findViewById(R.id.rv_events);
+        /*campOverContainer = view.findViewById(R.id.container_camp_over);
         campOverIv = view.findViewById(R.id.iv_camp_over);
         campOverTitleTv = view.findViewById(R.id.tv_camp_over_title);
-        fab = view.findViewById(R.id.fab_new_camp);
-        campOverDescTv = view.findViewById(R.id.tv_camp_over_desc);
+        fab = view.findViewById(R.id.fab_new_event);
+        campOverDescTv = view.findViewById(R.id.tv_camp_over_desc);*/
 
         summerCampRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new SummerCampAdapter(getContext());
-        summerCampRecyclerView.setAdapter(adapter);
+        //adapter = new SummerCampAdapter(getContext());
+        //summerCampRecyclerView.setAdapter(adapter);
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        /*fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 NewCampActivity.open(getContext());
             }
-        });
+        });*/
 
         return view;
     }
@@ -110,7 +108,7 @@ public class SummerCampFrag extends Fragment {
             }
         });
 
-        adapter.clear();
+        /*adapter.clear();
         childEventListener = getLubbleGroupsRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -140,7 +138,7 @@ public class SummerCampFrag extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        });*/
     }
 
     @Override

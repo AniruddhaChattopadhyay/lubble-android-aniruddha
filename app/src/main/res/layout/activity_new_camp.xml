@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context="in.lubble.app.summer_camp.new_camp.NewCampActivity">
+    android:background="@color/white">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -17,9 +16,9 @@
             android:layout_height="wrap_content">
 
             <ImageView
-                android:id="@+id/iv_class_image"
+                android:id="@+id/iv_event_image"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/summer_camp_img_height"
+                android:layout_height="@dimen/event_img_height"
                 android:background="#B3C8E8"
                 android:scaleType="fitCenter"
                 app:srcCompat="@drawable/ic_city_play" />
@@ -27,7 +26,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/iv_class_image"
+                android:layout_alignBottom="@id/iv_event_image"
                 android:layout_alignTop="@id/tv_change_pic"
                 android:layout_toLeftOf="@id/tv_change_pic"
                 android:background="@color/white"
@@ -38,8 +37,8 @@
                 android:id="@+id/tv_change_pic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/iv_class_image"
-                android:layout_alignRight="@id/iv_class_image"
+                android:layout_alignBottom="@id/iv_event_image"
+                android:layout_alignRight="@id/iv_event_image"
                 android:background="@color/white"
                 android:padding="4dp"
                 android:text="CHANGE PICTURE" />
@@ -47,25 +46,25 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/iv_class_image"
+                android:layout_below="@id/iv_event_image"
                 android:layout_margin="8dp">
 
                 <ImageView
-                    android:id="@+id/iv_class_name"
+                    android:id="@+id/iv_event_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/til_class_name"
+                    android:layout_alignBottom="@id/til_event_name"
                     android:layout_marginBottom="10dp"
                     android:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_edit_black_24dp" />
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_class_name"
+                    android:id="@+id/til_event_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
-                    android:layout_toRightOf="@id/iv_class_name"
-                    android:hint="Class Name">
+                    android:layout_toRightOf="@id/iv_event_name"
+                    android:hint="Event Name">
 
                     <EditText
                         android:layout_width="match_parent"
@@ -74,23 +73,23 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <ImageView
-                    android:id="@+id/iv_class_desc"
+                    android:id="@+id/iv_event_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/til_class_desc"
+                    android:layout_alignBottom="@id/til_event_desc"
                     android:layout_marginBottom="10dp"
                     android:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_format_align_left_black_24dp" />
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_class_desc"
+                    android:id="@+id/til_event_desc"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/til_class_name"
+                    android:layout_below="@id/til_event_name"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/iv_class_desc"
-                    android:hint="About the class">
+                    android:layout_toRightOf="@id/iv_event_desc"
+                    android:hint="About the event">
 
                     <EditText
                         android:layout_width="match_parent"
@@ -99,63 +98,155 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <ImageView
-                    android:id="@+id/iv_class_contact"
+                    android:id="@+id/iv_event_contact"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/til_class_number"
+                    android:layout_alignBottom="@id/til_event_date"
                     android:layout_marginBottom="10dp"
                     android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_call_black_24dp" />
+                    app:srcCompat="@drawable/ic_event_black_24dp" />
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_class_number"
+                    android:id="@+id/til_event_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/til_class_desc"
+                    android:layout_below="@id/til_event_desc"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/iv_class_contact"
-                    android:hint="Contact Number">
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                </android.support.design.widget.TextInputLayout>
-
-                <ImageView
-                    android:id="@+id/iv_class_time"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/til_class_timings"
-                    android:layout_marginTop="20dp"
-                    android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_access_time_black_24dp" />
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_class_timings"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/til_class_number"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@+id/iv_class_time"
-                    android:hint="Timings">
+                    android:layout_toRightOf="@id/iv_event_contact"
+                    android:hint="Event Date">
 
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="left|top"
-                        android:lines="3" />
+                        android:focusableInTouchMode="false" />
 
                 </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/iv_event_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/container_time"
+                    android:layout_marginTop="20dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_access_time_black_24dp" />
+
+                <LinearLayout
+                    android:id="@+id/container_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_event_date"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@+id/iv_event_time"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/til_event_start_time"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Start Time">
+
+                        <EditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusableInTouchMode="false"
+                            android:gravity="left|top"
+                            android:lines="1" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                    <android.support.design.widget.TextInputLayout
+                        android:id="@+id/til_event_end_time"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="End Time">
+
+                        <EditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:focusableInTouchMode="false"
+                            android:gravity="left|top"
+                            android:lines="1" />
+
+                    </android.support.design.widget.TextInputLayout>
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/iv_group_link"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignTop="@id/tv_link_group"
+                    app:srcCompat="@drawable/ic_group_24dp" />
+
+                <TextView
+                    android:id="@+id/tv_link_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/container_time"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@id/iv_group_link"
+                    android:text="Link event to a group"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/tv_link_group_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/tv_link_group"
+                    android:layout_below="@id/tv_link_group"
+                    android:text="People can discuss &amp; share event pics in the group"
+                    android:textSize="12sp" />
+
+                <RadioGroup
+                    android:id="@+id/radioGroup_group_link"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@id/tv_link_group"
+                    android:layout_below="@id/tv_link_group_hint">
+
+                    <RadioButton
+                        android:id="@+id/radiobtn_new_group"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Create a new group for this event" />
+
+                    <RadioButton
+                        android:id="@+id/radiobtn_old_group"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Link to your existing group" />
+
+                    <TextView
+                        android:id="@+id/tv_not_admin_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="32dp"
+                        android:text="You're not an admin of any group"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
+
+                    <Spinner
+                        android:id="@+id/spinner_admin_groups"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="100dp"
+                        android:visibility="gone" />
+
+                </RadioGroup>
 
                 <fragment
                     android:id="@+id/map"
                     android:name="com.google.android.gms.maps.SupportMapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
-                    android:layout_below="@id/til_class_timings"
+                    android:layout_below="@id/radioGroup_group_link"
                     android:layout_marginTop="8dp"
                     app:liteMode="true"
                     tools:context="com.example.mapwithmarker.MapsMarkerActivity" />
@@ -172,22 +263,22 @@
                     android:textColor="@color/white" />
 
                 <ImageView
-                    android:id="@+id/iv_class_address"
+                    android:id="@+id/iv_event_address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/till_class_address"
+                    android:layout_alignTop="@id/till_event_address"
                     android:layout_marginTop="20dp"
                     android:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_location_city_black_24dp" />
 
                 <android.support.design.widget.TextInputLayout
-                    android:id="@+id/till_class_address"
+                    android:id="@+id/till_event_address"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/map"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@+id/iv_class_address"
+                    android:layout_toRightOf="@+id/iv_event_address"
                     android:hint="Address">
 
                     <EditText

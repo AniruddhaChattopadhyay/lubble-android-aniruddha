@@ -16,7 +16,7 @@
             android:id="@+id/iv_class"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="@dimen/summer_camp_img_height"
+            android:maxHeight="@dimen/event_img_height"
             android:background="#B3C8E8"
             android:scaleType="fitCenter"
             app:layout_constraintEnd_toEndOf="parent"

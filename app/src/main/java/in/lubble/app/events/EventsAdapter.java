@@ -1,4 +1,4 @@
-package in.lubble.app.summer_camp;
+package in.lubble.app.events;
 
 import android.content.Context;
 import android.support.v7.widget.CardView;
@@ -15,25 +15,25 @@ import java.util.List;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.summer_camp.SummerCampInfoActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
-public class SummerCampAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final List<GroupData> groupDataList;
     private Context context;
 
-    public SummerCampAdapter(Context context) {
+    public EventsAdapter(Context context) {
         groupDataList = new ArrayList<>();
         this.context = context;
-        //addNewGroupCard();
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new SummerCampViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_summer_camp, parent, false));
+                .inflate(R.layout.item_event, parent, false));
     }
 
     @Override
@@ -58,32 +58,9 @@ public class SummerCampAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         }
     }
 
-    /*private void addNewGroupCard() {
-        groupDataList.add(0, null);
-        notifyDataSetChanged();
-    }*/
-
     void addGroup(GroupData groupData) {
         groupDataList.add(groupData);
         notifyDataSetChanged();
-    }
-
-    private int getVariableColor(int position) {
-        int selector = position % 5;
-        switch (selector) {
-            case 0:
-                return context.getResources().getColor(R.color.dk_cyan);
-            case 1:
-                return context.getResources().getColor(R.color.dk_red);
-            case 2:
-                return context.getResources().getColor(R.color.fb_color);
-            case 3:
-                return context.getResources().getColor(R.color.mute_purple);
-            case 4:
-                return context.getResources().getColor(R.color.dk_green);
-            default:
-                return context.getResources().getColor(R.color.mute_orange);
-        }
     }
 
     public void clear() {

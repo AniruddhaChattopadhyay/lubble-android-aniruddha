@@ -35,11 +35,11 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import in.lubble.app.announcements.announcementHistory.AnnouncementsFrag;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.domestic_directory.DomesticDirectoryFrag;
+import in.lubble.app.events.EventsFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.summer_camp.SummerCampFrag;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 
@@ -324,7 +324,7 @@ public class MainActivity extends AppCompatActivity {
                     switchFrag(DomesticDirectoryFrag.newInstance());
                     return true;
                 case R.id.navigation_summer_camp:
-                    switchFrag(SummerCampFrag.newInstance());
+                    switchFrag(EventsFrag.newInstance());
                     return true;
             }
             return false;

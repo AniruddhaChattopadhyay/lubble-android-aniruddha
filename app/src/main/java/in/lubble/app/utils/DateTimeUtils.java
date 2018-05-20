@@ -20,6 +20,7 @@ public class DateTimeUtils {
     public static final String SERVER_DATE_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
     public static final String APP_SHORT_TIME = "h:mm a";
     public static final String APP_DATE_YEAR = "MMM dd, yyyy";
+    public static final String APP_NORMAL_DATE_YEAR = "dd MMM, yyyy";
 
     public static String currTimestampInString() {
         Calendar c = Calendar.getInstance();
