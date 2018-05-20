@@ -10,13 +10,16 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -39,6 +42,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -50,22 +54,29 @@ import java.util.Set;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.utils.mapUtils.SphericalUtil;
 
 import static in.lubble.app.Constants.SVR_LATI;
 import static in.lubble.app.Constants.SVR_LONGI;
+import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.DateTimeUtils.APP_NORMAL_DATE_YEAR;
 import static in.lubble.app.utils.DateTimeUtils.APP_SHORT_TIME;
+import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class NewEventActivity extends AppCompatActivity {
 
+    private static final String TAG = "NewEventActivity";
     private static final int PLACE_PICKER_REQUEST = 828;
 
     private SupportMapFragment mapFragment;
     private LatLng defaultLatLng;
+    private ScrollView parentScrollView;
+    private TextInputLayout titleTil;
+    private TextInputLayout descTil;
     private TextInputLayout dateTil;
     private TextInputLayout startTimeTil;
     private TextInputLayout endTimeTil;
@@ -79,6 +90,8 @@ public class NewEventActivity extends AppCompatActivity {
     private Calendar myCalendar;
     private ChildEventListener userGroupRef;
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
+    private Button submitBtn;
+    private Place place;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, NewEventActivity.class));
@@ -87,8 +100,11 @@ public class NewEventActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_camp);
+        setContentView(R.layout.activity_new_event);
 
+        parentScrollView = findViewById(R.id.scrollview_parent);
+        titleTil = findViewById(R.id.til_event_name);
+        descTil = findViewById(R.id.til_event_desc);
         dateTil = findViewById(R.id.til_event_date);
         startTimeTil = findViewById(R.id.til_event_start_time);
         endTimeTil = findViewById(R.id.til_event_end_time);
@@ -98,6 +114,7 @@ public class NewEventActivity extends AppCompatActivity {
         oldGroupRadioBtn = findViewById(R.id.radiobtn_old_group);
         notAdminHintTv = findViewById(R.id.tv_not_admin_hint);
         adminGroupsSpinner = findViewById(R.id.spinner_admin_groups);
+        submitBtn = findViewById(R.id.btn_submit);
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
@@ -135,6 +152,92 @@ public class NewEventActivity extends AppCompatActivity {
                 adminGroupsSpinner.setVisibility(isChecked ? View.VISIBLE : View.GONE);
             }
         });
+
+        submitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isValidationPassed()) {
+                    return;
+                }
+                final EventData eventData = new EventData();
+                eventData.setTitle(titleTil.getEditText().getText().toString());
+                eventData.setDesc(descTil.getEditText().getText().toString());
+
+                final String dateStr = dateTil.getEditText().getText().toString();
+                final String startTimeStr = startTimeTil.getEditText().getText().toString();
+                final String endTimeStr = endTimeTil.getEditText().getText().toString();
+
+                Calendar cal = Calendar.getInstance();
+                SimpleDateFormat sdf = new SimpleDateFormat(APP_NORMAL_DATE_YEAR + " " + APP_SHORT_TIME, Locale.ENGLISH);
+                try {
+                    cal.setTime(sdf.parse(dateStr + " " + startTimeStr));
+                    eventData.setStartTimeTimestamp(cal.getTimeInMillis());
+
+                    if (isValidString(endTimeStr)) {
+                        cal.setTime(sdf.parse(dateStr + " " + endTimeStr));
+                        eventData.setEndTimeTimestamp(cal.getTimeInMillis());
+                    }
+                    eventData.setLati(place.getLatLng().latitude);
+                    eventData.setLongi(place.getLatLng().longitude);
+                    eventData.setAddress(addressTil.getEditText().getText().toString());
+                    if (oldGroupRadioBtn.isChecked()) {
+                        final GroupData selectedGroupData = (GroupData) adminGroupsSpinner.getSelectedItem();
+                        eventData.setGid(selectedGroupData.getId());
+                    }
+
+                    getEventsRef().push().setValue(eventData);
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    Toast.makeText(NewEventActivity.this, "Invalid date or time", Toast.LENGTH_SHORT).show();
+                    Crashlytics.logException(e);
+                }
+            }
+        });
+
+    }
+
+    private boolean isValidationPassed() {
+        if (!isValidString(titleTil.getEditText().getText().toString())) {
+            titleTil.setError("Please enter event name");
+            parentScrollView.smoothScrollTo(0, 0);
+            return false;
+        } else {
+            titleTil.setError(null);
+        }
+        if (!isValidString(descTil.getEditText().getText().toString())) {
+            descTil.setError("Please enter event description");
+            parentScrollView.smoothScrollTo(0, 0);
+            return false;
+        } else {
+            descTil.setError(null);
+        }
+        if (!isValidString(dateTil.getEditText().getText().toString())) {
+            dateTil.setError("Please enter event date");
+            parentScrollView.smoothScrollTo(0, 0);
+            return false;
+        } else {
+            dateTil.setError(null);
+        }
+        if (!isValidString(startTimeTil.getEditText().getText().toString())) {
+            startTimeTil.setError("Please enter event time");
+            parentScrollView.smoothScrollTo(0, 0);
+            return false;
+        } else {
+            startTimeTil.setError(null);
+        }
+        if (place == null) {
+            Toast.makeText(this, "Please select place on map", Toast.LENGTH_SHORT).show();
+            parentScrollView.smoothScrollTo(0, parentScrollView.getHeight());
+            return false;
+        }
+        if (!isValidString(addressTil.getEditText().getText().toString())) {
+            addressTil.setError("Please enter event address");
+            return false;
+        } else {
+            addressTil.setError(null);
+        }
+        return true;
     }
 
     @Override
@@ -173,8 +276,6 @@ public class NewEventActivity extends AppCompatActivity {
         });
 
     }
-
-    private static final String TAG = "NewEventActivity";
 
     private void fetchGroupInfo(String groupId) {
         final ValueEventListener joinedGroupRef = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
@@ -292,6 +393,7 @@ public class NewEventActivity extends AppCompatActivity {
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final GoogleMap googleMap) {
+                googleMap.clear();
                 // Add Marker
                 googleMap.addMarker(new MarkerOptions().position(defaultLatLng));
                 // Center map on the marker
@@ -333,7 +435,7 @@ public class NewEventActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = PlacePicker.getPlace(this, data);
+                place = PlacePicker.getPlace(this, data);
                 if (place != null) {
                     loadMapAt(place.getLatLng());
                     addressTil.getEditText().setText(place.getAddress());

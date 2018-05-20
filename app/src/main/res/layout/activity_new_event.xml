@@ -7,6 +7,7 @@
     android:background="@color/white">
 
     <ScrollView
+        android:id="@+id/scrollview_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/btn_submit">
@@ -67,6 +68,8 @@
                     android:hint="Event Name">
 
                     <EditText
+                        android:maxLines="1"
+                        android:inputType="textCapWords"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
@@ -98,7 +101,7 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <ImageView
-                    android:id="@+id/iv_event_contact"
+                    android:id="@+id/iv_event_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/til_event_date"
@@ -113,7 +116,7 @@
                     android:layout_below="@id/til_event_desc"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/iv_event_contact"
+                    android:layout_toRightOf="@id/iv_event_date"
                     android:hint="Event Date">
 
                     <EditText
