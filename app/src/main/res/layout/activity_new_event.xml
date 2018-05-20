@@ -68,10 +68,10 @@
                     android:hint="Event Name">
 
                     <EditText
-                        android:maxLines="1"
-                        android:inputType="textCapWords"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords"
+                        android:maxLines="1" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -101,6 +101,39 @@
                 </android.support.design.widget.TextInputLayout>
 
                 <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignBottom="@id/til_event_organizer"
+                    android:layout_marginBottom="10dp"
+                    app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_event_organizer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_event_desc"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@id/iv_event_desc"
+                    android:hint="Organizer">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <TextView
+                    android:id="@+id/tv_organizer_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_event_organizer"
+                    android:layout_marginLeft="12dp"
+                    android:layout_toRightOf="@id/iv_event_desc"
+                    android:text="Such as RWA, company/personal name, etc."
+                    android:textSize="12sp" />
+
+                <ImageView
                     android:id="@+id/iv_event_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -113,7 +146,7 @@
                     android:id="@+id/til_event_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/til_event_desc"
+                    android:layout_below="@id/tv_organizer_hint"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
                     android:layout_toRightOf="@id/iv_event_date"

@@ -149,8 +149,8 @@ public class MainActivity extends AppCompatActivity {
                 case "directory":
                     bottomNavigation.setSelectedItemId(R.id.navigation_domestic_help);
                     break;
-                case "summer":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_summer_camp);
+                case "events":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
                     break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
@@ -323,7 +323,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_domestic_help:
                     switchFrag(DomesticDirectoryFrag.newInstance());
                     return true;
-                case R.id.navigation_summer_camp:
+                case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
                     return true;
             }

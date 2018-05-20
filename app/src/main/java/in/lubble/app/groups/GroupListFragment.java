@@ -256,9 +256,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         unjoinedGroupListener = getLubbleGroupsRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                final GroupData unjoinedGroup = dataSnapshot.getValue(GroupData.class);
-                if (!joinedGroupIdList.contains(unjoinedGroup.getId()) && !unjoinedGroup.getIsPrivate()) {
-                    adapter.addPublicGroup(unjoinedGroup);
+                final GroupData unJoinedGroup = dataSnapshot.getValue(GroupData.class);
+                if (unJoinedGroup!=null && !joinedGroupIdList.contains(unJoinedGroup.getId()) && !unJoinedGroup.getIsPrivate()) {
+                    adapter.addPublicGroup(unJoinedGroup);
                 }
             }
 

@@ -21,6 +21,7 @@ public class DateTimeUtils {
     public static final String APP_SHORT_TIME = "h:mm a";
     public static final String APP_DATE_YEAR = "MMM dd, yyyy";
     public static final String APP_NORMAL_DATE_YEAR = "dd MMM, yyyy";
+    public static final String EVENT_DATE_TIME = "dd MMM, h:mm a";
 
     public static String currTimestampInString() {
         Calendar c = Calendar.getInstance();
@@ -62,6 +63,13 @@ public class DateTimeUtils {
     @NonNull
     public static String getTimeFromLong(long timeInMillis) {
         SimpleDateFormat sdf = new SimpleDateFormat(APP_SHORT_TIME);
+        Date resultDate = new Date(timeInMillis);
+        return sdf.format(resultDate);
+    }
+
+    @NonNull
+    public static String getTimeFromLong(long timeInMillis, String inputFormat) {
+        SimpleDateFormat sdf = new SimpleDateFormat(inputFormat);
         Date resultDate = new Date(timeInMillis);
         return sdf.format(resultDate);
     }

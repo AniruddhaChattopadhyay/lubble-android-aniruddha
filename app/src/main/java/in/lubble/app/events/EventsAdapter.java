@@ -14,19 +14,20 @@ import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
-import in.lubble.app.models.GroupData;
-import in.lubble.app.summer_camp.SummerCampInfoActivity;
+import in.lubble.app.models.EventData;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
+import static in.lubble.app.utils.DateTimeUtils.EVENT_DATE_TIME;
+import static in.lubble.app.utils.DateTimeUtils.getTimeFromLong;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final List<GroupData> groupDataList;
+    private final List<EventData> eventDataList;
     private Context context;
 
     public EventsAdapter(Context context) {
-        groupDataList = new ArrayList<>();
+        eventDataList = new ArrayList<>();
         this.context = context;
     }
 
@@ -38,62 +39,59 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        final GroupData groupData = groupDataList.get(position);
+        final EventData eventData = eventDataList.get(position);
         final SummerCampViewHolder viewHolder = (SummerCampViewHolder) holder;
-        if (groupData != null) {
 
-            GlideApp.with(viewHolder.mView)
-                    .load(groupData.getProfilePic())
-                    .placeholder(R.drawable.ic_wb_sunny_black_24dp)
-                    .error(R.drawable.ic_wb_sunny_black_24dp)
-                    .transform(new RoundedCornersTransformation(dpToPx(8), 0))
-                    .into(viewHolder.iconIv);
+        GlideApp.with(viewHolder.mView)
+                .load(eventData.getProfilePic())
+                .placeholder(R.drawable.ic_wb_sunny_black_24dp)
+                .error(R.drawable.ic_wb_sunny_black_24dp)
+                .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                .into(viewHolder.iconIv);
 
-            viewHolder.titleTv.setText(groupData.getTitle());
-            viewHolder.descTv.setText(groupData.getDescription());
-        } else {
-            viewHolder.iconIv.setImageResource(R.drawable.ic_add_circle_black_24dp);
-            viewHolder.titleTv.setText("Add your class");
-            viewHolder.descTv.setText("Submit your Summer Camp class to have it appear here");
-        }
+        viewHolder.organizerTv.setText(eventData.getOrganizer());
+        viewHolder.titleTv.setText(eventData.getTitle());
+
+        viewHolder.timeTv.setText(getTimeFromLong(eventData.getStartTimestamp(), EVENT_DATE_TIME));
     }
 
-    void addGroup(GroupData groupData) {
-        groupDataList.add(groupData);
+    void addEvent(EventData eventData) {
+        eventDataList.add(eventData);
         notifyDataSetChanged();
     }
 
     public void clear() {
-        groupDataList.clear();
+        eventDataList.clear();
         notifyDataSetChanged();
-        //addNewGroupCard();
     }
 
     @Override
     public int getItemCount() {
-        return groupDataList.size();
+        return eventDataList.size();
     }
 
     class SummerCampViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View mView;
         final CardView card;
         final ImageView iconIv;
+        final TextView organizerTv;
         final TextView titleTv;
-        final TextView descTv;
+        final TextView timeTv;
 
         SummerCampViewHolder(View view) {
             super(view);
             mView = view;
-            card = view.findViewById(R.id.card_summer_camp);
-            iconIv = view.findViewById(R.id.iv_class);
-            titleTv = view.findViewById(R.id.tv_camp_title);
-            descTv = view.findViewById(R.id.tv_camp_desc);
+            card = view.findViewById(R.id.card_event);
+            iconIv = view.findViewById(R.id.iv_event);
+            organizerTv = view.findViewById(R.id.tv_organizer_name);
+            titleTv = view.findViewById(R.id.tv_event_title);
+            timeTv = view.findViewById(R.id.tv_event_time);
             mView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            SummerCampInfoActivity.open(context, groupDataList.get(getAdapterPosition()).getId());
+            //SummerCampInfoActivity.open(context, eventDataList.get(getAdapterPosition()).getId());
         }
     }
 

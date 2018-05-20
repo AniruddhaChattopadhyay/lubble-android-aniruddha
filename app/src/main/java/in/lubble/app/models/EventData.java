@@ -1,27 +1,35 @@
 package in.lubble.app.models;
 
+import java.util.HashMap;
+
 /**
  * Created by ishaan on 20/5/18.
  */
 
 public class EventData {
 
-    private String picUrl;
+    public static final int NO = 0;
+    public static final int GOING = 1;
+    public static final int MAYBE = 2;
+
+    private String profilePic = "";
     private String title;
     private String desc;
-    private long startTimeTimestamp;
-    private long endTimeTimestamp = 0L;
+    private String organizer = "";
+    private HashMap<String, Object> members = new HashMap<>();
+    private long startTimestamp;
+    private long endTimestamp = 0L;
     private double lati;
     private double longi;
     private String address;
     private String gid;
 
-    public String getPicUrl() {
-        return picUrl;
+    public String getProfilePic() {
+        return profilePic;
     }
 
-    public void setPicUrl(String picUrl) {
-        this.picUrl = picUrl;
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
     }
 
     public String getTitle() {
@@ -40,20 +48,20 @@ public class EventData {
         this.desc = desc;
     }
 
-    public long getStartTimeTimestamp() {
-        return startTimeTimestamp;
+    public long getStartTimestamp() {
+        return startTimestamp;
     }
 
-    public void setStartTimeTimestamp(long startTimeTimestamp) {
-        this.startTimeTimestamp = startTimeTimestamp;
+    public void setStartTimestamp(long startTimeTimestamp) {
+        this.startTimestamp = startTimeTimestamp;
     }
 
-    public long getEndTimeTimestamp() {
-        return endTimeTimestamp;
+    public long getEndTimestamp() {
+        return endTimestamp;
     }
 
-    public void setEndTimeTimestamp(long endTimeTimestamp) {
-        this.endTimeTimestamp = endTimeTimestamp;
+    public void setEndTimestamp(long endTimeTimestamp) {
+        this.endTimestamp = endTimeTimestamp;
     }
 
     public double getLati() {
@@ -86,5 +94,21 @@ public class EventData {
 
     public void setGid(String gid) {
         this.gid = gid;
+    }
+
+    public HashMap<String, Object> getMembers() {
+        return members;
+    }
+
+    public void setMembers(HashMap<String, Object> members) {
+        this.members = members;
+    }
+
+    public String getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(String organizer) {
+        this.organizer = organizer;
     }
 }

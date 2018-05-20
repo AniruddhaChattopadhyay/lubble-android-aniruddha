@@ -17,8 +17,8 @@
         android:title="Directory" />
 
     <item
-        android:id="@+id/navigation_summer_camp"
-        android:icon="@drawable/ic_wb_sunny_black_24dp"
-        android:title="Summer Camp" />
+        android:id="@+id/navigation_events"
+        android:icon="@drawable/ic_event_black_24dp"
+        android:title="Events" />
 
 </menu>

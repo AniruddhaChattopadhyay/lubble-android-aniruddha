@@ -17,8 +17,9 @@ import com.google.firebase.database.DatabaseError;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.events.new_event.NewEventActivity;
-import in.lubble.app.models.GroupData;
+import in.lubble.app.models.EventData;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 
 public class EventsFrag extends Fragment {
@@ -69,14 +70,16 @@ public class EventsFrag extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
 
         adapter.clear();
-        childEventListener = getLubbleGroupsRef().addChildEventListener(new ChildEventListener() {
+        childEventListener = getEventsRef().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (progressBar != null) {
                     progressBar.setVisibility(View.GONE);
                 }
-                final GroupData publicGroup = dataSnapshot.getValue(GroupData.class);
-                adapter.addGroup(publicGroup);
+                final EventData eventData = dataSnapshot.getValue(EventData.class);
+                if (eventData != null) {
+                    adapter.addEvent(eventData);
+                }
             }
 
             @Override

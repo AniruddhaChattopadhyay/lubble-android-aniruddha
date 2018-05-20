@@ -63,6 +63,7 @@ import static in.lubble.app.Constants.SVR_LONGI;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.models.EventData.GOING;
 import static in.lubble.app.utils.DateTimeUtils.APP_NORMAL_DATE_YEAR;
 import static in.lubble.app.utils.DateTimeUtils.APP_SHORT_TIME;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -77,6 +78,7 @@ public class NewEventActivity extends AppCompatActivity {
     private ScrollView parentScrollView;
     private TextInputLayout titleTil;
     private TextInputLayout descTil;
+    private TextInputLayout organizerTil;
     private TextInputLayout dateTil;
     private TextInputLayout startTimeTil;
     private TextInputLayout endTimeTil;
@@ -105,6 +107,7 @@ public class NewEventActivity extends AppCompatActivity {
         parentScrollView = findViewById(R.id.scrollview_parent);
         titleTil = findViewById(R.id.til_event_name);
         descTil = findViewById(R.id.til_event_desc);
+        organizerTil = findViewById(R.id.til_event_organizer);
         dateTil = findViewById(R.id.til_event_date);
         startTimeTil = findViewById(R.id.til_event_start_time);
         endTimeTil = findViewById(R.id.til_event_end_time);
@@ -160,8 +163,9 @@ public class NewEventActivity extends AppCompatActivity {
                     return;
                 }
                 final EventData eventData = new EventData();
-                eventData.setTitle(titleTil.getEditText().getText().toString());
-                eventData.setDesc(descTil.getEditText().getText().toString());
+                eventData.setTitle(titleTil.getEditText().getText().toString().trim());
+                eventData.setDesc(descTil.getEditText().getText().toString().trim());
+                eventData.setOrganizer(organizerTil.getEditText().getText().toString().trim());
 
                 final String dateStr = dateTil.getEditText().getText().toString();
                 final String startTimeStr = startTimeTil.getEditText().getText().toString();
@@ -171,11 +175,11 @@ public class NewEventActivity extends AppCompatActivity {
                 SimpleDateFormat sdf = new SimpleDateFormat(APP_NORMAL_DATE_YEAR + " " + APP_SHORT_TIME, Locale.ENGLISH);
                 try {
                     cal.setTime(sdf.parse(dateStr + " " + startTimeStr));
-                    eventData.setStartTimeTimestamp(cal.getTimeInMillis());
+                    eventData.setStartTimestamp(cal.getTimeInMillis());
 
                     if (isValidString(endTimeStr)) {
                         cal.setTime(sdf.parse(dateStr + " " + endTimeStr));
-                        eventData.setEndTimeTimestamp(cal.getTimeInMillis());
+                        eventData.setEndTimestamp(cal.getTimeInMillis());
                     }
                     eventData.setLati(place.getLatLng().latitude);
                     eventData.setLongi(place.getLatLng().longitude);
@@ -183,7 +187,17 @@ public class NewEventActivity extends AppCompatActivity {
                     if (oldGroupRadioBtn.isChecked()) {
                         final GroupData selectedGroupData = (GroupData) adminGroupsSpinner.getSelectedItem();
                         eventData.setGid(selectedGroupData.getId());
+                    } else {
+                        eventData.setGid("");
                     }
+
+                    final HashMap<String, Object> membersMap = new HashMap<>();
+                    final HashMap<String, Object> memberInfoMap = new HashMap<>();
+                    memberInfoMap.put("response", GOING);
+                    memberInfoMap.put("timestamp", System.currentTimeMillis());
+                    memberInfoMap.put("isAdmin", true);
+                    membersMap.put(FirebaseAuth.getInstance().getUid(), memberInfoMap);
+                    eventData.setMembers(membersMap);
 
                     getEventsRef().push().setValue(eventData);
 
@@ -211,6 +225,13 @@ public class NewEventActivity extends AppCompatActivity {
             return false;
         } else {
             descTil.setError(null);
+        }
+        if (!isValidString(organizerTil.getEditText().getText().toString())) {
+            organizerTil.setError("Please enter event organizer name");
+            parentScrollView.smoothScrollTo(0, 0);
+            return false;
+        } else {
+            organizerTil.setError(null);
         }
         if (!isValidString(dateTil.getEditText().getText().toString())) {
             dateTil.setError("Please enter event date");
@@ -282,16 +303,18 @@ public class NewEventActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                final Set<Map.Entry<String, Object>> entries = groupData.getMembers().entrySet();
-                for (Map.Entry<String, Object> entry : entries) {
-                    final HashMap map = (HashMap) entry.getValue();
-                    if (entry.getKey().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())
-                            && map.get("admin") == Boolean.TRUE) {
-                        spinnerAdapter.add(groupData);
-                        // enable 2nd radio btn
-                        oldGroupRadioBtn.setEnabled(true);
-                        oldGroupRadioBtn.setTextColor(ContextCompat.getColor(NewEventActivity.this, R.color.black));
-                        notAdminHintTv.setVisibility(View.GONE);
+                if (groupData != null) {
+                    final Set<Map.Entry<String, Object>> entries = groupData.getMembers().entrySet();
+                    for (Map.Entry<String, Object> entry : entries) {
+                        final HashMap map = (HashMap) entry.getValue();
+                        if (entry.getKey().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())
+                                && map.get("admin") == Boolean.TRUE) {
+                            spinnerAdapter.add(groupData);
+                            // enable 2nd radio btn
+                            oldGroupRadioBtn.setEnabled(true);
+                            oldGroupRadioBtn.setTextColor(ContextCompat.getColor(NewEventActivity.this, R.color.black));
+                            notAdminHintTv.setVisibility(View.GONE);
+                        }
                     }
                 }
             }
