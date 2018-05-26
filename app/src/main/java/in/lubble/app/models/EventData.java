@@ -1,5 +1,7 @@
 package in.lubble.app.models;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.HashMap;
 
 /**
@@ -12,6 +14,8 @@ public class EventData {
     public static final int GOING = 1;
     public static final int MAYBE = 2;
 
+    @Exclude
+    private String id;
     private String profilePic = "";
     private String title;
     private String desc;
@@ -110,5 +114,13 @@ public class EventData {
 
     public void setOrganizer(String organizer) {
         this.organizer = organizer;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

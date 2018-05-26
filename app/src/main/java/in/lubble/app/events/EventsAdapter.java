@@ -97,7 +97,7 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onClick(View v) {
-            //SummerCampInfoActivity.open(context, eventDataList.get(getAdapterPosition()).getId());
+            EventInfoActivity.open(context, eventDataList.get(getAdapterPosition()).getId());
         }
     }
 

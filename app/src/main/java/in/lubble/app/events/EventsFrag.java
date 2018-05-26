@@ -78,6 +78,7 @@ public class EventsFrag extends Fragment {
                 }
                 final EventData eventData = dataSnapshot.getValue(EventData.class);
                 if (eventData != null) {
+                    eventData.setId(dataSnapshot.getKey());
                     adapter.addEvent(eventData);
                 }
             }

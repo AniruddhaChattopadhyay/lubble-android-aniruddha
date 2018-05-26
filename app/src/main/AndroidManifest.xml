@@ -108,7 +108,7 @@
             android:parentActivityName=".chat.ChatActivity"
             android:theme="@style/AppTheme" />
         <activity
-            android:name=".summer_camp.SummerCampInfoActivity"
+            android:name=".events.EventInfoActivity"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme">
             <meta-data

@@ -308,7 +308,7 @@ public class NewEventActivity extends AppCompatActivity {
                     for (Map.Entry<String, Object> entry : entries) {
                         final HashMap map = (HashMap) entry.getValue();
                         if (entry.getKey().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())
-                                && map.get("admin") == Boolean.TRUE) {
+                                && map.get("admin") == Boolean.TRUE && !groupData.getIsPrivate()) {
                             spinnerAdapter.add(groupData);
                             // enable 2nd radio btn
                             oldGroupRadioBtn.setEnabled(true);
