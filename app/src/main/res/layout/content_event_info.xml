@@ -61,13 +61,19 @@
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             tools:text="Event Name" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/tv_event_name"
+            android:layout_marginTop="12dp"
+            android:background="@color/very_light_gray" />
+
         <LinearLayout
             android:id="@+id/action_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_event_name"
-            android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="24dp"
             android:orientation="horizontal"
             android:weightSum="3">
 
@@ -139,6 +145,13 @@
 
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/action_container"
+            android:layout_marginTop="12dp"
+            android:background="@color/very_light_gray" />
+
         <ImageView
             android:id="@+id/iv_stats"
             android:layout_width="16dp"
@@ -155,6 +168,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/action_container"
             android:layout_marginLeft="8dp"
+            android:layout_marginTop="24dp"
             android:layout_toRightOf="@id/iv_time"
             android:ellipsize="end"
             android:gravity="center"
