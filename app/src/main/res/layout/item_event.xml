@@ -15,15 +15,15 @@
         <ImageView
             android:id="@+id/iv_event"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#B3C8E8"
+            android:layout_height="200dp"
+            android:background="#395359"
             android:maxHeight="@dimen/event_img_height"
             android:scaleType="fitCenter"
+            android:padding="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_city_play"
-            tools:src="@tools:sample/backgrounds/scenic" />
+            app:srcCompat="@drawable/ic_star_party" />
 
         <TextView
             android:id="@+id/tv_event_title"

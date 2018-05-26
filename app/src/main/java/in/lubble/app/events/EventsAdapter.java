@@ -16,6 +16,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.EventData;
 import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.StringUtils;
 
 import static in.lubble.app.utils.DateTimeUtils.EVENT_DATE_TIME;
 import static in.lubble.app.utils.DateTimeUtils.getTimeFromLong;
@@ -44,12 +45,17 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         GlideApp.with(viewHolder.mView)
                 .load(eventData.getProfilePic())
-                .placeholder(R.drawable.ic_wb_sunny_black_24dp)
-                .error(R.drawable.ic_wb_sunny_black_24dp)
+                .placeholder(R.drawable.ic_star_party)
+                .error(R.drawable.ic_star_party)
                 .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                 .into(viewHolder.iconIv);
 
-        viewHolder.organizerTv.setText(eventData.getOrganizer());
+        if (StringUtils.isValidString(eventData.getOrganizer())) {
+            viewHolder.organizerTv.setVisibility(View.VISIBLE);
+            viewHolder.organizerTv.setText(eventData.getOrganizer());
+        } else {
+            viewHolder.organizerTv.setVisibility(View.GONE);
+        }
         viewHolder.titleTv.setText(eventData.getTitle());
 
         viewHolder.timeTv.setText(getTimeFromLong(eventData.getStartTimestamp(), EVENT_DATE_TIME));
