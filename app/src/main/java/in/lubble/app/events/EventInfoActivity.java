@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -18,6 +19,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -48,7 +50,9 @@ public class EventInfoActivity extends AppCompatActivity {
     private TextView monthTv;
     private TextView dateTv;
     private TextView organizerTv;
+    private ImageView goingIcon;
     private TextView eventNameTv;
+    private TextView goingHintTv;
     private LinearLayout goingContainer;
     private LinearLayout maybeContainer;
     private LinearLayout shareContainer;
@@ -81,6 +85,8 @@ public class EventInfoActivity extends AppCompatActivity {
         dateTv = findViewById(R.id.tv_date);
         organizerTv = findViewById(R.id.tv_organizer_name);
         eventNameTv = findViewById(R.id.tv_event_name);
+        goingIcon = findViewById(R.id.iv_going);
+        goingHintTv = findViewById(R.id.tv_going_hint);
         goingContainer = findViewById(R.id.going_container);
         maybeContainer = findViewById(R.id.maybe_container);
         shareContainer = findViewById(R.id.share_container);
@@ -94,10 +100,52 @@ public class EventInfoActivity extends AppCompatActivity {
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
 
         eventRef = getEventsRef().child(eventId);
-        fetchGroupInfo();
+        fetchEventInfo();
+
+        goingContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                final DatabaseReference eventMemberRef = getEventsRef()
+                        .child(eventId)
+                        .child("members")
+                        .child(FirebaseAuth.getInstance().getUid());
+
+                final HashMap<String, Object> map = new HashMap<>();
+                map.put("response", EventData.GOING);
+                map.put("timestamp", System.currentTimeMillis());
+                eventMemberRef.updateChildren(map, new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                        toggleGoingButton(true);
+                    }
+                });
+
+            }
+        });
     }
 
-    private void fetchGroupInfo() {
+    private void toggleGoingButton(boolean isGoing) {
+        if (isGoing) {
+            goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_green), android.graphics.PorterDuff.Mode.SRC_IN);
+            goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.dark_green)));
+        } else {
+            goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
+            goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.black)));
+        }
+    }
+
+    private void toggleMaybeButton(boolean isMaybe) {
+        if (isMaybe) {
+            goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_green), android.graphics.PorterDuff.Mode.SRC_IN);
+            goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.dark_green)));
+        } else {
+            goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
+            goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.black)));
+        }
+    }
+
+    private void fetchEventInfo() {
 
         eventInfoListener = eventRef.addValueEventListener(new ValueEventListener() {
             @Override
@@ -127,6 +175,10 @@ public class EventInfoActivity extends AppCompatActivity {
                     eventNameTv.setText(eventData.getTitle());
                     addressTv.setText(eventData.getAddress());
                     descTv.setText(eventData.getDesc());
+
+                    final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
+                    toggleGoingButton(memberMap.get("response") == EventData.GOING);
+                    toggleGoingButton(memberMap.get("response") == EventData.GOING);
 
                     final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
                     final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
@@ -212,6 +264,7 @@ public class EventInfoActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
+        //todo remove with null checks
         eventRef.removeEventListener(eventInfoListener);
     }
 
