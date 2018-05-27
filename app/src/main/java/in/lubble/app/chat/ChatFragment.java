@@ -694,7 +694,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     public void openGroupInfo() {
-        if (groupData.isJoined() || !groupData.getIsPrivate()) {
+        if (groupData != null && (groupData.isJoined() || !groupData.getIsPrivate())) {
             ScrollingGroupInfoActivity.open(getContext(), groupId);
         }
     }
