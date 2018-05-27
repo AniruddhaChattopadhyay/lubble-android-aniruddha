@@ -2,6 +2,7 @@ package in.lubble.app.events;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -85,6 +87,7 @@ public class EventInfoActivity extends AppCompatActivity {
     private ValueEventListener isGroupJoinedListener;
     private DatabaseReference groupTitleRef;
     private ValueEventListener groupTitleListener;
+    private long oldResponse = EventData.NO;
 
     public static void open(Context context, String eventId) {
         Intent intent = new Intent(context, EventInfoActivity.class);
@@ -137,20 +140,28 @@ public class EventInfoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (eventData != null) {
-                    progressDialog.show();
-                    final DatabaseReference eventMemberRef = getEventsRef()
-                            .child(eventId)
-                            .child("members")
-                            .child(FirebaseAuth.getInstance().getUid());
 
-                    final HashMap<String, Object> map = new HashMap<>();
-                    map.put("response", EventData.GOING);
-                    map.put("timestamp", System.currentTimeMillis());
-
-                    getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
-                    eventMemberRef.updateChildren(map);
-
-                    checkGroupJoined(eventData.getGid(), EventData.GOING);
+                    if (oldResponse == EventData.GOING) {
+                        new AlertDialog.Builder(EventInfoActivity.this)
+                                .setTitle("Not Going?")
+                                .setMessage("Are you sure you will not attend the event?")
+                                .setPositiveButton("Not Going", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        changeStatus(EventData.NO);
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .show();
+                    } else {
+                        changeStatus(EventData.GOING);
+                    }
                 }
             }
         });
@@ -159,20 +170,8 @@ public class EventInfoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (eventData != null) {
-                    progressDialog.show();
-                    final DatabaseReference eventMemberRef = getEventsRef()
-                            .child(eventId)
-                            .child("members")
-                            .child(FirebaseAuth.getInstance().getUid());
-
-                    final HashMap<String, Object> map = new HashMap<>();
-                    map.put("response", EventData.MAYBE);
-                    map.put("timestamp", System.currentTimeMillis());
-
-                    getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
-                    eventMemberRef.updateChildren(map);
-
-                    checkGroupJoined(eventData.getGid(), EventData.MAYBE);
+                    final int newResponse = oldResponse == EventData.MAYBE ? EventData.NO : EventData.MAYBE;
+                    changeStatus(newResponse);
                 }
             }
         });
@@ -202,6 +201,25 @@ public class EventInfoActivity extends AppCompatActivity {
 
     }
 
+    private void changeStatus(int newResponse) {
+        progressDialog.show();
+        final DatabaseReference eventMemberRef = getEventsRef()
+                .child(eventId)
+                .child("members")
+                .child(FirebaseAuth.getInstance().getUid());
+
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("response", newResponse);
+        map.put("timestamp", System.currentTimeMillis());
+
+        if (newResponse != EventData.NO) {
+            getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
+        }
+        eventMemberRef.updateChildren(map);
+
+        checkGroupJoined(eventData.getGid(), newResponse);
+    }
+
     private void checkGroupJoined(@NonNull final String groupId, final int status) {
         checkGroupJoinedRef = getUserGroupsRef().child(groupId);
         checkGroupJoinedListener = checkGroupJoinedRef.addValueEventListener(new ValueEventListener() {
@@ -210,7 +228,10 @@ public class EventInfoActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 toggleGoingButton(status == EventData.GOING);
                 toggleMaybeButton(status == EventData.MAYBE);
-                EventGroupJoinedActivity.open(EventInfoActivity.this, status, groupId, isLinkedGroupJoined);
+                if (status != EventData.NO) {
+                    EventGroupJoinedActivity.open(EventInfoActivity.this, status, groupId, isLinkedGroupJoined);
+                }
+                oldResponse = status;
             }
 
             @Override
@@ -273,8 +294,9 @@ public class EventInfoActivity extends AppCompatActivity {
 
                     final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
                     if (memberMap != null) {
-                        toggleGoingButton(((long) memberMap.get("response")) == EventData.GOING);
-                        toggleMaybeButton(((long) memberMap.get("response")) == EventData.MAYBE);
+                        oldResponse = (long) memberMap.get("response");
+                        toggleGoingButton(oldResponse == EventData.GOING);
+                        toggleMaybeButton(oldResponse == EventData.MAYBE);
                     }
                     final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
                     final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
