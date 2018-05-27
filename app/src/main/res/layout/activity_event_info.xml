@@ -45,13 +45,6 @@
                     android:layout_height="64dp"
                     android:background="@drawable/gradient_black_trans" />
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="100dp"
-                    android:layout_alignParentBottom="true"
-                    android:background="@drawable/gradient_black_trans_dark"
-                    android:rotation="180" />
-
                 <ProgressBar
                     android:id="@+id/progressBar_groupInfo"
                     android:layout_width="wrap_content"
