@@ -164,6 +164,8 @@ public class FcmService extends FirebaseMessagingService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: ");
-        getAnnouncementsRef().removeEventListener(noticeListener);
+        if (noticeListener != null) {
+            getAnnouncementsRef().removeEventListener(noticeListener);
+        }
     }
 }
