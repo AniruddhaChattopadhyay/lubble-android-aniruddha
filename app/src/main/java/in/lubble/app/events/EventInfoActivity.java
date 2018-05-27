@@ -71,6 +71,12 @@ public class EventInfoActivity extends AppCompatActivity {
     private TextView descTv;
     private ProgressDialog progressDialog;
     private boolean isLinkedGroupJoined;
+    private DatabaseReference checkGroupJoinedRef;
+    private ValueEventListener checkGroupJoinedListener;
+    private DatabaseReference isGroupJoinedRef;
+    private ValueEventListener isGroupJoinedListener;
+    private DatabaseReference groupTitleRef;
+    private ValueEventListener groupTitleListener;
 
     public static void open(Context context, String eventId) {
         Intent intent = new Intent(context, EventInfoActivity.class);
@@ -164,7 +170,8 @@ public class EventInfoActivity extends AppCompatActivity {
     }
 
     private void checkGroupJoined(@NonNull final String groupId, final int status) {
-        getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
+        checkGroupJoinedRef = getUserGroupsRef().child(groupId);
+        checkGroupJoinedListener = checkGroupJoinedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 progressDialog.dismiss();
@@ -289,7 +296,8 @@ public class EventInfoActivity extends AppCompatActivity {
     }
 
     private void fetchIsLinkedGroupJoined(@NonNull String linkedGroupId) {
-        getUserGroupsRef().child(linkedGroupId).addValueEventListener(new ValueEventListener() {
+        isGroupJoinedRef = getUserGroupsRef().child(linkedGroupId);
+        isGroupJoinedListener = isGroupJoinedRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
@@ -306,13 +314,14 @@ public class EventInfoActivity extends AppCompatActivity {
     }
 
     private void fetchLinkedGroupInfo(String gid) {
-        RealtimeDbHelper.getLubbleGroupsRef().child(gid).child("title").addValueEventListener(new ValueEventListener() {
+        groupTitleRef = RealtimeDbHelper.getLubbleGroupsRef().child(gid).child("title");
+        groupTitleListener = groupTitleRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null) {
                     final String title = dataSnapshot.getValue(String.class);
                     if (StringUtils.isValidString(title)) {
-                        linkedGroupTv.setText(title);
+                        linkedGroupTv.setText("Linked Group: " + title);
                     }
                 }
             }
@@ -340,6 +349,15 @@ public class EventInfoActivity extends AppCompatActivity {
         super.onPause();
         if (eventInfoListener != null) {
             eventRef.removeEventListener(eventInfoListener);
+        }
+        if (checkGroupJoinedRef != null && checkGroupJoinedListener != null) {
+            checkGroupJoinedRef.removeEventListener(checkGroupJoinedListener);
+        }
+        if (isGroupJoinedRef != null && isGroupJoinedListener != null) {
+            isGroupJoinedRef.removeEventListener(isGroupJoinedListener);
+        }
+        if (groupTitleRef != null && groupTitleListener != null) {
+            groupTitleRef.removeEventListener(groupTitleListener);
         }
     }
 
