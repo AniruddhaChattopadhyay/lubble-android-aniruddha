@@ -243,9 +243,11 @@ public class EventInfoActivity extends AppCompatActivity {
 
     private void toggleGoingButton(boolean isGoing) {
         if (isGoing) {
+            goingIcon.setImageResource(R.drawable.ic_check_circle_black_24dp);
             goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_green), android.graphics.PorterDuff.Mode.SRC_IN);
             goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.dark_green)));
         } else {
+            goingIcon.setImageResource(R.drawable.ic_check_circle_outline);
             goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
             goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.black)));
         }
@@ -253,9 +255,11 @@ public class EventInfoActivity extends AppCompatActivity {
 
     private void toggleMaybeButton(boolean isMaybe) {
         if (isMaybe) {
+            maybeIcon.setImageResource(R.drawable.ic_help_black_24dp);
             maybeIcon.setColorFilter(ContextCompat.getColor(this, R.color.dk_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
             maybeHintTv.setTextColor((ContextCompat.getColor(this, R.color.dk_colorAccent)));
         } else {
+            maybeIcon.setImageResource(R.drawable.ic_help_outline_black_24dp);
             maybeIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
             maybeHintTv.setTextColor((ContextCompat.getColor(this, R.color.black)));
         }
