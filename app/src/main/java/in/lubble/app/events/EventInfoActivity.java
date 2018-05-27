@@ -139,8 +139,7 @@ public class EventInfoActivity extends AppCompatActivity {
         goingContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (eventData != null) {
-
+                if (eventData != null && !checkEventAdmin()) {
                     if (oldResponse == EventData.GOING) {
                         new AlertDialog.Builder(EventInfoActivity.this)
                                 .setTitle("Not Going?")
@@ -169,7 +168,7 @@ public class EventInfoActivity extends AppCompatActivity {
         maybeContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (eventData != null) {
+                if (eventData != null && !checkEventAdmin()) {
                     final int newResponse = oldResponse == EventData.MAYBE ? EventData.NO : EventData.MAYBE;
                     changeStatus(newResponse);
                 }
@@ -199,6 +198,25 @@ public class EventInfoActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private boolean checkEventAdmin() {
+        final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
+        boolean isAdmin;
+        isAdmin = memberMap.get("isAdmin") != null && ((boolean) memberMap.get("isAdmin"));
+        if (isAdmin) {
+            new AlertDialog.Builder(EventInfoActivity.this)
+                    .setTitle("Hosts cannot leave event")
+                    .setMessage("You are hosting this event & cannot change your own status.")
+                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        }
+        return isAdmin;
     }
 
     private void changeStatus(int newResponse) {
