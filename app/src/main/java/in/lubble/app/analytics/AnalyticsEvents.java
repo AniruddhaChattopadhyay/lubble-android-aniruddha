@@ -11,5 +11,6 @@ public class AnalyticsEvents {
      */
     public static final String LOGOUT_SUCCESS_EVENT = "LOGOUT_SUCCESS_EVENT";
     public static final String LOC_CHECK_FAILED = "LOC_CHECK_FAILED";
+    public static final String EVENT_JOINED_OPEN_GROUP = "EVENT_JOINED_OPEN_GROUP";
 
 }

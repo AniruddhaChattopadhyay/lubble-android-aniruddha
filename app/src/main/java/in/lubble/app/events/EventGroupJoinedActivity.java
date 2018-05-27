@@ -18,6 +18,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
@@ -72,12 +74,14 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
         isJoined = getIntent().getBooleanExtra(IS_JOINED, false);
 
         changeLayoutFor(status);
+        Analytics.triggerScreenEvent(this, getClass());
 
         fetchLinkedGroupInfo(groupId);
 
         openGroupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.EVENT_JOINED_OPEN_GROUP, EventGroupJoinedActivity.this);
                 final Intent intent = new Intent(EventGroupJoinedActivity.this, ChatActivity.class);
                 intent.putExtra(EXTRA_GROUP_ID, groupId);
                 intent.putExtra(EXTRA_IS_JOINING, false);
