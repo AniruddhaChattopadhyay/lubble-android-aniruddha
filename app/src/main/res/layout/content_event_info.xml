@@ -282,6 +282,7 @@
                 tools:text="Group Name" />
 
             <ImageView
+                android:id="@+id/iv_open_group"
                 android:layout_width="wrap_content"
                 android:layout_height="20dp"
                 android:layout_alignParentRight="true"

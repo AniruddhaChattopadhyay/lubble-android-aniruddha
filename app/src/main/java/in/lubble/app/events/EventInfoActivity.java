@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -32,12 +33,15 @@ import java.util.Map;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
 
+import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
@@ -68,6 +72,8 @@ public class EventInfoActivity extends AppCompatActivity {
     private TextView timeTv;
     private TextView addressTv;
     private TextView linkedGroupTv;
+    private ImageView linkedGroupOpenIcon;
+    private LinearLayout mapContainer;
     private TextView descTv;
     private ProgressDialog progressDialog;
     private boolean isLinkedGroupJoined;
@@ -112,6 +118,8 @@ public class EventInfoActivity extends AppCompatActivity {
         timeTv = findViewById(R.id.tv_time);
         addressTv = findViewById(R.id.tv_address);
         linkedGroupTv = findViewById(R.id.tv_linked_group);
+        linkedGroupOpenIcon = findViewById(R.id.iv_open_group);
+        mapContainer = findViewById(R.id.map_container);
         descTv = findViewById(R.id.tv_desc);
 
         progressDialog = new ProgressDialog(this);
@@ -163,6 +171,29 @@ public class EventInfoActivity extends AppCompatActivity {
                     eventMemberRef.updateChildren(map);
 
                     checkGroupJoined(eventData.getGid(), EventData.MAYBE);
+                }
+            }
+        });
+
+        linkedGroupOpenIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (eventData != null) {
+                    final Intent intent = new Intent(EventInfoActivity.this, ChatActivity.class);
+                    intent.putExtra(EXTRA_GROUP_ID, eventData.getGid());
+                    intent.putExtra(EXTRA_IS_JOINING, false);
+                    startActivity(intent);
+                }
+            }
+        });
+
+        mapContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (eventData != null) {
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:" + eventData.getLati() +
+                            "," + eventData.getLongi() + "?q=" + eventData.getLati() + "," + eventData.getLongi() + "(" + eventData.getTitle() + ")"));
+                    startActivity(intent);
                 }
             }
         });
