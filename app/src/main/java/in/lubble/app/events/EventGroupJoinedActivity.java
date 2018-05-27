@@ -31,6 +31,7 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
     private static final String TAG = "EventGroupJoinedActiv";
     private static final String STATUS = "STATUS";
     private static final String GROUP_ID = "GROUP_ID";
+    private static final String IS_JOINED = "IS_JOINED";
 
     private RelativeLayout rootLayout;
     private ImageView cancelIcon;
@@ -42,11 +43,14 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
 
     private int status = 1;
     private String groupId;
+    private boolean isJoined;
+    private ValueEventListener listener;
 
-    public static void open(Context context, int status, @NonNull String groupId) {
+    public static void open(Context context, int status, @NonNull String groupId, boolean isJoined) {
         final Intent intent = new Intent(context, EventGroupJoinedActivity.class);
         intent.putExtra(STATUS, status);
         intent.putExtra(GROUP_ID, groupId);
+        intent.putExtra(IS_JOINED, isJoined);
         context.startActivity(intent);
     }
 
@@ -65,6 +69,7 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
 
         status = getIntent().getIntExtra(STATUS, 1);
         groupId = getIntent().getStringExtra(GROUP_ID);
+        isJoined = getIntent().getBooleanExtra(IS_JOINED, false);
 
         changeLayoutFor(status);
 
@@ -90,20 +95,21 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
     }
 
     private void changeLayoutFor(int status) {
+        final String isJoinedStr = isJoined ? "already" : "now";
         if (status == EventData.GOING) {
             rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.dark_green));
             titleTv.setText("See you at the event!");
-            subtitleTv.setText("You are now a member of the event's group.\nChat with neighbours who are also going.");
+            subtitleTv.setText("You are " + isJoinedStr + " a member of the event's group.\nChat with neighbours who are also going.");
         } else if (status == EventData.MAYBE) {
             rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.dk_colorAccent));
             titleTv.setText("Hope to see you there!");
-            subtitleTv.setText("You are now a member of the event's group.\nChat with neighbours who are also interested.");
+            subtitleTv.setText("You are " + isJoinedStr + " a member of the event's group.\nChat with neighbours who are also interested.");
         }
     }
 
 
     private void fetchLinkedGroupInfo(String gid) {
-        RealtimeDbHelper.getLubbleGroupsRef().child(gid).addValueEventListener(new ValueEventListener() {
+        listener = RealtimeDbHelper.getLubbleGroupsRef().child(gid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null) {
@@ -129,5 +135,11 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
         });
     }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (listener != null) {
+            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).removeEventListener(listener);
+        }
+    }
 }

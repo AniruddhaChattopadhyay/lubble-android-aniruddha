@@ -170,7 +170,7 @@ public class EventInfoActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 toggleGoingButton(status == EventData.GOING);
                 toggleMaybeButton(status == EventData.MAYBE);
-                EventGroupJoinedActivity.open(EventInfoActivity.this, status, groupId);
+                EventGroupJoinedActivity.open(EventInfoActivity.this, status, groupId, isLinkedGroupJoined);
             }
 
             @Override
@@ -338,8 +338,9 @@ public class EventInfoActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        //todo remove with null checks
-        eventRef.removeEventListener(eventInfoListener);
+        if (eventInfoListener != null) {
+            eventRef.removeEventListener(eventInfoListener);
+        }
     }
 
 }
