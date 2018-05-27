@@ -115,15 +115,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.MainActivity" />
         </activity>
-        <activity android:name=".events.new_event.NewEventActivity"
-            android:windowSoftInputMode="adjustPan"
-            />
+        <activity
+            android:name=".events.new_event.NewEventActivity"
+            android:windowSoftInputMode="adjustPan" />
+
         <meta-data
-        android:name="com.google.android.gms.version"
-        android:value="@integer/google_play_services_version" />
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDKVXmP3ZzcYP-0z8ZmAb7BDnT6M4TALzA"/>
+            android:value="AIzaSyDKVXmP3ZzcYP-0z8ZmAb7BDnT6M4TALzA" />
+
+        <activity android:name=".events.EventGroupJoinedActivity"></activity>
     </application>
 
 </manifest>

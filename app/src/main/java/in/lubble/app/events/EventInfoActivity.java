@@ -134,7 +134,7 @@ public class EventInfoActivity extends AppCompatActivity {
                     getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
                     eventMemberRef.updateChildren(map);
 
-                    checkGroupJoined(eventData.getGid(), true);
+                    checkGroupJoined(eventData.getGid(), EventData.GOING);
                 }
             }
         });
@@ -156,20 +156,21 @@ public class EventInfoActivity extends AppCompatActivity {
                     getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
                     eventMemberRef.updateChildren(map);
 
-                    checkGroupJoined(eventData.getGid(), false);
+                    checkGroupJoined(eventData.getGid(), EventData.MAYBE);
                 }
             }
         });
 
     }
 
-    private void checkGroupJoined(@NonNull String groupId, final boolean isGoing) {
+    private void checkGroupJoined(@NonNull final String groupId, final int status) {
         getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 progressDialog.dismiss();
-                toggleGoingButton(isGoing);
-                toggleMaybeButton(!isGoing);
+                toggleGoingButton(status == EventData.GOING);
+                toggleMaybeButton(status == EventData.MAYBE);
+                EventGroupJoinedActivity.open(EventInfoActivity.this, status, groupId);
             }
 
             @Override
