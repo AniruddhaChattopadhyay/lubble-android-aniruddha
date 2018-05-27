@@ -1,9 +1,11 @@
 package in.lubble.app.events;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -32,10 +34,13 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 
 public class EventInfoActivity extends AppCompatActivity {
 
@@ -53,6 +58,8 @@ public class EventInfoActivity extends AppCompatActivity {
     private ImageView goingIcon;
     private TextView eventNameTv;
     private TextView goingHintTv;
+    private ImageView maybeIcon;
+    private TextView maybeHintTv;
     private LinearLayout goingContainer;
     private LinearLayout maybeContainer;
     private LinearLayout shareContainer;
@@ -62,6 +69,8 @@ public class EventInfoActivity extends AppCompatActivity {
     private TextView addressTv;
     private TextView linkedGroupTv;
     private TextView descTv;
+    private ProgressDialog progressDialog;
+    private boolean isLinkedGroupJoined;
 
     public static void open(Context context, String eventId) {
         Intent intent = new Intent(context, EventInfoActivity.class);
@@ -87,6 +96,8 @@ public class EventInfoActivity extends AppCompatActivity {
         eventNameTv = findViewById(R.id.tv_event_name);
         goingIcon = findViewById(R.id.iv_going);
         goingHintTv = findViewById(R.id.tv_going_hint);
+        maybeIcon = findViewById(R.id.iv_maybe);
+        maybeHintTv = findViewById(R.id.tv_maybe_hint);
         goingContainer = findViewById(R.id.going_container);
         maybeContainer = findViewById(R.id.maybe_container);
         shareContainer = findViewById(R.id.share_container);
@@ -97,6 +108,10 @@ public class EventInfoActivity extends AppCompatActivity {
         linkedGroupTv = findViewById(R.id.tv_linked_group);
         descTv = findViewById(R.id.tv_desc);
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Joining Group");
+        progressDialog.setMessage("Please Wait...");
+
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
 
         eventRef = getEventsRef().child(eventId);
@@ -105,21 +120,60 @@ public class EventInfoActivity extends AppCompatActivity {
         goingContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (eventData != null) {
+                    progressDialog.show();
+                    final DatabaseReference eventMemberRef = getEventsRef()
+                            .child(eventId)
+                            .child("members")
+                            .child(FirebaseAuth.getInstance().getUid());
 
-                final DatabaseReference eventMemberRef = getEventsRef()
-                        .child(eventId)
-                        .child("members")
-                        .child(FirebaseAuth.getInstance().getUid());
+                    final HashMap<String, Object> map = new HashMap<>();
+                    map.put("response", EventData.GOING);
+                    map.put("timestamp", System.currentTimeMillis());
 
-                final HashMap<String, Object> map = new HashMap<>();
-                map.put("response", EventData.GOING);
-                map.put("timestamp", System.currentTimeMillis());
-                eventMemberRef.updateChildren(map, new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                        toggleGoingButton(true);
-                    }
-                });
+                    getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
+                    eventMemberRef.updateChildren(map);
+
+                    checkGroupJoined(eventData.getGid(), true);
+                }
+            }
+        });
+
+        maybeContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (eventData != null) {
+                    progressDialog.show();
+                    final DatabaseReference eventMemberRef = getEventsRef()
+                            .child(eventId)
+                            .child("members")
+                            .child(FirebaseAuth.getInstance().getUid());
+
+                    final HashMap<String, Object> map = new HashMap<>();
+                    map.put("response", EventData.MAYBE);
+                    map.put("timestamp", System.currentTimeMillis());
+
+                    getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
+                    eventMemberRef.updateChildren(map);
+
+                    checkGroupJoined(eventData.getGid(), false);
+                }
+            }
+        });
+
+    }
+
+    private void checkGroupJoined(@NonNull String groupId, final boolean isGoing) {
+        getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                progressDialog.dismiss();
+                toggleGoingButton(isGoing);
+                toggleMaybeButton(!isGoing);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
@@ -137,11 +191,11 @@ public class EventInfoActivity extends AppCompatActivity {
 
     private void toggleMaybeButton(boolean isMaybe) {
         if (isMaybe) {
-            goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_green), android.graphics.PorterDuff.Mode.SRC_IN);
-            goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.dark_green)));
+            maybeIcon.setColorFilter(ContextCompat.getColor(this, R.color.dk_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+            maybeHintTv.setTextColor((ContextCompat.getColor(this, R.color.dk_colorAccent)));
         } else {
-            goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
-            goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.black)));
+            maybeIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
+            maybeHintTv.setTextColor((ContextCompat.getColor(this, R.color.black)));
         }
     }
 
@@ -177,9 +231,10 @@ public class EventInfoActivity extends AppCompatActivity {
                     descTv.setText(eventData.getDesc());
 
                     final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
-                    toggleGoingButton(memberMap.get("response") == EventData.GOING);
-                    toggleGoingButton(memberMap.get("response") == EventData.GOING);
-
+                    if (memberMap != null) {
+                        toggleGoingButton(((long) memberMap.get("response")) == EventData.GOING);
+                        toggleMaybeButton(((long) memberMap.get("response")) == EventData.MAYBE);
+                    }
                     final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
                     final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
                     final String date = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "dd");
@@ -221,6 +276,24 @@ public class EventInfoActivity extends AppCompatActivity {
                         suffixText += maybeCount + " maybe";
                         statsTv.setText(prefixText + suffixText);
                     }
+                    fetchIsLinkedGroupJoined(eventData.getGid());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void fetchIsLinkedGroupJoined(@NonNull String linkedGroupId) {
+        getUserGroupsRef().child(linkedGroupId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                if (userGroupData != null) {
+                    isLinkedGroupJoined = userGroupData.isJoined();
                 }
             }
 
