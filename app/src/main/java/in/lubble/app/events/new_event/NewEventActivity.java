@@ -1,9 +1,11 @@
 package in.lubble.app.events.new_event;
 
+import android.Manifest;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
@@ -21,6 +24,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -39,9 +43,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,10 +60,17 @@ import java.util.Set;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.UploadFileService;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.utils.mapUtils.SphericalUtil;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static in.lubble.app.Constants.SVR_LATI;
 import static in.lubble.app.Constants.SVR_LONGI;
@@ -66,16 +80,27 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.models.EventData.GOING;
 import static in.lubble.app.utils.DateTimeUtils.APP_NORMAL_DATE_YEAR;
 import static in.lubble.app.utils.DateTimeUtils.APP_SHORT_TIME;
+import static in.lubble.app.utils.FileUtils.createImageFile;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UserUtils.getLubbleId;
 
+@RuntimePermissions
 public class NewEventActivity extends AppCompatActivity {
 
     private static final String TAG = "NewEventActivity";
     private static final int PLACE_PICKER_REQUEST = 828;
+    private static final int REQUEST_CODE_EVENT_PIC = 626;
+
+    private String currentPhotoPath;
+    private Uri picUri = null;
 
     private SupportMapFragment mapFragment;
     private LatLng defaultLatLng;
     private ScrollView parentScrollView;
+    private ImageView headerImage;
     private TextInputLayout titleTil;
     private TextInputLayout descTil;
     private TextInputLayout organizerTil;
@@ -105,6 +130,7 @@ public class NewEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_event);
 
         parentScrollView = findViewById(R.id.scrollview_parent);
+        headerImage = findViewById(R.id.iv_event_image);
         titleTil = findViewById(R.id.til_event_name);
         descTil = findViewById(R.id.til_event_desc);
         organizerTil = findViewById(R.id.til_event_organizer);
@@ -199,7 +225,19 @@ public class NewEventActivity extends AppCompatActivity {
                     membersMap.put(FirebaseAuth.getInstance().getUid(), memberInfoMap);
                     eventData.setMembers(membersMap);
 
-                    getEventsRef().push().setValue(eventData);
+                    final DatabaseReference pushRef = getEventsRef().push();
+                    pushRef.setValue(eventData);
+
+                    if (picUri != null) {
+                        startService(new Intent(NewEventActivity.this, UploadFileService.class)
+                                .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
+                                .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
+                                .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + getLubbleId() + "/events/" + pushRef.getKey())
+                                .setAction(UploadFileService.ACTION_UPLOAD));
+                    }
+
+                    Toast.makeText(NewEventActivity.this, "Event Published", Toast.LENGTH_SHORT).show();
+                    finish();
 
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -209,6 +247,26 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
 
+        headerImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NewEventActivityPermissionsDispatcher
+                        .startPhotoPickerWithPermissionCheck(NewEventActivity.this, REQUEST_CODE_EVENT_PIC);
+            }
+        });
+
+    }
+
+    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    public void startPhotoPicker(int REQUEST_CODE) {
+        try {
+            File cameraPic = createImageFile(this);
+            currentPhotoPath = cameraPic.getAbsolutePath();
+            Intent pickImageIntent = getPickImageIntent(this, cameraPic);
+            startActivityForResult(pickImageIntent, REQUEST_CODE);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private boolean isValidationPassed() {
@@ -464,6 +522,20 @@ public class NewEventActivity extends AppCompatActivity {
                     addressTil.getEditText().setText(place.getAddress());
                 }
             }
+        } else if (requestCode == REQUEST_CODE_EVENT_PIC && resultCode == RESULT_OK) {
+            File imageFile;
+            if (data != null && data.getData() != null) {
+                Uri uri = data.getData();
+                imageFile = getFileFromInputStreamUri(this, uri);
+            } else {
+                // from camera
+                imageFile = new File(currentPhotoPath);
+            }
+            picUri = Uri.fromFile(imageFile);
+            GlideApp.with(this)
+                    .load(imageFile)
+                    .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
+                    .into(headerImage);
         }
     }
 
@@ -475,4 +547,28 @@ public class NewEventActivity extends AppCompatActivity {
             query.removeEventListener(map.get(query));
         }
     }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        NewEventActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showRationaleForCamera(final PermissionRequest request) {
+        showStoragePermRationale(this, request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        Toast.makeText(this, "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        Toast.makeText(this, "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
+    }
+
 }
