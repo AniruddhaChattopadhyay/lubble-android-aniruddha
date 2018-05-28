@@ -49,6 +49,7 @@ import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class EventInfoActivity extends AppCompatActivity {
 
@@ -293,18 +294,23 @@ public class EventInfoActivity extends AppCompatActivity {
                     setTitleWhenCollapsed();
                     GlideApp.with(EventInfoActivity.this)
                             .load(eventData.getProfilePic())
-                            .placeholder(R.drawable.ic_star_party)
                             .error(R.drawable.ic_star_party)
                             .listener(new RequestListener<Drawable>() {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                                     progressBar.setVisibility(View.GONE);
+                                    groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dark_teal));
+                                    groupHeaderIv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                                    groupHeaderIv.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
                                     return false;
                                 }
 
                                 @Override
                                 public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                                     progressBar.setVisibility(View.GONE);
+                                    groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.black));
+                                    groupHeaderIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                                    groupHeaderIv.setPadding(0, 0, 0, 0);
                                     return false;
                                 }
                             })
