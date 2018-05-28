@@ -25,6 +25,7 @@
     <color name="link_blue">#219CED</color>
     <color name="fb_color">#3B5998</color>
     <color name="teal">#009688</color>
+    <color name="dark_teal">#395359</color>
     <!-- Dark UI colors -->
     <color name="dk_cyan">#3aaab8</color>
     <color name="dk_green">#38ba9e</color>

@@ -16,7 +16,7 @@
             android:id="@+id/iv_event"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:background="#395359"
+            android:background="@color/dark_teal"
             android:maxHeight="@dimen/event_img_height"
             android:scaleType="fitCenter"
             android:padding="16dp"

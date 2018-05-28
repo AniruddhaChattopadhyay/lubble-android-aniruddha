@@ -1,6 +1,9 @@
 package in.lubble.app.events;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,6 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +56,23 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 .placeholder(R.drawable.ic_star_party)
                 .error(R.drawable.ic_star_party)
                 .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        viewHolder.iconIv.setBackgroundColor(ContextCompat.getColor(context, R.color.dark_teal));
+                        viewHolder.iconIv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                        viewHolder.iconIv.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        viewHolder.iconIv.setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+                        viewHolder.iconIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        viewHolder.iconIv.setPadding(0, 0, 0, 0);
+                        return false;
+                    }
+                })
                 .into(viewHolder.iconIv);
 
         if (StringUtils.isValidString(eventData.getOrganizer())) {
