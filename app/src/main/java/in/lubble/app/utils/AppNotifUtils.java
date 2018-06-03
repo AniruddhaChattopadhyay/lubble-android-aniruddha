@@ -16,7 +16,7 @@ import in.lubble.app.Constants;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
-import in.lubble.app.notifications.AppNotifData;
+import in.lubble.app.models.AppNotifData;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 
 import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;

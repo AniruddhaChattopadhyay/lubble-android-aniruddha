@@ -54,7 +54,7 @@ public class NewAnnouncementFragment extends Fragment {
                     announcementData.setMessage(msgEt.getText().toString());
                     pushAnnouncement(announcementData);
                 } else {
-                    Toast.makeText(getContext(), "Please fill all details", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.all_fill_details, Toast.LENGTH_SHORT).show();
                 }
             }
         });

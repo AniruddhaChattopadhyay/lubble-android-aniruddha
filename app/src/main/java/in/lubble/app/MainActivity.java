@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
@@ -265,11 +264,10 @@ public class MainActivity extends AppCompatActivity {
 
                     if (BuildConfig.VERSION_CODE < minAppVersion) {
                         // block app
-                        Toast.makeText(MainActivity.this, "Update Lubble App", Toast.LENGTH_SHORT).show();
                         final AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                        alertDialog.setTitle("Please Update App");
-                        alertDialog.setMessage("You haven't updated Lubble app in a while. Please download the latest update from play store.");
-                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "UPDATE", new DialogInterface.OnClickListener() {
+                        alertDialog.setTitle(getString(R.string.update_dialog_title));
+                        alertDialog.setMessage(getString(R.string.update_dialog_msg));
+                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_update), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 alertDialog.dismiss();
@@ -281,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         });
-                        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Re-check", new DialogInterface.OnClickListener() {
+                        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.update_recheck), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 alertDialog.dismiss();

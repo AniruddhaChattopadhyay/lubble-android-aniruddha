@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 
 import in.lubble.app.BuildConfig;
+import in.lubble.app.R;
 import permissions.dispatcher.PermissionRequest;
 
 /**
@@ -142,16 +143,16 @@ public class FileUtils {
 
     public static void showStoragePermRationale(Context context, final PermissionRequest request) {
         final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
-        alertDialog.setTitle("Please allow storage permission");
-        alertDialog.setMessage("Without permission we cannot upload your photos");
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Allow", new DialogInterface.OnClickListener() {
+        alertDialog.setTitle(context.getString(R.string.storage_perm_rationale_title));
+        alertDialog.setMessage(context.getString(R.string.storage_perm_rationale_subtitle));
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.all_allow), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 alertDialog.dismiss();
                 request.proceed();
             }
         });
-        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Deny", new DialogInterface.OnClickListener() {
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.all_deny), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 alertDialog.dismiss();

@@ -35,7 +35,7 @@ public class UserUtils {
 
     public static void logout(@NonNull final FragmentActivity activity) {
         final ProgressDialog progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage("Logging out...");
+        progressDialog.setMessage(activity.getString(R.string.logging_out));
         progressDialog.show();
         AuthUI.getInstance()
                 .signOut(activity)

@@ -99,15 +99,15 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
     }
 
     private void changeLayoutFor(int status) {
-        final String isJoinedStr = isJoined ? "already" : "now";
+        final String isJoinedStr = isJoined ? getString(R.string.already_member) : getString(R.string.now_member);
         if (status == EventData.GOING) {
             rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.dark_green));
-            titleTv.setText("See you at the event!");
-            subtitleTv.setText("You are " + isJoinedStr + " a member of the event's group.\nChat with neighbours who are also going.");
+            titleTv.setText(R.string.event_going_confirm_title);
+            subtitleTv.setText(String.format(getString(R.string.event_going_confirm_subtitle), isJoinedStr));
         } else if (status == EventData.MAYBE) {
             rootLayout.setBackgroundColor(ContextCompat.getColor(this, R.color.dk_colorAccent));
-            titleTv.setText("Hope to see you there!");
-            subtitleTv.setText("You are " + isJoinedStr + " a member of the event's group.\nChat with neighbours who are also interested.");
+            titleTv.setText(R.string.event_maybe_confirm_title);
+            subtitleTv.setText(String.format(getString(R.string.event_maybe_confirm_subtitle), isJoinedStr));
         }
     }
 

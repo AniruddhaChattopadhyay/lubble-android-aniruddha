@@ -192,8 +192,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     private void showJoiningDialog() {
         joiningProgressDialog = new ProgressDialog(getContext());
-        joiningProgressDialog.setTitle("Joining group");
-        joiningProgressDialog.setMessage("Please Wait...");
+        joiningProgressDialog.setTitle(getString(R.string.joining_group));
+        joiningProgressDialog.setMessage(getString(R.string.all_please_wait));
         joiningProgressDialog.show();
     }
 
@@ -275,7 +275,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     if (!groupData.isJoined() && groupData.getIsPrivate()) {
                         chatRecyclerView.setVisibility(View.GONE);
                         pvtSystemMsg.setVisibility(View.VISIBLE);
-                        ((TextView) pvtSystemMsg.findViewById(R.id.tv_system_msg)).setText("Messages are hidden in private groups until you join");
+                        ((TextView) pvtSystemMsg.findViewById(R.id.tv_system_msg)).setText(R.string.pvt_group_msgs_hidden);
                     } else {
                         chatRecyclerView.setVisibility(View.VISIBLE);
                         pvtSystemMsg.setVisibility(View.GONE);
@@ -339,7 +339,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                joinDescTv.setText("Invited by " + profileInfo.getName());
+                                joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
                                 declineTv.setVisibility(View.VISIBLE);
                             }
 
@@ -351,7 +351,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         composeCardView.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
                     } else {
-                        joinDescTv.setText("Join group to send messages");
+                        joinDescTv.setText(R.string.join_group_to_chat);
                         declineTv.setVisibility(View.GONE);
                         composeCardView.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
@@ -373,9 +373,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     String lubbleName = dataSnapshot.child("title").getValue(String.class);
                     showBottomSheetAlert(getContext(), getLayoutInflater(),
-                            "Welcome to " + lubbleName + " Group",
-                            "All your neighbors in " + lubbleName + " are a member of this group" +
-                                    "\n\nMessages you send here are visible to everyone.",
+                            String.format(getString(R.string.lubble_group_warning_title), lubbleName),
+                            String.format(getString(R.string.lubble_group_warning_subtitle), lubbleName),
                             R.drawable.ic_public_black_24dp, new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -396,8 +395,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         } else if (groupData != null && !LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown()
                 && !groupData.getIsPrivate() && !groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
             showBottomSheetAlert(getContext(), getLayoutInflater(),
-                    "This is a public group!",
-                    "Messages you send here are visible to everyone.",
+                    getString(R.string.public_group_warning_title),
+                    getString(R.string.public_group_warning_subtitle),
                     R.drawable.ic_public_black_24dp, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -721,12 +720,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
     void showDeniedForCamera() {
-        Toast.makeText(getContext(), "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), getString(R.string.storage_perm_denied_text), Toast.LENGTH_SHORT).show();
     }
 
     @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
     void showNeverAskForCamera() {
-        Toast.makeText(getContext(), "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
 
 }

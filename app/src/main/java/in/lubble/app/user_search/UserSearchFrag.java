@@ -101,13 +101,13 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
                         inviteesRef.child(uid).setValue(Boolean.TRUE, new DatabaseReference.CompletionListener() {
                             @Override
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                Toast.makeText(getContext(), "Invites Sent", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), R.string.invites_sent, Toast.LENGTH_SHORT).show();
                                 getActivity().finish();
                             }
                         });
                     }
                 } else {
-                    Toast.makeText(getContext(), "Please select users to invite", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), R.string.invite_select_users, Toast.LENGTH_SHORT).show();
                 }
             }
         });
