@@ -13,7 +13,7 @@ import static in.lubble.app.utils.FragUtils.replaceFrag;
 
 public class DomesticDirectoryActivity extends AppCompatActivity {
 
-    public static void newInstance(Context context) {
+    public static void open(Context context) {
         final Intent intent = new Intent(context, DomesticDirectoryActivity.class);
         context.startActivity(intent);
     }

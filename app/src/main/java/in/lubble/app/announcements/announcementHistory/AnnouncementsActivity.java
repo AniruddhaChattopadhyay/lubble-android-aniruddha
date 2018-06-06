@@ -14,7 +14,7 @@ import static in.lubble.app.utils.FragUtils.replaceFrag;
 
 public class AnnouncementsActivity extends AppCompatActivity {
 
-    public static void newInstance(Context context) {
+    public static void open(Context context) {
         final Intent intent = new Intent(context, AnnouncementsActivity.class);
         context.startActivity(intent);
     }

@@ -126,7 +126,16 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDKVXmP3ZzcYP-0z8ZmAb7BDnT6M4TALzA" />
 
-        <activity android:name=".events.EventGroupJoinedActivity"></activity>
+        <activity android:name=".events.EventGroupJoinedActivity" />
+        <activity
+            android:name=".lubble_info.LubbleActivity"
+            android:label="@string/title_activity_lubble"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="in.lubble.app.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

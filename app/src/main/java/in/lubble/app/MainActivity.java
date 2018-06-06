@@ -38,6 +38,7 @@ import in.lubble.app.domestic_directory.DomesticDirectoryFrag;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
+import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.StringUtils;
@@ -59,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
     private ValueEventListener presenceValueListener;
     private ImageView profileIcon;
     private TextView toolbarTitle;
+    private View lubbleClickTarget;
     private ValueEventListener dpEventListener;
     private BottomNavigationView bottomNavigation;
 
@@ -81,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setElevation(10);
         toolbarTitle = findViewById(R.id.lubble_toolbar_title);
+        lubbleClickTarget = findViewById(R.id.lubble_click_target);
         toolbarTitle.setVisibility(View.VISIBLE);
         profileIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +123,13 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
         updateDefaultGroupId();
+
+        lubbleClickTarget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LubbleActivity.open(MainActivity.this);
+            }
+        });
     }
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {

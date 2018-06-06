@@ -7,21 +7,45 @@
     android:layout_height="?attr/actionBarSize"
     app:elevation="12dp">
 
-    <ImageView
-        android:id="@+id/iv_toolbar_profile"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/lubble_toolbar_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textAllCaps="true"
-        android:textColor="@color/darker_gray"
-        android:visibility="gone"
-        tools:text="Saraswati vihar"
-        tools:visibility="visible" />
+        <ImageView
+            android:id="@+id/iv_toolbar_profile"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/lubble_toolbar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textAllCaps="true"
+            android:textColor="@color/darker_gray"
+            android:visibility="gone"
+            tools:text="Saraswati vihar"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/lubble_toolbar_title"
+            android:tint="@color/dark_gray"
+            app:srcCompat="@drawable/ic_arrow_drop_down_black_24dp" />
+
+        <View
+            android:id="@+id/lubble_click_target"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginRight="48dp"
+            android:layout_toRightOf="@id/iv_toolbar_profile" />
+
+    </RelativeLayout>
 
 </android.support.v7.widget.Toolbar>
