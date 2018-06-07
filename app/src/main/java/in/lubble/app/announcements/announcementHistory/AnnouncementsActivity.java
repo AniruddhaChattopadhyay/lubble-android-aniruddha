@@ -25,9 +25,10 @@ public class AnnouncementsActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_announcements);
 
-        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle(R.string.notice_board);
 
         replaceFrag(getSupportFragmentManager(), AnnouncementsFrag.newInstance(), R.id.frame_fragContainer);
     }

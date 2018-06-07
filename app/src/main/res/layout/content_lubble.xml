@@ -63,7 +63,7 @@
                 android:layout_marginRight="16dp"
                 android:background="@drawable/half_rounded_rectangle_hollow_bottom"
                 android:padding="16dp"
-                android:text="Domestic Help Directory"
+                android:text="@string/domestic_directory"
                 android:textColor="@color/black" />
 
             <ImageView

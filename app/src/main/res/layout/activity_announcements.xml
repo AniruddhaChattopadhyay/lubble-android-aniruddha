@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context="in.lubble.app.groups.NewGroupActivity">
 
-    <include layout="@layout/lubble_toolbar" />
+    <include layout="@layout/text_toolbar" />
 
     <FrameLayout
         android:id="@+id/frame_fragContainer"
