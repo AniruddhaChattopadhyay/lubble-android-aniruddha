@@ -7,6 +7,7 @@
 
     <color name="card_background">#EEEEEE</color>
     <color name="black">#000000</color>
+    <color name="bright_red">#df0505</color>
     <color name="red">#b41a1a</color>
     <color name="white">#FFFFFF</color>
     <color name="trans_white">#aaffffff</color>

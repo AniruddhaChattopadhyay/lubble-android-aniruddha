@@ -14,6 +14,8 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.events.new_event.NewEventActivity;
@@ -59,6 +61,13 @@ public class EventsFrag extends Fragment {
                 NewEventActivity.open(getContext());
             }
         });
+
+        if (!LubbleSharedPrefs.getInstance().getIsEventOpened()) {
+            LubbleSharedPrefs.getInstance().setIsEventOpened(true);
+            if (getActivity() != null) {
+                ((MainActivity) getActivity()).removeEventBadge();
+            }
+        }
 
         return view;
     }

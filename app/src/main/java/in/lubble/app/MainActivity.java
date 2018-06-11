@@ -8,6 +8,8 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.internal.BottomNavigationItemView;
+import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +17,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -130,6 +133,21 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         showEventTooltip();
+        showEventBadge();
+    }
+
+    private void showEventBadge() {
+        if (!LubbleSharedPrefs.getInstance().getIsEventOpened()) {
+            BottomNavigationMenuView bottomNavigationMenuView =
+                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+            View v = bottomNavigationMenuView.getChildAt(1);
+            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+
+            View badge = LayoutInflater.from(this)
+                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+
+            itemView.addView(badge);
+        }
     }
 
     private void showEventTooltip() {
@@ -362,6 +380,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void openProfile() {
         ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
+    }
+
+    public void removeEventBadge() {
+        BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+        View v = bottomNavigationMenuView.getChildAt(1);
+        BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        if (itemView != null && itemView.getChildAt(2) != null) {
+            itemView.removeViewAt(2);
+        }
     }
 
     @Override
