@@ -23,6 +23,7 @@ public class LubbleSharedPrefs {
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
     private final String SHOW_PVT_GROUP_INFO = "SHOW_PVT_GROUP_INFO";
     private final String IS_GROUP_INFO_OPENED = "IS_GROUP_INFO_OPENED";
+    private final String IS_EVENT_TOOLTIP_SHOWN = "IS_EVENT_TOOLTIP_SHOWN";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -139,6 +140,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsGroupInfoOpened(boolean isOpened) {
         return preferences.edit().putBoolean(IS_GROUP_INFO_OPENED, isOpened).commit();
+    }
+
+    public boolean getIsEventTooltipShown() {
+        return preferences.getBoolean(IS_EVENT_TOOLTIP_SHOWN, false);
+    }
+
+    public boolean setIsEventTooltipShown(boolean isShown) {
+        return preferences.edit().putBoolean(IS_EVENT_TOOLTIP_SHOWN, isShown).commit();
     }
 
 }

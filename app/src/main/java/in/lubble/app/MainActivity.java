@@ -41,6 +41,7 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
+import it.sephiroth.android.library.tooltip.Tooltip;
 
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -128,6 +129,27 @@ public class MainActivity extends AppCompatActivity {
                 LubbleActivity.open(MainActivity.this);
             }
         });
+        showEventTooltip();
+    }
+
+    private void showEventTooltip() {
+        if (!LubbleSharedPrefs.getInstance().getIsEventTooltipShown()) {
+            Tooltip.make(this,
+                    new Tooltip.Builder(101)
+                            .anchor(bottomNavigation.findViewById(R.id.navigation_events), Tooltip.Gravity.TOP)
+                            .closePolicy(new Tooltip.ClosePolicy()
+                                    .insidePolicy(true, false)
+                                    .outsidePolicy(true, false), 23000)
+                            .text("NEW! Events")
+                            .maxWidth(500)
+                            .withStyleId(R.style.LubbleTooltipStyle)
+                            .withArrow(true)
+                            .withOverlay(true)
+                            .floatingAnimation(Tooltip.AnimationBuilder.DEFAULT)
+                            .build()
+            ).show();
+            LubbleSharedPrefs.getInstance().setIsEventTooltipShown(true);
+        }
     }
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {

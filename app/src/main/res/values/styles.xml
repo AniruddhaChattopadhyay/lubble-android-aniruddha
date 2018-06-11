@@ -57,5 +57,14 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="TextOnDark" parent="@android:style/TextAppearance.Small">
+        <item name="android:textColor">#FFF</item>
+    </style>
+
+    <style name="LubbleTooltipStyle" parent="ToolTipLayoutDefaultStyle">
+        <item name="ttlm_backgroundColor">@color/darker_gray</item>
+        <item name="android:textAppearance">@style/TextOnDark</item>
+    </style>
+
 
 </resources>
