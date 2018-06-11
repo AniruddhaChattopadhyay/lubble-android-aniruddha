@@ -32,9 +32,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import in.lubble.app.announcements.announcementHistory.AnnouncementsFrag;
 import in.lubble.app.auth.LoginActivity;
-import in.lubble.app.domestic_directory.DomesticDirectoryFrag;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
@@ -153,12 +151,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
-                case "notice":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_notices);
-                    break;
-                case "directory":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_domestic_help);
-                    break;
                 case "events":
                     bottomNavigation.setSelectedItemId(R.id.navigation_events);
                     break;
@@ -326,12 +318,6 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
                     switchFrag(GroupListFragment.newInstance());
-                    return true;
-                case R.id.navigation_notices:
-                    switchFrag(AnnouncementsFrag.newInstance());
-                    return true;
-                case R.id.navigation_domestic_help:
-                    switchFrag(DomesticDirectoryFrag.newInstance());
                     return true;
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
