@@ -2,10 +2,12 @@ package in.lubble.app.events;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -14,11 +16,17 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -133,6 +141,13 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
             }
         });
 
+        ticketShareLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onInviteClicked();
+            }
+        });
+
         cancelIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,6 +155,59 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    private void onInviteClicked() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        String link = "https://lubble.in/?invitedby=" + uid;
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse(link))
+                .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
+                        .setTitle("You're invited to Family Fun Night!")
+                        .setDescription("Join the Saraswati Vihar community on Lubble App")
+                        .setImageUrl(Uri.parse("https://i.imgur.com/RqJo20M.png"))
+                        .build()
+                )
+                .setDynamicLinkDomain("bx5at.app.goo.gl")
+                .setAndroidParameters(
+                        new DynamicLink.AndroidParameters.Builder()
+                                .setMinimumVersion(1)
+                                .build())
+                .buildShortDynamicLink()
+                .addOnSuccessListener(new OnSuccessListener<ShortDynamicLink>() {
+                    @Override
+                    public void onSuccess(ShortDynamicLink shortDynamicLink) {
+                        Uri mInvitationUrl = shortDynamicLink.getShortLink();
+                        sendInvite(mInvitationUrl);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e(TAG, "onFailure: " + e.toString());
+                    }
+                });
+    }
+
+    private void sendInvite(Uri mInvitationUrl) {
+        String referrerName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        String subject = String.format("%s invites you to FAMILY FUN NIGHT", referrerName);
+        String invitationLink = mInvitationUrl.toString();
+        String msg = "You & your family are invited to a fun filled event just for Saraswati Vihar residents on 23rd June, 5pm at C-Block Park!" +
+                "\n\nTo win lucky draw prize tickets for the event, get the Lubble app now: "
+                + invitationLink;
+        try {
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.setType("text/plain");
+            i.putExtra(Intent.EXTRA_SUBJECT, subject);
+            i.putExtra(Intent.EXTRA_TEXT, msg);
+            startActivity(Intent.createChooser(i, "choose one"));
+        } catch (Exception e) {
+            Log.e(TAG, "sendInvite: " + e.toString());
+        }
+    }
+
 
     private void changeLayoutFor(int status) {
         final String isJoinedStr = isJoined ? "already" : "now";
