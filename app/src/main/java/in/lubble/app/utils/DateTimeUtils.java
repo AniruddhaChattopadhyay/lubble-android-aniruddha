@@ -22,6 +22,7 @@ public class DateTimeUtils {
     public static final String APP_DATE_YEAR = "MMM dd, yyyy";
     public static final String APP_NORMAL_DATE_YEAR = "dd MMM, yyyy";
     public static final String EVENT_DATE_TIME = "dd MMM, h:mm a";
+    public static final long FAMILY_FUN_NIGHT_END_TIME = 1529753400000L;
 
     public static String currTimestampInString() {
         Calendar c = Calendar.getInstance();

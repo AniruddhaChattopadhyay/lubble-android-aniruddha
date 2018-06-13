@@ -25,5 +25,6 @@ public class Constants {
 
     public static final double SVR_LATI = 28.696660;
     public static final double SVR_LONGI = 77.124772;
+    public static final String FAMILY_FUN_NIGHT = "FAMILY_FUN_NIGHT";
 
 }

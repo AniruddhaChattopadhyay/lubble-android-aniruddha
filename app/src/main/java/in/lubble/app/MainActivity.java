@@ -42,6 +42,7 @@ import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import it.sephiroth.android.library.tooltip.Tooltip;
@@ -151,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showEventTooltip() {
-        if (!LubbleSharedPrefs.getInstance().getIsEventTooltipShown()) {
+        if (!LubbleSharedPrefs.getInstance().getIsEventTooltipShown() && System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
             Tooltip.make(this,
                     new Tooltip.Builder(101)
                             .anchor(bottomNavigation.findViewById(R.id.navigation_events), Tooltip.Gravity.TOP)
