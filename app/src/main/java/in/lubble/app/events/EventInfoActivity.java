@@ -69,6 +69,7 @@ public class EventInfoActivity extends AppCompatActivity {
     private TextView goingHintTv;
     private ImageView maybeIcon;
     private TextView maybeHintTv;
+    private TextView finalMarkedStatus;
     private LinearLayout goingContainer;
     private LinearLayout maybeContainer;
     private LinearLayout shareContainer;
@@ -116,6 +117,7 @@ public class EventInfoActivity extends AppCompatActivity {
         goingHintTv = findViewById(R.id.tv_going_hint);
         maybeIcon = findViewById(R.id.iv_maybe);
         maybeHintTv = findViewById(R.id.tv_maybe_hint);
+        finalMarkedStatus = findViewById(R.id.tv_final_marked_status);
         goingContainer = findViewById(R.id.going_container);
         maybeContainer = findViewById(R.id.maybe_container);
         shareContainer = findViewById(R.id.share_container);
@@ -322,12 +324,21 @@ public class EventInfoActivity extends AppCompatActivity {
                     eventNameTv.setText(eventData.getTitle());
                     addressTv.setText(eventData.getAddress());
                     descTv.setText(eventData.getDesc());
+                    if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
+                        finalMarkedStatus.setVisibility(View.GONE);
+                    } else {
+                        finalMarkedStatus.setVisibility(View.VISIBLE);
+                        goingContainer.setVisibility(View.GONE);
+                        maybeContainer.setVisibility(View.GONE);
+                    }
 
                     final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
                     if (memberMap != null) {
                         oldResponse = (long) memberMap.get("response");
                         toggleGoingButton(oldResponse == EventData.GOING);
                         toggleMaybeButton(oldResponse == EventData.MAYBE);
+
+                        setFinalMarkedResponse(oldResponse);
                     }
                     final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
                     final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
@@ -379,6 +390,23 @@ public class EventInfoActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void setFinalMarkedResponse(long oldResponse) {
+        switch ((int) oldResponse) {
+            case EventData.GOING:
+                finalMarkedStatus.setText("Marked as GOING");
+                finalMarkedStatus.setTextColor(ContextCompat.getColor(this, R.color.dark_green));
+                break;
+            case EventData.MAYBE:
+                finalMarkedStatus.setText("Marked as MAYBE");
+                finalMarkedStatus.setTextColor(ContextCompat.getColor(this, R.color.dk_blue));
+                break;
+            default:
+                finalMarkedStatus.setText("Not Responded");
+                finalMarkedStatus.setTextColor(ContextCompat.getColor(this, R.color.black));
+                break;
+        }
     }
 
     private void fetchIsLinkedGroupJoined(@NonNull String linkedGroupId) {
