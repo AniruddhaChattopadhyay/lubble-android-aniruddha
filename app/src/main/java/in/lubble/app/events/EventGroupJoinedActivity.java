@@ -9,11 +9,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.GlideApp;
@@ -27,11 +31,13 @@ import in.lubble.app.models.GroupData;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
+import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 
 public class EventGroupJoinedActivity extends AppCompatActivity {
 
     private static final String TAG = "EventGroupJoinedActiv";
     private static final String STATUS = "STATUS";
+    private static final String EVENT_ID = "EVENT_ID";
     private static final String GROUP_ID = "GROUP_ID";
     private static final String IS_JOINED = "IS_JOINED";
 
@@ -41,16 +47,22 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
     private TextView subtitleTv;
     private ImageView groupIcon;
     private TextView groupNameTv;
-    private Button openGroupBtn;
+    private LinearLayout openGroupBtn;
+    private TextView finalGuestCountTv;
+    private Button confirmGuestsBtn;
+    private ElegantNumberButton guestCounter;
+    private LinearLayout ticketShareLayout;
 
     private int status = 1;
+    private String eventId;
     private String groupId;
     private boolean isJoined;
     private ValueEventListener listener;
 
-    public static void open(Context context, int status, @NonNull String groupId, boolean isJoined) {
+    public static void open(Context context, int status, String eventId, @NonNull String groupId, boolean isJoined) {
         final Intent intent = new Intent(context, EventGroupJoinedActivity.class);
         intent.putExtra(STATUS, status);
+        intent.putExtra(EVENT_ID, eventId);
         intent.putExtra(GROUP_ID, groupId);
         intent.putExtra(IS_JOINED, isJoined);
         context.startActivity(intent);
@@ -66,10 +78,15 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
         titleTv = findViewById(R.id.tv_title);
         subtitleTv = findViewById(R.id.tv_subtitle);
         groupIcon = findViewById(R.id.iv_group);
-        groupNameTv = findViewById(R.id.tv_group_name);
         openGroupBtn = findViewById(R.id.btn_open_group);
+        finalGuestCountTv = findViewById(R.id.tv_final_guest_count);
+        guestCounter = findViewById(R.id.guest_counter);
+        confirmGuestsBtn = findViewById(R.id.btn_confirm_guests);
+        groupNameTv = findViewById(R.id.tv_group_name);
+        ticketShareLayout = findViewById(R.id.ticket_share_layout);
 
         status = getIntent().getIntExtra(STATUS, 1);
+        eventId = getIntent().getStringExtra(EVENT_ID);
         groupId = getIntent().getStringExtra(GROUP_ID);
         isJoined = getIntent().getBooleanExtra(IS_JOINED, false);
 
@@ -77,6 +94,32 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
         Analytics.triggerScreenEvent(this, getClass());
 
         fetchLinkedGroupInfo(groupId);
+
+        guestCounter.setOnClickListener(new ElegantNumberButton.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (confirmGuestsBtn.getVisibility() != View.VISIBLE) {
+                    confirmGuestsBtn.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        confirmGuestsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final String guestCount = guestCounter.getNumber();
+                final DatabaseReference eventMemberRef = getEventsRef()
+                        .child(eventId)
+                        .child("members")
+                        .child(FirebaseAuth.getInstance().getUid())
+                        .child("guests");
+                eventMemberRef.setValue(Integer.parseInt(guestCount));
+                guestCounter.setVisibility(View.GONE);
+                confirmGuestsBtn.setVisibility(View.GONE);
+                finalGuestCountTv.setVisibility(View.VISIBLE);
+                finalGuestCountTv.setText(" + " + guestCount + " guests");
+            }
+        });
 
         openGroupBtn.setOnClickListener(new View.OnClickListener() {
             @Override

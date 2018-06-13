@@ -19,8 +19,11 @@
 
     <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_height="match_parent"
+        android:layout_above="@id/ticket_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="26dp"
+        android:animateLayoutChanges="true"
         android:gravity="center"
         android:orientation="vertical">
 
@@ -40,18 +43,54 @@
             android:textColor="@color/white" />
 
         <TextView
-            android:id="@+id/tv_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:text="How many more guests will be attending?"
+            android:textColor="@color/white" />
+
+        <TextView
+            android:id="@+id/tv_final_guest_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            tools:text="+ 2 Guests"
+            tools:visibility="visible" />
+
+        <com.cepheuen.elegantnumberbutton.view.ElegantNumberButton
+            android:id="@+id/guest_counter"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:backGroundColor="@color/white"
+            app:finalNumber="9"
+            app:textColor="@color/darker_gray"
+            app:textSize="8sp" />
+
+        <Button
+            android:id="@+id/btn_confirm_guests"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:text="CONFIRM"
+            android:theme="@style/WhiteButton"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
             android:gravity="center"
             android:text="You are now a member of the event's group.\nChat with neighbours who are also going."
             android:textColor="@color/white" />
 
         <LinearLayout
+            android:id="@+id/btn_open_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/pill_button_white"
             android:gravity="center"
             android:paddingRight="8dp">
@@ -66,13 +105,13 @@
                 android:id="@+id/tv_group_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Green Oasis Nite"
                 android:layout_marginLeft="4dp"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                tools:text="Green Oasis Nite" />
 
         </LinearLayout>
 
-        <Button
+        <!--<Button
             android:id="@+id/btn_open_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -80,7 +119,84 @@
             android:paddingLeft="24dp"
             android:paddingRight="24dp"
             android:text="Open group"
-            android:theme="@style/WhiteButton" />
+            android:theme="@style/TransparentButton" />-->
 
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ticket_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/ticket_share_layout"
+        android:layout_marginBottom="1dp"
+        android:background="@color/gold"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:tint="@color/black"
+            app:srcCompat="@drawable/ic_ticket_24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="1 x Lucky Draw Ticket Earned!"
+            android:textColor="@color/black" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ticket_share_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingBottom="16dp"
+        android:paddingTop="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Want More Tickets?"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Get an extra Ticket for every friend who signs up!"
+            android:textColor="@color/black" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"
+            android:background="@color/colorAccent"
+            android:gravity="center"
+            android:padding="8sp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tint="@color/white"
+                app:srcCompat="@drawable/ic_share_black_24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:text="Invite Friends"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
 </RelativeLayout>

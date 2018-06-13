@@ -204,7 +204,7 @@ public class EventInfoActivity extends AppCompatActivity {
     private boolean checkEventAdmin() {
         final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
         boolean isAdmin;
-        isAdmin = memberMap.get("isAdmin") != null && ((boolean) memberMap.get("isAdmin"));
+        isAdmin = memberMap != null && memberMap.get("isAdmin") != null && ((boolean) memberMap.get("isAdmin"));
         if (isAdmin) {
             new AlertDialog.Builder(EventInfoActivity.this)
                     .setTitle("Hosts cannot leave event")
@@ -229,6 +229,9 @@ public class EventInfoActivity extends AppCompatActivity {
 
         final HashMap<String, Object> map = new HashMap<>();
         map.put("response", newResponse);
+        if (newResponse == EventData.NO) {
+            map.put("guests", 0);
+        }
         map.put("timestamp", System.currentTimeMillis());
 
         if (newResponse != EventData.NO) {
@@ -248,7 +251,7 @@ public class EventInfoActivity extends AppCompatActivity {
                 toggleGoingButton(status == EventData.GOING);
                 toggleMaybeButton(status == EventData.MAYBE);
                 if (status != EventData.NO) {
-                    EventGroupJoinedActivity.open(EventInfoActivity.this, status, groupId, isLinkedGroupJoined);
+                    EventGroupJoinedActivity.open(EventInfoActivity.this, status, eventId, groupId, isLinkedGroupJoined);
                 }
                 oldResponse = status;
             }
