@@ -80,6 +80,8 @@ public class EventInfoActivity extends AppCompatActivity {
     private TextView linkedGroupTv;
     private ImageView linkedGroupOpenIcon;
     private LinearLayout mapContainer;
+    private ImageView ticketIv;
+    private TextView ticketCountTv;
     private TextView descTv;
     private ProgressDialog progressDialog;
     private boolean isLinkedGroupJoined;
@@ -128,6 +130,8 @@ public class EventInfoActivity extends AppCompatActivity {
         linkedGroupTv = findViewById(R.id.tv_linked_group);
         linkedGroupOpenIcon = findViewById(R.id.iv_open_group);
         mapContainer = findViewById(R.id.map_container);
+        ticketIv = findViewById(R.id.iv_ticket);
+        ticketCountTv = findViewById(R.id.tv_ticket_count);
         descTv = findViewById(R.id.tv_desc);
 
         progressDialog = new ProgressDialog(this);
@@ -324,6 +328,16 @@ public class EventInfoActivity extends AppCompatActivity {
                     eventNameTv.setText(eventData.getTitle());
                     addressTv.setText(eventData.getAddress());
                     descTv.setText(eventData.getDesc());
+
+                    if (eventData.getTicketCount() > 0) {
+                        ticketIv.setVisibility(View.VISIBLE);
+                        ticketCountTv.setVisibility(View.VISIBLE);
+                        ticketCountTv.setText("Lucky Draw Tickets: " + eventData.getTicketCount());
+                    } else {
+                        ticketIv.setVisibility(View.GONE);
+                        ticketCountTv.setVisibility(View.GONE);
+                    }
+
                     if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
                         finalMarkedStatus.setVisibility(View.GONE);
                     } else {
