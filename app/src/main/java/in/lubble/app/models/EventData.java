@@ -27,7 +27,6 @@ public class EventData {
     private double longi;
     private String address;
     private String gid;
-    private int ticketCount = 0;
 
     public String getProfilePic() {
         return profilePic;
@@ -125,11 +124,4 @@ public class EventData {
         this.id = id;
     }
 
-    public int getTicketCount() {
-        return ticketCount;
-    }
-
-    public void setTicketCount(int ticketCount) {
-        this.ticketCount = ticketCount;
-    }
 }

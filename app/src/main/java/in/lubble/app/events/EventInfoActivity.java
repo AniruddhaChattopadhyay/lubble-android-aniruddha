@@ -331,19 +331,6 @@ public class EventInfoActivity extends AppCompatActivity {
                     addressTv.setText(eventData.getAddress());
                     descTv.setText(eventData.getDesc());
 
-                    if (eventData.getTicketCount() > 0) {
-                        ticketIv.setVisibility(View.VISIBLE);
-                        ticketCountTv.setVisibility(View.VISIBLE);
-                        luckyDrawHint.setVisibility(View.GONE);
-                        ticketCountTv.setText("Lucky Draw Tickets: " + eventData.getTicketCount());
-                    } else {
-                        if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
-                            luckyDrawHint.setVisibility(View.VISIBLE);
-                        }
-                        ticketIv.setVisibility(View.GONE);
-                        ticketCountTv.setVisibility(View.GONE);
-                    }
-
                     if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
                         finalMarkedStatus.setVisibility(View.GONE);
                     } else {
@@ -359,6 +346,19 @@ public class EventInfoActivity extends AppCompatActivity {
                         toggleMaybeButton(oldResponse == EventData.MAYBE);
 
                         setFinalMarkedResponse(oldResponse);
+                        if (memberMap.get("tickets") != null && ((long) memberMap.get("tickets")) > 0) {
+                            ticketIv.setVisibility(View.VISIBLE);
+                            ticketCountTv.setVisibility(View.VISIBLE);
+                            luckyDrawHint.setVisibility(View.GONE);
+                            ticketCountTv.setText("Lucky Draw Tickets: " + ((long) memberMap.get("tickets")));
+                        } else {
+                            if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
+                                luckyDrawHint.setVisibility(View.VISIBLE);
+                            }
+                            ticketIv.setVisibility(View.GONE);
+                            ticketCountTv.setVisibility(View.GONE);
+                        }
+
                     }
                     final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
                     final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
