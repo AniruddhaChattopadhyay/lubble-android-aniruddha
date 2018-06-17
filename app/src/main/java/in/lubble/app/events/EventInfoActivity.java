@@ -143,7 +143,6 @@ public class EventInfoActivity extends AppCompatActivity {
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
 
         eventRef = getEventsRef().child(eventId);
-        fetchEventInfo();
 
         goingContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,6 +206,12 @@ public class EventInfoActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchEventInfo();
     }
 
     private boolean checkEventAdmin() {
