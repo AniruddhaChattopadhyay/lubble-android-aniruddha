@@ -32,7 +32,9 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.utils.DateTimeUtils;
 
+import static in.lubble.app.Constants.FAMILY_FUN_NIGHT;
 import static in.lubble.app.auth.LoginActivity.RC_SIGN_IN;
 
 public class WelcomeFrag extends Fragment {
@@ -133,33 +135,44 @@ public class WelcomeFrag extends Fragment {
 
                             String referrerUid = deepLink.getQueryParameter("invitedby");
                             LubbleSharedPrefs.getInstance().setReferrerUid(referrerUid);
+                            if (referrerUid.equalsIgnoreCase(FAMILY_FUN_NIGHT)) {
+                                if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
+                                    referrerHintTv.setVisibility(View.VISIBLE);
+                                    referrerHintTv.setText("Sign up to get");
+                                    referrerContainer.setVisibility(View.VISIBLE);
+                                    referrerNameTv.setText("Lucky Draw Tickets");
+                                    referrerDpIv.setImageResource(R.drawable.ic_ticket_24dp);
+                                } else {
+                                    // do not show anything after event start time
+                                }
+                            } else {
+                                // single listener as the user is new, has no cache.
+                                // referrer profile will be fetched via network, there wudnt be any cache hits.
+                                // Even if its cached, dsnt matter really, just shows who referred you, an outdated dp wont do much harm..
+                                RealtimeDbHelper.getUserInfoRef(referrerUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
 
-                            // single listener as the user is new, has no cache.
-                            // referrer profile will be fetched via network, there wudnt be any cache hits.
-                            // Even if its cached, dsnt matter really, just shows who referred you, an outdated dp wont do much harm..
-                            RealtimeDbHelper.getUserInfoRef(referrerUid).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                        if (profileInfo != null) {
 
-                                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                    if (profileInfo != null) {
-
-                                        referrerHintTv.setVisibility(View.VISIBLE);
-                                        referrerContainer.setVisibility(View.VISIBLE);
-                                        referrerNameTv.setText(profileInfo.getName());
-                                        GlideApp.with(getContext())
-                                                .load(profileInfo.getThumbnail())
-                                                .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                                                .circleCrop()
-                                                .into(referrerDpIv);
+                                            referrerHintTv.setVisibility(View.VISIBLE);
+                                            referrerContainer.setVisibility(View.VISIBLE);
+                                            referrerNameTv.setText(profileInfo.getName());
+                                            GlideApp.with(getContext())
+                                                    .load(profileInfo.getThumbnail())
+                                                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                                                    .circleCrop()
+                                                    .into(referrerDpIv);
+                                        }
                                     }
-                                }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
 
-                                }
-                            });
+                                    }
+                                });
+                            }
                         }
                     }
                 });

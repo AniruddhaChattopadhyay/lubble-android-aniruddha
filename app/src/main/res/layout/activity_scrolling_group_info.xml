@@ -36,7 +36,7 @@
                     android:layout_gravity="center"
                     android:background="@color/very_light_gray"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/city"
+                    tools:src="@drawable/city"
                     android:transitionName="nahi_chaiye" />
 
                 <View

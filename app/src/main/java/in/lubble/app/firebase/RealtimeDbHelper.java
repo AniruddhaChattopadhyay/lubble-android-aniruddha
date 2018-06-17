@@ -101,4 +101,8 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("devs");
     }
 
+    public static DatabaseReference getEventsRef() {
+        return getLubbleRef().child("events");
+    }
+
 }

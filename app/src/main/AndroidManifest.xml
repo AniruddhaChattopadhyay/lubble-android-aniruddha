@@ -5,7 +5,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".LubbleApp"
@@ -14,7 +14,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:allowBackup">
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name">
@@ -107,6 +108,35 @@
             android:name=".groups.group_info.ScrollingGroupInfoActivity"
             android:parentActivityName=".chat.ChatActivity"
             android:theme="@style/AppTheme" />
+        <activity
+            android:name=".events.EventInfoActivity"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="in.lubble.app.MainActivity" />
+        </activity>
+        <activity
+            android:name=".events.new_event.NewEventActivity"
+            android:windowSoftInputMode="adjustPan" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDKVXmP3ZzcYP-0z8ZmAb7BDnT6M4TALzA" />
+
+        <activity android:name=".events.EventGroupJoinedActivity" />
+        <activity
+            android:name=".lubble_info.LubbleActivity"
+            android:label="@string/title_activity_lubble"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="in.lubble.app.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

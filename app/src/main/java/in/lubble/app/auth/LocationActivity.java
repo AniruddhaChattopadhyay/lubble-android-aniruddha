@@ -48,6 +48,9 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.utils.StringUtils;
 
+import static in.lubble.app.Constants.SVR_LATI;
+import static in.lubble.app.Constants.SVR_LONGI;
+
 public class LocationActivity extends AppCompatActivity {
 
     private static final String TAG = "LocationActivity";
@@ -218,8 +221,8 @@ public class LocationActivity extends AppCompatActivity {
     private void validateUserLocation(Location location) {
         currLocation = location;
         final Location centralLocation = new Location("Saraswati Vihar");
-        centralLocation.setLatitude(28.696660);
-        centralLocation.setLongitude(77.124772);
+        centralLocation.setLatitude(SVR_LATI);
+        centralLocation.setLongitude(SVR_LONGI);
         if (location.distanceTo(centralLocation) < 700) {
             locationCheckSuccess();
         } else {

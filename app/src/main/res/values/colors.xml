@@ -7,12 +7,17 @@
 
     <color name="card_background">#EEEEEE</color>
     <color name="black">#000000</color>
+    <color name="bright_red">#df0505</color>
     <color name="red">#b41a1a</color>
     <color name="white">#FFFFFF</color>
+    <color name="gold">#FFCA0A</color>
+    <color name="trans_white">#aaffffff</color>
     <color name="default_text_color">#808080</color>
     <color name="darker_gray">#484848</color>
     <color name="dark_gray">#7e7e7e</color>
     <color name="gray">#b1b1b1</color>
+    <color name="trans_gray">#a3353535</color>
+    <color name="medium_light_grey">#CCCCCC</color>
     <color name="light_gray">#d6d6d6</color>
     <color name="very_light_gray">#ededed</color>
     <color name="purple">#6a03c9</color>
@@ -23,6 +28,7 @@
     <color name="link_blue">#219CED</color>
     <color name="fb_color">#3B5998</color>
     <color name="teal">#009688</color>
+    <color name="dark_teal">#395359</color>
     <!-- Dark UI colors -->
     <color name="dk_cyan">#3aaab8</color>
     <color name="dk_green">#38ba9e</color>

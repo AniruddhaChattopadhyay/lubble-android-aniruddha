@@ -13,7 +13,7 @@ import static in.lubble.app.utils.FragUtils.replaceFrag;
 
 public class DomesticDirectoryActivity extends AppCompatActivity {
 
-    public static void newInstance(Context context) {
+    public static void open(Context context) {
         final Intent intent = new Intent(context, DomesticDirectoryActivity.class);
         context.startActivity(intent);
     }
@@ -23,12 +23,12 @@ public class DomesticDirectoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_doesmtic_help);
 
-        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle(R.string.domestic_directory);
 
         replaceFrag(getSupportFragmentManager(), DomesticDirectoryFrag.newInstance(), R.id.frame_fragContainer);
-
     }
 
     @Override

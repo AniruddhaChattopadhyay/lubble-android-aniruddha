@@ -8,6 +8,8 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.internal.BottomNavigationItemView;
+import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +17,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,15 +35,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import in.lubble.app.announcements.announcementHistory.AnnouncementsFrag;
 import in.lubble.app.auth.LoginActivity;
-import in.lubble.app.domestic_directory.DomesticDirectoryFrag;
+import in.lubble.app.events.EventsFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
+import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
+import it.sephiroth.android.library.tooltip.Tooltip;
 
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -58,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private ValueEventListener presenceValueListener;
     private ImageView profileIcon;
     private TextView toolbarTitle;
+    private View lubbleClickTarget;
     private ValueEventListener dpEventListener;
     private BottomNavigationView bottomNavigation;
 
@@ -80,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setElevation(10);
         toolbarTitle = findViewById(R.id.lubble_toolbar_title);
+        lubbleClickTarget = findViewById(R.id.lubble_click_target);
         toolbarTitle.setVisibility(View.VISIBLE);
         profileIcon.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,6 +126,48 @@ public class MainActivity extends AppCompatActivity {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
         updateDefaultGroupId();
+
+        lubbleClickTarget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LubbleActivity.open(MainActivity.this);
+            }
+        });
+        showEventTooltip();
+        showEventBadge();
+    }
+
+    private void showEventBadge() {
+        if (!LubbleSharedPrefs.getInstance().getIsEventOpened()) {
+            BottomNavigationMenuView bottomNavigationMenuView =
+                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+            View v = bottomNavigationMenuView.getChildAt(1);
+            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+
+            View badge = LayoutInflater.from(this)
+                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+
+            itemView.addView(badge);
+        }
+    }
+
+    private void showEventTooltip() {
+        if (!LubbleSharedPrefs.getInstance().getIsEventTooltipShown() && System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
+            Tooltip.make(this,
+                    new Tooltip.Builder(101)
+                            .anchor(bottomNavigation.findViewById(R.id.navigation_events), Tooltip.Gravity.TOP)
+                            .closePolicy(new Tooltip.ClosePolicy()
+                                    .insidePolicy(true, false)
+                                    .outsidePolicy(true, false), 23000)
+                            .text("To get Lucky Draw tickets, go here")
+                            .withStyleId(R.style.LubbleTooltipStyle)
+                            .withArrow(true)
+                            .withOverlay(true)
+                            .floatingAnimation(Tooltip.AnimationBuilder.DEFAULT)
+                            .build()
+            ).show();
+            LubbleSharedPrefs.getInstance().setIsEventTooltipShown(true);
+        }
     }
 
     public BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -142,11 +191,8 @@ public class MainActivity extends AppCompatActivity {
 
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
-                case "notice":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_notices);
-                    break;
-                case "directory":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_domestic_help);
+                case "events":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
                     break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
@@ -313,11 +359,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_chats:
                     switchFrag(GroupListFragment.newInstance());
                     return true;
-                case R.id.navigation_notices:
-                    switchFrag(AnnouncementsFrag.newInstance());
-                    return true;
-                case R.id.navigation_domestic_help:
-                    switchFrag(DomesticDirectoryFrag.newInstance());
+                case R.id.navigation_events:
+                    switchFrag(EventsFrag.newInstance());
                     return true;
             }
             return false;
@@ -337,6 +380,15 @@ public class MainActivity extends AppCompatActivity {
 
     private void openProfile() {
         ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
+    }
+
+    public void removeEventBadge() {
+        BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+        View v = bottomNavigationMenuView.getChildAt(1);
+        BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        if (itemView != null && itemView.getChildAt(2) != null) {
+            itemView.removeViewAt(2);
+        }
     }
 
     @Override

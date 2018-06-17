@@ -7,13 +7,8 @@
         android:title="Chats" />
 
     <item
-        android:id="@+id/navigation_notices"
-        android:icon="@drawable/ic_announcement"
-        android:title="Notices" />
-
-    <item
-        android:id="@+id/navigation_domestic_help"
-        android:icon="@drawable/ic_format_list_bulleted_black_24dp"
-        android:title="Directory" />
+        android:id="@+id/navigation_events"
+        android:icon="@drawable/ic_event_black_24dp"
+        android:title="Events" />
 
 </menu>

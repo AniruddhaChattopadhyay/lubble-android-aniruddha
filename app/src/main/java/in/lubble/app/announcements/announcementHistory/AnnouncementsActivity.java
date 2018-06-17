@@ -14,7 +14,7 @@ import static in.lubble.app.utils.FragUtils.replaceFrag;
 
 public class AnnouncementsActivity extends AppCompatActivity {
 
-    public static void newInstance(Context context) {
+    public static void open(Context context) {
         final Intent intent = new Intent(context, AnnouncementsActivity.class);
         context.startActivity(intent);
     }
@@ -25,9 +25,10 @@ public class AnnouncementsActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_announcements);
 
-        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle(R.string.notice_board);
 
         replaceFrag(getSupportFragmentManager(), AnnouncementsFrag.newInstance(), R.id.frame_fragContainer);
     }
