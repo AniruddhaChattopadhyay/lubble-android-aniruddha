@@ -24,6 +24,7 @@ import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
 /**
@@ -34,6 +35,8 @@ public class FcmService extends FirebaseMessagingService {
 
     private static final String TAG = "FcmService";
     public static final String LOGOUT_ACTION = "LOGOUT_ACTION";
+
+    private ValueEventListener noticeListener;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -60,12 +63,31 @@ public class FcmService extends FirebaseMessagingService {
                 JsonElement jsonElement = gson.toJsonTree(dataMap);
                 AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
                 AppNotifUtils.showAppNotif(this, appNotifData);
+                // prefetch notices
+                pullNotices(dataMap);
             } else if (StringUtils.isValidString(type) && "chat".equalsIgnoreCase(type)) {
                 // create chat notif
                 createChatNotif(dataMap);
             } else {
                 Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
             }
+        }
+    }
+
+    private void pullNotices(Map<String, String> dataMap) {
+        final String type = dataMap.get("type");
+        if (StringUtils.isValidString(type) && "notice".equalsIgnoreCase(type)) {
+            noticeListener = getAnnouncementsRef().addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Log.d(TAG, "Notice pre-fetched: " + dataSnapshot.getKey());
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
         }
     }
 
@@ -142,5 +164,8 @@ public class FcmService extends FirebaseMessagingService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy: ");
+        if (noticeListener != null) {
+            getAnnouncementsRef().removeEventListener(noticeListener);
+        }
     }
 }

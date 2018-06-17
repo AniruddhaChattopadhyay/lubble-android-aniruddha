@@ -120,6 +120,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private RelativeLayout bottomContainer;
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
+    @Nullable
     private ValueEventListener bottomBarListener;
     @Nullable
     private String replyMsgId = null;
@@ -693,7 +694,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     public void openGroupInfo() {
-        if (groupData.isJoined() || !groupData.getIsPrivate()) {
+        if (groupData != null && (groupData.isJoined() || !groupData.getIsPrivate())) {
             ScrollingGroupInfoActivity.open(getContext(), groupId);
         }
     }
@@ -704,7 +705,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         prevUrl = "";
         messagesReference.removeEventListener(msgChildListener);
         groupReference.removeEventListener(groupInfoListener);
-        RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
+        if (bottomBarListener != null) {
+            RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
+        }
     }
 
     @Override
