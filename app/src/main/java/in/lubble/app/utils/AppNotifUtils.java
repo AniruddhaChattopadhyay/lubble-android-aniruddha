@@ -15,6 +15,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import in.lubble.app.Constants;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.notifications.AppNotifData;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
@@ -85,8 +86,12 @@ public class AppNotifUtils {
             return stackBuilder.addNextIntentWithParentStack(intent);
 
         } else if (appNotifData.getType().equalsIgnoreCase("notice")) {
+            Intent intent = new Intent(context, AnnouncementsActivity.class);
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            return stackBuilder.addNextIntentWithParentStack(intent);
+        } else if (appNotifData.getType().equalsIgnoreCase("events")) {
             Intent intent = new Intent(context, MainActivity.class);
-            intent.putExtra(EXTRA_TAB_NAME, "notice");
+            intent.putExtra(EXTRA_TAB_NAME, "events");
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else {
