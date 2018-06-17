@@ -143,6 +143,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_send_white_24dp"/>
 
                 <TextView
@@ -181,6 +182,32 @@
 
         </LinearLayout>
 
+
+        <ImageView
+            android:id="@+id/iv_ticket"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_below="@id/lucky_draw_hint"
+            android:layout_marginTop="8dp"
+            android:tint="@color/colorAccent"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_ticket_24dp"
+            tools:visibility="visible"/>
+
+        <TextView
+            android:id="@+id/tv_ticket_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/lucky_draw_hint"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_toRightOf="@id/iv_ticket"
+            android:text="Lucky Draw Tickets: 1"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
         <ImageView
             android:id="@+id/iv_stats"
             android:layout_width="16dp"
@@ -195,7 +222,7 @@
             android:id="@+id/tv_stats"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/lucky_draw_hint"
+            android:layout_below="@id/tv_ticket_count"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="12dp"
             android:layout_toRightOf="@id/iv_time"
@@ -323,31 +350,11 @@
 
         </RelativeLayout>
 
-        <ImageView
-            android:id="@+id/iv_ticket"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_below="@id/iv_group"
-            android:layout_marginTop="8dp"
-            android:tint="@color/colorAccent"
-            app:srcCompat="@drawable/ic_ticket_24dp"/>
-
-        <TextView
-            android:id="@+id/tv_ticket_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/iv_group"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_toRightOf="@id/iv_ticket"
-            android:text="Lucky Draw Tickets: 1"
-            android:textColor="@color/black"/>
-
         <TextView
             android:id="@+id/tv_desc_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/iv_ticket"
+            android:layout_below="@id/group_container"
             android:layout_marginTop="16dp"
             android:text="Details"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"

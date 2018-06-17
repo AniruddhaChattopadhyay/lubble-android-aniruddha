@@ -359,11 +359,20 @@ public class EventInfoActivity extends AppCompatActivity {
                         } else {
                             if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
                                 luckyDrawHint.setVisibility(View.VISIBLE);
+                            } else {
+                                luckyDrawHint.setVisibility(View.GONE);
                             }
                             ticketIv.setVisibility(View.GONE);
                             ticketCountTv.setVisibility(View.GONE);
                         }
-
+                    } else {
+                        if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
+                            luckyDrawHint.setVisibility(View.VISIBLE);
+                        } else {
+                            luckyDrawHint.setVisibility(View.GONE);
+                        }
+                        ticketIv.setVisibility(View.GONE);
+                        ticketCountTv.setVisibility(View.GONE);
                     }
                     final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
                     final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
