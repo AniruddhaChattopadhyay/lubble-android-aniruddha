@@ -1,150 +1,156 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="8dp"
-    android:orientation="vertical">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/signup_welcome"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/til_fname"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/first_name">
-
-        <EditText
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ."
-            android:inputType="textCapWords" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/til_lname"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/last_name">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ."
-            android:inputType="textCapWords" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:id="@+id/til_bio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="About You">
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="left"
-            android:lines="3"
-            android:maxLines="3" />
-
-    </android.support.design.widget.TextInputLayout>
-
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/android:progressBarStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="16dp"
-        tools:visibility="gone" />
-
-    <Spinner
-        android:id="@+id/spinner_block"
-        style="@style/Base.Widget.AppCompat.Spinner.Underlined"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="16dp"
-        android:visibility="gone"
-        tools:visibility="visible" />
+            android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="6dp"
-        android:layout_marginRight="6dp"
-        android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:weightSum="2">
+        android:layout_height="match_parent"
+        android:layout_margin="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="0dp"
+            android:text="Hello! Please introduce yourself."
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"/>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/til_fname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/first_name">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ."
+                android:inputType="textCapWords"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/til_lname"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/last_name">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ."
+                android:inputType="textCapWords"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/til_bio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="About You">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:lines="3"
+                android:maxLines="3"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/android:progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="16dp"
+            tools:visibility="gone"/>
+
+        <Spinner
+            android:id="@+id/spinner_block"
+            style="@style/Base.Widget.AppCompat.Spinner.Underlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <LinearLayout
-            android:id="@+id/linearLayout_owner_container"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@color/colorAccent"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="8dp">
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-            <ImageView
-                android:id="@+id/ic_owner"
-                android:layout_width="wrap_content"
-                android:layout_height="80dp"
-                android:tint="@color/white"
-                app:srcCompat="@drawable/ic_owner" />
-
-            <TextView
-                android:id="@+id/tv_owner"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/linearLayout_owner_container"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="OWNER"
-                android:textColor="@color/white"
-                android:textStyle="bold" />
+                android:layout_weight="1"
+                android:background="@color/colorAccent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/ic_owner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:tint="@color/white"
+                    app:srcCompat="@drawable/ic_owner"/>
+
+                <TextView
+                    android:id="@+id/tv_owner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="OWNER"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linearLayout_tenant_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/very_light_gray"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/ic_tenant"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    app:srcCompat="@drawable/ic_tenant"/>
+
+                <TextView
+                    android:id="@+id/tv_tenant"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TENANT"
+                    android:textStyle="bold"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/linearLayout_tenant_container"
-            android:layout_width="0dp"
+        <Button
+            android:id="@+id/btn_submit"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@color/very_light_gray"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="8dp">
-
-            <ImageView
-                android:id="@+id/ic_tenant"
-                android:layout_width="wrap_content"
-                android:layout_height="80dp"
-                app:srcCompat="@drawable/ic_tenant" />
-
-            <TextView
-                android:id="@+id/tv_tenant"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="TENANT"
-                android:textStyle="bold" />
-
-        </LinearLayout>
+            android:layout_marginBottom="8dp"
+            android:text="@string/btn_continue"
+            android:theme="@style/AccentButton"/>
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_submit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_continue"
-        android:theme="@style/AccentButton" />
-
-</LinearLayout>
+</ScrollView>
