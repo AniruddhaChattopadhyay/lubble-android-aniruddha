@@ -38,3 +38,4 @@
 }
 # crashlytics
 -keep public class * extends java.lang.Exception
+-keep class org.jsoup.**
