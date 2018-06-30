@@ -18,6 +18,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.events.new_event.NewEventActivity;
 import in.lubble.app.models.EventData;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
@@ -54,14 +55,12 @@ public class EventsFrag extends Fragment {
         recyclerView.setAdapter(adapter);
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
-        fab.setVisibility(View.GONE);
-
-        /*fab.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 NewEventActivity.open(getContext());
             }
-        });*/
+        });
 
         if (!LubbleSharedPrefs.getInstance().getIsEventOpened()) {
             LubbleSharedPrefs.getInstance().setIsEventOpened(true);
