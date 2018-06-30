@@ -114,13 +114,16 @@ public class ProfileFrag extends Fragment {
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String profilePicUrl = profileData.getProfilePic();
-                if (isValidString(profilePicUrl)) {
-                    String uploadPath = null;
-                    if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                        uploadPath = "user_profile/" + FirebaseAuth.getInstance().getUid();
+                final String profilePicUrl;
+                if (profileData != null) {
+                    profilePicUrl = profileData.getProfilePic();
+                    if (isValidString(profilePicUrl)) {
+                        String uploadPath = null;
+                        if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                            uploadPath = "user_profile/" + FirebaseAuth.getInstance().getUid();
+                        }
+                        FullScreenImageActivity.open(getActivity(), getContext(), profilePicUrl, profilePicIv, uploadPath, R.drawable.ic_account_circle_black_no_padding);
                     }
-                    FullScreenImageActivity.open(getActivity(), getContext(), profilePicUrl, profilePicIv, uploadPath, R.drawable.ic_account_circle_black_no_padding);
                 }
             }
         });
