@@ -113,8 +113,7 @@
             android:configChanges="orientation"
             android:label="Invite People"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".utils.FullScreenImageActivity" />
+        <activity android:name=".utils.FullScreenImageActivity" />
         <activity
             android:name=".chat.AttachImageActivity"
             android:configChanges="orientation"

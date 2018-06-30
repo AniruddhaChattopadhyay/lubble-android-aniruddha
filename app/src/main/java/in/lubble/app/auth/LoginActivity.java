@@ -75,17 +75,13 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                if (response.getError() != null && response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     showSnackbar(R.string.no_internet_connection);
                     return;
                 }
-
-                if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
-                    showSnackbar(R.string.unknown_error);
-                    return;
-                }
+                
+                showSnackbar(R.string.unknown_error);
             }
-            showSnackbar(R.string.unknown_sign_in_response);
         } else if (requestCode == REQUEST_LOCATION) {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));

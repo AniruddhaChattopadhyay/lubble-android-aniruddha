@@ -25,7 +25,6 @@ import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 import java.util.ArrayList;
 import java.util.List;
 
-import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -97,22 +96,19 @@ public class WelcomeFrag extends Fragment {
     }
 
     private void startAuthActivity() {
-        Bundle params = new Bundle();
-        params.putString(AuthUI.EXTRA_DEFAULT_COUNTRY_CODE, "in");
+        List<String> whitelistedCountries = new ArrayList<String>();
+        whitelistedCountries.add("in");
         List<AuthUI.IdpConfig> selectedProviders = new ArrayList<>();
         selectedProviders
-                .add(new AuthUI.IdpConfig.Builder(AuthUI.PHONE_VERIFICATION_PROVIDER)
-                        .setParams(params)
+                .add(new AuthUI.IdpConfig.PhoneBuilder()
+                        .setDefaultCountryIso("in")
+                        .setWhitelistedCountries(whitelistedCountries)
                         .build());
-        if (BuildConfig.DEBUG) {
-            selectedProviders
-                    .add(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER)
-                            .build());
-        }
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                 .setLogo(R.drawable.ic_android_black_24dp)
                 .setAvailableProviders(selectedProviders)
                 .setTheme(R.style.AppTheme)
+                .setTosAndPrivacyPolicyUrls("https://lubble.in/policies/terms", "https://lubble.in/policies/privacy")
                 .setIsSmartLockEnabled(true, true)
                 .build();
         getActivity().startActivityForResult(intent, RC_SIGN_IN);

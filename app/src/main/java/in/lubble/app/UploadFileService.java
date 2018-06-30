@@ -9,8 +9,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
@@ -114,13 +116,28 @@ public class UploadFileService extends BaseTaskService {
                         Log.d(TAG, "uploadFromUri:onSuccess");
 
                         // Get the public download URL
-                        Uri downloadUri = taskSnapshot.getMetadata().getDownloadUrl();
+                        photoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+                                    final Uri downloadUri = task.getResult();
+                                    // [START_EXCLUDE]
+                                    broadcastUploadFinished(downloadUri, fileUri, toTransmit, caption, groupId);
+                                    showUploadFinishedNotification(downloadUri, fileUri, toTransmit);
+                                    taskCompleted();
+                                    // [END_EXCLUDE]
+                                } else {
+                                    Log.d(TAG, "onComplete: failed");
 
-                        // [START_EXCLUDE]
-                        broadcastUploadFinished(downloadUri, fileUri, toTransmit, caption, groupId);
-                        showUploadFinishedNotification(downloadUri, fileUri, toTransmit);
-                        taskCompleted();
-                        // [END_EXCLUDE]
+                                    // [START_EXCLUDE]
+                                    broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId);
+                                    showUploadFinishedNotification(null, fileUri, toTransmit);
+                                    taskCompleted();
+                                    // [END_EXCLUDE]
+                                }
+                            }
+                        });
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
