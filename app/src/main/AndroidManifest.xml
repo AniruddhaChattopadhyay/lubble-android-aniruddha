@@ -18,7 +18,9 @@
         tools:replace="android:allowBackup">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:configChanges="orientation"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,7 +29,9 @@
         </activity>
         <activity
             android:name=".auth.LoginActivity"
-            android:launchMode="singleTop" />
+            android:configChanges="orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -41,11 +45,15 @@
 
         <activity
             android:name=".chat.ChatActivity"
-            android:parentActivityName=".MainActivity" />
+            android:configChanges="orientation"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".profile.ProfileActivity"
+            android:configChanges="orientation"
             android:label="Profile"
             android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
         <service android:name=".UploadFileService" />
@@ -67,8 +75,10 @@
 
         <activity
             android:name=".groups.NewGroupActivity"
+            android:configChanges="orientation"
             android:label="New Group"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="preloaded_fonts"
@@ -76,12 +86,16 @@
 
         <activity
             android:name=".announcements.NewAnnouncementActivity"
+            android:configChanges="orientation"
             android:label="New Announcement"
-            android:parentActivityName=".announcements.announcementHistory.AnnouncementsActivity" />
+            android:parentActivityName=".announcements.announcementHistory.AnnouncementsActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".announcements.announcementHistory.AnnouncementsActivity"
+            android:configChanges="orientation"
             android:label="Announcements"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait" />
         <activity android:name=".domestic_directory.DomesticDirectoryActivity" />
 
         <meta-data
@@ -90,27 +104,43 @@
 
         <activity
             android:name=".DebugActivity"
+            android:configChanges="orientation"
             android:label="@string/title_activity_debug"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".user_search.UserSearchActivity"
-            android:label="Invite People" />
-        <activity android:name=".utils.FullScreenImageActivity" />
+            android:configChanges="orientation"
+            android:label="Invite People"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".utils.FullScreenImageActivity" />
         <activity
             android:name=".chat.AttachImageActivity"
+            android:configChanges="orientation"
             android:parentActivityName=".chat.ChatActivity"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
-        <activity android:name=".auth.LocationActivity" />
+        <activity
+            android:name=".auth.LocationActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".auth.IntroActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
             android:theme="@style/BlueAppTheme" />
         <activity
             android:name=".groups.group_info.ScrollingGroupInfoActivity"
+            android:configChanges="orientation"
             android:parentActivityName=".chat.ChatActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity
             android:name=".events.EventInfoActivity"
+            android:configChanges="orientation"
             android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -118,6 +148,8 @@
         </activity>
         <activity
             android:name=".events.new_event.NewEventActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
         <meta-data
@@ -127,11 +159,16 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDKVXmP3ZzcYP-0z8ZmAb7BDnT6M4TALzA" />
 
-        <activity android:name=".events.EventGroupJoinedActivity" />
+        <activity
+            android:name=".events.EventGroupJoinedActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".lubble_info.LubbleActivity"
+            android:configChanges="orientation"
             android:label="@string/title_activity_lubble"
             android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

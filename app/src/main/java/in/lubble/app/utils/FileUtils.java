@@ -101,7 +101,9 @@ public class FileUtils {
                 // log
             } finally {
                 try {
-                    inputStream.close();
+                    if (inputStream != null) {
+                        inputStream.close();
+                    }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
