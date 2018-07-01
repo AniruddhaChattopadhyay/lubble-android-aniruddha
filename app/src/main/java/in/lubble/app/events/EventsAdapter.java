@@ -135,7 +135,7 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private void insertWithSort(EventData eventData, int pos) {
         final EventData prevEventData = eventDataList.get(pos - 1 < 0 ? 0 : pos - 1);
         if (prevEventData != null) {
-            if (eventData.getStartTimestamp() >= prevEventData.getStartTimestamp()) {
+            if (eventData.getStartTimestamp() >= prevEventData.getStartTimestamp() || pos == 0) {
                 eventDataList.add(pos, eventData);
             } else {
                 insertWithSort(eventData, --pos);
