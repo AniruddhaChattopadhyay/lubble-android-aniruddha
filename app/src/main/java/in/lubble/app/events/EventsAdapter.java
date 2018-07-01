@@ -122,13 +122,26 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         if (!eventDataList.contains(eventData)) {
             if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
                 // upcoming event
-                eventDataList.add(POS_DIV, eventData);
+                insertWithSort(eventData, POS_DIV);
                 POS_DIV++;
             } else {
                 // past event
                 eventDataList.add(POS_DIV + 1, eventData);
             }
             notifyDataSetChanged();
+        }
+    }
+
+    private void insertWithSort(EventData eventData, int pos) {
+        final EventData prevEventData = eventDataList.get(pos - 1 < 0 ? 0 : pos - 1);
+        if (prevEventData != null) {
+            if (eventData.getStartTimestamp() >= prevEventData.getStartTimestamp()) {
+                eventDataList.add(pos, eventData);
+            } else {
+                insertWithSort(eventData, --pos);
+            }
+        } else {
+            eventDataList.add(pos, eventData);
         }
     }
 
