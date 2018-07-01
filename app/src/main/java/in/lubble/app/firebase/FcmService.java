@@ -17,9 +17,9 @@ import com.google.gson.JsonElement;
 import java.util.Map;
 
 import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.notifications.AppNotifData;
+import in.lubble.app.models.AppNotifData;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
-import in.lubble.app.notifications.NotifData;
+import in.lubble.app.models.NotifData;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;

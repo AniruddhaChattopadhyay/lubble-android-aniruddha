@@ -190,9 +190,9 @@ public class ProfileFrag extends Fragment {
                 if (isValidString(profileData.getBio())) {
                     userBio.setText(profileData.getBio());
                 } else if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                    userBio.setText("Edit Profile to add a bio");
+                    userBio.setText(R.string.edit_profile_to_add_bio);
                 } else {
-                    userBio.setText("This user has no bio :(");
+                    userBio.setText(R.string.no_bio_text);
                 }
                 if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                     editProfileTV.setVisibility(View.VISIBLE);

@@ -107,8 +107,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (getActivity().getIntent().hasExtra(EXTRA_GROUP_ID_HIGHLIGHT)) {
 
             final ProgressDialog progressDialog = new ProgressDialog(getContext());
-            progressDialog.setTitle("Joining Group");
-            progressDialog.setMessage("Please check your internet connection");
+            progressDialog.setTitle(R.string.joining_group);
+            progressDialog.setMessage(getString(R.string.check_internet));
             progressDialog.show();
 
             final String groupId = getActivity().getIntent().getStringExtra(EXTRA_GROUP_ID_HIGHLIGHT);

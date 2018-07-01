@@ -49,12 +49,12 @@ public class MySpinnerAdapter extends ArrayAdapter<String> {
 
         if (position == 0) {
             holder.icon.setImageResource(R.drawable.ic_public_black_24dp);
-            holder.txt01.setText("Public Group");
-            holder.txt02.setText("Visible to everyone. Anyone can join");
+            holder.txt01.setText(R.string.public_group);
+            holder.txt02.setText(R.string.public_group_desc);
         } else {
             holder.icon.setImageResource(R.drawable.ic_lock_black_24dp);
-            holder.txt01.setText("Private Group");
-            holder.txt02.setText("Only invited people can join & see messages");
+            holder.txt01.setText(R.string.private_group);
+            holder.txt02.setText(R.string.private_group_desc);
         }
         return convertView;
     }

@@ -113,7 +113,7 @@ public class UserNameFrag extends Fragment {
                 blockSpinner.setVisibility(View.VISIBLE);
 
                 adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item);
-                adapter.add("Select Block");
+                adapter.add(getString(R.string.select_block));
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     adapter.add(child.getKey());
                 }
@@ -148,7 +148,7 @@ public class UserNameFrag extends Fragment {
                 if (isDataValid()) {
                     updateUserProfile();
                 } else {
-                    Snackbar.make(rootView, "Please enter all details", Snackbar.LENGTH_SHORT).show();
+                    Snackbar.make(rootView, getString(R.string.all_fill_details), Snackbar.LENGTH_SHORT).show();
                 }
             }
         });
@@ -191,7 +191,7 @@ public class UserNameFrag extends Fragment {
                 .build();
 
         final ProgressDialog progressDialog = new ProgressDialog(getContext());
-        progressDialog.setMessage("Updating");
+        progressDialog.setMessage(getString(R.string.all_updating));
         progressDialog.show();
 
         user.updateProfile(profileUpdates)
@@ -203,7 +203,7 @@ public class UserNameFrag extends Fragment {
                             Log.d(TAG, "User profile updated.");
                             openDpFrag();
                         } else {
-                            Toast.makeText(getContext(), "Try Again", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

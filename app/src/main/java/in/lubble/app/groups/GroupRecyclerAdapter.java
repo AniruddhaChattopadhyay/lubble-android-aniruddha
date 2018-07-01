@@ -100,7 +100,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             groupViewHolder.titleTv.setText(groupData.getTitle());
             if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
-                groupViewHolder.subtitleTv.setText("Invitation Pending");
+                groupViewHolder.subtitleTv.setText(R.string.invite_pending);
                 groupViewHolder.inviteIcon.setVisibility(View.VISIBLE);
             } else if (isValidString(groupData.getLastMessage())) {
                 groupViewHolder.subtitleTv.setText(groupData.getLastMessage());

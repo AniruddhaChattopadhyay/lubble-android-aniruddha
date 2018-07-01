@@ -1,4 +1,4 @@
-package in.lubble.app.notifications;
+package in.lubble.app.models;
 
 import com.google.gson.annotations.SerializedName;
 

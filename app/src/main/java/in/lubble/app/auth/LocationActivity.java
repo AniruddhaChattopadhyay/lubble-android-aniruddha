@@ -99,8 +99,8 @@ public class LocationActivity extends AppCompatActivity {
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
                 final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-                alertDialog.setMessage("We need your location to connect you with people nearby.\nWithout this permission, you cannot use Lubble");
-                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK", new DialogInterface.OnClickListener() {
+                alertDialog.setMessage(getString(R.string.loc_perm_rationale));
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         ActivityCompat.requestPermissions(LocationActivity.this,

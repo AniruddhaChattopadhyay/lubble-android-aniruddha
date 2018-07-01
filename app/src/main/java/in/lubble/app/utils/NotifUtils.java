@@ -29,7 +29,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
-import in.lubble.app.notifications.NotifData;
+import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;

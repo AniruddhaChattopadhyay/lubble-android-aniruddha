@@ -135,26 +135,26 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
         if (isMuted) {
             MutedChatsSharedPrefs.getInstance().getPreferences().edit().remove(groupId).apply();
             muteSwitch.setChecked(false);
-            Toast.makeText(this, "UN-MUTED", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.unmuted, Toast.LENGTH_SHORT).show();
         } else {
             MutedChatsSharedPrefs.getInstance().getPreferences().edit().putBoolean(groupId, true).apply();
             muteSwitch.setChecked(true);
-            Toast.makeText(this, "MUTED", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.muted, Toast.LENGTH_SHORT).show();
         }
     }
 
     private void showConfirmationDialog() {
         final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("Are you sure?");
-        alertDialog.setMessage("You will no longer be a part of this group");
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Leave Group", new DialogInterface.OnClickListener() {
+        alertDialog.setTitle(getString(R.string.all_are_you_sure));
+        alertDialog.setMessage(getString(R.string.leave_group_desc));
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.leave_group_title), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 alertDialog.dismiss();
                 leaveGroup();
             }
         });
-        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.all_cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 alertDialog.dismiss();
@@ -165,8 +165,8 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
 
     private void leaveGroup() {
         final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Leaving Group");
-        progressDialog.setMessage("Please Wait...");
+        progressDialog.setTitle(getString(R.string.leaving_group_title));
+        progressDialog.setMessage(getString(R.string.all_please_wait));
         progressDialog.show();
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(RealtimeDbHelper.getUserGroupPath() + "/" + groupId, null);
@@ -252,7 +252,7 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
             toggleMemberElements(groupData.isJoined());
 
             privacyIcon.setImageResource(groupData.getIsPrivate() ? R.drawable.ic_lock_black_24dp : R.drawable.ic_public_black_24dp);
-            privacyTv.setText(groupData.getIsPrivate() ? "Private Group" : "Public Group");
+            privacyTv.setText(groupData.getIsPrivate() ? getString(R.string.private_group) : getString(R.string.public_group));
         }
 
         @Override
@@ -303,7 +303,7 @@ public class ScrollingGroupInfoActivity extends AppCompatActivity {
             inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(ScrollingGroupInfoActivity.this, "Join the group to invite people", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ScrollingGroupInfoActivity.this, R.string.joing_group_to_invite, Toast.LENGTH_SHORT).show();
                 }
             });
         }

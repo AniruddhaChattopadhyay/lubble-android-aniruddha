@@ -102,7 +102,7 @@ public class NewGroupFragment extends Fragment {
             public void onClick(View v) {
 
                 progressDialog = new ProgressDialog(getContext());
-                progressDialog.setTitle("Creating New Group");
+                progressDialog.setTitle(getString(R.string.creating_new_group));
                 progressDialog.setMessage(getString(R.string.all_please_wait));
                 progressDialog.setCancelable(false);
                 progressDialog.show();
@@ -242,12 +242,12 @@ public class NewGroupFragment extends Fragment {
 
     @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
     void showDeniedForCamera() {
-        Toast.makeText(getContext(), "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), R.string.storage_perm_denied_text, Toast.LENGTH_SHORT).show();
     }
 
     @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
     void showNeverAskForCamera() {
-        Toast.makeText(getContext(), "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
 
 }

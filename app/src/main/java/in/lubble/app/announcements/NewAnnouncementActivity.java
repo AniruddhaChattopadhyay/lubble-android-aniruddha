@@ -26,7 +26,7 @@ public class NewAnnouncementActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("New Notice");
+        getSupportActionBar().setTitle(R.string.new_notice_title);
 
         replaceFrag(getSupportFragmentManager(), NewAnnouncementFragment.newInstance(), R.id.frame_fragContainer);
 

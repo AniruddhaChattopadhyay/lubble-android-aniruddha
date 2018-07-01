@@ -236,12 +236,12 @@ public class NewEventActivity extends AppCompatActivity {
                                 .setAction(UploadFileService.ACTION_UPLOAD));
                     }
 
-                    Toast.makeText(NewEventActivity.this, "Event Published", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NewEventActivity.this, R.string.event_published, Toast.LENGTH_SHORT).show();
                     finish();
 
                 } catch (ParseException e) {
                     e.printStackTrace();
-                    Toast.makeText(NewEventActivity.this, "Invalid date or time", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(NewEventActivity.this, R.string.invalid_date_time, Toast.LENGTH_SHORT).show();
                     Crashlytics.logException(e);
                 }
             }
@@ -271,47 +271,47 @@ public class NewEventActivity extends AppCompatActivity {
 
     private boolean isValidationPassed() {
         if (!isValidString(titleTil.getEditText().getText().toString())) {
-            titleTil.setError("Please enter event name");
+            titleTil.setError(getString(R.string.event_name_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             titleTil.setError(null);
         }
         if (!isValidString(descTil.getEditText().getText().toString())) {
-            descTil.setError("Please enter event description");
+            descTil.setError(getString(R.string.event_desc_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             descTil.setError(null);
         }
         if (!isValidString(organizerTil.getEditText().getText().toString())) {
-            organizerTil.setError("Please enter event organizer name");
+            organizerTil.setError(getString(R.string.event_organizer_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             organizerTil.setError(null);
         }
         if (!isValidString(dateTil.getEditText().getText().toString())) {
-            dateTil.setError("Please enter event date");
+            dateTil.setError(getString(R.string.event_date_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             dateTil.setError(null);
         }
         if (!isValidString(startTimeTil.getEditText().getText().toString())) {
-            startTimeTil.setError("Please enter event time");
+            startTimeTil.setError(getString(R.string.event_time_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             startTimeTil.setError(null);
         }
         if (place == null) {
-            Toast.makeText(this, "Please select place on map", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.event_map_error, Toast.LENGTH_SHORT).show();
             parentScrollView.smoothScrollTo(0, parentScrollView.getHeight());
             return false;
         }
         if (!isValidString(addressTil.getEditText().getText().toString())) {
-            addressTil.setError("Please enter event address");
+            addressTil.setError(getString(R.string.event_address_error));
             return false;
         } else {
             addressTil.setError(null);
@@ -563,12 +563,12 @@ public class NewEventActivity extends AppCompatActivity {
 
     @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
     void showDeniedForCamera() {
-        Toast.makeText(this, "Please grant permission to upload your photos", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.storage_perm_denied_text, Toast.LENGTH_SHORT).show();
     }
 
     @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
     void showNeverAskForCamera() {
-        Toast.makeText(this, "To enable permissions again, go to app settings of Lubble", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
 
 }

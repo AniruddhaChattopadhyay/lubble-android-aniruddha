@@ -137,8 +137,8 @@ public class EventInfoActivity extends AppCompatActivity {
         descTv = findViewById(R.id.tv_desc);
 
         progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Joining Group");
-        progressDialog.setMessage("Please Wait...");
+        progressDialog.setTitle(R.string.joining_group);
+        progressDialog.setMessage(getString(R.string.all_please_wait));
 
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
 
@@ -150,16 +150,16 @@ public class EventInfoActivity extends AppCompatActivity {
                 if (eventData != null && !checkEventAdmin()) {
                     if (oldResponse == EventData.GOING) {
                         new AlertDialog.Builder(EventInfoActivity.this)
-                                .setTitle("Not Going?")
-                                .setMessage("Are you sure you will not attend the event?")
-                                .setPositiveButton("Not Going", new DialogInterface.OnClickListener() {
+                                .setTitle(R.string.event_not_going_confirm_title)
+                                .setMessage(R.string.event_not_going_confirm_subtitle)
+                                .setPositiveButton(R.string.event_not_going, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         changeStatus(EventData.NO);
                                         dialog.dismiss();
                                     }
                                 })
-                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                .setNegativeButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         dialog.dismiss();
@@ -220,9 +220,9 @@ public class EventInfoActivity extends AppCompatActivity {
         isAdmin = memberMap != null && memberMap.get("isAdmin") != null && ((boolean) memberMap.get("isAdmin"));
         if (isAdmin) {
             new AlertDialog.Builder(EventInfoActivity.this)
-                    .setTitle("Hosts cannot leave event")
-                    .setMessage("You are hosting this event & cannot change your own status.")
-                    .setPositiveButton("Okay", new DialogInterface.OnClickListener() {
+                    .setTitle(R.string.event_host_leave_title)
+                    .setMessage(R.string.event_host_leave_subtitle)
+                    .setPositiveButton(R.string.all_ok, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
@@ -379,13 +379,13 @@ public class EventInfoActivity extends AppCompatActivity {
                     final String date = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "dd");
                     final String dayOfWeek = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "EEE");
                     final String startTime = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "h:mm a");
-                    String endTime = "onwards";
+                    String endTime = getString(R.string.event_time_onwards);
                     if (eventData.getEndTimestamp() > 0) {
                         endTime = "- " + DateTimeUtils.getTimeFromLong(eventData.getEndTimestamp(), "h:mm a");
                     }
                     monthTv.setText(month);
                     dateTv.setText(date);
-                    timeTv.setText(dayOfWeek + ", " + date + " " + monthFull + " from " + startTime + " " + endTime);
+                    timeTv.setText(String.format(getString(R.string.event_time_text), dayOfWeek, date, monthFull, startTime, endTime));
 
                     fetchLinkedGroupInfo(eventData.getGid());
 
@@ -402,7 +402,7 @@ public class EventInfoActivity extends AppCompatActivity {
                     if (goingCount > 5) {
                         statsIcon.setVisibility(View.VISIBLE);
                         statsTv.setVisibility(View.VISIBLE);
-                        statsTv.setText(goingCount + " going");
+                        statsTv.setText(String.format(getString(R.string.event_going_count), goingCount));
                     }
                     if (maybeCount > 3) {
                         statsIcon.setVisibility(View.VISIBLE);
@@ -412,8 +412,8 @@ public class EventInfoActivity extends AppCompatActivity {
                         if (StringUtils.isValidString(prefixText.toString())) {
                             suffixText = " · ";
                         }
-                        suffixText += maybeCount + " maybe";
-                        statsTv.setText(prefixText + suffixText);
+                        suffixText += String.format(getString(R.string.event_maybe_suffix), maybeCount);
+                        statsTv.setText(String.format(getString(R.string.event_maybe_count), prefixText, suffixText));
                     }
                     fetchIsLinkedGroupJoined(eventData.getGid());
                 }
@@ -469,7 +469,7 @@ public class EventInfoActivity extends AppCompatActivity {
                 if (dataSnapshot != null) {
                     final String title = dataSnapshot.getValue(String.class);
                     if (StringUtils.isValidString(title)) {
-                        linkedGroupTv.setText("Linked Group: " + title);
+                        linkedGroupTv.setText(String.format(getString(R.string.event_linked_group_hint), title));
                     }
                 }
             }
