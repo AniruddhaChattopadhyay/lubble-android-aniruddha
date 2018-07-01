@@ -87,7 +87,7 @@
             android:textColor="@color/white" />
 
         <LinearLayout
-            android:id="@+id/btn_open_group"
+            android:id="@+id/layout_open_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -111,7 +111,7 @@
 
         </LinearLayout>
 
-        <!--<Button
+        <Button
             android:id="@+id/btn_open_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -119,7 +119,7 @@
             android:paddingLeft="24dp"
             android:paddingRight="24dp"
             android:text="Open group"
-            android:theme="@style/TransparentButton" />-->
+            android:theme="@style/WhiteButton" />
 
     </LinearLayout>
 
@@ -131,7 +131,8 @@
         android:layout_marginBottom="1dp"
         android:background="@color/gold"
         android:gravity="center"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:visibility="gone">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -157,7 +158,8 @@
         android:gravity="center"
         android:orientation="vertical"
         android:paddingBottom="16dp"
-        android:paddingTop="8dp">
+        android:paddingTop="8dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="wrap_content"

@@ -55,7 +55,7 @@ public class EventGroupJoinedActivity extends AppCompatActivity {
     private TextView subtitleTv;
     private ImageView groupIcon;
     private TextView groupNameTv;
-    private LinearLayout openGroupBtn;
+    private Button openGroupBtn;
     private TextView finalGuestCountTv;
     private Button confirmGuestsBtn;
     private ElegantNumberButton guestCounter;
