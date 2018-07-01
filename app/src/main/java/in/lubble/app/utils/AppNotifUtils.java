@@ -17,11 +17,13 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.models.AppNotifData;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 
 import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.events.EventInfoActivity.KEY_EVENT_ID;
 import static in.lubble.app.utils.DateTimeUtils.getTimeBasedUniqueInt;
 
 /**
@@ -92,6 +94,11 @@ public class AppNotifUtils {
         } else if (appNotifData.getType().equalsIgnoreCase("events")) {
             Intent intent = new Intent(context, MainActivity.class);
             intent.putExtra(EXTRA_TAB_NAME, "events");
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            return stackBuilder.addNextIntentWithParentStack(intent);
+        } else if (appNotifData.getType().equalsIgnoreCase("new_event")) {
+            Intent intent = new Intent(context, EventInfoActivity.class);
+            intent.putExtra(KEY_EVENT_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else {

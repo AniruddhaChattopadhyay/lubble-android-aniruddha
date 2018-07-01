@@ -41,6 +41,7 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public EventsAdapter(Context context) {
         eventDataList = new ArrayList<>();
+        POS_DIV = 0;
         eventDataList.add(POS_DIV, null);
         this.context = context;
     }
@@ -118,15 +119,17 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     void addEvent(EventData eventData) {
-        if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
-            // upcoming event
-            eventDataList.add(POS_DIV, eventData);
-            POS_DIV++;
-        } else {
-            // past event
-            eventDataList.add(POS_DIV + 1, eventData);
+        if (!eventDataList.contains(eventData)) {
+            if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
+                // upcoming event
+                eventDataList.add(POS_DIV, eventData);
+                POS_DIV++;
+            } else {
+                // past event
+                eventDataList.add(POS_DIV + 1, eventData);
+            }
+            notifyDataSetChanged();
         }
-        notifyDataSetChanged();
     }
 
     public void clear() {

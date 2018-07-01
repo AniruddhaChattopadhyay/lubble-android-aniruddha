@@ -61,6 +61,7 @@ import java.util.Set;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
@@ -128,6 +129,7 @@ public class NewEventActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_event);
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         parentScrollView = findViewById(R.id.scrollview_parent);
         headerImage = findViewById(R.id.iv_event_image);

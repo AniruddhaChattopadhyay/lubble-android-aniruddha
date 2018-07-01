@@ -195,6 +195,9 @@ public class NewGroupFragment extends Fragment {
                 final Intent intent = new Intent(getContext(), ChatActivity.class);
                 intent.putExtra(EXTRA_GROUP_ID, pushId);
                 startActivity(intent);
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
             }
 
             @Override

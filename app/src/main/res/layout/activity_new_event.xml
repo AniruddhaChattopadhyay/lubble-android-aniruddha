@@ -10,7 +10,8 @@
         android:id="@+id/scrollview_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/btn_submit">
+        android:layout_above="@id/iv_info_hint"
+        android:layout_marginBottom="8dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -335,5 +336,25 @@
         android:layout_alignParentBottom="true"
         android:text="Submit"
         android:theme="@style/AccentButton" />
+
+    <TextView
+        android:id="@+id/tv_broadcast_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btn_submit"
+        android:layout_centerHorizontal="true"
+        android:text="Creating an event will notify &amp; invite all residents"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/iv_info_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/tv_broadcast_hint"
+        android:layout_alignTop="@id/tv_broadcast_hint"
+        android:layout_toLeftOf="@id/tv_broadcast_hint"
+        android:tint="@color/colorAccent"
+        app:srcCompat="@drawable/ic_info_black_24dp" />
 
 </RelativeLayout>

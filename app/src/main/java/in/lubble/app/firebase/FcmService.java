@@ -56,9 +56,10 @@ public class FcmService extends FirebaseMessagingService {
             } else if (StringUtils.isValidString(type) && (
                     "groupInvitation".equalsIgnoreCase(type))
                     || "notice".equalsIgnoreCase(type)
-                    || "referralJoined".equalsIgnoreCase(type)) {
-                // group invitation notif!
-                Log.d(TAG, "onMessageReceived: app type");
+                    || "referralJoined".equalsIgnoreCase(type)
+                    || "new_event".equalsIgnoreCase(type)
+                    || "events".equalsIgnoreCase(type)) {
+                Log.d(TAG, "onMessageReceived: type -> " + type);
                 Gson gson = new Gson();
                 JsonElement jsonElement = gson.toJsonTree(dataMap);
                 AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);

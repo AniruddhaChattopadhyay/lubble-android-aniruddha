@@ -28,6 +28,18 @@ public class EventData {
     private String address;
     private String gid;
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof EventData) {
+            EventData objectToCompare = (EventData) obj;
+            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
+                return true;
+            }
+            return false;
+        }
+        return super.equals(obj);
+    }
+
     public String getProfilePic() {
         return profilePic;
     }

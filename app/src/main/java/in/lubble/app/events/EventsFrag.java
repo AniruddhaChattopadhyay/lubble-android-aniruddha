@@ -69,6 +69,7 @@ public class EventsFrag extends Fragment {
             }
         }
 
+        adapter.clear();
         return view;
     }
 
@@ -78,7 +79,6 @@ public class EventsFrag extends Fragment {
 
         progressBar.setVisibility(View.VISIBLE);
 
-        adapter.clear();
         childEventListener = getEventsRef().orderByChild("startTimestamp").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {

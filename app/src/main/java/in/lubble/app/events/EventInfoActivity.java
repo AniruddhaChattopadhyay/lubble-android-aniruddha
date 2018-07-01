@@ -53,7 +53,7 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class EventInfoActivity extends AppCompatActivity {
 
-    private static final String KEY_EVENT_ID = "KEY_EVENT_ID";
+    public static final String KEY_EVENT_ID = "KEY_EVENT_ID";
 
     private String eventId;
     private DatabaseReference eventRef;
