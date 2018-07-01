@@ -122,4 +122,5 @@
     <string name="all_allow">Allow</string>
     <string name="all_deny">Deny</string>
     <string name="logging_out">Logging out…</string>
+    <string name="past_events">Past Events</string>
 </resources>

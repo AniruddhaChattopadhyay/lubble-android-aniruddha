@@ -32,67 +32,107 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private static final int TYPE_EVENT = 121;
+    private static final int TYPE_DIV = 365;
+
     private final List<EventData> eventDataList;
     private Context context;
+    private static int POS_DIV = 0;
 
     public EventsAdapter(Context context) {
         eventDataList = new ArrayList<>();
+        eventDataList.add(POS_DIV, null);
         this.context = context;
     }
 
     @Override
+    public int getItemViewType(int position) {
+        if (eventDataList.get(position) != null) {
+            return TYPE_EVENT;
+        } else {
+            return TYPE_DIV;
+        }
+    }
+
+    @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new SummerCampViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_event, parent, false));
+        if (viewType == TYPE_EVENT) {
+            return new EventViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_event, parent, false));
+        } else {
+            return new DividerViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_past_events_header, parent, false));
+        }
     }
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         final EventData eventData = eventDataList.get(position);
-        final SummerCampViewHolder viewHolder = (SummerCampViewHolder) holder;
+        if (eventData != null && holder instanceof EventViewHolder) {
+            final EventViewHolder viewHolder = (EventViewHolder) holder;
 
-        GlideApp.with(viewHolder.mView)
-                .load(eventData.getProfilePic())
-                .placeholder(R.drawable.ic_star_party)
-                .error(R.drawable.ic_star_party)
-                .transform(new RoundedCornersTransformation(dpToPx(8), 0))
-                .listener(new RequestListener<Drawable>() {
-                    @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        viewHolder.iconIv.setBackgroundColor(ContextCompat.getColor(context, R.color.dark_teal));
-                        viewHolder.iconIv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                        viewHolder.iconIv.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
-                        return false;
-                    }
+            GlideApp.with(viewHolder.mView)
+                    .load(eventData.getProfilePic())
+                    .placeholder(R.drawable.ic_star_party)
+                    .error(R.drawable.ic_star_party)
+                    .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            viewHolder.iconIv.setBackgroundColor(ContextCompat.getColor(context, R.color.dark_teal));
+                            viewHolder.iconIv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                            viewHolder.iconIv.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
+                            return false;
+                        }
 
-                    @Override
-                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        viewHolder.iconIv.setBackgroundColor(ContextCompat.getColor(context, R.color.black));
-                        viewHolder.iconIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                        viewHolder.iconIv.setPadding(0, 0, 0, 0);
-                        return false;
-                    }
-                })
-                .into(viewHolder.iconIv);
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            viewHolder.iconIv.setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+                            viewHolder.iconIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                            viewHolder.iconIv.setPadding(0, 0, 0, 0);
+                            return false;
+                        }
+                    })
+                    .into(viewHolder.iconIv);
 
-        if (StringUtils.isValidString(eventData.getOrganizer())) {
-            viewHolder.organizerTv.setVisibility(View.VISIBLE);
-            viewHolder.organizerTv.setText(eventData.getOrganizer());
+            if (StringUtils.isValidString(eventData.getOrganizer())) {
+                viewHolder.organizerTv.setVisibility(View.VISIBLE);
+                viewHolder.organizerTv.setText(eventData.getOrganizer());
+            } else {
+                viewHolder.organizerTv.setVisibility(View.GONE);
+            }
+            viewHolder.titleTv.setText(eventData.getTitle());
+
+            viewHolder.timeTv.setText(getTimeFromLong(eventData.getStartTimestamp(), EVENT_DATE_TIME));
+
+            if (position < POS_DIV) {
+                viewHolder.card.setAlpha(1f);
+            } else {
+                viewHolder.card.setAlpha(0.5f);
+            }
+
         } else {
-            viewHolder.organizerTv.setVisibility(View.GONE);
+            final DividerViewHolder viewHolder = (DividerViewHolder) holder;
+            viewHolder.titleTv.setText(R.string.past_events);
         }
-        viewHolder.titleTv.setText(eventData.getTitle());
-
-        viewHolder.timeTv.setText(getTimeFromLong(eventData.getStartTimestamp(), EVENT_DATE_TIME));
     }
 
     void addEvent(EventData eventData) {
-        eventDataList.add(eventData);
+        if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
+            // upcoming event
+            eventDataList.add(POS_DIV, eventData);
+            POS_DIV++;
+        } else {
+            // past event
+            eventDataList.add(POS_DIV + 1, eventData);
+        }
         notifyDataSetChanged();
     }
 
     public void clear() {
         eventDataList.clear();
+        POS_DIV = 0;
+        eventDataList.add(POS_DIV, null);
         notifyDataSetChanged();
     }
 
@@ -101,7 +141,7 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return eventDataList.size();
     }
 
-    class SummerCampViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View mView;
         final CardView card;
         final ImageView iconIv;
@@ -109,7 +149,7 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         final TextView titleTv;
         final TextView timeTv;
 
-        SummerCampViewHolder(View view) {
+        EventViewHolder(View view) {
             super(view);
             mView = view;
             card = view.findViewById(R.id.card_event);
@@ -123,6 +163,17 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         @Override
         public void onClick(View v) {
             EventInfoActivity.open(context, eventDataList.get(getAdapterPosition()).getId());
+        }
+    }
+
+    class DividerViewHolder extends RecyclerView.ViewHolder {
+        final View mView;
+        final TextView titleTv;
+
+        DividerViewHolder(View view) {
+            super(view);
+            mView = view;
+            titleTv = view.findViewById(R.id.tv_title);
         }
     }
 
