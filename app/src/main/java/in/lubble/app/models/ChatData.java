@@ -24,7 +24,7 @@ public class ChatData {
     private String message;
     private String imgUrl;
     private int lubbCount = 0;
-    private HashMap<String, Boolean> lubbers = new HashMap<>();
+    private HashMap<String, Long> lubbReceipts = new HashMap<>();
     private long createdTimestamp;
     private Object serverTimestamp;
     private HashMap<String, Long> deliveryReceipts = new HashMap<>();
@@ -79,12 +79,12 @@ public class ChatData {
         this.lubbCount = lubbCount;
     }
 
-    public HashMap<String, Boolean> getLubbers() {
-        return lubbers;
+    public HashMap<String, Long> getLubbReceipts() {
+        return lubbReceipts;
     }
 
-    public void setLubbers(HashMap<String, Boolean> lubbers) {
-        this.lubbers = lubbers;
+    public void setLubbReceipts(HashMap<String, Long> lubbReceipts) {
+        this.lubbReceipts = lubbReceipts;
     }
 
     public String getId() {

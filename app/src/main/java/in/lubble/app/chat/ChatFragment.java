@@ -42,7 +42,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.Constants;
@@ -210,7 +209,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         final ChatAdapter chatAdapter = new ChatAdapter(
                 getActivity(),
                 getContext(),
-                new ArrayList<ChatData>(),
+                groupId,
                 chatRecyclerView,
                 this,
                 GlideApp.with(getContext()));
