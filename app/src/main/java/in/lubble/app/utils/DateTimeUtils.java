@@ -20,6 +20,7 @@ public class DateTimeUtils {
     public static final String SERVER_DATE_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'";
     public static final String APP_SHORT_TIME = "h:mm a";
     public static final String APP_DATE_YEAR = "MMM dd, yyyy";
+    public static final String APP_DATE_NO_YEAR = "MMM dd";
     public static final String APP_NORMAL_DATE_YEAR = "dd MMM, yyyy";
     public static final String EVENT_DATE_TIME = "dd MMM, h:mm a";
     public static final long FAMILY_FUN_NIGHT_END_TIME = 1529753400000L;
@@ -56,9 +57,17 @@ public class DateTimeUtils {
 
     @NonNull
     public static String getDateFromLong(long timeInMillis) {
-        SimpleDateFormat sdf = new SimpleDateFormat(APP_DATE_YEAR);
         Date resultDate = new Date(timeInMillis);
-        return sdf.format(resultDate);
+        final Calendar calendar = Calendar.getInstance();
+        final Calendar currCalendar = Calendar.getInstance();
+        calendar.setTime(resultDate);
+        if (calendar.get(Calendar.YEAR) == currCalendar.get(Calendar.YEAR)) {
+            SimpleDateFormat sdf = new SimpleDateFormat(APP_DATE_NO_YEAR);
+            return sdf.format(resultDate);
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat(APP_DATE_YEAR);
+            return sdf.format(resultDate);
+        }
     }
 
     @NonNull
@@ -96,6 +105,27 @@ public class DateTimeUtils {
             return "Just now";
         }
         return humanTime;
+    }
+
+    @NonNull
+    /**
+     * return "3 mins ago" if time is < 5mins from curr time
+     *  otherwise returns readable date time
+     */
+    public static String getHumanTimestampWithTime(long time) {
+        if (System.currentTimeMillis() - time < 5 * DateUtils.MINUTE_IN_MILLIS) {
+            String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString();
+            if (humanTime.equalsIgnoreCase("0 min. ago")
+                    || humanTime.equalsIgnoreCase("0 mins ago")
+                    || humanTime.equalsIgnoreCase("In 0 min.")
+                    || humanTime.equalsIgnoreCase("In 0 mins")
+                    ) {
+                return "Just now";
+            }
+            return humanTime;
+        } else {
+            return getDateFromLong(time) + ", " + getTimeFromLong(time);
+        }
     }
 
 }

@@ -15,7 +15,7 @@ import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.MsgInfoData;
 
-import static in.lubble.app.utils.DateTimeUtils.getHumanTimestamp;
+import static in.lubble.app.utils.DateTimeUtils.getHumanTimestampWithTime;
 
 public class MsgReadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -46,7 +46,7 @@ public class MsgReadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 .circleCrop()
                 .into(viewHolder.dpIv);
         viewHolder.nameTv.setText(msgInfoData.getProfileInfo().getName());
-        viewHolder.timestampTv.setText(getHumanTimestamp(msgInfoData.getTimestamp()));
+        viewHolder.timestampTv.setText(getHumanTimestampWithTime(msgInfoData.getTimestamp()));
 
     }
 
