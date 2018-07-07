@@ -29,6 +29,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,6 +50,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
+import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.ChatData;
@@ -698,6 +700,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    public void openChatInfo(String chatId) {
+        if (chatId != null) {
+            startActivity(MsgInfoActivity.getIntent(getContext(), groupId, chatId));
+        } else {
+            Crashlytics.logException(new NullPointerException("chatId is null when trying to open msg info"));
+        }
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -730,5 +740,4 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     void showNeverAskForCamera() {
         Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
-
 }

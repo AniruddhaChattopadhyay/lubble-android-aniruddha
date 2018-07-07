@@ -492,6 +492,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                menu.findItem(R.id.action_info).setVisible(false);
                 return true;
             }
 
@@ -615,6 +616,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                menu.findItem(R.id.action_info).setVisible(true);
                 return true;
             }
 
@@ -634,6 +636,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         String message = chatDataList.get(getAdapterPosition()).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
+                        break;
+                    case R.id.action_info:
+                        Log.d(TAG, "onActionItemClicked: ");
+                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId());
                         break;
                 }
                 mode.finish();

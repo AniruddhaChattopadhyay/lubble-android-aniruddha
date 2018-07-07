@@ -173,6 +173,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.MainActivity" />
         </activity>
+        <activity
+            android:name=".chat.chat_info.MsgInfoActivity"
+            android:parentActivityName=".chat.ChatActivity"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="in.lubble.app.chat.ChatActivity" />
+        </activity>
     </application>
 
 </manifest>
