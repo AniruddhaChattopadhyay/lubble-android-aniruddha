@@ -20,6 +20,32 @@
         android:text="@string/liked_by"
         android:textColor="@color/colorAccent" />
 
+    <LinearLayout
+        android:id="@+id/linear_layout_no_likes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@color/white"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:tint="@color/default_text_color"
+            app:srcCompat="@drawable/ic_broken_heart" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:text="@string/no_likes" />
+
+    </LinearLayout>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_liked_msg_info"
         android:layout_width="match_parent"

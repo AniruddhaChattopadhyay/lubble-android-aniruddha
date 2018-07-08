@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -35,6 +36,7 @@ public class MsgInfoActivity extends AppCompatActivity {
     private static final String ARG_CHAT_ID = "ARG_CHAT_ID";
     private static final String ARG_SHOW_READ_RECEIPTS = "ARG_SHOW_READ_RECEIPTS";
 
+    private LinearLayout noLikesContainer;
     private TextView readByHeaderTv;
     private RecyclerView readRecyclerView;
     private RecyclerView lubbRecyclerView;
@@ -69,6 +71,7 @@ public class MsgInfoActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         readByHeaderTv = findViewById(R.id.tv_read_by_header);
+        noLikesContainer = findViewById(R.id.linear_layout_no_likes);
         readRecyclerView = findViewById(R.id.rv_msg_info);
         lubbRecyclerView = findViewById(R.id.rv_liked_msg_info);
 
@@ -147,8 +150,13 @@ public class MsgInfoActivity extends AppCompatActivity {
                 chatData = dataSnapshot.getValue(ChatData.class);
                 if (chatData != null) {
                     final HashMap<String, Long> lubbReceiptsMap = chatData.getLubbReceipts();
-                    for (String uid : lubbReceiptsMap.keySet()) {
-                        fetchAndAddProfileInfoToLubbReceipts(uid);
+                    if (lubbReceiptsMap.size() > 0) {
+                        noLikesContainer.setVisibility(View.GONE);
+                        for (String uid : lubbReceiptsMap.keySet()) {
+                            fetchAndAddProfileInfoToLubbReceipts(uid);
+                        }
+                    } else {
+                        noLikesContainer.setVisibility(View.VISIBLE);
                     }
                 }
             }
