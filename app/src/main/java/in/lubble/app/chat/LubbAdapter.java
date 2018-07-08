@@ -44,6 +44,11 @@ public class LubbAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     }
 
+    public void clear() {
+        dpUrlList.clear();
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return dpUrlList.size();

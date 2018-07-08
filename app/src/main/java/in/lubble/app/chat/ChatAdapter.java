@@ -265,6 +265,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         recvdChatViewHolder.lubbHeadsRv.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
 
         int i = 0;
+        ((LubbAdapter) recvdChatViewHolder.lubbHeadsRv.getAdapter()).clear();
         for (String uid : chatData.getLubbReceipts().keySet()) {
             if (i++ < 4) {
                 // show a max of 4 heads
