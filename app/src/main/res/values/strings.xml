@@ -130,4 +130,6 @@
     <string name="action_reply">Reply</string>
     <string name="action_copy">Copy</string>
     <string name="no_likes">No likes till now</string>
+    <string name="like">Like</string>
+    <string name="liked">Liked</string>
 </resources>

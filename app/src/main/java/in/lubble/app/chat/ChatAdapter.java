@@ -6,6 +6,8 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -509,6 +511,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView lubbCount;
         private LinearLayout lubbHeadsContainer;
         private ImageView dpIv;
+        private LinearLayout lubbPopOutContainer;
+        @Nullable
+        private ActionMode actionMode;
+        private ImageView lubbIv;
+        private TextView lubbHintTv;
 
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
@@ -527,6 +534,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
             lubbHeadsContainer = itemView.findViewById(R.id.linear_layout_lubb_heads);
             dpIv = itemView.findViewById(R.id.iv_dp);
+            lubbPopOutContainer = itemView.findViewById(R.id.linear_layout_lubb_pop);
+            lubbIv = itemView.findViewById(R.id.iv_lubb_icon);
+            lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
+
+            lubbPopOutContainer.setOnClickListener(this);
             lubbHeadsContainer.setOnClickListener(this);
             dpIv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
@@ -534,6 +546,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkContainer.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
             chatIv.setOnLongClickListener(this);
+
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -573,6 +586,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
+                lubbPopOutContainer.setVisibility(View.GONE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -585,6 +599,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
             switch (v.getId()) {
                 case R.id.iv_dp:
                     ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
+                    break;
+                case R.id.linear_layout_lubb_pop:
+                    toggleLubb(getAdapterPosition());
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
                     break;
                 case R.id.linearLayout_lubb_container:
                     toggleLubb(getAdapterPosition());
@@ -618,6 +638,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @Override
         public boolean onLongClick(View v) {
+            lubbPopOutContainer.setVisibility(View.VISIBLE);
+            toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
             itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
             if (highlightedPos != -1) {
                 // another item was highlighted, remove its highlight
@@ -625,7 +647,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
             highlightedPos = getAdapterPosition();
             selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+            actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
             return true;
         }
     }
@@ -644,7 +666,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private LinearLayout lubbHeadsContainer;
+        private LinearLayout lubbPopOutContainer;
         private TextView lubbCount;
+        @Nullable
+        private ActionMode actionMode;
+        private ImageView lubbIv;
+        private TextView lubbHintTv;
 
         SentChatViewHolder(final View itemView) {
             super(itemView);
@@ -661,9 +688,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
             lubbHeadsContainer = itemView.findViewById(R.id.linear_layout_lubb_heads);
+            lubbPopOutContainer = itemView.findViewById(R.id.linear_layout_lubb_pop);
+            lubbIv = itemView.findViewById(R.id.iv_lubb_icon);
+            lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
+
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             lubbHeadsContainer.setOnClickListener(this);
+            lubbPopOutContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
             chatIv.setOnLongClickListener(this);
             itemView.setOnLongClickListener(this);
@@ -704,6 +736,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
+                lubbPopOutContainer.setVisibility(View.GONE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -716,6 +749,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
             switch (v.getId()) {
                 case R.id.linearLayout_lubb_container:
                     toggleLubb(getAdapterPosition());
+                    break;
+                case R.id.linear_layout_lubb_pop:
+                    toggleLubb(getAdapterPosition());
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
                     break;
                 case R.id.link_meta_container:
                     ChatData chatData = chatDataList.get(getAdapterPosition());
@@ -746,6 +785,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @Override
         public boolean onLongClick(View v) {
+            lubbPopOutContainer.setVisibility(View.VISIBLE);
+            toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
             itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
             if (highlightedPos != -1) {
                 // another item was highlighted, remove its highlight
@@ -753,8 +794,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
             highlightedPos = getAdapterPosition();
             selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+            actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
             return true;
+        }
+    }
+
+    private void toggleLubbPopOutContainer(ImageView lubbIv, TextView lubbTv, boolean isLubbed) {
+        if (isLubbed) {
+            lubbIv.setImageResource(R.drawable.ic_favorite_24dp);
+            lubbIv.setColorFilter(null);
+            lubbTv.setText(R.string.liked);
+        } else {
+            lubbIv.setImageResource(R.drawable.ic_favorite_border_24dp);
+            lubbIv.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(context, R.color.bright_red), PorterDuff.Mode.SRC_IN));
+            lubbTv.setText(R.string.like);
         }
     }
 

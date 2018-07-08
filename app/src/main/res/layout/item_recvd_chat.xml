@@ -192,11 +192,43 @@
                     android:layout_marginLeft="4dp"
                     android:orientation="horizontal"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible" />
 
             </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_layout_lubb_pop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:layout_marginRight="18dp"
+        android:background="@drawable/like_pill_button_white"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:id="@+id/iv_lubb_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:tint="@color/bright_red"
+            app:srcCompat="@drawable/ic_favorite_border_24dp" />
+
+        <TextView
+            android:id="@+id/tv_lubb_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/like"
+            android:textColor="@color/black" />
+
+    </LinearLayout>
+
 </FrameLayout>
