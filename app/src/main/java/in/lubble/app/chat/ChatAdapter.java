@@ -198,6 +198,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData);
 
         sentChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+        sentChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
 
         int i = 0;
         sentChatViewHolder.lubbHeadsContainer.removeAllViews();
@@ -277,6 +278,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
         recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+        recvdChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
 
         int i = 0;
         recvdChatViewHolder.lubbHeadsContainer.removeAllViews();
@@ -490,7 +492,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 });
     }
 
-    public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private TextView authorNameTv;
         private TextView messageTv;
@@ -529,28 +531,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             dpIv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
-            chatIv.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    return false;
-                }
-            });
             linkContainer.setOnClickListener(this);
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-                    if (highlightedPos != -1) {
-                        // another item was highlighted, remove its highlight
-                        notifyItemChanged(highlightedPos);
-                    }
-                    highlightedPos = getAdapterPosition();
-                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-                    ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
-                    return true;
-                }
-            });
-
+            itemView.setOnLongClickListener(this);
+            chatIv.setOnLongClickListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -632,9 +615,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
             }
         }
+
+        @Override
+        public boolean onLongClick(View v) {
+            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+            if (highlightedPos != -1) {
+                // another item was highlighted, remove its highlight
+                notifyItemChanged(highlightedPos);
+            }
+            highlightedPos = getAdapterPosition();
+            selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+            ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+            return true;
+        }
     }
 
-    public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private TextView messageTv;
         private LinearLayout linkContainer;
@@ -669,20 +665,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer.setOnClickListener(this);
             lubbHeadsContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-                    if (highlightedPos != -1) {
-                        // another item was highlighted, remove its highlight
-                        notifyItemChanged(highlightedPos);
-                    }
-                    highlightedPos = getAdapterPosition();
-                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-                    ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
-                    return true;
-                }
-            });
+            chatIv.setOnLongClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -758,6 +742,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
                     break;
             }
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+            if (highlightedPos != -1) {
+                // another item was highlighted, remove its highlight
+                notifyItemChanged(highlightedPos);
+            }
+            highlightedPos = getAdapterPosition();
+            selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+            ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+            return true;
         }
     }
 
