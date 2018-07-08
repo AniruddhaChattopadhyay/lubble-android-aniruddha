@@ -196,6 +196,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData);
 
+        sentChatViewHolder.lubbHeadsRv.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+
+        int i = 0;
+        ((LubbAdapter) sentChatViewHolder.lubbHeadsRv.getAdapter()).clear();
+        for (String uid : chatData.getLubbReceipts().keySet()) {
+            if (i++ < 4) {
+                // show a max of 4 heads
+                // todo sort?
+                addLubbHead(uid, sentChatViewHolder.lubbHeadsRv);
+            } else {
+                break;
+            }
+        }
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -616,6 +629,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private MsgFlexBoxLayout textContainer;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
+        private RecyclerView lubbHeadsRv;
         private TextView lubbCount;
 
         SentChatViewHolder(final View itemView) {
@@ -632,9 +646,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
+            lubbHeadsRv = itemView.findViewById(R.id.rv_lubb_heads);
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
+            lubbHeadsRv.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
+            lubbHeadsRv.setAdapter(new LubbAdapter(GlideApp.with(context)));
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {

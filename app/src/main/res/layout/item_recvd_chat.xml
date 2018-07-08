@@ -20,10 +20,13 @@
             android:layout_marginTop="8dp"
             app:srcCompat="@drawable/ic_account_no_padding" />
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/frame_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:layout_margin="8dp"
+            android:layout_toRightOf="@id/iv_dp"
+            android:orientation="vertical">
 
             <LinearLayout
                 android:id="@+id/ll_box"
@@ -158,12 +161,13 @@
 
             </LinearLayout>
 
+
             <LinearLayout
                 android:id="@+id/linearLayout_lubb_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignRight="@id/ll_box"
-                android:layout_below="@id/ll_box"
+                android:layout_alignRight="@id/frame_msg"
+                android:layout_below="@id/frame_msg"
                 android:layout_marginTop="4dp"
                 android:gravity="left|center_vertical"
                 android:orientation="horizontal">
@@ -194,7 +198,7 @@
 
             </LinearLayout>
 
-        </RelativeLayout>
+        </LinearLayout>
 
     </LinearLayout>
 </FrameLayout>
