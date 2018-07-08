@@ -124,4 +124,6 @@
     <string name="logging_out">Logging out…</string>
     <string name="past_events">Past Events</string>
     <string name="read_by">Read By</string>
+    <string name="msg_info">Message Info</string>
+    <string name="liked_by">Liked By</string>
 </resources>

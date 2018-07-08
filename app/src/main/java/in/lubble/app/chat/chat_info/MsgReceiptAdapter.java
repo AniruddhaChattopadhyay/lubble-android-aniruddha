@@ -17,14 +17,14 @@ import in.lubble.app.models.MsgInfoData;
 
 import static in.lubble.app.utils.DateTimeUtils.getHumanTimestampWithTime;
 
-public class MsgReadAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class MsgReceiptAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final String TAG = "MsgReadAdapter";
+    private static final String TAG = "MsgReceiptAdapter";
 
     private final List<MsgInfoData> msgInfoList;
     private final GlideRequests glide;
 
-    public MsgReadAdapter(GlideRequests glide) {
+    public MsgReceiptAdapter(GlideRequests glide) {
         msgInfoList = new ArrayList<>();
         this.glide = glide;
     }

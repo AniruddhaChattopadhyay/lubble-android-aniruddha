@@ -31,10 +31,12 @@ public class MsgInfoActivity extends AppCompatActivity {
     private static final String ARG_GROUP_ID = "ARG_GROUP_ID";
     private static final String ARG_CHAT_ID = "ARG_CHAT_ID";
 
-    private RecyclerView recyclerView;
+    private RecyclerView readRecyclerView;
+    private RecyclerView lubbRecyclerView;
     private String groupId;
     private String chatId;
-    private MsgReadAdapter adapter;
+    private MsgReceiptAdapter readAdapter;
+    private MsgReceiptAdapter lubbAdapter;
     private ValueEventListener listener;
     private ChatData chatData;
 
@@ -52,15 +54,19 @@ public class MsgInfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_msg_info);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        setTitle("Message Info");
+        setTitle(getString(R.string.msg_info));
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        recyclerView = findViewById(R.id.rv_msg_info);
+        readRecyclerView = findViewById(R.id.rv_msg_info);
+        lubbRecyclerView = findViewById(R.id.rv_liked_msg_info);
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new MsgReadAdapter(GlideApp.with(this));
-        recyclerView.setAdapter(adapter);
+        readRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        lubbRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        readAdapter = new MsgReceiptAdapter(GlideApp.with(this));
+        lubbAdapter = new MsgReceiptAdapter(GlideApp.with(this));
+        readRecyclerView.setAdapter(readAdapter);
+        lubbRecyclerView.setAdapter(lubbAdapter);
 
         groupId = getIntent().getStringExtra(ARG_GROUP_ID);
         chatId = getIntent().getStringExtra(ARG_CHAT_ID);
@@ -71,6 +77,7 @@ public class MsgInfoActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         fetchReadReceipts();
+        fetchLubbReceipts();
     }
 
     private void fetchReadReceipts() {
@@ -81,7 +88,7 @@ public class MsgInfoActivity extends AppCompatActivity {
                 if (chatData != null) {
                     final HashMap<String, Long> readReceiptsMap = chatData.getReadReceipts();
                     for (String uid : readReceiptsMap.keySet()) {
-                        fetchProfileInfo(uid);
+                        fetchAndAddProfileInfoToReadReceipts(uid);
                     }
                 }
             }
@@ -93,7 +100,7 @@ public class MsgInfoActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchProfileInfo(String uid) {
+    private void fetchAndAddProfileInfoToReadReceipts(String uid) {
         getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -103,7 +110,48 @@ public class MsgInfoActivity extends AppCompatActivity {
                     final MsgInfoData msgInfoData = new MsgInfoData();
                     msgInfoData.setProfileInfo(profileInfo);
                     msgInfoData.setTimestamp(chatData.getReadReceipts().get(profileInfo.getId()));
-                    adapter.addData(msgInfoData);
+                    readAdapter.addData(msgInfoData);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void fetchLubbReceipts() {
+        listener = RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                chatData = dataSnapshot.getValue(ChatData.class);
+                if (chatData != null) {
+                    final HashMap<String, Long> lubbReceiptsMap = chatData.getLubbReceipts();
+                    for (String uid : lubbReceiptsMap.keySet()) {
+                        fetchAndAddProfileInfoToLubbReceipts(uid);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void fetchAndAddProfileInfoToLubbReceipts(String uid) {
+        getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                if (profileInfo != null) {
+                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                    final MsgInfoData msgInfoData = new MsgInfoData();
+                    msgInfoData.setProfileInfo(profileInfo);
+                    msgInfoData.setTimestamp(chatData.getReadReceipts().get(profileInfo.getId()));
+                    lubbAdapter.addData(msgInfoData);
                 }
             }
 
