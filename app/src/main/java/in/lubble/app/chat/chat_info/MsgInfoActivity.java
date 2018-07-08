@@ -4,11 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,21 +33,28 @@ public class MsgInfoActivity extends AppCompatActivity {
     private static final String TAG = "MsgInfoActivity";
     private static final String ARG_GROUP_ID = "ARG_GROUP_ID";
     private static final String ARG_CHAT_ID = "ARG_CHAT_ID";
+    private static final String ARG_SHOW_READ_RECEIPTS = "ARG_SHOW_READ_RECEIPTS";
 
+    private TextView readByHeaderTv;
     private RecyclerView readRecyclerView;
     private RecyclerView lubbRecyclerView;
     private String groupId;
     private String chatId;
     private MsgReceiptAdapter readAdapter;
     private MsgReceiptAdapter lubbAdapter;
-    private ValueEventListener listener;
+    @Nullable
+    private ValueEventListener readListener;
+    @Nullable
+    private ValueEventListener lubbListener;
     private ChatData chatData;
+    private boolean showReadReceipts;
 
     @NonNull
-    public static Intent getIntent(Context context, String groupId, String chatId) {
+    public static Intent getIntent(Context context, String groupId, String chatId, boolean showReadReceipts) {
         final Intent intent = new Intent(context, MsgInfoActivity.class);
         intent.putExtra(ARG_GROUP_ID, groupId);
         intent.putExtra(ARG_CHAT_ID, chatId);
+        intent.putExtra(ARG_SHOW_READ_RECEIPTS, showReadReceipts);
         return intent;
     }
 
@@ -58,6 +68,7 @@ public class MsgInfoActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        readByHeaderTv = findViewById(R.id.tv_read_by_header);
         readRecyclerView = findViewById(R.id.rv_msg_info);
         lubbRecyclerView = findViewById(R.id.rv_liked_msg_info);
 
@@ -70,18 +81,26 @@ public class MsgInfoActivity extends AppCompatActivity {
 
         groupId = getIntent().getStringExtra(ARG_GROUP_ID);
         chatId = getIntent().getStringExtra(ARG_CHAT_ID);
+        showReadReceipts = getIntent().getBooleanExtra(ARG_SHOW_READ_RECEIPTS, false);
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        fetchReadReceipts();
         fetchLubbReceipts();
+        if (showReadReceipts) {
+            readByHeaderTv.setVisibility(View.VISIBLE);
+            readRecyclerView.setVisibility(View.VISIBLE);
+            fetchReadReceipts();
+        } else {
+            readByHeaderTv.setVisibility(View.GONE);
+            readRecyclerView.setVisibility(View.GONE);
+        }
     }
 
     private void fetchReadReceipts() {
-        listener = RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).addValueEventListener(new ValueEventListener() {
+        readListener = RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 chatData = dataSnapshot.getValue(ChatData.class);
@@ -122,7 +141,7 @@ public class MsgInfoActivity extends AppCompatActivity {
     }
 
     private void fetchLubbReceipts() {
-        listener = RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).addValueEventListener(new ValueEventListener() {
+        lubbListener = RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 chatData = dataSnapshot.getValue(ChatData.class);
@@ -176,6 +195,11 @@ public class MsgInfoActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).removeEventListener(listener);
+        if (lubbListener != null) {
+            RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).removeEventListener(lubbListener);
+        }
+        if (readListener != null) {
+            RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).removeEventListener(readListener);
+        }
     }
 }

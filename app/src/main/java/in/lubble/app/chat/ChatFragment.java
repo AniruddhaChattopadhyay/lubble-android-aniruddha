@@ -699,9 +699,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void openChatInfo(String chatId) {
+    public void openChatInfo(String chatId, boolean showReadReceipts) {
         if (chatId != null) {
-            startActivity(MsgInfoActivity.getIntent(getContext(), groupId, chatId));
+            startActivity(MsgInfoActivity.getIntent(getContext(), groupId, chatId, showReadReceipts));
         } else {
             Crashlytics.logException(new NullPointerException("chatId is null when trying to open msg info"));
         }

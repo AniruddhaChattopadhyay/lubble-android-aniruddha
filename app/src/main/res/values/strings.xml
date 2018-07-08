@@ -126,4 +126,7 @@
     <string name="read_by">Read By</string>
     <string name="msg_info">Message Info</string>
     <string name="liked_by">Liked By</string>
+    <string name="action_info">Info</string>
+    <string name="action_reply">Reply</string>
+    <string name="action_copy">Copy</string>
 </resources>

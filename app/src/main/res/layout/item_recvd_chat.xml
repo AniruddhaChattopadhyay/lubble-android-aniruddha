@@ -164,7 +164,7 @@
 
             <LinearLayout
                 android:id="@+id/linearLayout_lubb_container"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignRight="@id/frame_msg"
                 android:layout_below="@id/frame_msg"
@@ -185,16 +185,14 @@
                     android:layout_marginLeft="2dp"
                     tools:text="3" />
 
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/rv_lubb_heads"
+                <LinearLayout
+                    android:id="@+id/linear_layout_lubb_heads"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="4dp"
                     android:orientation="horizontal"
                     android:visibility="gone"
-                    app:layoutManager="android.support.v7.widget.LinearLayoutManager"
-                    tools:listItem="@layout/item_lubb_head"
-                    tools:visibility="visible" />
+                    tools:visibility="visible"/>
 
             </LinearLayout>
 

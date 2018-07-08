@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.style.URLSpan;
 import android.util.Log;
@@ -26,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.load.DataSource;
@@ -61,6 +61,7 @@ import static in.lubble.app.models.ChatData.REPLY;
 import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
 /**
  * Created by ishaan on 21/1/18.
@@ -196,15 +197,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData);
 
-        sentChatViewHolder.lubbHeadsRv.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+        sentChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
 
         int i = 0;
-        ((LubbAdapter) sentChatViewHolder.lubbHeadsRv.getAdapter()).clear();
+        sentChatViewHolder.lubbHeadsContainer.removeAllViews();
         for (String uid : chatData.getLubbReceipts().keySet()) {
             if (i++ < 4) {
                 // show a max of 4 heads
                 // todo sort?
-                addLubbHead(uid, sentChatViewHolder.lubbHeadsRv);
+                addLubbHead(uid, sentChatViewHolder.lubbHeadsContainer);
             } else {
                 break;
             }
@@ -275,22 +276,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
-        recvdChatViewHolder.lubbHeadsRv.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+        recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
 
         int i = 0;
-        ((LubbAdapter) recvdChatViewHolder.lubbHeadsRv.getAdapter()).clear();
+        recvdChatViewHolder.lubbHeadsContainer.removeAllViews();
         for (String uid : chatData.getLubbReceipts().keySet()) {
             if (i++ < 4) {
                 // show a max of 4 heads
                 // todo sort?
-                addLubbHead(uid, recvdChatViewHolder.lubbHeadsRv);
+                addLubbHead(uid, recvdChatViewHolder.lubbHeadsContainer);
             } else {
                 break;
             }
         }
     }
 
-    private void addLubbHead(String uid, final RecyclerView lubbHeadsRv) {
+    private void addLubbHead(String uid, final LinearLayout lubbHeadsContainer) {
         // single as its very difficult otherwise to keep track of all listeners for every user
         // plus we don't really need realtime updation of user DP and/or name in chat
         getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -298,7 +299,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
                 if (map != null) {
-                    ((LubbAdapter) lubbHeadsRv.getAdapter()).addData(map.get("thumbnail"));
+                    final ImageView lubbHeadIv = new ImageView(context);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
+                    lubbHeadIv.setLayoutParams(lp);
+                    GlideApp.with(context).load(map.get("thumbnail"))
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .circleCrop()
+                            .into(lubbHeadIv);
+                    lubbHeadsContainer.addView(lubbHeadIv);
                 }
             }
 
@@ -497,7 +505,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
-        private RecyclerView lubbHeadsRv;
+        private LinearLayout lubbHeadsContainer;
         private ImageView dpIv;
 
         public RecvdChatViewHolder(final View itemView) {
@@ -515,14 +523,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
-            lubbHeadsRv = itemView.findViewById(R.id.rv_lubb_heads);
+            lubbHeadsContainer = itemView.findViewById(R.id.linear_layout_lubb_heads);
             dpIv = itemView.findViewById(R.id.iv_dp);
+            lubbHeadsContainer.setOnClickListener(this);
             dpIv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
+            chatIv.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    return false;
+                }
+            });
             linkContainer.setOnClickListener(this);
-            lubbHeadsRv.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
-            lubbHeadsRv.setAdapter(new LubbAdapter(GlideApp.with(context)));
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -544,7 +557,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
-                menu.findItem(R.id.action_info).setVisible(false);
                 return true;
             }
 
@@ -566,6 +578,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         String message = chatDataList.get(getAdapterPosition()).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
+                        break;
+                    case R.id.action_info:
+                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), false);
                         break;
                 }
                 mode.finish();
@@ -612,6 +627,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
                     }
                     break;
+                case R.id.linear_layout_lubb_heads:
+                    chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), false);
+                    break;
             }
         }
     }
@@ -629,7 +647,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private MsgFlexBoxLayout textContainer;
         private LinearLayout lubbContainer;
         private ImageView lubbIcon;
-        private RecyclerView lubbHeadsRv;
+        private LinearLayout lubbHeadsContainer;
         private TextView lubbCount;
 
         SentChatViewHolder(final View itemView) {
@@ -646,12 +664,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
-            lubbHeadsRv = itemView.findViewById(R.id.rv_lubb_heads);
+            lubbHeadsContainer = itemView.findViewById(R.id.linear_layout_lubb_heads);
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
+            lubbHeadsContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
-            lubbHeadsRv.setLayoutManager(new LinearLayoutManager(context, RecyclerView.HORIZONTAL, false));
-            lubbHeadsRv.setAdapter(new LubbAdapter(GlideApp.with(context)));
             itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
@@ -672,7 +689,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
-                menu.findItem(R.id.action_info).setVisible(true);
                 return true;
             }
 
@@ -694,8 +710,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         clipboard.setPrimaryClip(clip);
                         break;
                     case R.id.action_info:
-                        Log.d(TAG, "onActionItemClicked: ");
-                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId());
+                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
                         break;
                 }
                 mode.finish();
@@ -738,6 +753,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             notifyItemChanged(pos);
                         }
                     }
+                    break;
+                case R.id.linear_layout_lubb_heads:
+                    chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
                     break;
             }
         }

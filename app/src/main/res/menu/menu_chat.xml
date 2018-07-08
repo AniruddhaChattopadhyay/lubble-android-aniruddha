@@ -5,20 +5,19 @@
     <item
         android:id="@+id/action_info"
         android:icon="@drawable/ic_info_black_24dp"
-        android:title="Info"
-        android:visible="false"
+        android:title="@string/action_info"
         app:showAsAction="always"
         tools:visible="true" />
 
     <item
         android:id="@+id/action_reply"
         android:icon="@drawable/ic_reply_black_24dp"
-        android:title="Reply"
+        android:title="@string/action_reply"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_copy"
         android:icon="@drawable/ic_content_copy_black_24dp"
-        android:title="Copy"
+        android:title="@string/action_copy"
         app:showAsAction="always" />
 </menu>
