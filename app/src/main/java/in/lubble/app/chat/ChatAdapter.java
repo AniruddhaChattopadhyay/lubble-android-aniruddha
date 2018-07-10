@@ -10,6 +10,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -87,6 +88,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private String groupId;
     private int highlightedPos = -1;
     private int posToFlash = -1;
+    private boolean shownLubbHintForLastMsg;
 
     public ChatAdapter(Activity activity, Context context, String groupId,
                        RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
@@ -279,8 +281,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
-        recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
         recvdChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+        recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+
+        showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
 
         int i = 0;
         recvdChatViewHolder.lubbHeadsContainer.removeAllViews();
@@ -292,6 +296,28 @@ public class ChatAdapter extends RecyclerView.Adapter {
             } else {
                 break;
             }
+        }
+    }
+
+    private void showLubbHintIfLastMsg(int position, final ChatData chatData, final RecvdChatViewHolder recvdChatViewHolder) {
+        if (position == chatDataList.size() - 1 && !shownLubbHintForLastMsg) {
+            recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.VISIBLE);
+            recvdChatViewHolder.lubbContainer.setVisibility(View.GONE);
+            shownLubbHintForLastMsg = true;
+            if (chatData.getLubbCount() > 0) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (chatFragment != null && chatFragment.isAdded() && chatFragment.isVisible()) {
+                            recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
+                            recvdChatViewHolder.lubbContainer.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }, 2000);
+            }
+        } else {
+            recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
+            recvdChatViewHolder.lubbContainer.setVisibility(View.VISIBLE);
         }
     }
 
@@ -507,6 +533,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView dateTv;
         private MsgFlexBoxLayout textContainer;
         private LinearLayout lubbContainer;
+        private LinearLayout lubbLastHintContainer;
+        private TextView lubbAnyHintTv;
         private ImageView lubbIcon;
         private TextView lubbCount;
         private LinearLayout lubbHeadsContainer;
@@ -530,6 +558,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             dateTv = itemView.findViewById(R.id.tv_date);
             textContainer = itemView.findViewById(R.id.msgFlexBox_text);
             lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
+            lubbLastHintContainer = itemView.findViewById(R.id.linearLayout_lubb_hint_container);
+            lubbAnyHintTv = itemView.findViewById(R.id.tv_any_lubb_hint);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
             lubbHeadsContainer = itemView.findViewById(R.id.linear_layout_lubb_heads);
@@ -537,6 +567,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbPopOutContainer = itemView.findViewById(R.id.linear_layout_lubb_pop);
             lubbIv = itemView.findViewById(R.id.iv_lubb_icon);
             lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
+
+            lubbAnyHintTv.setSelected(true);
+            lubbAnyHintTv.setHorizontallyScrolling(true);
 
             lubbPopOutContainer.setOnClickListener(this);
             lubbHeadsContainer.setOnClickListener(this);

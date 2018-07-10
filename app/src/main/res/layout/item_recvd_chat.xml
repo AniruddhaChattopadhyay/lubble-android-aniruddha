@@ -196,6 +196,39 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/linearLayout_lubb_hint_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="left|center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:id="@+id/iv_lubb_hint"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    app:srcCompat="@drawable/ic_favorite_border_24dp" />
+
+                <TextView
+                    android:id="@+id/tv_any_lubb_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="2dp"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:freezesText="true"
+                    android:marqueeRepeatLimit="1"
+                    android:orientation="horizontal"
+                    android:singleLine="true"
+                    android:text="@string/like_any_msg_hint"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </LinearLayout>
