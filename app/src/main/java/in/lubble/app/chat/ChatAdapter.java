@@ -281,10 +281,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
+        handleLubbs(recvdChatViewHolder, chatData);
+        showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
+    }
+
+    private void handleLubbs(RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
         recvdChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
         recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
 
-        showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
 
         int i = 0;
         recvdChatViewHolder.lubbHeadsContainer.removeAllViews();
@@ -317,7 +321,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         } else {
             recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
-            recvdChatViewHolder.lubbContainer.setVisibility(View.VISIBLE);
+            handleLubbs(recvdChatViewHolder, chatData);
         }
     }
 
