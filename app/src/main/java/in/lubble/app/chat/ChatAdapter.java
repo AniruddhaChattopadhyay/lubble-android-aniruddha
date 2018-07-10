@@ -638,9 +638,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.linear_layout_lubb_pop:
                     toggleLubb(getAdapterPosition());
-                    if (actionMode != null) {
-                        actionMode.finish();
-                    }
                     break;
                 case R.id.linearLayout_lubb_container:
                     toggleLubb(getAdapterPosition());
@@ -669,6 +666,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 case R.id.linear_layout_lubb_heads:
                     chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), false);
                     break;
+            }
+            if (actionMode != null) {
+                actionMode.finish();
             }
         }
 
@@ -788,9 +788,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.linear_layout_lubb_pop:
                     toggleLubb(getAdapterPosition());
-                    if (actionMode != null) {
-                        actionMode.finish();
-                    }
                     break;
                 case R.id.link_meta_container:
                     ChatData chatData = chatDataList.get(getAdapterPosition());
@@ -816,6 +813,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 case R.id.linear_layout_lubb_heads:
                     chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
                     break;
+            }
+            if (actionMode != null) {
+                actionMode.finish();
             }
         }
 
