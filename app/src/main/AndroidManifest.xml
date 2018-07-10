@@ -181,6 +181,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.chat.ChatActivity" />
         </activity>
+        <activity android:name=".marketplace.MarketplaceActivity"></activity>
     </application>
 
 </manifest>
