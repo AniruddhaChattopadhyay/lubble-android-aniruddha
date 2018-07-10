@@ -281,7 +281,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
-        handleLubbs(recvdChatViewHolder, chatData);
         showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
     }
 
@@ -314,7 +313,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     public void run() {
                         if (chatFragment != null && chatFragment.isAdded() && chatFragment.isVisible()) {
                             recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
-                            recvdChatViewHolder.lubbContainer.setVisibility(View.VISIBLE);
+                            handleLubbs(recvdChatViewHolder, chatData);
                         }
                     }
                 }, 2000);
