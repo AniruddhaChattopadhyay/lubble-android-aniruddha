@@ -96,6 +96,11 @@ public class AppNotifUtils {
             intent.putExtra(EXTRA_TAB_NAME, "events");
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
+        } else if (appNotifData.getType().equalsIgnoreCase("marketplace")) {
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.putExtra(EXTRA_TAB_NAME, "marketplace");
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("new_event")) {
             Intent intent = new Intent(context, EventInfoActivity.class);
             intent.putExtra(KEY_EVENT_ID, appNotifData.getNotifKey());

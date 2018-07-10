@@ -39,6 +39,7 @@ import in.lubble.app.events.EventsFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
+import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
@@ -192,6 +193,9 @@ public class MainActivity extends AppCompatActivity {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
                 case "events":
                     bottomNavigation.setSelectedItemId(R.id.navigation_events);
+                    break;
+                case "marketplace":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_mplace);
                     break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
@@ -356,6 +360,9 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
                     switchFrag(GroupListFragment.newInstance());
+                    return true;
+                case R.id.navigation_mplace:
+                    switchFrag(MarketplaceFrag.newInstance());
                     return true;
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
