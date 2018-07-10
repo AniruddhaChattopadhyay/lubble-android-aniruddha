@@ -2,13 +2,13 @@ package in.lubble.app.marketplace;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -47,8 +47,8 @@ public class MarketplaceFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_marketplace, container, false);
 
-        CardView cat1cv = view.findViewById(R.id.layout_cat1);
-        CardView cat2cv = view.findViewById(R.id.layout_cat2);
+        RelativeLayout cat1cv = view.findViewById(R.id.layout_cat1);
+        RelativeLayout cat2cv = view.findViewById(R.id.layout_cat2);
 
         RecyclerView allItemsRv = view.findViewById(R.id.rv_all_items);
         allItemsRv.setNestedScrollingEnabled(false);
