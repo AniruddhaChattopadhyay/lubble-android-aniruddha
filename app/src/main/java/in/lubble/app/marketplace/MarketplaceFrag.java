@@ -5,21 +5,35 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.models.marketplace.Category;
+import in.lubble.app.models.marketplace.Item;
+import in.lubble.app.models.marketplace.MarketplaceData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MarketplaceFrag extends Fragment {
 
+    private static final String TAG = "MarketplaceFrag";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private String mParam1;
-    private String mParam2;
+    private TextView cat1Name;
+    private TextView cat2Name;
+    private RecyclerView allItemsRv;
+    private RecyclerView category1Rv;
+    private RecyclerView category2Rv;
 
     public MarketplaceFrag() {
         // Required empty public constructor
@@ -50,38 +64,64 @@ public class MarketplaceFrag extends Fragment {
         RelativeLayout cat1cv = view.findViewById(R.id.layout_cat1);
         RelativeLayout cat2cv = view.findViewById(R.id.layout_cat2);
 
-        RecyclerView allItemsRv = view.findViewById(R.id.rv_all_items);
+        cat1Name = cat1cv.findViewById(R.id.tv_category);
+        cat2Name = cat2cv.findViewById(R.id.tv_category);
+        allItemsRv = view.findViewById(R.id.rv_all_items);
         allItemsRv.setNestedScrollingEnabled(false);
-        RecyclerView category1Rv = cat1cv.findViewById(R.id.rv_cat_items);
+
+        category1Rv = cat1cv.findViewById(R.id.rv_cat_items);
         category1Rv.setNestedScrollingEnabled(false);
-        RecyclerView category2Rv = cat2cv.findViewById(R.id.rv_cat_items);
+        category2Rv = cat2cv.findViewById(R.id.rv_cat_items);
         category2Rv.setNestedScrollingEnabled(false);
 
         category1Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        category2Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        allItemsRv.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
         final SmallItemAdapter cat1Adapter = new SmallItemAdapter(GlideApp.with(getContext()));
-        cat1Adapter.addData("1");
-        cat1Adapter.addData("2");
-        cat1Adapter.addData("3");
-        cat1Adapter.addData("4");
         category1Rv.setAdapter(cat1Adapter);
 
-        category2Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         final SmallItemAdapter cat2Adapter = new SmallItemAdapter(GlideApp.with(getContext()));
-        cat2Adapter.addData("1");
-        cat2Adapter.addData("2");
-        cat2Adapter.addData("3");
-        cat2Adapter.addData("4");
         category2Rv.setAdapter(cat2Adapter);
 
-        allItemsRv.setLayoutManager(new GridLayoutManager(getContext(), 2));
         final BigItemAdapter allItemsAdapter = new BigItemAdapter(GlideApp.with(getContext()));
-        allItemsAdapter.addData("1");
-        allItemsAdapter.addData("2");
-        allItemsAdapter.addData("3");
-        allItemsAdapter.addData("4");
         allItemsRv.setAdapter(allItemsAdapter);
 
+        fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter);
+
         return view;
+    }
+
+    private void fetchMarketplaceData(final SmallItemAdapter cat1Adapter, final SmallItemAdapter cat2Adapter, final BigItemAdapter allItemsAdapter) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchMarketplaceData().enqueue(new Callback<MarketplaceData>() {
+            @Override
+            public void onResponse(Call<MarketplaceData> call, Response<MarketplaceData> response) {
+                final MarketplaceData marketplaceData = response.body();
+
+                final Category category1 = marketplaceData.getCategories().get(0);
+                cat1Name.setText(category1.getName());
+                for (Item item : category1.getItems()) {
+                    cat1Adapter.addData(item);
+                }
+
+                final Category category2 = marketplaceData.getCategories().get(1);
+                cat2Name.setText(category2.getName());
+                for (Item item : category2.getItems()) {
+                    cat2Adapter.addData(item);
+                }
+
+                for (Item item : marketplaceData.getItems()) {
+                    allItemsAdapter.addData(item);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<MarketplaceData> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+            }
+        });
     }
 
 }

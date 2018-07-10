@@ -13,17 +13,18 @@ import java.util.List;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
+import in.lubble.app.models.marketplace.Item;
 
 public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 
     private static final String TAG = "MsgReceiptAdapter";
 
-    private final List<String> msgInfoList;
+    private final List<Item> itemList;
     private final GlideRequests glide;
 
     public BigItemAdapter(GlideRequests glide) {
-        msgInfoList = new ArrayList<>();
+        itemList = new ArrayList<>();
         this.glide = glide;
     }
 
@@ -38,19 +39,21 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
         final BigItemAdapter.ViewHolder viewHolder = (BigItemAdapter.ViewHolder) holder;
+        final Item item = itemList.get(position);
+
         viewHolder.itemIv.setImageResource(R.drawable.blue_circle);
-        viewHolder.nameTv.setText(msgInfoList.get(position));
-        viewHolder.priceTv.setText(msgInfoList.get(position));
+        viewHolder.nameTv.setText(item.getName());
+        viewHolder.priceTv.setText("₹ " + item.getSellingPrice());
 
     }
 
     @Override
     public int getItemCount() {
-        return msgInfoList.size();
+        return itemList.size();
     }
 
-    public void addData(String str) {
-        msgInfoList.add(str);
+    public void addData(Item item) {
+        itemList.add(item);
         notifyDataSetChanged();
     }
 

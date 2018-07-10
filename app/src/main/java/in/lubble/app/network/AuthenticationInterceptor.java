@@ -1,5 +1,7 @@
 package in.lubble.app.network;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.io.IOException;
 
 import okhttp3.Interceptor;
@@ -19,6 +21,7 @@ public class AuthenticationInterceptor implements Interceptor {
         Request original = chain.request();
 
         Request.Builder builder = original.newBuilder()
+                .header("uid", FirebaseAuth.getInstance().getUid())
                 .header("Token", authToken);
 
         Request request = builder.build();

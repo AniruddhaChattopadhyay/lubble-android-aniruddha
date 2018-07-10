@@ -1,7 +1,8 @@
 package in.lubble.app.network;
 
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -10,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServiceGenerator {
 
-    private static final String BASE_URL = "https://api.lubble.in/";
+    private static final String BASE_URL = "http://api.lubble.in/";
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
@@ -26,8 +27,9 @@ public class ServiceGenerator {
     private static OkHttpClient.Builder httpClient =
             new OkHttpClient.Builder();
 
-    public static <S> S createService(Class<S> serviceClass, @NonNull final String authToken) {
+    public static <S> S createService(Class<S> serviceClass) {
 
+        final String authToken = FirebaseAuth.getInstance().getAccessToken(false).getResult().getToken();
         if (!TextUtils.isEmpty(authToken)) {
             AuthenticationInterceptor interceptor =
                     new AuthenticationInterceptor(authToken);
