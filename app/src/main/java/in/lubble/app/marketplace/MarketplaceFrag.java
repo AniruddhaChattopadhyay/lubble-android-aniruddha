@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -34,6 +35,7 @@ public class MarketplaceFrag extends Fragment {
     private RecyclerView allItemsRv;
     private RecyclerView category1Rv;
     private RecyclerView category2Rv;
+    private LinearLayout newItemContainer;
 
     public MarketplaceFrag() {
         // Required empty public constructor
@@ -67,6 +69,7 @@ public class MarketplaceFrag extends Fragment {
         cat1Name = cat1cv.findViewById(R.id.tv_category);
         cat2Name = cat2cv.findViewById(R.id.tv_category);
         allItemsRv = view.findViewById(R.id.rv_all_items);
+        newItemContainer = view.findViewById(R.id.new_item_container);
         allItemsRv.setNestedScrollingEnabled(false);
 
         category1Rv = cat1cv.findViewById(R.id.rv_cat_items);

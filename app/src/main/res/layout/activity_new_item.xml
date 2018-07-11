@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <ScrollView
+        android:id="@+id/scrollview_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/iv_info_hint"
+        android:layout_marginBottom="8dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_event_image"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/event_img_height"
+                android:background="#395359"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/ic_star_party" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/iv_event_image"
+                android:layout_alignTop="@id/tv_change_pic"
+                android:layout_toLeftOf="@id/tv_change_pic"
+                android:background="@color/white"
+                android:paddingLeft="4dp"
+                app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+            <TextView
+                android:id="@+id/tv_change_pic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/iv_event_image"
+                android:layout_alignRight="@id/iv_event_image"
+                android:background="@color/white"
+                android:padding="4dp"
+                android:text="CHANGE PICTURE" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/iv_event_image"
+                android:layout_margin="8dp">
+
+                <TextView
+                    android:id="@+id/tv_type_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="What are you selling?" />
+
+                <RadioGroup
+                    android:id="@+id/radio_group_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_type_hint"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="Product" />
+
+                    <RadioButton
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:text="Service" />
+
+                </RadioGroup>
+
+                <ImageView
+                    android:id="@+id/iv_event_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/til_event_name"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_event_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/radio_group_type"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@id/iv_event_name"
+                    android:hint="Item Name">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords"
+                        android:maxLines="1" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/iv_event_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/til_event_desc"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_format_align_left_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_event_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_event_name"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@id/iv_event_desc"
+                    android:hint="About the item">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignBottom="@id/til_event_organizer"
+                    android:layout_marginBottom="10dp"
+                    app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_event_organizer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_event_desc"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@id/iv_event_desc"
+                    android:hint="MRP">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/iv_event_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/til_event_date"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_event_black_24dp" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_event_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_event_organizer"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@id/iv_event_date"
+                    android:hint="Selling Price">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:focusableInTouchMode="false" />
+
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/btn_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Submit for approval"
+        android:theme="@style/AccentButton" />
+
+    <TextView
+        android:id="@+id/tv_broadcast_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btn_submit"
+        android:layout_centerHorizontal="true"
+        android:text="It usually takes a few hours to review your item"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/iv_info_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/tv_broadcast_hint"
+        android:layout_alignTop="@id/tv_broadcast_hint"
+        android:layout_toLeftOf="@id/tv_broadcast_hint"
+        android:tint="@color/colorAccent"
+        app:srcCompat="@drawable/ic_info_black_24dp" />
+
+</RelativeLayout>

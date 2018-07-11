@@ -1,4 +1,5 @@
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -34,6 +35,35 @@
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginTop="8dp" />
+
+        <LinearLayout
+            android:id="@+id/new_item_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/pill_button"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            app:srcCompat="@drawable/ic_add_black_24dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tint="@color/white"
+                app:srcCompat="@drawable/ic_add_circle_black_24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:text="Sell a product or service"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 
