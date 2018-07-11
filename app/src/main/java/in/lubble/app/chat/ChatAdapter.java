@@ -148,15 +148,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
-        if (highlightedPos == position) {
-            sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+        if (posToFlash == position) {
+            UiUtils.animateColor(sentChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
 
-        if (posToFlash == position) {
-            UiUtils.animateColor(sentChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
-            posToFlash = -1;
+        if (highlightedPos == position) {
+            sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
@@ -223,15 +223,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         showDpAndName(recvdChatViewHolder, chatData);
 
-        if (highlightedPos == position) {
-            recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+        if (posToFlash == position) {
+            UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
 
-        if (posToFlash == position) {
-            UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
-            posToFlash = -1;
+        if (highlightedPos == position) {
+            recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
