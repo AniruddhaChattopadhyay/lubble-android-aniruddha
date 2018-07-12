@@ -13,7 +13,6 @@ import android.support.annotation.Nullable;
 import android.support.constraint.Group;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -100,7 +99,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private TextView joinDescTv;
     private Button joinBtn;
     private TextView declineTv;
-    private CardView composeCardView;
+    private RelativeLayout composeContainer;
     private Group linkMetaContainer;
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
@@ -161,7 +160,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
-        composeCardView = view.findViewById(R.id.compose_container);
+        composeContainer = view.findViewById(R.id.compose_container);
         joinContainer = view.findViewById(R.id.relativeLayout_join_container);
         joinDescTv = view.findViewById(R.id.tv_join_desc);
         joinBtn = view.findViewById(R.id.btn_join);
@@ -330,7 +329,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (groupData.isJoined()) {
-                    composeCardView.setVisibility(View.VISIBLE);
+                    composeContainer.setVisibility(View.VISIBLE);
                     joinContainer.setVisibility(View.GONE);
                     if (joiningProgressDialog != null && isJoining) {
                         bottomContainer.setVisibility(View.VISIBLE);
@@ -355,12 +354,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                             }
                         });
-                        composeCardView.setVisibility(View.GONE);
+                        composeContainer.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
                     } else {
                         joinDescTv.setText(R.string.join_group_to_chat);
                         declineTv.setVisibility(View.GONE);
-                        composeCardView.setVisibility(View.GONE);
+                        composeContainer.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
                     }
                 }
