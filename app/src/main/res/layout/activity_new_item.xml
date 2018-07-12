@@ -16,33 +16,60 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_centerHorizontal="true"
+                android:background="@color/very_light_gray"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_add_black_24dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add Photo"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
             <ImageView
                 android:id="@+id/iv_event_image"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/event_img_height"
-                android:background="#395359"
-                android:scaleType="centerCrop"
-                app:srcCompat="@drawable/ic_star_party" />
+                android:layout_height="300dp"
+                android:scaleType="centerCrop" />
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/iv_event_image"
-                android:layout_alignTop="@id/tv_change_pic"
-                android:layout_toLeftOf="@id/tv_change_pic"
-                android:background="@color/white"
-                android:paddingLeft="4dp"
-                app:srcCompat="@drawable/ic_edit_black_24dp" />
-
-            <TextView
-                android:id="@+id/tv_change_pic"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@id/iv_event_image"
                 android:layout_alignRight="@id/iv_event_image"
                 android:background="@color/white"
-                android:padding="4dp"
-                android:text="CHANGE PICTURE" />
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="4dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+                <TextView
+                    android:id="@+id/tv_change_pic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="Change Photo"
+                    android:textColor="@color/darker_gray" />
+
+            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -61,6 +88,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/tv_type_hint"
+                    android:layout_marginTop="4dp"
                     android:orientation="horizontal">
 
                     <RadioButton
@@ -107,8 +135,8 @@
                     android:id="@+id/iv_event_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/til_event_desc"
-                    android:layout_marginBottom="10dp"
+                    android:layout_alignTop="@id/til_event_desc"
+                    android:layout_marginTop="20dp"
                     android:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_format_align_left_black_24dp" />
 
@@ -124,7 +152,10 @@
 
                     <EditText
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:gravity="top|left"
+                        android:inputType="textMultiLine"
+                        android:lines="3" />
 
                 </android.support.design.widget.TextInputLayout>
 
@@ -133,7 +164,8 @@
                     android:layout_height="24dp"
                     android:layout_alignBottom="@id/til_event_organizer"
                     android:layout_marginBottom="10dp"
-                    app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_price_tag" />
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/til_event_organizer"
@@ -147,18 +179,19 @@
 
                     <EditText
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
 
                 </android.support.design.widget.TextInputLayout>
 
                 <ImageView
                     android:id="@+id/iv_event_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_alignBottom="@id/til_event_date"
                     android:layout_marginBottom="10dp"
                     android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_event_black_24dp" />
+                    app:srcCompat="@drawable/ic_circle_rupee" />
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/til_event_date"
@@ -173,7 +206,7 @@
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:focusableInTouchMode="false" />
+                        android:inputType="number" />
 
                 </android.support.design.widget.TextInputLayout>
 
