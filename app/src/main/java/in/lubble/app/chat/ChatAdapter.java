@@ -284,10 +284,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
         showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
     }
 
-    private void handleLubbs(RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
-        recvdChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
-        recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+    private void handleLubbs(RecvdChatViewHolder recvdChatViewHolder, ChatData chatData, boolean toAnimate) {
 
+        if (chatData.getLubbCount() > 0) {
+            if (toAnimate) {
+                UiUtils.animateSlideDownShow(context, recvdChatViewHolder.lubbContainer);
+            } else {
+                recvdChatViewHolder.lubbContainer.setVisibility(View.VISIBLE);
+            }
+        } else {
+            recvdChatViewHolder.lubbContainer.setVisibility(View.GONE);
+        }
+
+        //recvdChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+        recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
 
         int i = 0;
         recvdChatViewHolder.lubbHeadsContainer.removeAllViews();
@@ -304,7 +314,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void showLubbHintIfLastMsg(int position, final ChatData chatData, final RecvdChatViewHolder recvdChatViewHolder) {
         if (position == chatDataList.size() - 1 && !shownLubbHintForLastMsg) {
-            recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.VISIBLE);
+            UiUtils.animateSlideDownShow(context, recvdChatViewHolder.lubbLastHintContainer);
+            //recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.lubbContainer.setVisibility(View.GONE);
             shownLubbHintForLastMsg = true;
             if (chatData.getLubbCount() > 0) {
@@ -312,15 +323,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     @Override
                     public void run() {
                         if (chatFragment != null && chatFragment.isAdded() && chatFragment.isVisible()) {
-                            recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
-                            handleLubbs(recvdChatViewHolder, chatData);
+                            //recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
+                            UiUtils.animateSlideDownHide(context, recvdChatViewHolder.lubbLastHintContainer);
+                            handleLubbs(recvdChatViewHolder, chatData, true);
                         }
                     }
                 }, 2000);
             }
         } else {
             recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
-            handleLubbs(recvdChatViewHolder, chatData);
+            handleLubbs(recvdChatViewHolder, chatData, false);
         }
     }
 

@@ -100,5 +100,23 @@ public class UiUtils {
         return bottomSheetDialog;
     }
 
+    public static void animateSlideDownHide(Context context, View view) {
+        if (context != null && view.getVisibility() == View.VISIBLE) {
+            Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_down_hide);
+            slideUp.setDuration(500);
+            view.startAnimation(slideUp);
+            view.setVisibility(View.GONE);
+        }
+    }
+
+    public static void animateSlideDownShow(Context context, View view) {
+        if (context != null && view.getVisibility() != View.VISIBLE) {
+            Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down_show);
+            slideDown.setDuration(500);
+            view.startAnimation(slideDown);
+            view.setVisibility(View.VISIBLE);
+        }
+    }
+
 
 }
