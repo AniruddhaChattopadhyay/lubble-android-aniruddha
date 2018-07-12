@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.Group;
@@ -226,29 +227,33 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 int msgCount = chatAdapter.getItemCount();
                 int lastVisiblePosition =
                         layoutManager.findLastCompletelyVisibleItemPosition();
-                // If the recycler view is initially being loaded
-                if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
-                    final int pos = msgCount - 1;
-                    final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
-                    if (chatMsg.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
-                        // unread msg found
-                        foundFirstUnreadMsg = true;
-                        final ChatData unreadChatData = new ChatData();
-                        unreadChatData.setType(UNREAD);
-                        chatAdapter.addChatData(pos, unreadChatData);
-                        chatRecyclerView.scrollToPosition(pos - 1);
-                    } else {
-                        // all msgs read, scroll to last msg
+                if (recylerViewState != null) {
+                    chatRecyclerView.getLayoutManager().onRestoreInstanceState(recylerViewState);
+                } else {
+                    // If the recycler view is initially being loaded
+                    if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
+                        final int pos = msgCount - 1;
+                        final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
+                        if (chatMsg.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
+                            // unread msg found
+                            foundFirstUnreadMsg = true;
+                            final ChatData unreadChatData = new ChatData();
+                            unreadChatData.setType(UNREAD);
+                            chatAdapter.addChatData(pos, unreadChatData);
+                            chatRecyclerView.scrollToPosition(pos - 1);
+                        } else {
+                            // all msgs read, scroll to last msg
+                            chatRecyclerView.scrollToPosition(positionStart);
+                        }
+                    } else if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                            lastVisiblePosition == (positionStart - 1))) {
+                        // If the user is at the bottom of the list, scroll to the bottom
+                        // of the list to show the newly added message.
+                        chatRecyclerView.scrollToPosition(positionStart);
+                    } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
+                            chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                         chatRecyclerView.scrollToPosition(positionStart);
                     }
-                } else if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
-                        lastVisiblePosition == (positionStart - 1))) {
-                    // If the user is at the bottom of the list, scroll to the bottom
-                    // of the list to show the newly added message.
-                    chatRecyclerView.scrollToPosition(positionStart);
-                } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
-                        chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                    chatRecyclerView.scrollToPosition(positionStart);
                 }
             }
         });
@@ -707,9 +712,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    Parcelable recylerViewState;
+
     @Override
     public void onPause() {
         super.onPause();
+        recylerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
         messagesReference.removeEventListener(msgChildListener);
         groupReference.removeEventListener(groupInfoListener);
