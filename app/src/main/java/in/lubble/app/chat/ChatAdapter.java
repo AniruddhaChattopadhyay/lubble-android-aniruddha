@@ -49,6 +49,8 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
@@ -650,6 +652,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.linear_layout_lubb_pop:
                     toggleLubb(getAdapterPosition());
+                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
                     break;
                 case R.id.linearLayout_lubb_container:
                     toggleLubb(getAdapterPosition());
@@ -797,6 +800,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             switch (v.getId()) {
                 case R.id.linearLayout_lubb_container:
                     toggleLubb(getAdapterPosition());
+                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
                     break;
                 case R.id.linear_layout_lubb_pop:
                     toggleLubb(getAdapterPosition());
