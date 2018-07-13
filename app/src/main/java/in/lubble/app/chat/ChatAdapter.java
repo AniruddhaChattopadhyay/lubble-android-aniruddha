@@ -52,6 +52,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
@@ -91,6 +92,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private int highlightedPos = -1;
     private int posToFlash = -1;
     private boolean shownLubbHintForLastMsg;
+    private static HashMap<String, ProfileInfo> profileInfoMap = new HashMap<>();
 
     public ChatAdapter(Activity activity, Context context, String groupId,
                        RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
@@ -212,7 +214,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (i++ < 4) {
                 // show a max of 4 heads
                 // todo sort?
-                addLubbHead(uid, sentChatViewHolder.lubbHeadsContainer);
+                if (profileInfoMap.containsKey(uid)) {
+                    final ImageView lubbHeadIv = new ImageView(context);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
+                    lubbHeadIv.setLayoutParams(lp);
+                    GlideApp.with(context).load(profileInfoMap.get(uid).getThumbnail())
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .circleCrop()
+                            .into(lubbHeadIv);
+                    sentChatViewHolder.lubbHeadsContainer.addView(lubbHeadIv);
+                } else {
+                    updateProfileInfoMap(uid, sentChatViewHolder.lubbHeadsContainer, sentChatViewHolder.getAdapterPosition());
+                }
             } else {
                 break;
             }
@@ -307,7 +320,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (i++ < 4) {
                 // show a max of 4 heads
                 // todo sort?
-                addLubbHead(uid, recvdChatViewHolder.lubbHeadsContainer);
+                if (profileInfoMap.containsKey(uid)) {
+                    final ImageView lubbHeadIv = new ImageView(context);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
+                    lubbHeadIv.setLayoutParams(lp);
+                    GlideApp.with(context).load(profileInfoMap.get(uid).getThumbnail())
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .circleCrop()
+                            .into(lubbHeadIv);
+                    recvdChatViewHolder.lubbHeadsContainer.addView(lubbHeadIv);
+                } else {
+                    updateProfileInfoMap(uid, recvdChatViewHolder.lubbHeadsContainer, recvdChatViewHolder.getAdapterPosition());
+                }
             } else {
                 break;
             }
@@ -338,7 +362,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private void addLubbHead(String uid, final LinearLayout lubbHeadsContainer) {
+    private void updateProfileInfoMap(String uid, final LinearLayout lubbHeadsContainer, final int pos) {
         // single as its very difficult otherwise to keep track of all listeners for every user
         // plus we don't really need realtime updation of user DP and/or name in chat
         getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -346,14 +370,21 @@ public class ChatAdapter extends RecyclerView.Adapter {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
                 if (map != null) {
-                    final ImageView lubbHeadIv = new ImageView(context);
+                    /*final ImageView lubbHeadIv = new ImageView(context);
                     RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
                     lubbHeadIv.setLayoutParams(lp);
                     GlideApp.with(context).load(map.get("thumbnail"))
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .circleCrop()
                             .into(lubbHeadIv);
-                    lubbHeadsContainer.addView(lubbHeadIv);
+                    lubbHeadsContainer.addView(lubbHeadIv);*/
+
+                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                    if (profileInfo != null) {
+                        profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                        profileInfoMap.put(profileInfo.getId(), profileInfo);
+                        notifyItemChanged(pos);
+                    }
                 }
             }
 
