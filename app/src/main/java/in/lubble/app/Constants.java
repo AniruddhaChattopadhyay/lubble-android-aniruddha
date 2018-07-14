@@ -1,5 +1,7 @@
 package in.lubble.app;
 
+import okhttp3.MediaType;
+
 /**
  * Created by ishaan on 26/1/18.
  */
@@ -26,5 +28,7 @@ public class Constants {
     public static final double SVR_LATI = 28.696660;
     public static final double SVR_LONGI = 77.124772;
     public static final String FAMILY_FUN_NIGHT = "FAMILY_FUN_NIGHT";
+
+    public static final MediaType MEDIA_TYPE = MediaType.parse("application/json");
 
 }

@@ -92,6 +92,13 @@ public class MarketplaceFrag extends Fragment {
 
         fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter);
 
+        newItemContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                NewItemActiv.open(getContext());
+            }
+        });
+
         return view;
     }
 
