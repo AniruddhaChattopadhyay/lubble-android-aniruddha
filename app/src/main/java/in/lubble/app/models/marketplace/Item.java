@@ -4,6 +4,8 @@ package in.lubble.app.models.marketplace;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+
 public class Item {
 
     @SerializedName("id")
@@ -26,7 +28,7 @@ public class Item {
     private Boolean isActive;
     @SerializedName("photos")
     @Expose
-    private String photos;
+    private ArrayList<Object> photos;
     @SerializedName("mrp")
     @Expose
     private Integer mrp;
@@ -35,7 +37,7 @@ public class Item {
     private Integer sellingPrice;
     @SerializedName("starting_price")
     @Expose
-    private Object startingPrice;
+    private Integer startingPrice;
     @SerializedName("view_count")
     @Expose
     private Integer viewCount;
@@ -94,11 +96,11 @@ public class Item {
         this.isActive = isActive;
     }
 
-    public String getPhotos() {
+    public ArrayList<Object> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(String photos) {
+    public void setPhotos(ArrayList<Object> photos) {
         this.photos = photos;
     }
 
@@ -118,11 +120,11 @@ public class Item {
         this.sellingPrice = sellingPrice;
     }
 
-    public Object getStartingPrice() {
+    public Integer getStartingPrice() {
         return startingPrice;
     }
 
-    public void setStartingPrice(Object startingPrice) {
+    public void setStartingPrice(Integer startingPrice) {
         this.startingPrice = startingPrice;
     }
 

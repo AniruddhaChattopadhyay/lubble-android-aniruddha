@@ -2,6 +2,9 @@ package in.lubble.app.network;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+
+import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import okhttp3.RequestBody;
@@ -14,6 +17,9 @@ public interface Endpoints {
 
     @GET("marketplace/home")
     Call<MarketplaceData> fetchMarketplaceData();
+
+    @GET("marketplace/categories")
+    Call<ArrayList<Category>> fetchCategories();
 
     @POST("marketplace/item")
     Call<Item> uploadNewItem(@Body RequestBody params);

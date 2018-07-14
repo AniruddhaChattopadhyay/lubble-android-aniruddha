@@ -56,17 +56,21 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "NewItemActiv";
 
     private static final int REQUEST_CODE_ITEM_PIC = 469;
+    private static final int REQUEST_CODE_CATEGORY = 339;
     private Uri picUri = null;
 
     private ScrollView parentScrollView;
     private ImageView photoIv;
     private LinearLayout changePicHintContainer;
     private TextInputLayout nameTil;
+    private TextInputLayout categoryTil;
     private TextInputLayout descTil;
     private TextInputLayout mrpTil;
     private TextInputLayout sellingPriceTil;
     private Button submitBtn;
     private String currentPhotoPath;
+    private int categoryId = -1;
+    private String categoryName;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, NewItemActiv.class));
@@ -81,6 +85,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         photoIv = findViewById(R.id.iv_item_image);
         changePicHintContainer = findViewById(R.id.linearlayout_changepic_hint);
         nameTil = findViewById(R.id.til_item_name);
+        categoryTil = findViewById(R.id.til_category);
         descTil = findViewById(R.id.til_item_desc);
         mrpTil = findViewById(R.id.til_item_mrp);
         sellingPriceTil = findViewById(R.id.til_item_sellingprice);
@@ -99,6 +104,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
         photoIv.setOnClickListener(this);
         changePicHintContainer.setOnClickListener(this);
+        categoryTil.getEditText().setOnClickListener(this);
     }
 
     @Override
@@ -108,6 +114,9 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             case R.id.linearlayout_changepic_hint:
                 NewItemActivPermissionsDispatcher
                         .startPhotoPickerWithPermissionCheck(NewItemActiv.this, REQUEST_CODE_ITEM_PIC);
+                break;
+            case R.id.et_category:
+                startActivityForResult(CategoryListActiv.getIntent(NewItemActiv.this), REQUEST_CODE_CATEGORY);
                 break;
         }
     }
@@ -127,6 +136,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     .load(imageFile)
                     .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
                     .into(photoIv);
+        } else if (requestCode == REQUEST_CODE_CATEGORY && resultCode == RESULT_OK) {
+            categoryId = data.getIntExtra("cat_id", -1);
+            categoryName = data.getStringExtra("cat_name");
+            categoryTil.getEditText().setText(categoryName);
         }
     }
 
@@ -135,7 +148,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         HashMap<String, Object> params = new HashMap<>();
 
         params.put("name", nameTil.getEditText().getText().toString());
-        params.put("category", 1);
+        params.put("category", categoryId);
         params.put("mrp", mrpTil.getEditText().getText().toString());
         params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
         params.put("client_timestamp", System.currentTimeMillis());
@@ -196,7 +209,12 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         } else {
             sellingPriceTil.setError(null);
         }
-        if (!isValidString(picUri.toString())) {
+        if (categoryId == -1) {
+            Toast.makeText(this, R.string.no_category, Toast.LENGTH_SHORT).show();
+            parentScrollView.smoothScrollTo(0, 0);
+            return false;
+        }
+        if (picUri == null) {
             Toast.makeText(this, R.string.no_photo, Toast.LENGTH_SHORT).show();
             parentScrollView.smoothScrollTo(0, 0);
             return false;

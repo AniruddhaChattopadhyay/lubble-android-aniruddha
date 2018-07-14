@@ -134,4 +134,14 @@
     <string name="liked">Liked</string>
     <string name="like_any_msg_hint">Tap &amp; hold any message to like it</string>
     <string name="no_photo">Please add a photo</string>
+    <string name="choose_category">Choose Category</string>
+    <string name="item_name">Item Name</string>
+    <string name="what_are_you_selling">What are you selling?</string>
+    <string name="change_photo">Change Photo</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="product">Product</string>
+    <string name="service">Service</string>
+    <string name="no_category">Please choose category</string>
+    <string name="please_choose_a_category">Please choose a category</string>
+    <string name="category">Category</string>
 </resources>
