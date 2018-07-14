@@ -378,9 +378,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
-                                declineTv.setVisibility(View.VISIBLE);
+                                if (isAdded() && isVisible()) {
+                                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                    joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
+                                    declineTv.setVisibility(View.VISIBLE);
+                                }
                             }
 
                             @Override
