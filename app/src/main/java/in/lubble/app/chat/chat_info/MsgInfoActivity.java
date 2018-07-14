@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -128,11 +129,13 @@ public class MsgInfoActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 if (profileInfo != null) {
-                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                    final MsgInfoData msgInfoData = new MsgInfoData();
-                    msgInfoData.setProfileInfo(profileInfo);
-                    msgInfoData.setTimestamp(chatData.getReadReceipts().get(profileInfo.getId()));
-                    readAdapter.addData(msgInfoData);
+                    profileInfo.setId(dataSnapshot  .getRef().getParent().getKey()); // this works. Don't touch.
+                    if (!profileInfo.getId().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                        final MsgInfoData msgInfoData = new MsgInfoData();
+                        msgInfoData.setProfileInfo(profileInfo);
+                        msgInfoData.setTimestamp(chatData.getReadReceipts().get(profileInfo.getId()));
+                        readAdapter.addData(msgInfoData);
+                    }
                 }
             }
 
