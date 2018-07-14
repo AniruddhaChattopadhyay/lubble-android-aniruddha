@@ -663,12 +663,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        String message = chatDataList.get(highlightedPos).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
                         break;
                     case R.id.action_info:
-                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), false);
+                        chatFragment.openChatInfo(chatDataList.get(highlightedPos).getId(), false);
                         break;
                 }
                 mode.finish();
@@ -820,12 +820,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        String message = chatDataList.get(highlightedPos).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
                         break;
                     case R.id.action_info:
-                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
+                        chatFragment.openChatInfo(chatDataList.get(highlightedPos).getId(), true);
                         break;
                 }
                 mode.finish();
