@@ -161,8 +161,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+            sentChatViewHolder.lubbPopOutContainer.setVisibility(View.VISIBLE);
+            toggleLubbPopOutContainer(sentChatViewHolder.lubbIv,
+                    sentChatViewHolder.lubbHintTv,
+                    chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            sentChatViewHolder.lubbPopOutContainer.setVisibility(View.GONE);
         }
 
         if (isValidString(chatData.getMessage())) {
@@ -247,8 +252,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+            recvdChatViewHolder.lubbPopOutContainer.setVisibility(View.VISIBLE);
+            toggleLubbPopOutContainer(recvdChatViewHolder.lubbIv,
+                    recvdChatViewHolder.lubbHintTv,
+                    chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            recvdChatViewHolder.lubbPopOutContainer.setVisibility(View.GONE);
+
         }
 
         if (isValidString(chatData.getMessage())) {
@@ -667,7 +678,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
-                lubbPopOutContainer.setVisibility(View.GONE);
+                //lubbPopOutContainer.setVisibility(View.GONE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -720,16 +731,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @Override
         public boolean onLongClick(View v) {
-            lubbPopOutContainer.setVisibility(View.VISIBLE);
-            toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
-            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-            if (highlightedPos != -1) {
-                // another item was highlighted, remove its highlight
-                notifyItemChanged(highlightedPos);
+            if (getAdapterPosition() != highlightedPos) {
+                actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                lubbPopOutContainer.setVisibility(View.VISIBLE);
+                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                if (highlightedPos != -1) {
+                    // another item was highlighted, remove its highlight
+                    notifyItemChanged(highlightedPos);
+                }
+                highlightedPos = getAdapterPosition();
+                selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+            } else {
+                if (actionMode != null) {
+                    actionMode.finish();
+                }
             }
-            highlightedPos = getAdapterPosition();
-            selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
             return true;
         }
     }
@@ -818,7 +835,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
-                lubbPopOutContainer.setVisibility(View.GONE);
+                //lubbPopOutContainer.setVisibility(View.GONE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -868,16 +885,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @Override
         public boolean onLongClick(View v) {
-            lubbPopOutContainer.setVisibility(View.VISIBLE);
-            toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
-            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-            if (highlightedPos != -1) {
-                // another item was highlighted, remove its highlight
-                notifyItemChanged(highlightedPos);
+            if (getAdapterPosition() != highlightedPos) {
+                actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                lubbPopOutContainer.setVisibility(View.VISIBLE);
+                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                if (highlightedPos != -1) {
+                    // another item was highlighted, remove its highlight
+                    notifyItemChanged(highlightedPos);
+                }
+                highlightedPos = getAdapterPosition();
+                selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+            } else {
+                if (actionMode != null) {
+                    actionMode.finish();
+                }
             }
-            highlightedPos = getAdapterPosition();
-            selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
             return true;
         }
     }
