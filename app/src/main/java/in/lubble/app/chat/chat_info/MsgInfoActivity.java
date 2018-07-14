@@ -111,7 +111,9 @@ public class MsgInfoActivity extends AppCompatActivity {
                 if (chatData != null) {
                     final HashMap<String, Long> readReceiptsMap = chatData.getReadReceipts();
                     for (String uid : readReceiptsMap.keySet()) {
-                        fetchAndAddProfileInfoToReadReceipts(uid);
+                        if (!uid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                            fetchAndAddProfileInfoToReadReceipts(uid);
+                        }
                     }
                 }
             }
@@ -129,13 +131,11 @@ public class MsgInfoActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 if (profileInfo != null) {
-                    profileInfo.setId(dataSnapshot  .getRef().getParent().getKey()); // this works. Don't touch.
-                    if (!profileInfo.getId().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                        final MsgInfoData msgInfoData = new MsgInfoData();
-                        msgInfoData.setProfileInfo(profileInfo);
-                        msgInfoData.setTimestamp(chatData.getReadReceipts().get(profileInfo.getId()));
-                        readAdapter.addData(msgInfoData);
-                    }
+                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                    final MsgInfoData msgInfoData = new MsgInfoData();
+                    msgInfoData.setProfileInfo(profileInfo);
+                    msgInfoData.setTimestamp(chatData.getReadReceipts().get(profileInfo.getId()));
+                    readAdapter.addData(msgInfoData);
                 }
             }
 
