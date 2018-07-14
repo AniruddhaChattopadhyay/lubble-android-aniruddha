@@ -31,6 +31,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -101,6 +102,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+
+        UiUtils.hideKeyboard(this);
 
         photoIv.setOnClickListener(this);
         changePicHintContainer.setOnClickListener(this);
