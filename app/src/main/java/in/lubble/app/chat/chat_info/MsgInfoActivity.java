@@ -94,6 +94,10 @@ public class MsgInfoActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        readAdapter.clear();
+        lubbAdapter.clear();
+
         fetchLubbReceipts();
         if (showReadReceipts) {
             readByHeaderTv.setVisibility(View.VISIBLE);

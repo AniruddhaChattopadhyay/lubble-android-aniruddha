@@ -60,6 +60,11 @@ public class MsgReceiptAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         notifyDataSetChanged();
     }
 
+    public void clear() {
+        msgInfoList.clear();
+        notifyDataSetChanged();
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final ImageView dpIv;
