@@ -2,6 +2,7 @@ package in.lubble.app.network;
 
 import com.google.gson.annotations.SerializedName;
 
+import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -15,8 +16,7 @@ public interface Endpoints {
     Call<MarketplaceData> fetchMarketplaceData();
 
     @POST("marketplace/item")
-    Call<ResponseBean> uploadNewItem(@Body RequestBody params);
-
+    Call<Item> uploadNewItem(@Body RequestBody params);
 
     class ResponseBean {
 

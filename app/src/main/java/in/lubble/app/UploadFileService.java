@@ -14,9 +14,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -24,6 +26,7 @@ import in.lubble.app.models.ChatData;
 
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
+import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
 /**
@@ -36,6 +39,7 @@ public class UploadFileService extends BaseTaskService {
     private static final String TAG = "UploadFileService";
     public static final int BUCKET_DEFAULT = 362;
     public static final int BUCKET_CONVO = 491;
+    public static final int BUCKET_MARKETPLACE = 839;
 
     /**
      * Intent Actions
@@ -67,32 +71,73 @@ public class UploadFileService extends BaseTaskService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand:" + intent + ":" + startId);
 
-        final boolean isConvoBucket = intent.getIntExtra(EXTRA_BUCKET, BUCKET_DEFAULT) == BUCKET_CONVO;
-        if (isConvoBucket) {
+        final int bucketId = intent.getIntExtra(EXTRA_BUCKET, BUCKET_DEFAULT);
+        if (bucketId == BUCKET_CONVO) {
             mStorageRef = getConvoBucketRef();
+        } else if (bucketId == BUCKET_MARKETPLACE) {
+            mStorageRef = getMarketplaceBucketRef();
         } else {
             mStorageRef = getDefaultBucketRef();
         }
 
+        taskStarted();
+
         if (ACTION_UPLOAD.equals(intent.getAction())) {
-            Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
-            uploadFromUri(
-                    fileUri,
-                    intent.getStringExtra(EXTRA_FILE_NAME),
-                    intent.getStringExtra(EXTRA_UPLOAD_PATH),
-                    intent.getStringExtra(EXTRA_CAPTION),
-                    intent.getStringExtra(EXTRA_GROUP_ID),
-                    isConvoBucket
-            );
+            if (bucketId == BUCKET_MARKETPLACE) {
+                Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
+                uploadFromUriWithMetadata(
+                        fileUri,
+                        intent.getStringExtra(EXTRA_FILE_NAME),
+                        intent.getStringExtra(EXTRA_UPLOAD_PATH),
+                        intent.getStringExtra(EXTRA_CAPTION),
+                        intent.getStringExtra(EXTRA_GROUP_ID)
+                );
+            } else {
+                Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
+                uploadFromUri(
+                        fileUri,
+                        intent.getStringExtra(EXTRA_FILE_NAME),
+                        intent.getStringExtra(EXTRA_UPLOAD_PATH),
+                        intent.getStringExtra(EXTRA_CAPTION),
+                        intent.getStringExtra(EXTRA_GROUP_ID),
+                        bucketId == BUCKET_CONVO,
+                        null
+                );
+            }
         }
 
         return START_REDELIVER_INTENT;
     }
 
-    private void uploadFromUri(final Uri fileUri, String fileName, String uploadPath, final String caption, final String groupId, final boolean toTransmit) {
+
+    private void uploadFromUriWithMetadata(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         taskStarted();
+
+        showProgressNotification(getString(R.string.progress_uploading), 0, 0);
+
+        FirebaseAuth.getInstance().getAccessToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+            @Override
+            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                if (task.isSuccessful()) {
+                    // Create file metadata including the content type
+                    StorageMetadata metadata = new StorageMetadata.Builder()
+                            .setContentType("image/jpg")
+                            .setCustomMetadata("uid", FirebaseAuth.getInstance().getUid())
+                            .setCustomMetadata("token", task.getResult().getToken())
+                            .build();
+                    uploadFromUri(fileUri, fileName, uploadPath, caption, groupId, false, metadata);
+                } else {
+                    //todo OMG what to do here??
+                }
+            }
+        });
+    }
+
+    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId,
+                               final boolean toTransmit, @Nullable StorageMetadata metadata) {
+        Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference photoRef = mStorageRef.child(uploadPath)
@@ -100,7 +145,13 @@ public class UploadFileService extends BaseTaskService {
 
         // Upload file to Firebase Storage
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
-        photoRef.putFile(fileUri).
+        final UploadTask uploadTask;
+        if (metadata != null) {
+            uploadTask = photoRef.putFile(fileUri, metadata);
+        } else {
+            uploadTask = photoRef.putFile(fileUri);
+        }
+        uploadTask.
                 addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
