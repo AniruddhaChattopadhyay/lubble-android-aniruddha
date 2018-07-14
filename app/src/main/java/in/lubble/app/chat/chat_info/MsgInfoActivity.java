@@ -112,7 +112,7 @@ public class MsgInfoActivity extends AppCompatActivity {
                 chatData = dataSnapshot.getValue(ChatData.class);
                 if (chatData != null) {
                     final HashMap<String, Long> readReceiptsMap = chatData.getReadReceipts();
-                    if (readReceiptsMap.size() > 0) {
+                    if (readReceiptsMap.size() > 1) {
                         noReadsContainer.setVisibility(View.GONE);
                         for (String uid : readReceiptsMap.keySet()) {
                             if (!uid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
