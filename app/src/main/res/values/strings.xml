@@ -144,4 +144,9 @@
     <string name="no_category">Please choose category</string>
     <string name="please_choose_a_category">Please choose a category</string>
     <string name="category">Category</string>
+    <string name="item_review_hint">It takes a few hours to review your item</string>
+    <string name="submit_for_approval">Submit for approval</string>
+    <string name="selling_price">Selling Price</string>
+    <string name="mrp">MRP</string>
+    <string name="about_the_item">About the item</string>
 </resources>

@@ -1,276 +1,275 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollview_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <ScrollView
-        android:id="@+id/scrollview_parent"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/iv_info_hint"
-        android:layout_marginBottom="8dp">
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_centerHorizontal="true"
+            android:background="@color/very_light_gray"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_add_black_24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/add_photo"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/iv_item_image"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:id="@+id/linearlayout_changepic_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/iv_item_image"
+            android:layout_alignRight="@id/iv_item_image"
+            android:background="@color/white"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="4dp"
+                android:tint="@color/darker_gray"
+                app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+            <TextView
+                android:id="@+id/tv_change_pic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="4dp"
+                android:text="@string/change_photo"
+                android:textColor="@color/darker_gray" />
+
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_below="@id/iv_item_image"
+            android:layout_margin="8dp">
+
+            <TextView
+                android:id="@+id/tv_type_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/what_are_you_selling" />
+
+            <RadioGroup
+                android:id="@+id/radio_group_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_type_hint"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="@string/product" />
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="@string/service" />
+
+            </RadioGroup>
+
+            <ImageView
+                android:id="@+id/iv_event_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/til_item_name"
+                android:layout_marginBottom="10dp"
+                android:tint="@color/darker_gray"
+                app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_item_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/radio_group_type"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_toRightOf="@id/iv_event_name"
+                android:hint="@string/item_name">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/iv_category"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/til_category"
+                android:layout_alignTop="@id/til_category"
+                android:tint="@color/darker_gray"
+                app:srcCompat="@drawable/ic_category" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_item_name"
+                android:layout_marginTop="8dp"
+                android:layout_toRightOf="@id/iv_category"
+                android:hint="@string/category"
+                android:padding="8dp">
+
+                <EditText
+                    android:id="@+id/et_category"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusableInTouchMode="false"
+                    android:inputType="textCapWords"
+                    android:maxLines="1" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/iv_event_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/til_item_desc"
+                android:layout_marginTop="20dp"
+                android:tint="@color/darker_gray"
+                app:srcCompat="@drawable/ic_format_align_left_black_24dp" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_item_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_category"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_toRightOf="@id/iv_event_desc"
+                android:hint="@string/about_the_item">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top|left"
+                    android:inputType="textMultiLine"
+                    android:lines="3" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignBottom="@id/til_item_mrp"
+                android:layout_marginBottom="10dp"
+                android:tint="@color/darker_gray"
+                app:srcCompat="@drawable/ic_price_tag" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_item_mrp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_item_desc"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_toRightOf="@id/iv_event_desc"
+                android:hint="@string/mrp">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+
+            </android.support.design.widget.TextInputLayout>
+
+            <ImageView
+                android:id="@+id/iv_event_date"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignBottom="@id/til_item_sellingprice"
+                android:layout_marginBottom="10dp"
+                android:tint="@color/darker_gray"
+                app:srcCompat="@drawable/ic_circle_rupee" />
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/til_item_sellingprice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_item_mrp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_toRightOf="@id/iv_event_date"
+                android:hint="@string/selling_price">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number" />
+
+            </android.support.design.widget.TextInputLayout>
 
             <LinearLayout
+                android:id="@+id/hint_container"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/til_item_sellingprice"
                 android:layout_centerHorizontal="true"
-                android:background="@color/very_light_gray"
                 android:gravity="center"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
                 <ImageView
+                    android:id="@+id/iv_info_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_add_black_24dp" />
+                    android:tint="@color/dark_gray"
+                    app:srcCompat="@drawable/ic_info_black_24dp" />
 
                 <TextView
+                    android:id="@+id/tv_item_hint"
+                    android:layout_marginLeft="4dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/add_photo"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
+                    android:text="@string/item_review_hint" />
 
             </LinearLayout>
 
-            <ImageView
-                android:id="@+id/iv_item_image"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:scaleType="centerCrop" />
-
-            <LinearLayout
-                android:id="@+id/linearlayout_changepic_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/iv_item_image"
-                android:layout_alignRight="@id/iv_item_image"
-                android:background="@color/white"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:padding="4dp">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="4dp"
-                    android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_edit_black_24dp" />
-
-                <TextView
-                    android:id="@+id/tv_change_pic"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="4dp"
-                    android:text="@string/change_photo"
-                    android:textColor="@color/darker_gray" />
-
-            </LinearLayout>
-
-            <RelativeLayout
+            <Button
+                android:id="@+id/btn_submit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/iv_item_image"
-                android:layout_margin="8dp">
+                android:layout_below="@id/hint_container"
+                android:text="@string/submit_for_approval"
+                android:theme="@style/AccentButton" />
 
-                <TextView
-                    android:id="@+id/tv_type_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/what_are_you_selling" />
-
-                <RadioGroup
-                    android:id="@+id/radio_group_type"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_type_hint"
-                    android:layout_marginTop="4dp"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/product" />
-
-                    <RadioButton
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:text="@string/service" />
-
-                </RadioGroup>
-
-                <ImageView
-                    android:id="@+id/iv_event_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/til_item_name"
-                    android:layout_marginBottom="10dp"
-                    android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_edit_black_24dp" />
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_item_name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/radio_group_type"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/iv_event_name"
-                    android:hint="@string/item_name">
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textCapWords"
-                        android:maxLines="1" />
-
-                </android.support.design.widget.TextInputLayout>
-
-                <ImageView
-                    android:id="@+id/iv_category"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/til_category"
-                    android:layout_alignTop="@id/til_category"
-                    android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_category" />
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_category"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/til_item_name"
-                    android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/iv_category"
-                    android:hint="@string/category"
-                    android:padding="8dp">
-
-                    <EditText
-                        android:id="@+id/et_category"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:focusableInTouchMode="false"
-                        android:inputType="textCapWords"
-                        android:maxLines="1" />
-
-                </android.support.design.widget.TextInputLayout>
-
-                <ImageView
-                    android:id="@+id/iv_event_desc"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/til_item_desc"
-                    android:layout_marginTop="20dp"
-                    android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_format_align_left_black_24dp" />
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_item_desc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/til_category"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/iv_event_desc"
-                    android:hint="About the item">
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="top|left"
-                        android:inputType="textMultiLine"
-                        android:lines="3" />
-
-                </android.support.design.widget.TextInputLayout>
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignBottom="@id/til_item_mrp"
-                    android:layout_marginBottom="10dp"
-                    android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_price_tag" />
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_item_mrp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/til_item_desc"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/iv_event_desc"
-                    android:hint="MRP">
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number" />
-
-                </android.support.design.widget.TextInputLayout>
-
-                <ImageView
-                    android:id="@+id/iv_event_date"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_alignBottom="@id/til_item_sellingprice"
-                    android:layout_marginBottom="10dp"
-                    android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_circle_rupee" />
-
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/til_item_sellingprice"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/til_item_mrp"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_toRightOf="@id/iv_event_date"
-                    android:hint="Selling Price">
-
-                    <EditText
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="number" />
-
-                </android.support.design.widget.TextInputLayout>
-
-            </RelativeLayout>
         </RelativeLayout>
-    </ScrollView>
+    </RelativeLayout>
 
-    <Button
-        android:id="@+id/btn_submit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:text="Submit for approval"
-        android:theme="@style/AccentButton" />
-
-    <TextView
-        android:id="@+id/tv_item_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/btn_submit"
-        android:layout_centerHorizontal="true"
-        android:text="It usually takes a few hours to review your item"
-        android:textColor="@color/colorAccent"
-        android:textStyle="bold" />
-
-    <ImageView
-        android:id="@+id/iv_info_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/tv_item_hint"
-        android:layout_alignTop="@id/tv_item_hint"
-        android:layout_toLeftOf="@id/tv_item_hint"
-        android:tint="@color/colorAccent"
-        app:srcCompat="@drawable/ic_info_black_24dp" />
-
-</RelativeLayout>
+</ScrollView>
