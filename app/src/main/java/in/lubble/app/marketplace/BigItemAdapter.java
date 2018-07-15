@@ -14,6 +14,7 @@ import java.util.List;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Item;
+import in.lubble.app.models.marketplace.PhotoData;
 
 public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -41,9 +42,15 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         final BigItemAdapter.ViewHolder viewHolder = (BigItemAdapter.ViewHolder) holder;
         final Item item = itemList.get(position);
 
-        viewHolder.itemIv.setImageResource(R.drawable.blue_circle);
         viewHolder.nameTv.setText(item.getName());
         viewHolder.priceTv.setText("₹ " + item.getSellingPrice());
+
+        final ArrayList<PhotoData> photoList = item.getPhotos();
+        if (photoList.size() > 0) {
+            glide.load(photoList.get(0).getUrl()).into(viewHolder.itemIv);
+        } else {
+            viewHolder.itemIv.setImageResource(R.drawable.blue_circle);
+        }
 
     }
 

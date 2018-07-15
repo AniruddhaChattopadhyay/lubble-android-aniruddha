@@ -28,7 +28,7 @@ public class Item {
     private Boolean isActive;
     @SerializedName("photos")
     @Expose
-    private ArrayList<Object> photos;
+    private ArrayList<PhotoData> photos;
     @SerializedName("mrp")
     @Expose
     private Integer mrp;
@@ -96,11 +96,11 @@ public class Item {
         this.isActive = isActive;
     }
 
-    public ArrayList<Object> getPhotos() {
+    public ArrayList<PhotoData> getPhotos() {
         return photos;
     }
 
-    public void setPhotos(ArrayList<Object> photos) {
+    public void setPhotos(ArrayList<PhotoData> photos) {
         this.photos = photos;
     }
 
