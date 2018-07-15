@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
@@ -31,6 +32,12 @@ public interface Endpoints {
 
     @POST("marketplace/seller/")
     Call<SellerData> uploadSellerProfile(@Body RequestBody params);
+
+    @GET("marketplace/seller/{seller_id}")
+    Call<SellerData> fetchSellerProfile(@Path("seller_id") int sellerId);
+
+    @GET("app/features")
+    Call<FeatureData> fetchAppFeatures();
 
     class ResponseBean {
 

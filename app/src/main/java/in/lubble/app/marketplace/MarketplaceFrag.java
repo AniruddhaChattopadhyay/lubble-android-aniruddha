@@ -14,6 +14,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
@@ -95,8 +96,14 @@ public class MarketplaceFrag extends Fragment {
         newItemContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //NewItemActiv.open(getContext());
-                SellerEditActiv.open(getContext());
+                final int sellerId = LubbleSharedPrefs.getInstance().getSellerId();
+                if (sellerId == -1) {
+                    // no seller ID found, start activ to create a new seller
+                    SellerEditActiv.open(getContext());
+                } else {
+                    // seller ID found, open dashboard
+                    SellerDashActiv.open(getContext(), sellerId);
+                }
             }
         });
 

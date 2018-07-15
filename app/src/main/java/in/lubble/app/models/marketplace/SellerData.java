@@ -3,6 +3,8 @@ package in.lubble.app.models.marketplace;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+
 public class SellerData {
 
     @SerializedName("id")
@@ -17,6 +19,9 @@ public class SellerData {
     @SerializedName("photo")
     @Expose
     private String photoUrl;
+    @SerializedName("items")
+    @Expose
+    private ArrayList<Item> itemList;
 
     public Integer getId() {
         return id;
@@ -50,4 +55,11 @@ public class SellerData {
         this.photoUrl = photoUrl;
     }
 
+    public ArrayList<Item> getItemList() {
+        return itemList;
+    }
+
+    public void setItemList(ArrayList<Item> itemList) {
+        this.itemList = itemList;
+    }
 }

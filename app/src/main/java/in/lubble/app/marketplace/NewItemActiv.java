@@ -157,6 +157,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
         HashMap<String, Object> params = new HashMap<>();
 
+        params.put("seller", "8");
         params.put("name", nameTil.getEditText().getText().toString());
         params.put("category", categoryId);
         params.put("mrp", mrpTil.getEditText().getText().toString());

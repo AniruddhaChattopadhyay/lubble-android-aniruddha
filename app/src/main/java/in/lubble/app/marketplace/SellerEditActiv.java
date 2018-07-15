@@ -135,6 +135,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                             .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
                             .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/seller/" + sellerData.getId())
                             .setAction(UploadFileService.ACTION_UPLOAD));
+                    SellerDashActiv.open(SellerEditActiv.this, sellerData.getId());
                 }
             }
 

@@ -25,6 +25,7 @@ public class LubbleSharedPrefs {
     private final String IS_GROUP_INFO_OPENED = "IS_GROUP_INFO_OPENED";
     private final String IS_EVENT_TOOLTIP_SHOWN = "IS_EVENT_TOOLTIP_SHOWN";
     private final String IS_EVENT_OPENED = "IS_EVENT_OPENED";
+    private final String SELLER_ID = "SELLER_ID";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -157,6 +158,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsEventOpened(boolean isOpened) {
         return preferences.edit().putBoolean(IS_EVENT_OPENED, isOpened).commit();
+    }
+
+    public int getSellerId() {
+        return preferences.getInt(SELLER_ID, -1);
+    }
+
+    public boolean setSellerId(int sellerId) {
+        return preferences.edit().putInt(SELLER_ID, sellerId).commit();
     }
 
 }
