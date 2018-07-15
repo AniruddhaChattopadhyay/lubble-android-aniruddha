@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@color/white"
+        android:background="@color/super_light_gray"
         android:gravity="center"
         android:padding="8dp"
         android:text="UNREAD MESSAGES\t&#x25bd;" />
