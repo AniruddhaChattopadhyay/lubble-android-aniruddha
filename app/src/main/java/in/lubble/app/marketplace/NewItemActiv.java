@@ -8,7 +8,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -93,6 +95,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         submitBtn = findViewById(R.id.btn_submit);
 
         Analytics.triggerScreenEvent(this, this.getClass());
+
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -223,6 +229,17 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             return false;
         }
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)

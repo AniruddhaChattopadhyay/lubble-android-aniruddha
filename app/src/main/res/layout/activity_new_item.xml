@@ -10,9 +10,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <include
+            android:id="@+id/text_toolbar"
+            layout="@layout/text_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="300dp"
+            android:layout_below="@id/text_toolbar"
             android:layout_centerHorizontal="true"
             android:background="@color/very_light_gray"
             android:gravity="center"
@@ -35,6 +42,7 @@
         <ImageView
             android:id="@+id/iv_item_image"
             android:layout_width="match_parent"
+            android:layout_below="@id/text_toolbar"
             android:layout_height="300dp"
             android:scaleType="centerCrop" />
 
@@ -241,8 +249,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/til_item_sellingprice"
                 android:layout_centerHorizontal="true"
-                android:gravity="center"
                 android:layout_marginTop="8dp"
+                android:gravity="center"
                 android:orientation="horizontal">
 
                 <ImageView
@@ -254,9 +262,9 @@
 
                 <TextView
                     android:id="@+id/tv_item_hint"
-                    android:layout_marginLeft="4dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
                     android:text="@string/item_review_hint" />
 
             </LinearLayout>
