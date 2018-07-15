@@ -14,8 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
@@ -33,7 +32,6 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -54,113 +52,70 @@ import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 @RuntimePermissions
-public class NewItemActiv extends AppCompatActivity implements View.OnClickListener {
+public class SellerEditActiv extends AppCompatActivity implements View.OnClickListener {
 
-    private static final String TAG = "NewItemActiv";
+    private static final String TAG = "SellerEditActiv";
+    private static final int REQUEST_PHOTO = 304;
 
-    private static final int REQUEST_CODE_ITEM_PIC = 469;
-    private static final int REQUEST_CODE_CATEGORY = 339;
+    private ImageView photoIv;
+    private TextView changePicHintTv;
+    private TextInputLayout sellerNameTil;
+    private TextInputLayout sellerAboutTil;
+    private Button submitBtn;
+
+    private String currentPhotoPath;
     private Uri picUri = null;
 
-    private ScrollView parentScrollView;
-    private ImageView photoIv;
-    private LinearLayout changePicHintContainer;
-    private TextInputLayout nameTil;
-    private TextInputLayout categoryTil;
-    private TextInputLayout descTil;
-    private TextInputLayout mrpTil;
-    private TextInputLayout sellingPriceTil;
-    private Button submitBtn;
-    private String currentPhotoPath;
-    private int categoryId = -1;
-    private String categoryName;
-
     public static void open(Context context) {
-        context.startActivity(new Intent(context, NewItemActiv.class));
+        context.startActivity(new Intent(context, SellerEditActiv.class));
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_item);
+        setContentView(R.layout.activity_seller_edit);
 
-        parentScrollView = findViewById(R.id.scrollview_parent);
-        photoIv = findViewById(R.id.iv_item_image);
-        changePicHintContainer = findViewById(R.id.linearlayout_changepic_hint);
-        nameTil = findViewById(R.id.til_item_name);
-        categoryTil = findViewById(R.id.til_category);
-        descTil = findViewById(R.id.til_item_desc);
-        mrpTil = findViewById(R.id.til_item_mrp);
-        sellingPriceTil = findViewById(R.id.til_item_sellingprice);
+        photoIv = findViewById(R.id.iv_seller_pic);
+        changePicHintTv = findViewById(R.id.tv_change_pic_hint);
+        sellerNameTil = findViewById(R.id.til_seller_name);
+        sellerAboutTil = findViewById(R.id.til_seller_about);
         submitBtn = findViewById(R.id.btn_submit);
-
-        Analytics.triggerScreenEvent(this, this.getClass());
 
         Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle("New Item");
+        setTitle("Seller Profile");
 
-        submitBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isValidationPassed()) {
-                    uploadNewItem();
-                }
-            }
-        });
-
-        UiUtils.hideKeyboard(this);
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         photoIv.setOnClickListener(this);
-        changePicHintContainer.setOnClickListener(this);
-        categoryTil.getEditText().setOnClickListener(this);
+        changePicHintTv.setOnClickListener(this);
+        submitBtn.setOnClickListener(this);
+
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.iv_item_image:
-            case R.id.linearlayout_changepic_hint:
-                NewItemActivPermissionsDispatcher
-                        .startPhotoPickerWithPermissionCheck(NewItemActiv.this, REQUEST_CODE_ITEM_PIC);
+            case R.id.iv_seller_pic:
+            case R.id.tv_change_pic_hint:
+                SellerEditActivPermissionsDispatcher
+                        .startPhotoPickerWithPermissionCheck(SellerEditActiv.this, REQUEST_PHOTO);
                 break;
-            case R.id.et_category:
-                startActivityForResult(CategoryListActiv.getIntent(NewItemActiv.this), REQUEST_CODE_CATEGORY);
+            case R.id.btn_submit:
+                if (isValidationPassed()) {
+                    uploadSellerProfile();
+                }
                 break;
         }
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_ITEM_PIC && resultCode == RESULT_OK) {
-            File imageFile;
-            if (data != null && data.getData() != null) {
-                Uri uri = data.getData();
-                imageFile = getFileFromInputStreamUri(this, uri);
-            } else {
-                // from camera
-                imageFile = new File(currentPhotoPath);
-            }
-            picUri = Uri.fromFile(imageFile);
-            GlideApp.with(this)
-                    .load(imageFile)
-                    .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
-                    .into(photoIv);
-        } else if (requestCode == REQUEST_CODE_CATEGORY && resultCode == RESULT_OK) {
-            categoryId = data.getIntExtra("cat_id", -1);
-            categoryName = data.getStringExtra("cat_name");
-            categoryTil.getEditText().setText(categoryName);
-        }
-    }
-
-    private void uploadNewItem() {
+    private void uploadSellerProfile() {
 
         HashMap<String, Object> params = new HashMap<>();
 
-        params.put("name", nameTil.getEditText().getText().toString());
-        params.put("category", categoryId);
-        params.put("mrp", mrpTil.getEditText().getText().toString());
-        params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
+        params.put("name", sellerNameTil.getEditText().getText().toString());
+        params.put("bio", sellerAboutTil.getEditText().getText().toString());
         params.put("client_timestamp", System.currentTimeMillis());
 
         final JSONObject jsonObject = new JSONObject(params);
@@ -174,11 +129,11 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 final Item item = response.body();
                 if (item != null) {
                     //todo compress img
-                    startService(new Intent(NewItemActiv.this, UploadFileService.class)
-                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "item_pic_" + System.currentTimeMillis() + ".jpg")
+                    startService(new Intent(SellerEditActiv.this, UploadFileService.class)
+                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "seller_pic_" + System.currentTimeMillis() + ".jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
                             .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
-                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/items/" + item.getId())
+                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/seller/" + item.getId())
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
             }
@@ -190,43 +145,41 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_PHOTO && resultCode == RESULT_OK) {
+            File imageFile;
+            if (data != null && data.getData() != null) {
+                Uri uri = data.getData();
+                imageFile = getFileFromInputStreamUri(this, uri);
+            } else {
+                // from camera
+                imageFile = new File(currentPhotoPath);
+            }
+            picUri = Uri.fromFile(imageFile);
+            GlideApp.with(this)
+                    .load(imageFile)
+                    .circleCrop()
+                    .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
+                    .into(photoIv);
+        }
+    }
+
     private boolean isValidationPassed() {
-        if (!isValidString(nameTil.getEditText().getText().toString().trim())) {
-            nameTil.setError(getString(R.string.name_error));
-            parentScrollView.smoothScrollTo(0, 0);
+        if (!isValidString(sellerNameTil.getEditText().getText().toString().trim())) {
+            sellerNameTil.setError(getString(R.string.name_error));
             return false;
         } else {
-            nameTil.setError(null);
+            sellerNameTil.setError(null);
         }
-        if (!isValidString(descTil.getEditText().getText().toString())) {
-            descTil.setError(getString(R.string.desc_error));
-            parentScrollView.smoothScrollTo(0, 0);
+        if (!isValidString(sellerAboutTil.getEditText().getText().toString())) {
+            sellerAboutTil.setError(getString(R.string.desc_error));
             return false;
         } else {
-            descTil.setError(null);
-        }
-        if (!isValidString(mrpTil.getEditText().getText().toString())) {
-            mrpTil.setError(getString(R.string.event_organizer_error));
-            parentScrollView.smoothScrollTo(0, 0);
-            return false;
-        } else {
-            mrpTil.setError(null);
-        }
-        if (!isValidString(sellingPriceTil.getEditText().getText().toString())) {
-            sellingPriceTil.setError(getString(R.string.event_date_error));
-            parentScrollView.smoothScrollTo(0, 0);
-            return false;
-        } else {
-            sellingPriceTil.setError(null);
-        }
-        if (categoryId == -1) {
-            Toast.makeText(this, R.string.no_category, Toast.LENGTH_SHORT).show();
-            parentScrollView.smoothScrollTo(0, 0);
-            return false;
+            sellerAboutTil.setError(null);
         }
         if (picUri == null) {
             Toast.makeText(this, R.string.no_photo, Toast.LENGTH_SHORT).show();
-            parentScrollView.smoothScrollTo(0, 0);
             return false;
         }
         return true;
@@ -259,7 +212,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // NOTE: delegate the permission handling to generated method
-        NewItemActivPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+        SellerEditActivPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
     @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)

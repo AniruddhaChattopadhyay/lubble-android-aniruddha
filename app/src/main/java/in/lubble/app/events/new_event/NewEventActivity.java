@@ -273,14 +273,14 @@ public class NewEventActivity extends AppCompatActivity {
 
     private boolean isValidationPassed() {
         if (!isValidString(titleTil.getEditText().getText().toString())) {
-            titleTil.setError(getString(R.string.event_name_error));
+            titleTil.setError(getString(R.string.name_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             titleTil.setError(null);
         }
         if (!isValidString(descTil.getEditText().getText().toString())) {
-            descTil.setError(getString(R.string.event_desc_error));
+            descTil.setError(getString(R.string.desc_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {

@@ -95,7 +95,8 @@ public class MarketplaceFrag extends Fragment {
         newItemContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NewItemActiv.open(getContext());
+                //NewItemActiv.open(getContext());
+                SellerEditActiv.open(getContext());
             }
         });
 
