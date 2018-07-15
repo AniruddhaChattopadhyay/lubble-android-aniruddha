@@ -515,6 +515,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
             final int size = chatDataList.size();
             chatDataList.add(chatData);
+            if (size - 1 >= 0) {
+                // remove the last msg lubb hint
+                notifyItemChanged(size - 1);
+            }
             notifyItemInserted(size);
         }
     }
@@ -522,6 +526,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void addChatData(int pos, @NonNull ChatData chatData) {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
             chatDataList.add(pos, chatData);
+            if (pos - 1 >= 0) {
+                // remove the last msg lubb hint
+                notifyItemChanged(pos - 1);
+            }
             notifyItemInserted(pos);
         }
     }
