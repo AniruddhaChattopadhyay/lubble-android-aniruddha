@@ -129,6 +129,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ValueEventListener bottomBarListener;
     @Nullable
     private String replyMsgId = null;
+    @Nullable
+    private Parcelable recyclerViewState;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -223,6 +225,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         foundFirstUnreadMsg = false;
+        chatRecyclerView.setOnFlingListener(new RecyclerView.OnFlingListener() {
+            @Override
+            public boolean onFling(int velocityX, int velocityY) {
+                recyclerViewState = null;
+                return false;
+            }
+        });
         chatAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
@@ -230,8 +239,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 int msgCount = chatAdapter.getItemCount();
                 int lastVisiblePosition =
                         layoutManager.findLastCompletelyVisibleItemPosition();
-                if (recylerViewState != null) {
-                    chatRecyclerView.getLayoutManager().onRestoreInstanceState(recylerViewState);
+                if (recyclerViewState != null) {
+                    chatRecyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+                    if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                            lastVisiblePosition == (positionStart - 1))) {
+                        // If the user is at the bottom of the list, scroll to the bottom
+                        // of the list to show the newly added message.
+                        recyclerViewState = null;
+                        chatRecyclerView.scrollToPosition(positionStart);
+                    }
                 } else {
                     // If the recycler view is initially being loaded
                     if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
@@ -747,12 +763,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    Parcelable recylerViewState;
-
     @Override
     public void onPause() {
         super.onPause();
-        recylerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
+        recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
         messagesReference.removeEventListener(msgChildListener);
         groupReference.removeEventListener(groupInfoListener);
