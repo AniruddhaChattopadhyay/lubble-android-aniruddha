@@ -65,7 +65,7 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         notifyDataSetChanged();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView itemIv;
         final TextView nameTv;
         final TextView priceTv;
@@ -75,6 +75,12 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             itemIv = view.findViewById(R.id.iv_item);
             nameTv = view.findViewById(R.id.tv_name);
             priceTv = view.findViewById(R.id.tv_price);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            ItemActivity.open(v.getContext(), itemList.get(getAdapterPosition()).getId());
         }
     }
 
