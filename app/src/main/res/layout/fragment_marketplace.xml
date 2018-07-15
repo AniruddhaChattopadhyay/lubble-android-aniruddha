@@ -55,6 +55,7 @@
         app:layout_anchorGravity="bottom|right|end"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
+        android:elevation="6dp"
         android:background="@drawable/pill_button"
         android:gravity="center"
         android:orientation="horizontal"
