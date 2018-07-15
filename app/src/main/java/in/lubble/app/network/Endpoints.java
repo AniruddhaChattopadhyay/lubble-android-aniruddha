@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
+import in.lubble.app.models.marketplace.SellerData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -16,17 +17,20 @@ import retrofit2.http.Path;
 
 public interface Endpoints {
 
-    @GET("marketplace/home")
+    @GET("marketplace/home/")
     Call<MarketplaceData> fetchMarketplaceData();
 
-    @GET("marketplace/categories")
+    @GET("marketplace/categories/")
     Call<ArrayList<Category>> fetchCategories();
 
-    @POST("marketplace/item")
+    @POST("marketplace/item/")
     Call<Item> uploadNewItem(@Body RequestBody params);
 
-    @GET("marketplace/item/{item_id}")
+    @GET("marketplace/item/{item_id}/")
     Call<Item> fetchItemDetails(@Path("item_id") int itemId);
+
+    @POST("marketplace/seller/")
+    Call<SellerData> uploadSellerProfile(@Body RequestBody params);
 
     class ResponseBean {
 

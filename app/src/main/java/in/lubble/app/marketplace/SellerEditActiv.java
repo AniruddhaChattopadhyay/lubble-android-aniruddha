@@ -29,7 +29,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.models.marketplace.Item;
+import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import okhttp3.RequestBody;
@@ -123,23 +123,23 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.uploadNewItem(body).enqueue(new Callback<Item>() {
+        endpoints.uploadSellerProfile(body).enqueue(new Callback<SellerData>() {
             @Override
-            public void onResponse(Call<Item> call, Response<Item> response) {
-                final Item item = response.body();
-                if (item != null) {
+            public void onResponse(Call<SellerData> call, Response<SellerData> response) {
+                final SellerData sellerData = response.body();
+                if (sellerData != null) {
                     //todo compress img
                     startService(new Intent(SellerEditActiv.this, UploadFileService.class)
                             .putExtra(UploadFileService.EXTRA_FILE_NAME, "seller_pic_" + System.currentTimeMillis() + ".jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
                             .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
-                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/seller/" + item.getId())
+                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/seller/" + sellerData.getId())
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
             }
 
             @Override
-            public void onFailure(Call<Item> call, Throwable t) {
+            public void onFailure(Call<SellerData> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
             }
         });
