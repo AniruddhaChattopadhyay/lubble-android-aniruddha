@@ -554,6 +554,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         return chatDataList.indexOf(chatDataToFind);
     }
 
+    public void setPosToFlash(int pos) {
+        this.posToFlash = pos;
+    }
+
     @Override
     public int getItemCount() {
         return chatDataList.size();

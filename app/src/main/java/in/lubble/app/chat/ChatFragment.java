@@ -258,6 +258,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     final int indexOfChatMsg = chatAdapter.getIndexOfChatMsg(msgIdToOpen);
                     if (indexOfChatMsg != -1) {
                         chatRecyclerView.scrollToPosition(indexOfChatMsg);
+                        chatAdapter.setPosToFlash(indexOfChatMsg);
                         if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
                                 lastVisiblePosition == (positionStart - 1))) {
                             // If the user is at the bottom of the list, scroll to the bottom
