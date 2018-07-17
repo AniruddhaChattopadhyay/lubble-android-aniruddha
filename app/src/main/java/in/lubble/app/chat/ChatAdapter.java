@@ -548,6 +548,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         return chatDataList.get(pos);
     }
 
+    public int getIndexOfChatMsg(String msgId) {
+        final ChatData chatDataToFind = new ChatData();
+        chatDataToFind.setId(msgId);
+        return chatDataList.indexOf(chatDataToFind);
+    }
+
     @Override
     public int getItemCount() {
         return chatDataList.size();

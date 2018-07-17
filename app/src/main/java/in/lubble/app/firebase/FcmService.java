@@ -66,6 +66,12 @@ public class FcmService extends FirebaseMessagingService {
                 AppNotifUtils.showAppNotif(this, appNotifData);
                 // prefetch notices
                 pullNotices(dataMap);
+            } else if (StringUtils.isValidString(type) && "lubb".equalsIgnoreCase(type)) {
+                // create like notif
+                Gson gson = new Gson();
+                JsonElement jsonElement = gson.toJsonTree(dataMap);
+                AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
+                AppNotifUtils.showAppNotif(this, appNotifData);
             } else if (StringUtils.isValidString(type) && "chat".equalsIgnoreCase(type)) {
                 // create chat notif
                 createChatNotif(dataMap);

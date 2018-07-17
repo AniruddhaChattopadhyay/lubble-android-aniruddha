@@ -5,14 +5,20 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import com.bumptech.glide.request.target.Target;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.concurrent.ExecutionException;
+
 import in.lubble.app.Constants;
+import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
@@ -23,6 +29,7 @@ import in.lubble.app.notifications.KeyMappingSharedPrefs;
 
 import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_MSG_ID;
 import static in.lubble.app.events.EventInfoActivity.KEY_EVENT_ID;
 import static in.lubble.app.utils.DateTimeUtils.getTimeBasedUniqueInt;
 
@@ -57,6 +64,8 @@ public class AppNotifUtils {
         String notifChannel = Constants.APP_NOTIF_CHANNEL;
         if (appNotifData.getType().equalsIgnoreCase("notice")) {
             notifChannel = Constants.NOTICE_NOTIF_CHANNEL;
+        } else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
+            notifChannel = Constants.LUBB_NOTIF_CHANNEL;
         }
         addGroupIdMapping(appNotifData.getNotifKey());
 
@@ -73,10 +82,24 @@ public class AppNotifUtils {
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(appNotifData.getMsg()))
                 .setContentText(appNotifData.getMsg());
 
-        NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        try {
+            if (StringUtils.isValidString(appNotifData.getIconUrl())) {
+                final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getIconUrl()).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
+                builder.setLargeIcon(bitmap);
+            } else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
+                builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_notif_like));
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            NotificationManager notificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify(notifId, builder.build());
+            notificationManager.notify(notifId, builder.build());
+        }
+
     }
 
     private static TaskStackBuilder getPendingIntent(Context context, AppNotifData appNotifData) {
@@ -99,6 +122,12 @@ public class AppNotifUtils {
         } else if (appNotifData.getType().equalsIgnoreCase("new_event")) {
             Intent intent = new Intent(context, EventInfoActivity.class);
             intent.putExtra(KEY_EVENT_ID, appNotifData.getNotifKey());
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            return stackBuilder.addNextIntentWithParentStack(intent);
+        }  else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
+            Intent intent = new Intent(context, ChatActivity.class);
+            intent.putExtra(EXTRA_GROUP_ID, appNotifData.getGroupId());
+            intent.putExtra(EXTRA_MSG_ID, appNotifData.getMessageId());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else {

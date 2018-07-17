@@ -18,6 +18,7 @@ import static in.lubble.app.utils.FragUtils.replaceFrag;
 public class ChatActivity extends AppCompatActivity {
 
     public static final String EXTRA_GROUP_ID = "chat_activ_group_id";
+    public static final String EXTRA_MSG_ID = "chat_activ_msg_id";
     // if we need to show joining progress dialog
     public static final String EXTRA_IS_JOINING = "chat_activ_is_joining";
     private ImageView toolbarIcon;
@@ -47,13 +48,14 @@ public class ChatActivity extends AppCompatActivity {
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
+        final String msgId = getIntent().getStringExtra(EXTRA_MSG_ID);
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);
 
         if (groupId == null) {
             throw new RuntimeException("No Group ID passed");
         }
 
-        final ChatFragment targetFrag = ChatFragment.newInstance(groupId, isJoining);
+        final ChatFragment targetFrag = ChatFragment.newInstance(groupId, isJoining, msgId);
         replaceFrag(getSupportFragmentManager(), targetFrag, R.id.frame_fragContainer);
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override

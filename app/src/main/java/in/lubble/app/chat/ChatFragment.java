@@ -95,6 +95,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
+    private static final String KEY_MSG_ID = "CHAT_MSG_ID";
     private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
 
     @Nullable
@@ -116,6 +117,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
     private String groupId;
+    @Nullable
+    private String msgIdToOpen;
     private boolean isJoining;
     private ChildEventListener msgChildListener;
     private ValueEventListener groupInfoListener;
@@ -136,10 +139,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         // Required empty public constructor
     }
 
-    public static ChatFragment newInstance(String groupId, boolean isJoining) {
+    public static ChatFragment newInstance(String groupId, boolean isJoining, @Nullable String msgId) {
 
         Bundle args = new Bundle();
         args.putString(KEY_GROUP_ID, groupId);
+        args.putString(KEY_MSG_ID, msgId);
         args.putBoolean(KEY_IS_JOINING, isJoining);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
@@ -151,6 +155,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         groupId = getArguments().getString(KEY_GROUP_ID);
+        msgIdToOpen = getArguments().getString(KEY_MSG_ID);
         isJoining = getArguments().getBoolean(KEY_IS_JOINING);
 
         groupReference = getLubbleGroupsRef().child(groupId);
@@ -229,6 +234,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public boolean onFling(int velocityX, int velocityY) {
                 recyclerViewState = null;
+                msgIdToOpen = null;
                 return false;
             }
         });
@@ -247,6 +253,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         // of the list to show the newly added message.
                         recyclerViewState = null;
                         chatRecyclerView.scrollToPosition(positionStart);
+                    }
+                } else if (msgIdToOpen != null) {
+                    final int indexOfChatMsg = chatAdapter.getIndexOfChatMsg(msgIdToOpen);
+                    if (indexOfChatMsg != -1) {
+                        chatRecyclerView.scrollToPosition(indexOfChatMsg);
+                        if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                                lastVisiblePosition == (positionStart - 1))) {
+                            // If the user is at the bottom of the list, scroll to the bottom
+                            // of the list to show the newly added message.
+                            msgIdToOpen = null;
+                            chatRecyclerView.scrollToPosition(positionStart);
+                        }
                     }
                 } else {
                     // If the recycler view is initially being loaded

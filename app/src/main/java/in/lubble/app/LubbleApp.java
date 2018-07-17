@@ -81,6 +81,12 @@ public class LubbleApp extends Application {
                             "App Notifications",
                             NotificationManager.IMPORTANCE_HIGH));
 
+            mNotifyMgr.createNotificationChannel(
+                    new NotificationChannel(
+                            Constants.LUBB_NOTIF_CHANNEL,
+                            "Message Like Notifications",
+                            NotificationManager.IMPORTANCE_LOW));
+
         }
     }
 }
