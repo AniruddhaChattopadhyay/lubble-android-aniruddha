@@ -23,6 +23,7 @@ import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.MsgInfoData;
@@ -69,6 +70,8 @@ public class MsgInfoActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setTitle(getString(R.string.msg_info));
+
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
