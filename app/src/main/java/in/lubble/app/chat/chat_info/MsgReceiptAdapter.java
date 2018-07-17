@@ -13,8 +13,10 @@ import java.util.List;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.MsgInfoData;
 
+import static in.lubble.app.analytics.AnalyticsEvents.EXPAND_LIKES;
 import static in.lubble.app.utils.DateTimeUtils.getHumanTimestampWithTime;
 
 public class MsgReceiptAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -119,6 +121,7 @@ public class MsgReceiptAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         @Override
         public void onClick(View v) {
+            Analytics.triggerEvent(EXPAND_LIKES, v.getContext());
             initCount = -1;
             notifyDataSetChanged();
         }
