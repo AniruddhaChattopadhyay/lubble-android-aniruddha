@@ -83,8 +83,8 @@ public class MsgInfoActivity extends AppCompatActivity {
 
         readRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         lubbRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        readAdapter = new MsgReceiptAdapter(GlideApp.with(this));
-        lubbAdapter = new MsgReceiptAdapter(GlideApp.with(this));
+        readAdapter = new MsgReceiptAdapter(GlideApp.with(this), -1);
+        lubbAdapter = new MsgReceiptAdapter(GlideApp.with(this), 3);
         readRecyclerView.setAdapter(readAdapter);
         lubbRecyclerView.setAdapter(lubbAdapter);
 
