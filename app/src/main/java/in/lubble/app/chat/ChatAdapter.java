@@ -179,6 +179,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid())) {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+            if (position == chatDataList.size() - 1) {
+                // scroll to bottom if liked last msg to show that like icon and count
+                recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
+            }
         } else {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
@@ -272,6 +276,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid())) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+            if (position == chatDataList.size() - 1) {
+                // scroll to bottom if liked last msg to show that like icon and count
+                recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
+            }
         } else {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
