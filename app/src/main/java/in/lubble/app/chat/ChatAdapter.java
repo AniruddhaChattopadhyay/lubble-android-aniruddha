@@ -358,7 +358,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void showLubbHintIfLastMsg(int position, final ChatData chatData, final RecvdChatViewHolder recvdChatViewHolder) {
-        if (position == chatDataList.size() - 1 && !shownLubbHintForLastMsg) {
+        if (position == chatDataList.size() - 1) {
             UiUtils.animateSlideDownShow(context, recvdChatViewHolder.lubbLastHintContainer);
             //recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.lubbContainer.setVisibility(View.GONE);
