@@ -7,10 +7,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 
 import java.util.ArrayList;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.network.Endpoints;
@@ -19,25 +22,30 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CategoryListActiv extends AppCompatActivity {
+public class CategoryChooserActiv extends AppCompatActivity {
 
-    private static final String TAG = "CategoryListActiv";
+    private static final String TAG = "CategoryChooserActiv";
     private RecyclerView catsRv;
     private CategoryAdapter categoryAdapter;
 
     public static Intent getIntent(Context context) {
-        return new Intent(context, CategoryListActiv.class);
+        return new Intent(context, CategoryChooserActiv.class);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_category_list);
+        setContentView(R.layout.activity_choose_category);
+
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle(R.string.category);
 
         catsRv = findViewById(R.id.rv_cats);
         catsRv.setLayoutManager(new LinearLayoutManager(this));
 
-        categoryAdapter = new CategoryAdapter(new CategorySelectedListener() {
+        categoryAdapter = new CategoryAdapter(GlideApp.with(this), new CategorySelectedListener() {
             @Override
             public void onSelected(Category category) {
                 final Intent intent = new Intent();
@@ -73,8 +81,15 @@ public class CategoryListActiv extends AppCompatActivity {
         });
     }
 
-    protected interface CategorySelectedListener {
-        void onSelected(Category category);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

@@ -73,7 +73,6 @@ public class ItemListActiv extends AppCompatActivity {
         }
 
         if (!isSeller) {
-            sellerPicIv.setVisibility(View.GONE);
             sellerBioTv.setVisibility(View.GONE);
             fetchCategoryItems();
         } else {
@@ -90,12 +89,13 @@ public class ItemListActiv extends AppCompatActivity {
                 final Category categoryData = response.body();
                 if (categoryData != null) {
                     sellerNameTv.setText(categoryData.getName());
-                    //sellerBioTv.setText(categoryData.getBio());
 
-                    /*GlideApp.with(ItemListActiv.this)
-                            .load(categoryData.getPhotoUrl())
+                    GlideApp.with(ItemListActiv.this)
+                            .load(categoryData.getIcon())
                             .circleCrop()
-                            .into(sellerPicIv);*/
+                            .into(sellerPicIv);
+
+                    sellerPicIv.setBackgroundResource(R.drawable.circle);
 
                     setTitle(categoryData.getName());
 

@@ -5,11 +5,13 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Category;
 
@@ -18,11 +20,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final String TAG = "CategoryAdapter";
 
     private final List<Category> categoryList;
-    private CategoryListActiv.CategorySelectedListener categorySelectedListener;
+    private CategorySelectedListener categorySelectedListener;
+    private GlideRequests glide;
 
-    public CategoryAdapter(CategoryListActiv.CategorySelectedListener categorySelectedListener) {
+    public CategoryAdapter(GlideRequests glide, CategorySelectedListener categorySelectedListener) {
         categoryList = new ArrayList<>();
         this.categorySelectedListener = categorySelectedListener;
+        this.glide = glide;
     }
 
     @NonNull
@@ -41,6 +45,8 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         viewHolder.nameTv.setText(category.getName());
 
+        glide.load(category.getIcon()).into(viewHolder.iconIv);
+
     }
 
     @Override
@@ -54,11 +60,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        final ImageView iconIv;
         final TextView nameTv;
 
         ViewHolder(View view) {
             super(view);
-            nameTv = view.findViewById(R.id.tv_cat_name);
+            iconIv = view.findViewById(R.id.iv_icon);
+            nameTv = view.findViewById(R.id.tv_label);
             view.setOnClickListener(this);
         }
 

@@ -127,7 +127,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                         .startPhotoPickerWithPermissionCheck(NewItemActiv.this, REQUEST_CODE_ITEM_PIC);
                 break;
             case R.id.et_category:
-                startActivityForResult(CategoryListActiv.getIntent(NewItemActiv.this), REQUEST_CODE_CATEGORY);
+                startActivityForResult(CategoryChooserActiv.getIntent(NewItemActiv.this), REQUEST_CODE_CATEGORY);
                 break;
         }
     }

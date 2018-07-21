@@ -77,7 +77,7 @@ public class ColoredChipsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public void onClick(View v) {
             final Category selectedCategory = list.get(getAdapterPosition());
             if (selectedCategory.getId() == null) {
-                //todo open categories activ
+                v.getContext().startActivity(CategoriesActiv.getIntent(v.getContext()));
             } else {
                 ItemListActiv.open(v.getContext(), false, selectedCategory.getId());
             }
