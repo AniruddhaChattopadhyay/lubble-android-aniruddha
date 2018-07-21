@@ -16,6 +16,9 @@ public class Category {
     @SerializedName("name")
     @Expose
     private String name;
+    @SerializedName("icon")
+    @Expose
+    private String icon;
     @SerializedName("items")
     @Expose
     @Nullable
@@ -46,4 +49,11 @@ public class Category {
         this.items = items;
     }
 
+    public String getIcon() {
+        return icon;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
 }

@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -31,6 +33,7 @@ public class MarketplaceFrag extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    private RecyclerView categoriesRv;
     private TextView cat1Name;
     private TextView cat2Name;
     private RecyclerView allItemsRv;
@@ -64,6 +67,8 @@ public class MarketplaceFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_marketplace, container, false);
 
+        categoriesRv = view.findViewById(R.id.rv_categories);
+        categoriesRv.setNestedScrollingEnabled(false);
         RelativeLayout cat1cv = view.findViewById(R.id.layout_cat1);
         RelativeLayout cat2cv = view.findViewById(R.id.layout_cat2);
 
@@ -78,9 +83,13 @@ public class MarketplaceFrag extends Fragment {
         category2Rv = cat2cv.findViewById(R.id.rv_cat_items);
         category2Rv.setNestedScrollingEnabled(false);
 
+        categoriesRv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         category1Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         category2Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         allItemsRv.setLayoutManager(new GridLayoutManager(getContext(), 2));
+
+        final ColoredChipsAdapter catAdapter = new ColoredChipsAdapter(GlideApp.with(getContext()));
+        categoriesRv.setAdapter(catAdapter);
 
         final SmallItemAdapter cat1Adapter = new SmallItemAdapter(GlideApp.with(getContext()));
         category1Rv.setAdapter(cat1Adapter);
@@ -92,6 +101,7 @@ public class MarketplaceFrag extends Fragment {
         allItemsRv.setAdapter(allItemsAdapter);
 
         fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter);
+        fetchCategories(catAdapter);
 
         newItemContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,6 +147,27 @@ public class MarketplaceFrag extends Fragment {
 
             @Override
             public void onFailure(Call<MarketplaceData> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+            }
+        });
+    }
+
+    private void fetchCategories(final ColoredChipsAdapter catAdapter) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchCategories().enqueue(new Callback<ArrayList<Category>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Category>> call, Response<ArrayList<Category>> response) {
+                final ArrayList<Category> categoryList = response.body();
+                if (categoryList != null && categoryList.size() > 0) {
+                    int upperLimit = categoryList.size() > 5 ? 5 : categoryList.size();
+                    for (int i = 0; i < upperLimit; i++) {
+                        catAdapter.addData(categoryList.get(i));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Category>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
             }
         });
