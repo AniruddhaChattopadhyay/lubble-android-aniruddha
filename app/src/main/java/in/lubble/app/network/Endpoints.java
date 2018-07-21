@@ -33,11 +33,17 @@ public interface Endpoints {
     @POST("marketplace/seller/")
     Call<SellerData> uploadSellerProfile(@Body RequestBody params);
 
-    @GET("marketplace/seller/{seller_id}")
+    @GET("marketplace/seller/{seller_id}/")
     Call<SellerData> fetchSellerProfile(@Path("seller_id") int sellerId);
 
-    @GET("app/features")
+    @GET("app/features/")
     Call<FeatureData> fetchAppFeatures();
+
+    @GET("marketplace/items/category/{cat_id}")
+    Call<Category> fetchCategoryItems(@Path("cat_id") int categoryId);
+
+    @GET("marketplace/items/seller/{seller_id}")
+    Call<SellerData> fetchSellerItems(@Path("seller_id") int sellerId);
 
     class ResponseBean {
 

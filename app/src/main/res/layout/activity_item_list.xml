@@ -49,24 +49,11 @@
                 android:gravity="center_horizontal"
                 tools:text="@tools:sample/lorem" />
 
-            <TextView
-                android:id="@+id/tv_new_item"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_seller_bio"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/rect_rounded_border"
-                android:padding="8dp"
-                android:text="Add New Item"
-                android:textColor="@color/colorAccent"
-                android:textStyle="bold" />
-
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_items"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_new_item"
+                android:layout_below="@id/tv_seller_bio"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"
