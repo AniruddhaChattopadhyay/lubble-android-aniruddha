@@ -47,7 +47,9 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         final ArrayList<PhotoData> photoList = item.getPhotos();
         if (photoList.size() > 0) {
-            glide.load(photoList.get(0).getUrl()).into(viewHolder.itemIv);
+            glide.load(photoList.get(0).getUrl())
+                    .thumbnail(0.1f)
+                    .into(viewHolder.itemIv);
         }
 
     }

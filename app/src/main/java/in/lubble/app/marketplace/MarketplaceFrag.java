@@ -13,8 +13,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -100,8 +98,7 @@ public class MarketplaceFrag extends Fragment {
         final BigItemAdapter allItemsAdapter = new BigItemAdapter(GlideApp.with(getContext()));
         allItemsRv.setAdapter(allItemsAdapter);
 
-        fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter);
-        fetchCategories(catAdapter);
+        fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter, catAdapter);
 
         newItemContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,20 +117,20 @@ public class MarketplaceFrag extends Fragment {
         return view;
     }
 
-    private void fetchMarketplaceData(final SmallItemAdapter cat1Adapter, final SmallItemAdapter cat2Adapter, final BigItemAdapter allItemsAdapter) {
+    private void fetchMarketplaceData(final SmallItemAdapter cat1Adapter, final SmallItemAdapter cat2Adapter, final BigItemAdapter allItemsAdapter, final ColoredChipsAdapter catAdapter) {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchMarketplaceData().enqueue(new Callback<MarketplaceData>() {
             @Override
             public void onResponse(Call<MarketplaceData> call, Response<MarketplaceData> response) {
                 final MarketplaceData marketplaceData = response.body();
 
-                final Category category1 = marketplaceData.getCategories().get(0);
+                final Category category1 = marketplaceData.getShowcaseCategories().get(0);
                 cat1Name.setText(category1.getName());
                 for (Item item : category1.getItems()) {
                     cat1Adapter.addData(item);
                 }
 
-                final Category category2 = marketplaceData.getCategories().get(1);
+                final Category category2 = marketplaceData.getShowcaseCategories().get(1);
                 cat2Name.setText(category2.getName());
                 for (Item item : category2.getItems()) {
                     cat2Adapter.addData(item);
@@ -143,31 +140,14 @@ public class MarketplaceFrag extends Fragment {
                     allItemsAdapter.addData(item);
                 }
 
+                for (int i = 0; i < marketplaceData.getCategories().size(); i++) {
+                    catAdapter.addData(marketplaceData.getCategories().get(i));
+                }
+
             }
 
             @Override
             public void onFailure(Call<MarketplaceData> call, Throwable t) {
-                Log.e(TAG, "onFailure: ");
-            }
-        });
-    }
-
-    private void fetchCategories(final ColoredChipsAdapter catAdapter) {
-        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchCategories().enqueue(new Callback<ArrayList<Category>>() {
-            @Override
-            public void onResponse(Call<ArrayList<Category>> call, Response<ArrayList<Category>> response) {
-                final ArrayList<Category> categoryList = response.body();
-                if (categoryList != null && categoryList.size() > 0) {
-                    int upperLimit = categoryList.size() > 5 ? 5 : categoryList.size();
-                    for (int i = 0; i < upperLimit; i++) {
-                        catAdapter.addData(categoryList.get(i));
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ArrayList<Category>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
             }
         });

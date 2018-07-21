@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
@@ -157,7 +158,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
         HashMap<String, Object> params = new HashMap<>();
 
-        params.put("seller", "8");
+        params.put("seller", LubbleSharedPrefs.getInstance().getSellerId());
         params.put("name", nameTil.getEditText().getText().toString());
         params.put("category", categoryId);
         params.put("mrp", mrpTil.getEditText().getText().toString());

@@ -25,6 +25,10 @@ public class ColoredChipsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public ColoredChipsAdapter(GlideRequests glide) {
         list = new ArrayList<>();
         this.glide = glide;
+        final Category allCategoryView = new Category();
+        allCategoryView.setIcon("https://firebasestorage.googleapis.com/v0/b/lubble-dev-marketplace/o/marketplace%2Fcategory_icons%2Fgrid.png?alt=media&token=f6d954c8-6795-4204-9a37-c954f3bd33e7");
+        allCategoryView.setName("Categories");
+        addData(allCategoryView);
     }
 
     @NonNull
@@ -71,9 +75,13 @@ public class ColoredChipsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         @Override
         public void onClick(View v) {
-            ItemListActiv.open(v.getContext(), false, list.get(getAdapterPosition()).getId());
+            final Category selectedCategory = list.get(getAdapterPosition());
+            if (selectedCategory.getId() == null) {
+                //todo open categories activ
+            } else {
+                ItemListActiv.open(v.getContext(), false, selectedCategory.getId());
+            }
         }
     }
-
 
 }
