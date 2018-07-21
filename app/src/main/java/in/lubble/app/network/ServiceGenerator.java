@@ -2,7 +2,9 @@ package in.lubble.app.network;
 
 import android.text.TextUtils;
 
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GetTokenResult;
 
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -29,7 +31,11 @@ public class ServiceGenerator {
 
     public static <S> S createService(Class<S> serviceClass) {
 
-        final String authToken = FirebaseAuth.getInstance().getAccessToken(false).getResult().getToken();
+        String authToken = "";
+        final Task<GetTokenResult> accessTokenTask = FirebaseAuth.getInstance().getAccessToken(false);
+        if (accessTokenTask.isComplete()) {
+            authToken = accessTokenTask.getResult().getToken();
+        }
         if (!TextUtils.isEmpty(authToken)) {
             AuthenticationInterceptor interceptor =
                     new AuthenticationInterceptor(authToken);
