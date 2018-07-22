@@ -1,6 +1,7 @@
 package in.lubble.app.marketplace;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
@@ -16,6 +17,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -46,6 +49,9 @@ public class MarketplaceFrag extends Fragment {
     private LinearLayout newItemContainer;
     private PagerContainer pagerContainer;
     private ViewPager viewPager;
+    private int currentPage = 0;
+    private Handler handler = new Handler();
+    private ArrayList<SliderData> sliderDataList = new ArrayList<>();
 
     public MarketplaceFrag() {
         // Required empty public constructor
@@ -56,15 +62,6 @@ public class MarketplaceFrag extends Fragment {
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        /*if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }*/
     }
 
     @Override
@@ -131,27 +128,6 @@ public class MarketplaceFrag extends Fragment {
         return view;
     }
 
-    private void setupSlider(final ArrayList<SliderData> sliderDataList) {
-        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList));
-
-        new CoverFlow.Builder()
-                .with(viewPager)
-                .pagerMargin(getResources().getDimensionPixelSize(R.dimen.pager_margin))
-                .scale(0.3f)
-                .spaceSize(0f)
-                .rotationY(0f)
-                .build();
-
-        //Manually setting the first View to be elevated
-        viewPager.post(new Runnable() {
-            @Override
-            public void run() {
-                Fragment fragment = (Fragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                ViewCompat.setElevation(fragment.getView(), 8.0f);
-            }
-        });
-    }
-
     private void fetchMarketplaceData(final SmallItemAdapter cat1Adapter, final SmallItemAdapter cat2Adapter, final BigItemAdapter allItemsAdapter, final ColoredChipsAdapter catAdapter) {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchMarketplaceData().enqueue(new Callback<MarketplaceData>() {
@@ -181,7 +157,8 @@ public class MarketplaceFrag extends Fragment {
 
                 if (marketplaceData.getSliderDataList().size() > 0) {
                     pagerContainer.setVisibility(View.VISIBLE);
-                    setupSlider(marketplaceData.getSliderDataList());
+                    sliderDataList = marketplaceData.getSliderDataList();
+                    setupSlider();
                 } else {
                     pagerContainer.setVisibility(View.GONE);
                 }
@@ -194,5 +171,60 @@ public class MarketplaceFrag extends Fragment {
             }
         });
     }
+
+    private void setupSlider() {
+        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList));
+
+        new CoverFlow.Builder()
+                .with(viewPager)
+                .pagerMargin(getResources().getDimensionPixelSize(R.dimen.pager_margin))
+                .scale(0.3f)
+                .spaceSize(0f)
+                .rotationY(0f)
+                .build();
+
+        //Manually setting the first View to be elevated
+        viewPager.post(new Runnable() {
+            @Override
+            public void run() {
+                Fragment fragment = (Fragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                ViewCompat.setElevation(fragment.getView(), 8.0f);
+            }
+        });
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                currentPage = position;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(update);
+            }
+        }, 1000, 5000);
+
+    }
+
+    private Runnable update = new Runnable() {
+        public void run() {
+            if (currentPage == sliderDataList.size()) {
+                currentPage = 0;
+            }
+            viewPager.setCurrentItem(currentPage++, true);
+        }
+    };
 
 }
