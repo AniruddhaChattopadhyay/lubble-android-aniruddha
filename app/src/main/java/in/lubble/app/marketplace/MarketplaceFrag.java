@@ -2,6 +2,7 @@ package in.lubble.app.marketplace;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -13,6 +14,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -21,6 +24,8 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import me.crosswall.lib.coverflow.CoverFlow;
+import me.crosswall.lib.coverflow.core.PagerContainer;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,6 +43,8 @@ public class MarketplaceFrag extends Fragment {
     private RecyclerView category1Rv;
     private RecyclerView category2Rv;
     private LinearLayout newItemContainer;
+    private PagerContainer pagerContainer;
+    private ViewPager viewPager;
 
     public MarketplaceFrag() {
         // Required empty public constructor
@@ -67,6 +74,12 @@ public class MarketplaceFrag extends Fragment {
 
         categoriesRv = view.findViewById(R.id.rv_categories);
         categoriesRv.setNestedScrollingEnabled(false);
+
+        pagerContainer = view.findViewById(R.id.pager_container);
+        viewPager = view.findViewById(R.id.viewpager);
+        viewPager.setClipChildren(false);
+        viewPager.setOffscreenPageLimit(4);
+
         RelativeLayout cat1cv = view.findViewById(R.id.layout_cat1);
         RelativeLayout cat2cv = view.findViewById(R.id.layout_cat2);
 
@@ -114,7 +127,32 @@ public class MarketplaceFrag extends Fragment {
             }
         });
 
+        setupSlider();
+
         return view;
+    }
+
+    private void setupSlider() {
+        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), getDummySliderDataList()));
+
+
+        new CoverFlow.Builder()
+                .with(viewPager)
+                .pagerMargin(getResources().getDimensionPixelSize(R.dimen.pager_margin))
+                .scale(0.3f)
+                .spaceSize(0f)
+                .rotationY(0f)
+                .build();
+    }
+
+    private ArrayList<SliderData> getDummySliderDataList() {
+        final ArrayList<SliderData> sliderDataList = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            final SliderData sliderData = new SliderData();
+            sliderData.setUrl("http://www.gstatic.com/webp/gallery/1.webp");
+            sliderDataList.add(sliderData);
+        }
+        return sliderDataList;
     }
 
     private void fetchMarketplaceData(final SmallItemAdapter cat1Adapter, final SmallItemAdapter cat2Adapter, final BigItemAdapter allItemsAdapter, final ColoredChipsAdapter catAdapter) {

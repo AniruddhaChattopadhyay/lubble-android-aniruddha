@@ -19,17 +19,33 @@
                 android:id="@+id/rv_categories"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal"
                 app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
+
+            <me.crosswall.lib.coverflow.core.PagerContainer
+                android:id="@+id/pager_container"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_below="@id/rv_categories"
+                android:layout_marginTop="8dp"
+                android:background="?attr/colorPrimary">
+
+                <android.support.v4.view.ViewPager
+                    android:id="@+id/viewpager"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center" />
+
+            </me.crosswall.lib.coverflow.core.PagerContainer>
 
             <include
                 android:id="@+id/layout_cat1"
                 layout="@layout/mplace_category_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/rv_categories"
+                android:layout_below="@id/pager_container"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp" />
 
