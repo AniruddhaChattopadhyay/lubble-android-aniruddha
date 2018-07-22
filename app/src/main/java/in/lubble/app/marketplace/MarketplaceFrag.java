@@ -2,6 +2,7 @@ package in.lubble.app.marketplace;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -127,14 +128,11 @@ public class MarketplaceFrag extends Fragment {
             }
         });
 
-        setupSlider();
-
         return view;
     }
 
-    private void setupSlider() {
-        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), getDummySliderDataList()));
-
+    private void setupSlider(final ArrayList<SliderData> sliderDataList) {
+        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList));
 
         new CoverFlow.Builder()
                 .with(viewPager)
@@ -143,16 +141,15 @@ public class MarketplaceFrag extends Fragment {
                 .spaceSize(0f)
                 .rotationY(0f)
                 .build();
-    }
 
-    private ArrayList<SliderData> getDummySliderDataList() {
-        final ArrayList<SliderData> sliderDataList = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            final SliderData sliderData = new SliderData();
-            sliderData.setUrl("http://www.gstatic.com/webp/gallery/1.webp");
-            sliderDataList.add(sliderData);
-        }
-        return sliderDataList;
+        //Manually setting the first View to be elevated
+        viewPager.post(new Runnable() {
+            @Override
+            public void run() {
+                Fragment fragment = (Fragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
+                ViewCompat.setElevation(fragment.getView(), 8.0f);
+            }
+        });
     }
 
     private void fetchMarketplaceData(final SmallItemAdapter cat1Adapter, final SmallItemAdapter cat2Adapter, final BigItemAdapter allItemsAdapter, final ColoredChipsAdapter catAdapter) {
@@ -180,6 +177,13 @@ public class MarketplaceFrag extends Fragment {
 
                 for (int i = 0; i < marketplaceData.getCategories().size(); i++) {
                     catAdapter.addData(marketplaceData.getCategories().get(i));
+                }
+
+                if (marketplaceData.getSliderDataList().size() > 0) {
+                    pagerContainer.setVisibility(View.VISIBLE);
+                    setupSlider(marketplaceData.getSliderDataList());
+                } else {
+                    pagerContainer.setVisibility(View.GONE);
                 }
 
             }

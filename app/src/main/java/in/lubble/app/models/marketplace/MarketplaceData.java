@@ -7,11 +7,16 @@ import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.lubble.app.marketplace.SliderData;
+
 public class MarketplaceData {
 
     @SerializedName("categories")
     @Expose
     private ArrayList<Category> categories = null;
+    @SerializedName("sliders")
+    @Expose
+    private ArrayList<SliderData> sliderDataList = new ArrayList<>();
     @SerializedName("showcase_categories")
     @Expose
     private ArrayList<Category> showcaseCategories = null;
@@ -41,5 +46,13 @@ public class MarketplaceData {
 
     public void setCategories(ArrayList<Category> categories) {
         this.categories = categories;
+    }
+
+    public ArrayList<SliderData> getSliderDataList() {
+        return sliderDataList;
+    }
+
+    public void setSliderDataList(ArrayList<SliderData> sliderDataList) {
+        this.sliderDataList = sliderDataList;
     }
 }
