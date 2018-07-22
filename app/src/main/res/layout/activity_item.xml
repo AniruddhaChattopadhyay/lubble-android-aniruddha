@@ -64,6 +64,42 @@
 
         </RelativeLayout>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/half_rounded_rectangle_hollow_top"
+            android:padding="8dp"
+            android:text="Sold By"
+            android:textColor="@color/black" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/rectangle_border"
+            android:orientation="vertical">
+
+            <include layout="@layout/layout_item_list" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_visit_shop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/half_rounded_rectangle_blue_bottom"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="Visit Shop"
+            android:textColor="@color/white"
+            android:textStyle="bold" />
+
     </LinearLayout>
 
 </android.support.v4.widget.NestedScrollView>

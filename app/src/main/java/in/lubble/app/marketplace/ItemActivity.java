@@ -5,9 +5,12 @@ import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,6 +21,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.PhotoData;
+import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
@@ -34,6 +38,11 @@ public class ItemActivity extends AppCompatActivity {
     private TextView priceTv;
     private TextView mrpTv;
     private TextView descTv;
+    private ImageView sellerIv;
+    private TextView sellerNameTv;
+    private TextView sellerBioTv;
+    private RecyclerView sellerItemsRv;
+    private TextView visitShopTv;
 
     private int itemId;
 
@@ -53,6 +62,12 @@ public class ItemActivity extends AppCompatActivity {
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
         descTv = findViewById(R.id.tv_item_desc);
+
+        sellerIv = findViewById(R.id.iv_seller_pic);
+        sellerNameTv = findViewById(R.id.tv_seller_name);
+        sellerBioTv = findViewById(R.id.tv_seller_bio);
+        sellerItemsRv = findViewById(R.id.rv_items);
+        visitShopTv = findViewById(R.id.tv_visit_shop);
 
         mrpTv.setPaintFlags(mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
 
@@ -89,6 +104,27 @@ public class ItemActivity extends AppCompatActivity {
                                 .into(imageIv);
                     }
                     setTitle(item.getName());
+
+                    final SellerData sellerData = item.getSellerData();
+                    if (sellerData != null) {
+
+                        sellerNameTv.setText(sellerData.getName());
+                        sellerBioTv.setText(sellerData.getBio());
+                        GlideApp.with(ItemActivity.this).load(sellerData.getPhotoUrl()).circleCrop().into(sellerIv);
+
+                        sellerItemsRv.setLayoutManager(new GridLayoutManager(ItemActivity.this, 2));
+                        final BigItemAdapter itemAdapter = new BigItemAdapter(GlideApp.with(ItemActivity.this));
+                        sellerItemsRv.setAdapter(itemAdapter);
+                        for (Item sellerItem : sellerData.getItemList()) {
+                            itemAdapter.addData(sellerItem);
+                        }
+                        visitShopTv.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
+                            }
+                        });
+                    }
                 }
             }
 

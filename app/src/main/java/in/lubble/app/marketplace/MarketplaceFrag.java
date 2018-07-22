@@ -134,7 +134,7 @@ public class MarketplaceFrag extends Fragment {
             @Override
             public void onResponse(Call<MarketplaceData> call, Response<MarketplaceData> response) {
                 final MarketplaceData marketplaceData = response.body();
-                if (marketplaceData != null) {
+                if (marketplaceData != null && isAdded() && isVisible()) {
                     final Category category1 = marketplaceData.getShowcaseCategories().get(0);
                     cat1Name.setText(category1.getName());
                     for (Item item : category1.getItems()) {

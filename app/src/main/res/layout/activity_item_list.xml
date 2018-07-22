@@ -18,49 +18,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/iv_seller_pic"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="8dp"
-                app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
-
-            <TextView
-                android:id="@+id/tv_seller_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/iv_seller_pic"
-                android:layout_centerHorizontal="true"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                tools:text="Seller Name" />
-
-            <TextView
-                android:id="@+id/tv_seller_bio"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_seller_name"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:gravity="center_horizontal"
-                tools:text="@tools:sample/lorem" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rv_items"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_seller_bio"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-
-        </RelativeLayout>
+        <include layout="@layout/layout_item_list" />
 
     </android.support.v4.widget.NestedScrollView>
 

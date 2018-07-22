@@ -1,6 +1,8 @@
 
 package in.lubble.app.models.marketplace;
 
+import android.support.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -47,6 +49,10 @@ public class Item {
     @SerializedName("category")
     @Expose
     private Integer category;
+    @SerializedName("seller_details")
+    @Expose
+    @Nullable
+    private SellerData sellerData;
 
     public Integer getId() {
         return id;
@@ -152,4 +158,12 @@ public class Item {
         this.category = category;
     }
 
+    @Nullable
+    public SellerData getSellerData() {
+        return sellerData;
+    }
+
+    public void setSellerData(@Nullable SellerData sellerData) {
+        this.sellerData = sellerData;
+    }
 }
