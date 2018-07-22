@@ -214,7 +214,7 @@ public class MarketplaceFrag extends Fragment {
             public void run() {
                 handler.post(update);
             }
-        }, 1000, 5000);
+        }, 100, 2000);
 
     }
 
