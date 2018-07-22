@@ -1,7 +1,5 @@
 package in.lubble.app.network;
 
-import android.text.TextUtils;
-
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
@@ -13,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServiceGenerator {
 
-    private static final String BASE_URL = "http://api.lubble.in/";
+    private static final String BASE_URL = "https://api.lubble.in/";
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
@@ -36,16 +34,16 @@ public class ServiceGenerator {
         if (accessTokenTask.isComplete()) {
             authToken = accessTokenTask.getResult().getToken();
         }
-        if (!TextUtils.isEmpty(authToken)) {
-            AuthenticationInterceptor interceptor =
-                    new AuthenticationInterceptor(authToken);
+        AuthenticationInterceptor interceptor =
+                new AuthenticationInterceptor(authToken);
 
-            if (!httpClient.interceptors().contains(interceptor)) {
-                httpClient.addInterceptor(interceptor);
+        httpClient.authenticator(TokenAuthenticator.getInstance());
 
-                builder.client(httpClient.build());
-                retrofit = builder.build();
-            }
+        if (!httpClient.interceptors().contains(interceptor)) {
+            httpClient.addInterceptor(interceptor);
+
+            builder.client(httpClient.build());
+            retrofit = builder.build();
         }
 
         if (!httpClient.interceptors().contains(logging)) {
@@ -55,5 +53,6 @@ public class ServiceGenerator {
         }
         return retrofit.create(serviceClass);
     }
+
 
 }

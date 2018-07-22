@@ -134,35 +134,35 @@ public class MarketplaceFrag extends Fragment {
             @Override
             public void onResponse(Call<MarketplaceData> call, Response<MarketplaceData> response) {
                 final MarketplaceData marketplaceData = response.body();
+                if (marketplaceData != null) {
+                    final Category category1 = marketplaceData.getShowcaseCategories().get(0);
+                    cat1Name.setText(category1.getName());
+                    for (Item item : category1.getItems()) {
+                        cat1Adapter.addData(item);
+                    }
 
-                final Category category1 = marketplaceData.getShowcaseCategories().get(0);
-                cat1Name.setText(category1.getName());
-                for (Item item : category1.getItems()) {
-                    cat1Adapter.addData(item);
+                    final Category category2 = marketplaceData.getShowcaseCategories().get(1);
+                    cat2Name.setText(category2.getName());
+                    for (Item item : category2.getItems()) {
+                        cat2Adapter.addData(item);
+                    }
+
+                    for (Item item : marketplaceData.getItems()) {
+                        allItemsAdapter.addData(item);
+                    }
+
+                    for (int i = 0; i < marketplaceData.getCategories().size(); i++) {
+                        catAdapter.addData(marketplaceData.getCategories().get(i));
+                    }
+
+                    if (marketplaceData.getSliderDataList().size() > 0) {
+                        pagerContainer.setVisibility(View.VISIBLE);
+                        sliderDataList = marketplaceData.getSliderDataList();
+                        setupSlider();
+                    } else {
+                        pagerContainer.setVisibility(View.GONE);
+                    }
                 }
-
-                final Category category2 = marketplaceData.getShowcaseCategories().get(1);
-                cat2Name.setText(category2.getName());
-                for (Item item : category2.getItems()) {
-                    cat2Adapter.addData(item);
-                }
-
-                for (Item item : marketplaceData.getItems()) {
-                    allItemsAdapter.addData(item);
-                }
-
-                for (int i = 0; i < marketplaceData.getCategories().size(); i++) {
-                    catAdapter.addData(marketplaceData.getCategories().get(i));
-                }
-
-                if (marketplaceData.getSliderDataList().size() > 0) {
-                    pagerContainer.setVisibility(View.VISIBLE);
-                    sliderDataList = marketplaceData.getSliderDataList();
-                    setupSlider();
-                } else {
-                    pagerContainer.setVisibility(View.GONE);
-                }
-
             }
 
             @Override
