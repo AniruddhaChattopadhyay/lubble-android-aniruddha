@@ -18,6 +18,10 @@ public class AppNotifData {
     private String type;
     @SerializedName("groupId")
     private String groupId;
+    @SerializedName("messageId")
+    private String messageId;
+    @SerializedName("iconUrl")
+    private String iconUrl;
 
     public String getNotifKey() {
         return notifKey;
@@ -59,4 +63,19 @@ public class AppNotifData {
         this.groupId = groupId;
     }
 
+    public String getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(String messageId) {
+        this.messageId = messageId;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public void setIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
+    }
 }

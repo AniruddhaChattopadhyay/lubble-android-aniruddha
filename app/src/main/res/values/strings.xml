@@ -133,6 +133,7 @@
     <string name="like">Like</string>
     <string name="liked">Liked</string>
     <string name="like_any_msg_hint">Tap &amp; hold any message to like it</string>
+    <string name="no_reads">Waiting for someone to read your message</string>
     <string name="no_photo">Please add a photo</string>
     <string name="choose_category">Choose Category</string>
     <string name="item_name">Item Name</string>

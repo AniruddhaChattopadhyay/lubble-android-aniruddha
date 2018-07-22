@@ -216,7 +216,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 GroupData groupData = dataSnapshot.getValue(GroupData.class);
 
                 final UserGroupData userGroupData = userGroupDataMap.get(dataSnapshot.getKey());
-                if (groupData!=null && groupData.getId() != null) {
+                if (groupData != null && groupData.getId() != null) {
                     adapter.addGroup(groupData, userGroupData);
                     groupsRecyclerView.scrollToPosition(0);
                 }
@@ -259,7 +259,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 final GroupData unJoinedGroup = dataSnapshot.getValue(GroupData.class);
-                if (unJoinedGroup != null && !joinedGroupIdList.contains(unJoinedGroup.getId()) && !unJoinedGroup.getIsPrivate()) {
+                if (unJoinedGroup != null && unJoinedGroup.getId() != null && !joinedGroupIdList.contains(unJoinedGroup.getId()) && !unJoinedGroup.getIsPrivate()) {
                     adapter.addPublicGroup(unJoinedGroup);
                 }
             }

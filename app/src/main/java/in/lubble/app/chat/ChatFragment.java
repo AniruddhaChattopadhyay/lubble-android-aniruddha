@@ -7,18 +7,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.Group;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.CardView;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -91,6 +95,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
+    private static final String KEY_MSG_ID = "CHAT_MSG_ID";
     private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
 
     @Nullable
@@ -99,7 +104,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private TextView joinDescTv;
     private Button joinBtn;
     private TextView declineTv;
-    private CardView composeCardView;
+    private RelativeLayout composeContainer;
     private Group linkMetaContainer;
     private RecyclerView chatRecyclerView;
     private EditText newMessageEt;
@@ -112,6 +117,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
     private String groupId;
+    @Nullable
+    private String msgIdToOpen;
     private boolean isJoining;
     private ChildEventListener msgChildListener;
     private ValueEventListener groupInfoListener;
@@ -125,15 +132,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ValueEventListener bottomBarListener;
     @Nullable
     private String replyMsgId = null;
+    @Nullable
+    private Parcelable recyclerViewState;
 
     public ChatFragment() {
         // Required empty public constructor
     }
 
-    public static ChatFragment newInstance(String groupId, boolean isJoining) {
+    public static ChatFragment newInstance(String groupId, boolean isJoining, @Nullable String msgId) {
 
         Bundle args = new Bundle();
         args.putString(KEY_GROUP_ID, groupId);
+        args.putString(KEY_MSG_ID, msgId);
         args.putBoolean(KEY_IS_JOINING, isJoining);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
@@ -145,6 +155,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
 
         groupId = getArguments().getString(KEY_GROUP_ID);
+        msgIdToOpen = getArguments().getString(KEY_MSG_ID);
         isJoining = getArguments().getBoolean(KEY_IS_JOINING);
 
         groupReference = getLubbleGroupsRef().child(groupId);
@@ -160,7 +171,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
-        composeCardView = view.findViewById(R.id.compose_container);
+        composeContainer = view.findViewById(R.id.compose_container);
         joinContainer = view.findViewById(R.id.relativeLayout_join_container);
         joinDescTv = view.findViewById(R.id.tv_join_desc);
         joinBtn = view.findViewById(R.id.btn_join);
@@ -219,6 +230,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         foundFirstUnreadMsg = false;
+        chatRecyclerView.setOnFlingListener(new RecyclerView.OnFlingListener() {
+            @Override
+            public boolean onFling(int velocityX, int velocityY) {
+                recyclerViewState = null;
+                msgIdToOpen = null;
+                return false;
+            }
+        });
         chatAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
@@ -226,29 +245,53 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 int msgCount = chatAdapter.getItemCount();
                 int lastVisiblePosition =
                         layoutManager.findLastCompletelyVisibleItemPosition();
-                // If the recycler view is initially being loaded
-                if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
-                    final int pos = msgCount - 1;
-                    final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
-                    if (chatMsg.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
-                        // unread msg found
-                        foundFirstUnreadMsg = true;
-                        final ChatData unreadChatData = new ChatData();
-                        unreadChatData.setType(UNREAD);
-                        chatAdapter.addChatData(pos, unreadChatData);
-                        chatRecyclerView.scrollToPosition(pos - 1);
-                    } else {
-                        // all msgs read, scroll to last msg
+                if (recyclerViewState != null) {
+                    chatRecyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
+                    if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                            lastVisiblePosition == (positionStart - 1))) {
+                        // If the user is at the bottom of the list, scroll to the bottom
+                        // of the list to show the newly added message.
+                        recyclerViewState = null;
                         chatRecyclerView.scrollToPosition(positionStart);
                     }
-                } else if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
-                        lastVisiblePosition == (positionStart - 1))) {
-                    // If the user is at the bottom of the list, scroll to the bottom
-                    // of the list to show the newly added message.
-                    chatRecyclerView.scrollToPosition(positionStart);
-                } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
-                        chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                    chatRecyclerView.scrollToPosition(positionStart);
+                } else if (msgIdToOpen != null) {
+                    final int indexOfChatMsg = chatAdapter.getIndexOfChatMsg(msgIdToOpen);
+                    if (indexOfChatMsg != -1) {
+                        chatRecyclerView.scrollToPosition(indexOfChatMsg);
+                        chatAdapter.setPosToFlash(indexOfChatMsg);
+                        if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                                lastVisiblePosition == (positionStart - 1))) {
+                            // If the user is at the bottom of the list, scroll to the bottom
+                            // of the list to show the newly added message.
+                            msgIdToOpen = null;
+                            chatRecyclerView.scrollToPosition(positionStart);
+                        }
+                    }
+                } else {
+                    // If the recycler view is initially being loaded
+                    if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
+                        final int pos = msgCount - 1;
+                        final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
+                        if (chatMsg.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
+                            // unread msg found
+                            foundFirstUnreadMsg = true;
+                            final ChatData unreadChatData = new ChatData();
+                            unreadChatData.setType(UNREAD);
+                            chatAdapter.addChatData(pos, unreadChatData);
+                            chatRecyclerView.scrollToPosition(pos - 1);
+                        } else {
+                            // all msgs read, scroll to last msg
+                            chatRecyclerView.scrollToPosition(positionStart);
+                        }
+                    } else if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                            lastVisiblePosition == (positionStart - 1))) {
+                        // If the user is at the bottom of the list, scroll to the bottom
+                        // of the list to show the newly added message.
+                        chatRecyclerView.scrollToPosition(positionStart);
+                    } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
+                            chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                        chatRecyclerView.scrollToPosition(positionStart);
+                    }
                 }
             }
         });
@@ -265,6 +308,36 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 }
             }
         });
+
+        resetActionBar();
+    }
+
+    private void resetActionBar() {
+        final ActionMode actionMode = ((AppCompatActivity) getContext()).startSupportActionMode(new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+
+            }
+        });
+        if (actionMode != null) {
+            actionMode.finish();
+        }
     }
 
     private void syncGroupInfo() {
@@ -325,7 +398,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (groupData.isJoined()) {
-                    composeCardView.setVisibility(View.VISIBLE);
+                    composeContainer.setVisibility(View.VISIBLE);
                     joinContainer.setVisibility(View.GONE);
                     if (joiningProgressDialog != null && isJoining) {
                         bottomContainer.setVisibility(View.VISIBLE);
@@ -340,9 +413,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
-                                declineTv.setVisibility(View.VISIBLE);
+                                if (isAdded() && isVisible()) {
+                                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                    joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
+                                    declineTv.setVisibility(View.VISIBLE);
+                                }
                             }
 
                             @Override
@@ -350,12 +425,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                             }
                         });
-                        composeCardView.setVisibility(View.GONE);
+                        composeContainer.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
                     } else {
                         joinDescTv.setText(R.string.join_group_to_chat);
                         declineTv.setVisibility(View.GONE);
-                        composeCardView.setVisibility(View.GONE);
+                        composeContainer.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
                     }
                 }
@@ -710,6 +785,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onPause() {
         super.onPause();
+        recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
         messagesReference.removeEventListener(msgChildListener);
         groupReference.removeEventListener(groupInfoListener);

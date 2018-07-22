@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
@@ -153,6 +154,10 @@ public class NotifUtils {
 
     private static Notification buildSummary(Context context, String groupKey, ArrayList<NotifData> notifDataList) {
 
+        Intent intent = new Intent(context, MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        stackBuilder.addNextIntentWithParentStack(intent);
+
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Lubble")
@@ -161,6 +166,7 @@ public class NotifUtils {
                 .setShowWhen(true)
                 .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                 .setGroup(groupKey)
+                .setContentIntent(stackBuilder.getPendingIntent(SUMMARY_ID, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setGroupSummary(true)
                 .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
 

@@ -18,6 +18,7 @@ public class Constants {
     public static final String CHAT_NOTIF_CHANNEL = "Chat Notifications";
     public static final String SENDING_MEDIA_NOTIF_CHANNEL = "Sending Media";
     public static final String NOTICE_NOTIF_CHANNEL = "Notice Notifications";
+    public static final String LUBB_NOTIF_CHANNEL = "Message Like Notifications";
     public static final String APP_NOTIF_CHANNEL = "App Notifications";
 
     public static final String DEFAULT_GROUP = LubbleSharedPrefs.getInstance().getDefaultGroupId();

@@ -49,7 +49,10 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
@@ -89,6 +92,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private int highlightedPos = -1;
     private int posToFlash = -1;
     private boolean shownLubbHintForLastMsg;
+    private static HashMap<String, ProfileInfo> profileInfoMap = new HashMap<>();
 
     public ChatAdapter(Activity activity, Context context, String groupId,
                        RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
@@ -148,17 +152,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
-        if (highlightedPos == position) {
-            sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
-        } else {
-            sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
-        }
-
         if (posToFlash == position) {
             UiUtils.animateColor(sentChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
             posToFlash = -1;
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (highlightedPos == position) {
+            sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+            sentChatViewHolder.lubbPopOutContainer.setVisibility(View.VISIBLE);
+            toggleLubbPopOutContainer(sentChatViewHolder.lubbIv,
+                    sentChatViewHolder.lubbHintTv,
+                    chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+        } else {
+            sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            sentChatViewHolder.lubbPopOutContainer.setVisibility(View.GONE);
         }
 
         if (isValidString(chatData.getMessage())) {
@@ -170,6 +179,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid())) {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+            if (position == chatDataList.size() - 1) {
+                // scroll to bottom if liked last msg to show that like icon and count
+                recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
+            }
         } else {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
@@ -210,7 +223,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (i++ < 4) {
                 // show a max of 4 heads
                 // todo sort?
-                addLubbHead(uid, sentChatViewHolder.lubbHeadsContainer);
+                if (profileInfoMap.containsKey(uid)) {
+                    final ImageView lubbHeadIv = new ImageView(context);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
+                    lubbHeadIv.setLayoutParams(lp);
+                    GlideApp.with(context).load(profileInfoMap.get(uid).getThumbnail())
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .circleCrop()
+                            .into(lubbHeadIv);
+                    sentChatViewHolder.lubbHeadsContainer.addView(lubbHeadIv);
+                } else {
+                    updateProfileInfoMap(uid, sentChatViewHolder.lubbHeadsContainer, sentChatViewHolder.getAdapterPosition());
+                }
             } else {
                 break;
             }
@@ -223,17 +247,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         showDpAndName(recvdChatViewHolder, chatData);
 
-        if (highlightedPos == position) {
-            recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
-        } else {
-            recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
-        }
-
         if (posToFlash == position) {
             UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
             posToFlash = -1;
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+        }
+
+        if (highlightedPos == position) {
+            recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+            recvdChatViewHolder.lubbPopOutContainer.setVisibility(View.VISIBLE);
+            toggleLubbPopOutContainer(recvdChatViewHolder.lubbIv,
+                    recvdChatViewHolder.lubbHintTv,
+                    chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+        } else {
+            recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            recvdChatViewHolder.lubbPopOutContainer.setVisibility(View.GONE);
+
         }
 
         if (isValidString(chatData.getMessage())) {
@@ -246,6 +276,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid())) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+            if (position == chatDataList.size() - 1) {
+                // scroll to bottom if liked last msg to show that like icon and count
+                recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
+            }
         } else {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
@@ -281,10 +315,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
-        recvdChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
-        recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
-
         showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
+    }
+
+    private void handleLubbs(RecvdChatViewHolder recvdChatViewHolder, ChatData chatData, boolean toAnimate) {
+
+        if (chatData.getLubbCount() > 0) {
+            if (toAnimate) {
+                UiUtils.animateSlideDownShow(context, recvdChatViewHolder.lubbContainer);
+            } else {
+                recvdChatViewHolder.lubbContainer.setVisibility(View.VISIBLE);
+            }
+        } else {
+            recvdChatViewHolder.lubbContainer.setVisibility(View.GONE);
+        }
+
+        //recvdChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
+        recvdChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
 
         int i = 0;
         recvdChatViewHolder.lubbHeadsContainer.removeAllViews();
@@ -292,7 +339,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (i++ < 4) {
                 // show a max of 4 heads
                 // todo sort?
-                addLubbHead(uid, recvdChatViewHolder.lubbHeadsContainer);
+                if (profileInfoMap.containsKey(uid)) {
+                    final ImageView lubbHeadIv = new ImageView(context);
+                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
+                    lubbHeadIv.setLayoutParams(lp);
+                    GlideApp.with(context).load(profileInfoMap.get(uid).getThumbnail())
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .circleCrop()
+                            .into(lubbHeadIv);
+                    recvdChatViewHolder.lubbHeadsContainer.addView(lubbHeadIv);
+                } else {
+                    updateProfileInfoMap(uid, recvdChatViewHolder.lubbHeadsContainer, recvdChatViewHolder.getAdapterPosition());
+                }
             } else {
                 break;
             }
@@ -300,8 +358,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void showLubbHintIfLastMsg(int position, final ChatData chatData, final RecvdChatViewHolder recvdChatViewHolder) {
-        if (position == chatDataList.size() - 1 && !shownLubbHintForLastMsg) {
-            recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.VISIBLE);
+        if (position == chatDataList.size() - 1) {
+            UiUtils.animateSlideDownShow(context, recvdChatViewHolder.lubbLastHintContainer);
+            //recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.lubbContainer.setVisibility(View.GONE);
             shownLubbHintForLastMsg = true;
             if (chatData.getLubbCount() > 0) {
@@ -309,19 +368,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     @Override
                     public void run() {
                         if (chatFragment != null && chatFragment.isAdded() && chatFragment.isVisible()) {
-                            recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
-                            recvdChatViewHolder.lubbContainer.setVisibility(View.VISIBLE);
+                            //recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
+                            UiUtils.animateSlideDownHide(context, recvdChatViewHolder.lubbLastHintContainer);
+                            handleLubbs(recvdChatViewHolder, chatData, true);
                         }
                     }
                 }, 2000);
             }
         } else {
             recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
-            recvdChatViewHolder.lubbContainer.setVisibility(View.VISIBLE);
+            handleLubbs(recvdChatViewHolder, chatData, false);
         }
     }
 
-    private void addLubbHead(String uid, final LinearLayout lubbHeadsContainer) {
+    private void updateProfileInfoMap(String uid, final LinearLayout lubbHeadsContainer, final int pos) {
         // single as its very difficult otherwise to keep track of all listeners for every user
         // plus we don't really need realtime updation of user DP and/or name in chat
         getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -329,14 +389,21 @@ public class ChatAdapter extends RecyclerView.Adapter {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
                 if (map != null) {
-                    final ImageView lubbHeadIv = new ImageView(context);
+                    /*final ImageView lubbHeadIv = new ImageView(context);
                     RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
                     lubbHeadIv.setLayoutParams(lp);
                     GlideApp.with(context).load(map.get("thumbnail"))
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .circleCrop()
                             .into(lubbHeadIv);
-                    lubbHeadsContainer.addView(lubbHeadIv);
+                    lubbHeadsContainer.addView(lubbHeadIv);*/
+
+                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                    if (profileInfo != null) {
+                        profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                        profileInfoMap.put(profileInfo.getId(), profileInfo);
+                        notifyItemChanged(pos);
+                    }
                 }
             }
 
@@ -456,6 +523,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
             final int size = chatDataList.size();
             chatDataList.add(chatData);
+            if (size - 1 >= 0) {
+                // remove the last msg lubb hint
+                notifyItemChanged(size - 1);
+            }
             notifyItemInserted(size);
         }
     }
@@ -463,6 +534,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void addChatData(int pos, @NonNull ChatData chatData) {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
             chatDataList.add(pos, chatData);
+            if (pos - 1 >= 0) {
+                // remove the last msg lubb hint
+                notifyItemChanged(pos - 1);
+            }
             notifyItemInserted(pos);
         }
     }
@@ -479,6 +554,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public ChatData getChatMsgAt(int pos) {
         return chatDataList.get(pos);
+    }
+
+    public int getIndexOfChatMsg(String msgId) {
+        final ChatData chatDataToFind = new ChatData();
+        chatDataToFind.setId(msgId);
+        return chatDataList.indexOf(chatDataToFind);
+    }
+
+    public void setPosToFlash(int pos) {
+        this.posToFlash = pos;
     }
 
     @Override
@@ -604,12 +689,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        String message = chatDataList.get(highlightedPos).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
                         break;
                     case R.id.action_info:
-                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), false);
+                        chatFragment.openChatInfo(chatDataList.get(highlightedPos).getId(), false);
                         break;
                 }
                 mode.finish();
@@ -619,7 +704,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
-                lubbPopOutContainer.setVisibility(View.GONE);
+                //lubbPopOutContainer.setVisibility(View.GONE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -635,9 +720,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.linear_layout_lubb_pop:
                     toggleLubb(getAdapterPosition());
-                    if (actionMode != null) {
-                        actionMode.finish();
-                    }
+                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
                     break;
                 case R.id.linearLayout_lubb_container:
                     toggleLubb(getAdapterPosition());
@@ -667,20 +750,29 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), false);
                     break;
             }
+            if (actionMode != null) {
+                actionMode.finish();
+            }
         }
 
         @Override
         public boolean onLongClick(View v) {
-            lubbPopOutContainer.setVisibility(View.VISIBLE);
-            toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
-            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-            if (highlightedPos != -1) {
-                // another item was highlighted, remove its highlight
-                notifyItemChanged(highlightedPos);
+            if (getAdapterPosition() != highlightedPos) {
+                actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                lubbPopOutContainer.setVisibility(View.VISIBLE);
+                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                if (highlightedPos != -1) {
+                    // another item was highlighted, remove its highlight
+                    notifyItemChanged(highlightedPos);
+                }
+                highlightedPos = getAdapterPosition();
+                selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+            } else {
+                if (actionMode != null) {
+                    actionMode.finish();
+                }
             }
-            highlightedPos = getAdapterPosition();
-            selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
             return true;
         }
     }
@@ -754,12 +846,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        String message = chatDataList.get(getAdapterPosition()).getMessage();
+                        String message = chatDataList.get(highlightedPos).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
                         break;
                     case R.id.action_info:
-                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
+                        chatFragment.openChatInfo(chatDataList.get(highlightedPos).getId(), true);
                         break;
                 }
                 mode.finish();
@@ -769,7 +861,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
-                lubbPopOutContainer.setVisibility(View.GONE);
+                //lubbPopOutContainer.setVisibility(View.GONE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -782,12 +874,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             switch (v.getId()) {
                 case R.id.linearLayout_lubb_container:
                     toggleLubb(getAdapterPosition());
+                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
                     break;
                 case R.id.linear_layout_lubb_pop:
                     toggleLubb(getAdapterPosition());
-                    if (actionMode != null) {
-                        actionMode.finish();
-                    }
                     break;
                 case R.id.link_meta_container:
                     ChatData chatData = chatDataList.get(getAdapterPosition());
@@ -814,20 +904,29 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
                     break;
             }
+            if (actionMode != null) {
+                actionMode.finish();
+            }
         }
 
         @Override
         public boolean onLongClick(View v) {
-            lubbPopOutContainer.setVisibility(View.VISIBLE);
-            toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
-            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-            if (highlightedPos != -1) {
-                // another item was highlighted, remove its highlight
-                notifyItemChanged(highlightedPos);
+            if (getAdapterPosition() != highlightedPos) {
+                actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                lubbPopOutContainer.setVisibility(View.VISIBLE);
+                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                if (highlightedPos != -1) {
+                    // another item was highlighted, remove its highlight
+                    notifyItemChanged(highlightedPos);
+                }
+                highlightedPos = getAdapterPosition();
+                selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+            } else {
+                if (actionMode != null) {
+                    actionMode.finish();
+                }
             }
-            highlightedPos = getAdapterPosition();
-            selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
             return true;
         }
     }

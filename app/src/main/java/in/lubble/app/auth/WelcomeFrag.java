@@ -109,7 +109,7 @@ public class WelcomeFrag extends Fragment {
                 .setAvailableProviders(selectedProviders)
                 .setTheme(R.style.AppTheme)
                 .setTosAndPrivacyPolicyUrls("https://lubble.in/policies/terms", "https://lubble.in/policies/privacy")
-                .setIsSmartLockEnabled(true, true)
+                .setIsSmartLockEnabled(false, false)
                 .build();
         getActivity().startActivityForResult(intent, RC_SIGN_IN);
     }

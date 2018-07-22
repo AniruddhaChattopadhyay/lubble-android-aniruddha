@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.MsgInfoData;
@@ -37,6 +39,7 @@ public class MsgInfoActivity extends AppCompatActivity {
     private static final String ARG_SHOW_READ_RECEIPTS = "ARG_SHOW_READ_RECEIPTS";
 
     private LinearLayout noLikesContainer;
+    private LinearLayout noReadsContainer;
     private TextView readByHeaderTv;
     private RecyclerView readRecyclerView;
     private RecyclerView lubbRecyclerView;
@@ -68,17 +71,20 @@ public class MsgInfoActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         setTitle(getString(R.string.msg_info));
 
+        Analytics.triggerScreenEvent(this, this.getClass());
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         readByHeaderTv = findViewById(R.id.tv_read_by_header);
         noLikesContainer = findViewById(R.id.linear_layout_no_likes);
+        noReadsContainer = findViewById(R.id.linear_layout_no_reads);
         readRecyclerView = findViewById(R.id.rv_msg_info);
         lubbRecyclerView = findViewById(R.id.rv_liked_msg_info);
 
         readRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         lubbRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        readAdapter = new MsgReceiptAdapter(GlideApp.with(this));
-        lubbAdapter = new MsgReceiptAdapter(GlideApp.with(this));
+        readAdapter = new MsgReceiptAdapter(GlideApp.with(this), -1);
+        lubbAdapter = new MsgReceiptAdapter(GlideApp.with(this), 3);
         readRecyclerView.setAdapter(readAdapter);
         lubbRecyclerView.setAdapter(lubbAdapter);
 
@@ -91,6 +97,10 @@ public class MsgInfoActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        readAdapter.clear();
+        lubbAdapter.clear();
+
         fetchLubbReceipts();
         if (showReadReceipts) {
             readByHeaderTv.setVisibility(View.VISIBLE);
@@ -109,8 +119,15 @@ public class MsgInfoActivity extends AppCompatActivity {
                 chatData = dataSnapshot.getValue(ChatData.class);
                 if (chatData != null) {
                     final HashMap<String, Long> readReceiptsMap = chatData.getReadReceipts();
-                    for (String uid : readReceiptsMap.keySet()) {
-                        fetchAndAddProfileInfoToReadReceipts(uid);
+                    if (readReceiptsMap.size() > 1) {
+                        noReadsContainer.setVisibility(View.GONE);
+                        for (String uid : readReceiptsMap.keySet()) {
+                            if (!uid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                                fetchAndAddProfileInfoToReadReceipts(uid);
+                            }
+                        }
+                    } else {
+                        noReadsContainer.setVisibility(View.VISIBLE);
                     }
                 }
             }
