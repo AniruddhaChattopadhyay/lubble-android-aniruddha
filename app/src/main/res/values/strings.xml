@@ -155,4 +155,6 @@
     <string name="about_seller">About Seller</string>
     <string name="become_a_seller">Become a seller</string>
     <string name="about_seller_hint">Tell buyers about your passions, why you are the perfect individual or business from whom they should purchase</string>
+    <string name="selling_price_error">Please enter sale price</string>
+    <string name="mrp_error">Please enter original MRP of the item</string>
 </resources>

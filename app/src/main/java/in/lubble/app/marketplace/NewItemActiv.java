@@ -208,14 +208,14 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             descTil.setError(null);
         }
         if (!isValidString(mrpTil.getEditText().getText().toString())) {
-            mrpTil.setError(getString(R.string.event_organizer_error));
+            mrpTil.setError(getString(R.string.mrp_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             mrpTil.setError(null);
         }
         if (!isValidString(sellingPriceTil.getEditText().getText().toString())) {
-            sellingPriceTil.setError(getString(R.string.event_date_error));
+            sellingPriceTil.setError(getString(R.string.selling_price_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
