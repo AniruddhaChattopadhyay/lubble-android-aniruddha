@@ -10,6 +10,9 @@ import java.util.ArrayList;
 
 public class Item {
 
+    public static final int ITEM_PRODUCT = 0;
+    public static final int ITEM_SERVICE = 1;
+
     @SerializedName("id")
     @Expose
     private Integer id;

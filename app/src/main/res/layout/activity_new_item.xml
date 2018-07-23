@@ -42,8 +42,8 @@
         <ImageView
             android:id="@+id/iv_item_image"
             android:layout_width="match_parent"
-            android:layout_below="@id/text_toolbar"
             android:layout_height="300dp"
+            android:layout_below="@id/text_toolbar"
             android:scaleType="centerCrop" />
 
         <LinearLayout
@@ -95,12 +95,13 @@
                 android:orientation="horizontal">
 
                 <RadioButton
+                    android:id="@+id/rb_product"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:checked="true"
                     android:text="@string/product" />
 
                 <RadioButton
+                    android:id="@+id/rb_service"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
@@ -192,6 +193,13 @@
 
             </android.support.design.widget.TextInputLayout>
 
+            <LinearLayout
+                android:id="@+id/linearlayout_catalogue"
+                android:layout_width="match_parent"
+                android:layout_below="@id/til_item_desc"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
@@ -204,7 +212,7 @@
                 android:id="@+id/til_item_mrp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/til_item_desc"
+                android:layout_below="@id/linearlayout_catalogue"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_toRightOf="@id/iv_event_desc"

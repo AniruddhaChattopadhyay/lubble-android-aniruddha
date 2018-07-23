@@ -13,17 +13,23 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
@@ -32,6 +38,7 @@ import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Item;
+import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.UiUtils;
@@ -46,8 +53,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.view.Gravity.RIGHT;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.BUCKET_MARKETPLACE;
+import static in.lubble.app.models.marketplace.Item.ITEM_PRODUCT;
+import static in.lubble.app.models.marketplace.Item.ITEM_SERVICE;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
@@ -66,15 +76,20 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private ScrollView parentScrollView;
     private ImageView photoIv;
     private LinearLayout changePicHintContainer;
+    private RadioButton productRadioBtn;
+    private RadioButton serviceRadioBtn;
     private TextInputLayout nameTil;
     private TextInputLayout categoryTil;
     private TextInputLayout descTil;
+    private LinearLayout catalogueLinearLayout;
     private TextInputLayout mrpTil;
     private TextInputLayout sellingPriceTil;
     private Button submitBtn;
     private String currentPhotoPath;
     private int categoryId = -1;
     private String categoryName;
+    private ArrayList<ServiceData> serviceDataList;
+    private int selectedItemType = ITEM_PRODUCT;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, NewItemActiv.class));
@@ -88,9 +103,13 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         parentScrollView = findViewById(R.id.scrollview_parent);
         photoIv = findViewById(R.id.iv_item_image);
         changePicHintContainer = findViewById(R.id.linearlayout_changepic_hint);
+        RadioGroup itemTypeRadioGroup = findViewById(R.id.radio_group_type);
+        productRadioBtn = findViewById(R.id.rb_product);
+        serviceRadioBtn = findViewById(R.id.rb_service);
         nameTil = findViewById(R.id.til_item_name);
         categoryTil = findViewById(R.id.til_category);
         descTil = findViewById(R.id.til_item_desc);
+        catalogueLinearLayout = findViewById(R.id.linearlayout_catalogue);
         mrpTil = findViewById(R.id.til_item_mrp);
         sellingPriceTil = findViewById(R.id.til_item_sellingprice);
         submitBtn = findViewById(R.id.btn_submit);
@@ -116,6 +135,105 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         photoIv.setOnClickListener(this);
         changePicHintContainer.setOnClickListener(this);
         categoryTil.getEditText().setOnClickListener(this);
+
+        itemTypeRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.rb_product) {
+                    selectedItemType = ITEM_PRODUCT;
+                } else {
+                    selectedItemType = ITEM_SERVICE;
+                    showCatalogue();
+                }
+            }
+        });
+    }
+
+    private void showCatalogue() {
+        catalogueLinearLayout.removeAllViews();
+        catalogueLinearLayout.invalidate();
+        addNewService(0);
+        addNewService(0);
+
+        addBtnLayout();
+    }
+
+    private void addBtnLayout() {
+        final LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setWeightSum(10);
+
+        final Button newServiceBtn = new Button(this);
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 7);
+        newServiceBtn.setLayoutParams(lp);
+        newServiceBtn.setText("Add Service");
+        newServiceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addNewService(catalogueLinearLayout.getChildCount() - 1);
+            }
+        });
+        final Button deleteServiceBtn = new Button(this);
+        final LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 3);
+        deleteServiceBtn.setLayoutParams(lp1);
+        deleteServiceBtn.setText("Delete");
+        deleteServiceBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //todo remove data too
+                if (catalogueLinearLayout.getChildCount() > 2) {
+                    catalogueLinearLayout.removeViewAt(catalogueLinearLayout.getChildCount() - 2);
+                } else {
+                    Toast.makeText(NewItemActiv.this, "Please add at least 1 service", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        linearLayout.addView(newServiceBtn);
+        linearLayout.addView(deleteServiceBtn);
+        catalogueLinearLayout.addView(linearLayout);
+    }
+
+    private void addNewService(int pos) {
+        final LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setWeightSum(10);
+
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 7);
+        final TextInputLayout textInputLayout = new TextInputLayout(this);
+        textInputLayout.setLayoutParams(lp);
+        final EditText editText = new EditText(this);
+        //editText.setLayoutParams(lp);
+        textInputLayout.addView(editText);
+        textInputLayout.setHint("Service Name");
+
+        final LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 3);
+        final TextInputLayout textInputLayout1 = new TextInputLayout(this);
+        textInputLayout1.setLayoutParams(lp1);
+        textInputLayout1.setGravity(RIGHT);
+        textInputLayout1.setHorizontalGravity(RIGHT);
+        final EditText editText1 = new EditText(this);
+        textInputLayout1.addView(editText1);
+        //editText1.setLayoutParams(lp1);
+        textInputLayout1.setHint("Price");
+
+        linearLayout.addView(textInputLayout);
+        linearLayout.addView(textInputLayout1);
+        catalogueLinearLayout.addView(linearLayout, pos);
+    }
+
+    private ArrayList<ServiceData> getAllServiceDatas() {
+        serviceDataList = new ArrayList<>();
+        int serviceCount = catalogueLinearLayout.getChildCount() - 1;
+        for (int i = 0; i < serviceCount; i++) {
+            final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
+            final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
+            final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
+
+            final ServiceData serviceData
+                    = new ServiceData(nameTil.getEditText().getText().toString(), Integer.parseInt(priceTil.getEditText().getText().toString()));
+            serviceDataList.add(serviceData);
+        }
+        return serviceDataList;
     }
 
     @Override
@@ -159,15 +277,27 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         HashMap<String, Object> params = new HashMap<>();
 
         params.put("seller", LubbleSharedPrefs.getInstance().getSellerId());
+        params.put("type", selectedItemType);
         params.put("name", nameTil.getEditText().getText().toString());
         params.put("category", categoryId);
         params.put("mrp", mrpTil.getEditText().getText().toString());
         params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
         params.put("client_timestamp", System.currentTimeMillis());
 
-        final JSONObject jsonObject = new JSONObject(params);
+        JSONArray serviceCatalog = new JSONArray();
+        for (ServiceData serviceData : getAllServiceDatas()) {
+            final JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("title", serviceData.getTitle());
+                jsonObject.put("price", serviceData.getPrice());
+                serviceCatalog.put(jsonObject);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        params.put("service_catalog", serviceCatalog);
 
-        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+        RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.uploadNewItem(body).enqueue(new Callback<Item>() {
