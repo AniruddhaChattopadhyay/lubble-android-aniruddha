@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.PhotoData;
 import in.lubble.app.models.marketplace.SellerData;
@@ -100,6 +101,7 @@ public class ItemActivity extends AppCompatActivity {
             public void onResponse(Call<Item> call, Response<Item> response) {
                 final Item item = response.body();
                 itemProgressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
                 if (item != null) {
                     titleTv.setText(item.getName());
                     priceTv.setText("₹ " + item.getSellingPrice());
@@ -116,7 +118,6 @@ public class ItemActivity extends AppCompatActivity {
                     setTitle(item.getName());
 
                     final SellerData sellerData = item.getSellerData();
-                    progressBar.setVisibility(View.GONE);
                     if (sellerData != null) {
 
                         sellerNameTv.setText(sellerData.getName());
@@ -137,8 +138,15 @@ public class ItemActivity extends AppCompatActivity {
                         });
                     }
                 } else {
-                    Crashlytics.logException(new IllegalArgumentException("Item null for item ID: " + itemId));
-                    Toast.makeText(ItemActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    if (response.code() == 404) {
+                        final Bundle bundle = new Bundle();
+                        bundle.putInt("item_id", itemId);
+                        Analytics.triggerEvent(AnalyticsEvents.ITEM_NOT_FOUND, bundle, ItemActivity.this);
+                        Toast.makeText(ItemActivity.this, "Item Not Found", Toast.LENGTH_LONG).show();
+                    } else {
+                        Crashlytics.logException(new IllegalArgumentException("Item null for item ID: " + itemId));
+                        Toast.makeText(ItemActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
