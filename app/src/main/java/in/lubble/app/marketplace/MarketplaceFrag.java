@@ -13,8 +13,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -41,6 +45,7 @@ public class MarketplaceFrag extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     private RecyclerView categoriesRv;
+    private ProgressBar progressBar;
     private TextView cat1Name;
     private TextView cat2Name;
     private RecyclerView allItemsRv;
@@ -73,6 +78,7 @@ public class MarketplaceFrag extends Fragment {
         categoriesRv = view.findViewById(R.id.rv_categories);
         categoriesRv.setNestedScrollingEnabled(false);
 
+        progressBar = view.findViewById(R.id.progress_bar);
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
         viewPager.setClipChildren(false);
@@ -133,6 +139,7 @@ public class MarketplaceFrag extends Fragment {
         endpoints.fetchMarketplaceData().enqueue(new Callback<MarketplaceData>() {
             @Override
             public void onResponse(Call<MarketplaceData> call, Response<MarketplaceData> response) {
+                progressBar.setVisibility(View.GONE);
                 final MarketplaceData marketplaceData = response.body();
                 if (marketplaceData != null && isAdded() && isVisible()) {
                     final Category category1 = marketplaceData.getShowcaseCategories().get(0);
@@ -162,12 +169,17 @@ public class MarketplaceFrag extends Fragment {
                     } else {
                         pagerContainer.setVisibility(View.GONE);
                     }
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("marketplaceData is NULL for "));
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<MarketplaceData> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
     }
