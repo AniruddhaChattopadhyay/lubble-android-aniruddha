@@ -11,7 +11,11 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -32,6 +36,7 @@ public class ItemListActiv extends AppCompatActivity {
     private static final String PARAM_ID = "PARAM_ID";
 
     private ImageView sellerPicIv;
+    private ProgressBar progressBar;
     private TextView sellerNameTv;
     private TextView sellerBioTv;
     private boolean isSeller;
@@ -58,6 +63,7 @@ public class ItemListActiv extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         sellerPicIv = findViewById(R.id.iv_seller_pic);
+        progressBar = findViewById(R.id.progress_bar);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
         recyclerView = findViewById(R.id.rv_items);
@@ -86,6 +92,7 @@ public class ItemListActiv extends AppCompatActivity {
         endpoints.fetchCategoryItems(sellerId).enqueue(new Callback<Category>() {
             @Override
             public void onResponse(Call<Category> call, Response<Category> response) {
+                progressBar.setVisibility(View.GONE);
                 final Category categoryData = response.body();
                 if (categoryData != null) {
                     sellerNameTv.setText(categoryData.getName());
@@ -104,12 +111,17 @@ public class ItemListActiv extends AppCompatActivity {
                             adapter.addData(item);
                         }
                     }
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("Category null for cat id: " + sellerId));
+                    Toast.makeText(ItemListActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Category> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ItemListActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -119,6 +131,7 @@ public class ItemListActiv extends AppCompatActivity {
         endpoints.fetchSellerItems(sellerId).enqueue(new Callback<SellerData>() {
             @Override
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
+                progressBar.setVisibility(View.GONE);
                 final SellerData sellerData = response.body();
                 if (sellerData != null) {
                     sellerNameTv.setText(sellerData.getName());
@@ -136,12 +149,17 @@ public class ItemListActiv extends AppCompatActivity {
                             adapter.addData(item);
                         }
                     }
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("sellerData null for seller id: " + sellerId));
+                    Toast.makeText(ItemListActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<SellerData> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ItemListActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
     }

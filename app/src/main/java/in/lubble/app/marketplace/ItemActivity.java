@@ -12,7 +12,11 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 
 import java.util.ArrayList;
 
@@ -34,6 +38,8 @@ public class ItemActivity extends AppCompatActivity {
     private static final String PARAM_ITEM_ID = "PARAM_ITEM_ID";
 
     private ImageView imageIv;
+    private ProgressBar itemProgressBar;
+    private ProgressBar progressBar;
     private TextView titleTv;
     private TextView priceTv;
     private TextView mrpTv;
@@ -57,6 +63,8 @@ public class ItemActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item);
 
+        itemProgressBar = findViewById(R.id.item_progress_bar);
+        progressBar = findViewById(R.id.progress_bar);
         imageIv = findViewById(R.id.iv_item_image);
         titleTv = findViewById(R.id.tv_item_title);
         priceTv = findViewById(R.id.tv_price);
@@ -91,6 +99,7 @@ public class ItemActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Item> call, Response<Item> response) {
                 final Item item = response.body();
+                itemProgressBar.setVisibility(View.GONE);
                 if (item != null) {
                     titleTv.setText(item.getName());
                     priceTv.setText("₹ " + item.getSellingPrice());
@@ -101,11 +110,13 @@ public class ItemActivity extends AppCompatActivity {
                     if (photoList.size() > 0) {
                         GlideApp.with(ItemActivity.this)
                                 .load(photoList.get(0).getUrl())
+                                .thumbnail(0.1f)
                                 .into(imageIv);
                     }
                     setTitle(item.getName());
 
                     final SellerData sellerData = item.getSellerData();
+                    progressBar.setVisibility(View.GONE);
                     if (sellerData != null) {
 
                         sellerNameTv.setText(sellerData.getName());
@@ -125,12 +136,18 @@ public class ItemActivity extends AppCompatActivity {
                             }
                         });
                     }
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("Item null for item ID: " + itemId));
+                    Toast.makeText(ItemActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Item> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
+                itemProgressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(ItemActivity.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
     }

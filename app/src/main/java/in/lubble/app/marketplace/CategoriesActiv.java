@@ -10,6 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
 
 import java.util.ArrayList;
 
@@ -25,6 +27,7 @@ import retrofit2.Response;
 public class CategoriesActiv extends AppCompatActivity {
 
     private static final String TAG = "CategoriesActiv";
+    private ProgressBar progressBar;
     private RecyclerView catsRv;
     private CategoryAdapter categoryAdapter;
 
@@ -42,6 +45,7 @@ public class CategoriesActiv extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.category);
 
+        progressBar = findViewById(R.id.progress_bar);
         catsRv = findViewById(R.id.rv_cats);
         catsRv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -62,6 +66,7 @@ public class CategoriesActiv extends AppCompatActivity {
         endpoints.fetchCategories().enqueue(new Callback<ArrayList<Category>>() {
             @Override
             public void onResponse(Call<ArrayList<Category>> call, Response<ArrayList<Category>> response) {
+                progressBar.setVisibility(View.GONE);
                 final ArrayList<Category> categoryList = response.body();
                 if (categoryList != null && categoryList.size() > 0) {
                     for (Category category : categoryList) {
@@ -73,6 +78,7 @@ public class CategoriesActiv extends AppCompatActivity {
             @Override
             public void onFailure(Call<ArrayList<Category>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
+                progressBar.setVisibility(View.GONE);
             }
         });
     }

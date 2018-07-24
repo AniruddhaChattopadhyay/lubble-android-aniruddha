@@ -17,6 +17,13 @@
         android:text="@string/please_choose_a_category"
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_cats"
         android:layout_width="match_parent"

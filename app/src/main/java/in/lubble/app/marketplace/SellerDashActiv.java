@@ -7,11 +7,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -30,6 +33,7 @@ public class SellerDashActiv extends AppCompatActivity {
     private static final String PARAM_SELLER_ID = "PARAM_SELLER_ID";
 
     private ImageView sellerPicIv;
+    private ProgressBar progressBar;
     private TextView sellerNameTv;
     private TextView sellerBioTv;
     private int sellerId;
@@ -54,6 +58,7 @@ public class SellerDashActiv extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         sellerPicIv = findViewById(R.id.iv_seller_pic);
+        progressBar = findViewById(R.id.progress_bar);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
         final TextView newItemTv = findViewById(R.id.tv_new_item);
@@ -82,6 +87,7 @@ public class SellerDashActiv extends AppCompatActivity {
         endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<SellerData>() {
             @Override
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
+                progressBar.setVisibility(View.GONE);
                 final SellerData sellerData = response.body();
                 if (sellerData != null) {
                     sellerNameTv.setText(sellerData.getName());
@@ -97,12 +103,16 @@ public class SellerDashActiv extends AppCompatActivity {
                     for (Item item : sellerData.getItemList()) {
                         adapter.addData(item);
                     }
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
+                    Toast.makeText(SellerDashActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<SellerData> call, Throwable t) {
-                Log.e(TAG, "onFailure: ");
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(SellerDashActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
     }

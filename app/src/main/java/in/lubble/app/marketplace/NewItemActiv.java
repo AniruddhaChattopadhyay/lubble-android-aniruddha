@@ -332,6 +332,9 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                             .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
                             .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/items/" + item.getId())
                             .setAction(UploadFileService.ACTION_UPLOAD));
+                    finish();
+                } else {
+                    Toast.makeText(NewItemActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
