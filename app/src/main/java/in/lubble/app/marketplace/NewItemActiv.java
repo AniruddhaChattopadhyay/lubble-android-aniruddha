@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
@@ -53,6 +56,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.text.InputType.TYPE_CLASS_NUMBER;
+import static android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS;
 import static android.view.Gravity.RIGHT;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.BUCKET_MARKETPLACE;
@@ -63,6 +68,7 @@ import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
 @RuntimePermissions
 public class NewItemActiv extends AppCompatActivity implements View.OnClickListener {
@@ -114,6 +120,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         sellingPriceTil = findViewById(R.id.til_item_sellingprice);
         submitBtn = findViewById(R.id.btn_submit);
 
+        productRadioBtn.setChecked(true);
+
         Analytics.triggerScreenEvent(this, this.getClass());
 
         Toolbar toolbar = findViewById(R.id.text_toolbar);
@@ -141,6 +149,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.rb_product) {
                     selectedItemType = ITEM_PRODUCT;
+                    catalogueLinearLayout.setVisibility(View.GONE);
                 } else {
                     selectedItemType = ITEM_SERVICE;
                     showCatalogue();
@@ -152,8 +161,17 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private void showCatalogue() {
         catalogueLinearLayout.removeAllViews();
         catalogueLinearLayout.invalidate();
+
         addNewService(0);
         addNewService(0);
+
+        catalogueLinearLayout.setVisibility(View.VISIBLE);
+        final TextView catalogueTitle = new TextView(this);
+        catalogueTitle.setText("List all your services");
+        //catalogueTitle.setGravity(CENTER);
+        catalogueTitle.setTextSize(16);
+        catalogueTitle.setPadding(0, dpToPx(12), 0, dpToPx(8));
+        catalogueLinearLayout.addView(catalogueTitle, 0);
 
         addBtnLayout();
     }
@@ -181,7 +199,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View v) {
                 //todo remove data too
-                if (catalogueLinearLayout.getChildCount() > 2) {
+                if (catalogueLinearLayout.getChildCount() > 3) {
                     catalogueLinearLayout.removeViewAt(catalogueLinearLayout.getChildCount() - 2);
                 } else {
                     Toast.makeText(NewItemActiv.this, "Please add at least 1 service", Toast.LENGTH_SHORT).show();
@@ -204,6 +222,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         final EditText editText = new EditText(this);
         //editText.setLayoutParams(lp);
         textInputLayout.addView(editText);
+        textInputLayout.getEditText().setInputType(TYPE_TEXT_FLAG_CAP_WORDS);
         textInputLayout.setHint("Service Name");
 
         final LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 3);
@@ -215,6 +234,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         textInputLayout1.addView(editText1);
         //editText1.setLayoutParams(lp1);
         textInputLayout1.setHint("Price");
+        textInputLayout1.getEditText().setInputType(TYPE_CLASS_NUMBER);
 
         linearLayout.addView(textInputLayout);
         linearLayout.addView(textInputLayout1);
@@ -224,7 +244,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private ArrayList<ServiceData> getAllServiceDatas() {
         serviceDataList = new ArrayList<>();
         int serviceCount = catalogueLinearLayout.getChildCount() - 1;
-        for (int i = 0; i < serviceCount; i++) {
+        for (int i = 1; i < serviceCount; i++) {
             final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
             final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
             final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
@@ -360,6 +380,18 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             Toast.makeText(this, R.string.no_photo, Toast.LENGTH_SHORT).show();
             parentScrollView.smoothScrollTo(0, 0);
             return false;
+        }
+        // check all services
+        int serviceCount = catalogueLinearLayout.getChildCount() - 1;
+        for (int i = 1; i < serviceCount; i++) {
+            final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
+            final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
+            final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
+
+            if (TextUtils.isEmpty(nameTil.getEditText().getText()) || TextUtils.isEmpty(priceTil.getEditText().getText())) {
+                Snackbar.make(parentScrollView, "Services cannot be empty", Snackbar.LENGTH_LONG).show();
+                return false;
+            }
         }
         return true;
     }
