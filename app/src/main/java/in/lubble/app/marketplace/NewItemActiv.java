@@ -44,7 +44,6 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
 import permissions.dispatcher.NeedsPermission;
@@ -300,24 +299,26 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         params.put("seller", LubbleSharedPrefs.getInstance().getSellerId());
         params.put("type", selectedItemType);
         params.put("name", nameTil.getEditText().getText().toString());
+        params.put("description", descTil.getEditText().getText().toString());
         params.put("category", categoryId);
         params.put("mrp", mrpTil.getEditText().getText().toString());
         params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
         params.put("client_timestamp", System.currentTimeMillis());
 
-        JSONArray serviceCatalog = new JSONArray();
-        for (ServiceData serviceData : getAllServiceDatas()) {
-            final JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("title", serviceData.getTitle());
-                jsonObject.put("price", serviceData.getPrice());
-                serviceCatalog.put(jsonObject);
-            } catch (JSONException e) {
-                e.printStackTrace();
+        if (selectedItemType == ITEM_SERVICE) {
+            JSONArray serviceCatalog = new JSONArray();
+            for (ServiceData serviceData : getAllServiceDatas()) {
+                final JSONObject jsonObject = new JSONObject();
+                try {
+                    jsonObject.put("title", serviceData.getTitle());
+                    jsonObject.put("price", serviceData.getPrice());
+                    serviceCatalog.put(jsonObject);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
+            params.put("service_catalog", serviceCatalog);
         }
-        params.put("service_catalog", serviceCatalog);
-
         RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
@@ -326,7 +327,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             public void onResponse(Call<Item> call, Response<Item> response) {
                 final Item item = response.body();
                 if (item != null) {
-                    FileUtils.compressImage(new File(picUri.getPath()).getAbsolutePath(), 80);
+                    // todo FileUtils.compressImage(new File(picUri.getPath()).getAbsolutePath(), 80);
                     //todo progress bar
                     //todo profile (test) this compression
                     startService(new Intent(NewItemActiv.this, UploadFileService.class)
@@ -387,16 +388,18 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         }
-        // check all services
-        int serviceCount = catalogueLinearLayout.getChildCount() - 1;
-        for (int i = 1; i < serviceCount; i++) {
-            final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
-            final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
-            final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
+        if (selectedItemType == ITEM_SERVICE) {
+            // check all services
+            int serviceCount = catalogueLinearLayout.getChildCount() - 1;
+            for (int i = 1; i < serviceCount; i++) {
+                final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
+                final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
+                final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
 
-            if (TextUtils.isEmpty(nameTil.getEditText().getText()) || TextUtils.isEmpty(priceTil.getEditText().getText())) {
-                Snackbar.make(parentScrollView, "Services cannot be empty", Snackbar.LENGTH_LONG).show();
-                return false;
+                if (TextUtils.isEmpty(nameTil.getEditText().getText()) || TextUtils.isEmpty(priceTil.getEditText().getText())) {
+                    Snackbar.make(parentScrollView, "Services cannot be empty", Snackbar.LENGTH_LONG).show();
+                    return false;
+                }
             }
         }
         return true;
