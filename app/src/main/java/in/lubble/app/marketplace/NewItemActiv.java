@@ -44,6 +44,7 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
 import permissions.dispatcher.NeedsPermission;
@@ -325,7 +326,9 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             public void onResponse(Call<Item> call, Response<Item> response) {
                 final Item item = response.body();
                 if (item != null) {
-                    //todo compress img
+                    FileUtils.compressImage(new File(picUri.getPath()).getAbsolutePath(), 80);
+                    //todo progress bar
+                    //todo profile (test) this compression
                     startService(new Intent(NewItemActiv.this, UploadFileService.class)
                             .putExtra(UploadFileService.EXTRA_FILE_NAME, "item_pic_" + System.currentTimeMillis() + ".jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
