@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -27,6 +29,7 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.PhotoData;
 import in.lubble.app.models.marketplace.SellerData;
+import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
@@ -45,6 +48,7 @@ public class ItemActivity extends AppCompatActivity {
     private TextView priceTv;
     private TextView mrpTv;
     private TextView descTv;
+    private RecyclerView serviceRv;
     private ImageView sellerIv;
     private TextView sellerNameTv;
     private TextView sellerBioTv;
@@ -71,6 +75,7 @@ public class ItemActivity extends AppCompatActivity {
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
         descTv = findViewById(R.id.tv_item_desc);
+        serviceRv = findViewById(R.id.rv_service_catalog);
 
         sellerIv = findViewById(R.id.iv_seller_pic);
         sellerNameTv = findViewById(R.id.tv_seller_name);
@@ -107,6 +112,12 @@ public class ItemActivity extends AppCompatActivity {
                     priceTv.setText("₹ " + item.getSellingPrice());
                     mrpTv.setText(String.valueOf(item.getMrp()));
                     descTv.setText(item.getDescription());
+
+                    if (item.getType() == Item.ITEM_SERVICE) {
+                        toggleServiceCatalog(true, item.getServiceDataList());
+                    } else {
+                        toggleServiceCatalog(false, null);
+                    }
 
                     final ArrayList<PhotoData> photoList = item.getPhotos();
                     if (photoList.size() > 0) {
@@ -158,6 +169,20 @@ public class ItemActivity extends AppCompatActivity {
                 Toast.makeText(ItemActivity.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void toggleServiceCatalog(boolean isShown, @Nullable ArrayList<ServiceData> serviceDataList) {
+        if (isShown && serviceDataList != null && !serviceDataList.isEmpty()) {
+            serviceRv.setVisibility(View.VISIBLE);
+            serviceRv.setLayoutManager(new LinearLayoutManager(this));
+            final ServiceCatalogAdapter adapter = new ServiceCatalogAdapter();
+            serviceRv.setAdapter(adapter);
+            for (ServiceData serviceData : serviceDataList) {
+                adapter.addData(serviceData);
+            }
+        } else {
+            serviceRv.setVisibility(View.GONE);
+        }
     }
 
     @Override

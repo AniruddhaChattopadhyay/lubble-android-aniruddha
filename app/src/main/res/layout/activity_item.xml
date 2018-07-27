@@ -68,6 +68,23 @@
                 android:maxLines="4"
                 tools:text="@tools:sample/lorem/random" />
 
+            <TextView
+                android:id="@+id/tv_service_catalog_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_item_desc"
+                android:layout_marginTop="16dp"
+                android:text="Service catalog"
+                android:textColor="@color/black" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_service_catalog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_service_catalog_hint"
+                android:layout_marginTop="8dp"
+                android:visibility="visible" />
+
         </RelativeLayout>
 
         <TextView
@@ -75,6 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
             android:background="@drawable/half_rounded_rectangle_hollow_top"
             android:padding="8dp"
             android:text="Sold By"

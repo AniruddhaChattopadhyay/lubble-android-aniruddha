@@ -56,6 +56,25 @@ public class Item {
     @Expose
     @Nullable
     private SellerData sellerData;
+    @SerializedName("type")
+    @Expose
+    private int type = 0;
+    @SerializedName("service_catalog")
+    @Expose
+    @Nullable
+    private ArrayList<ServiceData> serviceDataList;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Item) {
+            Item objectToCompare = (Item) obj;
+            if (this.id != null && objectToCompare.getId() != null && this.id.equals(objectToCompare.getId())) {
+                return true;
+            }
+            return false;
+        }
+        return super.equals(obj);
+    }
 
     public Integer getId() {
         return id;
@@ -168,5 +187,22 @@ public class Item {
 
     public void setSellerData(@Nullable SellerData sellerData) {
         this.sellerData = sellerData;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    @Nullable
+    public ArrayList<ServiceData> getServiceDataList() {
+        return serviceDataList;
+    }
+
+    public void setServiceDataList(@Nullable ArrayList<ServiceData> serviceDataList) {
+        this.serviceDataList = serviceDataList;
     }
 }

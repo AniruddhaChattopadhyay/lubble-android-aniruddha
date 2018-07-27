@@ -1,12 +1,16 @@
 package in.lubble.app.marketplace;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -31,6 +35,10 @@ public class SellerDashActiv extends AppCompatActivity {
 
     private static final String TAG = "SellerDashActiv";
     private static final String PARAM_SELLER_ID = "PARAM_SELLER_ID";
+    public static final String ACTION_IMG_DONE = "ACTION_IMG_DONE";
+    public static final String EXTRA_IMG_TYPE = "EXTRA_IMG_TYPE";
+    public static final String EXTRA_IMG_ID = "EXTRA_IMG_ID";
+    public static final String EXTRA_IMG_URL = "EXTRA_IMG_URL";
 
     private ImageView sellerPicIv;
     private ProgressBar progressBar;
@@ -39,6 +47,7 @@ public class SellerDashActiv extends AppCompatActivity {
     private int sellerId;
     private RecyclerView recyclerView;
     private BigItemAdapter adapter;
+    private BroadcastReceiver photoUploadReceiver;
 
     public static void open(Context context, int sellerId) {
         final Intent intent = new Intent(context, SellerDashActiv.class);
@@ -72,14 +81,53 @@ public class SellerDashActiv extends AppCompatActivity {
             throw new IllegalArgumentException("no seller ID bruh");
         }
 
-        fetchSellerProfile();
-
         newItemTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 NewItemActiv.open(SellerDashActiv.this);
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchSellerProfile();
+        if (adapter != null) {
+            adapter.clear();
+        }
+        registerMediaUploadCallback();
+    }
+
+    private void registerMediaUploadCallback() {
+        photoUploadReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                //todo hideProgressDialog();
+                if (intent.getAction() != null) {
+                    switch (intent.getAction()) {
+                        case ACTION_IMG_DONE:
+                            final String imgType = intent.getStringExtra(EXTRA_IMG_TYPE);
+                            final String imgId = intent.getStringExtra(EXTRA_IMG_ID);
+                            final String imgUrl = intent.getStringExtra(EXTRA_IMG_URL);
+                            if (!TextUtils.isEmpty(imgType) && !TextUtils.isEmpty(imgId)) {
+                                if (imgType.equalsIgnoreCase("500")) {
+                                    // ITEM
+                                    adapter.updateItemPic(Integer.parseInt(imgId), imgUrl);
+                                } else if (imgType.equalsIgnoreCase("501")) {
+                                    // SELLER
+                                    GlideApp.with(SellerDashActiv.this)
+                                            .load(imgUrl)
+                                            .circleCrop()
+                                            .into(sellerPicIv);
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+        };
+        LocalBroadcastManager.getInstance(this).registerReceiver(photoUploadReceiver, new IntentFilter(ACTION_IMG_DONE));
     }
 
     private void fetchSellerProfile() {
@@ -115,6 +163,14 @@ public class SellerDashActiv extends AppCompatActivity {
                 Toast.makeText(SellerDashActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (photoUploadReceiver != null) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(photoUploadReceiver);
+        }
     }
 
     @Override

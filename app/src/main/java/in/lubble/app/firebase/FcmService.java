@@ -26,6 +26,10 @@ import in.lubble.app.utils.StringUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.marketplace.SellerDashActiv.ACTION_IMG_DONE;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_ID;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_TYPE;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_URL;
 
 /**
  * Created by ishaan on 26/1/18.
@@ -75,10 +79,23 @@ public class FcmService extends FirebaseMessagingService {
             } else if (StringUtils.isValidString(type) && "chat".equalsIgnoreCase(type)) {
                 // create chat notif
                 createChatNotif(dataMap);
+            }  else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
+                // mplace image uploaded, send broadcast
+                sendMarketplaceImgBroadcast(dataMap);
             } else {
                 Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
             }
         }
+    }
+
+    private void sendMarketplaceImgBroadcast(Map<String, String> dataMap) {
+
+        Intent broadcast = new Intent(ACTION_IMG_DONE)
+                .putExtra(EXTRA_IMG_TYPE, dataMap.get("img_type"))
+                .putExtra(EXTRA_IMG_ID, dataMap.get("id"))
+                .putExtra(EXTRA_IMG_URL, dataMap.get("url"));
+
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
     }
 
     private void pullNotices(Map<String, String> dataMap) {

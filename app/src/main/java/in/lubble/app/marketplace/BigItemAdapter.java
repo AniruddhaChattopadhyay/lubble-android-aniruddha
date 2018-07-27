@@ -64,6 +64,28 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyDataSetChanged();
     }
 
+    public void updateItemPic(int itemId, @NonNull String downloadUrl) {
+        final Item itemToUpdate = new Item();
+        itemToUpdate.setId(itemId);
+        final int index = itemList.indexOf(itemToUpdate);
+        if (index != -1) {
+            final Item item = itemList.get(index);
+
+            ArrayList<PhotoData> photoList = new ArrayList<>();
+            final PhotoData photoData = new PhotoData();
+            photoData.setUrl(downloadUrl);
+            photoList.add(photoData);
+
+            item.setPhotos(photoList);
+            notifyItemChanged(index);
+        }
+    }
+
+    public void clear() {
+        itemList.clear();
+        notifyDataSetChanged();
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView itemIv;
         final TextView nameTv;
