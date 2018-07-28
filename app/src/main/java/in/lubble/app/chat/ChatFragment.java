@@ -546,7 +546,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     checkAndInsertDate(chatData);
                     chatData.setId(dataSnapshot.getKey());
                     chatAdapter.addChatData(chatData);
-                    //sendReadReceipt(chatData);
+                    sendReadReceipt(chatData);
                 }
             }
 
@@ -598,7 +598,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     private void sendReadReceipt(ChatData chatData) {
         if (chatData.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
-            getMessagesRef().child(groupId).child(chatData.getId())
+            // either GROUP or DM id should be non-null if a msg exists
+            getMessagesRef().child(groupId == null ? dmId : groupId).child(chatData.getId())
                     .child("readReceipts")
                     .child(FirebaseAuth.getInstance().getUid())
                     .setValue(System.currentTimeMillis());
