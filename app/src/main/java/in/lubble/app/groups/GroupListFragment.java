@@ -1,10 +1,8 @@
 package in.lubble.app.groups;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
@@ -30,7 +28,6 @@ import java.util.Set;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
-import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 
@@ -42,7 +39,6 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
     private static final String TAG = "GroupListFragment";
-    public static final String EXTRA_GROUP_ID_HIGHLIGHT = "extra_group_id_highlight";
 
     private OnListFragmentInteractionListener mListener;
     private GroupRecyclerAdapter adapter;
@@ -100,43 +96,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         groupsRecyclerView.setVisibility(View.INVISIBLE);
         syncUserGroupIds();
 
-        summerCampJoinCheck();
-    }
-
-    private void summerCampJoinCheck() {
-        if (getActivity().getIntent().hasExtra(EXTRA_GROUP_ID_HIGHLIGHT)) {
-
-            final ProgressDialog progressDialog = new ProgressDialog(getContext());
-            progressDialog.setTitle(R.string.joining_group);
-            progressDialog.setMessage(getString(R.string.check_internet));
-            progressDialog.show();
-
-            final String groupId = getActivity().getIntent().getStringExtra(EXTRA_GROUP_ID_HIGHLIGHT);
-
-            summerCampChildRef = RealtimeDbHelper.getUserGroupsRef().child(groupId);
-            summerCampJoinListener = summerCampChildRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
-                    if (userGroupData != null && userGroupData.isJoined()) {
-                        progressDialog.dismiss();
-                        // after joining, the newly joined group will move to 0th position, so highlight that.
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                adapter.flashPos(0);
-                            }
-                        }, 500);
-                        summerCampChildRef.removeEventListener(summerCampJoinListener);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                }
-            });
-            getActivity().getIntent().removeExtra(EXTRA_GROUP_ID_HIGHLIGHT);
-        }
     }
 
     private void syncUserGroupIds() {

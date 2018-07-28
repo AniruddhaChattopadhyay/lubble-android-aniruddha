@@ -663,7 +663,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 replyMsgId = null;
                 break;
             case R.id.iv_attach:
-                if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(dmId)) {
+                if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
                     Toast.makeText(getContext(), "Please send a text message first", Toast.LENGTH_SHORT).show();
                     break;
                 }
@@ -862,8 +862,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onPause();
         recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
-        messagesReference.removeEventListener(msgChildListener);
-        groupReference.removeEventListener(groupInfoListener);
+        if (messagesReference != null) {
+            messagesReference.removeEventListener(msgChildListener);
+        }
+        if (groupReference != null) {
+            groupReference.removeEventListener(groupInfoListener);
+        }
         if (bottomBarListener != null) {
             RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
         }

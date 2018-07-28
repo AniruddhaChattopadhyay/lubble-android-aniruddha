@@ -11,7 +11,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,7 +24,6 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -74,6 +72,7 @@ public class ItemActivity extends AppCompatActivity {
     private RecyclerView sellerItemsRv;
     private TextView visitShopTv;
     private Button chatBtn;
+    private ValueEventListener sellerDmIdValueEventListener;
 
     private int itemId;
 
@@ -172,16 +171,14 @@ public class ItemActivity extends AppCompatActivity {
                         chatBtn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-
-                                final DatabaseReference dms = RealtimeDbHelper.getUserRef(FirebaseAuth.getInstance().getUid())
-                                        .child("dms");
-                                final Query query = dms.child(String.valueOf(sellerData.getId()));
-                                final ValueEventListener sellerDmIdValueEventListener = query.addValueEventListener(new ValueEventListener() {
+                                final Query query = RealtimeDbHelper.getUserRef(FirebaseAuth.getInstance().getUid())
+                                        .child("dms").orderByChild("profileId").equalTo(String.valueOf(sellerData.getId()));
+                                sellerDmIdValueEventListener = query.addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                         final HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
-                                        final CharSequence dmId = (CharSequence) map.keySet().toArray()[0];
-                                        if (!TextUtils.isEmpty(dmId)) {
+                                        if (map != null) {
+                                            String dmId = (String) map.keySet().toArray()[0];
                                             final Intent intent = new Intent(ItemActivity.this, ChatActivity.class);
                                             intent.putExtra(EXTRA_IS_JOINING, false);
                                             intent.putExtra(EXTRA_DM_ID, dmId);
@@ -196,11 +193,16 @@ public class ItemActivity extends AppCompatActivity {
                                             intent.putExtra(EXTRA_RECEIVER_DP_URL, sellerData.getPhotoUrl());
                                             startActivity(intent);
                                         }
+                                        if (sellerDmIdValueEventListener != null) {
+                                            query.removeEventListener(sellerDmIdValueEventListener);
+                                        }
                                     }
 
                                     @Override
                                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                                        if (sellerDmIdValueEventListener != null) {
+                                            query.removeEventListener(sellerDmIdValueEventListener);
+                                        }
                                     }
                                 });
                             }
