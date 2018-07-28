@@ -1,6 +1,8 @@
 package in.lubble.app.marketplace;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,8 +20,10 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private static final String TAG = "ServiceCatalogAdapter";
 
     private final List<ServiceData> serviceDataList;
+    private Context context;
 
-    public ServiceCatalogAdapter() {
+    public ServiceCatalogAdapter(Context context) {
+        this.context = context;
         serviceDataList = new ArrayList<>();
     }
 
@@ -40,6 +44,12 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         viewHolder.serviceNameTv.setText(serviceData.getTitle());
         viewHolder.servicePriceTv.setText("₹ " + serviceData.getPrice());
 
+        if (position % 2 == 0) {
+            viewHolder.view.setBackgroundColor(ContextCompat.getColor(context, R.color.very_light_gray));
+        } else {
+            viewHolder.view.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+        }
+
     }
 
     @Override
@@ -53,11 +63,13 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
+        final View view;
         final TextView serviceNameTv;
         final TextView servicePriceTv;
 
         ViewHolder(View view) {
             super(view);
+            this.view = view;
             serviceNameTv = view.findViewById(R.id.tv_service_name);
             servicePriceTv = view.findViewById(R.id.tv_service_price);
         }

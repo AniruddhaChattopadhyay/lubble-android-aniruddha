@@ -48,6 +48,7 @@ public class ItemActivity extends AppCompatActivity {
     private TextView priceTv;
     private TextView mrpTv;
     private TextView descTv;
+    private TextView serviceHintTv;
     private RecyclerView serviceRv;
     private ImageView sellerIv;
     private TextView sellerNameTv;
@@ -75,6 +76,7 @@ public class ItemActivity extends AppCompatActivity {
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
         descTv = findViewById(R.id.tv_item_desc);
+        serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
         serviceRv = findViewById(R.id.rv_service_catalog);
 
         sellerIv = findViewById(R.id.iv_seller_pic);
@@ -173,14 +175,17 @@ public class ItemActivity extends AppCompatActivity {
 
     private void toggleServiceCatalog(boolean isShown, @Nullable ArrayList<ServiceData> serviceDataList) {
         if (isShown && serviceDataList != null && !serviceDataList.isEmpty()) {
+            serviceHintTv.setVisibility(View.VISIBLE);
             serviceRv.setVisibility(View.VISIBLE);
+            serviceRv.setNestedScrollingEnabled(false);
             serviceRv.setLayoutManager(new LinearLayoutManager(this));
-            final ServiceCatalogAdapter adapter = new ServiceCatalogAdapter();
+            final ServiceCatalogAdapter adapter = new ServiceCatalogAdapter(this);
             serviceRv.setAdapter(adapter);
             for (ServiceData serviceData : serviceDataList) {
                 adapter.addData(serviceData);
             }
         } else {
+            serviceHintTv.setVisibility(View.GONE);
             serviceRv.setVisibility(View.GONE);
         }
     }

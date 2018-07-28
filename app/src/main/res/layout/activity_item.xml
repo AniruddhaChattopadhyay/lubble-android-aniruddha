@@ -24,7 +24,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="8dp">
+            android:layout_margin="16dp">
 
             <ProgressBar
                 android:id="@+id/item_progress_bar"
@@ -74,16 +74,24 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_item_desc"
                 android:layout_marginTop="16dp"
-                android:text="Service catalog"
+                android:padding="8dp"
+                android:text="Service Catalog"
+                android:textSize="16sp"
+                android:background="@drawable/half_rounded_rectangle_hollow_top"
+                android:visibility="gone"
+                tools:visibility="visible"
                 android:textColor="@color/black" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_service_catalog"
                 android:layout_width="match_parent"
+                android:background="@drawable/half_rounded_rectangle_hollow_bottom"
                 android:layout_height="wrap_content"
+                android:paddingLeft="1dp"
+                android:paddingRight="1dp"
                 android:layout_below="@id/tv_service_catalog_hint"
-                android:layout_marginTop="8dp"
-                android:visibility="visible" />
+                android:visibility="gone"
+                tools:visibility="visible" />
 
         </RelativeLayout>
 
