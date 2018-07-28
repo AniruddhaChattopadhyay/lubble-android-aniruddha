@@ -105,4 +105,19 @@ public class RealtimeDbHelper {
         return getLubbleRef().child("events");
     }
 
+    /*
+        For Marketplace
+     */
+    public static DatabaseReference getCreateDmRef() {
+        return FirebaseDatabase.getInstance().getReference("create_dm");
+    }
+
+    public static DatabaseReference getDmMessagesRef() {
+        return FirebaseDatabase.getInstance().getReference("messages/dms");
+    }
+
+    public static DatabaseReference getDmsRef() {
+        return FirebaseDatabase.getInstance().getReference("dms");
+    }
+
 }

@@ -3,7 +3,6 @@ package in.lubble.app.marketplace;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -169,8 +168,8 @@ public class MarketplaceFrag extends Fragment {
                     } else {
                         pagerContainer.setVisibility(View.GONE);
                     }
-                } else {
-                    Crashlytics.logException(new IllegalArgumentException("marketplaceData is NULL for "));
+                } else if (isAdded() && isVisible()) {
+                    Crashlytics.logException(new IllegalArgumentException("marketplaceData is NULL"));
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -194,15 +193,6 @@ public class MarketplaceFrag extends Fragment {
                 .spaceSize(0f)
                 .rotationY(0f)
                 .build();
-
-        //Manually setting the first View to be elevated
-        viewPager.post(new Runnable() {
-            @Override
-            public void run() {
-                Fragment fragment = (Fragment) viewPager.getAdapter().instantiateItem(viewPager, 0);
-                ViewCompat.setElevation(fragment.getView(), 8.0f);
-            }
-        });
 
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

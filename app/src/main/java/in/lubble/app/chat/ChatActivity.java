@@ -21,6 +21,12 @@ public class ChatActivity extends AppCompatActivity {
     public static final String EXTRA_MSG_ID = "chat_activ_msg_id";
     // if we need to show joining progress dialog
     public static final String EXTRA_IS_JOINING = "chat_activ_is_joining";
+    // for when DM exists
+    public static final String EXTRA_DM_ID = "EXTRA_DM_ID";
+    // for new DMs
+    public static final String EXTRA_RECEIVER_ID = "EXTRA_RECEIVER_ID";
+    public static final String EXTRA_RECEIVER_NAME = "EXTRA_RECEIVER_NAME";
+    public static final String EXTRA_RECEIVER_DP_URL = "EXTRA_RECEIVER_DP_URL";
     private ImageView toolbarIcon;
     private ImageView toolbarLockIcon;
     private TextView toolbarTv;
@@ -50,12 +56,14 @@ public class ChatActivity extends AppCompatActivity {
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
         final String msgId = getIntent().getStringExtra(EXTRA_MSG_ID);
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);
+        final String dmId = getIntent().getStringExtra(EXTRA_DM_ID);
 
-        if (groupId == null) {
-            throw new RuntimeException("No Group ID passed");
-        }
-
-        final ChatFragment targetFrag = ChatFragment.newInstance(groupId, isJoining, msgId);
+        final ChatFragment targetFrag = ChatFragment.newInstance(
+                groupId, isJoining, msgId, dmId,
+                getIntent().getStringExtra(EXTRA_RECEIVER_ID),
+                getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
+                getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL)
+        );
         replaceFrag(getSupportFragmentManager(), targetFrag, R.id.frame_fragContainer);
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override

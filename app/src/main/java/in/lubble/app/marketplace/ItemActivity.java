@@ -4,28 +4,40 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.PhotoData;
 import in.lubble.app.models.marketplace.SellerData;
@@ -35,6 +47,12 @@ import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_DP_URL;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_NAME;
 
 public class ItemActivity extends AppCompatActivity {
 
@@ -55,6 +73,7 @@ public class ItemActivity extends AppCompatActivity {
     private TextView sellerBioTv;
     private RecyclerView sellerItemsRv;
     private TextView visitShopTv;
+    private Button chatBtn;
 
     private int itemId;
 
@@ -75,6 +94,7 @@ public class ItemActivity extends AppCompatActivity {
         titleTv = findViewById(R.id.tv_item_title);
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
+        chatBtn = findViewById(R.id.btn_chat);
         descTv = findViewById(R.id.tv_item_desc);
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
         serviceRv = findViewById(R.id.rv_service_catalog);
@@ -147,6 +167,42 @@ public class ItemActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View v) {
                                 ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
+                            }
+                        });
+                        chatBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                final DatabaseReference dms = RealtimeDbHelper.getUserRef(FirebaseAuth.getInstance().getUid())
+                                        .child("dms");
+                                final Query query = dms.child(String.valueOf(sellerData.getId()));
+                                final ValueEventListener sellerDmIdValueEventListener = query.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        final HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                                        final CharSequence dmId = (CharSequence) map.keySet().toArray()[0];
+                                        if (!TextUtils.isEmpty(dmId)) {
+                                            final Intent intent = new Intent(ItemActivity.this, ChatActivity.class);
+                                            intent.putExtra(EXTRA_IS_JOINING, false);
+                                            intent.putExtra(EXTRA_DM_ID, dmId);
+                                            //intent.putExtra(EXTRA_RECEIVER_NAME, sellerData.getName());
+                                            //intent.putExtra(EXTRA_RECEIVER_DP_URL, sellerData.getPhotoUrl());
+                                            startActivity(intent);
+                                        } else {
+                                            final Intent intent = new Intent(ItemActivity.this, ChatActivity.class);
+                                            intent.putExtra(EXTRA_IS_JOINING, false);
+                                            intent.putExtra(EXTRA_RECEIVER_ID, String.valueOf(sellerData.getId()));
+                                            intent.putExtra(EXTRA_RECEIVER_NAME, sellerData.getName());
+                                            intent.putExtra(EXTRA_RECEIVER_DP_URL, sellerData.getPhotoUrl());
+                                            startActivity(intent);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
                             }
                         });
                     }

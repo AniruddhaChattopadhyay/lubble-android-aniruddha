@@ -18,6 +18,7 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -73,6 +74,7 @@ import permissions.dispatcher.RuntimePermissions;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -97,6 +99,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
     private static final String KEY_MSG_ID = "CHAT_MSG_ID";
     private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
+    private static final String KEY_DM_ID = "KEY_DM_ID";
+    private static final String KEY_RECEIVER_ID = "KEY_RECEIVER_ID";
+    private static final String KEY_RECEIVER_NAME = "KEY_RECEIVER_NAME";
+    private static final String KEY_RECEIVER_DP_URL = "KEY_RECEIVER_DP_URL";
 
     @Nullable
     private GroupData groupData;
@@ -113,10 +119,21 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private TextView linkTitle;
     private TextView linkDesc;
     private ImageView linkCancel;
+    @Nullable
     private DatabaseReference groupReference;
+    @Nullable
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
+    @Nullable
     private String groupId;
+    @Nullable
+    private String dmId;
+    @Nullable
+    private String receiverId;
+    @Nullable
+    private String receiverName;
+    @Nullable
+    private String receiverDpUrl;
     @Nullable
     private String msgIdToOpen;
     private boolean isJoining;
@@ -134,17 +151,23 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private String replyMsgId = null;
     @Nullable
     private Parcelable recyclerViewState;
+    private ChatAdapter chatAdapter;
 
     public ChatFragment() {
         // Required empty public constructor
     }
 
-    public static ChatFragment newInstance(String groupId, boolean isJoining, @Nullable String msgId) {
+    public static ChatFragment newInstance(@Nullable String groupId, boolean isJoining, @Nullable String msgId, @Nullable String dmId,
+                                           @Nullable String receiverId, @Nullable String receiverName, @Nullable String receiverDpUrl) {
 
         Bundle args = new Bundle();
         args.putString(KEY_GROUP_ID, groupId);
         args.putString(KEY_MSG_ID, msgId);
         args.putBoolean(KEY_IS_JOINING, isJoining);
+        args.putString(KEY_DM_ID, dmId);
+        args.putString(KEY_RECEIVER_ID, receiverId);
+        args.putString(KEY_RECEIVER_NAME, receiverName);
+        args.putString(KEY_RECEIVER_DP_URL, receiverDpUrl);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
@@ -156,11 +179,23 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         groupId = getArguments().getString(KEY_GROUP_ID);
         msgIdToOpen = getArguments().getString(KEY_MSG_ID);
+        dmId = getArguments().getString(KEY_DM_ID);
+        receiverId = getArguments().getString(KEY_RECEIVER_ID);
+        receiverName = getArguments().getString(KEY_RECEIVER_NAME);
+        receiverDpUrl = getArguments().getString(KEY_RECEIVER_DP_URL);
         isJoining = getArguments().getBoolean(KEY_IS_JOINING);
 
-        groupReference = getLubbleGroupsRef().child(groupId);
-        messagesReference = getMessagesRef().child(groupId);
+        if (groupId != null) {
+            groupReference = getLubbleGroupsRef().child(groupId);
+            messagesReference = getMessagesRef().child(groupId);
+        } else if (dmId != null) {
+            // todo groupReference = getLubbleGroupsRef().child(groupId);
+            messagesReference = getDmMessagesRef().child(dmId);
+        } else if (receiverId != null) {
 
+        } else {
+            throw new RuntimeException("khuch to params dega bhai?");
+        }
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         registerMediaUploadCallback();
 
@@ -217,7 +252,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         chatRecyclerView.setLayoutManager(layoutManager);
-        final ChatAdapter chatAdapter = new ChatAdapter(
+        chatAdapter = new ChatAdapter(
                 getActivity(),
                 getContext(),
                 groupId,
@@ -225,7 +260,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 this,
                 GlideApp.with(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
-        msgChildListener = msgListener(chatAdapter);
+        if (messagesReference != null) {
+            msgChildListener = msgListener(messagesReference);
+        }
 
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
@@ -341,32 +378,40 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void syncGroupInfo() {
-        groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                groupData = dataSnapshot.getValue(GroupData.class);
-                // fetchMembersProfile(groupData.getMembers()); to be used for tagging
-                if (groupData != null) {
-                    if (!groupData.isJoined() && groupData.getIsPrivate()) {
-                        chatRecyclerView.setVisibility(View.GONE);
-                        pvtSystemMsg.setVisibility(View.VISIBLE);
-                        ((TextView) pvtSystemMsg.findViewById(R.id.tv_system_msg)).setText(R.string.pvt_group_msgs_hidden);
-                    } else {
-                        chatRecyclerView.setVisibility(View.VISIBLE);
-                        pvtSystemMsg.setVisibility(View.GONE);
+        if (!TextUtils.isEmpty(receiverName)) {
+            chatRecyclerView.setVisibility(View.VISIBLE);
+            ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true);
+        } else if (groupReference != null) {
+            groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    groupData = dataSnapshot.getValue(GroupData.class);
+                    // fetchMembersProfile(groupData.getMembers()); to be used for tagging
+                    if (groupData != null) {
+                        if (!groupData.isJoined() && groupData.getIsPrivate()) {
+                            chatRecyclerView.setVisibility(View.GONE);
+                            pvtSystemMsg.setVisibility(View.VISIBLE);
+                            ((TextView) pvtSystemMsg.findViewById(R.id.tv_system_msg)).setText(R.string.pvt_group_msgs_hidden);
+                        } else {
+                            chatRecyclerView.setVisibility(View.VISIBLE);
+                            pvtSystemMsg.setVisibility(View.GONE);
+                        }
+                        ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
+                        resetUnreadCount();
+                        showBottomBar(groupData);
+                        showPublicGroupWarning();
                     }
-                    ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
-                    resetUnreadCount();
-                    showBottomBar(groupData);
-                    showPublicGroupWarning();
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        } else if (!TextUtils.isEmpty(dmId)) {
+            chatRecyclerView.setVisibility(View.VISIBLE);
+            //todo
+        }
     }
 
     private void fetchMembersProfile(HashMap<String, Object> membersMap) {
@@ -493,7 +538,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
-    private ChildEventListener msgListener(final ChatAdapter chatAdapter) {
+    private ChildEventListener msgListener(@NonNull DatabaseReference messagesReference) {
         return messagesReference.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -504,7 +549,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     checkAndInsertDate(chatData);
                     chatData.setId(dataSnapshot.getKey());
                     chatAdapter.addChatData(chatData);
-                    sendReadReceipt(chatData);
+                    //sendReadReceipt(chatData);
                 }
             }
 
@@ -583,8 +628,34 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     chatData.setLinkDesc(linkDesc.getText().toString());
                 }
 
-                messagesReference.push().setValue(chatData);
+                if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
+                    final DatabaseReference pushRef = RealtimeDbHelper.getCreateDmRef().push();
 
+                    final HashMap<String, Object> userMap = new HashMap<>();
+                    final HashMap<Object, Object> map2 = new HashMap<>();
+                    map2.put("isSeller", true);
+                    userMap.put(receiverId, map2);
+
+                    HashMap<String, Object> sellerMap = new HashMap<>();
+                    sellerMap.put("isSeller", false);
+                    sellerMap.put("otherUser", receiverId);
+                    userMap.put(FirebaseAuth.getInstance().getUid(), sellerMap);
+
+                    final HashMap<String, Object> map = new HashMap<>();
+                    map.put("members", userMap);
+                    map.put("message", chatData);
+                    pushRef.setValue(map);
+                    dmId = pushRef.getKey();
+
+                    //todo groupReference = getLubbleGroupsRef().child(groupId);
+                    messagesReference = getDmMessagesRef().child(dmId);
+                    msgChildListener = msgListener(messagesReference);
+
+                } else if (!TextUtils.isEmpty(groupId)) {
+                    messagesReference.push().setValue(chatData);
+                } else if (!TextUtils.isEmpty(dmId)) {
+                    messagesReference.push().setValue(chatData);
+                }
                 newMessageEt.setText("");
                 linkTitle.setText("");
                 linkDesc.setText("");
@@ -592,6 +663,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 replyMsgId = null;
                 break;
             case R.id.iv_attach:
+                if (TextUtils.isEmpty(groupId) || TextUtils.isEmpty(dmId)) {
+                    Toast.makeText(getContext(), "Please send a text message first", Toast.LENGTH_SHORT).show();
+                    break;
+                }
                 ChatFragmentPermissionsDispatcher
                         .startPhotoPickerWithPermissionCheck(ChatFragment.this, REQUEST_CODE_IMG);
                 break;

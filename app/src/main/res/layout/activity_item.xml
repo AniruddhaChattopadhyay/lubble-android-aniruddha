@@ -59,11 +59,20 @@
                 android:textSize="12sp"
                 tools:text="899" />
 
+            <Button
+                android:id="@+id/btn_chat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_price"
+                android:layout_marginTop="4dp"
+                android:text="Chat with Seller"
+                android:theme="@style/AccentButton" />
+
             <TextView
                 android:id="@+id/tv_item_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_price"
+                android:layout_below="@id/btn_chat"
                 android:layout_marginTop="4dp"
                 android:maxLines="4"
                 tools:text="@tools:sample/lorem/random" />
@@ -74,22 +83,22 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_item_desc"
                 android:layout_marginTop="16dp"
+                android:background="@drawable/half_rounded_rectangle_hollow_top"
                 android:padding="8dp"
                 android:text="Service Catalog"
+                android:textColor="@color/black"
                 android:textSize="16sp"
-                android:background="@drawable/half_rounded_rectangle_hollow_top"
                 android:visibility="gone"
-                tools:visibility="visible"
-                android:textColor="@color/black" />
+                tools:visibility="visible" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_service_catalog"
                 android:layout_width="match_parent"
-                android:background="@drawable/half_rounded_rectangle_hollow_bottom"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/tv_service_catalog_hint"
+                android:background="@drawable/half_rounded_rectangle_hollow_bottom"
                 android:paddingLeft="1dp"
                 android:paddingRight="1dp"
-                android:layout_below="@id/tv_service_catalog_hint"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
