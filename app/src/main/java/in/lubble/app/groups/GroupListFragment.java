@@ -3,6 +3,8 @@ package in.lubble.app.groups;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
@@ -17,7 +19,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -28,12 +29,20 @@ import java.util.Set;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.models.DmData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 
+import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_DP_URL;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_NAME;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
@@ -43,10 +52,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private OnListFragmentInteractionListener mListener;
     private GroupRecyclerAdapter adapter;
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
+    private HashMap<Query, ValueEventListener> dmListenersMap = new HashMap<>();
     private ChildEventListener joinedGroupListener;
     private ChildEventListener unjoinedGroupListener;
-    private DatabaseReference summerCampChildRef;
-    private ValueEventListener summerCampJoinListener;
+    private ChildEventListener userDmsListener;
     private RecyclerView groupsRecyclerView;
     private ProgressBar progressBar;
     private HashMap<String, Set<String>> groupInvitedByMap;
@@ -95,7 +104,99 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         adapter.clearGroups();
         groupsRecyclerView.setVisibility(View.INVISIBLE);
         syncUserGroupIds();
+        syncUserDmIds();
+    }
 
+    private void syncUserDmIds() {
+
+        userDmsListener = getUserDmsRef().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                final String dmId = dataSnapshot.getKey();
+                if (dmId != null) {
+                    fetchDmFrom(dmId);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                /// TODO: 29/7/18 update unread count etc
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                /// TODO: 29/7/18
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void fetchDmFrom(@NonNull final String dmId) {
+        final ValueEventListener dmValueListener = getDmsRef().child(dmId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final DmData dmData = dataSnapshot.getValue(DmData.class);
+                if (dmData != null) {
+                    dmData.setId(dataSnapshot.getKey());
+
+                    final GroupData dmGroupData = new GroupData();
+                    dmGroupData.setId(dmData.getId());
+                    dmGroupData.setLastMessage(dmData.getLastMessage());
+                    dmGroupData.setLastMessageTimestamp(dmData.getLastMessageTimestamp());
+                    dmGroupData.setIsPrivate(true);
+
+                    final HashMap<String, Object> members = dmData.getMembers();
+                    for (String profileId : members.keySet()) {
+                        if (!FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId)) {
+                            final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
+                            if (profileMap != null) {
+                                final boolean isSeller = (boolean) profileMap.get("isSeller");
+                                if (isSeller) {
+                                    fetchSellerProfileFrom(profileId, dmGroupData);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            private synchronized void fetchSellerProfileFrom(String profileId, final GroupData dmGroupData) {
+                getSellerRef().child(profileId).child("info").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                        if (profileInfo != null) {
+                            profileInfo.setId(dataSnapshot.getKey());
+                            dmGroupData.setTitle(profileInfo.getName());
+                            dmGroupData.setThumbnail(profileInfo.getThumbnail());
+                            final UserGroupData userGroupData = new UserGroupData();
+                            userGroupData.setJoined(true);
+                            adapter.addGroup(dmGroupData, userGroupData);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        dmListenersMap.put(getDmsRef().child(dmId), dmValueListener);
     }
 
     private void syncUserGroupIds() {
@@ -271,11 +372,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (unjoinedGroupListener != null) {
             getLubbleGroupsRef().removeEventListener(unjoinedGroupListener);
         }
-        if (summerCampJoinListener != null) {
-            summerCampChildRef.removeEventListener(summerCampJoinListener);
+        if (userDmsListener != null) {
+            getUserDmsRef().removeEventListener(userDmsListener);
         }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
+        }
+        for (Query query : dmListenersMap.keySet()) {
+            query.removeEventListener(dmListenersMap.get(query));
         }
     }
 
@@ -293,4 +397,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         startActivity(intent);
     }
 
+    @Override
+    public void onDmClick(String dmId, String name, String thumbnailUrl) {
+        final Intent intent = new Intent(getContext(), ChatActivity.class);
+        intent.putExtra(EXTRA_DM_ID, dmId);
+        intent.putExtra(EXTRA_RECEIVER_NAME, name);
+        intent.putExtra(EXTRA_RECEIVER_DP_URL, thumbnailUrl);
+        startActivity(intent);
+    }
 }

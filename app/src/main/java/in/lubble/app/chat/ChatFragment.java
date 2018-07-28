@@ -408,9 +408,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 }
             });
-        } else if (!TextUtils.isEmpty(dmId)) {
-            chatRecyclerView.setVisibility(View.VISIBLE);
-            //todo
         }
     }
 

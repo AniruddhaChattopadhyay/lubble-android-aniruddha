@@ -182,8 +182,8 @@ public class ItemActivity extends AppCompatActivity {
                                             final Intent intent = new Intent(ItemActivity.this, ChatActivity.class);
                                             intent.putExtra(EXTRA_IS_JOINING, false);
                                             intent.putExtra(EXTRA_DM_ID, dmId);
-                                            //intent.putExtra(EXTRA_RECEIVER_NAME, sellerData.getName());
-                                            //intent.putExtra(EXTRA_RECEIVER_DP_URL, sellerData.getPhotoUrl());
+                                            intent.putExtra(EXTRA_RECEIVER_NAME, sellerData.getName());
+                                            intent.putExtra(EXTRA_RECEIVER_DP_URL, sellerData.getPhotoUrl());
                                             startActivity(intent);
                                         } else {
                                             final Intent intent = new Intent(ItemActivity.this, ChatActivity.class);

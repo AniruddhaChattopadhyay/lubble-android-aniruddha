@@ -8,4 +8,6 @@ public interface OnListFragmentInteractionListener {
 
     void onListFragmentInteraction(String groupId, boolean isJoining);
 
+    void onDmClick(String dmId, String name, String thumbnailUrl);
+
 }

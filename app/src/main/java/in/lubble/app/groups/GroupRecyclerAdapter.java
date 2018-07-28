@@ -116,7 +116,12 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                     if (null != mListener) {
                         // Notify the active callbacks interface (the activity, if the
                         // fragment is attached to one) that an item has been selected.
-                        mListener.onListFragmentInteraction(groupViewHolder.groupData.getId(), false);
+                        final boolean isDm = groupData.getMembers().size() == 0;
+                        if (isDm) {
+                            mListener.onDmClick(groupViewHolder.groupData.getId(), groupData.getTitle(), groupData.getThumbnail());
+                        } else {
+                            mListener.onListFragmentInteraction(groupViewHolder.groupData.getId(), false);
+                        }
                     }
                 }
             });

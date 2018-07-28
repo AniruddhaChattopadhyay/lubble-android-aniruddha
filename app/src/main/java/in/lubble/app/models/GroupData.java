@@ -26,7 +26,6 @@ public class GroupData {
     private String createdBy;
     @Exclude
     private Set<String> invitedBy;
-    private String summerCampDesc;
 
     public GroupData() {
     }  // Needed for Firebase
@@ -76,7 +75,8 @@ public class GroupData {
 
     @Exclude
     public boolean isJoined() {
-        return getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
+        // is a DM if member size is 0
+        return getMembers().size() == 0 || getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
     }
 
     public boolean getIsPrivate() {
@@ -140,18 +140,12 @@ public class GroupData {
 
     @Exclude
     public long getJoinedTimestamp() {
-        if (isJoined()) {
+        if (isJoined() && getMembers().size() > 0) {
+            // is a DM if member size is 0
             return (Long) ((HashMap) getMembers().get(FirebaseAuth.getInstance().getUid())).get("joinedTimestamp");
         } else {
             return 0;
         }
     }
 
-    public String getSummerCampDesc() {
-        return summerCampDesc;
-    }
-
-    public void setSummerCampDesc(String summerCampDesc) {
-        this.summerCampDesc = summerCampDesc;
-    }
 }

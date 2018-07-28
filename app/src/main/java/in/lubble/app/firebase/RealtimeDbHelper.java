@@ -120,4 +120,12 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("dms");
     }
 
+    public static DatabaseReference getUserDmsRef() {
+        return getUserRef(FirebaseAuth.getInstance().getUid()).child("dms");
+    }
+
+    public static DatabaseReference getSellerRef() {
+        return FirebaseDatabase.getInstance().getReference("sellers");
+    }
+
 }
