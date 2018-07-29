@@ -833,7 +833,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             }
 
             final Uri fileUri = Uri.fromFile(imageFile);
-            AttachImageActivity.open(getContext(), fileUri, groupId);
+            String chatId = groupId;
+            if (!TextUtils.isEmpty(dmId)) {
+                chatId = dmId;
+            }
+            AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
         }
     }
 
