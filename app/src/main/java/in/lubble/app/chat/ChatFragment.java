@@ -669,7 +669,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     dateChatData.setMessage(DateTimeUtils.getDateFromLong(chatData.getCreatedTimestamp()));
                     dateChatData.setType(SYSTEM);
                     final HashMap<String, Long> readMap = new HashMap<>();
-                    readMap.put(FirebaseAuth.getInstance().getUid(), 0L);
+                    readMap.put(authorId, 0L);
                     dateChatData.setReadReceipts(readMap);
                     chatAdapter.addChatData(dateChatData);
                 }
