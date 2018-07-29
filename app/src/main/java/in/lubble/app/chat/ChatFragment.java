@@ -324,7 +324,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
                         final int pos = msgCount - 1;
                         final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
-                        if (chatMsg.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
+                        if (chatMsg.getReadReceipts().get(authorId) == null) {
                             // unread msg found
                             foundFirstUnreadMsg = true;
                             final ChatData unreadChatData = new ChatData();
@@ -341,7 +341,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         // of the list to show the newly added message.
                         chatRecyclerView.scrollToPosition(positionStart);
                     } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
-                            chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                            chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(authorId)) {
                         chatRecyclerView.scrollToPosition(positionStart);
                     }
                 }
@@ -436,11 +436,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         final HashMap<String, Object> members = dmData.getMembers();
                         for (String profileId : members.keySet()) {
                             final String sellerId = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
-                            if (FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId) || sellerId.equalsIgnoreCase(profileId)) { // this person's profile ID, could be a seller or a user
+                            if (authorId.equalsIgnoreCase(profileId) || sellerId.equalsIgnoreCase(profileId)) {
+                                // this person's profile ID, could be a seller or a user
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
                                     isAuthorSeller = (boolean) profileMap.get("isSeller");
                                     authorId = profileId;
+                                    chatAdapter.setAuthorId(authorId);
+                                    chatAdapter.setDmId(dmId);
                                 }
                             } else {
                                 // other person's profile ID, could be a seller or a user
@@ -639,7 +642,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
                     checkAndInsertDate(chatData);
                     chatData.setId(dataSnapshot.getKey());
-                    chatData.setIsDm(!TextUtils.isEmpty(dmId));
                     chatAdapter.addChatData(chatData);
                     sendReadReceipt(chatData);
                 }
@@ -718,6 +720,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 chatData.setMessage(newMessageEt.getText().toString());
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
+                chatData.setIsDm(!TextUtils.isEmpty(dmId));
 
                 if (isValidString(replyMsgId)) {
                     chatData.setType(REPLY);
@@ -740,7 +743,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     HashMap<String, Object> sellerMap = new HashMap<>();
                     sellerMap.put("isSeller", false);
                     sellerMap.put("otherUser", receiverId);
-                    userMap.put(FirebaseAuth.getInstance().getUid(), sellerMap);
+                    userMap.put(authorId, sellerMap);
 
                     final HashMap<String, Object> map = new HashMap<>();
                     map.put("members", userMap);
@@ -751,6 +754,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     dmInfoReference = getDmsRef().child(dmId);
                     messagesReference = getDmMessagesRef().child(dmId);
                     msgChildListener = msgListener(messagesReference);
+                    syncGroupInfo();
 
                 } else if (!TextUtils.isEmpty(groupId)) {
                     messagesReference.push().setValue(chatData);
@@ -926,7 +930,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     public void openChatInfo(String chatId, boolean showReadReceipts) {
         if (chatId != null) {
-            startActivity(MsgInfoActivity.getIntent(getContext(), groupId, chatId, showReadReceipts));
+            if (!TextUtils.isEmpty(groupId)) {
+                startActivity(MsgInfoActivity.getIntent(getContext(), groupId, chatId, showReadReceipts, false, authorId));
+            } else {
+                startActivity(MsgInfoActivity.getIntent(getContext(), dmId, chatId, showReadReceipts, true, authorId));
+            }
         } else {
             Crashlytics.logException(new NullPointerException("chatId is null when trying to open msg info"));
         }

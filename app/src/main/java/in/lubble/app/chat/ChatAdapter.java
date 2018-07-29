@@ -38,6 +38,7 @@ import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
@@ -59,7 +60,9 @@ import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.MsgFlexBoxLayout;
 import in.lubble.app.utils.UiUtils;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
@@ -88,11 +91,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private ArrayList<ChatData> chatDataList;
     private ChatFragment chatFragment;
     private String selectedChatId = null;
+    @Nullable
     private String groupId;
     private int highlightedPos = -1;
     private int posToFlash = -1;
     private boolean shownLubbHintForLastMsg;
     private static HashMap<String, ProfileInfo> profileInfoMap = new HashMap<>();
+    private String authorId = FirebaseAuth.getInstance().getUid();
+    @Nullable
+    private String dmId;
 
     public ChatAdapter(Activity activity, Context context, String groupId,
                        RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
@@ -105,6 +112,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         this.glide = glide;
     }
 
+    public void setAuthorId(String authorId) {
+        this.authorId = authorId;
+    }
+
+    public void setDmId(@NonNull String dmId) {
+        this.dmId = dmId;
+    }
+
     @Override
     public int getItemViewType(int position) {
         final ChatData chatData = chatDataList.get(position);
@@ -112,7 +127,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             return TYPE_SYSTEM;
         } else if (isValidString(chatData.getType()) && chatData.getType().equalsIgnoreCase(UNREAD)) {
             return TYPE_UNREAD;
-        } else if (chatData.getAuthorUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+        } else if (chatData.getAuthorUid().equalsIgnoreCase(authorId)) {
             return TYPE_SENT;
         } else {
             return TYPE_RECEIVED;
@@ -164,7 +179,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.lubbPopOutContainer.setVisibility(View.VISIBLE);
             toggleLubbPopOutContainer(sentChatViewHolder.lubbIv,
                     sentChatViewHolder.lubbHintTv,
-                    chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+                    chatData.getLubbReceipts().containsKey(authorId));
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
             sentChatViewHolder.lubbPopOutContainer.setVisibility(View.GONE);
@@ -177,7 +192,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
         }
         sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
-        if (chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid())) {
+        if (chatData.getLubbReceipts().containsKey(authorId)) {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
             if (position == chatDataList.size() - 1) {
                 // scroll to bottom if liked last msg to show that like icon and count
@@ -233,7 +248,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             .into(lubbHeadIv);
                     sentChatViewHolder.lubbHeadsContainer.addView(lubbHeadIv);
                 } else {
-                    updateProfileInfoMap(uid, sentChatViewHolder.lubbHeadsContainer, sentChatViewHolder.getAdapterPosition());
+                    updateProfileInfoMap(getUserInfoRef(uid), uid, sentChatViewHolder.getAdapterPosition());
                 }
             } else {
                 break;
@@ -245,7 +260,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
-        if(!chatData.getIsDm()) {
+        if (!chatData.getIsDm()) {
             showDpAndName(recvdChatViewHolder, chatData);
         } else {
             recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
@@ -264,7 +279,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.lubbPopOutContainer.setVisibility(View.VISIBLE);
             toggleLubbPopOutContainer(recvdChatViewHolder.lubbIv,
                     recvdChatViewHolder.lubbHintTv,
-                    chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+                    chatData.getLubbReceipts().containsKey(authorId));
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
             recvdChatViewHolder.lubbPopOutContainer.setVisibility(View.GONE);
@@ -279,7 +294,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
         recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getCreatedTimestamp()));
         recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
-        if (chatData.getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid())) {
+        if (chatData.getLubbReceipts().containsKey(authorId)) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
             if (position == chatDataList.size() - 1) {
                 // scroll to bottom if liked last msg to show that like icon and count
@@ -354,7 +369,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             .into(lubbHeadIv);
                     recvdChatViewHolder.lubbHeadsContainer.addView(lubbHeadIv);
                 } else {
-                    updateProfileInfoMap(uid, recvdChatViewHolder.lubbHeadsContainer, recvdChatViewHolder.getAdapterPosition());
+                    updateProfileInfoMap(getUserInfoRef(uid), uid, recvdChatViewHolder.getAdapterPosition());
                 }
             } else {
                 break;
@@ -386,29 +401,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private void updateProfileInfoMap(String uid, final LinearLayout lubbHeadsContainer, final int pos) {
+    private void updateProfileInfoMap(DatabaseReference userInfoRef, final String uid, final int pos) {
         // single as its very difficult otherwise to keep track of all listeners for every user
         // plus we don't really need realtime updation of user DP and/or name in chat
-        getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+        userInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                if (map != null) {
-                    /*final ImageView lubbHeadIv = new ImageView(context);
-                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
-                    lubbHeadIv.setLayoutParams(lp);
-                    GlideApp.with(context).load(map.get("thumbnail"))
-                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                            .circleCrop()
-                            .into(lubbHeadIv);
-                    lubbHeadsContainer.addView(lubbHeadIv);*/
-
-                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                    if (profileInfo != null) {
-                        profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                        profileInfoMap.put(profileInfo.getId(), profileInfo);
-                        notifyItemChanged(pos);
-                    }
+                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                if (profileInfo != null) {
+                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                    profileInfoMap.put(profileInfo.getId(), profileInfo);
+                    notifyItemChanged(pos);
+                } else {
+                    updateProfileInfoMap(getSellerInfoRef(uid), uid, pos);
                 }
             }
 
@@ -583,37 +588,43 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void toggleLubb(int pos) {
-        getMessagesRef().child(groupId).child(chatDataList.get(pos).getId())
-                .runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-                        ChatData chatData = mutableData.getValue(ChatData.class);
-                        if (chatData == null) {
-                            return Transaction.success(mutableData);
-                        }
+        final ChatData chatData = chatDataList.get(pos);
+        DatabaseReference lubbRef;
+        if (chatData.getIsDm()) {
+            lubbRef = getDmMessagesRef().child(dmId).child(chatData.getId());
+        } else {
+            lubbRef = getMessagesRef().child(groupId).child(chatData.getId());
+        }
+        lubbRef.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                ChatData chatData = mutableData.getValue(ChatData.class);
+                if (chatData == null) {
+                    return Transaction.success(mutableData);
+                }
 
-                        final String uid = FirebaseAuth.getInstance().getUid();
-                        if (chatData.getLubbReceipts().containsKey(uid)) {
-                            // Unstar the message and remove self from lubbs
-                            chatData.setLubbCount(chatData.getLubbCount() - 1);
-                            chatData.getLubbReceipts().remove(uid);
-                        } else {
-                            // Star the message and add self to lubbs
-                            chatData.setLubbCount(chatData.getLubbCount() + 1);
-                            chatData.getLubbReceipts().put(uid, System.currentTimeMillis());
-                        }
+                final String uid = authorId;
+                if (chatData.getLubbReceipts().containsKey(uid)) {
+                    // Unstar the message and remove self from lubbs
+                    chatData.setLubbCount(chatData.getLubbCount() - 1);
+                    chatData.getLubbReceipts().remove(uid);
+                } else {
+                    // Star the message and add self to lubbs
+                    chatData.setLubbCount(chatData.getLubbCount() + 1);
+                    chatData.getLubbReceipts().put(uid, System.currentTimeMillis());
+                }
 
-                        // Set value and report transaction success
-                        mutableData.setValue(chatData);
-                        return Transaction.success(mutableData);
-                    }
+                // Set value and report transaction success
+                mutableData.setValue(chatData);
+                return Transaction.success(mutableData);
+            }
 
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                        // Transaction completed
-                        Log.d(TAG, "postTransaction:onComplete:" + databaseError);
-                    }
-                });
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                // Transaction completed
+                Log.d(TAG, "postTransaction:onComplete:" + databaseError);
+            }
+        });
     }
 
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
@@ -771,7 +782,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (getAdapterPosition() != highlightedPos) {
                 actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
                 lubbPopOutContainer.setVisibility(View.VISIBLE);
-                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(authorId));
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                 if (highlightedPos != -1) {
                     // another item was highlighted, remove its highlight
@@ -925,7 +936,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (getAdapterPosition() != highlightedPos) {
                 actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
                 lubbPopOutContainer.setVisibility(View.VISIBLE);
-                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(FirebaseAuth.getInstance().getUid()));
+                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(authorId));
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                 if (highlightedPos != -1) {
                     // another item was highlighted, remove its highlight

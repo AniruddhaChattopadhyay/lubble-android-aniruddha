@@ -151,14 +151,14 @@ public class FcmService extends FirebaseMessagingService {
             if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
                 NotifUtils.updateChatNotifs(this, notifData);
             }
-            updateUnreadCounter(notifData);
+            // todo updateUnreadCounter(notifData);
             pullNewMsgs(notifData);
             //sendDeliveryReceipt(notifData);
         }
     }
 
     private void pullNewMsgs(NotifData notifData) {
-        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
+        RealtimeDbHelper.getDmMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "Pulled: " + dataSnapshot.getKey());

@@ -128,4 +128,8 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("sellers");
     }
 
+    public static DatabaseReference getSellerInfoRef(String uid) {
+        return FirebaseDatabase.getInstance().getReference("sellers").child(uid).child("info");
+    }
+
 }

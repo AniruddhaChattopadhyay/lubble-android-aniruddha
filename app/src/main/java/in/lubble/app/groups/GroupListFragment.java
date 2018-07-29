@@ -107,6 +107,39 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         groupsRecyclerView.setVisibility(View.INVISIBLE);
         syncUserGroupIds();
         syncUserDmIds();
+        syncSellerDmIds();
+    }
+
+    private void syncSellerDmIds() {
+        getSellerRef().child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())).child("dms").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                final String dmId = dataSnapshot.getKey();
+                if (dmId != null) {
+                    fetchDmFrom(dmId);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void syncUserDmIds() {
