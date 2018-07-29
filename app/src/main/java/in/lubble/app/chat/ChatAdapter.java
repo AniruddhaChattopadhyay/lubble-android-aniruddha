@@ -245,7 +245,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
-        showDpAndName(recvdChatViewHolder, chatData);
+        if(!chatData.getIsDm()) {
+            showDpAndName(recvdChatViewHolder, chatData);
+        } else {
+            recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
+            recvdChatViewHolder.dpIv.setVisibility(View.GONE);
+        }
 
         if (posToFlash == position) {
             UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
@@ -467,12 +472,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
                 if (map != null) {
+                    recvdChatViewHolder.authorNameTv.setVisibility(View.VISIBLE);
+                    recvdChatViewHolder.dpIv.setVisibility(View.VISIBLE);
                     glide.load(map.get("thumbnail"))
                             .circleCrop()
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(recvdChatViewHolder.dpIv);
                     recvdChatViewHolder.authorNameTv.setText(map.get("name"));
+                } else {
+                    // must be DM
+                    recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
+                    recvdChatViewHolder.dpIv.setVisibility(View.GONE);
                 }
             }
 

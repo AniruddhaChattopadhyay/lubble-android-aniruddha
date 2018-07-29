@@ -18,8 +18,8 @@ import java.util.Map;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.models.AppNotifData;
-import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.models.NotifData;
+import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
@@ -76,10 +76,13 @@ public class FcmService extends FirebaseMessagingService {
                 JsonElement jsonElement = gson.toJsonTree(dataMap);
                 AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
                 AppNotifUtils.showAppNotif(this, appNotifData);
-            } else if (StringUtils.isValidString(type) && "chat".equalsIgnoreCase(type)) {
+            } else if (StringUtils.isValidString(type) && ("chat".equalsIgnoreCase(type))) {
                 // create chat notif
                 createChatNotif(dataMap);
-            }  else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
+            } else if (StringUtils.isValidString(type) && ("dm".equalsIgnoreCase(type))) {
+                // create chat notif
+                createDmNotif(dataMap);
+            } else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
                 // mplace image uploaded, send broadcast
                 sendMarketplaceImgBroadcast(dataMap);
             } else {
@@ -123,6 +126,22 @@ public class FcmService extends FirebaseMessagingService {
     }
 
     private void createChatNotif(Map<String, String> dataMap) {
+        Gson gson = new Gson();
+        JsonElement jsonElement = gson.toJsonTree(dataMap);
+        NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
+
+        if (!notifData.getGroupId().equalsIgnoreCase(LubbleSharedPrefs.getInstance().getCurrentActiveGroupId())) {
+            // only show notif if that group is not in foreground & the group's notifs are not muted
+            if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
+                NotifUtils.updateChatNotifs(this, notifData);
+            }
+            updateUnreadCounter(notifData);
+            pullNewMsgs(notifData);
+            //sendDeliveryReceipt(notifData);
+        }
+    }
+
+    private void createDmNotif(Map<String, String> dataMap) {
         Gson gson = new Gson();
         JsonElement jsonElement = gson.toJsonTree(dataMap);
         NotifData notifData = gson.fromJson(jsonElement, NotifData.class);

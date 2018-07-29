@@ -46,12 +46,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_DP_URL;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_NAME;
-
 public class ItemActivity extends AppCompatActivity {
 
     private static final String TAG = "ItemActivity";
@@ -179,19 +173,14 @@ public class ItemActivity extends AppCompatActivity {
                                         final HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
                                         if (map != null) {
                                             String dmId = (String) map.keySet().toArray()[0];
-                                            final Intent intent = new Intent(ItemActivity.this, ChatActivity.class);
-                                            intent.putExtra(EXTRA_IS_JOINING, false);
-                                            intent.putExtra(EXTRA_DM_ID, dmId);
-                                            intent.putExtra(EXTRA_RECEIVER_NAME, sellerData.getName());
-                                            intent.putExtra(EXTRA_RECEIVER_DP_URL, sellerData.getPhotoUrl());
-                                            startActivity(intent);
+                                            ChatActivity.openForDm(ItemActivity.this, dmId, null);
                                         } else {
-                                            final Intent intent = new Intent(ItemActivity.this, ChatActivity.class);
-                                            intent.putExtra(EXTRA_IS_JOINING, false);
-                                            intent.putExtra(EXTRA_RECEIVER_ID, String.valueOf(sellerData.getId()));
-                                            intent.putExtra(EXTRA_RECEIVER_NAME, sellerData.getName());
-                                            intent.putExtra(EXTRA_RECEIVER_DP_URL, sellerData.getPhotoUrl());
-                                            startActivity(intent);
+                                            ChatActivity.openForEmptyDm(
+                                                    ItemActivity.this,
+                                                    String.valueOf(sellerData.getId()),
+                                                    sellerData.getName(),
+                                                    sellerData.getPhotoUrl()
+                                            );
                                         }
                                         if (sellerDmIdValueEventListener != null) {
                                             query.removeEventListener(sellerDmIdValueEventListener);

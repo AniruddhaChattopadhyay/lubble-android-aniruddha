@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
@@ -135,6 +136,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                             .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
                             .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/seller/" + sellerData.getId())
                             .setAction(UploadFileService.ACTION_UPLOAD));
+                    LubbleSharedPrefs.getInstance().setSellerId(sellerData.getId());
                     SellerDashActiv.open(SellerEditActiv.this, sellerData.getId());
                 }
             }

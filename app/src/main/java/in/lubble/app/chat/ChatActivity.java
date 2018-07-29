@@ -1,8 +1,13 @@
 package in.lubble.app.chat;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -30,6 +35,30 @@ public class ChatActivity extends AppCompatActivity {
     private ImageView toolbarIcon;
     private ImageView toolbarLockIcon;
     private TextView toolbarTv;
+    private ChatFragment targetFrag = null;
+
+    public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
+        final Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(EXTRA_GROUP_ID, groupId);
+        intent.putExtra(EXTRA_IS_JOINING, isJoining);
+        intent.putExtra(EXTRA_MSG_ID, msgId);
+        context.startActivity(intent);
+    }
+
+    public static void openForDm(@NonNull Context context, @NonNull String dmId, @Nullable String msgId) {
+        final Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(EXTRA_DM_ID, dmId);
+        intent.putExtra(EXTRA_MSG_ID, msgId);
+        context.startActivity(intent);
+    }
+
+    public static void openForEmptyDm(@NonNull Context context, @Nullable String receiverId, @Nullable String receiverName, @Nullable String receiverDpUrl) {
+        final Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(EXTRA_RECEIVER_ID, receiverId);
+        intent.putExtra(EXTRA_RECEIVER_NAME, receiverName);
+        intent.putExtra(EXTRA_RECEIVER_DP_URL, receiverDpUrl);
+        context.startActivity(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,17 +87,31 @@ public class ChatActivity extends AppCompatActivity {
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);
         final String dmId = getIntent().getStringExtra(EXTRA_DM_ID);
 
-        final ChatFragment targetFrag = ChatFragment.newInstance(
-                groupId, isJoining, msgId, dmId,
-                getIntent().getStringExtra(EXTRA_RECEIVER_ID),
-                getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
-                getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL)
-        );
+        if (!TextUtils.isEmpty(groupId)) {
+            targetFrag = ChatFragment.newInstanceForGroup(
+                    groupId, isJoining, msgId
+            );
+        } else if (!TextUtils.isEmpty(dmId)) {
+            targetFrag = ChatFragment.newInstanceForDm(
+                    dmId, msgId
+            );
+        } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
+            targetFrag = ChatFragment.newInstanceForEmptyDm(
+                    getIntent().getStringExtra(EXTRA_RECEIVER_ID),
+                    getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
+                    getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL)
+            );
+        } else {
+            throw new RuntimeException("Invalid Args, see the valid factory methods by searching for this error string");
+        }
+
         replaceFrag(getSupportFragmentManager(), targetFrag, R.id.frame_fragContainer);
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                targetFrag.openGroupInfo();
+                if (targetFrag != null) {
+                    targetFrag.openGroupInfo();
+                }
             }
         });
     }

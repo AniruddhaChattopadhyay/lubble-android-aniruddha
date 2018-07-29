@@ -2,8 +2,6 @@ package in.lubble.app.chat;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,7 +10,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.Group;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -53,7 +50,6 @@ import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
-import in.lubble.app.UploadFileService;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
@@ -158,19 +154,34 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     @Nullable
     private Parcelable recyclerViewState;
     private ChatAdapter chatAdapter;
+    private String authorId = FirebaseAuth.getInstance().getUid();
+    private boolean isAuthorSeller;
 
     public ChatFragment() {
         // Required empty public constructor
     }
 
-    public static ChatFragment newInstance(@Nullable String groupId, boolean isJoining, @Nullable String msgId, @Nullable String dmId,
-                                           @Nullable String receiverId, @Nullable String receiverName, @Nullable String receiverDpUrl) {
-
+    public static ChatFragment newInstanceForGroup(@NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         Bundle args = new Bundle();
         args.putString(KEY_GROUP_ID, groupId);
         args.putString(KEY_MSG_ID, msgId);
         args.putBoolean(KEY_IS_JOINING, isJoining);
+        ChatFragment fragment = new ChatFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ChatFragment newInstanceForDm(@NonNull String dmId, @Nullable String msgId) {
+        Bundle args = new Bundle();
+        args.putString(KEY_MSG_ID, msgId);
         args.putString(KEY_DM_ID, dmId);
+        ChatFragment fragment = new ChatFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ChatFragment newInstanceForEmptyDm(@NonNull String receiverId, @NonNull String receiverName, @Nullable String receiverDpUrl) {
+        Bundle args = new Bundle();
         args.putString(KEY_RECEIVER_ID, receiverId);
         args.putString(KEY_RECEIVER_NAME, receiverName);
         args.putString(KEY_RECEIVER_DP_URL, receiverDpUrl);
@@ -198,13 +209,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             dmInfoReference = getDmsRef().child(dmId);
             messagesReference = getDmMessagesRef().child(dmId);
         } else if (receiverId != null) {
-
+            // no refs need to be init here
         } else {
             throw new RuntimeException("khuch to params dega bhai?");
         }
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        registerMediaUploadCallback();
-
     }
 
     @Override
@@ -383,11 +392,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    // For populating the toolbar with DP and Title
     private void syncGroupInfo() {
-        if (!TextUtils.isEmpty(receiverName)) {
+        if (!TextUtils.isEmpty(receiverId)) {
             chatRecyclerView.setVisibility(View.VISIBLE);
             ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true);
-        } else if (groupReference != null) {
+        } else if (!TextUtils.isEmpty(groupId)) {
             groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -414,8 +424,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 }
             });
-        }
-        if (!TextUtils.isEmpty(dmId) && dmInfoReference != null) {
+        } else if (!TextUtils.isEmpty(dmId)) {
+            chatRecyclerView.setVisibility(View.VISIBLE);
             dmEventListener = dmInfoReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -425,7 +435,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                         final HashMap<String, Object> members = dmData.getMembers();
                         for (String profileId : members.keySet()) {
-                            if (!FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId)) {
+                            final String sellerId = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
+                            if (FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId) || sellerId.equalsIgnoreCase(profileId)) { // this person's profile ID, could be a seller or a user
+                                final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
+                                if (profileMap != null) {
+                                    isAuthorSeller = (boolean) profileMap.get("isSeller");
+                                    authorId = profileId;
+                                }
+                            } else {
+                                // other person's profile ID, could be a seller or a user
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
                                     final boolean isSeller = (boolean) profileMap.get("isSeller");
@@ -621,6 +639,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
                     checkAndInsertDate(chatData);
                     chatData.setId(dataSnapshot.getKey());
+                    chatData.setIsDm(!TextUtils.isEmpty(dmId));
                     chatAdapter.addChatData(chatData);
                     sendReadReceipt(chatData);
                 }
@@ -673,12 +692,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void sendReadReceipt(ChatData chatData) {
-        if (chatData.getReadReceipts().get(FirebaseAuth.getInstance().getUid()) == null) {
-            // either GROUP or DM id should be non-null if a msg exists
-            getMessagesRef().child(groupId == null ? dmId : groupId).child(chatData.getId())
-                    .child("readReceipts")
-                    .child(FirebaseAuth.getInstance().getUid())
-                    .setValue(System.currentTimeMillis());
+        if (chatData.getReadReceipts().get(authorId) == null) {
+            if (!TextUtils.isEmpty(groupId)) {
+                getMessagesRef().child(groupId).child(chatData.getId())
+                        .child("readReceipts")
+                        .child(authorId)
+                        .setValue(System.currentTimeMillis());
+            } else {
+                getDmMessagesRef().child(dmId).child(chatData.getId())
+                        .child("readReceipts")
+                        .child(authorId)
+                        .setValue(System.currentTimeMillis());
+            }
         }
     }
 
@@ -688,7 +713,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             case R.id.iv_send_btn:
 
                 final ChatData chatData = new ChatData();
-                chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                chatData.setAuthorUid(authorId);
+                chatData.setAuthorIsSeller(isAuthorSeller);
                 chatData.setMessage(newMessageEt.getText().toString());
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
@@ -703,6 +729,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 }
 
                 if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
+                    // first msg in a new DM, create new DM chat
                     final DatabaseReference pushRef = RealtimeDbHelper.getCreateDmRef().push();
 
                     final HashMap<String, Object> userMap = new HashMap<>();
@@ -720,8 +747,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     map.put("message", chatData);
                     pushRef.setValue(map);
                     dmId = pushRef.getKey();
-
-                    //todo groupReference = getLubbleGroupsRef().child(groupId);
+                    // new DM chat created with dmId. Start listeners.
+                    dmInfoReference = getDmsRef().child(dmId);
                     messagesReference = getDmMessagesRef().child(dmId);
                     msgChildListener = msgListener(messagesReference);
 
@@ -794,33 +821,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             final Uri fileUri = Uri.fromFile(imageFile);
             AttachImageActivity.open(getContext(), fileUri, groupId);
-            /*getContext().startService(new Intent(getContext(), UploadFileService.class)
-                    .putExtra(UploadFileService.EXTRA_BUCKET, UploadFileService.BUCKET_CONVO)
-                    .putExtra(UploadFileService.EXTRA_FILE_NAME, fileUri.getLastPathSegment())
-                    .putExtra(EXTRA_FILE_URI, fileUri)
-                    .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/0/groups/0")
-                    .setAction(UploadFileService.ACTION_UPLOAD));*/
-
         }
-    }
-
-    private void registerMediaUploadCallback() {
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                //todo hideProgressDialog();
-
-                switch (intent.getAction()) {
-                    case UploadFileService.UPLOAD_COMPLETED:
-                        //todo show pic to user
-
-                        break;
-                    case UploadFileService.UPLOAD_ERROR:
-
-                        break;
-                }
-            }
-        }, UploadFileService.getIntentFilter());
     }
 
     private void setupTogglingOfSendBtn() {
@@ -936,13 +937,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onPause();
         recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
-        if (messagesReference != null) {
+        if (messagesReference != null && msgChildListener != null) {
             messagesReference.removeEventListener(msgChildListener);
         }
-        if (groupReference != null) {
+        if (groupReference != null && groupInfoListener != null) {
             groupReference.removeEventListener(groupInfoListener);
         }
-        if (dmInfoReference != null) {
+        if (dmInfoReference != null && dmEventListener != null) {
             dmInfoReference.removeEventListener(dmEventListener);
         }
         if (bottomBarListener != null) {

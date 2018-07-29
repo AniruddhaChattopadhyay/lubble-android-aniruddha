@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
@@ -157,7 +158,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
                     final HashMap<String, Object> members = dmData.getMembers();
                     for (String profileId : members.keySet()) {
-                        if (!FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId)) {
+                        final String sellerId = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
+                        if (!FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId) && !sellerId.equalsIgnoreCase(profileId)) {
                             final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                             if (profileMap != null) {
                                 final boolean isSeller = (boolean) profileMap.get("isSeller");
