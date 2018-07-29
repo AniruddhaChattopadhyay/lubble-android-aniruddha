@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import in.lubble.app.LubbleSharedPrefs;
+
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 /**
@@ -126,6 +128,11 @@ public class RealtimeDbHelper {
 
     public static DatabaseReference getSellerRef() {
         return FirebaseDatabase.getInstance().getReference("sellers");
+    }
+
+    public static DatabaseReference getSellerDmsRef() {
+        return FirebaseDatabase.getInstance().getReference("sellers")
+                .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())).child("dms");
     }
 
     public static DatabaseReference getSellerInfoRef(String uid) {

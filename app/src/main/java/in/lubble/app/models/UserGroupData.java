@@ -8,17 +8,17 @@ import java.util.HashMap;
 
 public class UserGroupData {
 
-    private int unreadCount;
+    private long unreadCount;
     private boolean joined;
     private HashMap<String, Boolean> invitedBy;
     private HashMap<String, Boolean> invitees;
     private long invitedTimeStamp;
 
-    public int getUnreadCount() {
+    public long getUnreadCount() {
         return unreadCount;
     }
 
-    public void setUnreadCount(int unreadCount) {
+    public void setUnreadCount(long unreadCount) {
         this.unreadCount = unreadCount;
     }
 

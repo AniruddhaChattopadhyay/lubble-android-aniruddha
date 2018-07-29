@@ -62,6 +62,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private ProgressBar progressBar;
     private HashMap<String, Set<String>> groupInvitedByMap;
     private HashMap<String, UserGroupData> userGroupDataMap;
+    private HashMap<String, Long> dmMap;
 
     public GroupListFragment() {
     }
@@ -81,6 +82,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
         groupInvitedByMap = new HashMap<>();
         userGroupDataMap = new HashMap<>();
+        dmMap = new HashMap<>();
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -116,13 +118,25 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 final String dmId = dataSnapshot.getKey();
                 if (dmId != null) {
+                    HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                    Long count = 0L;
+                    if (map != null && map.containsKey("unreadCount")) {
+                        count = (Long) map.get("unreadCount");
+                    }
+                    dmMap.put(dmId, count);
                     fetchDmFrom(dmId);
                 }
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-
+                HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                Long count = 0L;
+                if (map != null && map.containsKey("unreadCount")) {
+                    count = (Long) map.get("unreadCount");
+                }
+                dmMap.put(dataSnapshot.getKey(), count);
+                fetchDmFrom(dataSnapshot.getKey());
             }
 
             @Override
@@ -149,13 +163,25 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 final String dmId = dataSnapshot.getKey();
                 if (dmId != null) {
+                    HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                    Long count = 0L;
+                    if (map != null && map.containsKey("unreadCount")) {
+                        count = (Long) map.get("unreadCount");
+                    }
+                    dmMap.put(dmId, count);
                     fetchDmFrom(dmId);
                 }
             }
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                /// TODO: 29/7/18 update unread count etc
+                HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                Long count = 0L;
+                if (map != null && map.containsKey("unreadCount")) {
+                    count = (Long) map.get("unreadCount");
+                }
+                dmMap.put(dataSnapshot.getKey(), count);
+                fetchDmFrom(dataSnapshot.getKey());
             }
 
             @Override
@@ -220,6 +246,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                                 dmGroupData.setThumbnail(profileInfo.getThumbnail());
                                 final UserGroupData userGroupData = new UserGroupData();
                                 userGroupData.setJoined(true);
+                                userGroupData.setUnreadCount(dmMap.get(dmGroupData.getId()));
                                 adapter.addGroup(dmGroupData, userGroupData);
                             }
                         }
@@ -243,6 +270,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                             dmGroupData.setThumbnail(profileInfo.getThumbnail());
                             final UserGroupData userGroupData = new UserGroupData();
                             userGroupData.setJoined(true);
+                            userGroupData.setUnreadCount(dmMap.get(dmGroupData.getId()));
                             adapter.addGroup(dmGroupData, userGroupData);
                         }
                     }

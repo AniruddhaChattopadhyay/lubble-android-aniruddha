@@ -8,6 +8,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -135,7 +136,7 @@ public class FcmService extends FirebaseMessagingService {
             if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
                 NotifUtils.updateChatNotifs(this, notifData);
             }
-            updateUnreadCounter(notifData);
+            updateUnreadCounter(notifData, false);
             pullNewMsgs(notifData);
             //sendDeliveryReceipt(notifData);
         }
@@ -151,7 +152,7 @@ public class FcmService extends FirebaseMessagingService {
             if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
                 NotifUtils.updateChatNotifs(this, notifData);
             }
-            // todo updateUnreadCounter(notifData);
+            updateUnreadCounter(notifData, true);
             pullNewMsgs(notifData);
             //sendDeliveryReceipt(notifData);
         }
@@ -171,14 +172,25 @@ public class FcmService extends FirebaseMessagingService {
         });
     }
 
-    private void updateUnreadCounter(NotifData notifData) {
-        RealtimeDbHelper.getUserGroupsRef().child(notifData.getGroupId())
-                .child("unreadCount").addListenerForSingleValueEvent(new ValueEventListener() {
+    private void updateUnreadCounter(NotifData notifData, boolean isDm) {
+        DatabaseReference unreadCountRef = RealtimeDbHelper.getUserGroupsRef().child(notifData.getGroupId()).child("unreadCount");
+        if(isDm){
+            if (notifData.getIsSeller()) {
+                unreadCountRef = RealtimeDbHelper.getSellerRef()
+                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
+                        .child("dms")
+                        .child(notifData.getGroupId())
+                        .child("unreadCount");
+            } else {
+                unreadCountRef = RealtimeDbHelper.getUserDmsRef().child(notifData.getGroupId()).child("unreadCount");
+            }
+        }
+        unreadCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Integer oldCount = 0;
+                Long oldCount = 0L;
                 if (dataSnapshot.getValue() != null) {
-                    oldCount = dataSnapshot.getValue(Integer.class);
+                    oldCount = dataSnapshot.getValue(Long.class);
                 }
                 dataSnapshot.getRef().setValue(++oldCount);
             }

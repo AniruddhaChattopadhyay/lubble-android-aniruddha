@@ -155,7 +155,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private Parcelable recyclerViewState;
     private ChatAdapter chatAdapter;
     private String authorId = FirebaseAuth.getInstance().getUid();
-    private boolean isAuthorSeller;
+    private boolean isCurrUserSeller;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -440,7 +440,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                                 // this person's profile ID, could be a seller or a user
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    isAuthorSeller = (boolean) profileMap.get("isSeller");
+                                    isCurrUserSeller = (boolean) profileMap.get("isSeller");
                                     authorId = profileId;
                                     chatAdapter.setAuthorId(authorId);
                                     chatAdapter.setDmId(dmId);
@@ -458,6 +458,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                                 }
                             }
                         }
+                        resetUnreadCount();
                     }
                 }
 
@@ -626,9 +627,17 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void resetUnreadCount() {
-        if (groupData != null && groupData.isJoined()) {
+        if (!TextUtils.isEmpty(groupId) && groupData != null && groupData.isJoined()) {
             RealtimeDbHelper.getUserGroupsRef().child(groupId)
                     .child("unreadCount").setValue(0);
+        } else if (!TextUtils.isEmpty(dmId)) {
+            if (isCurrUserSeller) {
+                RealtimeDbHelper.getSellerDmsRef().child(dmId)
+                        .child("unreadCount").setValue(0);
+            } else {
+                RealtimeDbHelper.getUserDmsRef().child(dmId)
+                        .child("unreadCount").setValue(0);
+            }
         }
     }
 
@@ -716,7 +725,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 final ChatData chatData = new ChatData();
                 chatData.setAuthorUid(authorId);
-                chatData.setAuthorIsSeller(isAuthorSeller);
+                chatData.setAuthorIsSeller(isCurrUserSeller);
                 chatData.setMessage(newMessageEt.getText().toString());
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
