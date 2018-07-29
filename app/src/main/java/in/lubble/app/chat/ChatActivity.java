@@ -119,7 +119,11 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        LubbleSharedPrefs.getInstance().setCurrentActiveGroupId(getIntent().getStringExtra(EXTRA_GROUP_ID));
+        if (getIntent().hasExtra(EXTRA_GROUP_ID)) {
+            LubbleSharedPrefs.getInstance().setCurrentActiveGroupId(getIntent().getStringExtra(EXTRA_GROUP_ID));
+        } else if (getIntent().hasExtra(EXTRA_DM_ID)) {
+            LubbleSharedPrefs.getInstance().setCurrentActiveGroupId(getIntent().getStringExtra(EXTRA_DM_ID));
+        }
     }
 
     public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate) {
