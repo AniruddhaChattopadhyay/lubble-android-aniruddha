@@ -44,6 +44,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
@@ -162,11 +163,38 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                                 final boolean isSeller = (boolean) profileMap.get("isSeller");
                                 if (isSeller) {
                                     fetchSellerProfileFrom(profileId, dmGroupData);
+                                } else {
+                                    fetchProfileFrom(profileId, dmGroupData);
                                 }
                             }
                         }
                     }
                 }
+            }
+
+            private void fetchProfileFrom(String profileId, final GroupData dmGroupData) {
+                getUserInfoRef(profileId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                        if (map != null) {
+                            final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                            if (profileInfo != null) {
+                                profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                                dmGroupData.setTitle(profileInfo.getName());
+                                dmGroupData.setThumbnail(profileInfo.getThumbnail());
+                                final UserGroupData userGroupData = new UserGroupData();
+                                userGroupData.setJoined(true);
+                                adapter.addGroup(dmGroupData, userGroupData);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             private synchronized void fetchSellerProfileFrom(String profileId, final GroupData dmGroupData) {

@@ -58,6 +58,7 @@ import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.models.DmData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
@@ -75,8 +76,10 @@ import permissions.dispatcher.RuntimePermissions;
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.models.ChatData.REPLY;
@@ -122,6 +125,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     @Nullable
     private DatabaseReference groupReference;
     @Nullable
+    private DatabaseReference dmInfoReference;
+    @Nullable
     private DatabaseReference messagesReference;
     private String currentPhotoPath;
     @Nullable
@@ -140,6 +145,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ChildEventListener msgChildListener;
     private ValueEventListener groupInfoListener;
     private HashMap<String, ProfileInfo> groupMembersMap;
+    private ValueEventListener dmEventListener;
     private String prevUrl = "";
     private boolean foundFirstUnreadMsg;
     private RelativeLayout bottomContainer;
@@ -189,7 +195,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             groupReference = getLubbleGroupsRef().child(groupId);
             messagesReference = getMessagesRef().child(groupId);
         } else if (dmId != null) {
-            // todo groupReference = getLubbleGroupsRef().child(groupId);
+            dmInfoReference = getDmsRef().child(dmId);
             messagesReference = getDmMessagesRef().child(dmId);
         } else if (receiverId != null) {
 
@@ -405,6 +411,76 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+        if (!TextUtils.isEmpty(dmId) && dmInfoReference != null) {
+            dmEventListener = dmInfoReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    final DmData dmData = dataSnapshot.getValue(DmData.class);
+                    if (dmData != null) {
+                        dmData.setId(dataSnapshot.getKey());
+
+                        final HashMap<String, Object> members = dmData.getMembers();
+                        for (String profileId : members.keySet()) {
+                            if (!FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId)) {
+                                final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
+                                if (profileMap != null) {
+                                    final boolean isSeller = (boolean) profileMap.get("isSeller");
+                                    if (isSeller) {
+                                        fetchSellerProfileFrom(profileId);
+                                    } else {
+                                        fetchProfileFrom(profileId);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                private void fetchProfileFrom(String profileId) {
+                    getUserInfoRef(profileId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                            if (map != null) {
+                                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                if (profileInfo != null) {
+                                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                                    ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+
+                private synchronized void fetchSellerProfileFrom(String profileId) {
+                    getSellerRef().child(profileId).child("info").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                            if (profileInfo != null) {
+                                profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                                ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
             });
@@ -865,6 +941,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
         if (groupReference != null) {
             groupReference.removeEventListener(groupInfoListener);
+        }
+        if (dmInfoReference != null) {
+            dmInfoReference.removeEventListener(dmEventListener);
         }
         if (bottomBarListener != null) {
             RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
