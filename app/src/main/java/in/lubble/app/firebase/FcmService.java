@@ -153,12 +153,26 @@ public class FcmService extends FirebaseMessagingService {
                 NotifUtils.updateChatNotifs(this, notifData);
             }
             updateUnreadCounter(notifData, true);
-            pullNewMsgs(notifData);
+            pullNewDmMsgs(notifData);
             //sendDeliveryReceipt(notifData);
         }
     }
 
     private void pullNewMsgs(NotifData notifData) {
+        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "Pulled: " + dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void pullNewDmMsgs(NotifData notifData) {
         RealtimeDbHelper.getDmMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
