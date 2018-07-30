@@ -11,6 +11,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -67,6 +68,9 @@ public class ItemActivity extends AppCompatActivity {
     private TextView visitShopTv;
     private Button chatBtn;
     private ValueEventListener sellerDmIdValueEventListener;
+    private Query sellerDmQuery;
+    @Nullable
+    private String dmId = null;
 
     private int itemId;
 
@@ -162,38 +166,20 @@ public class ItemActivity extends AppCompatActivity {
                                 ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
                             }
                         });
+                        syncDmId(sellerData);
                         chatBtn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                final Query query = RealtimeDbHelper.getUserRef(FirebaseAuth.getInstance().getUid())
-                                        .child("dms").orderByChild("profileId").equalTo(String.valueOf(sellerData.getId()));
-                                sellerDmIdValueEventListener = query.addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        final HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
-                                        if (map != null) {
-                                            String dmId = (String) map.keySet().toArray()[0];
-                                            ChatActivity.openForDm(ItemActivity.this, dmId, null);
-                                        } else {
-                                            ChatActivity.openForEmptyDm(
-                                                    ItemActivity.this,
-                                                    String.valueOf(sellerData.getId()),
-                                                    sellerData.getName(),
-                                                    sellerData.getPhotoUrl()
-                                            );
-                                        }
-                                        if (sellerDmIdValueEventListener != null) {
-                                            query.removeEventListener(sellerDmIdValueEventListener);
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                                        if (sellerDmIdValueEventListener != null) {
-                                            query.removeEventListener(sellerDmIdValueEventListener);
-                                        }
-                                    }
-                                });
+                                if (!TextUtils.isEmpty(dmId)) {
+                                    ChatActivity.openForDm(ItemActivity.this, dmId, null);
+                                } else {
+                                    ChatActivity.openForEmptyDm(
+                                            ItemActivity.this,
+                                            String.valueOf(sellerData.getId()),
+                                            sellerData.getName(),
+                                            sellerData.getPhotoUrl()
+                                    );
+                                }
                             }
                         });
                     }
@@ -220,6 +206,24 @@ public class ItemActivity extends AppCompatActivity {
         });
     }
 
+    private void syncDmId(SellerData sellerData) {
+        sellerDmQuery = RealtimeDbHelper.getUserRef(FirebaseAuth.getInstance().getUid())
+                .child("dms").orderByChild("profileId").equalTo(String.valueOf(sellerData.getId()));
+        sellerDmIdValueEventListener = sellerDmQuery.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                if (map != null) {
+                    dmId = (String) map.keySet().toArray()[0];
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+    }
+
     private void toggleServiceCatalog(boolean isShown, @Nullable ArrayList<ServiceData> serviceDataList) {
         if (isShown && serviceDataList != null && !serviceDataList.isEmpty()) {
             serviceHintTv.setVisibility(View.VISIBLE);
@@ -234,6 +238,14 @@ public class ItemActivity extends AppCompatActivity {
         } else {
             serviceHintTv.setVisibility(View.GONE);
             serviceRv.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (sellerDmIdValueEventListener != null) {
+            sellerDmQuery.removeEventListener(sellerDmIdValueEventListener);
         }
     }
 
