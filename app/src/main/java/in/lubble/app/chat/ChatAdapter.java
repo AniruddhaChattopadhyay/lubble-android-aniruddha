@@ -470,33 +470,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
-        // single as its very difficult otherwise to keep track of all listeners for every user
-        // plus we don't really need realtime updation of user DP and/or name in chat
-        getUserInfoRef(chatData.getAuthorUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                if (map != null) {
-                    recvdChatViewHolder.authorNameTv.setVisibility(View.VISIBLE);
-                    recvdChatViewHolder.dpIv.setVisibility(View.VISIBLE);
-                    glide.load(map.get("thumbnail"))
-                            .circleCrop()
-                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                            .error(R.drawable.ic_account_circle_black_no_padding)
-                            .into(recvdChatViewHolder.dpIv);
-                    recvdChatViewHolder.authorNameTv.setText(map.get("name"));
-                } else {
-                    // must be DM
-                    recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
-                    recvdChatViewHolder.dpIv.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        if (profileInfoMap.containsKey(chatData.getAuthorUid())) {
+            recvdChatViewHolder.authorNameTv.setVisibility(View.VISIBLE);
+            recvdChatViewHolder.dpIv.setVisibility(View.VISIBLE);
+            final ProfileInfo profileInfo = profileInfoMap.get(chatData.getAuthorUid());
+            glide.load(profileInfo.getThumbnail())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                    .error(R.drawable.ic_account_circle_black_no_padding)
+                    .into(recvdChatViewHolder.dpIv);
+            recvdChatViewHolder.authorNameTv.setText(profileInfo.getName());
+        } else {
+            updateProfileInfoMap(getUserInfoRef(chatData.getAuthorUid()), chatData.getAuthorUid(), recvdChatViewHolder.getAdapterPosition());
+        }
     }
 
     private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
