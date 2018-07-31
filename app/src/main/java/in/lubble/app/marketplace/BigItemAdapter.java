@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -47,11 +48,16 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         final ArrayList<PhotoData> photoList = item.getPhotos();
         if (photoList.size() > 0) {
+            viewHolder.itemPicProgressBar.setVisibility(View.GONE);
             glide.load(photoList.get(0).getUrl())
                     .thumbnail(0.1f)
                     .into(viewHolder.itemIv);
+        } else {
+            viewHolder.itemPicProgressBar.setVisibility(View.VISIBLE);
+            glide.load("")
+                    .thumbnail(0.1f)
+                    .into(viewHolder.itemIv);
         }
-
     }
 
     @Override
@@ -88,12 +94,14 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final ImageView itemIv;
+        final ProgressBar itemPicProgressBar;
         final TextView nameTv;
         final TextView priceTv;
 
         ViewHolder(View view) {
             super(view);
             itemIv = view.findViewById(R.id.iv_item);
+            itemPicProgressBar = view.findViewById(R.id.progress_bar_item_pic);
             nameTv = view.findViewById(R.id.tv_name);
             priceTv = view.findViewById(R.id.tv_price);
             view.setOnClickListener(this);

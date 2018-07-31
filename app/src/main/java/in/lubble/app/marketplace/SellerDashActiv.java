@@ -35,23 +35,27 @@ public class SellerDashActiv extends AppCompatActivity {
 
     private static final String TAG = "SellerDashActiv";
     private static final String PARAM_SELLER_ID = "PARAM_SELLER_ID";
+    private static final String PARAM_IS_NEW_SELLER = "PARAM_IS_NEW_SELLER";
     public static final String ACTION_IMG_DONE = "ACTION_IMG_DONE";
     public static final String EXTRA_IMG_TYPE = "EXTRA_IMG_TYPE";
     public static final String EXTRA_IMG_ID = "EXTRA_IMG_ID";
     public static final String EXTRA_IMG_URL = "EXTRA_IMG_URL";
 
     private ImageView sellerPicIv;
+    private ProgressBar sellerPicProgressBar;
     private ProgressBar progressBar;
     private TextView sellerNameTv;
     private TextView sellerBioTv;
     private int sellerId;
+    private boolean isNewSeller;
     private RecyclerView recyclerView;
     private BigItemAdapter adapter;
     private BroadcastReceiver photoUploadReceiver;
 
-    public static void open(Context context, int sellerId) {
+    public static void open(Context context, int sellerId, boolean isNewSeller) {
         final Intent intent = new Intent(context, SellerDashActiv.class);
         intent.putExtra(PARAM_SELLER_ID, sellerId);
+        intent.putExtra(PARAM_IS_NEW_SELLER, isNewSeller);
         context.startActivity(intent);
     }
 
@@ -67,6 +71,7 @@ public class SellerDashActiv extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         sellerPicIv = findViewById(R.id.iv_seller_pic);
+        sellerPicProgressBar = findViewById(R.id.progress_bar_seller_pic);
         progressBar = findViewById(R.id.progress_bar);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
@@ -77,8 +82,14 @@ public class SellerDashActiv extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         sellerId = getIntent().getIntExtra(PARAM_SELLER_ID, -1);
+        isNewSeller = getIntent().getBooleanExtra(PARAM_IS_NEW_SELLER, false);
         if (sellerId == -1) {
             throw new IllegalArgumentException("no seller ID bruh");
+        }
+        if (isNewSeller) {
+            sellerPicProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            sellerPicProgressBar.setVisibility(View.GONE);
         }
 
         newItemTv.setOnClickListener(new View.OnClickListener() {
@@ -116,6 +127,7 @@ public class SellerDashActiv extends AppCompatActivity {
                                     adapter.updateItemPic(Integer.parseInt(imgId), imgUrl);
                                 } else if (imgType.equalsIgnoreCase("501")) {
                                     // SELLER
+                                    sellerPicProgressBar.setVisibility(View.GONE);
                                     GlideApp.with(SellerDashActiv.this)
                                             .load(imgUrl)
                                             .circleCrop()

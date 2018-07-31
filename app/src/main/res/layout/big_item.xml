@@ -9,9 +9,19 @@
         android:id="@+id/iv_item"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:scaleType="centerCrop"
         android:background="@color/very_light_gray"
-        tools:src="@tools:sample/avatars" />
+        android:scaleType="centerCrop" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar_item_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/iv_item"
+        android:layout_alignLeft="@id/iv_item"
+        android:layout_alignRight="@id/iv_item"
+        android:layout_alignTop="@id/iv_item"
+        android:padding="60dp"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/tv_name"

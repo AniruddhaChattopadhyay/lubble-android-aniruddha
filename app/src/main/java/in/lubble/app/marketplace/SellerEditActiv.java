@@ -137,7 +137,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                             .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/seller/" + sellerData.getId())
                             .setAction(UploadFileService.ACTION_UPLOAD));
                     LubbleSharedPrefs.getInstance().setSellerId(sellerData.getId());
-                    SellerDashActiv.open(SellerEditActiv.this, sellerData.getId());
+                    SellerDashActiv.open(SellerEditActiv.this, sellerData.getId(), true);
                 }
             }
 
