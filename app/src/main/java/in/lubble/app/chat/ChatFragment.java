@@ -27,6 +27,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -147,6 +148,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private RelativeLayout bottomContainer;
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
+    private ProgressBar sendBtnProgressBtn;
     @Nullable
     private ValueEventListener bottomBarListener;
     @Nullable
@@ -236,6 +238,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         linkCancel = view.findViewById(R.id.iv_link_cancel);
         bottomContainer = view.findViewById(R.id.bottom_container);
         pvtSystemMsg = view.findViewById(R.id.view_pvt_sys_msg);
+        sendBtnProgressBtn = view.findViewById(R.id.progress_bar_send);
 
         groupMembersMap = new HashMap<>();
 
@@ -651,6 +654,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 Log.d(TAG, "onChildAdded: ");
                 final ChatData chatData = dataSnapshot.getValue(ChatData.class);
                 if (chatData != null) {
+                    sendBtnProgressBtn.setVisibility(View.GONE);
                     Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
                     checkAndInsertDate(chatData);
                     chatData.setId(dataSnapshot.getKey());
@@ -745,6 +749,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
                     // first msg in a new DM, create new DM chat
+                    sendBtnProgressBtn.setVisibility(View.VISIBLE);
                     final DatabaseReference pushRef = RealtimeDbHelper.getCreateDmRef().push();
 
                     final HashMap<String, Object> userMap = new HashMap<>();

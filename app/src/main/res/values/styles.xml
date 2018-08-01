@@ -10,6 +10,10 @@
         <item name="android:datePickerStyle">@style/datepicker</item>
     </style>
 
+    <style name="AppTheme.WhiteAccent">
+        <item name="colorAccent">@color/white</item> <!-- Whatever color you want-->
+    </style>
+
     <!--For Blue Status Bar in some activities-->
     <style name="BlueAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
