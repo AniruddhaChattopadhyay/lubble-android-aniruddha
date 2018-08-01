@@ -253,6 +253,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         declineTv.setOnClickListener(this);
         linkCancel.setOnClickListener(this);
 
+        if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
+            // new DM chat, pre-fill help text in editText
+            newMessageEt.setText("Hi! I am interested in this item, is it available?");
+            newMessageEt.selectAll();
+            newMessageEt.requestFocus();
+        }
+
         return view;
     }
 
