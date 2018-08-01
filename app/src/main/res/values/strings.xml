@@ -157,4 +157,6 @@
     <string name="about_seller_hint">Tell buyers about your passions, why you are the perfect individual or business from whom they should purchase</string>
     <string name="selling_price_error">Please enter sale price</string>
     <string name="mrp_error">Please enter original MRP of the item</string>
+    <string name="add_new_item">Add New Item</string>
+    <string name="edit_seller_profile">Edit Seller Profile</string>
 </resources>

@@ -1,6 +1,7 @@
 package in.lubble.app.marketplace;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
+import com.crashlytics.android.Crashlytics;
 
 import org.json.JSONObject;
 
@@ -63,6 +65,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
     private TextInputLayout sellerNameTil;
     private TextInputLayout sellerAboutTil;
     private Button submitBtn;
+    private int sellerId = -1;
 
     private String currentPhotoPath;
     private Uri picUri = null;
@@ -93,6 +96,49 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         changePicHintTv.setOnClickListener(this);
         submitBtn.setOnClickListener(this);
 
+        sellerId = LubbleSharedPrefs.getInstance().getSellerId();
+        if (sellerId != -1) {
+            // seller already exists, pre-fill seller details for editing
+            fetchSellerProfile(sellerId);
+        }
+    }
+
+    private void fetchSellerProfile(final int sellerId) {
+
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.all_please_wait));
+        progressDialog.show();
+
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<SellerData>() {
+            @Override
+            public void onResponse(Call<SellerData> call, Response<SellerData> response) {
+                progressDialog.dismiss();
+                final SellerData sellerData = response.body();
+                if (sellerData != null) {
+                    sellerNameTil.getEditText().setText(sellerData.getName());
+                    //sellerNameTil.getEditText().setEnabled(false);
+                    sellerNameTil.setEnabled(false);
+                    sellerAboutTil.getEditText().setText(sellerData.getBio());
+
+                    GlideApp.with(SellerEditActiv.this)
+                            .load(sellerData.getPhotoUrl())
+                            .circleCrop()
+                            .into(photoIv);
+                    setTitle(sellerData.getName());
+
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
+                    Toast.makeText(SellerEditActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<SellerData> call, Throwable t) {
+                progressDialog.dismiss();
+                Toast.makeText(SellerEditActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -124,18 +170,29 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.uploadSellerProfile(body).enqueue(new Callback<SellerData>() {
+        final Call<SellerData> sellerDataCall;
+        if (sellerId == -1) {
+            // new seller
+            sellerDataCall = endpoints.uploadSellerProfile(body);
+        } else {
+            // updating old seller
+            sellerDataCall = endpoints.updateSellerProfile(sellerId, body);
+        }
+        sellerDataCall.enqueue(new Callback<SellerData>() {
             @Override
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 final SellerData sellerData = response.body();
                 if (sellerData != null) {
-                    //todo compress img
-                    startService(new Intent(SellerEditActiv.this, UploadFileService.class)
-                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "seller_pic_" + System.currentTimeMillis() + ".jpg")
-                            .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
-                            .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
-                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/seller/" + sellerData.getId())
-                            .setAction(UploadFileService.ACTION_UPLOAD));
+                    if (picUri != null) {
+                        // upload pic only if it has changed, might not when editing seller
+                        //todo compress img
+                        startService(new Intent(SellerEditActiv.this, UploadFileService.class)
+                                .putExtra(UploadFileService.EXTRA_FILE_NAME, "seller_pic_" + System.currentTimeMillis() + ".jpg")
+                                .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
+                                .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
+                                .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/seller/" + sellerData.getId())
+                                .setAction(UploadFileService.ACTION_UPLOAD));
+                    }
                     LubbleSharedPrefs.getInstance().setSellerId(sellerData.getId());
                     SellerDashActiv.open(SellerEditActiv.this, sellerData.getId(), true);
                 }
@@ -181,7 +238,8 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         } else {
             sellerAboutTil.setError(null);
         }
-        if (picUri == null) {
+        if (picUri == null && sellerId == -1) {
+            // new seller; pic is reqd
             Toast.makeText(this, R.string.no_photo, Toast.LENGTH_SHORT).show();
             return false;
         }

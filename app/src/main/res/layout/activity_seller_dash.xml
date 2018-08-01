@@ -26,12 +26,12 @@
                 android:id="@+id/progress_bar_seller_pic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:layout_alignBottom="@id/iv_seller_pic"
                 android:layout_alignLeft="@id/iv_seller_pic"
                 android:layout_alignRight="@id/iv_seller_pic"
                 android:layout_alignTop="@id/iv_seller_pic"
-                android:padding="12dp" />
+                android:padding="12dp"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/iv_seller_pic"
@@ -61,23 +61,35 @@
                 tools:text="@tools:sample/lorem" />
 
             <TextView
-                android:id="@+id/tv_new_item"
+                android:id="@+id/tv_edit_seller_profile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_seller_bio"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/rect_rounded_border"
-                android:padding="8dp"
-                android:text="Add New Item"
-                android:textColor="@color/colorAccent"
-                android:textStyle="bold" />
+                android:paddingBottom="4dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="4dp"
+                android:text="@string/edit_seller_profile"
+                android:textColor="@color/colorAccent" />
+
+            <Button
+                android:id="@+id/btn_new_item"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_edit_seller_profile"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="8dp"
+                android:text="@string/add_new_item"
+                android:theme="@style/AccentButton" />
 
             <ProgressBar
                 android:id="@+id/progress_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_new_item"
+                android:layout_below="@id/btn_new_item"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="8dp" />
 
@@ -85,7 +97,7 @@
                 android:id="@+id/rv_items"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_new_item"
+                android:layout_below="@id/btn_new_item"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"

@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -75,7 +76,8 @@ public class SellerDashActiv extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
-        final TextView newItemTv = findViewById(R.id.tv_new_item);
+        final TextView editProfileTv = findViewById(R.id.tv_edit_seller_profile);
+        final Button newItemBtn = findViewById(R.id.btn_new_item);
         recyclerView = findViewById(R.id.rv_items);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new BigItemAdapter(GlideApp.with(this));
@@ -92,10 +94,16 @@ public class SellerDashActiv extends AppCompatActivity {
             sellerPicProgressBar.setVisibility(View.GONE);
         }
 
-        newItemTv.setOnClickListener(new View.OnClickListener() {
+        newItemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 NewItemActiv.open(SellerDashActiv.this);
+            }
+        });
+        editProfileTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SellerEditActiv.open(SellerDashActiv.this);
             }
         });
     }
@@ -114,7 +122,6 @@ public class SellerDashActiv extends AppCompatActivity {
         photoUploadReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //todo hideProgressDialog();
                 if (intent.getAction() != null) {
                     switch (intent.getAction()) {
                         case ACTION_IMG_DONE:

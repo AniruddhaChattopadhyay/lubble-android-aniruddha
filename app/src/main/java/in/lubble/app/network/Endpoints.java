@@ -14,6 +14,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
 public interface Endpoints {
@@ -35,6 +36,9 @@ public interface Endpoints {
 
     @GET("marketplace/seller/{seller_id}/")
     Call<SellerData> fetchSellerProfile(@Path("seller_id") int sellerId);
+
+    @PUT("marketplace/seller/{seller_id}/")
+    Call<SellerData> updateSellerProfile(@Path("seller_id") int sellerId, @Body RequestBody params);
 
     @GET("app/features/")
     Call<FeatureData> fetchAppFeatures();
