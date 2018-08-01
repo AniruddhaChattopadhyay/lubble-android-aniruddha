@@ -117,8 +117,6 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                 final SellerData sellerData = response.body();
                 if (sellerData != null) {
                     sellerNameTil.getEditText().setText(sellerData.getName());
-                    //sellerNameTil.getEditText().setEnabled(false);
-                    sellerNameTil.setEnabled(false);
                     sellerAboutTil.getEditText().setText(sellerData.getBio());
 
                     GlideApp.with(SellerEditActiv.this)
@@ -163,7 +161,6 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
 
         params.put("name", sellerNameTil.getEditText().getText().toString());
         params.put("bio", sellerAboutTil.getEditText().getText().toString());
-        params.put("client_timestamp", System.currentTimeMillis());
 
         final JSONObject jsonObject = new JSONObject(params);
 
@@ -173,15 +170,22 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         final Call<SellerData> sellerDataCall;
         if (sellerId == -1) {
             // new seller
+            params.put("client_timestamp", System.currentTimeMillis());
             sellerDataCall = endpoints.uploadSellerProfile(body);
         } else {
             // updating old seller
             sellerDataCall = endpoints.updateSellerProfile(sellerId, body);
         }
+
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.all_updating));
+        progressDialog.show();
+
         sellerDataCall.enqueue(new Callback<SellerData>() {
             @Override
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 final SellerData sellerData = response.body();
+                progressDialog.dismiss();
                 if (sellerData != null) {
                     if (picUri != null) {
                         // upload pic only if it has changed, might not when editing seller
@@ -201,6 +205,8 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
             @Override
             public void onFailure(Call<SellerData> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
+                Toast.makeText(SellerEditActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
             }
         });
     }
