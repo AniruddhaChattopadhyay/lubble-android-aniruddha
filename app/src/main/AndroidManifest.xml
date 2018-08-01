@@ -189,7 +189,7 @@
             android:name=".marketplace.NewItemActiv"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".marketplace.CategoryChooserActiv"
             android:configChanges="orientation"
@@ -197,6 +197,7 @@
         <activity
             android:name=".marketplace.ItemActivity"
             android:configChanges="orientation"
+            android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait" />
         <activity
             android:name=".marketplace.SellerEditActiv"

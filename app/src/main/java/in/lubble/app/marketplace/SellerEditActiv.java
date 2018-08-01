@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +21,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONObject;
 
@@ -63,6 +65,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
     private ImageView photoIv;
     private TextView changePicHintTv;
     private TextInputLayout sellerNameTil;
+    private TextInputLayout phoneNumberTil;
     private TextInputLayout sellerAboutTil;
     private Button submitBtn;
     private int sellerId = -1;
@@ -82,6 +85,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         photoIv = findViewById(R.id.iv_seller_pic);
         changePicHintTv = findViewById(R.id.tv_change_pic_hint);
         sellerNameTil = findViewById(R.id.til_seller_name);
+        phoneNumberTil = findViewById(R.id.til_mobile_number);
         sellerAboutTil = findViewById(R.id.til_seller_about);
         submitBtn = findViewById(R.id.btn_submit);
 
@@ -96,10 +100,18 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         changePicHintTv.setOnClickListener(this);
         submitBtn.setOnClickListener(this);
 
+        String userPhoneNumber = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+        if (!TextUtils.isEmpty(userPhoneNumber) && userPhoneNumber.startsWith("+91")) {
+            userPhoneNumber = userPhoneNumber.substring(3);
+        }
+        phoneNumberTil.getEditText().setText(userPhoneNumber);
+        phoneNumberTil.getEditText().selectAll();
+
         sellerId = LubbleSharedPrefs.getInstance().getSellerId();
         if (sellerId != -1) {
             // seller already exists, pre-fill seller details for editing
             fetchSellerProfile(sellerId);
+            submitBtn.setText(R.string.all_update);
         }
     }
 
@@ -117,6 +129,9 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                 final SellerData sellerData = response.body();
                 if (sellerData != null) {
                     sellerNameTil.getEditText().setText(sellerData.getName());
+                    if (!TextUtils.isEmpty(sellerData.getPhone())) {
+                        phoneNumberTil.getEditText().setText(sellerData.getPhone());
+                    }
                     sellerAboutTil.getEditText().setText(sellerData.getBio());
 
                     GlideApp.with(SellerEditActiv.this)
@@ -159,8 +174,9 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
 
         HashMap<String, Object> params = new HashMap<>();
 
-        params.put("name", sellerNameTil.getEditText().getText().toString());
-        params.put("bio", sellerAboutTil.getEditText().getText().toString());
+        params.put("name", sellerNameTil.getEditText().getText().toString().trim());
+        params.put("phone", phoneNumberTil.getEditText().getText().toString().trim());
+        params.put("bio", sellerAboutTil.getEditText().getText().toString().trim());
 
         final JSONObject jsonObject = new JSONObject(params);
 
@@ -199,6 +215,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                     }
                     LubbleSharedPrefs.getInstance().setSellerId(sellerData.getId());
                     SellerDashActiv.open(SellerEditActiv.this, sellerData.getId(), true);
+                    finish();
                 }
             }
 
@@ -237,6 +254,12 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
             return false;
         } else {
             sellerNameTil.setError(null);
+        }
+        if (!isValidString(phoneNumberTil.getEditText().getText().toString().trim())) {
+            phoneNumberTil.setError(getString(R.string.phone_error));
+            return false;
+        } else {
+            phoneNumberTil.setError(null);
         }
         if (!isValidString(sellerAboutTil.getEditText().getText().toString())) {
             sellerAboutTil.setError(getString(R.string.desc_error));

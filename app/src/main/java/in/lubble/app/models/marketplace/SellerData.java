@@ -13,6 +13,9 @@ public class SellerData {
     @SerializedName("name")
     @Expose
     private String name;
+    @SerializedName("phone")
+    @Expose
+    private String phone;
     @SerializedName("bio")
     @Expose
     private String bio;
@@ -61,5 +64,13 @@ public class SellerData {
 
     public void setItemList(ArrayList<Item> itemList) {
         this.itemList = itemList;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }
