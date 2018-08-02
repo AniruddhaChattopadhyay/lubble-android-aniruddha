@@ -97,7 +97,7 @@ public class SellerDashActiv extends AppCompatActivity {
         newItemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NewItemActiv.open(SellerDashActiv.this);
+                NewItemActiv.open(SellerDashActiv.this, -1);
             }
         });
         editProfileTv.setOnClickListener(new View.OnClickListener() {

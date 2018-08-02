@@ -1,6 +1,7 @@
 package in.lubble.app.marketplace;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.signature.ObjectKey;
+import com.crashlytics.android.Crashlytics;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +42,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
@@ -74,6 +77,7 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 public class NewItemActiv extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "NewItemActiv";
+    private static final String ARG_EDIT_ITEM_ID = "ARG_EDIT_ITEM_ID";
 
     private static final int REQUEST_CODE_ITEM_PIC = 469;
     private static final int REQUEST_CODE_CATEGORY = 339;
@@ -96,9 +100,12 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private String categoryName;
     private ArrayList<ServiceData> serviceDataList;
     private int selectedItemType = ITEM_PRODUCT;
+    private int itemId = -1;
 
-    public static void open(Context context) {
-        context.startActivity(new Intent(context, NewItemActiv.class));
+    public static void open(Context context, int itemId) {
+        final Intent intent = new Intent(context, NewItemActiv.class);
+        intent.putExtra(ARG_EDIT_ITEM_ID, itemId);
+        context.startActivity(intent);
     }
 
     @Override
@@ -124,11 +131,17 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
         Analytics.triggerScreenEvent(this, this.getClass());
 
+        itemId = getIntent().getIntExtra(ARG_EDIT_ITEM_ID, -1);
+
         Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        setTitle("New Item");
-
+        if (itemId != -1) {
+            setTitle("Edit Item");
+            fetchItemDetails();
+        } else {
+            setTitle("New Item");
+        }
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -156,6 +169,56 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+    }
+
+    private void fetchItemDetails() {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(R.string.all_updating);
+        progressDialog.show();
+
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchItemDetails(itemId).enqueue(new Callback<Item>() {
+            @Override
+            public void onResponse(Call<Item> call, Response<Item> response) {
+                progressDialog.dismiss();
+                final Item item = response.body();
+                if (item != null) {
+                    nameTil.getEditText().setText(item.getName());
+                    descTil.getEditText().setText(item.getDescription());
+                    mrpTil.getEditText().setText(item.getMrp());
+                    sellingPriceTil.getEditText().setText(item.getSellingPrice());
+                    if (item.getType() == ITEM_PRODUCT) {
+                        productRadioBtn.setChecked(true);
+                        serviceRadioBtn.setChecked(false);
+                    } else {
+                        productRadioBtn.setChecked(false);
+                        serviceRadioBtn.setChecked(true);
+                    }
+                    handleServiceCatalog(item.getServiceDataList());
+                    //todo categoryTil.getEditText().setText(item.getCategory());
+                } else {
+                    if (response.code() == 404) {
+                        final Bundle bundle = new Bundle();
+                        bundle.putInt("item_id", itemId);
+                        Analytics.triggerEvent(AnalyticsEvents.ITEM_NOT_FOUND, bundle, NewItemActiv.this);
+                        Toast.makeText(NewItemActiv.this, "Item Not Found", Toast.LENGTH_LONG).show();
+                    } else {
+                        Crashlytics.logException(new IllegalArgumentException("Item null for item ID: " + itemId));
+                        Toast.makeText(NewItemActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    }
+                    finish();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Item> call, Throwable t) {
+                progressDialog.dismiss();
+            }
+        });
+    }
+
+    private void handleServiceCatalog(ArrayList<ServiceData> serviceDataList) {
+        showCatalogue();
     }
 
     private void showCatalogue() {
