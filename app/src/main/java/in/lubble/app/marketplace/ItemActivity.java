@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -58,6 +59,7 @@ public class ItemActivity extends AppCompatActivity {
     private TextView titleTv;
     private TextView priceTv;
     private TextView mrpTv;
+    private TextView editItemTv;
     private TextView descTv;
     private TextView serviceHintTv;
     private RecyclerView serviceRv;
@@ -91,6 +93,7 @@ public class ItemActivity extends AppCompatActivity {
         titleTv = findViewById(R.id.tv_item_title);
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
+        editItemTv = findViewById(R.id.tv_edit_item);
         chatBtn = findViewById(R.id.btn_chat);
         descTv = findViewById(R.id.tv_item_desc);
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
@@ -182,6 +185,17 @@ public class ItemActivity extends AppCompatActivity {
                                 }
                             }
                         });
+                        if (sellerData.getId() == LubbleSharedPrefs.getInstance().getSellerId()) {
+                            editItemTv.setVisibility(View.VISIBLE);
+                            editItemTv.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    NewItemActiv.open(ItemActivity.this, itemId);
+                                }
+                            });
+                        } else {
+                            editItemTv.setVisibility(View.GONE);
+                        }
                     }
                 } else {
                     if (response.code() == 404) {

@@ -59,11 +59,25 @@
                 android:textSize="12sp"
                 tools:text="899" />
 
+            <TextView
+                android:id="@+id/tv_edit_item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_price"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rect_rounded_border"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="@string/edit_item"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
             <Button
                 android:id="@+id/btn_chat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_price"
+                android:layout_below="@id/tv_edit_item"
                 android:layout_marginTop="4dp"
                 android:text="@string/chat_with_seller"
                 android:theme="@style/AccentButton" />
