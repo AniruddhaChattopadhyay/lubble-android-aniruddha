@@ -96,9 +96,7 @@
                     android:gravity="center"
                     android:padding="8dp"
                     android:text="@string/edit_item"
-                    android:textColor="@color/colorAccent"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
+                    android:textColor="@color/colorAccent" />
 
                 <TextView
                     android:id="@+id/tv_view_count"
