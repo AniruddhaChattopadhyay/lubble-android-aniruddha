@@ -173,7 +173,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
     private void fetchItemDetails() {
         final ProgressDialog progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle(R.string.all_updating);
+        progressDialog.setTitle(R.string.all_please_wait);
         progressDialog.show();
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
@@ -198,6 +198,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                             .load(item.getPhotos().get(0).getUrl())
                             .into(photoIv);
                     handleServiceCatalog(item.getServiceDataList());
+                    categoryId = item.getCategory().getId();
                     categoryTil.getEditText().setText(item.getCategory().getName());
                 } else {
                     if (response.code() == 404) {
@@ -368,11 +369,12 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         params.put("type", selectedItemType);
         params.put("name", nameTil.getEditText().getText().toString());
         params.put("description", descTil.getEditText().getText().toString());
-        params.put("category", categoryId);
+        params.put("category_id", categoryId);
         params.put("mrp", mrpTil.getEditText().getText().toString());
         params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
-        params.put("client_timestamp", System.currentTimeMillis());
-
+        if (itemId == -1) {
+            params.put("client_timestamp", System.currentTimeMillis());
+        }
         if (selectedItemType == ITEM_SERVICE) {
             JSONArray serviceCatalog = new JSONArray();
             for (ServiceData serviceData : getAllServiceDatas()) {
@@ -390,7 +392,13 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.uploadNewItem(body).enqueue(new Callback<Item>() {
+        final Call<Item> itemCall;
+        if (itemId == -1) {
+            itemCall = endpoints.uploadNewItem(body);
+        } else {
+            itemCall = endpoints.updateItem(itemId, body);
+        }
+        itemCall.enqueue(new Callback<Item>() {
             @Override
             public void onResponse(Call<Item> call, Response<Item> response) {
                 final Item item = response.body();
@@ -398,12 +406,14 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     // todo FileUtils.compressImage(new File(picUri.getPath()).getAbsolutePath(), 80);
                     //todo progress bar
                     //todo profile (test) this compression
-                    startService(new Intent(NewItemActiv.this, UploadFileService.class)
-                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "item_pic_" + System.currentTimeMillis() + ".jpg")
-                            .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
-                            .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
-                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/items/" + item.getId())
-                            .setAction(UploadFileService.ACTION_UPLOAD));
+                    if (picUri != null) {
+                        startService(new Intent(NewItemActiv.this, UploadFileService.class)
+                                .putExtra(UploadFileService.EXTRA_FILE_NAME, "item_pic_" + System.currentTimeMillis() + ".jpg")
+                                .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
+                                .putExtra(UploadFileService.EXTRA_BUCKET, BUCKET_MARKETPLACE)
+                                .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/items/" + item.getId())
+                                .setAction(UploadFileService.ACTION_UPLOAD));
+                    }
                     finish();
                 } else {
                     Toast.makeText(NewItemActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();

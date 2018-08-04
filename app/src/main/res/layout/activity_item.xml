@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -59,26 +60,63 @@
                 android:textSize="12sp"
                 tools:text="899" />
 
-            <TextView
-                android:id="@+id/tv_edit_item"
+            <RelativeLayout
+                android:id="@+id/relativelayout_item_pvt_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_price"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/colorAccent"
-                android:background="@drawable/rect_rounded_border"
-                android:gravity="center"
-                android:padding="8dp"
-                android:text="@string/edit_item"
-                android:visibility="gone"
-                tools:visibility="visible" />
+                android:layout_marginTop="4dp"
+                android:background="@drawable/rounded_rect_super_light_gray"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/iv_lock"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:tint="@color/default_text_color"
+                    app:srcCompat="@drawable/ic_lock_black_24dp" />
+
+                <TextView
+                    android:id="@+id/tv_item_pvt_info_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/iv_lock"
+                    android:text="This section is only visible to you"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_edit_item"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_item_pvt_info_hint"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/rect_rounded_border"
+                    android:gravity="center"
+                    android:padding="8dp"
+                    android:text="@string/edit_item"
+                    android:textColor="@color/colorAccent"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/tv_edit_item"
+                    android:layout_alignTop="@id/tv_edit_item"
+                    android:layout_marginLeft="8dp"
+                    android:layout_toRightOf="@id/tv_edit_item"
+                    android:gravity="center"
+                    android:visibility="gone"
+                    android:text="View Count: 69"
+                    android:textColor="@color/black" />
+
+            </RelativeLayout>
 
             <Button
                 android:id="@+id/btn_chat"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_edit_item"
+                android:layout_below="@id/relativelayout_item_pvt_info"
                 android:layout_marginTop="4dp"
                 android:text="@string/chat_with_seller"
                 android:theme="@style/AccentButton" />
@@ -112,8 +150,9 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_service_catalog_hint"
                 android:background="@drawable/half_rounded_rectangle_hollow_bottom"
-                android:paddingLeft="1dp"
-                android:paddingRight="1dp"
+                android:paddingLeft="2dp"
+                android:paddingRight="2dp"
+                android:paddingBottom="4dp"
                 android:visibility="gone"
                 tools:visibility="visible" />
 

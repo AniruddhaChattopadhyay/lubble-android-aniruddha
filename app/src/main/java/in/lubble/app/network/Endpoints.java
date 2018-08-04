@@ -28,6 +28,9 @@ public interface Endpoints {
     @POST("marketplace/item/")
     Call<Item> uploadNewItem(@Body RequestBody params);
 
+    @PUT("marketplace/item/{item_id}/")
+    Call<Item> updateItem(@Path("item_id") int itemId, @Body RequestBody params);
+
     @GET("marketplace/item/{item_id}/")
     Call<Item> fetchItemDetails(@Path("item_id") int itemId);
 
