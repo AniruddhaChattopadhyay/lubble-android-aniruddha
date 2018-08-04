@@ -25,6 +25,9 @@ public class SellerData {
     @SerializedName("items")
     @Expose
     private ArrayList<Item> itemList;
+    @SerializedName("view_count")
+    @Expose
+    private long viewCount;
 
     public Integer getId() {
         return id;
@@ -72,5 +75,13 @@ public class SellerData {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(long viewCount) {
+        this.viewCount = viewCount;
     }
 }

@@ -18,6 +18,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,7 +60,9 @@ public class ItemActivity extends AppCompatActivity {
     private TextView titleTv;
     private TextView priceTv;
     private TextView mrpTv;
+    private RelativeLayout itemPvtInfoLayout;
     private TextView editItemTv;
+    private TextView viewCountTv;
     private TextView descTv;
     private TextView serviceHintTv;
     private RecyclerView serviceRv;
@@ -93,7 +96,9 @@ public class ItemActivity extends AppCompatActivity {
         titleTv = findViewById(R.id.tv_item_title);
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
+        itemPvtInfoLayout = findViewById(R.id.relativelayout_item_pvt_info);
         editItemTv = findViewById(R.id.tv_edit_item);
+        viewCountTv = findViewById(R.id.tv_view_count);
         chatBtn = findViewById(R.id.btn_chat);
         descTv = findViewById(R.id.tv_item_desc);
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
@@ -186,15 +191,21 @@ public class ItemActivity extends AppCompatActivity {
                             }
                         });
                         if (sellerData.getId() == LubbleSharedPrefs.getInstance().getSellerId()) {
-                            editItemTv.setVisibility(View.VISIBLE);
+                            itemPvtInfoLayout.setVisibility(View.VISIBLE);
                             editItemTv.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     NewItemActiv.open(ItemActivity.this, itemId);
                                 }
                             });
+                            if (LubbleSharedPrefs.getInstance().getIsViewCountEnabled()) {
+                                viewCountTv.setVisibility(View.VISIBLE);
+                                viewCountTv.setText("View Count: " + sellerData.getViewCount());
+                            } else {
+                                viewCountTv.setVisibility(View.GONE);
+                            }
                         } else {
-                            editItemTv.setVisibility(View.GONE);
+                            itemPvtInfoLayout.setVisibility(View.GONE);
                         }
                     }
                 } else {

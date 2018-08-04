@@ -11,6 +11,9 @@ public class FeatureData {
     @SerializedName("sellers")
     @Expose
     private List<Integer> sellers = new ArrayList<>();
+    @SerializedName("is_view_count_enabled")
+    @Expose
+    private boolean isViewCountEnabled;
 
     public List<Integer> getSellers() {
         return sellers;
@@ -20,4 +23,11 @@ public class FeatureData {
         this.sellers = sellers;
     }
 
+    public boolean isViewCountEnabled() {
+        return isViewCountEnabled;
+    }
+
+    public void setViewCountEnabled(boolean viewCountEnabled) {
+        isViewCountEnabled = viewCountEnabled;
+    }
 }

@@ -26,6 +26,7 @@ public class LubbleSharedPrefs {
     private final String IS_EVENT_TOOLTIP_SHOWN = "IS_EVENT_TOOLTIP_SHOWN";
     private final String IS_EVENT_OPENED = "IS_EVENT_OPENED";
     private final String SELLER_ID = "SELLER_ID";
+    private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -166,6 +167,14 @@ public class LubbleSharedPrefs {
 
     public boolean setSellerId(int sellerId) {
         return preferences.edit().putInt(SELLER_ID, sellerId).commit();
+    }
+
+    public boolean getIsViewCountEnabled() {
+        return preferences.getBoolean(IS_VIEW_COUNT_ENABLED, false);
+    }
+
+    public boolean setIsViewCountEnabled(boolean isViewCountEnabled) {
+        return preferences.edit().putBoolean(IS_VIEW_COUNT_ENABLED, isViewCountEnabled).commit();
     }
 
 }

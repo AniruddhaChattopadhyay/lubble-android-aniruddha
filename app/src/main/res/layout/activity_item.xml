@@ -67,7 +67,9 @@
                 android:layout_below="@id/tv_price"
                 android:layout_marginTop="4dp"
                 android:background="@drawable/rounded_rect_super_light_gray"
-                android:padding="8dp">
+                android:padding="8dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <ImageView
                     android:id="@+id/iv_lock"
@@ -99,6 +101,7 @@
                     tools:visibility="visible" />
 
                 <TextView
+                    android:id="@+id/tv_view_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/tv_edit_item"
@@ -106,9 +109,9 @@
                     android:layout_marginLeft="8dp"
                     android:layout_toRightOf="@id/tv_edit_item"
                     android:gravity="center"
-                    android:visibility="gone"
                     android:text="View Count: 69"
-                    android:textColor="@color/black" />
+                    android:textColor="@color/black"
+                    android:visibility="gone" />
 
             </RelativeLayout>
 
@@ -150,9 +153,9 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_service_catalog_hint"
                 android:background="@drawable/half_rounded_rectangle_hollow_bottom"
+                android:paddingBottom="4dp"
                 android:paddingLeft="2dp"
                 android:paddingRight="2dp"
-                android:paddingBottom="4dp"
                 android:visibility="gone"
                 tools:visibility="visible" />
 

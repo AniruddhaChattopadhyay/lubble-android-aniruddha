@@ -27,6 +27,7 @@ public class FeatureUtils {
                     if (sellerList != null && sellerList.size() > 0) {
                         LubbleSharedPrefs.getInstance().setSellerId(sellerList.get(0));
                     }
+                    LubbleSharedPrefs.getInstance().setIsViewCountEnabled(featureData.isViewCountEnabled());
                 }
             }
 
