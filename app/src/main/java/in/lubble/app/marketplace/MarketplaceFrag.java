@@ -43,6 +43,7 @@ public class MarketplaceFrag extends Fragment {
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
+    private TextView searchTv;
     private RecyclerView categoriesRv;
     private ProgressBar progressBar;
     private TextView cat1Name;
@@ -74,6 +75,7 @@ public class MarketplaceFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_marketplace, container, false);
 
+        searchTv = view.findViewById(R.id.tv_search);
         categoriesRv = view.findViewById(R.id.rv_categories);
         categoriesRv.setNestedScrollingEnabled(false);
 
@@ -127,6 +129,13 @@ public class MarketplaceFrag extends Fragment {
                     // seller ID found, open dashboard
                     SellerDashActiv.open(getContext(), sellerId, false);
                 }
+            }
+        });
+
+        searchTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SearchActivity.open(getContext());
             }
         });
 

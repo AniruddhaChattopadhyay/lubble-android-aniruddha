@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
@@ -46,11 +47,14 @@ public interface Endpoints {
     @GET("app/features/")
     Call<FeatureData> fetchAppFeatures();
 
-    @GET("marketplace/items/category/{cat_id}")
+    @GET("marketplace/items/category/{cat_id}/")
     Call<Category> fetchCategoryItems(@Path("cat_id") int categoryId);
 
-    @GET("marketplace/items/seller/{seller_id}")
+    @GET("marketplace/items/seller/{seller_id}/")
     Call<SellerData> fetchSellerItems(@Path("seller_id") int sellerId);
+
+    @GET("marketplace/itemlist/")
+    Call<ArrayList<ItemSearchData>> fetchItemList();
 
     class ResponseBean {
 

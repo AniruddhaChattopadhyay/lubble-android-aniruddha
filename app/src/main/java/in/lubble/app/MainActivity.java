@@ -50,7 +50,8 @@ import it.sephiroth.android.library.tooltip.Tooltip;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
-import static in.lubble.app.utils.FeatureUtils.fetchAndPersistAppFeatures;
+import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
+import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -137,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
         showEventTooltip();
         showEventBadge();
         fetchAndPersistAppFeatures();
+        fetchAndPersistMplaceItems();
     }
 
 

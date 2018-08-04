@@ -2,9 +2,12 @@ package in.lubble.app.utils;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.database.DbSingleton;
+import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -12,9 +15,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class FeatureUtils {
+public class MainUtils {
 
-    private static final String TAG = "FeatureUtils";
+    private static final String TAG = "MainUtils";
 
     public static void fetchAndPersistAppFeatures() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
@@ -36,6 +39,30 @@ public class FeatureUtils {
                 Log.e(TAG, "onFailure: ");
             }
         });
+    }
+
+    public static void fetchAndPersistMplaceItems() {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchItemList().enqueue(new Callback<ArrayList<ItemSearchData>>() {
+            @Override
+            public void onResponse(Call<ArrayList<ItemSearchData>> call, Response<ArrayList<ItemSearchData>> response) {
+                final ArrayList<ItemSearchData> itemsList = response.body();
+                if (itemsList != null && itemsList.size() > 0) {
+                    insertItemsToDb(itemsList);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<ItemSearchData>> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+            }
+        });
+    }
+
+    private static void insertItemsToDb(final ArrayList<ItemSearchData> itemsList) {
+        for (ItemSearchData itemSearchData : itemsList) {
+            DbSingleton.getInstance().createItemSearchData(itemSearchData);
+        }
     }
 
 }
