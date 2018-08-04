@@ -185,8 +185,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 if (item != null) {
                     nameTil.getEditText().setText(item.getName());
                     descTil.getEditText().setText(item.getDescription());
-                    mrpTil.getEditText().setText(item.getMrp());
-                    sellingPriceTil.getEditText().setText(item.getSellingPrice());
+                    mrpTil.getEditText().setText(String.valueOf(item.getMrp()));
+                    sellingPriceTil.getEditText().setText(String.valueOf(item.getSellingPrice()));
                     if (item.getType() == ITEM_PRODUCT) {
                         productRadioBtn.setChecked(true);
                         serviceRadioBtn.setChecked(false);
@@ -194,8 +194,11 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                         productRadioBtn.setChecked(false);
                         serviceRadioBtn.setChecked(true);
                     }
+                    GlideApp.with(NewItemActiv.this)
+                            .load(item.getPhotos().get(0).getUrl())
+                            .into(photoIv);
                     handleServiceCatalog(item.getServiceDataList());
-                    //todo categoryTil.getEditText().setText(item.getCategory());
+                    categoryTil.getEditText().setText(item.getCategory().getName());
                 } else {
                     if (response.code() == 404) {
                         final Bundle bundle = new Bundle();
@@ -218,7 +221,9 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     }
 
     private void handleServiceCatalog(ArrayList<ServiceData> serviceDataList) {
-        showCatalogue();
+        if (serviceDataList != null && serviceDataList.size() > 0) {
+            showCatalogue();
+        }
     }
 
     private void showCatalogue() {
@@ -446,7 +451,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         }
-        if (picUri == null) {
+        if (picUri == null && itemId == -1) {
             Toast.makeText(this, R.string.no_photo, Toast.LENGTH_SHORT).show();
             parentScrollView.smoothScrollTo(0, 0);
             return false;

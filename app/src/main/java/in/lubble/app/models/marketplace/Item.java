@@ -51,7 +51,7 @@ public class Item {
     private String seller;
     @SerializedName("category")
     @Expose
-    private Integer category;
+    private Category category;
     @SerializedName("seller_details")
     @Expose
     @Nullable
@@ -172,11 +172,11 @@ public class Item {
         this.seller = seller;
     }
 
-    public Integer getCategory() {
+    public Category getCategory() {
         return category;
     }
 
-    public void setCategory(Integer category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 

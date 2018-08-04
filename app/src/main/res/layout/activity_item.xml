@@ -66,6 +66,7 @@
                 android:layout_below="@id/tv_price"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="8dp"
+                android:textColor="@color/colorAccent"
                 android:background="@drawable/rect_rounded_border"
                 android:gravity="center"
                 android:padding="8dp"
