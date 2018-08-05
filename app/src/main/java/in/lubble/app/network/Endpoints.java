@@ -14,6 +14,7 @@ import in.lubble.app.models.marketplace.SellerData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -62,6 +63,12 @@ public interface Endpoints {
 
     @PUT("marketplace/rating/{rating_id}/")
     Call<RatingData> updateRating(@Path("rating_id") int ratingId, @Body RequestBody params);
+
+    @POST("marketplace/seller/{seller_id}/recommend/")
+    Call<RatingData> uploadRecommendation(@Path("seller_id") int sellerId);
+
+    @DELETE("marketplace/seller/{seller_id}/recommend/")
+    Call<RatingData> deleteRecommendation(@Path("seller_id") int sellerId);
 
     class ResponseBean {
 

@@ -33,11 +33,47 @@
         android:gravity="center_horizontal"
         tools:text="@tools:sample/lorem" />
 
+    <LinearLayout
+        android:id="@+id/container_recommend_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_seller_bio"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rect_rounded_border"
+        android:gravity="center"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/iv_recommend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_favorite_border_24dp" />
+
+        <TextView
+            android:id="@+id/tv_recommend_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:gravity="center_vertical"
+            android:text="Recommend" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_recommendation_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/container_recommend_btn"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/black"
+        tools:text="143 recommendations" />
+
     <ProgressBar
         android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_seller_bio"
+        android:layout_below="@id/tv_recommendation_count"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp" />
 
@@ -45,7 +81,7 @@
         android:id="@+id/rv_items"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/progress_bar"
+        android:layout_below="@id/tv_recommendation_count"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"

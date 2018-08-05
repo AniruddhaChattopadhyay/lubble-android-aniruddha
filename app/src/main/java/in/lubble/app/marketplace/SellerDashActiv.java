@@ -52,6 +52,7 @@ public class SellerDashActiv extends AppCompatActivity {
     private RecyclerView recyclerView;
     private BigItemAdapter adapter;
     private BroadcastReceiver photoUploadReceiver;
+    private TextView recommendationCount;
 
     public static void open(Context context, int sellerId, boolean isNewSeller) {
         final Intent intent = new Intent(context, SellerDashActiv.class);
@@ -78,6 +79,7 @@ public class SellerDashActiv extends AppCompatActivity {
         sellerBioTv = findViewById(R.id.tv_seller_bio);
         final TextView editProfileTv = findViewById(R.id.tv_edit_seller_profile);
         final Button newItemBtn = findViewById(R.id.btn_new_item);
+        recommendationCount = findViewById(R.id.tv_recommendation_count);
         recyclerView = findViewById(R.id.rv_items);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new BigItemAdapter(GlideApp.with(this));
@@ -170,6 +172,7 @@ public class SellerDashActiv extends AppCompatActivity {
                     for (Item item : sellerData.getItemList()) {
                         adapter.addData(item);
                     }
+                    recommendationCount.setText(sellerData.getRecommendationCount() + " recommendations");
                 } else {
                     Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
                     Toast.makeText(SellerDashActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();

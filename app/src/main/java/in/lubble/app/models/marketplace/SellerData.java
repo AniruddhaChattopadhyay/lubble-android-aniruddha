@@ -28,6 +28,12 @@ public class SellerData {
     @SerializedName("view_count")
     @Expose
     private long viewCount;
+    @SerializedName("recommendations_count")
+    @Expose
+    private long recommendationCount = 0;
+    @SerializedName("is_recommended")
+    @Expose
+    private boolean isRecommended;
 
     public Integer getId() {
         return id;
@@ -83,5 +89,21 @@ public class SellerData {
 
     public void setViewCount(long viewCount) {
         this.viewCount = viewCount;
+    }
+
+    public long getRecommendationCount() {
+        return recommendationCount;
+    }
+
+    public void setRecommendationCount(long recommendationCount) {
+        this.recommendationCount = recommendationCount;
+    }
+
+    public boolean getIsRecommended() {
+        return isRecommended;
+    }
+
+    public void setIsRecommended(boolean recommended) {
+        isRecommended = recommended;
     }
 }

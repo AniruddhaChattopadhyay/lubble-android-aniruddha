@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,6 +44,12 @@ public class ItemListActiv extends AppCompatActivity {
     private int sellerId;
     private RecyclerView recyclerView;
     private BigItemAdapter adapter;
+    private TextView recommendationCountTv;
+    private LinearLayout recommendContainer;
+    private ImageView recommendIv;
+    private TextView recommendHintTV;
+    private boolean isRecommended;
+    private long recommendationCount = 0;
 
     public static void open(Context context, boolean isSeller, int id) {
         final Intent intent = new Intent(context, ItemListActiv.class);
@@ -67,6 +74,10 @@ public class ItemListActiv extends AppCompatActivity {
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
         recyclerView = findViewById(R.id.rv_items);
+        recommendIv = findViewById(R.id.iv_recommend);
+        recommendHintTV = findViewById(R.id.tv_recommend_hint);
+        recommendContainer = findViewById(R.id.container_recommend_btn);
+        recommendationCountTv = findViewById(R.id.tv_recommendation_count);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new BigItemAdapter(GlideApp.with(this));
         recyclerView.setAdapter(adapter);
@@ -80,11 +91,54 @@ public class ItemListActiv extends AppCompatActivity {
 
         if (!isSeller) {
             sellerBioTv.setVisibility(View.GONE);
+            recommendContainer.setVisibility(View.GONE);
+            recommendationCountTv.setVisibility(View.GONE);
             fetchCategoryItems();
         } else {
             fetchSellerItems();
+            recommendContainer.setVisibility(View.VISIBLE);
+            recommendationCountTv.setVisibility(View.VISIBLE);
         }
 
+    }
+
+    private void updateRecommendation() {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        final Call<RatingData> call;
+        if (isRecommended) {
+            call = endpoints.deleteRecommendation(sellerId);
+        } else {
+            call = endpoints.uploadRecommendation(sellerId);
+        }
+        call.enqueue(new Callback<RatingData>() {
+            @Override
+            public void onResponse(Call<RatingData> call, Response<RatingData> response) {
+                if (response.isSuccessful()) {
+                    isRecommended = !isRecommended;
+                    updateRecommendContainer();
+                    if (isRecommended) {
+                        recommendationCountTv.setText(++recommendationCount + " recommendations");
+                    } else {
+                        recommendationCountTv.setText(--recommendationCount + " recommendations");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RatingData> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void updateRecommendContainer() {
+        if (isRecommended) {
+            recommendIv.setImageResource(R.drawable.ic_favorite_24dp);
+            recommendHintTV.setText("Recommended");
+        } else {
+            recommendIv.setImageResource(R.drawable.ic_favorite_border_24dp);
+            recommendHintTV.setText("Recommend");
+        }
     }
 
     private void fetchCategoryItems() {
@@ -149,6 +203,16 @@ public class ItemListActiv extends AppCompatActivity {
                             adapter.addData(item);
                         }
                     }
+                    recommendationCount = sellerData.getRecommendationCount();
+                    recommendationCountTv.setText(recommendationCount + " recommendations");
+                    isRecommended = sellerData.getIsRecommended();
+                    updateRecommendContainer();
+                    recommendContainer.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            updateRecommendation();
+                        }
+                    });
                 } else {
                     Crashlytics.logException(new IllegalArgumentException("sellerData null for seller id: " + sellerId));
                     Toast.makeText(ItemListActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();

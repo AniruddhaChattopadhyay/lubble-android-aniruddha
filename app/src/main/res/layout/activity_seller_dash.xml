@@ -85,22 +85,32 @@
                 android:text="@string/add_new_item"
                 android:theme="@style/AccentButton" />
 
-            <ProgressBar
-                android:id="@+id/progress_bar"
+            <TextView
+                android:id="@+id/tv_recommendation_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/btn_new_item"
                 android:layout_centerHorizontal="true"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:textColor="@color/black"
+                tools:text="143 recommendations" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_recommendation_count"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="12dp" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_items"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/btn_new_item"
+                android:layout_below="@id/tv_recommendation_count"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="12dp"
                 android:nestedScrollingEnabled="false"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
