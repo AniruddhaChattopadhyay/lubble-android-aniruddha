@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+import in.lubble.app.marketplace.RatingData;
+
 public class Item {
 
     public static final int ITEM_PRODUCT = 0;
@@ -63,6 +65,10 @@ public class Item {
     @Expose
     @Nullable
     private ArrayList<ServiceData> serviceDataList;
+    @SerializedName("my_rating")
+    @Expose
+    @Nullable
+    private RatingData ratingData;
 
     @Override
     public boolean equals(Object obj) {
@@ -204,5 +210,14 @@ public class Item {
 
     public void setServiceDataList(@Nullable ArrayList<ServiceData> serviceDataList) {
         this.serviceDataList = serviceDataList;
+    }
+
+    @Nullable
+    public RatingData getRatingData() {
+        return ratingData;
+    }
+
+    public void setRatingData(@Nullable RatingData ratingData) {
+        this.ratingData = ratingData;
     }
 }

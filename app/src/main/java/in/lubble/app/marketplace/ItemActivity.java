@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,8 +17,10 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,6 +32,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -39,15 +44,20 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.PhotoData;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class ItemActivity extends AppCompatActivity {
 
@@ -66,6 +76,13 @@ public class ItemActivity extends AppCompatActivity {
     private TextView descTv;
     private TextView serviceHintTv;
     private RecyclerView serviceRv;
+    private ImageView ratingAccountIv;
+    private TextView ratingHintTv;
+    private RatingBar ratingBar;
+    private TextView myReviewTv;
+    private EditText reviewEt;
+    private TextView submitRatingTv;
+    private ProgressBar submitRatingProgressBar;
     private ImageView sellerIv;
     private TextView sellerNameTv;
     private TextView sellerBioTv;
@@ -104,6 +121,14 @@ public class ItemActivity extends AppCompatActivity {
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
         serviceRv = findViewById(R.id.rv_service_catalog);
 
+        ratingAccountIv = findViewById(R.id.iv_account);
+        ratingHintTv = findViewById(R.id.tv_rate_hint);
+        ratingBar = findViewById(R.id.ratingbar);
+        myReviewTv = findViewById(R.id.tv_my_review);
+        reviewEt = findViewById(R.id.et_review);
+        submitRatingTv = findViewById(R.id.tv_rating_submit);
+        submitRatingProgressBar = findViewById(R.id.progressBar_rating_submit);
+
         sellerIv = findViewById(R.id.iv_seller_pic);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
@@ -122,8 +147,124 @@ public class ItemActivity extends AppCompatActivity {
         }
 
         fetchItemDetails();
+        setDpForRating();
+        handleNewRatings();
 
         Analytics.triggerScreenEvent(this, this.getClass());
+    }
+
+    private void handleNewRatings() {
+        ratingBar.setMax(5);
+        ratingBar.setStepSize(1);
+        ratingBar.setNumStars(5);
+        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            @Override
+            public void onRatingChanged(final RatingBar ratingBar, float rating, boolean fromUser) {
+                submitRatingTv.setTextColor(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent));
+                submitRatingTv.setText("SUBMIT");
+                submitRatingTv.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        uploadRating(ratingBar.getRating());
+                    }
+                });
+            }
+        });
+    }
+
+    private void uploadRating(float rating) {
+
+        submitRatingTv.setVisibility(View.INVISIBLE);
+        submitRatingProgressBar.setVisibility(View.VISIBLE);
+        HashMap<String, Object> params = new HashMap<>();
+
+        params.put("rating", Math.round(rating));
+
+        final JSONObject jsonObject = new JSONObject(params);
+
+        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.uploadNewRating(itemId, body).enqueue(new Callback<RatingData>() {
+            @Override
+            public void onResponse(Call<RatingData> call, Response<RatingData> response) {
+                submitRatingTv.setVisibility(View.VISIBLE);
+                submitRatingProgressBar.setVisibility(View.GONE);
+                final RatingData ratingData = response.body();
+                if (response.isSuccessful() && ratingData != null) {
+                    showReviewLayout(ratingData.getRatingId());
+                } else {
+                    Toast.makeText(ItemActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RatingData> call, Throwable t) {
+                submitRatingTv.setVisibility(View.VISIBLE);
+                submitRatingProgressBar.setVisibility(View.GONE);
+                Toast.makeText(ItemActivity.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showReviewLayout(final int ratingId) {
+        ratingBar.setVisibility(View.GONE);
+        reviewEt.setVisibility(View.VISIBLE);
+        submitRatingTv.setText("FINISH");
+        submitRatingTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                uploadReview(ratingId);
+            }
+        });
+    }
+
+    private void uploadReview(int ratingId) {
+        submitRatingTv.setVisibility(View.INVISIBLE);
+        submitRatingProgressBar.setVisibility(View.VISIBLE);
+        HashMap<String, Object> params = new HashMap<>();
+
+        params.put("review", reviewEt.getText().toString().trim());
+
+        final JSONObject jsonObject = new JSONObject(params);
+
+        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.updateRating(ratingId, body).enqueue(new Callback<RatingData>() {
+            @Override
+            public void onResponse(Call<RatingData> call, Response<RatingData> response) {
+                submitRatingTv.setVisibility(View.VISIBLE);
+                submitRatingProgressBar.setVisibility(View.GONE);
+                final RatingData ratingData = response.body();
+                if (response.isSuccessful() && ratingData != null) {
+                    showMyRatingLayout(ratingData);
+                } else {
+                    Toast.makeText(ItemActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RatingData> call, Throwable t) {
+                submitRatingTv.setVisibility(View.VISIBLE);
+                submitRatingProgressBar.setVisibility(View.GONE);
+                Toast.makeText(ItemActivity.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void showMyRatingLayout(RatingData ratingData) {
+        ratingBar.setVisibility(View.VISIBLE);
+        submitRatingTv.setVisibility(View.GONE);
+        reviewEt.setVisibility(View.GONE);
+        submitRatingProgressBar.setVisibility(View.GONE);
+        if (!TextUtils.isEmpty(ratingData.getReview())) {
+            myReviewTv.setVisibility(View.VISIBLE);
+            myReviewTv.setText(ratingData.getReview());
+        } else {
+            myReviewTv.setVisibility(View.GONE);
+        }
+        ratingHintTv.setText("Your Rating");
+        ratingBar.setIsIndicator(true);
+        ratingBar.setRating(ratingData.getStarRating());
     }
 
     private void fetchItemDetails() {
@@ -208,6 +349,9 @@ public class ItemActivity extends AppCompatActivity {
                             itemPvtInfoLayout.setVisibility(View.GONE);
                         }
                     }
+                    if (item.getRatingData() != null) {
+                        showMyRatingLayout(item.getRatingData());
+                    }
                 } else {
                     if (response.code() == 404) {
                         final Bundle bundle = new Bundle();
@@ -264,6 +408,30 @@ public class ItemActivity extends AppCompatActivity {
             serviceHintTv.setVisibility(View.GONE);
             serviceRv.setVisibility(View.GONE);
         }
+    }
+
+    private void setDpForRating() {
+        getUserInfoRef(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                try {
+                    GlideApp.with(ItemActivity.this)
+                            .load(profileInfo == null ? "" : profileInfo.getThumbnail())
+                            .circleCrop()
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .error(R.drawable.ic_account_circle_black_no_padding)
+                            .into(ratingAccountIv);
+                } catch (IllegalArgumentException e) {
+                    Crashlytics.logException(e);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
