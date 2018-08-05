@@ -80,8 +80,13 @@
         <item name="android:textAppearance">@style/TextOnDark</item>
     </style>
 
-    <style name="RatingBar" parent="Theme.AppCompat">
+    <style name="BigRatingBar" parent="Theme.AppCompat">
         <item name="colorControlNormal">@color/dark_gold</item>
+        <item name="colorControlActivated">@color/dark_gold</item>
+    </style>
+
+    <style name="SmallRatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/dark_gray</item>
         <item name="colorControlActivated">@color/dark_gold</item>
     </style>
 

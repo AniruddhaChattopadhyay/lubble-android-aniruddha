@@ -69,6 +69,16 @@ public class Item {
     @Expose
     @Nullable
     private RatingData ratingData;
+    @SerializedName("ratings")
+    @Expose
+    @Nullable
+    private ArrayList<RatingData> userRatingsList;
+    @SerializedName("total_rating")
+    @Expose
+    private long totalRating;
+    @SerializedName("total_ratings_count")
+    @Expose
+    private long totalRatingsCount;
 
     @Override
     public boolean equals(Object obj) {
@@ -219,5 +229,30 @@ public class Item {
 
     public void setRatingData(@Nullable RatingData ratingData) {
         this.ratingData = ratingData;
+    }
+
+    @Nullable
+    public ArrayList<RatingData> getUserRatingsList() {
+        return userRatingsList;
+    }
+
+    public void setUserRatingsList(@Nullable ArrayList<RatingData> userRatingsList) {
+        this.userRatingsList = userRatingsList;
+    }
+
+    public long getTotalRating() {
+        return totalRating;
+    }
+
+    public void setTotalRating(long totalRating) {
+        this.totalRating = totalRating;
+    }
+
+    public long getTotalRatingsCount() {
+        return totalRatingsCount;
+    }
+
+    public void setTotalRatingsCount(long totalRatingsCount) {
+        this.totalRatingsCount = totalRatingsCount;
     }
 }

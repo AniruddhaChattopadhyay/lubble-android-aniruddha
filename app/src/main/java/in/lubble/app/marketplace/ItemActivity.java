@@ -83,6 +83,10 @@ public class ItemActivity extends AppCompatActivity {
     private EditText reviewEt;
     private TextView submitRatingTv;
     private ProgressBar submitRatingProgressBar;
+    private RecyclerView reviewsRecyclerView;
+    private TextView avgRatingTv;
+    private TextView ratingCountTv;
+    private RatingBar avgRatingBar;
     private ImageView sellerIv;
     private TextView sellerNameTv;
     private TextView sellerBioTv;
@@ -128,6 +132,10 @@ public class ItemActivity extends AppCompatActivity {
         reviewEt = findViewById(R.id.et_review);
         submitRatingTv = findViewById(R.id.tv_rating_submit);
         submitRatingProgressBar = findViewById(R.id.progressBar_rating_submit);
+        reviewsRecyclerView = findViewById(R.id.rv_reviews);
+        avgRatingTv = findViewById(R.id.tv_avg_rating);
+        ratingCountTv = findViewById(R.id.tv_rating_count);
+        avgRatingBar = findViewById(R.id.ratingbar_avg);
 
         sellerIv = findViewById(R.id.iv_seller_pic);
         sellerNameTv = findViewById(R.id.tv_seller_name);
@@ -136,6 +144,7 @@ public class ItemActivity extends AppCompatActivity {
         visitShopTv = findViewById(R.id.tv_visit_shop);
 
         mrpTv.setPaintFlags(mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
@@ -351,6 +360,16 @@ public class ItemActivity extends AppCompatActivity {
                     }
                     if (item.getRatingData() != null) {
                         showMyRatingLayout(item.getRatingData());
+                    }
+                    float avgRating = 0F;
+                    if (item.getTotalRatingsCount() > 0) {
+                        avgRating = item.getTotalRating() / item.getTotalRatingsCount();
+                    }
+                    avgRatingTv.setText(String.format("%.1f", avgRating));
+                    ratingCountTv.setText(item.getTotalRatingsCount() + " ratings");
+                    avgRatingBar.setRating(avgRating);
+                    if (item.getUserRatingsList() != null) {
+                        reviewsRecyclerView.setAdapter(new ReviewAdapter(GlideApp.with(ItemActivity.this), item.getUserRatingsList()));
                     }
                 } else {
                     if (response.code() == 404) {

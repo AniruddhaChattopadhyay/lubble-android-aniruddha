@@ -19,8 +19,7 @@ import in.lubble.app.models.marketplace.PhotoData;
 
 public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-
-    private static final String TAG = "MsgReceiptAdapter";
+    private static final String TAG = "BigItemAdapter";
 
     private final List<Item> itemList;
     private final GlideRequests glide;

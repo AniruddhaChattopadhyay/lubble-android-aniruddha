@@ -6,6 +6,8 @@ public class RatingData {
 
     @SerializedName("id")
     private int ratingId;
+    @SerializedName("user")
+    private String userId;
     @SerializedName("rating")
     private int starRating;
     @SerializedName("review")
@@ -33,5 +35,13 @@ public class RatingData {
 
     public void setReview(String review) {
         this.review = review;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }
