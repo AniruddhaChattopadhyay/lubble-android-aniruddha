@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
@@ -99,6 +100,12 @@ public class ItemActivity extends AppCompatActivity {
     private String dmId = null;
 
     private int itemId;
+    private TextView recommendationCountTv;
+    private LinearLayout recommendBtnContainer;
+    private ImageView recommendIv;
+    private TextView recommendHintTV;
+    private boolean isRecommended;
+    private long recommendationCount = 0;
 
     public static void open(Context context, int itemId) {
         final Intent intent = new Intent(context, ItemActivity.class);
@@ -140,6 +147,10 @@ public class ItemActivity extends AppCompatActivity {
         sellerIv = findViewById(R.id.iv_seller_pic);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
+        recommendIv = findViewById(R.id.iv_recommend);
+        recommendHintTV = findViewById(R.id.tv_recommend_hint);
+        recommendBtnContainer = findViewById(R.id.container_recommend_btn);
+        recommendationCountTv = findViewById(R.id.tv_recommendation_count);
         sellerItemsRv = findViewById(R.id.rv_items);
         visitShopTv = findViewById(R.id.tv_visit_shop);
 
@@ -357,6 +368,7 @@ public class ItemActivity extends AppCompatActivity {
                         } else {
                             itemPvtInfoLayout.setVisibility(View.GONE);
                         }
+                        handleRecommendations(sellerData);
                     }
                     if (item.getRatingData() != null) {
                         showMyRatingLayout(item.getRatingData());
@@ -392,6 +404,58 @@ public class ItemActivity extends AppCompatActivity {
                 Toast.makeText(ItemActivity.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void handleRecommendations(final SellerData sellerData) {
+        recommendationCount = sellerData.getRecommendationCount();
+        recommendationCountTv.setText(recommendationCount + " recommendations");
+        isRecommended = sellerData.getIsRecommended();
+        updateRecommendContainer();
+        recommendBtnContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateRecommendation(sellerData.getId());
+            }
+        });
+    }
+
+    private void updateRecommendation(Integer sellerId) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        final Call<RatingData> call;
+        if (isRecommended) {
+            call = endpoints.deleteRecommendation(sellerId);
+        } else {
+            call = endpoints.uploadRecommendation(sellerId);
+        }
+        call.enqueue(new Callback<RatingData>() {
+            @Override
+            public void onResponse(Call<RatingData> call, Response<RatingData> response) {
+                if (response.isSuccessful()) {
+                    isRecommended = !isRecommended;
+                    updateRecommendContainer();
+                    if (isRecommended) {
+                        recommendationCountTv.setText(++recommendationCount + " recommendations");
+                    } else {
+                        recommendationCountTv.setText(--recommendationCount + " recommendations");
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RatingData> call, Throwable t) {
+
+            }
+        });
+    }
+
+    private void updateRecommendContainer() {
+        if (isRecommended) {
+            recommendIv.setImageResource(R.drawable.ic_favorite_24dp);
+            recommendHintTV.setText("Recommended");
+        } else {
+            recommendIv.setImageResource(R.drawable.ic_favorite_border_24dp);
+            recommendHintTV.setText("Recommend");
+        }
     }
 
     private void syncDmId(SellerData sellerData) {
