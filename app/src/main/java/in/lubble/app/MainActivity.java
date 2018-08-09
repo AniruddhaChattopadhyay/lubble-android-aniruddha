@@ -313,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
                     Integer minAppVersion = child.getValue(Integer.class);
                     minAppVersion = minAppVersion == null ? 27 : minAppVersion;
 
-                    if (BuildConfig.VERSION_CODE < minAppVersion) {
+                    if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing()) {
                         // block app
                         final AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
                         alertDialog.setTitle(getString(R.string.update_dialog_title));
