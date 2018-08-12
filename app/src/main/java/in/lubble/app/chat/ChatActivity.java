@@ -32,6 +32,7 @@ public class ChatActivity extends AppCompatActivity {
     public static final String EXTRA_RECEIVER_ID = "EXTRA_RECEIVER_ID";
     public static final String EXTRA_RECEIVER_NAME = "EXTRA_RECEIVER_NAME";
     public static final String EXTRA_RECEIVER_DP_URL = "EXTRA_RECEIVER_DP_URL";
+    public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
     private ImageView toolbarIcon;
     private ImageView toolbarLockIcon;
     private TextView toolbarTv;
@@ -52,11 +53,13 @@ public class ChatActivity extends AppCompatActivity {
         context.startActivity(intent);
     }
 
-    public static void openForEmptyDm(@NonNull Context context, @Nullable String receiverId, @Nullable String receiverName, @Nullable String receiverDpUrl) {
+    public static void openForEmptyDm(@NonNull Context context, @Nullable String receiverId, @Nullable String receiverName, @Nullable String receiverDpUrl,
+                                      @Nullable String itemTitle) {
         final Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(EXTRA_RECEIVER_ID, receiverId);
         intent.putExtra(EXTRA_RECEIVER_NAME, receiverName);
         intent.putExtra(EXTRA_RECEIVER_DP_URL, receiverDpUrl);
+        intent.putExtra(EXTRA_ITEM_TITLE, itemTitle);
         context.startActivity(intent);
     }
 
@@ -100,7 +103,8 @@ public class ChatActivity extends AppCompatActivity {
             targetFrag = ChatFragment.newInstanceForEmptyDm(
                     getIntent().getStringExtra(EXTRA_RECEIVER_ID),
                     getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
-                    getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL)
+                    getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL),
+                    getIntent().getStringExtra(EXTRA_ITEM_TITLE)
             );
         } else {
             throw new RuntimeException("Invalid Args, see the valid factory methods by searching for this error string");

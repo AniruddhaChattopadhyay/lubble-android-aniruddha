@@ -103,6 +103,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private static final String KEY_RECEIVER_ID = "KEY_RECEIVER_ID";
     private static final String KEY_RECEIVER_NAME = "KEY_RECEIVER_NAME";
     private static final String KEY_RECEIVER_DP_URL = "KEY_RECEIVER_DP_URL";
+    private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
 
     @Nullable
     private GroupData groupData;
@@ -136,6 +137,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private String receiverName;
     @Nullable
     private String receiverDpUrl;
+    @Nullable
+    private String itemTitle;
     @Nullable
     private String msgIdToOpen;
     private boolean isJoining;
@@ -182,11 +185,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         return fragment;
     }
 
-    public static ChatFragment newInstanceForEmptyDm(@NonNull String receiverId, @NonNull String receiverName, @Nullable String receiverDpUrl) {
+    public static ChatFragment newInstanceForEmptyDm(@NonNull String receiverId, @NonNull String receiverName, @Nullable String receiverDpUrl, @Nullable String itemName) {
         Bundle args = new Bundle();
         args.putString(KEY_RECEIVER_ID, receiverId);
         args.putString(KEY_RECEIVER_NAME, receiverName);
         args.putString(KEY_RECEIVER_DP_URL, receiverDpUrl);
+        args.putString(KEY_ITEM_TITLE, itemName);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
@@ -202,6 +206,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         receiverId = getArguments().getString(KEY_RECEIVER_ID);
         receiverName = getArguments().getString(KEY_RECEIVER_NAME);
         receiverDpUrl = getArguments().getString(KEY_RECEIVER_DP_URL);
+        itemTitle = getArguments().getString(KEY_ITEM_TITLE);
         isJoining = getArguments().getBoolean(KEY_IS_JOINING);
 
         if (groupId != null) {
@@ -255,7 +260,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
             // new DM chat, pre-fill help text in editText
-            newMessageEt.setText("Hi! I am interested in this item, is it available?");
+            newMessageEt.setText("Hi! I am interested in (" + itemTitle + "), is it available?");
             newMessageEt.selectAll();
             newMessageEt.requestFocus();
         }

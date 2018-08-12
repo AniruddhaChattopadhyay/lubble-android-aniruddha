@@ -351,7 +351,8 @@ public class ItemActivity extends AppCompatActivity {
                                             ItemActivity.this,
                                             String.valueOf(sellerData.getId()),
                                             sellerData.getName(),
-                                            sellerData.getPhotoUrl()
+                                            sellerData.getPhotoUrl(),
+                                            item.getName()
                                     );
                                 }
                             }
