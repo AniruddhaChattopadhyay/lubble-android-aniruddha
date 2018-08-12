@@ -73,13 +73,7 @@ public class ChatActivity extends AppCompatActivity {
         TextView toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         setTitle("");
-        if (!LubbleSharedPrefs.getInstance().getIsGroupInfoOpened()) {
-            toolbarInviteHint.setVisibility(View.VISIBLE);
-            toolbarInviteHint.setHorizontallyScrolling(true);
-            toolbarInviteHint.setSelected(true);
-        } else {
-            toolbarInviteHint.setVisibility(View.GONE);
-        }
+
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
@@ -87,6 +81,13 @@ public class ChatActivity extends AppCompatActivity {
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);
         final String dmId = getIntent().getStringExtra(EXTRA_DM_ID);
 
+        if (!LubbleSharedPrefs.getInstance().getIsGroupInfoOpened() && !TextUtils.isEmpty(groupId)) {
+            toolbarInviteHint.setVisibility(View.VISIBLE);
+            toolbarInviteHint.setHorizontallyScrolling(true);
+            toolbarInviteHint.setSelected(true);
+        } else {
+            toolbarInviteHint.setVisibility(View.GONE);
+        }
         if (!TextUtils.isEmpty(groupId)) {
             targetFrag = ChatFragment.newInstanceForGroup(
                     groupId, isJoining, msgId
