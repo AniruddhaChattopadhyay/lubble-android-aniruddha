@@ -25,6 +25,7 @@ import java.util.TimerTask;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
@@ -138,6 +139,13 @@ public class MarketplaceFrag extends Fragment {
                 SearchActivity.open(getContext());
             }
         });
+
+        if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
+            LubbleSharedPrefs.getInstance().setIsMplaceOpened(true);
+            if (getActivity() != null) {
+                ((MainActivity) getActivity()).removeBadge();
+            }
+        }
 
         return view;
     }

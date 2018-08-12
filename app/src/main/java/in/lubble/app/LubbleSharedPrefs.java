@@ -23,8 +23,7 @@ public class LubbleSharedPrefs {
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
     private final String SHOW_PVT_GROUP_INFO = "SHOW_PVT_GROUP_INFO";
     private final String IS_GROUP_INFO_OPENED = "IS_GROUP_INFO_OPENED";
-    private final String IS_EVENT_TOOLTIP_SHOWN = "IS_EVENT_TOOLTIP_SHOWN";
-    private final String IS_EVENT_OPENED = "IS_EVENT_OPENED";
+    private final String IS_MPLACE_OPENED = "IS_MPLACE_OPENED";
     private final String SELLER_ID = "SELLER_ID";
     private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
 
@@ -145,20 +144,12 @@ public class LubbleSharedPrefs {
         return preferences.edit().putBoolean(IS_GROUP_INFO_OPENED, isOpened).commit();
     }
 
-    public boolean getIsEventTooltipShown() {
-        return preferences.getBoolean(IS_EVENT_TOOLTIP_SHOWN, false);
+    public boolean getIsMplaceOpened() {
+        return preferences.getBoolean(IS_MPLACE_OPENED, false);
     }
 
-    public boolean setIsEventTooltipShown(boolean isShown) {
-        return preferences.edit().putBoolean(IS_EVENT_TOOLTIP_SHOWN, isShown).commit();
-    }
-
-    public boolean getIsEventOpened() {
-        return preferences.getBoolean(IS_EVENT_OPENED, false);
-    }
-
-    public boolean setIsEventOpened(boolean isOpened) {
-        return preferences.edit().putBoolean(IS_EVENT_OPENED, isOpened).commit();
+    public boolean setIsMplaceOpened(boolean isOpened) {
+        return preferences.edit().putBoolean(IS_MPLACE_OPENED, isOpened).commit();
     }
 
     public int getSellerId() {
