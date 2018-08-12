@@ -166,11 +166,16 @@ public class ItemActivity extends AppCompatActivity {
             throw new IllegalArgumentException("No ITEM ID passed");
         }
 
-        fetchItemDetails();
         setDpForRating();
         handleNewRatings();
 
         Analytics.triggerScreenEvent(this, this.getClass());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchItemDetails();
     }
 
     private void handleNewRatings() {

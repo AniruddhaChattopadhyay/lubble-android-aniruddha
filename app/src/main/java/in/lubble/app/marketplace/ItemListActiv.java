@@ -89,6 +89,11 @@ public class ItemListActiv extends AppCompatActivity {
             throw new IllegalArgumentException("no seller ID bruh");
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (!isSeller) {
             sellerBioTv.setVisibility(View.GONE);
             recommendContainer.setVisibility(View.GONE);
@@ -99,7 +104,6 @@ public class ItemListActiv extends AppCompatActivity {
             recommendContainer.setVisibility(View.VISIBLE);
             recommendationCountTv.setVisibility(View.VISIBLE);
         }
-
     }
 
     private void updateRecommendation() {
