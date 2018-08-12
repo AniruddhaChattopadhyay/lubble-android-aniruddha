@@ -54,7 +54,7 @@ public class LubbleSharedPrefs {
      * Clear all SharedPreferences for RiderInfo
      */
     public void clearAll() {
-        preferences.edit().clear().commit();
+        preferences.edit().clear().apply();
     }
 
     //******************************************/
