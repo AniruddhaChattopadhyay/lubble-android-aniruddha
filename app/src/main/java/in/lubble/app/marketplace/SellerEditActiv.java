@@ -180,17 +180,16 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
 
         final JSONObject jsonObject = new JSONObject(params);
 
-        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
-
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final Call<SellerData> sellerDataCall;
         if (sellerId == -1) {
             // new seller
             params.put("client_timestamp", System.currentTimeMillis());
-            sellerDataCall = endpoints.uploadSellerProfile(body);
+            sellerDataCall = endpoints.uploadSellerProfile(RequestBody.create(MEDIA_TYPE, jsonObject.toString()));
         } else {
             // updating old seller
-            sellerDataCall = endpoints.updateSellerProfile(sellerId, body);
+            RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+            sellerDataCall = endpoints.updateSellerProfile(sellerId, RequestBody.create(MEDIA_TYPE, jsonObject.toString()));
         }
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
