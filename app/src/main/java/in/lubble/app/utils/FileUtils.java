@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -164,19 +162,6 @@ public class FileUtils {
             }
         });
         alertDialog.show();
-    }
-
-    public static boolean compressImage(String filePath, int quality) {
-        try {
-            Bitmap bm = BitmapFactory.decodeFile(filePath);
-            FileOutputStream outputStream = new FileOutputStream(filePath);
-            bm.compress(Bitmap.CompressFormat.JPEG, quality, outputStream);
-            outputStream.flush();
-            outputStream.close();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
 }

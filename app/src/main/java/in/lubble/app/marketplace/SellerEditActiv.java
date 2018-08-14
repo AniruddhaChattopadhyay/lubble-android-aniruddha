@@ -178,18 +178,16 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         params.put("phone", phoneNumberTil.getEditText().getText().toString().trim());
         params.put("bio", sellerAboutTil.getEditText().getText().toString().trim());
 
-        final JSONObject jsonObject = new JSONObject(params);
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final Call<SellerData> sellerDataCall;
         if (sellerId == -1) {
             // new seller
             params.put("client_timestamp", System.currentTimeMillis());
-            sellerDataCall = endpoints.uploadSellerProfile(RequestBody.create(MEDIA_TYPE, jsonObject.toString()));
+            sellerDataCall = endpoints.uploadSellerProfile(RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString()));
         } else {
             // updating old seller
-            RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
-            sellerDataCall = endpoints.updateSellerProfile(sellerId, RequestBody.create(MEDIA_TYPE, jsonObject.toString()));
+            sellerDataCall = endpoints.updateSellerProfile(sellerId, RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString()));
         }
 
         final ProgressDialog progressDialog = new ProgressDialog(this);
@@ -204,7 +202,9 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                 if (sellerData != null) {
                     if (picUri != null) {
                         // upload pic only if it has changed, might not when editing seller
-                        //todo compress img
+                        Log.d(TAG, "OG file size: " + new File(picUri.getPath()).length() / 1024);
+                        //picUri = Uri.fromFile(new File(compressImage(picUri.getPath())));
+                        Log.d(TAG, "NEW file size: " + new File(picUri.getPath()).length() / 1024);
                         startService(new Intent(SellerEditActiv.this, UploadFileService.class)
                                 .putExtra(UploadFileService.EXTRA_FILE_NAME, "seller_pic_" + System.currentTimeMillis() + ".jpg")
                                 .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
