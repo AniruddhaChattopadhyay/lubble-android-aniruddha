@@ -128,14 +128,16 @@ public class UiUtils {
     public static String compressImage(String ogFilepath) {
         Bitmap bmp = BitmapFactory.decodeFile(ogFilepath);
         File outFile = new File(ogFilepath);
-        try {
-            FileOutputStream outStream = new FileOutputStream(outFile);
-            bmp.compress(Bitmap.CompressFormat.JPEG, 75, outStream);
-            outStream.flush();
-            outStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
+        if (outFile.length() / 1024 > 50) {
+            try {
+                FileOutputStream outStream = new FileOutputStream(outFile);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 75, outStream);
+                outStream.flush();
+                outStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Crashlytics.logException(e);
+            }
         }
         return outFile.getAbsolutePath();
     }
