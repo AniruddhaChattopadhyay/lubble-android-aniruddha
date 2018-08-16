@@ -7,7 +7,7 @@ public class ServiceData {
     @SerializedName("title")
     private String title;
     @SerializedName("price")
-    private Integer price;
+    private Integer price = -1;
 
     public ServiceData(String title, Integer price) {
         this.title = title;

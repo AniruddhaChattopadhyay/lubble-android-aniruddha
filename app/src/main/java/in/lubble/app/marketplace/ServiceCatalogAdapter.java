@@ -42,7 +42,25 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         final ServiceData serviceData = serviceDataList.get(position);
 
         viewHolder.serviceNameTv.setText(serviceData.getTitle());
-        viewHolder.servicePriceTv.setText("₹ " + serviceData.getPrice());
+        final Integer price = serviceData.getPrice();
+        if (price < 0) {
+            viewHolder.servicePriceTv.setText("Ask for price");
+            viewHolder.servicePriceTv.setTextColor(ContextCompat.getColor(context, R.color.link_blue));
+            viewHolder.servicePriceTv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+        } else if (price == 0) {
+            viewHolder.servicePriceTv.setText("FREE");
+            viewHolder.servicePriceTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+            viewHolder.servicePriceTv.setOnClickListener(null);
+        } else {
+            viewHolder.servicePriceTv.setText("₹ " + price);
+            viewHolder.servicePriceTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+            viewHolder.servicePriceTv.setOnClickListener(null);
+        }
 
         if (position % 2 == 0) {
             viewHolder.view.setBackgroundColor(ContextCompat.getColor(context, R.color.very_light_gray));
