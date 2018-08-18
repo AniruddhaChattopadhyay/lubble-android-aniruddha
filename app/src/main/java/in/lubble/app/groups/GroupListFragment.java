@@ -186,7 +186,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-                /// TODO: 29/7/18
+                if (dataSnapshot.getKey() != null) {
+                    // remove from list
+                    adapter.removeGroup(dataSnapshot.getKey());
+                }
             }
 
             @Override

@@ -26,8 +26,6 @@
     <string name="all_skip">skip</string>
     <string name="all_lets_go">Let\'s Go</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="profile">Profile</string>
     <string name="clear_db">Clear DB</string>
     <string name="edit_profile">EDIT PROFILE</string>

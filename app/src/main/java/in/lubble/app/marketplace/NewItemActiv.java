@@ -59,7 +59,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static android.text.InputType.TYPE_CLASS_NUMBER;
+import static android.text.InputType.TYPE_NUMBER_FLAG_SIGNED;
 import static android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS;
 import static android.view.Gravity.RIGHT;
 import static in.lubble.app.Constants.MEDIA_TYPE;
@@ -71,6 +71,7 @@ import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UiUtils.compressImage;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 @RuntimePermissions
@@ -267,7 +268,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         deleteServiceBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //todo remove data too
+                serviceDataList.remove(serviceDataList.size() - 1);
                 if (catalogueLinearLayout.getChildCount() > 3) {
                     catalogueLinearLayout.removeViewAt(catalogueLinearLayout.getChildCount() - 2);
                 } else {
@@ -303,7 +304,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         textInputLayout1.addView(editText1);
         //editText1.setLayoutParams(lp1);
         textInputLayout1.setHint("Price");
-        textInputLayout1.getEditText().setInputType(TYPE_CLASS_NUMBER);
+        textInputLayout1.getEditText().setInputType(TYPE_NUMBER_FLAG_SIGNED);
 
         linearLayout.addView(textInputLayout);
         linearLayout.addView(textInputLayout1);
@@ -403,10 +404,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             public void onResponse(Call<Item> call, Response<Item> response) {
                 final Item item = response.body();
                 if (item != null) {
-                    // todo FileUtils.compressImage(new File(picUri.getPath()).getAbsolutePath(), 80);
-                    //todo progress bar
-                    //todo profile (test) this compression
                     if (picUri != null) {
+                        Log.d(TAG, "OG file size: " + new File(picUri.getPath()).length() / 1024);
+                        picUri = Uri.fromFile(new File(compressImage(picUri.getPath())));
+                        Log.d(TAG, "NEW file size: " + new File(picUri.getPath()).length() / 1024);
                         startService(new Intent(NewItemActiv.this, UploadFileService.class)
                                 .putExtra(UploadFileService.EXTRA_FILE_NAME, "item_pic_" + System.currentTimeMillis() + ".jpg")
                                 .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
