@@ -43,7 +43,18 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         final Item item = itemList.get(position);
 
         viewHolder.nameTv.setText(item.getName());
-        viewHolder.priceTv.setText("₹ " + item.getSellingPrice());
+        if (item.getType() == Item.ITEM_SERVICE) {
+            final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
+            if (startingPrice < 0) {
+                viewHolder.priceTv.setText("Request Price");
+            } else if (startingPrice == 0) {
+                viewHolder.priceTv.setText("Free onwards");
+            } else {
+                viewHolder.priceTv.setText("₹" + startingPrice + " onwards");
+            }
+        } else {
+            viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+        }
 
         final ArrayList<PhotoData> photoList = item.getPhotos();
         if (photoList.size() > 0) {

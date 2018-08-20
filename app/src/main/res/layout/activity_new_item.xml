@@ -201,6 +201,7 @@
                 android:orientation="vertical" />
 
             <ImageView
+                android:id="@+id/iv_mrp"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignBottom="@id/til_item_mrp"
@@ -226,7 +227,7 @@
             </android.support.design.widget.TextInputLayout>
 
             <ImageView
-                android:id="@+id/iv_event_date"
+                android:id="@+id/iv_selling_price"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignBottom="@id/til_item_sellingprice"
@@ -241,7 +242,7 @@
                 android:layout_below="@id/til_item_mrp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
-                android:layout_toRightOf="@id/iv_event_date"
+                android:layout_toRightOf="@id/iv_selling_price"
                 android:hint="@string/selling_price">
 
                 <EditText

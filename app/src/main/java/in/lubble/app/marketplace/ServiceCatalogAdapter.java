@@ -4,15 +4,21 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.R;
+import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.marketplace.ServiceData;
 
 public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -21,9 +27,12 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     private final List<ServiceData> serviceDataList;
     private Context context;
+    private SellerData sellerData;
+    private String dmId;
 
-    public ServiceCatalogAdapter(Context context) {
+    public ServiceCatalogAdapter(Context context, @NonNull SellerData sellerData) {
         this.context = context;
+        this.sellerData = sellerData;
         serviceDataList = new ArrayList<>();
     }
 
@@ -49,7 +58,23 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             viewHolder.servicePriceTv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    if (!TextUtils.isEmpty(dmId)) {
+                        ChatActivity.openForDm(context, dmId, null);
+                    } else {
+                        if (sellerData != null) {
+                            ChatActivity.openForEmptyDm(
+                                    context,
+                                    String.valueOf(sellerData.getId()),
+                                    sellerData.getName(),
+                                    sellerData.getPhotoUrl(),
+                                    serviceData.getTitle()
+                            );
+                        } else {
+                            final IllegalArgumentException throwable = new IllegalArgumentException("Service Data is NULL when trying to request service price");
+                            Log.e(TAG, "onClick: ", throwable);
+                            Crashlytics.logException(throwable);
+                        }
+                    }
                 }
             });
         } else if (price == 0) {
@@ -78,6 +103,10 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     public void addData(ServiceData serviceData) {
         serviceDataList.add(serviceData);
         notifyDataSetChanged();
+    }
+
+    public void updateDmId(String dmId) {
+        this.dmId = dmId;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

@@ -260,7 +260,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
         if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
             // new DM chat, pre-fill help text in editText
-            newMessageEt.setText("Hi! I am interested in (" + itemTitle + "), is it available?");
+            newMessageEt.setText("Hi! I am interested in " + itemTitle);
             newMessageEt.selectAll();
             newMessageEt.requestFocus();
         }

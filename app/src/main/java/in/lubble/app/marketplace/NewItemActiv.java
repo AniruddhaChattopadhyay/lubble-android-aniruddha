@@ -94,6 +94,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private TextInputLayout descTil;
     private LinearLayout catalogueLinearLayout;
     private TextInputLayout mrpTil;
+    private ImageView mrpIv;
+    private ImageView sellingPriceIv;
     private TextInputLayout sellingPriceTil;
     private Button submitBtn;
     private String currentPhotoPath;
@@ -125,6 +127,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         descTil = findViewById(R.id.til_item_desc);
         catalogueLinearLayout = findViewById(R.id.linearlayout_catalogue);
         mrpTil = findViewById(R.id.til_item_mrp);
+        mrpIv = findViewById(R.id.iv_mrp);
+        sellingPriceIv = findViewById(R.id.iv_selling_price);
         sellingPriceTil = findViewById(R.id.til_item_sellingprice);
         submitBtn = findViewById(R.id.btn_submit);
 
@@ -146,6 +150,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                updateServiceDatas();
                 if (isValidationPassed()) {
                     uploadNewItem();
                 }
@@ -164,9 +169,17 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 if (checkedId == R.id.rb_product) {
                     selectedItemType = ITEM_PRODUCT;
                     catalogueLinearLayout.setVisibility(View.GONE);
+                    mrpTil.setVisibility(View.VISIBLE);
+                    mrpIv.setVisibility(View.VISIBLE);
+                    sellingPriceTil.setVisibility(View.VISIBLE);
+                    sellingPriceIv.setVisibility(View.VISIBLE);
                 } else {
                     selectedItemType = ITEM_SERVICE;
                     showCatalogue();
+                    mrpTil.setVisibility(View.GONE);
+                    mrpIv.setVisibility(View.GONE);
+                    sellingPriceTil.setVisibility(View.GONE);
+                    sellingPriceIv.setVisibility(View.GONE);
                 }
             }
         });
@@ -311,7 +324,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         catalogueLinearLayout.addView(linearLayout, pos);
     }
 
-    private ArrayList<ServiceData> getAllServiceDatas() {
+    private ArrayList<ServiceData> updateServiceDatas() {
         serviceDataList = new ArrayList<>();
         int serviceCount = catalogueLinearLayout.getChildCount() - 1;
         for (int i = 1; i < serviceCount; i++) {
@@ -371,14 +384,19 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         params.put("name", nameTil.getEditText().getText().toString());
         params.put("description", descTil.getEditText().getText().toString());
         params.put("category_id", categoryId);
-        params.put("mrp", mrpTil.getEditText().getText().toString());
-        params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
+        if (selectedItemType == ITEM_PRODUCT) {
+            params.put("mrp", mrpTil.getEditText().getText().toString());
+            params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
+        } else {
+            int minValueService = getMinValueService();
+            params.put("starting_price", String.valueOf(minValueService));
+        }
         if (itemId == -1) {
             params.put("client_timestamp", System.currentTimeMillis());
         }
         if (selectedItemType == ITEM_SERVICE) {
             JSONArray serviceCatalog = new JSONArray();
-            for (ServiceData serviceData : getAllServiceDatas()) {
+            for (ServiceData serviceData : serviceDataList) {
                 final JSONObject jsonObject = new JSONObject();
                 try {
                     jsonObject.put("title", serviceData.getTitle());
@@ -428,6 +446,16 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    private int getMinValueService() {
+        int minValue = Integer.MAX_VALUE;
+        for (ServiceData serviceData : serviceDataList) {
+            if (serviceData.getPrice() < minValue) {
+                minValue = serviceData.getPrice();
+            }
+        }
+        return minValue;
+    }
+
     private boolean isValidationPassed() {
         if (!isValidString(nameTil.getEditText().getText().toString().trim())) {
             nameTil.setError(getString(R.string.name_error));
@@ -443,14 +471,14 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         } else {
             descTil.setError(null);
         }
-        if (!isValidString(mrpTil.getEditText().getText().toString())) {
+        if (!isValidString(mrpTil.getEditText().getText().toString()) && selectedItemType == ITEM_PRODUCT) {
             mrpTil.setError(getString(R.string.mrp_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             mrpTil.setError(null);
         }
-        if (!isValidString(sellingPriceTil.getEditText().getText().toString())) {
+        if (!isValidString(sellingPriceTil.getEditText().getText().toString()) && selectedItemType == ITEM_PRODUCT) {
             sellingPriceTil.setError(getString(R.string.selling_price_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;

@@ -106,6 +106,7 @@ public class ItemActivity extends AppCompatActivity {
     private TextView recommendHintTV;
     private boolean isRecommended;
     private long recommendationCount = 0;
+    private ServiceCatalogAdapter serviceCatalogAdapter;
 
     public static void open(Context context, int itemId) {
         final Intent intent = new Intent(context, ItemActivity.class);
@@ -302,12 +303,24 @@ public class ItemActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 if (item != null) {
                     titleTv.setText(item.getName());
-                    priceTv.setText("₹ " + item.getSellingPrice());
+                    if (item.getType() == Item.ITEM_SERVICE) {
+                        final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
+                        if (startingPrice < 0) {
+                            priceTv.setVisibility(View.GONE);
+                            mrpTv.setVisibility(View.GONE);
+                        } else if (startingPrice == 0) {
+                            priceTv.setText("Free onwards");
+                        } else {
+                            priceTv.setText("₹" + startingPrice + " onwards");
+                        }
+                    } else {
+                        priceTv.setText("₹" + item.getSellingPrice());
+                    }
                     mrpTv.setText(String.valueOf(item.getMrp()));
                     descTv.setText(item.getDescription());
 
                     if (item.getType() == Item.ITEM_SERVICE) {
-                        toggleServiceCatalog(true, item.getServiceDataList());
+                        toggleServiceCatalog(true, item);
                     } else {
                         toggleServiceCatalog(false, null);
                     }
@@ -344,6 +357,7 @@ public class ItemActivity extends AppCompatActivity {
                         chatBtn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+
                                 if (!TextUtils.isEmpty(dmId)) {
                                     ChatActivity.openForDm(ItemActivity.this, dmId, null);
                                 } else {
@@ -473,6 +487,7 @@ public class ItemActivity extends AppCompatActivity {
                 final HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
                 if (map != null) {
                     dmId = (String) map.keySet().toArray()[0];
+                    serviceCatalogAdapter.updateDmId(dmId);
                 }
             }
 
@@ -482,16 +497,17 @@ public class ItemActivity extends AppCompatActivity {
         });
     }
 
-    private void toggleServiceCatalog(boolean isShown, @Nullable ArrayList<ServiceData> serviceDataList) {
-        if (isShown && serviceDataList != null && !serviceDataList.isEmpty()) {
+    private void toggleServiceCatalog(boolean isShown, @Nullable Item item) {
+        if (isShown && item != null && item.getServiceDataList() != null && !item.getServiceDataList().isEmpty()) {
+            ArrayList<ServiceData> serviceDataList = item.getServiceDataList();
             serviceHintTv.setVisibility(View.VISIBLE);
             serviceRv.setVisibility(View.VISIBLE);
             serviceRv.setNestedScrollingEnabled(false);
             serviceRv.setLayoutManager(new LinearLayoutManager(this));
-            final ServiceCatalogAdapter adapter = new ServiceCatalogAdapter(this);
-            serviceRv.setAdapter(adapter);
+            serviceCatalogAdapter = new ServiceCatalogAdapter(this, item.getSellerData());
+            serviceRv.setAdapter(serviceCatalogAdapter);
             for (ServiceData serviceData : serviceDataList) {
-                adapter.addData(serviceData);
+                serviceCatalogAdapter.addData(serviceData);
             }
         } else {
             serviceHintTv.setVisibility(View.GONE);
