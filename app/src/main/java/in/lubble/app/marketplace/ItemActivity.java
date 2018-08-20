@@ -487,7 +487,9 @@ public class ItemActivity extends AppCompatActivity {
                 final HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
                 if (map != null) {
                     dmId = (String) map.keySet().toArray()[0];
-                    serviceCatalogAdapter.updateDmId(dmId);
+                    if (serviceCatalogAdapter != null) {
+                        serviceCatalogAdapter.updateDmId(dmId);
+                    }
                 }
             }
 
