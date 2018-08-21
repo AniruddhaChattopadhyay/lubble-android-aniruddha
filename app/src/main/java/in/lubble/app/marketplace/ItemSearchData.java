@@ -1,8 +1,11 @@
 package in.lubble.app.marketplace;
 
-public class ItemSearchData {
-    private int id;
+import com.google.gson.annotations.SerializedName;
 
+public class ItemSearchData {
+    @SerializedName("id")
+    private int id;
+    @SerializedName("name")
     private String name;
 
     public int getId() {
