@@ -19,8 +19,11 @@
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_below="@id/toolbar"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
             android:background="@color/very_light_gray"
-            android:scaleType="centerCrop" />
+            android:scaleType="fitCenter"
+            tools:src="@tools:sample/avatars" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -59,7 +62,7 @@
                 android:layout_alignBaseline="@id/tv_price"
                 android:layout_marginLeft="4dp"
                 android:layout_toRightOf="@id/tv_price"
-                android:textSize="12sp"
+                android:textColor="@color/red"
                 tools:text="899" />
 
             <RelativeLayout
@@ -123,20 +126,38 @@
                 android:text="@string/chat_with_seller"
                 android:theme="@style/AccentButton" />
 
-            <TextView
-                android:id="@+id/tv_item_desc"
+            <LinearLayout
+                android:id="@+id/container_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/btn_chat"
-                android:layout_marginTop="4dp"
-                android:maxLines="4"
-                tools:text="@tools:sample/lorem" />
+                android:layout_marginTop="8dp"
+                android:background="@drawable/rect_rounded_border"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <TextView
+                    android:id="@+id/tv_desc_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Description"
+                    android:textColor="@color/black"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_item_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    tools:text="@tools:sample/lorem/random" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tv_service_catalog_hint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_item_desc"
+                android:layout_below="@id/container_desc"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/half_rounded_rectangle_hollow_top"
                 android:padding="8dp"

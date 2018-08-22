@@ -17,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -187,7 +188,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (isValidString(chatData.getMessage())) {
             sentChatViewHolder.messageTv.setVisibility(View.VISIBLE);
-            sentChatViewHolder.messageTv.setText(chatData.getMessage());
+            sentChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage()));
         } else {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
         }
@@ -288,7 +289,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (isValidString(chatData.getMessage())) {
             recvdChatViewHolder.messageTv.setVisibility(View.VISIBLE);
-            recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+            recvdChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage()));
         } else {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }

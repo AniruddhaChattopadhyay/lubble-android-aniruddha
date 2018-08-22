@@ -3,6 +3,7 @@ package in.lubble.app.marketplace;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,6 +13,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -26,6 +28,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -317,7 +323,7 @@ public class ItemActivity extends AppCompatActivity {
                         priceTv.setText("₹" + item.getSellingPrice());
                     }
                     mrpTv.setText(String.valueOf(item.getMrp()));
-                    descTv.setText(item.getDescription());
+                    descTv.setText(Html.fromHtml(item.getDescription()));
 
                     if (item.getType() == Item.ITEM_SERVICE) {
                         toggleServiceCatalog(true, item);
@@ -329,6 +335,19 @@ public class ItemActivity extends AppCompatActivity {
                     if (photoList.size() > 0) {
                         GlideApp.with(ItemActivity.this)
                                 .load(photoList.get(0).getUrl())
+                                .listener(new RequestListener<Drawable>() {
+                                    @Override
+                                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                        imageIv.setBackgroundColor(ContextCompat.getColor(ItemActivity.this, R.color.very_light_gray));
+                                        return false;
+                                    }
+
+                                    @Override
+                                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                        imageIv.setBackgroundColor(ContextCompat.getColor(ItemActivity.this, R.color.white));
+                                        return false;
+                                    }
+                                })
                                 .thumbnail(0.1f)
                                 .into(imageIv);
                     }
@@ -409,6 +428,7 @@ public class ItemActivity extends AppCompatActivity {
                         bundle.putInt("item_id", itemId);
                         Analytics.triggerEvent(AnalyticsEvents.ITEM_NOT_FOUND, bundle, ItemActivity.this);
                         Toast.makeText(ItemActivity.this, "Item Not Found", Toast.LENGTH_LONG).show();
+                        itemProgressBar.setVisibility(View.GONE);
                     } else {
                         Crashlytics.logException(new IllegalArgumentException("Item null for item ID: " + itemId));
                         Toast.makeText(ItemActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();

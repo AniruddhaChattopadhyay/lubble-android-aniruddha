@@ -8,18 +8,22 @@
     <ImageView
         android:id="@+id/iv_item"
         android:layout_width="100dp"
-        android:scaleType="centerCrop"
         android:layout_height="100dp"
-        android:background="@color/very_light_gray" />
+        android:background="@color/very_light_gray"
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/tv_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/iv_item"
+        android:layout_alignRight="@id/iv_item"
         android:layout_below="@id/iv_item"
         android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="2"
         android:textColor="@color/black"
-        tools:text="Agra se Joote" />
+        tools:text="Agra se Joote kahin bech do nahi to kya hoga" />
 
     <TextView
         android:id="@+id/tv_price"
