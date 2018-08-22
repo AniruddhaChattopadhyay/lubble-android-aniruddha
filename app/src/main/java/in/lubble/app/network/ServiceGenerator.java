@@ -4,6 +4,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
 
+import in.lubble.app.BuildConfig;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -11,7 +12,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ServiceGenerator {
 
-    private static final String BASE_URL = "https://api.lubble.in/";
+    private static final String BASE_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://devapi.lubble.in/" : "https://api.lubble.in/";
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
