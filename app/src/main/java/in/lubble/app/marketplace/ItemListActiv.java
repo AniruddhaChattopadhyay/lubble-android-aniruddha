@@ -63,8 +63,6 @@ public class ItemListActiv extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
 
-        Analytics.triggerScreenEvent(this, this.getClass());
-
         Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -89,6 +87,9 @@ public class ItemListActiv extends AppCompatActivity {
             throw new IllegalArgumentException("no seller ID bruh");
         }
 
+        final Bundle attrs = new Bundle();
+        attrs.putBoolean("is_seller", isSeller);
+        Analytics.triggerScreenEvent(this, this.getClass());
     }
 
     @Override

@@ -27,6 +27,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
@@ -147,6 +148,7 @@ public class MarketplaceFrag extends Fragment {
             }
         }
 
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
         return view;
     }
 
