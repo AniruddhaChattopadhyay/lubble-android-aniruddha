@@ -84,7 +84,7 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     break;
                 case Item.ITEM_REJECTED:
                     viewHolder.approvalStatusTv.setVisibility(View.VISIBLE);
-                    viewHolder.approvalStatusTv.setText("Rejected");
+                    viewHolder.approvalStatusTv.setText("Declined");
                     viewHolder.approvalStatusTv.setBackgroundColor(ContextCompat.getColor(viewHolder.view.getContext(), R.color.red));
                     break;
             }
@@ -146,7 +146,7 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         @Override
         public void onClick(View v) {
-            ItemActivity.open(v.getContext(), itemList.get(getAdapterPosition()).getId());
+            v.getContext().startActivity(ItemActivity.getIntent(v.getContext(), itemList.get(getAdapterPosition()).getId()));
         }
     }
 

@@ -19,11 +19,14 @@ import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
+import in.lubble.app.marketplace.ItemActivity;
+import in.lubble.app.marketplace.SellerDashActiv;
 import in.lubble.app.models.AppNotifData;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 
@@ -102,6 +105,41 @@ public class AppNotifUtils {
 
     }
 
+    public static void showNormalAppNotif(Context context, AppNotifData appNotifData) {
+        Log.d(TAG, "showNormalAppNotif: data ");
+        String notifChannel = Constants.APP_NOTIF_CHANNEL;
+
+        final TaskStackBuilder stackBuilder = getPendingIntent(context, appNotifData);
+        final int notifId = Integer.parseInt(appNotifData.getNotifKey());
+
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, notifChannel)
+                .setContentTitle(appNotifData.getTitle())
+                .setSmallIcon(R.drawable.ic_lubble_notif)
+                .setAutoCancel(true)
+                .setChannelId(notifChannel)
+                .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
+                .setColor(ContextCompat.getColor(context, R.color.colorAccent))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(appNotifData.getMsg()))
+                .setContentText(appNotifData.getMsg());
+
+        try {
+            if (StringUtils.isValidString(appNotifData.getIconUrl())) {
+                final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getIconUrl()).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
+                builder.setLargeIcon(bitmap);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            NotificationManager notificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            notificationManager.notify(notifId, builder.build());
+        }
+
+    }
+
     private static TaskStackBuilder getPendingIntent(Context context, AppNotifData appNotifData) {
 
         if (appNotifData.getType().equalsIgnoreCase("groupInvitation")) {
@@ -129,12 +167,19 @@ public class AppNotifUtils {
             intent.putExtra(KEY_EVENT_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
-        }  else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
+        } else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
             Intent intent = new Intent(context, ChatActivity.class);
             intent.putExtra(EXTRA_GROUP_ID, appNotifData.getGroupId());
             intent.putExtra(EXTRA_MSG_ID, appNotifData.getMessageId());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
+        } else if (appNotifData.getType().equalsIgnoreCase("mplace_approval")) {
+            Intent intent = ItemActivity.getIntent(context, Integer.parseInt(appNotifData.getNotifKey()));
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            Intent sellerDashIntent = SellerDashActiv.getIntent(context, LubbleSharedPrefs.getInstance().getSellerId(), false);
+            stackBuilder.addNextIntent(sellerDashIntent);
+            stackBuilder.addNextIntent(intent);
+            return stackBuilder;
         } else {
             Intent intent = new Intent(context, MainActivity.class);
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);

@@ -85,6 +85,7 @@ public class ItemActivity extends AppCompatActivity {
     private TextView descTv;
     private TextView serviceHintTv;
     private RecyclerView serviceRv;
+    private RelativeLayout userReviewContainer;
     private ImageView ratingAccountIv;
     private TextView ratingHintTv;
     private RatingBar ratingBar;
@@ -116,10 +117,10 @@ public class ItemActivity extends AppCompatActivity {
     private long recommendationCount = 0;
     private ServiceCatalogAdapter serviceCatalogAdapter;
 
-    public static void open(Context context, int itemId) {
+    public static Intent getIntent(Context context, int itemId) {
         final Intent intent = new Intent(context, ItemActivity.class);
         intent.putExtra(PARAM_ITEM_ID, itemId);
-        context.startActivity(intent);
+        return intent;
     }
 
     @Override
@@ -143,6 +144,7 @@ public class ItemActivity extends AppCompatActivity {
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
         serviceRv = findViewById(R.id.rv_service_catalog);
 
+        userReviewContainer = findViewById(R.id.container_user_review);
         ratingAccountIv = findViewById(R.id.iv_account);
         ratingHintTv = findViewById(R.id.tv_rate_hint);
         ratingBar = findViewById(R.id.ratingbar);
@@ -409,8 +411,12 @@ public class ItemActivity extends AppCompatActivity {
                                 viewCountTv.setVisibility(View.GONE);
                             }
                             showApprovalStatus(item.getApprovalStatus(), item.getRejectionReason());
+                            userReviewContainer.setVisibility(View.GONE);
+                            ratingAccountIv.setVisibility(View.GONE);
                         } else {
                             itemPvtInfoLayout.setVisibility(View.GONE);
+                            userReviewContainer.setVisibility(View.VISIBLE);
+                            ratingAccountIv.setVisibility(View.VISIBLE);
                         }
                         handleRecommendations(sellerData);
                     }

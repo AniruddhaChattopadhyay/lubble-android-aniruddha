@@ -89,7 +89,7 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         @Override
         public void onClick(View v) {
-            ItemActivity.open(v.getContext(), itemList.get(getAdapterPosition()).getId());
+            v.getContext().startActivity(ItemActivity.getIntent(v.getContext(), itemList.get(getAdapterPosition()).getId()));
         }
     }
 

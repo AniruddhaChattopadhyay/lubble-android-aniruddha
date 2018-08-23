@@ -76,7 +76,7 @@ public class SlidePageFrag extends Fragment {
                 if (clickId != -1 && clickType != -1) {
                     switch (clickType) {
                         case ITEM:
-                            ItemActivity.open(getContext(), clickId);
+                            getContext().startActivity(ItemActivity.getIntent(getContext(), clickId));
                             break;
                         case CATEGORY:
                             ItemListActiv.open(getContext(), false, clickId);

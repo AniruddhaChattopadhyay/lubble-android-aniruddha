@@ -73,7 +73,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
         @Override
         public void onClick(View v) {
             final ItemSearchData itemSearchData = itemSearchDataList.get(getAdapterPosition());
-            ItemActivity.open(context, itemSearchData.getId());
+            context.startActivity(ItemActivity.getIntent(context, itemSearchData.getId()));
         }
     }
 

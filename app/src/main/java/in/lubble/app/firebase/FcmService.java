@@ -86,6 +86,12 @@ public class FcmService extends FirebaseMessagingService {
             } else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
                 // mplace image uploaded, send broadcast
                 sendMarketplaceImgBroadcast(dataMap);
+            }  else if (StringUtils.isValidString(type) && "mplace_approval".equalsIgnoreCase(type)) {
+                // mplace item approval status changed
+                Gson gson = new Gson();
+                JsonElement jsonElement = gson.toJsonTree(dataMap);
+                AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
+                AppNotifUtils.showNormalAppNotif(this, appNotifData);
             } else {
                 Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
             }

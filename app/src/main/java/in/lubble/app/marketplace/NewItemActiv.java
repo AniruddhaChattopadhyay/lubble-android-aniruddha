@@ -384,6 +384,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         params.put("name", nameTil.getEditText().getText().toString());
         params.put("description", descTil.getEditText().getText().toString());
         params.put("category_id", categoryId);
+        params.put("approval_status", Item.ITEM_PENDING_APPROVAL);
         if (selectedItemType == ITEM_PRODUCT) {
             params.put("mrp", mrpTil.getEditText().getText().toString());
             params.put("selling_price", sellingPriceTil.getEditText().getText().toString());

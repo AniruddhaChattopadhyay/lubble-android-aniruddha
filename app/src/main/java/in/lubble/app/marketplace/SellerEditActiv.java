@@ -214,7 +214,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                                 .setAction(UploadFileService.ACTION_UPLOAD));
                     }
                     LubbleSharedPrefs.getInstance().setSellerId(sellerData.getId());
-                    SellerDashActiv.open(SellerEditActiv.this, sellerData.getId(), true);
+                    startActivity(SellerDashActiv.getIntent(SellerEditActiv.this, sellerData.getId(), true));
                     finish();
                 }
             }

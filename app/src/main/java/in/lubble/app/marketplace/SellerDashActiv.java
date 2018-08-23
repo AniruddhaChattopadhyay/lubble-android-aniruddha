@@ -54,11 +54,11 @@ public class SellerDashActiv extends AppCompatActivity {
     private BroadcastReceiver photoUploadReceiver;
     private TextView recommendationCount;
 
-    public static void open(Context context, int sellerId, boolean isNewSeller) {
+    public static Intent getIntent(Context context, int sellerId, boolean isNewSeller) {
         final Intent intent = new Intent(context, SellerDashActiv.class);
         intent.putExtra(PARAM_SELLER_ID, sellerId);
         intent.putExtra(PARAM_IS_NEW_SELLER, isNewSeller);
-        context.startActivity(intent);
+        return intent;
     }
 
     @Override

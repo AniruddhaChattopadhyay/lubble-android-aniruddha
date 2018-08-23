@@ -129,7 +129,7 @@ public class MarketplaceFrag extends Fragment {
                     SellerEditActiv.open(getContext());
                 } else {
                     // seller ID found, open dashboard
-                    SellerDashActiv.open(getContext(), sellerId, false);
+                    getContext().startActivity(SellerDashActiv.getIntent(getContext(), sellerId, false));
                 }
             }
         });
