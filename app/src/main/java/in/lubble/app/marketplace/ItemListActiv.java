@@ -77,7 +77,7 @@ public class ItemListActiv extends AppCompatActivity {
         recommendContainer = findViewById(R.id.container_recommend_btn);
         recommendationCountTv = findViewById(R.id.tv_recommendation_count);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter = new BigItemAdapter(GlideApp.with(this));
+        adapter = new BigItemAdapter(GlideApp.with(this), false);
         recyclerView.setAdapter(adapter);
 
         isSeller = getIntent().getBooleanExtra(PARAM_IS_SELLER, false);

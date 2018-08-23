@@ -115,7 +115,7 @@ public class MarketplaceFrag extends Fragment {
         final SmallItemAdapter cat2Adapter = new SmallItemAdapter(GlideApp.with(getContext()));
         category2Rv.setAdapter(cat2Adapter);
 
-        final BigItemAdapter allItemsAdapter = new BigItemAdapter(GlideApp.with(getContext()));
+        final BigItemAdapter allItemsAdapter = new BigItemAdapter(GlideApp.with(getContext()), false);
         allItemsRv.setAdapter(allItemsAdapter);
 
         fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter, catAdapter);

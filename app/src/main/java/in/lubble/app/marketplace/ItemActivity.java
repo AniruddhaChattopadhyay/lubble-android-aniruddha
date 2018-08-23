@@ -361,7 +361,7 @@ public class ItemActivity extends AppCompatActivity {
                         GlideApp.with(ItemActivity.this).load(sellerData.getPhotoUrl()).circleCrop().into(sellerIv);
 
                         sellerItemsRv.setLayoutManager(new GridLayoutManager(ItemActivity.this, 2));
-                        final BigItemAdapter itemAdapter = new BigItemAdapter(GlideApp.with(ItemActivity.this));
+                        final BigItemAdapter itemAdapter = new BigItemAdapter(GlideApp.with(ItemActivity.this), false);
                         sellerItemsRv.setAdapter(itemAdapter);
                         for (Item sellerItem : sellerData.getItemList()) {
                             itemAdapter.addData(sellerItem);

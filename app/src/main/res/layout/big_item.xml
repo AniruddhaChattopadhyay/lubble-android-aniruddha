@@ -12,6 +12,16 @@
         android:background="@color/very_light_gray"
         android:scaleType="centerCrop" />
 
+    <TextView
+        android:id="@+id/tv_approval_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:padding="4dp"
+        android:text="Pending Approval" />
+
     <ProgressBar
         android:id="@+id/progress_bar_item_pic"
         android:layout_width="wrap_content"

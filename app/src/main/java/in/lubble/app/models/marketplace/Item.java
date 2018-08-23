@@ -15,6 +15,10 @@ public class Item {
     public static final int ITEM_PRODUCT = 0;
     public static final int ITEM_SERVICE = 1;
 
+    public static final int ITEM_PENDING_APPROVAL = 0;
+    public static final int ITEM_APPROVED = 1;
+    public static final int ITEM_REJECTED = 2;
+
     @SerializedName("id")
     @Expose
     private Integer id;
@@ -79,6 +83,9 @@ public class Item {
     @SerializedName("total_ratings_count")
     @Expose
     private long totalRatingsCount;
+    @SerializedName("approval_status")
+    @Expose
+    private int approvalStatus = ITEM_PENDING_APPROVAL;
 
     @Override
     public boolean equals(Object obj) {
@@ -254,5 +261,13 @@ public class Item {
 
     public void setTotalRatingsCount(long totalRatingsCount) {
         this.totalRatingsCount = totalRatingsCount;
+    }
+
+    public int getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(int approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
 }

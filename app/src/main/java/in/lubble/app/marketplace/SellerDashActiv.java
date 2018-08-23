@@ -82,7 +82,7 @@ public class SellerDashActiv extends AppCompatActivity {
         recommendationCount = findViewById(R.id.tv_recommendation_count);
         recyclerView = findViewById(R.id.rv_items);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter = new BigItemAdapter(GlideApp.with(this));
+        adapter = new BigItemAdapter(GlideApp.with(this), true);
         recyclerView.setAdapter(adapter);
 
         sellerId = getIntent().getIntExtra(PARAM_SELLER_ID, -1);
