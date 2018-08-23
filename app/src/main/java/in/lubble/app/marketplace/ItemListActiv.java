@@ -166,6 +166,7 @@ public class ItemListActiv extends AppCompatActivity {
                     setTitle(categoryData.getName());
 
                     if (categoryData.getItems() != null) {
+                        adapter.clear();
                         for (Item item : categoryData.getItems()) {
                             adapter.addData(item);
                         }
@@ -204,6 +205,7 @@ public class ItemListActiv extends AppCompatActivity {
                     setTitle(sellerData.getName());
 
                     if (sellerData.getItemList() != null) {
+                        adapter.clear();
                         for (Item item : sellerData.getItemList()) {
                             adapter.addData(item);
                         }

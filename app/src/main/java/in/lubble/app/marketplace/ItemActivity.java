@@ -80,6 +80,8 @@ public class ItemActivity extends AppCompatActivity {
     private RelativeLayout itemPvtInfoLayout;
     private TextView editItemTv;
     private TextView viewCountTv;
+    private ImageView approvalIconIv;
+    private TextView approvalStatusTv;
     private TextView descTv;
     private TextView serviceHintTv;
     private RecyclerView serviceRv;
@@ -134,6 +136,8 @@ public class ItemActivity extends AppCompatActivity {
         itemPvtInfoLayout = findViewById(R.id.relativelayout_item_pvt_info);
         editItemTv = findViewById(R.id.tv_edit_item);
         viewCountTv = findViewById(R.id.tv_view_count);
+        approvalIconIv = findViewById(R.id.iv_approval_icon);
+        approvalStatusTv = findViewById(R.id.tv_approval_status);
         chatBtn = findViewById(R.id.btn_chat);
         descTv = findViewById(R.id.tv_item_desc);
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
@@ -400,10 +404,11 @@ public class ItemActivity extends AppCompatActivity {
                             });
                             if (LubbleSharedPrefs.getInstance().getIsViewCountEnabled()) {
                                 viewCountTv.setVisibility(View.VISIBLE);
-                                viewCountTv.setText("View Count: " + sellerData.getViewCount());
+                                viewCountTv.setText("Views: " + sellerData.getViewCount());
                             } else {
                                 viewCountTv.setVisibility(View.GONE);
                             }
+                            showApprovalStatus(item.getApprovalStatus(), item.getRejectionReason());
                         } else {
                             itemPvtInfoLayout.setVisibility(View.GONE);
                         }
@@ -444,6 +449,26 @@ public class ItemActivity extends AppCompatActivity {
                 Toast.makeText(ItemActivity.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showApprovalStatus(int approvalStatus, @Nullable String reason) {
+        switch (approvalStatus) {
+            case Item.ITEM_PENDING_APPROVAL:
+                approvalIconIv.setImageResource(R.drawable.ic_access_time_black_24dp);
+                approvalStatusTv.setText("Pending Approval");
+                approvalStatusTv.setTextColor(ContextCompat.getColor(this, R.color.black));
+                break;
+            case Item.ITEM_APPROVED:
+                approvalIconIv.setImageResource(R.drawable.ic_check_circle_black_24dp);
+                approvalStatusTv.setText("Approved");
+                approvalStatusTv.setTextColor(ContextCompat.getColor(this, R.color.black));
+                break;
+            case Item.ITEM_REJECTED:
+                approvalIconIv.setImageResource(R.drawable.ic_cancel_red_24dp);
+                approvalStatusTv.setText("Declined: " + reason);
+                approvalStatusTv.setTextColor(ContextCompat.getColor(this, R.color.red));
+                break;
+        }
     }
 
     private void handleRecommendations(final SellerData sellerData) {

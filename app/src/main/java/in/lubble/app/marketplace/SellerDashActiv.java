@@ -113,10 +113,10 @@ public class SellerDashActiv extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        fetchSellerProfile();
         if (adapter != null) {
             adapter.clear();
         }
+        fetchSellerProfile();
         registerMediaUploadCallback();
     }
 

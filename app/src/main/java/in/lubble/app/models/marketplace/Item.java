@@ -86,6 +86,9 @@ public class Item {
     @SerializedName("approval_status")
     @Expose
     private int approvalStatus = ITEM_PENDING_APPROVAL;
+    @SerializedName("rejection_reason")
+    @Expose
+    private String rejectionReason;
 
     @Override
     public boolean equals(Object obj) {
@@ -269,5 +272,13 @@ public class Item {
 
     public void setApprovalStatus(int approvalStatus) {
         this.approvalStatus = approvalStatus;
+    }
+
+    public String getRejectionReason() {
+        return rejectionReason;
+    }
+
+    public void setRejectionReason(String rejectionReason) {
+        this.rejectionReason = rejectionReason;
     }
 }
