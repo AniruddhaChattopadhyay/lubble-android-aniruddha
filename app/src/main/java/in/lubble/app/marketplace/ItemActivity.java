@@ -13,7 +13,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
@@ -58,6 +57,7 @@ import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.FullScreenImageActivity;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -329,7 +329,7 @@ public class ItemActivity extends AppCompatActivity {
                         priceTv.setText("₹" + item.getSellingPrice());
                     }
                     mrpTv.setText(String.valueOf(item.getMrp()));
-                    descTv.setText(Html.fromHtml(item.getDescription()));
+                    descTv.setText(item.getDescription());
 
                     if (item.getType() == Item.ITEM_SERVICE) {
                         toggleServiceCatalog(true, item);
@@ -356,6 +356,16 @@ public class ItemActivity extends AppCompatActivity {
                                 })
                                 .thumbnail(0.1f)
                                 .into(imageIv);
+                        imageIv.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                FullScreenImageActivity.open(
+                                        ItemActivity.this, ItemActivity.this,
+                                        photoList.get(0).getUrl(), imageIv, null,
+                                        R.drawable.ic_cancel_black_24dp
+                                );
+                            }
+                        });
                     }
                     setTitle(item.getName());
 

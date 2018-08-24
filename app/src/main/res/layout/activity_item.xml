@@ -18,11 +18,10 @@
             android:id="@+id/iv_item_image"
             android:layout_width="match_parent"
             android:layout_height="300dp"
+            android:transitionName="fullscreen_image"
             android:layout_below="@id/toolbar"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
             android:background="@color/very_light_gray"
-            android:scaleType="fitCenter"
+            android:scaleType="centerCrop"
             tools:src="@tools:sample/avatars" />
 
         <RelativeLayout
