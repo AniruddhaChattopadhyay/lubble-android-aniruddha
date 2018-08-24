@@ -2,12 +2,14 @@ package in.lubble.app.marketplace;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -407,6 +409,8 @@ public class ItemActivity extends AppCompatActivity {
                             }
                         });
                         if (sellerData.getId() == LubbleSharedPrefs.getInstance().getSellerId()) {
+                            chatBtn.setEnabled(false);
+                            ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.gray)));
                             itemPvtInfoLayout.setVisibility(View.VISIBLE);
                             editItemTv.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -424,6 +428,8 @@ public class ItemActivity extends AppCompatActivity {
                             userReviewContainer.setVisibility(View.GONE);
                             ratingAccountIv.setVisibility(View.GONE);
                         } else {
+                            chatBtn.setEnabled(true);
+                            ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent)));
                             itemPvtInfoLayout.setVisibility(View.GONE);
                             userReviewContainer.setVisibility(View.VISIBLE);
                             ratingAccountIv.setVisibility(View.VISIBLE);
