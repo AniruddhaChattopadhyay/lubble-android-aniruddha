@@ -60,6 +60,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.text.InputType.TYPE_CLASS_NUMBER;
+import static android.text.InputType.TYPE_CLASS_TEXT;
 import static android.text.InputType.TYPE_NUMBER_FLAG_SIGNED;
 import static android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS;
 import static android.view.Gravity.RIGHT;
@@ -288,7 +290,9 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         deleteServiceBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                serviceDataList.remove(serviceDataList.size() - 1);
+                if (serviceDataList != null) {
+                    serviceDataList.remove(serviceDataList.size() - 1);
+                }
                 if (catalogueLinearLayout.getChildCount() > 3) {
                     catalogueLinearLayout.removeViewAt(catalogueLinearLayout.getChildCount() - 2);
                 } else {
@@ -312,7 +316,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         final EditText editText = new EditText(this);
         //editText.setLayoutParams(lp);
         textInputLayout.addView(editText);
-        textInputLayout.getEditText().setInputType(TYPE_TEXT_FLAG_CAP_WORDS);
+        textInputLayout.getEditText().setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_FLAG_CAP_WORDS);
         textInputLayout.setHint("Service Name");
 
         final LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 3);
@@ -324,7 +328,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         textInputLayout1.addView(editText1);
         //editText1.setLayoutParams(lp1);
         textInputLayout1.setHint("Price");
-        textInputLayout1.getEditText().setInputType(TYPE_NUMBER_FLAG_SIGNED);
+        textInputLayout1.getEditText().setInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_SIGNED);
 
         linearLayout.addView(textInputLayout);
         linearLayout.addView(textInputLayout1);

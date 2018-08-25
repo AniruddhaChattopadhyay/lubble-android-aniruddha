@@ -322,15 +322,15 @@ public class ItemActivity extends AppCompatActivity {
                         if (startingPrice < 0) {
                             priceTv.setVisibility(View.GONE);
                             mrpTv.setVisibility(View.GONE);
-                        } else if (startingPrice == 0) {
-                            priceTv.setText("Free onwards");
                         } else {
                             priceTv.setText("₹" + startingPrice + " onwards");
+                            mrpTv.setVisibility(View.GONE);
                         }
                     } else {
                         priceTv.setText("₹" + item.getSellingPrice());
+                        mrpTv.setText(String.valueOf(item.getMrp()));
+                        mrpTv.setVisibility(View.VISIBLE);
                     }
-                    mrpTv.setText(String.valueOf(item.getMrp()));
                     descTv.setText(item.getDescription());
 
                     if (item.getType() == Item.ITEM_SERVICE) {
