@@ -204,8 +204,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     if (item.getType() == ITEM_PRODUCT) {
                         productRadioBtn.setChecked(true);
                         serviceRadioBtn.setChecked(false);
+                        serviceRadioBtn.setEnabled(false);
                     } else {
                         productRadioBtn.setChecked(false);
+                        productRadioBtn.setEnabled(false);
                         serviceRadioBtn.setChecked(true);
                     }
                     GlideApp.with(NewItemActiv.this)
