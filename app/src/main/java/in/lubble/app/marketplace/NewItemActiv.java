@@ -151,8 +151,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateServiceDataFromUi();
                 if (isValidationPassed()) {
+                    updateServiceDataFromUi();
                     uploadNewItem();
                 }
             }
@@ -383,10 +383,16 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
                 final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
 
-                final ServiceData serviceData = serviceDataList.get(i - 1);
-                serviceData.setTitle(nameTil.getEditText().getText().toString());
-                serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
-                serviceDataList.set(i - 1, serviceData);
+                ServiceData serviceData;
+                if (i - 1 < serviceDataList.size()) {
+                    serviceData = serviceDataList.get(i - 1);
+                    serviceData.setTitle(nameTil.getEditText().getText().toString());
+                    serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                    serviceDataList.set(i - 1, serviceData);
+                } else {
+                    serviceData = new ServiceData(nameTil.getEditText().getText().toString(), Integer.parseInt(priceTil.getEditText().getText().toString()));
+                    serviceDataList.add(serviceData);
+                }
             }
         }
         return serviceDataList;
