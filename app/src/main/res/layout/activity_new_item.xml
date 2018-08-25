@@ -189,15 +189,17 @@
                     android:layout_height="wrap_content"
                     android:gravity="top|left"
                     android:inputType="textMultiLine"
-                    android:lines="3" />
+                    android:maxLines="7"
+                    android:scrollbars="vertical"
+                    android:minLines="3" />
 
             </android.support.design.widget.TextInputLayout>
 
             <LinearLayout
                 android:id="@+id/linearlayout_catalogue"
                 android:layout_width="match_parent"
-                android:layout_below="@id/til_item_desc"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/til_item_desc"
                 android:orientation="vertical" />
 
             <ImageView
