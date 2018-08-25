@@ -46,10 +46,11 @@ public class ChatActivity extends AppCompatActivity {
         context.startActivity(intent);
     }
 
-    public static void openForDm(@NonNull Context context, @NonNull String dmId, @Nullable String msgId) {
+    public static void openForDm(@NonNull Context context, @NonNull String dmId, @Nullable String msgId, @Nullable String itemTitle) {
         final Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(EXTRA_DM_ID, dmId);
         intent.putExtra(EXTRA_MSG_ID, msgId);
+        intent.putExtra(EXTRA_ITEM_TITLE, itemTitle);
         context.startActivity(intent);
     }
 
@@ -97,7 +98,8 @@ public class ChatActivity extends AppCompatActivity {
             );
         } else if (!TextUtils.isEmpty(dmId)) {
             targetFrag = ChatFragment.newInstanceForDm(
-                    dmId, msgId
+                    dmId, msgId,
+                    getIntent().getStringExtra(EXTRA_ITEM_TITLE)
             );
         } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
             targetFrag = ChatFragment.newInstanceForEmptyDm(

@@ -396,7 +396,7 @@ public class ItemActivity extends AppCompatActivity {
                             public void onClick(View v) {
 
                                 if (!TextUtils.isEmpty(dmId)) {
-                                    ChatActivity.openForDm(ItemActivity.this, dmId, null);
+                                    ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
                                 } else {
                                     ChatActivity.openForEmptyDm(
                                             ItemActivity.this,

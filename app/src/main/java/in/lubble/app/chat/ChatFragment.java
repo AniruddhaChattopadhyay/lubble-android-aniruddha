@@ -176,10 +176,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         return fragment;
     }
 
-    public static ChatFragment newInstanceForDm(@NonNull String dmId, @Nullable String msgId) {
+    public static ChatFragment newInstanceForDm(@NonNull String dmId, @Nullable String msgId, @Nullable String itemName) {
         Bundle args = new Bundle();
         args.putString(KEY_MSG_ID, msgId);
         args.putString(KEY_DM_ID, dmId);
+        args.putString(KEY_ITEM_TITLE, itemName);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
@@ -258,7 +259,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         declineTv.setOnClickListener(this);
         linkCancel.setOnClickListener(this);
 
-        if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
+        if (!TextUtils.isEmpty(itemTitle)) {
             // new DM chat, pre-fill help text in editText
             newMessageEt.setText("Hi! I am interested in \"" + itemTitle + "\"");
             newMessageEt.selectAll();

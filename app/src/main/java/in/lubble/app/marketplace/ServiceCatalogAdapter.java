@@ -59,7 +59,7 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 @Override
                 public void onClick(View v) {
                     if (!TextUtils.isEmpty(dmId)) {
-                        ChatActivity.openForDm(context, dmId, null);
+                        ChatActivity.openForDm(context, dmId, null, serviceData.getTitle());
                     } else {
                         if (sellerData != null) {
                             ChatActivity.openForEmptyDm(
