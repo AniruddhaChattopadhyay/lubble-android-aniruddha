@@ -391,25 +391,13 @@ public class ItemActivity extends AppCompatActivity {
                             }
                         });
                         syncDmId(sellerData);
-                        chatBtn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-
-                                if (!TextUtils.isEmpty(dmId)) {
-                                    ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
-                                } else {
-                                    ChatActivity.openForEmptyDm(
-                                            ItemActivity.this,
-                                            String.valueOf(sellerData.getId()),
-                                            sellerData.getName(),
-                                            sellerData.getPhotoUrl(),
-                                            item.getName()
-                                    );
-                                }
-                            }
-                        });
                         if (sellerData.getId() == LubbleSharedPrefs.getInstance().getSellerId()) {
-                            chatBtn.setEnabled(false);
+                            chatBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Toast.makeText(ItemActivity.this, "You cannot chat with yourself :)", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.gray)));
                             itemPvtInfoLayout.setVisibility(View.VISIBLE);
                             editItemTv.setOnClickListener(new View.OnClickListener() {
@@ -428,8 +416,24 @@ public class ItemActivity extends AppCompatActivity {
                             userReviewContainer.setVisibility(View.GONE);
                             ratingAccountIv.setVisibility(View.GONE);
                         } else {
-                            chatBtn.setEnabled(true);
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent)));
+                            chatBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+
+                                    if (!TextUtils.isEmpty(dmId)) {
+                                        ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
+                                    } else {
+                                        ChatActivity.openForEmptyDm(
+                                                ItemActivity.this,
+                                                String.valueOf(sellerData.getId()),
+                                                sellerData.getName(),
+                                                sellerData.getPhotoUrl(),
+                                                item.getName()
+                                        );
+                                    }
+                                }
+                            });
                             itemPvtInfoLayout.setVisibility(View.GONE);
                             userReviewContainer.setVisibility(View.VISIBLE);
                             ratingAccountIv.setVisibility(View.VISIBLE);
