@@ -749,7 +749,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 chatData.setMessage(newMessageEt.getText().toString());
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
-                chatData.setIsDm(!TextUtils.isEmpty(dmId));
+                chatData.setIsDm(TextUtils.isEmpty(groupId));
 
                 if (isValidString(replyMsgId)) {
                     chatData.setType(REPLY);
