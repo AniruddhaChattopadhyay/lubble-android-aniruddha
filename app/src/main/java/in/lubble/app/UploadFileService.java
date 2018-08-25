@@ -123,8 +123,6 @@ public class UploadFileService extends BaseTaskService {
     private void uploadFromUriWithMetadata(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
-        taskStarted();
-
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
 
         FirebaseAuth.getInstance().getAccessToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
@@ -139,7 +137,7 @@ public class UploadFileService extends BaseTaskService {
                             .build();
                     uploadFromUri(fileUri, fileName, uploadPath, caption, groupId, false, metadata, null);
                 } else {
-                    //todo OMG what to do here??
+                    taskCompleted();
                 }
             }
         });

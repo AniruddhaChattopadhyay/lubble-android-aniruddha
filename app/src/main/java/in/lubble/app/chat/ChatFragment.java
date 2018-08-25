@@ -321,6 +321,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         // of the list to show the newly added message.
                         recyclerViewState = null;
                         chatRecyclerView.scrollToPosition(positionStart);
+                    } else {
+                        chatRecyclerView.scrollToPosition(positionStart);
                     }
                 } else if (msgIdToOpen != null) {
                     final int indexOfChatMsg = chatAdapter.getIndexOfChatMsg(msgIdToOpen);
@@ -358,6 +360,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         chatRecyclerView.scrollToPosition(positionStart);
                     } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
                             chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(authorId)) {
+                        chatRecyclerView.scrollToPosition(positionStart);
+                    } else {
                         chatRecyclerView.scrollToPosition(positionStart);
                     }
                 }

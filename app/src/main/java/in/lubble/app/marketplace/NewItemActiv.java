@@ -215,7 +215,9 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                             .load(item.getPhotos().get(0).getUrl())
                             .into(photoIv);
                     serviceDataList = item.getServiceDataList();
-                    showCatalogue(item.getServiceDataList());
+                    if (serviceDataList != null && serviceDataList.size() > 0) {
+                        showCatalogue(item.getServiceDataList());
+                    }
                     categoryId = item.getCategory().getId();
                     categoryTil.getEditText().setText(item.getCategory().getName());
                 } else {
