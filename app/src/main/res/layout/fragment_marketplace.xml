@@ -24,7 +24,7 @@
                 android:drawableLeft="@drawable/ic_search_gray_24dp"
                 android:gravity="center_vertical"
                 android:padding="8dp"
-                android:text="Search Lubble Marketplace" />
+                android:text="Search Lubble Market" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_categories"

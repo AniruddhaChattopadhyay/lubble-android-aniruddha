@@ -28,12 +28,14 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -113,7 +115,39 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
             // seller already exists, pre-fill seller details for editing
             fetchSellerProfile(sellerId);
             submitBtn.setText(R.string.all_update);
+        } else {
+            fetchSellerId();
         }
+    }
+
+    private void fetchSellerId() {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage(getString(R.string.all_please_wait));
+        progressDialog.show();
+
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchAppFeatures().enqueue(new Callback<FeatureData>() {
+            @Override
+            public void onResponse(Call<FeatureData> call, Response<FeatureData> response) {
+                progressDialog.dismiss();
+                final FeatureData featureData = response.body();
+                if (featureData != null) {
+                    final List<Integer> sellerList = featureData.getSellers();
+                    if (sellerList != null && sellerList.size() > 0) {
+                        sellerId = sellerList.get(0);
+                        LubbleSharedPrefs.getInstance().setSellerId(sellerId);
+                        startActivity(SellerDashActiv.getIntent(SellerEditActiv.this, sellerId, false));
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FeatureData> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+                progressDialog.dismiss();
+            }
+        });
     }
 
     private void fetchSellerProfile(final int sellerId) {
