@@ -441,7 +441,7 @@ public class ItemActivity extends AppCompatActivity {
                     }
                     float avgRating = 0F;
                     if (item.getTotalRatingsCount() > 0) {
-                        avgRating = item.getTotalRating() / item.getTotalRatingsCount();
+                        avgRating = (float) item.getTotalRating() / item.getTotalRatingsCount();
                     }
                     avgRatingTv.setText(String.format("%.1f", avgRating));
                     ratingCountTv.setText(item.getTotalRatingsCount() + " ratings");
