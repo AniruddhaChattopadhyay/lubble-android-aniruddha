@@ -414,10 +414,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
     // For populating the toolbar with DP and Title
     private void syncGroupInfo() {
-        if (!TextUtils.isEmpty(receiverId)) {
-            chatRecyclerView.setVisibility(View.VISIBLE);
-            ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true);
-        } else if (!TextUtils.isEmpty(groupId)) {
+        if (!TextUtils.isEmpty(groupId)) {
             groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -529,6 +526,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 }
             });
+        } else if (!TextUtils.isEmpty(receiverId)) {
+            chatRecyclerView.setVisibility(View.VISIBLE);
+            ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true);
         }
     }
 
