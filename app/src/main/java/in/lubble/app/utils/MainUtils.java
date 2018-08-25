@@ -61,6 +61,7 @@ public class MainUtils {
 
     private static void insertItemsToDb(final ArrayList<ItemSearchData> itemsList) {
         for (ItemSearchData itemSearchData : itemsList) {
+            DbSingleton.getInstance().deleteAllSearchData();
             DbSingleton.getInstance().createItemSearchData(itemSearchData);
         }
     }

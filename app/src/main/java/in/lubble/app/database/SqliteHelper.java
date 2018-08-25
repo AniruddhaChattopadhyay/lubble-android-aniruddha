@@ -96,4 +96,16 @@ public class SqliteHelper extends SQLiteOpenHelper {
         return itemSearchDataList;
     }
 
+    public long deleteAllSearchData() {
+
+        long createdRowNumber = 0;
+        SQLiteDatabase db = DbSingleton.openDatabase();
+
+        db.delete(TABLE_ITEM_SEARCH_DATA, null, null);
+        DbSingleton.closeDatabase();
+
+        Log.i(TAG, "TABLE_ITEM_SEARCH_DATA: Deleted");
+        return createdRowNumber;
+    }
+
 }
