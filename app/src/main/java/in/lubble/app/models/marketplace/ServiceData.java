@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class ServiceData {
 
+    @SerializedName("id")
+    private String id;
     @SerializedName("title")
     private String title;
     @SerializedName("price")
@@ -28,5 +30,13 @@ public class ServiceData {
 
     public void setPrice(Integer price) {
         this.price = price;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

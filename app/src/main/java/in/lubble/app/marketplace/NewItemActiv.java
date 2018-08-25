@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -150,7 +151,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                updateServiceDatas();
+                updateServiceDataFromUi();
                 if (isValidationPassed()) {
                     uploadNewItem();
                 }
@@ -175,7 +176,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     sellingPriceIv.setVisibility(View.VISIBLE);
                 } else {
                     selectedItemType = ITEM_SERVICE;
-                    showCatalogue();
+                    showCatalogue(null);
                     mrpTil.setVisibility(View.GONE);
                     mrpIv.setVisibility(View.GONE);
                     sellingPriceTil.setVisibility(View.GONE);
@@ -213,7 +214,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     GlideApp.with(NewItemActiv.this)
                             .load(item.getPhotos().get(0).getUrl())
                             .into(photoIv);
-                    handleServiceCatalog(item.getServiceDataList());
+                    serviceDataList = item.getServiceDataList();
+                    showCatalogue(item.getServiceDataList());
                     categoryId = item.getCategory().getId();
                     categoryTil.getEditText().setText(item.getCategory().getName());
                 } else {
@@ -237,18 +239,19 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void handleServiceCatalog(ArrayList<ServiceData> serviceDataList) {
-        if (serviceDataList != null && serviceDataList.size() > 0) {
-            showCatalogue();
-        }
-    }
-
-    private void showCatalogue() {
+    private void showCatalogue(@Nullable ArrayList<ServiceData> serviceDataList) {
         catalogueLinearLayout.removeAllViews();
         catalogueLinearLayout.invalidate();
 
-        addNewService(0);
-        addNewService(0);
+        if (serviceDataList == null || serviceDataList.isEmpty()) {
+            addNewService(0);
+            addNewService(0);
+        } else {
+            for (int i = 0; i < serviceDataList.size(); i++) {
+                final ServiceData serviceData = serviceDataList.get(i);
+                addNewService(i, serviceData.getTitle(), serviceData.getPrice());
+            }
+        }
 
         catalogueLinearLayout.setVisibility(View.VISIBLE);
         final TextView catalogueTitle = new TextView(this);
@@ -326,17 +329,65 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         catalogueLinearLayout.addView(linearLayout, pos);
     }
 
-    private ArrayList<ServiceData> updateServiceDatas() {
-        serviceDataList = new ArrayList<>();
-        int serviceCount = catalogueLinearLayout.getChildCount() - 1;
-        for (int i = 1; i < serviceCount; i++) {
-            final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
-            final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
-            final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
+    private void addNewService(int pos, String title, int price) {
+        final LinearLayout linearLayout = new LinearLayout(this);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setWeightSum(10);
 
-            final ServiceData serviceData
-                    = new ServiceData(nameTil.getEditText().getText().toString(), Integer.parseInt(priceTil.getEditText().getText().toString()));
-            serviceDataList.add(serviceData);
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 7);
+        final TextInputLayout textInputLayout = new TextInputLayout(this);
+        textInputLayout.setLayoutParams(lp);
+        final EditText editText = new EditText(this);
+        //editText.setLayoutParams(lp);
+        textInputLayout.addView(editText);
+        textInputLayout.getEditText().setInputType(TYPE_TEXT_FLAG_CAP_WORDS);
+        textInputLayout.setHint("Service Name");
+        textInputLayout.getEditText().setText(title);
+
+        final LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 3);
+        final TextInputLayout textInputLayout1 = new TextInputLayout(this);
+        textInputLayout1.setLayoutParams(lp1);
+        textInputLayout1.setGravity(RIGHT);
+        textInputLayout1.setHorizontalGravity(RIGHT);
+        final EditText editText1 = new EditText(this);
+        textInputLayout1.addView(editText1);
+        //editText1.setLayoutParams(lp1);
+        textInputLayout1.setHint("Price");
+        textInputLayout1.getEditText().setInputType(TYPE_NUMBER_FLAG_SIGNED);
+        textInputLayout1.getEditText().setText(String.valueOf(price));
+
+        linearLayout.addView(textInputLayout);
+        linearLayout.addView(textInputLayout1);
+        catalogueLinearLayout.addView(linearLayout, pos);
+    }
+
+    private ArrayList<ServiceData> updateServiceDataFromUi() {
+        if (serviceDataList == null || serviceDataList.isEmpty()) {
+            // creating new item
+            serviceDataList = new ArrayList<>();
+            int serviceCount = catalogueLinearLayout.getChildCount() - 1;
+            for (int i = 1; i < serviceCount; i++) {
+                final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
+                final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
+                final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
+
+                final ServiceData serviceData
+                        = new ServiceData(nameTil.getEditText().getText().toString(), Integer.parseInt(priceTil.getEditText().getText().toString()));
+                serviceDataList.add(serviceData);
+            }
+        } else {
+            // editing old item
+            int serviceCount = catalogueLinearLayout.getChildCount() - 1;
+            for (int i = 1; i < serviceCount; i++) {
+                final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
+                final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
+                final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
+
+                final ServiceData serviceData = serviceDataList.get(i - 1);
+                serviceData.setTitle(nameTil.getEditText().getText().toString());
+                serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                serviceDataList.set(i - 1, serviceData);
+            }
         }
         return serviceDataList;
     }
@@ -402,6 +453,9 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             for (ServiceData serviceData : serviceDataList) {
                 final JSONObject jsonObject = new JSONObject();
                 try {
+                    if (itemId != -1 && !TextUtils.isEmpty(serviceData.getId())) {
+                        jsonObject.put("id", serviceData.getId());
+                    }
                     jsonObject.put("title", serviceData.getTitle());
                     jsonObject.put("price", serviceData.getPrice());
                     serviceCatalog.put(jsonObject);
@@ -436,6 +490,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                                 .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "marketplace/items/" + item.getId())
                                 .setAction(UploadFileService.ACTION_UPLOAD));
                     }
+                    Toast.makeText(NewItemActiv.this, "Submitted", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
                     Toast.makeText(NewItemActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
