@@ -391,7 +391,7 @@ public class ItemActivity extends AppCompatActivity {
                             public void onClick(View v) {
                                 final Bundle bundle = new Bundle();
                                 bundle.putInt("seller_id", sellerData.getId());
-                                Analytics.triggerEvent(VISIT_SHOP_CLICK, ItemActivity.this);
+                                Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
                                 ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
                             }
                         });
@@ -427,7 +427,7 @@ public class ItemActivity extends AppCompatActivity {
                                 public void onClick(View v) {
                                     final Bundle bundle = new Bundle();
                                     bundle.putInt("seller_id", sellerData.getId());
-                                    Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, ItemActivity.this);
+                                    Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, bundle, ItemActivity.this);
                                     if (!TextUtils.isEmpty(dmId)) {
                                         ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
                                     } else {

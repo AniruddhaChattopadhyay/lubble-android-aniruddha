@@ -228,7 +228,7 @@ public class ItemListActiv extends AppCompatActivity {
                         public void onClick(View v) {
                             final Bundle bundle = new Bundle();
                             bundle.putInt("seller_id", sellerId);
-                            Analytics.triggerEvent(RECOMMEND_BTN_CLICK, ItemListActiv.this);
+                            Analytics.triggerEvent(RECOMMEND_BTN_CLICK, bundle, ItemListActiv.this);
                             updateRecommendation();
                         }
                     });
