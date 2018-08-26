@@ -66,6 +66,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.analytics.AnalyticsEvents.MPLACE_CHAT_BTN_CLICKED;
+import static in.lubble.app.analytics.AnalyticsEvents.VISIT_SHOP_CLICK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class ItemActivity extends AppCompatActivity {
@@ -387,6 +389,9 @@ public class ItemActivity extends AppCompatActivity {
                         visitShopTv.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                final Bundle bundle = new Bundle();
+                                bundle.putInt("seller_id", sellerData.getId());
+                                Analytics.triggerEvent(VISIT_SHOP_CLICK, ItemActivity.this);
                                 ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
                             }
                         });
@@ -420,7 +425,9 @@ public class ItemActivity extends AppCompatActivity {
                             chatBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-
+                                    final Bundle bundle = new Bundle();
+                                    bundle.putInt("seller_id", sellerData.getId());
+                                    Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, ItemActivity.this);
                                     if (!TextUtils.isEmpty(dmId)) {
                                         ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
                                     } else {

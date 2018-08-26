@@ -30,6 +30,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static in.lubble.app.analytics.AnalyticsEvents.RECOMMEND_BTN_CLICK;
+
 public class ItemListActiv extends AppCompatActivity {
 
     private static final String TAG = "SellerDashActiv";
@@ -43,6 +45,7 @@ public class ItemListActiv extends AppCompatActivity {
     private boolean isSeller;
     private int sellerId;
     private RecyclerView recyclerView;
+    private TextView noItemsHintTv;
     private BigItemAdapter adapter;
     private TextView recommendationCountTv;
     private LinearLayout recommendContainer;
@@ -72,6 +75,7 @@ public class ItemListActiv extends AppCompatActivity {
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
         recyclerView = findViewById(R.id.rv_items);
+        noItemsHintTv = findViewById(R.id.tv_no_items_hint);
         recommendIv = findViewById(R.id.iv_recommend);
         recommendHintTV = findViewById(R.id.tv_recommend_hint);
         recommendContainer = findViewById(R.id.container_recommend_btn);
@@ -165,11 +169,16 @@ public class ItemListActiv extends AppCompatActivity {
 
                     setTitle(categoryData.getName());
 
-                    if (categoryData.getItems() != null) {
+                    if (categoryData.getItems() != null && !categoryData.getItems().isEmpty()) {
+                        recyclerView.setVisibility(View.VISIBLE);
+                        noItemsHintTv.setVisibility(View.GONE);
                         adapter.clear();
                         for (Item item : categoryData.getItems()) {
                             adapter.addData(item);
                         }
+                    } else {
+                        recyclerView.setVisibility(View.GONE);
+                        noItemsHintTv.setVisibility(View.VISIBLE);
                     }
                 } else {
                     Crashlytics.logException(new IllegalArgumentException("Category null for cat id: " + sellerId));
@@ -217,6 +226,9 @@ public class ItemListActiv extends AppCompatActivity {
                     recommendContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            final Bundle bundle = new Bundle();
+                            bundle.putInt("seller_id", sellerId);
+                            Analytics.triggerEvent(RECOMMEND_BTN_CLICK, ItemListActiv.this);
                             updateRecommendation();
                         }
                     });

@@ -88,4 +88,16 @@
         android:nestedScrollingEnabled="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+    <TextView
+        android:id="@+id/tv_no_items_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_recommendation_count"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        android:visibility="gone"
+        android:text="No items yet in this category\n Be the first one to add new items"
+        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />
+
 </RelativeLayout>
