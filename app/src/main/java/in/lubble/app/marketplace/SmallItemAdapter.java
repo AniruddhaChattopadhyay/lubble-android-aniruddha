@@ -1,5 +1,6 @@
 package in.lubble.app.marketplace;
 
+import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -64,13 +65,15 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
                 if (startingPrice < 0) {
                     viewHolder.priceTv.setText("Request Price");
-                } else if (startingPrice == 0) {
-                    viewHolder.priceTv.setText("Free onwards");
                 } else {
                     viewHolder.priceTv.setText("₹" + startingPrice + " onwards");
                 }
+                viewHolder.mrpTv.setVisibility(View.GONE);
             } else {
                 viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+                viewHolder.mrpTv.setVisibility(View.VISIBLE);
+                viewHolder.mrpTv.setText("₹" + item.getMrp());
+                viewHolder.mrpTv.setPaintFlags(viewHolder.mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             }
 
             final ArrayList<PhotoData> photoList = item.getPhotos();
@@ -96,12 +99,14 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         final ImageView itemIv;
         final TextView nameTv;
         final TextView priceTv;
+        final TextView mrpTv;
 
         ViewHolder(View view) {
             super(view);
             itemIv = view.findViewById(R.id.iv_item);
             nameTv = view.findViewById(R.id.tv_name);
             priceTv = view.findViewById(R.id.tv_price);
+            mrpTv = view.findViewById(R.id.tv_mrp);
             view.setOnClickListener(this);
         }
 

@@ -1,5 +1,6 @@
 package in.lubble.app.marketplace;
 
+import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -50,13 +51,16 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
             if (startingPrice < 0) {
                 viewHolder.priceTv.setText("Request Price");
-            } else if (startingPrice == 0) {
-                viewHolder.priceTv.setText("Free onwards");
             } else {
                 viewHolder.priceTv.setText("₹" + startingPrice + " onwards");
             }
+
+            viewHolder.mrpTv.setVisibility(View.GONE);
         } else {
             viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+            viewHolder.mrpTv.setVisibility(View.VISIBLE);
+            viewHolder.mrpTv.setText("₹" + item.getMrp());
+            viewHolder.mrpTv.setPaintFlags(viewHolder.mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
         }
 
         final ArrayList<PhotoData> photoList = item.getPhotos();
@@ -132,6 +136,7 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         final ProgressBar itemPicProgressBar;
         final TextView nameTv;
         final TextView priceTv;
+        final TextView mrpTv;
 
         ViewHolder(View view) {
             super(view);
@@ -141,6 +146,7 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             approvalStatusTv = view.findViewById(R.id.tv_approval_status);
             nameTv = view.findViewById(R.id.tv_name);
             priceTv = view.findViewById(R.id.tv_price);
+            mrpTv = view.findViewById(R.id.tv_mrp);
             view.setOnClickListener(this);
         }
 
