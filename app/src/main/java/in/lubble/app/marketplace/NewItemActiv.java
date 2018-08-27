@@ -107,6 +107,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private ArrayList<ServiceData> serviceDataList;
     private int selectedItemType = ITEM_PRODUCT;
     private int itemId = -1;
+    private ProgressDialog progressDialog;
 
     public static void open(Context context, int itemId) {
         final Intent intent = new Intent(context, NewItemActiv.class);
@@ -189,7 +190,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     }
 
     private void fetchItemDetails() {
-        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.all_please_wait);
         progressDialog.show();
 
@@ -442,6 +443,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
     private void uploadNewItem() {
 
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(R.string.all_please_wait);
+        progressDialog.show();
+
         HashMap<String, Object> params = new HashMap<>();
 
         params.put("seller", LubbleSharedPrefs.getInstance().getSellerId());
@@ -489,6 +494,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         itemCall.enqueue(new Callback<Item>() {
             @Override
             public void onResponse(Call<Item> call, Response<Item> response) {
+                progressDialog.dismiss();
                 final Item item = response.body();
                 if (item != null) {
                     if (picUri != null) {
@@ -511,6 +517,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
             @Override
             public void onFailure(Call<Item> call, Throwable t) {
+                progressDialog.dismiss();
+                Toast.makeText(NewItemActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "onFailure: ");
             }
         });
