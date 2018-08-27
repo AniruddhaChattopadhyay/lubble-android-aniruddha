@@ -46,6 +46,8 @@ public class MarketplaceFrag extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     private TextView searchTv;
+    private TextView viewAllTv;
+    private ProgressBar viewAllProgressBar;
     private RecyclerView categoriesRv;
     private ProgressBar progressBar;
     private TextView cat1Name;
@@ -58,6 +60,7 @@ public class MarketplaceFrag extends Fragment {
     private ViewPager viewPager;
     private int currentPage = 0;
     private Handler handler = new Handler();
+    private BigItemAdapter allItemsAdapter;
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
 
     public MarketplaceFrag() {
@@ -78,6 +81,8 @@ public class MarketplaceFrag extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_marketplace, container, false);
 
         searchTv = view.findViewById(R.id.tv_search);
+        viewAllTv = view.findViewById(R.id.tv_view_all_items);
+        viewAllProgressBar = view.findViewById(R.id.progressbar_view_all);
         categoriesRv = view.findViewById(R.id.rv_categories);
         categoriesRv.setNestedScrollingEnabled(false);
 
@@ -115,7 +120,7 @@ public class MarketplaceFrag extends Fragment {
         final SmallItemAdapter cat2Adapter = new SmallItemAdapter(GlideApp.with(getContext()));
         category2Rv.setAdapter(cat2Adapter);
 
-        final BigItemAdapter allItemsAdapter = new BigItemAdapter(GlideApp.with(getContext()), false);
+        allItemsAdapter = new BigItemAdapter(GlideApp.with(getContext()), false);
         allItemsRv.setAdapter(allItemsAdapter);
 
         fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter, catAdapter);
@@ -148,8 +153,47 @@ public class MarketplaceFrag extends Fragment {
             }
         }
 
+        viewAllTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                fetchAllItems();
+            }
+        });
+
         Analytics.triggerScreenEvent(getContext(), this.getClass());
         return view;
+    }
+
+    private void fetchAllItems() {
+        viewAllProgressBar.setVisibility(View.VISIBLE);
+        viewAllTv.setText("");
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchAllItems().enqueue(new Callback<ArrayList<Item>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Item>> call, Response<ArrayList<Item>> response) {
+                viewAllProgressBar.setVisibility(View.GONE);
+                final ArrayList<Item> itemArrayList = response.body();
+                if (itemArrayList != null && isAdded() && isVisible() && !itemArrayList.isEmpty()) {
+                    viewAllTv.setVisibility(View.GONE);
+                    allItemsAdapter.clear();
+                    for (Item item : itemArrayList) {
+                        allItemsAdapter.addData(item);
+                    }
+                } else if (isAdded() && isVisible()) {
+                    viewAllTv.setText("View All");
+                    Crashlytics.logException(new IllegalArgumentException("itemArrayList is NULL"));
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Item>> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+                viewAllProgressBar.setVisibility(View.GONE);
+                viewAllTv.setText("View All");
+                Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void fetchMarketplaceData(final SmallItemAdapter cat1Adapter, final SmallItemAdapter cat2Adapter, final BigItemAdapter allItemsAdapter, final ColoredChipsAdapter catAdapter) {

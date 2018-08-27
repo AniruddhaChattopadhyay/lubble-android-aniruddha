@@ -70,6 +70,9 @@ public interface Endpoints {
     @DELETE("marketplace/seller/{seller_id}/recommend/")
     Call<RatingData> deleteRecommendation(@Path("seller_id") int sellerId);
 
+    @GET("marketplace/allitems/")
+    Call<ArrayList<Item>> fetchAllItems();
+
     class ResponseBean {
 
         @SerializedName("message")
