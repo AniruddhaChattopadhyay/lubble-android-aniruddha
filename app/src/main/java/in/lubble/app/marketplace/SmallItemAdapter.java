@@ -18,8 +18,9 @@ import in.lubble.app.models.marketplace.PhotoData;
 
 public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-
     private static final String TAG = "SmallItemAdapter";
+    private static final int TYPE_ITEM = 172;
+    private static final int TYPE_VIEW_ALL = 506;
 
     private final List<Item> itemList;
     private final GlideRequests glide;
@@ -29,39 +30,56 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         this.glide = glide;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (itemList.get(position) == null) {
+            return TYPE_VIEW_ALL;
+        } else {
+            return TYPE_ITEM;
+        }
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new SmallItemAdapter.ViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.small_item, parent, false));
+        if (viewType == TYPE_ITEM) {
+            return new ViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.small_item, parent, false));
+        } else {
+            return new ViewAllViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.view_all_item, parent, false));
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        final SmallItemAdapter.ViewHolder viewHolder = (SmallItemAdapter.ViewHolder) holder;
+        if (holder instanceof ViewHolder) {
+            final SmallItemAdapter.ViewHolder viewHolder = (SmallItemAdapter.ViewHolder) holder;
 
-        final Item item = itemList.get(position);
+            final Item item = itemList.get(position);
 
-        viewHolder.nameTv.setText(item.getName());
-        if (item.getType() == Item.ITEM_SERVICE) {
-            final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
-            if (startingPrice < 0) {
-                viewHolder.priceTv.setText("Request Price");
-            } else if (startingPrice == 0) {
-                viewHolder.priceTv.setText("Free onwards");
+            viewHolder.nameTv.setText(item.getName());
+            if (item.getType() == Item.ITEM_SERVICE) {
+                final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
+                if (startingPrice < 0) {
+                    viewHolder.priceTv.setText("Request Price");
+                } else if (startingPrice == 0) {
+                    viewHolder.priceTv.setText("Free onwards");
+                } else {
+                    viewHolder.priceTv.setText("₹" + startingPrice + " onwards");
+                }
             } else {
-                viewHolder.priceTv.setText("₹" + startingPrice + " onwards");
+                viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+            }
+
+            final ArrayList<PhotoData> photoList = item.getPhotos();
+            if (photoList.size() > 0) {
+                glide.load(photoList.get(0).getUrl()).into(viewHolder.itemIv);
             }
         } else {
-            viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+            // nothing to do here..
         }
-
-        final ArrayList<PhotoData> photoList = item.getPhotos();
-        if (photoList.size() > 0) {
-            glide.load(photoList.get(0).getUrl()).into(viewHolder.itemIv);
-        }
-
     }
 
     @Override
@@ -90,6 +108,19 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         @Override
         public void onClick(View v) {
             v.getContext().startActivity(ItemActivity.getIntent(v.getContext(), itemList.get(getAdapterPosition()).getId()));
+        }
+    }
+
+    class ViewAllViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        ViewAllViewHolder(View view) {
+            super(view);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            ItemListActiv.open(v.getContext(), false, itemList.get(0).getCategory().getId());
         }
     }
 

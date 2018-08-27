@@ -209,11 +209,16 @@ public class MarketplaceFrag extends Fragment {
                     for (Item item : category1.getItems()) {
                         cat1Adapter.addData(item);
                     }
-
+                    if (category1.getItems().size() > 4) {
+                        cat1Adapter.addData(null);
+                    }
                     final Category category2 = marketplaceData.getShowcaseCategories().get(1);
                     cat2Name.setText(category2.getName());
                     for (Item item : category2.getItems()) {
                         cat2Adapter.addData(item);
+                    }
+                    if (category2.getItems().size() > 4) {
+                        cat2Adapter.addData(null);
                     }
 
                     for (Item item : marketplaceData.getItems()) {
