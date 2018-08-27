@@ -71,9 +71,13 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 viewHolder.mrpTv.setVisibility(View.GONE);
             } else {
                 viewHolder.priceTv.setText("₹" + item.getSellingPrice());
-                viewHolder.mrpTv.setVisibility(View.VISIBLE);
-                viewHolder.mrpTv.setText("₹" + item.getMrp());
-                viewHolder.mrpTv.setPaintFlags(viewHolder.mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                if (item.getMrp().equals(item.getSellingPrice())) {
+                    viewHolder.mrpTv.setVisibility(View.GONE);
+                } else {
+                    viewHolder.mrpTv.setVisibility(View.VISIBLE);
+                    viewHolder.mrpTv.setText("₹" + item.getMrp());
+                    viewHolder.mrpTv.setPaintFlags(viewHolder.mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                }
             }
 
             final ArrayList<PhotoData> photoList = item.getPhotos();

@@ -330,8 +330,12 @@ public class ItemActivity extends AppCompatActivity {
                         }
                     } else {
                         priceTv.setText("₹" + item.getSellingPrice());
-                        mrpTv.setText(String.valueOf(item.getMrp()));
-                        mrpTv.setVisibility(View.VISIBLE);
+                        if (item.getMrp().equals(item.getSellingPrice())) {
+                            mrpTv.setVisibility(View.GONE);
+                        } else {
+                            mrpTv.setText(String.valueOf(item.getMrp()));
+                            mrpTv.setVisibility(View.VISIBLE);
+                        }
                     }
                     descTv.setText(item.getDescription());
 
