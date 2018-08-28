@@ -16,6 +16,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -23,6 +25,7 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -96,10 +99,12 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private TextInputLayout categoryTil;
     private TextInputLayout descTil;
     private LinearLayout catalogueLinearLayout;
+    private Spinner priceSpinner;
     private TextInputLayout mrpTil;
     private ImageView mrpIv;
     private ImageView sellingPriceIv;
     private TextInputLayout sellingPriceTil;
+    private TextView priceHintTv;
     private Button submitBtn;
     private String currentPhotoPath;
     private int categoryId = -1;
@@ -130,11 +135,30 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         categoryTil = findViewById(R.id.til_category);
         descTil = findViewById(R.id.til_item_desc);
         catalogueLinearLayout = findViewById(R.id.linearlayout_catalogue);
+        priceSpinner = findViewById(R.id.spinner_price);
         mrpTil = findViewById(R.id.til_item_mrp);
         mrpIv = findViewById(R.id.iv_mrp);
         sellingPriceIv = findViewById(R.id.iv_selling_price);
         sellingPriceTil = findViewById(R.id.til_item_sellingprice);
+        priceHintTv = findViewById(R.id.tv_price_hint);
         submitBtn = findViewById(R.id.btn_submit);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.price_options_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        priceSpinner.setAdapter(adapter);
+        priceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                final String selectedOption = (String) parent.getItemAtPosition(position);
+                handleChangeInPriceOptions(selectedOption);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         productRadioBtn.setChecked(true);
 
@@ -187,6 +211,35 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+    }
+
+    private void handleChangeInPriceOptions(String selectedOption) {
+        switch (selectedOption) {
+            case "Paid":
+                sellingPriceIv.setVisibility(View.VISIBLE);
+                sellingPriceTil.setVisibility(View.VISIBLE);
+                mrpIv.setVisibility(View.VISIBLE);
+                mrpTil.setVisibility(View.VISIBLE);
+                priceHintTv.setVisibility(View.GONE);
+                break;
+            case "Free Demo":
+                sellingPriceIv.setVisibility(View.GONE);
+                sellingPriceTil.setVisibility(View.GONE);
+                mrpIv.setVisibility(View.GONE);
+                mrpTil.setVisibility(View.GONE);
+                priceHintTv.setVisibility(View.VISIBLE);
+                priceHintTv.setText("People can contact you to request a free demo for this product.\nNo price will be listed on the product.");
+                break;
+            case "Request Price":
+                sellingPriceIv.setVisibility(View.GONE);
+                sellingPriceTil.setVisibility(View.GONE);
+                mrpIv.setVisibility(View.GONE);
+                mrpTil.setVisibility(View.GONE);
+                priceHintTv.setVisibility(View.VISIBLE);
+                priceHintTv.setText("Buyers will have to contact you and ask for price. No price will be listed on the product." +
+                        "\n\nThis is NOT recommended as hiding price from buyers can lead to lower sales.");
+                break;
+        }
     }
 
     private void fetchItemDetails() {

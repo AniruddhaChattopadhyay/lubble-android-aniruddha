@@ -190,8 +190,8 @@
                     android:gravity="top|left"
                     android:inputType="textMultiLine"
                     android:maxLines="7"
-                    android:scrollbars="vertical"
-                    android:minLines="3" />
+                    android:minLines="3"
+                    android:scrollbars="vertical" />
 
             </android.support.design.widget.TextInputLayout>
 
@@ -201,6 +201,25 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/til_item_desc"
                 android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tv_pricing_details_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/linearlayout_catalogue"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:text="Pricing Details"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+            <Spinner
+                android:id="@+id/spinner_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_pricing_details_hint"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="14dp"
+                android:layout_toRightOf="@id/iv_event_desc" />
 
             <ImageView
                 android:id="@+id/iv_mrp"
@@ -215,7 +234,7 @@
                 android:id="@+id/til_item_mrp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/linearlayout_catalogue"
+                android:layout_below="@id/spinner_price"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_toRightOf="@id/iv_event_desc"
@@ -254,11 +273,20 @@
 
             </android.support.design.widget.TextInputLayout>
 
+            <TextView
+                android:id="@+id/tv_price_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/spinner_price"
+                android:layout_below="@id/til_item_sellingprice"
+                android:layout_marginBottom="16dp"
+                android:layout_marginTop="8dp" />
+
             <LinearLayout
                 android:id="@+id/hint_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/til_item_sellingprice"
+                android:layout_below="@id/tv_price_hint"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="8dp"
                 android:gravity="center"

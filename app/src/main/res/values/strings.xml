@@ -161,4 +161,9 @@
     <string name="phone_error">Please enter your phone number</string>
     <string name="chat_with_seller">Chat with Seller</string>
     <string name="edit_item">Edit Item</string>
+    <string-array name="price_options_array">
+        <item>Paid</item>
+        <item>Free Demo</item>
+        <item>Request Price</item>
+    </string-array>
 </resources>
