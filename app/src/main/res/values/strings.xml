@@ -163,7 +163,6 @@
     <string name="edit_item">Edit Item</string>
     <string-array name="price_options_array">
         <item>Paid</item>
-        <item>Free Demo</item>
         <item>Request Price</item>
     </string-array>
 </resources>

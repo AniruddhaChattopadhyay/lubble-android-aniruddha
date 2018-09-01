@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollview_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -195,20 +196,13 @@
 
             </android.support.design.widget.TextInputLayout>
 
-            <LinearLayout
-                android:id="@+id/linearlayout_catalogue"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/til_item_desc"
-                android:orientation="vertical" />
-
             <TextView
                 android:id="@+id/tv_pricing_details_hint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/linearlayout_catalogue"
-                android:layout_marginTop="8dp"
+                android:layout_below="@id/til_item_desc"
                 android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
                 android:text="Pricing Details"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
@@ -217,76 +211,90 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_pricing_details_hint"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="14dp"
-                android:layout_toRightOf="@id/iv_event_desc" />
+                android:layout_marginTop="14dp" />
 
-            <ImageView
-                android:id="@+id/iv_mrp"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignBottom="@id/til_item_mrp"
-                android:layout_marginBottom="10dp"
-                android:tint="@color/darker_gray"
-                app:srcCompat="@drawable/ic_price_tag" />
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/til_item_mrp"
+            <RelativeLayout
+                android:id="@+id/container_pricing"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/spinner_price"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_toRightOf="@id/iv_event_desc"
-                android:hint="@string/mrp">
+                android:layout_below="@id/spinner_price">
 
-                <EditText
+                <TextView
+                    android:id="@+id/tv_price_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:layout_marginTop="8dp"
+                    android:maxLines="7"
+                    tools:text="@tools:sample/lorem/random" />
+
+                <LinearLayout
+                    android:id="@+id/linearlayout_catalogue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number" />
+                    android:layout_below="@id/tv_price_hint"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical" />
 
-            </android.support.design.widget.TextInputLayout>
+                <ImageView
+                    android:id="@+id/iv_mrp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignBottom="@id/til_item_mrp"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_price_tag" />
 
-            <ImageView
-                android:id="@+id/iv_selling_price"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignBottom="@id/til_item_sellingprice"
-                android:layout_marginBottom="10dp"
-                android:tint="@color/darker_gray"
-                app:srcCompat="@drawable/ic_circle_rupee" />
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/til_item_sellingprice"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/til_item_mrp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_toRightOf="@id/iv_selling_price"
-                android:hint="@string/selling_price">
-
-                <EditText
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_item_mrp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="number" />
+                    android:layout_below="@id/tv_price_hint"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@id/iv_mrp"
+                    android:hint="@string/mrp">
 
-            </android.support.design.widget.TextInputLayout>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
 
-            <TextView
-                android:id="@+id/tv_price_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@id/spinner_price"
-                android:layout_below="@id/til_item_sellingprice"
-                android:layout_marginBottom="16dp"
-                android:layout_marginTop="8dp" />
+                </android.support.design.widget.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/iv_selling_price"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignBottom="@id/til_item_sellingprice"
+                    android:layout_marginBottom="10dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_circle_rupee" />
+
+                <android.support.design.widget.TextInputLayout
+                    android:id="@+id/til_item_sellingprice"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/til_item_mrp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@id/iv_selling_price"
+                    android:hint="@string/selling_price">
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+
+                </android.support.design.widget.TextInputLayout>
+
+            </RelativeLayout>
 
             <LinearLayout
                 android:id="@+id/hint_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_price_hint"
+                android:layout_below="@id/container_pricing"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="8dp"
                 android:gravity="center"

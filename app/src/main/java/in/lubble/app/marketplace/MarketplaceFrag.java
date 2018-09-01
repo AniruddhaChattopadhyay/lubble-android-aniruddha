@@ -203,7 +203,7 @@ public class MarketplaceFrag extends Fragment {
             public void onResponse(Call<MarketplaceData> call, Response<MarketplaceData> response) {
                 progressBar.setVisibility(View.GONE);
                 final MarketplaceData marketplaceData = response.body();
-                if (marketplaceData != null && isAdded() && isVisible()) {
+                if (response.isSuccessful() && marketplaceData != null && isAdded() && isVisible()) {
                     final Category category1 = marketplaceData.getShowcaseCategories().get(0);
                     cat1Name.setText(category1.getName());
                     for (Item item : category1.getItems()) {
@@ -237,7 +237,7 @@ public class MarketplaceFrag extends Fragment {
                         pagerContainer.setVisibility(View.GONE);
                     }
                 } else if (isAdded() && isVisible()) {
-                    Crashlytics.logException(new IllegalArgumentException("marketplaceData is NULL"));
+                    Crashlytics.log("Marketplace bad response");
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }

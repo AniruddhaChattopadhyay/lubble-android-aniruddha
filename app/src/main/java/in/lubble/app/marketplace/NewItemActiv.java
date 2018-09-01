@@ -113,6 +113,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private int selectedItemType = ITEM_PRODUCT;
     private int itemId = -1;
     private ProgressDialog progressDialog;
+    @Nullable
+    private Item item;
 
     public static void open(Context context, int itemId) {
         final Intent intent = new Intent(context, NewItemActiv.class);
@@ -213,28 +215,39 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    private String selectedPriceOption = "PAID";
+
     private void handleChangeInPriceOptions(String selectedOption) {
-        switch (selectedOption) {
-            case "Paid":
-                sellingPriceIv.setVisibility(View.VISIBLE);
-                sellingPriceTil.setVisibility(View.VISIBLE);
-                mrpIv.setVisibility(View.VISIBLE);
-                mrpTil.setVisibility(View.VISIBLE);
+        selectedPriceOption = selectedOption;
+        switch (selectedOption.toUpperCase()) {
+            case "PAID":
+                if (selectedItemType == Item.ITEM_PRODUCT) {
+                    sellingPriceIv.setVisibility(View.VISIBLE);
+                    sellingPriceTil.setVisibility(View.VISIBLE);
+                    mrpIv.setVisibility(View.VISIBLE);
+                    mrpTil.setVisibility(View.VISIBLE);
+                } else {
+                    if (itemId != -1 && item != null) {
+                        showCatalogue(item.getServiceDataList());
+                    } else {
+                        showCatalogue(null);
+                    }
+                }
                 priceHintTv.setVisibility(View.GONE);
                 break;
-            case "Free Demo":
-                sellingPriceIv.setVisibility(View.GONE);
-                sellingPriceTil.setVisibility(View.GONE);
-                mrpIv.setVisibility(View.GONE);
-                mrpTil.setVisibility(View.GONE);
-                priceHintTv.setVisibility(View.VISIBLE);
-                priceHintTv.setText("People can contact you to request a free demo for this product.\nNo price will be listed on the product.");
-                break;
-            case "Request Price":
-                sellingPriceIv.setVisibility(View.GONE);
-                sellingPriceTil.setVisibility(View.GONE);
-                mrpIv.setVisibility(View.GONE);
-                mrpTil.setVisibility(View.GONE);
+            case "REQUEST PRICE":
+                if (selectedItemType == Item.ITEM_PRODUCT) {
+                    sellingPriceIv.setVisibility(View.GONE);
+                    sellingPriceTil.setVisibility(View.GONE);
+                    mrpIv.setVisibility(View.GONE);
+                    mrpTil.setVisibility(View.GONE);
+                } else {
+                    if (itemId != -1 && item != null) {
+                        showCatalogue(item.getServiceDataList());
+                    } else {
+                        showCatalogue(null);
+                    }
+                }
                 priceHintTv.setVisibility(View.VISIBLE);
                 priceHintTv.setText("Buyers will have to contact you and ask for price. No price will be listed on the product." +
                         "\n\nThis is NOT recommended as hiding price from buyers can lead to lower sales.");
@@ -252,7 +265,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onResponse(Call<Item> call, Response<Item> response) {
                 progressDialog.dismiss();
-                final Item item = response.body();
+                item = response.body();
                 if (item != null) {
                     nameTil.getEditText().setText(item.getName());
                     descTil.getEditText().setText(item.getDescription());
@@ -383,6 +396,13 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         //editText1.setLayoutParams(lp1);
         textInputLayout1.setHint("Price");
         textInputLayout1.getEditText().setInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_SIGNED);
+        if (selectedPriceOption.equalsIgnoreCase("PAID")) {
+            textInputLayout1.getEditText().setText("");
+            textInputLayout1.getEditText().setEnabled(true);
+        } else {
+            textInputLayout1.getEditText().setText("On Request");
+            textInputLayout1.getEditText().setEnabled(false);
+        }
 
         linearLayout.addView(textInputLayout);
         linearLayout.addView(textInputLayout1);
@@ -414,7 +434,13 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         //editText1.setLayoutParams(lp1);
         textInputLayout1.setHint("Price");
         textInputLayout1.getEditText().setInputType(TYPE_NUMBER_FLAG_SIGNED);
-        textInputLayout1.getEditText().setText(String.valueOf(price));
+        if (selectedPriceOption.equalsIgnoreCase("PAID")) {
+            textInputLayout1.getEditText().setText(String.valueOf(price));
+            textInputLayout1.getEditText().setEnabled(true);
+        } else {
+            textInputLayout1.getEditText().setText("On Request");
+            textInputLayout1.getEditText().setEnabled(false);
+        }
 
         linearLayout.addView(textInputLayout);
         linearLayout.addView(textInputLayout1);
