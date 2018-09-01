@@ -17,6 +17,8 @@ import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.PhotoData;
 
+import static in.lubble.app.models.marketplace.Item.ITEM_PRICING_PAID;
+
 public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "SmallItemAdapter";
@@ -63,20 +65,25 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             viewHolder.nameTv.setText(item.getName());
             if (item.getType() == Item.ITEM_SERVICE) {
                 final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
-                if (startingPrice < 0) {
-                    viewHolder.priceTv.setText("Request Price");
-                } else {
+                if (item.getPricingOption() == ITEM_PRICING_PAID) {
                     viewHolder.priceTv.setText("₹" + startingPrice + " onwards");
+                } else {
+                    viewHolder.priceTv.setText("Request Price");
                 }
                 viewHolder.mrpTv.setVisibility(View.GONE);
             } else {
-                viewHolder.priceTv.setText("₹" + item.getSellingPrice());
-                if (item.getMrp().equals(item.getSellingPrice())) {
-                    viewHolder.mrpTv.setVisibility(View.GONE);
+                if (item.getPricingOption() == ITEM_PRICING_PAID) {
+                    viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+                    if (item.getMrp().equals(item.getSellingPrice())) {
+                        viewHolder.mrpTv.setVisibility(View.GONE);
+                    } else {
+                        viewHolder.mrpTv.setVisibility(View.VISIBLE);
+                        viewHolder.mrpTv.setText("₹" + item.getMrp());
+                        viewHolder.mrpTv.setPaintFlags(viewHolder.mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    }
                 } else {
-                    viewHolder.mrpTv.setVisibility(View.VISIBLE);
-                    viewHolder.mrpTv.setText("₹" + item.getMrp());
-                    viewHolder.mrpTv.setPaintFlags(viewHolder.mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    viewHolder.priceTv.setText("Request Price");
+                    viewHolder.mrpTv.setVisibility(View.GONE);
                 }
             }
 

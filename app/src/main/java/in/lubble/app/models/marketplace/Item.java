@@ -19,6 +19,9 @@ public class Item {
     public static final int ITEM_APPROVED = 1;
     public static final int ITEM_REJECTED = 2;
 
+    public static final int ITEM_PRICING_PAID = 0;
+    public static final int ITEM_PRICING_ON_REQUEST = 1;
+
     @SerializedName("id")
     @Expose
     private Integer id;
@@ -89,6 +92,9 @@ public class Item {
     @SerializedName("rejection_reason")
     @Expose
     private String rejectionReason;
+    @SerializedName("pricing_option")
+    @Expose
+    private int pricingOption = ITEM_PRICING_PAID;
 
     @Override
     public boolean equals(Object obj) {
@@ -280,5 +286,13 @@ public class Item {
 
     public void setRejectionReason(String rejectionReason) {
         this.rejectionReason = rejectionReason;
+    }
+
+    public int getPricingOption() {
+        return pricingOption;
+    }
+
+    public void setPricingOption(int pricingOption) {
+        this.pricingOption = pricingOption;
     }
 }
