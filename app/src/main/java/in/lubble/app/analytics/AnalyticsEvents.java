@@ -20,4 +20,7 @@ public class AnalyticsEvents {
     public static final String RECOMMEND_BTN_CLICK = "RECOMMEND_BTN_CLICK";
     public static final String VISIT_SHOP_CLICK = "VISIT_SHOP_CLICK";
 
+    public static final String HELP_BTN_CLICKED = "HELP_BTN_CLICKED";
+    public static final String HELP_PHONE_CLICKED = "HELP_PHONE_CLICKED";
+
 }

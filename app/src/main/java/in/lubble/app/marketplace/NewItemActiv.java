@@ -8,12 +8,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -70,6 +72,8 @@ import static android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS;
 import static android.view.Gravity.RIGHT;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.BUCKET_MARKETPLACE;
+import static in.lubble.app.analytics.AnalyticsEvents.HELP_BTN_CLICKED;
+import static in.lubble.app.analytics.AnalyticsEvents.HELP_PHONE_CLICKED;
 import static in.lubble.app.models.marketplace.Item.ITEM_PRODUCT;
 import static in.lubble.app.models.marketplace.Item.ITEM_SERVICE;
 import static in.lubble.app.utils.FileUtils.createImageFile;
@@ -670,14 +674,53 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.new_item_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            // Respond to the action bar's Up/Home button
             case android.R.id.home:
+                // Respond to the action bar's Up/Home button
                 onBackPressed();
+                return true;
+            case R.id.action_help:
+                openHelpBottomSheet();
+                Analytics.triggerEvent(HELP_BTN_CLICKED, this);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openHelpBottomSheet() {
+
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = getLayoutInflater().inflate(R.layout.help_bottom_sheet, null);
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
+
+        final TextView gotItTv = sheetView.findViewById(R.id.tv_got_it);
+        final TextView phoneTv = sheetView.findViewById(R.id.tv_phone_number);
+
+        phoneTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Analytics.triggerEvent(HELP_PHONE_CLICKED, NewItemActiv.this);
+                Intent intent = new Intent(Intent.ACTION_DIAL);
+                intent.setData(Uri.parse("tel:+916361686026"));
+                startActivity(intent);
+            }
+        });
+
+        gotItTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetDialog.dismiss();
+            }
+        });
+
     }
 
     @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
