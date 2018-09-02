@@ -48,7 +48,6 @@
                 android:id="@+id/iv_item_image"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:layout_below="@id/text_toolbar"
                 android:scaleType="centerCrop" />
 
             <LinearLayout

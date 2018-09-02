@@ -10,12 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.marketplace.SellerData;
@@ -58,22 +60,27 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             viewHolder.servicePriceTv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!TextUtils.isEmpty(dmId)) {
-                        ChatActivity.openForDm(context, dmId, null, serviceData.getTitle());
-                    } else {
-                        if (sellerData != null) {
-                            ChatActivity.openForEmptyDm(
-                                    context,
-                                    String.valueOf(sellerData.getId()),
-                                    sellerData.getName(),
-                                    sellerData.getPhotoUrl(),
-                                    serviceData.getTitle()
-                            );
+                    if (sellerData.getId() != LubbleSharedPrefs.getInstance().getSellerId()) {
+                        //allow chat only if the seller is not same as viewing user
+                        if (!TextUtils.isEmpty(dmId)) {
+                            ChatActivity.openForDm(context, dmId, null, serviceData.getTitle());
                         } else {
-                            final IllegalArgumentException throwable = new IllegalArgumentException("Service Data is NULL when trying to request service price");
-                            Log.e(TAG, "onClick: ", throwable);
-                            Crashlytics.logException(throwable);
+                            if (sellerData != null) {
+                                ChatActivity.openForEmptyDm(
+                                        context,
+                                        String.valueOf(sellerData.getId()),
+                                        sellerData.getName(),
+                                        sellerData.getPhotoUrl(),
+                                        serviceData.getTitle()
+                                );
+                            } else {
+                                final IllegalArgumentException throwable = new IllegalArgumentException("Service Data is NULL when trying to request service price");
+                                Log.e(TAG, "onClick: ", throwable);
+                                Crashlytics.logException(throwable);
+                            }
                         }
+                    } else {
+                        Toast.makeText(context, "You cannot chat with yourself :)", Toast.LENGTH_SHORT).show();
                     }
                 }
             });

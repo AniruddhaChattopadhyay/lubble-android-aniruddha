@@ -74,6 +74,7 @@ import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.BUCKET_MARKETPLACE;
 import static in.lubble.app.analytics.AnalyticsEvents.HELP_BTN_CLICKED;
 import static in.lubble.app.analytics.AnalyticsEvents.HELP_PHONE_CLICKED;
+import static in.lubble.app.models.marketplace.Item.ITEM_PRICING_PAID;
 import static in.lubble.app.models.marketplace.Item.ITEM_PRODUCT;
 import static in.lubble.app.models.marketplace.Item.ITEM_SERVICE;
 import static in.lubble.app.utils.FileUtils.createImageFile;
@@ -119,6 +120,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private ProgressDialog progressDialog;
     @Nullable
     private Item item;
+    private int selectedPriceOption = Item.ITEM_PRICING_PAID;
 
     public static void open(Context context, int itemId) {
         final Intent intent = new Intent(context, NewItemActiv.class);
@@ -156,8 +158,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         priceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                final String selectedOption = (String) parent.getItemAtPosition(position);
-                handleChangeInPriceOptions(selectedOption);
+                handleChangeInPriceOptions(position);
             }
 
             @Override
@@ -219,12 +220,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private String selectedPriceOption = "PAID";
-
-    private void handleChangeInPriceOptions(String selectedOption) {
+    private void handleChangeInPriceOptions(int selectedOption) {
         selectedPriceOption = selectedOption;
-        switch (selectedOption.toUpperCase()) {
-            case "PAID":
+        switch (selectedOption) {
+            case Item.ITEM_PRICING_PAID:
                 if (selectedItemType == Item.ITEM_PRODUCT) {
                     sellingPriceIv.setVisibility(View.VISIBLE);
                     sellingPriceTil.setVisibility(View.VISIBLE);
@@ -239,7 +238,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 }
                 priceHintTv.setVisibility(View.GONE);
                 break;
-            case "REQUEST PRICE":
+            case Item.ITEM_PRICING_ON_REQUEST:
                 if (selectedItemType == Item.ITEM_PRODUCT) {
                     sellingPriceIv.setVisibility(View.GONE);
                     sellingPriceTil.setVisibility(View.GONE);
@@ -275,6 +274,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     descTil.getEditText().setText(item.getDescription());
                     mrpTil.getEditText().setText(String.valueOf(item.getMrp()));
                     sellingPriceTil.getEditText().setText(String.valueOf(item.getSellingPrice()));
+                    selectedItemType = item.getType();
                     if (item.getType() == ITEM_PRODUCT) {
                         productRadioBtn.setChecked(true);
                         serviceRadioBtn.setChecked(false);
@@ -286,7 +286,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     }
                     GlideApp.with(NewItemActiv.this)
                             .load(item.getPhotos().get(0).getUrl())
+                            .thumbnail(0.1F)
                             .into(photoIv);
+                    selectedPriceOption = item.getPricingOption();
+                    priceSpinner.setSelection(selectedPriceOption);
                     serviceDataList = item.getServiceDataList();
                     if (serviceDataList != null && serviceDataList.size() > 0) {
                         showCatalogue(item.getServiceDataList());
@@ -400,7 +403,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         //editText1.setLayoutParams(lp1);
         textInputLayout1.setHint("Price");
         textInputLayout1.getEditText().setInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_SIGNED);
-        if (selectedPriceOption.equalsIgnoreCase("PAID")) {
+        if (selectedPriceOption == Item.ITEM_PRICING_PAID) {
             textInputLayout1.getEditText().setText("");
             textInputLayout1.getEditText().setEnabled(true);
         } else {
@@ -438,8 +441,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         //editText1.setLayoutParams(lp1);
         textInputLayout1.setHint("Price");
         textInputLayout1.getEditText().setInputType(TYPE_NUMBER_FLAG_SIGNED);
-        if (selectedPriceOption.equalsIgnoreCase("PAID")) {
-            textInputLayout1.getEditText().setText(String.valueOf(price));
+        if (selectedPriceOption == Item.ITEM_PRICING_PAID) {
+            if (price >= 0) {
+                textInputLayout1.getEditText().setText(String.valueOf(price));
+            }
             textInputLayout1.getEditText().setEnabled(true);
         } else {
             textInputLayout1.getEditText().setText("On Request");
@@ -462,7 +467,11 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
 
                 final ServiceData serviceData
-                        = new ServiceData(nameTil.getEditText().getText().toString(), Integer.parseInt(priceTil.getEditText().getText().toString()));
+                        = new ServiceData();
+                serviceData.setTitle(nameTil.getEditText().getText().toString());
+                if (selectedPriceOption == ITEM_PRICING_PAID) {
+                    serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                }
                 serviceDataList.add(serviceData);
             }
         } else {
@@ -477,10 +486,16 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 if (i - 1 < serviceDataList.size()) {
                     serviceData = serviceDataList.get(i - 1);
                     serviceData.setTitle(nameTil.getEditText().getText().toString());
-                    serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                    if (selectedPriceOption == ITEM_PRICING_PAID) {
+                        serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                    }
                     serviceDataList.set(i - 1, serviceData);
                 } else {
-                    serviceData = new ServiceData(nameTil.getEditText().getText().toString(), Integer.parseInt(priceTil.getEditText().getText().toString()));
+                    serviceData = new ServiceData();
+                    serviceData.setTitle(nameTil.getEditText().getText().toString());
+                    if (selectedPriceOption == ITEM_PRICING_PAID) {
+                        serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                    }
                     serviceDataList.add(serviceData);
                 }
             }
@@ -534,6 +549,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
         params.put("seller", LubbleSharedPrefs.getInstance().getSellerId());
         params.put("type", selectedItemType);
+        params.put("pricing_option", selectedPriceOption);
         params.put("name", nameTil.getEditText().getText().toString());
         params.put("description", descTil.getEditText().getText().toString());
         params.put("category_id", categoryId);

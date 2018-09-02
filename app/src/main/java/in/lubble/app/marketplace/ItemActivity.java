@@ -319,24 +319,35 @@ public class ItemActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
                 if (item != null) {
                     titleTv.setText(item.getName());
-                    if (item.getType() == Item.ITEM_SERVICE) {
-                        final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
-                        if (startingPrice < 0) {
-                            priceTv.setVisibility(View.GONE);
-                            mrpTv.setVisibility(View.GONE);
+
+                    if (item.getPricingOption() == Item.ITEM_PRICING_PAID) {
+                        if (item.getType() == Item.ITEM_SERVICE) {
+                            if (item.getPricingOption() == Item.ITEM_PRICING_PAID) {
+                                final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
+                                if (startingPrice < 0) {
+                                    priceTv.setVisibility(View.GONE);
+                                    mrpTv.setVisibility(View.GONE);
+                                } else {
+                                    priceTv.setText("₹" + startingPrice + " onwards");
+                                    mrpTv.setVisibility(View.GONE);
+                                }
+                            }
                         } else {
-                            priceTv.setText("₹" + startingPrice + " onwards");
-                            mrpTv.setVisibility(View.GONE);
+                            if (item.getPricingOption() == Item.ITEM_PRICING_PAID) {
+                                priceTv.setText("₹" + item.getSellingPrice());
+                                if (item.getMrp().equals(item.getSellingPrice())) {
+                                    mrpTv.setVisibility(View.GONE);
+                                } else {
+                                    mrpTv.setText(String.valueOf(item.getMrp()));
+                                    mrpTv.setVisibility(View.VISIBLE);
+                                }
+                            }
                         }
                     } else {
-                        priceTv.setText("₹" + item.getSellingPrice());
-                        if (item.getMrp().equals(item.getSellingPrice())) {
-                            mrpTv.setVisibility(View.GONE);
-                        } else {
-                            mrpTv.setText(String.valueOf(item.getMrp()));
-                            mrpTv.setVisibility(View.VISIBLE);
-                        }
+                        priceTv.setText("Request Price");
+                        mrpTv.setVisibility(View.GONE);
                     }
+
                     descTv.setText(item.getDescription());
 
                     if (item.getType() == Item.ITEM_SERVICE) {

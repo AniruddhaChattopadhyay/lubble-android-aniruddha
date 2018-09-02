@@ -11,11 +11,6 @@ public class ServiceData {
     @SerializedName("price")
     private Integer price = -1;
 
-    public ServiceData(String title, Integer price) {
-        this.title = title;
-        this.price = price;
-    }
-
     public String getTitle() {
         return title;
     }
