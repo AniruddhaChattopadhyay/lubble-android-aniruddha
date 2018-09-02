@@ -288,10 +288,12 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                         productRadioBtn.setEnabled(false);
                         serviceRadioBtn.setChecked(true);
                     }
-                    GlideApp.with(NewItemActiv.this)
-                            .load(item.getPhotos().get(0).getUrl())
-                            .thumbnail(0.1F)
-                            .into(photoIv);
+                    if (item.getPhotos() != null && !item.getPhotos().isEmpty()) {
+                        GlideApp.with(NewItemActiv.this)
+                                .load(item.getPhotos().get(0).getUrl())
+                                .thumbnail(0.1F)
+                                .into(photoIv);
+                    }
                     selectedPriceOption = item.getPricingOption();
                     priceSpinner.setSelection(selectedPriceOption);
                     serviceDataList = item.getServiceDataList();
@@ -368,10 +370,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         deleteServiceBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (serviceDataList != null) {
-                    serviceDataList.remove(serviceDataList.size() - 1);
-                }
                 if (catalogueLinearLayout.getChildCount() > 3) {
+                    if (serviceDataList != null) {
+                        serviceDataList.remove(serviceDataList.size() - 1);
+                    }
                     catalogueLinearLayout.removeViewAt(catalogueLinearLayout.getChildCount() - 2);
                 } else {
                     Toast.makeText(NewItemActiv.this, "Please add at least 1 service", Toast.LENGTH_SHORT).show();
@@ -431,7 +433,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         final EditText editText = new EditText(this);
         //editText.setLayoutParams(lp);
         textInputLayout.addView(editText);
-        textInputLayout.getEditText().setInputType(TYPE_TEXT_FLAG_CAP_WORDS);
+        textInputLayout.getEditText().setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_FLAG_CAP_WORDS);
         textInputLayout.setHint("Service Name");
         textInputLayout.getEditText().setText(title);
 
@@ -444,7 +446,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         textInputLayout1.addView(editText1);
         //editText1.setLayoutParams(lp1);
         textInputLayout1.setHint("Price");
-        textInputLayout1.getEditText().setInputType(TYPE_NUMBER_FLAG_SIGNED);
+        textInputLayout1.getEditText().setInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_SIGNED);
         if (selectedPriceOption == Item.ITEM_PRICING_PAID) {
             if (price >= 0) {
                 textInputLayout1.getEditText().setText(String.valueOf(price));
