@@ -648,14 +648,14 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         } else {
             descTil.setError(null);
         }
-        if (!isValidString(mrpTil.getEditText().getText().toString()) && selectedItemType == ITEM_PRODUCT) {
+        if (selectedItemType == ITEM_PRODUCT && selectedPriceOption == Item.ITEM_PRICING_PAID && !isValidString(mrpTil.getEditText().getText().toString())) {
             mrpTil.setError(getString(R.string.mrp_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             mrpTil.setError(null);
         }
-        if (!isValidString(sellingPriceTil.getEditText().getText().toString()) && selectedItemType == ITEM_PRODUCT) {
+        if (selectedItemType == ITEM_PRODUCT && !isValidString(sellingPriceTil.getEditText().getText().toString()) && selectedItemType == ITEM_PRODUCT) {
             sellingPriceTil.setError(getString(R.string.selling_price_error));
             parentScrollView.smoothScrollTo(0, 0);
             return false;
