@@ -448,7 +448,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         textInputLayout1.setHint("Price");
         textInputLayout1.getEditText().setInputType(TYPE_CLASS_NUMBER | TYPE_NUMBER_FLAG_SIGNED);
         if (selectedPriceOption == Item.ITEM_PRICING_PAID) {
-            if (price >= 0) {
+            if (price != null && price >= 0) {
                 textInputLayout1.getEditText().setText(String.valueOf(price));
             } else {
                 textInputLayout1.getEditText().setText("");
@@ -479,6 +479,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 serviceData.setTitle(nameTil.getEditText().getText().toString());
                 if (selectedPriceOption == ITEM_PRICING_PAID) {
                     serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                } else {
+                    serviceData.setPrice(null);
                 }
                 serviceDataList.add(serviceData);
             }
@@ -594,7 +596,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                         jsonObject.put("id", serviceData.getId());
                     }
                     jsonObject.put("title", serviceData.getTitle());
-                    jsonObject.put("price", serviceData.getPrice());
+                    jsonObject.put("price", serviceData.getPrice() == null ? JSONObject.NULL : serviceData.getPrice());
                     serviceCatalog.put(jsonObject);
                 } catch (JSONException e) {
                     e.printStackTrace();

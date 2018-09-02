@@ -54,7 +54,7 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         viewHolder.serviceNameTv.setText(serviceData.getTitle());
         final Integer price = serviceData.getPrice();
-        if (price < 0) {
+        if (price == null || price < 0) {
             viewHolder.servicePriceTv.setText("Ask for price");
             viewHolder.servicePriceTv.setTextColor(ContextCompat.getColor(context, R.color.link_blue));
             viewHolder.servicePriceTv.setOnClickListener(new View.OnClickListener() {
