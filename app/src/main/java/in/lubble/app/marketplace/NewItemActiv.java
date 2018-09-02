@@ -272,8 +272,12 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 if (item != null) {
                     nameTil.getEditText().setText(item.getName());
                     descTil.getEditText().setText(item.getDescription());
-                    mrpTil.getEditText().setText(String.valueOf(item.getMrp()));
-                    sellingPriceTil.getEditText().setText(String.valueOf(item.getSellingPrice()));
+                    if (item.getMrp() != null) {
+                        mrpTil.getEditText().setText(String.valueOf(item.getMrp()));
+                    }
+                    if (item.getSellingPrice() != null) {
+                        sellingPriceTil.getEditText().setText(String.valueOf(item.getSellingPrice()));
+                    }
                     selectedItemType = item.getType();
                     if (item.getType() == ITEM_PRODUCT) {
                         productRadioBtn.setChecked(true);
@@ -416,7 +420,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         catalogueLinearLayout.addView(linearLayout, pos);
     }
 
-    private void addNewService(int pos, String title, int price) {
+    private void addNewService(Integer pos, String title, Integer price) {
         final LinearLayout linearLayout = new LinearLayout(this);
         linearLayout.setOrientation(LinearLayout.HORIZONTAL);
         linearLayout.setWeightSum(10);
@@ -444,6 +448,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         if (selectedPriceOption == Item.ITEM_PRICING_PAID) {
             if (price >= 0) {
                 textInputLayout1.getEditText().setText(String.valueOf(price));
+            } else {
+                textInputLayout1.getEditText().setText("");
             }
             textInputLayout1.getEditText().setEnabled(true);
         } else {
@@ -488,6 +494,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     serviceData.setTitle(nameTil.getEditText().getText().toString());
                     if (selectedPriceOption == ITEM_PRICING_PAID) {
                         serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                    } else {
+                        serviceData.setPrice(null);
                     }
                     serviceDataList.set(i - 1, serviceData);
                 } else {
@@ -495,6 +503,8 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                     serviceData.setTitle(nameTil.getEditText().getText().toString());
                     if (selectedPriceOption == ITEM_PRICING_PAID) {
                         serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                    } else {
+                        serviceData.setPrice(null);
                     }
                     serviceDataList.add(serviceData);
                 }
@@ -555,11 +565,20 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         params.put("category_id", categoryId);
         params.put("approval_status", Item.ITEM_PENDING_APPROVAL);
         if (selectedItemType == ITEM_PRODUCT) {
-            params.put("mrp", mrpTil.getEditText().getText().toString());
-            params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
+            if (selectedPriceOption == ITEM_PRICING_PAID) {
+                params.put("mrp", mrpTil.getEditText().getText().toString());
+                params.put("selling_price", sellingPriceTil.getEditText().getText().toString());
+            } else {
+                params.put("mrp", null);
+                params.put("selling_price", null);
+            }
         } else {
-            int minValueService = getMinValueService();
-            params.put("starting_price", String.valueOf(minValueService));
+            if (selectedPriceOption == ITEM_PRICING_PAID) {
+                int minValueService = getMinValueService();
+                params.put("starting_price", String.valueOf(minValueService));
+            } else {
+                params.put("starting_price", null);
+            }
         }
         if (itemId == -1) {
             params.put("client_timestamp", System.currentTimeMillis());
@@ -650,14 +669,12 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         }
         if (selectedItemType == ITEM_PRODUCT && selectedPriceOption == Item.ITEM_PRICING_PAID && !isValidString(mrpTil.getEditText().getText().toString())) {
             mrpTil.setError(getString(R.string.mrp_error));
-            parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             mrpTil.setError(null);
         }
-        if (selectedItemType == ITEM_PRODUCT && !isValidString(sellingPriceTil.getEditText().getText().toString()) && selectedItemType == ITEM_PRODUCT) {
+        if (selectedItemType == ITEM_PRODUCT && selectedPriceOption == Item.ITEM_PRICING_PAID && !isValidString(sellingPriceTil.getEditText().getText().toString())) {
             sellingPriceTil.setError(getString(R.string.selling_price_error));
-            parentScrollView.smoothScrollTo(0, 0);
             return false;
         } else {
             sellingPriceTil.setError(null);
