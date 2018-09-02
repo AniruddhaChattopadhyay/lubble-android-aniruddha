@@ -10,9 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 
 import static in.lubble.app.marketplace.SliderData.CATEGORY;
+import static in.lubble.app.marketplace.SliderData.DASH;
 import static in.lubble.app.marketplace.SliderData.ITEM;
 import static in.lubble.app.marketplace.SliderData.SELLER;
 
@@ -73,7 +75,7 @@ public class SlidePageFrag extends Fragment {
             public void onClick(View v) {
                 final int clickType = sliderData.getClickType();
                 final int clickId = sliderData.getClickId();
-                if (clickId != -1 && clickType != -1) {
+                if (clickType != -1) {
                     switch (clickType) {
                         case ITEM:
                             getContext().startActivity(ItemActivity.getIntent(getContext(), clickId));
@@ -83,6 +85,16 @@ public class SlidePageFrag extends Fragment {
                             break;
                         case SELLER:
                             ItemListActiv.open(getContext(), true, clickId);
+                            break;
+                        case DASH:
+                            final int sellerId = LubbleSharedPrefs.getInstance().getSellerId();
+                            if (sellerId == -1) {
+                                // no seller ID found, start activ to create a new seller
+                                SellerEditActiv.open(getContext());
+                            } else {
+                                // seller ID found, open dashboard
+                                getContext().startActivity(SellerDashActiv.getIntent(getContext(), sellerId, false));
+                            }
                             break;
                     }
                 }
