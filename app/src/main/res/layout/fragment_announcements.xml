@@ -18,8 +18,7 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
-        android:layout_marginTop="8dp"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_marginTop="8dp" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_new_announcement"

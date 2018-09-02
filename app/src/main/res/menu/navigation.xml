@@ -7,6 +7,11 @@
         android:title="Chats" />
 
     <item
+        android:id="@+id/navigation_mplace"
+        android:icon="@drawable/ic_shopping_cart_black_24dp"
+        android:title="Market" />
+
+    <item
         android:id="@+id/navigation_events"
         android:icon="@drawable/ic_event_black_24dp"
         android:title="Events" />

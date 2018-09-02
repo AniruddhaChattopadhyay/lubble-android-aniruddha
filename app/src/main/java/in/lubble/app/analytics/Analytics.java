@@ -20,6 +20,12 @@ public class Analytics {
         FirebaseAnalytics.getInstance(context).setCurrentScreen((Activity) context, simpleName, null);
     }
 
+    public static void triggerScreenEvent(Context context, Object className, Bundle attributes) {
+        final String simpleName = ((Class<?>) className).getSimpleName();
+        triggerEvent(simpleName, attributes, context);
+        FirebaseAnalytics.getInstance(context).setCurrentScreen((Activity) context, simpleName, null);
+    }
+
     public static void triggerEvent(String title, Context context) {
         if (context != null) {
             Bundle attributes = new Bundle();

@@ -14,9 +14,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -24,6 +26,8 @@ import in.lubble.app.models.ChatData;
 
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
+import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
 /**
@@ -36,6 +40,7 @@ public class UploadFileService extends BaseTaskService {
     private static final String TAG = "UploadFileService";
     public static final int BUCKET_DEFAULT = 362;
     public static final int BUCKET_CONVO = 491;
+    public static final int BUCKET_MARKETPLACE = 839;
 
     /**
      * Intent Actions
@@ -53,7 +58,10 @@ public class UploadFileService extends BaseTaskService {
     public static final String EXTRA_UPLOAD_PATH = "extra_upload_path";
     public static final String EXTRA_DOWNLOAD_URL = "extra_download_url";
     public static final String EXTRA_CAPTION = "extra_caption";
-    public static final String EXTRA_GROUP_ID = "extra_group_id";
+    public static final String EXTRA_CHAT_ID = "extra_chat_id";
+    public static final String EXTRA_IS_DM = "EXTRA_IS_DM";
+    public static final String EXTRA_AUTHOR_ID = "EXTRA_AUTHOR_ID";
+    public static final String EXTRA_IS_AUTHOR_SELLER = "EXTRA_IS_AUTHOR_SELLER";
 
     private StorageReference mStorageRef;
 
@@ -67,32 +75,77 @@ public class UploadFileService extends BaseTaskService {
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand:" + intent + ":" + startId);
 
-        final boolean isConvoBucket = intent.getIntExtra(EXTRA_BUCKET, BUCKET_DEFAULT) == BUCKET_CONVO;
-        if (isConvoBucket) {
+        final int bucketId = intent.getIntExtra(EXTRA_BUCKET, BUCKET_DEFAULT);
+        if (bucketId == BUCKET_CONVO) {
             mStorageRef = getConvoBucketRef();
+        } else if (bucketId == BUCKET_MARKETPLACE) {
+            mStorageRef = getMarketplaceBucketRef();
         } else {
             mStorageRef = getDefaultBucketRef();
         }
 
+        taskStarted();
+
         if (ACTION_UPLOAD.equals(intent.getAction())) {
-            Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
-            uploadFromUri(
-                    fileUri,
-                    intent.getStringExtra(EXTRA_FILE_NAME),
-                    intent.getStringExtra(EXTRA_UPLOAD_PATH),
-                    intent.getStringExtra(EXTRA_CAPTION),
-                    intent.getStringExtra(EXTRA_GROUP_ID),
-                    isConvoBucket
-            );
+            if (bucketId == BUCKET_MARKETPLACE) {
+                Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
+                uploadFromUriWithMetadata(
+                        fileUri,
+                        intent.getStringExtra(EXTRA_FILE_NAME),
+                        intent.getStringExtra(EXTRA_UPLOAD_PATH),
+                        intent.getStringExtra(EXTRA_CAPTION),
+                        intent.getStringExtra(EXTRA_CHAT_ID)
+                );
+            } else {
+                final DmInfoData dmInfoData = new DmInfoData(
+                        intent.getStringExtra(EXTRA_AUTHOR_ID),
+                        intent.getBooleanExtra(EXTRA_IS_DM, false),
+                        intent.getBooleanExtra(EXTRA_IS_AUTHOR_SELLER, false)
+                );
+                Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
+                uploadFromUri(
+                        fileUri,
+                        intent.getStringExtra(EXTRA_FILE_NAME),
+                        intent.getStringExtra(EXTRA_UPLOAD_PATH),
+                        intent.getStringExtra(EXTRA_CAPTION),
+                        intent.getStringExtra(EXTRA_CHAT_ID),
+                        bucketId == BUCKET_CONVO,
+                        null,
+                        dmInfoData
+                );
+            }
         }
 
         return START_REDELIVER_INTENT;
     }
 
-    private void uploadFromUri(final Uri fileUri, String fileName, String uploadPath, final String caption, final String groupId, final boolean toTransmit) {
+
+    private void uploadFromUriWithMetadata(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
-        taskStarted();
+        showProgressNotification(getString(R.string.progress_uploading), 0, 0);
+
+        FirebaseAuth.getInstance().getAccessToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+            @Override
+            public void onComplete(@NonNull Task<GetTokenResult> task) {
+                if (task.isSuccessful()) {
+                    // Create file metadata including the content type
+                    StorageMetadata metadata = new StorageMetadata.Builder()
+                            .setContentType("image/jpg")
+                            .setCustomMetadata("uid", FirebaseAuth.getInstance().getUid())
+                            .setCustomMetadata("token", task.getResult().getToken())
+                            .build();
+                    uploadFromUri(fileUri, fileName, uploadPath, caption, groupId, false, metadata, null);
+                } else {
+                    taskCompleted();
+                }
+            }
+        });
+    }
+
+    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId,
+                               final boolean toTransmit, @Nullable StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) {
+        Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference photoRef = mStorageRef.child(uploadPath)
@@ -100,7 +153,13 @@ public class UploadFileService extends BaseTaskService {
 
         // Upload file to Firebase Storage
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
-        photoRef.putFile(fileUri).
+        final UploadTask uploadTask;
+        if (metadata != null) {
+            uploadTask = photoRef.putFile(fileUri, metadata);
+        } else {
+            uploadTask = photoRef.putFile(fileUri);
+        }
+        uploadTask.
                 addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
@@ -122,7 +181,7 @@ public class UploadFileService extends BaseTaskService {
                                 if (task.isSuccessful()) {
                                     final Uri downloadUri = task.getResult();
                                     // [START_EXCLUDE]
-                                    broadcastUploadFinished(downloadUri, fileUri, toTransmit, caption, groupId);
+                                    broadcastUploadFinished(downloadUri, fileUri, toTransmit, caption, groupId, dmInfoData);
                                     showUploadFinishedNotification(downloadUri, fileUri, toTransmit);
                                     taskCompleted();
                                     // [END_EXCLUDE]
@@ -130,7 +189,7 @@ public class UploadFileService extends BaseTaskService {
                                     Log.d(TAG, "onComplete: failed");
 
                                     // [START_EXCLUDE]
-                                    broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId);
+                                    broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId, dmInfoData);
                                     showUploadFinishedNotification(null, fileUri, toTransmit);
                                     taskCompleted();
                                     // [END_EXCLUDE]
@@ -147,7 +206,7 @@ public class UploadFileService extends BaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId);
+                        broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId, dmInfoData);
                         showUploadFinishedNotification(null, fileUri, toTransmit);
                         taskCompleted();
                         // [END_EXCLUDE]
@@ -161,7 +220,8 @@ public class UploadFileService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit, String caption, String groupId) {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit, String caption,
+                                            String chatId, DmInfoData dmInfoData) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
@@ -171,19 +231,25 @@ public class UploadFileService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            transmitMedia(downloadUrl, caption, groupId);
+            transmitMedia(downloadUrl, caption, chatId, dmInfoData.isDm, dmInfoData.authorId, dmInfoData.isAuthorSeller);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())
                 .sendBroadcast(broadcast);
     }
 
-    private void transmitMedia(Uri downloadUrl, String caption, String groupId) {
-
-        final DatabaseReference msgReference = getMessagesRef().child(groupId);
+    private void transmitMedia(Uri downloadUrl, String caption, String chatId, boolean isDm, String authorId, boolean isAuthorSeller) {
+        final DatabaseReference msgReference;
+        if (isDm) {
+            msgReference = getDmMessagesRef().child(chatId);
+        } else {
+            msgReference = getMessagesRef().child(chatId);
+        }
 
         final ChatData chatData = new ChatData();
-        chatData.setAuthorUid(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        chatData.setAuthorUid(authorId);
+        chatData.setAuthorIsSeller(isAuthorSeller);
+        chatData.setIsDm(isDm);
         chatData.setMessage(caption);
         chatData.setImgUrl(downloadUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());
@@ -221,6 +287,19 @@ public class UploadFileService extends BaseTaskService {
         filter.addAction(UPLOAD_ERROR);
 
         return filter;
+    }
+
+    private class DmInfoData {
+        private String authorId;
+        private boolean isDm;
+        private boolean isAuthorSeller;
+
+        DmInfoData(String authorId, boolean isDm, boolean isAuthorSeller) {
+            this.authorId = authorId;
+            this.isDm = isDm;
+            this.isAuthorSeller = isAuthorSeller;
+        }
+
     }
 
 }

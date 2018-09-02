@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -29,12 +30,15 @@ import in.lubble.app.models.ChatData;
 import in.lubble.app.models.MsgInfoData;
 import in.lubble.app.models.ProfileInfo;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class MsgInfoActivity extends AppCompatActivity {
 
     private static final String TAG = "MsgInfoActivity";
     private static final String ARG_GROUP_ID = "ARG_GROUP_ID";
+    private static final String ARG_IS_DM = "ARG_IS_DM";
+    private static final String ARG_AUTHOR_ID = "ARG_AUTHOR_ID";
     private static final String ARG_CHAT_ID = "ARG_CHAT_ID";
     private static final String ARG_SHOW_READ_RECEIPTS = "ARG_SHOW_READ_RECEIPTS";
 
@@ -43,8 +47,8 @@ public class MsgInfoActivity extends AppCompatActivity {
     private TextView readByHeaderTv;
     private RecyclerView readRecyclerView;
     private RecyclerView lubbRecyclerView;
-    private String groupId;
     private String chatId;
+    private String msgId;
     private MsgReceiptAdapter readAdapter;
     private MsgReceiptAdapter lubbAdapter;
     @Nullable
@@ -53,13 +57,17 @@ public class MsgInfoActivity extends AppCompatActivity {
     private ValueEventListener lubbListener;
     private ChatData chatData;
     private boolean showReadReceipts;
+    private boolean isDm;
+    private String authorId = FirebaseAuth.getInstance().getUid();
 
     @NonNull
-    public static Intent getIntent(Context context, String groupId, String chatId, boolean showReadReceipts) {
+    public static Intent getIntent(Context context, String groupId, String chatId, boolean showReadReceipts, boolean isDm, String authorId) {
         final Intent intent = new Intent(context, MsgInfoActivity.class);
         intent.putExtra(ARG_GROUP_ID, groupId);
         intent.putExtra(ARG_CHAT_ID, chatId);
         intent.putExtra(ARG_SHOW_READ_RECEIPTS, showReadReceipts);
+        intent.putExtra(ARG_IS_DM, isDm);
+        intent.putExtra(ARG_AUTHOR_ID, authorId);
         return intent;
     }
 
@@ -88,8 +96,10 @@ public class MsgInfoActivity extends AppCompatActivity {
         readRecyclerView.setAdapter(readAdapter);
         lubbRecyclerView.setAdapter(lubbAdapter);
 
-        groupId = getIntent().getStringExtra(ARG_GROUP_ID);
-        chatId = getIntent().getStringExtra(ARG_CHAT_ID);
+        chatId = getIntent().getStringExtra(ARG_GROUP_ID);
+        msgId = getIntent().getStringExtra(ARG_CHAT_ID);
+        isDm = getIntent().getBooleanExtra(ARG_IS_DM, false);
+        authorId = getIntent().getStringExtra(ARG_AUTHOR_ID);
         showReadReceipts = getIntent().getBooleanExtra(ARG_SHOW_READ_RECEIPTS, false);
 
     }
@@ -113,7 +123,11 @@ public class MsgInfoActivity extends AppCompatActivity {
     }
 
     private void fetchReadReceipts() {
-        readListener = RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).addValueEventListener(new ValueEventListener() {
+        DatabaseReference msgRef = RealtimeDbHelper.getMessagesRef().child(chatId).child(msgId);
+        if (isDm) {
+            msgRef = RealtimeDbHelper.getDmMessagesRef().child(chatId).child(msgId);
+        }
+        readListener = msgRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 chatData = dataSnapshot.getValue(ChatData.class);
@@ -122,8 +136,8 @@ public class MsgInfoActivity extends AppCompatActivity {
                     if (readReceiptsMap.size() > 1) {
                         noReadsContainer.setVisibility(View.GONE);
                         for (String uid : readReceiptsMap.keySet()) {
-                            if (!uid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                                fetchAndAddProfileInfoToReadReceipts(uid);
+                            if (!uid.equalsIgnoreCase(authorId)) {
+                                fetchAndAddProfileInfoToReadReceipts(getUserInfoRef(uid), uid);
                             }
                         }
                     } else {
@@ -139,8 +153,8 @@ public class MsgInfoActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchAndAddProfileInfoToReadReceipts(String uid) {
-        getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void fetchAndAddProfileInfoToReadReceipts(DatabaseReference userInfoRef, final String uid) {
+        userInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
@@ -150,6 +164,8 @@ public class MsgInfoActivity extends AppCompatActivity {
                     msgInfoData.setProfileInfo(profileInfo);
                     msgInfoData.setTimestamp(chatData.getReadReceipts().get(profileInfo.getId()));
                     readAdapter.addData(msgInfoData);
+                } else {
+                    fetchAndAddProfileInfoToReadReceipts(getSellerInfoRef(uid), uid);
                 }
             }
 
@@ -161,7 +177,11 @@ public class MsgInfoActivity extends AppCompatActivity {
     }
 
     private void fetchLubbReceipts() {
-        lubbListener = RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).addValueEventListener(new ValueEventListener() {
+        DatabaseReference lubbRef = RealtimeDbHelper.getMessagesRef().child(chatId).child(msgId);
+        if (isDm) {
+            lubbRef = RealtimeDbHelper.getDmMessagesRef().child(chatId).child(msgId);
+        }
+        lubbListener = lubbRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 chatData = dataSnapshot.getValue(ChatData.class);
@@ -170,7 +190,7 @@ public class MsgInfoActivity extends AppCompatActivity {
                     if (lubbReceiptsMap.size() > 0) {
                         noLikesContainer.setVisibility(View.GONE);
                         for (String uid : lubbReceiptsMap.keySet()) {
-                            fetchAndAddProfileInfoToLubbReceipts(uid);
+                            fetchAndAddProfileInfoToLubbReceipts(getUserInfoRef(uid), uid);
                         }
                     } else {
                         noLikesContainer.setVisibility(View.VISIBLE);
@@ -185,8 +205,8 @@ public class MsgInfoActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchAndAddProfileInfoToLubbReceipts(String uid) {
-        getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void fetchAndAddProfileInfoToLubbReceipts(DatabaseReference userInfoRef, final String uid) {
+        userInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
@@ -194,8 +214,10 @@ public class MsgInfoActivity extends AppCompatActivity {
                     profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
                     final MsgInfoData msgInfoData = new MsgInfoData();
                     msgInfoData.setProfileInfo(profileInfo);
-                    msgInfoData.setTimestamp(chatData.getReadReceipts().get(profileInfo.getId()));
+                    msgInfoData.setTimestamp(chatData.getLubbReceipts().get(profileInfo.getId()));
                     lubbAdapter.addData(msgInfoData);
+                } else {
+                    fetchAndAddProfileInfoToLubbReceipts(getSellerInfoRef(uid), uid);
                 }
             }
 
@@ -221,10 +243,10 @@ public class MsgInfoActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         if (lubbListener != null) {
-            RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).removeEventListener(lubbListener);
+            RealtimeDbHelper.getMessagesRef().child(chatId).child(msgId).removeEventListener(lubbListener);
         }
         if (readListener != null) {
-            RealtimeDbHelper.getMessagesRef().child(groupId).child(chatId).removeEventListener(readListener);
+            RealtimeDbHelper.getMessagesRef().child(chatId).child(msgId).removeEventListener(readListener);
         }
     }
 }

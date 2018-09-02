@@ -39,16 +39,17 @@ import in.lubble.app.events.EventsFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
+import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
-import it.sephiroth.android.library.tooltip.Tooltip;
 
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
+import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -132,12 +133,14 @@ public class MainActivity extends AppCompatActivity {
                 LubbleActivity.open(MainActivity.this);
             }
         });
-        showEventTooltip();
-        showEventBadge();
+        showMplaceBadge();
+        fetchAndPersistAppFeatures();
+        fetchAndPersistMplaceItems();
     }
 
-    private void showEventBadge() {
-        if (!LubbleSharedPrefs.getInstance().getIsEventOpened()) {
+
+    private void showMplaceBadge() {
+        if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
             BottomNavigationMenuView bottomNavigationMenuView =
                     (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
             View v = bottomNavigationMenuView.getChildAt(1);
@@ -147,25 +150,6 @@ public class MainActivity extends AppCompatActivity {
                     .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
             itemView.addView(badge);
-        }
-    }
-
-    private void showEventTooltip() {
-        if (!LubbleSharedPrefs.getInstance().getIsEventTooltipShown() && System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
-            Tooltip.make(this,
-                    new Tooltip.Builder(101)
-                            .anchor(bottomNavigation.findViewById(R.id.navigation_events), Tooltip.Gravity.TOP)
-                            .closePolicy(new Tooltip.ClosePolicy()
-                                    .insidePolicy(true, false)
-                                    .outsidePolicy(true, false), 23000)
-                            .text("To get Lucky Draw tickets, go here")
-                            .withStyleId(R.style.LubbleTooltipStyle)
-                            .withArrow(true)
-                            .withOverlay(true)
-                            .floatingAnimation(Tooltip.AnimationBuilder.DEFAULT)
-                            .build()
-            ).show();
-            LubbleSharedPrefs.getInstance().setIsEventTooltipShown(true);
         }
     }
 
@@ -192,6 +176,9 @@ public class MainActivity extends AppCompatActivity {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
                 case "events":
                     bottomNavigation.setSelectedItemId(R.id.navigation_events);
+                    break;
+                case "marketplace":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_mplace);
                     break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
@@ -304,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
                     Integer minAppVersion = child.getValue(Integer.class);
                     minAppVersion = minAppVersion == null ? 27 : minAppVersion;
 
-                    if (BuildConfig.VERSION_CODE < minAppVersion) {
+                    if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing()) {
                         // block app
                         final AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
                         alertDialog.setTitle(getString(R.string.update_dialog_title));
@@ -357,6 +344,9 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_chats:
                     switchFrag(GroupListFragment.newInstance());
                     return true;
+                case R.id.navigation_mplace:
+                    switchFrag(MarketplaceFrag.newInstance());
+                    return true;
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
                     return true;
@@ -380,7 +370,7 @@ public class MainActivity extends AppCompatActivity {
         ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
     }
 
-    public void removeEventBadge() {
+    public void removeBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
         View v = bottomNavigationMenuView.getChildAt(1);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;

@@ -4,6 +4,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import in.lubble.app.LubbleSharedPrefs;
+
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 /**
@@ -103,6 +105,38 @@ public class RealtimeDbHelper {
 
     public static DatabaseReference getEventsRef() {
         return getLubbleRef().child("events");
+    }
+
+    /*
+        For Marketplace
+     */
+    public static DatabaseReference getCreateDmRef() {
+        return FirebaseDatabase.getInstance().getReference("create_dm");
+    }
+
+    public static DatabaseReference getDmMessagesRef() {
+        return FirebaseDatabase.getInstance().getReference("messages/dms");
+    }
+
+    public static DatabaseReference getDmsRef() {
+        return FirebaseDatabase.getInstance().getReference("dms");
+    }
+
+    public static DatabaseReference getUserDmsRef() {
+        return getUserRef(FirebaseAuth.getInstance().getUid()).child("dms");
+    }
+
+    public static DatabaseReference getSellerRef() {
+        return FirebaseDatabase.getInstance().getReference("sellers");
+    }
+
+    public static DatabaseReference getSellerDmsRef() {
+        return FirebaseDatabase.getInstance().getReference("sellers")
+                .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())).child("dms");
+    }
+
+    public static DatabaseReference getSellerInfoRef(String uid) {
+        return FirebaseDatabase.getInstance().getReference("sellers").child(uid).child("info");
     }
 
 }

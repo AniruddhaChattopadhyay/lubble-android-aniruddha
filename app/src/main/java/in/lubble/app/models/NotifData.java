@@ -32,6 +32,10 @@ public class NotifData {
     private String timestamp;
     @SerializedName("isImage")
     private String hasImage;
+    @SerializedName("type")
+    private String notifType;
+    @SerializedName("isSeller")
+    private Boolean isSeller;
 
     public String getMessageId() {
         return messageId;
@@ -123,5 +127,21 @@ public class NotifData {
 
     public void setHasImage(String hasImage) {
         this.hasImage = hasImage;
+    }
+
+    public String getNotifType() {
+        return notifType;
+    }
+
+    public void setNotifType(String notifType) {
+        this.notifType = notifType;
+    }
+
+    public Boolean getIsSeller() {
+        return isSeller;
+    }
+
+    public void setIsSeller(Boolean seller) {
+        isSeller = seller;
     }
 }

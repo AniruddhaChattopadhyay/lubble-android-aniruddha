@@ -10,6 +10,10 @@
         <item name="android:datePickerStyle">@style/datepicker</item>
     </style>
 
+    <style name="AppTheme.WhiteAccent">
+        <item name="colorAccent">@color/white</item> <!-- Whatever color you want-->
+    </style>
+
     <!--For Blue Status Bar in some activities-->
     <style name="BlueAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -74,6 +78,16 @@
     <style name="LubbleTooltipStyle" parent="ToolTipLayoutDefaultStyle">
         <item name="ttlm_backgroundColor">@color/darker_gray</item>
         <item name="android:textAppearance">@style/TextOnDark</item>
+    </style>
+
+    <style name="BigRatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/dark_gold</item>
+        <item name="colorControlActivated">@color/dark_gold</item>
+    </style>
+
+    <style name="SmallRatingBar" parent="Theme.AppCompat">
+        <item name="colorControlNormal">@color/dark_gray</item>
+        <item name="colorControlActivated">@color/dark_gold</item>
     </style>
 
 

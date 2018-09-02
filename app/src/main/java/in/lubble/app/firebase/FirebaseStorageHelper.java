@@ -25,4 +25,11 @@ public class FirebaseStorageHelper {
         return FirebaseStorage.getInstance("gs://lubble-in-convo").getReference();
     }
 
+    public static StorageReference getMarketplaceBucketRef() {
+        if ("dev".equalsIgnoreCase(BuildConfig.FLAVOR)) {
+            return FirebaseStorage.getInstance("gs://lubble-dev-marketplace").getReference();
+        }
+        return FirebaseStorage.getInstance("gs://lubble-in-marketplace").getReference();
+    }
+
 }

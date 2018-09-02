@@ -141,7 +141,7 @@
             android:layout_marginTop="8dp"
             android:nestedScrollingEnabled="false"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:listitem="@layout/item_icon_text" />
+            tools:listitem="@layout/item_group_member" />
 
     </LinearLayout>
 </android.support.v4.widget.NestedScrollView>

@@ -239,10 +239,12 @@ public class ProfileFrag extends Fragment {
         RealtimeDbHelper.getDevRef().child(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null && dataSnapshot.getValue(Boolean.class)) {
-                    toggleDevMenu(true);
-                } else {
-                    toggleDevMenu(false);
+                if (isAdded() && isVisible()) {
+                    if (dataSnapshot.getValue() != null && dataSnapshot.getValue(Boolean.class)) {
+                        toggleDevMenu(true);
+                    } else {
+                        toggleDevMenu(false);
+                    }
                 }
             }
 

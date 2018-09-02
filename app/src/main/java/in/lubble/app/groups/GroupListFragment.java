@@ -1,10 +1,10 @@
 package in.lubble.app.groups;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
@@ -19,7 +19,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -27,34 +26,43 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
-import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.DmData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 
+import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_DP_URL;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_NAME;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
     private static final String TAG = "GroupListFragment";
-    public static final String EXTRA_GROUP_ID_HIGHLIGHT = "extra_group_id_highlight";
 
     private OnListFragmentInteractionListener mListener;
     private GroupRecyclerAdapter adapter;
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
+    private HashMap<Query, ValueEventListener> dmListenersMap = new HashMap<>();
     private ChildEventListener joinedGroupListener;
     private ChildEventListener unjoinedGroupListener;
-    private DatabaseReference summerCampChildRef;
-    private ValueEventListener summerCampJoinListener;
+    private ChildEventListener userDmsListener;
     private RecyclerView groupsRecyclerView;
     private ProgressBar progressBar;
     private HashMap<String, Set<String>> groupInvitedByMap;
     private HashMap<String, UserGroupData> userGroupDataMap;
+    private HashMap<String, Long> dmMap;
 
     public GroupListFragment() {
     }
@@ -74,6 +82,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
         groupInvitedByMap = new HashMap<>();
         userGroupDataMap = new HashMap<>();
+        dmMap = new HashMap<>();
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -99,44 +108,189 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         adapter.clearGroups();
         groupsRecyclerView.setVisibility(View.INVISIBLE);
         syncUserGroupIds();
-
-        summerCampJoinCheck();
+        syncUserDmIds();
+        syncSellerDmIds();
     }
 
-    private void summerCampJoinCheck() {
-        if (getActivity().getIntent().hasExtra(EXTRA_GROUP_ID_HIGHLIGHT)) {
+    private void syncSellerDmIds() {
+        getSellerRef().child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())).child("dms").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                final String dmId = dataSnapshot.getKey();
+                if (dmId != null) {
+                    HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                    Long count = 0L;
+                    if (map != null && map.containsKey("unreadCount")) {
+                        count = (Long) map.get("unreadCount");
+                    }
+                    dmMap.put(dmId, count);
+                    fetchDmFrom(dmId);
+                }
+            }
 
-            final ProgressDialog progressDialog = new ProgressDialog(getContext());
-            progressDialog.setTitle(R.string.joining_group);
-            progressDialog.setMessage(getString(R.string.check_internet));
-            progressDialog.show();
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                Long count = 0L;
+                if (map != null && map.containsKey("unreadCount")) {
+                    count = (Long) map.get("unreadCount");
+                }
+                dmMap.put(dataSnapshot.getKey(), count);
+                fetchDmFrom(dataSnapshot.getKey());
+            }
 
-            final String groupId = getActivity().getIntent().getStringExtra(EXTRA_GROUP_ID_HIGHLIGHT);
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
 
-            summerCampChildRef = RealtimeDbHelper.getUserGroupsRef().child(groupId);
-            summerCampJoinListener = summerCampChildRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
-                    if (userGroupData != null && userGroupData.isJoined()) {
-                        progressDialog.dismiss();
-                        // after joining, the newly joined group will move to 0th position, so highlight that.
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                adapter.flashPos(0);
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void syncUserDmIds() {
+
+        userDmsListener = getUserDmsRef().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                final String dmId = dataSnapshot.getKey();
+                if (dmId != null) {
+                    HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                    Long count = 0L;
+                    if (map != null && map.containsKey("unreadCount")) {
+                        count = (Long) map.get("unreadCount");
+                    }
+                    dmMap.put(dmId, count);
+                    fetchDmFrom(dmId);
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                HashMap<String, Object> map = (HashMap<String, Object>) dataSnapshot.getValue();
+                Long count = 0L;
+                if (map != null && map.containsKey("unreadCount")) {
+                    count = (Long) map.get("unreadCount");
+                }
+                dmMap.put(dataSnapshot.getKey(), count);
+                fetchDmFrom(dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getKey() != null) {
+                    // remove from list
+                    adapter.removeGroup(dataSnapshot.getKey());
+                }
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void fetchDmFrom(@NonNull final String dmId) {
+        final ValueEventListener dmValueListener = getDmsRef().child(dmId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final DmData dmData = dataSnapshot.getValue(DmData.class);
+                if (dmData != null) {
+                    dmData.setId(dataSnapshot.getKey());
+
+                    final GroupData dmGroupData = new GroupData();
+                    dmGroupData.setId(dmData.getId());
+                    dmGroupData.setLastMessage(dmData.getLastMessage());
+                    dmGroupData.setLastMessageTimestamp(dmData.getLastMessageTimestamp());
+                    dmGroupData.setIsPrivate(true);
+
+                    final HashMap<String, Object> members = dmData.getMembers();
+                    for (String profileId : members.keySet()) {
+                        final String sellerId = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
+                        if (!FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId) && !sellerId.equalsIgnoreCase(profileId)) {
+                            final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
+                            if (profileMap != null) {
+                                final boolean isSeller = (boolean) profileMap.get("isSeller");
+                                if (isSeller) {
+                                    fetchSellerProfileFrom(profileId, dmGroupData);
+                                } else {
+                                    fetchProfileFrom(profileId, dmGroupData);
+                                }
                             }
-                        }, 500);
-                        summerCampChildRef.removeEventListener(summerCampJoinListener);
+                        }
                     }
                 }
+            }
 
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                }
-            });
-            getActivity().getIntent().removeExtra(EXTRA_GROUP_ID_HIGHLIGHT);
-        }
+            private void fetchProfileFrom(String profileId, final GroupData dmGroupData) {
+                getUserInfoRef(profileId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                        if (map != null) {
+                            final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                            if (profileInfo != null) {
+                                profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
+                                dmGroupData.setTitle(profileInfo.getName());
+                                dmGroupData.setThumbnail(profileInfo.getThumbnail());
+                                final UserGroupData userGroupData = new UserGroupData();
+                                userGroupData.setJoined(true);
+                                userGroupData.setUnreadCount(dmMap.get(dmGroupData.getId()));
+                                adapter.addGroup(dmGroupData, userGroupData);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            private synchronized void fetchSellerProfileFrom(String profileId, final GroupData dmGroupData) {
+                getSellerRef().child(profileId).child("info").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                        if (profileInfo != null) {
+                            profileInfo.setId(dataSnapshot.getKey());
+                            dmGroupData.setTitle(profileInfo.getName());
+                            dmGroupData.setThumbnail(profileInfo.getThumbnail());
+                            final UserGroupData userGroupData = new UserGroupData();
+                            userGroupData.setJoined(true);
+                            userGroupData.setUnreadCount(dmMap.get(dmGroupData.getId()));
+                            adapter.addGroup(dmGroupData, userGroupData);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        dmListenersMap.put(getDmsRef().child(dmId), dmValueListener);
     }
 
     private void syncUserGroupIds() {
@@ -312,11 +466,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (unjoinedGroupListener != null) {
             getLubbleGroupsRef().removeEventListener(unjoinedGroupListener);
         }
-        if (summerCampJoinListener != null) {
-            summerCampChildRef.removeEventListener(summerCampJoinListener);
+        if (userDmsListener != null) {
+            getUserDmsRef().removeEventListener(userDmsListener);
         }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
+        }
+        for (Query query : dmListenersMap.keySet()) {
+            query.removeEventListener(dmListenersMap.get(query));
         }
     }
 
@@ -334,4 +491,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         startActivity(intent);
     }
 
+    @Override
+    public void onDmClick(String dmId, String name, String thumbnailUrl) {
+        final Intent intent = new Intent(getContext(), ChatActivity.class);
+        intent.putExtra(EXTRA_DM_ID, dmId);
+        intent.putExtra(EXTRA_RECEIVER_NAME, name);
+        intent.putExtra(EXTRA_RECEIVER_DP_URL, thumbnailUrl);
+        startActivity(intent);
+    }
 }

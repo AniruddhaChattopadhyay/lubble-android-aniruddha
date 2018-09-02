@@ -5,6 +5,8 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.design.widget.BottomSheetDialog;
@@ -15,6 +17,11 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.crashlytics.android.Crashlytics;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 import in.lubble.app.R;
 
@@ -118,5 +125,21 @@ public class UiUtils {
         }
     }
 
+    public static String compressImage(String ogFilepath) {
+        Bitmap bmp = BitmapFactory.decodeFile(ogFilepath);
+        File outFile = new File(ogFilepath);
+        if (outFile.length() / 1024 > 50) {
+            try {
+                FileOutputStream outStream = new FileOutputStream(outFile);
+                bmp.compress(Bitmap.CompressFormat.JPEG, 75, outStream);
+                outStream.flush();
+                outStream.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Crashlytics.logException(e);
+            }
+        }
+        return outFile.getAbsolutePath();
+    }
 
 }

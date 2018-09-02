@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bumptech.glide.request.target.Target;
@@ -29,10 +30,11 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
-import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.models.NotifData;
+import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 
+import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 
 /**
@@ -84,7 +86,12 @@ public class NotifUtils {
             String groupDpUrl = getGroupDp(notifDataList, groupId);
 
             Intent intent = new Intent(context, ChatActivity.class);
-            intent.putExtra(EXTRA_GROUP_ID, groupId);
+            if (TextUtils.isEmpty(map.getValue().getConversationTitle())) {
+                // it is a DM notif
+                intent.putExtra(EXTRA_DM_ID, groupId);
+            } else {
+                intent.putExtra(EXTRA_GROUP_ID, groupId);
+            }
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addNextIntentWithParentStack(intent);
 
@@ -146,8 +153,12 @@ public class NotifUtils {
     }
 
     private static void buildGroupNotification(NotificationCompat.MessagingStyle messagingStyle, NotifData notifData) {
-        messagingStyle.setConversationTitle(notifData.getGroupName());
 
+        if ("dm".equalsIgnoreCase(notifData.getNotifType())) {
+            messagingStyle.setConversationTitle(null);
+        } else {
+            messagingStyle.setConversationTitle(notifData.getGroupName());
+        }
         messagingStyle.addMessage(notifData.getMessageBody(), notifData.getTimestamp(), notifData.getAuthorName());
         messagingStyleMap.put(notifData.getGroupId(), messagingStyle);
     }

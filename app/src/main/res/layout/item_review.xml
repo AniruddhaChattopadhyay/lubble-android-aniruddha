@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <ImageView
+        android:id="@+id/iv_user_pic"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@id/ratingbar_user"
+        app:srcCompat="@drawable/ic_account_no_padding" />
+
+    <TextView
+        android:id="@+id/tv_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/iv_user_pic"
+        android:maxLines="1"
+        tools:text="@tools:sample/lorem/random" />
+
+    <RatingBar
+        android:id="@+id/ratingbar_user"
+        style="@style/Widget.AppCompat.RatingBar.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/tv_user_name"
+        android:layout_below="@id/tv_user_name"
+        android:numStars="5"
+        android:theme="@style/SmallRatingBar" />
+
+    <TextView
+        android:id="@+id/tv_user_review"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/tv_user_name"
+        android:layout_below="@id/ratingbar_user"
+        android:layout_marginTop="8dp"
+        android:maxLines="4"
+        android:textColor="@color/black"
+        tools:text="@tools:sample/lorem/random" />
+
+</RelativeLayout>

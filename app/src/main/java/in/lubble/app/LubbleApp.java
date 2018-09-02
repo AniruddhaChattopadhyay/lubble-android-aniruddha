@@ -10,6 +10,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 
+import in.lubble.app.database.DbSingleton;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
@@ -32,6 +33,7 @@ public class LubbleApp extends Application {
         if (BuildConfig.DEBUG) {
             FirebaseDatabase.getInstance().setLogLevel(Logger.Level.DEBUG);
         }
+        DbSingleton.initializeInstance(getApplicationContext());
 
         appContext = this;
 

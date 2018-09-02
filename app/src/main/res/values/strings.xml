@@ -26,8 +26,6 @@
     <string name="all_skip">skip</string>
     <string name="all_lets_go">Let\'s Go</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="profile">Profile</string>
     <string name="clear_db">Clear DB</string>
     <string name="edit_profile">EDIT PROFILE</string>
@@ -74,8 +72,8 @@
     <string name="public_group_warning_subtitle">Messages you send here are visible to everyone.</string>
     <string name="event_published">Event Published</string>
     <string name="invalid_date_time">Invalid date or time</string>
-    <string name="event_name_error">Please enter event name</string>
-    <string name="event_desc_error">Please enter event description</string>
+    <string name="name_error">Please enter name</string>
+    <string name="desc_error">Please enter description</string>
     <string name="event_organizer_error">Please enter event organizer name</string>
     <string name="event_date_error">Please enter event date</string>
     <string name="event_time_error">Please enter event time</string>
@@ -134,4 +132,37 @@
     <string name="liked">Liked</string>
     <string name="like_any_msg_hint">Tap &amp; hold any message to like it</string>
     <string name="no_reads">Waiting for someone to read your message</string>
+    <string name="no_photo">Please add a photo</string>
+    <string name="choose_category">Choose Category</string>
+    <string name="item_name">Item Name</string>
+    <string name="what_are_you_selling">What are you selling?</string>
+    <string name="change_photo">Change Photo</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="product">Product</string>
+    <string name="service">Service</string>
+    <string name="no_category">Please choose category</string>
+    <string name="please_choose_a_category">Please choose a category</string>
+    <string name="category">Category</string>
+    <string name="item_review_hint">It takes a few hours to review your item</string>
+    <string name="submit_for_approval">Submit for approval</string>
+    <string name="selling_price">Selling Price</string>
+    <string name="mrp">MRP</string>
+    <string name="about_the_item">About the item</string>
+    <string name="change_seller_photo">Change Seller Photo</string>
+    <string name="seller_name">Seller Name</string>
+    <string name="about_seller">About Seller</string>
+    <string name="become_a_seller">Become a seller</string>
+    <string name="about_seller_hint">Tell buyers about your passions, why you are the perfect individual or business from whom they should purchase</string>
+    <string name="selling_price_error">Please enter sale price</string>
+    <string name="mrp_error">Please enter original MRP of the item</string>
+    <string name="add_new_item">Add New Item</string>
+    <string name="edit_seller_profile">Edit Seller Profile</string>
+    <string name="seller_phone_hint"><![CDATA[Seller phone number will be publicly visible on your seller profile & on products/services you sell on Lubble]]></string>
+    <string name="phone_error">Please enter your phone number</string>
+    <string name="chat_with_seller">Chat with Seller</string>
+    <string name="edit_item">Edit Item</string>
+    <string-array name="price_options_array">
+        <item>Paid</item>
+        <item>Request Price</item>
+    </string-array>
 </resources>

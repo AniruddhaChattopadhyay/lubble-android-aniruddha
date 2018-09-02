@@ -6,4 +6,5 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="app_bar_height">240dp</dimen>
     <dimen name="event_img_height">160dp</dimen>
+    <dimen name="pager_margin">-30dp</dimen>
 </resources>

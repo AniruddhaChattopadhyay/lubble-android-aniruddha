@@ -21,6 +21,7 @@ public class ChatData {
 
     private String id;
     private String authorUid;
+    private boolean authorIsSeller;
     private String message;
     private String imgUrl;
     private int lubbCount = 0;
@@ -34,6 +35,7 @@ public class ChatData {
     private String linkDesc;
     @Nullable
     private String replyMsgId = null;
+    private boolean isDm;
 
     @Override
     public boolean equals(Object obj) {
@@ -163,5 +165,21 @@ public class ChatData {
 
     public void setReplyMsgId(@Nullable String replyMsgId) {
         this.replyMsgId = replyMsgId;
+    }
+
+    public boolean isAuthorIsSeller() {
+        return authorIsSeller;
+    }
+
+    public void setAuthorIsSeller(boolean authorIsSeller) {
+        this.authorIsSeller = authorIsSeller;
+    }
+
+    public boolean getIsDm() {
+        return isDm;
+    }
+
+    public void setIsDm(boolean dm) {
+        isDm = dm;
     }
 }

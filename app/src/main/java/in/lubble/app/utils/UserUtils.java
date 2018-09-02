@@ -43,6 +43,7 @@ public class UserUtils {
                     public void onComplete(@NonNull Task<Void> task) {
                         progressDialog.dismiss();
                         // user is now signed out
+                        LubbleSharedPrefs.getInstance().clearAll();
                         Intent intent = new Intent(activity, LoginActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         activity.startActivity(intent);
