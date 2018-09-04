@@ -23,6 +23,9 @@ public class Category {
     @Expose
     @Nullable
     private List<Item> items = null;
+    @SerializedName("type")
+    @Expose
+    private int type = Item.ITEM_PRODUCT;
 
     public Integer getId() {
         return id;
@@ -55,5 +58,13 @@ public class Category {
 
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }

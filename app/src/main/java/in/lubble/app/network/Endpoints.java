@@ -73,6 +73,9 @@ public interface Endpoints {
     @GET("marketplace/allitems/")
     Call<ArrayList<Item>> fetchAllItems();
 
+    @GET("/marketplace/servicecategories/")
+    Call<ArrayList<Category>> fetchServiceCategories();
+
     class ResponseBean {
 
         @SerializedName("message")

@@ -14,18 +14,17 @@ import java.util.List;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
-import in.lubble.app.models.marketplace.Item;
-import in.lubble.app.models.marketplace.PhotoData;
+import in.lubble.app.models.marketplace.Category;
 
 public class ServiceCategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "ServiceCategoryAdapter";
 
-    private final List<Item> itemList;
+    private final List<Category> categoryList;
     private final GlideRequests glide;
 
     public ServiceCategoryAdapter(GlideRequests glide) {
-        itemList = new ArrayList<>();
+        categoryList = new ArrayList<>();
         this.glide = glide;
     }
 
@@ -40,53 +39,31 @@ public class ServiceCategoryAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
         final ServiceCategoryAdapter.ViewHolder viewHolder = (ServiceCategoryAdapter.ViewHolder) holder;
-        final Item item = itemList.get(position);
+        final Category category = categoryList.get(position);
 
-        viewHolder.nameTv.setText(item.getName());
+        viewHolder.nameTv.setText(category.getName());
 
-        final ArrayList<PhotoData> photoList = item.getPhotos();
-        if (photoList.size() > 0) {
-            viewHolder.itemPicProgressBar.setVisibility(View.GONE);
-            glide.load(photoList.get(0).getUrl())
-                    .thumbnail(0.1f)
-                    .into(viewHolder.itemIv);
-        } else {
-            viewHolder.itemPicProgressBar.setVisibility(View.VISIBLE);
-            glide.load("")
-                    .into(viewHolder.itemIv);
-        }
+        final String picUrl = category.getIcon();
+        viewHolder.itemPicProgressBar.setVisibility(View.GONE);
+        glide.load(picUrl)
+                .thumbnail(0.1f)
+                .error(R.drawable.rounded_rect_gray)
+                .into(viewHolder.itemIv);
 
     }
 
     @Override
     public int getItemCount() {
-        return itemList.size();
+        return categoryList.size();
     }
 
-    public void addData(Item item) {
-        itemList.add(item);
+    public void addData(Category category) {
+        categoryList.add(category);
         notifyDataSetChanged();
     }
 
-    /*public void updateItemPic(int itemId, @NonNull String downloadUrl) {
-        final Item itemToUpdate = new Item();
-        itemToUpdate.setId(itemId);
-        final int index = itemList.indexOf(itemToUpdate);
-        if (index != -1) {
-            final Item item = itemList.get(index);
-
-            ArrayList<PhotoData> photoList = new ArrayList<>();
-            final PhotoData photoData = new PhotoData();
-            photoData.setUrl(downloadUrl);
-            photoList.add(photoData);
-
-            item.setPhotos(photoList);
-            notifyItemChanged(index);
-        }
-    }*/
-
     public void clear() {
-        itemList.clear();
+        categoryList.clear();
         notifyDataSetChanged();
     }
 
@@ -107,7 +84,7 @@ public class ServiceCategoryAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
         @Override
         public void onClick(View v) {
-            ServiceCategoryDetailActiv.open(v.getContext(), String.valueOf(itemList.get(getAdapterPosition()).getId()));
+            ServiceCategoryDetailActiv.open(v.getContext(), categoryList.get(getAdapterPosition()).getId());
         }
     }
 

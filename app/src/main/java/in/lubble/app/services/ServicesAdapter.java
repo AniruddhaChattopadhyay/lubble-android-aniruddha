@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -14,6 +15,7 @@ import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.models.marketplace.Item;
+import in.lubble.app.models.marketplace.PhotoData;
 
 public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -42,17 +44,17 @@ public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         viewHolder.nameTv.setText(item.getName());
 
-        /*final ArrayList<PhotoData> photoList = item.getPhotos();
+        final ArrayList<PhotoData> photoList = item.getPhotos();
         if (photoList.size() > 0) {
-            viewHolder.itemPicProgressBar.setVisibility(View.GONE);
             glide.load(photoList.get(0).getUrl())
                     .thumbnail(0.1f)
-                    .into(viewHolder.itemIv);
+                    .circleCrop()
+                    .into(viewHolder.iconIv);
         } else {
-            viewHolder.itemPicProgressBar.setVisibility(View.VISIBLE);
-            glide.load("")
-                    .into(viewHolder.itemIv);
-        }*/
+            glide.load(R.drawable.blue_circle)
+                    .circleCrop()
+                    .into(viewHolder.iconIv);
+        }
 
     }
 
@@ -73,11 +75,13 @@ public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View view;
+        final ImageView iconIv;
         final TextView nameTv;
 
         ViewHolder(View view) {
             super(view);
             this.view = view;
+            iconIv = view.findViewById(R.id.iv_service_icon);
             nameTv = view.findViewById(R.id.tv_service_name);
             view.setOnClickListener(this);
         }
