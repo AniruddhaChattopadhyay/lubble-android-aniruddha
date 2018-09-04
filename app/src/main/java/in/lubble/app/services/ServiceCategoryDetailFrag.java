@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -30,6 +31,7 @@ public class ServiceCategoryDetailFrag extends Fragment {
 
     private static final String ARG_CATEGORY_ID = "ARG_CATEGORY_ID";
     private int categoryId;
+    private ProgressBar progressBar;
     private RecyclerView servicesRv;
     private ServicesAdapter servicesAdapter;
 
@@ -58,6 +60,7 @@ public class ServiceCategoryDetailFrag extends Fragment {
                              Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_service_category_detail, container, false);
 
+        progressBar = view.findViewById(R.id.progress_bar_service_detail);
         servicesRv = view.findViewById(R.id.rv_services);
         servicesRv.setLayoutManager(new LinearLayoutManager(getContext()));
         servicesAdapter = new ServicesAdapter(GlideApp.with(getContext()));
@@ -71,11 +74,12 @@ public class ServiceCategoryDetailFrag extends Fragment {
     }
 
     private void fetchServices() {
+        progressBar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchCategoryItems(categoryId).enqueue(new Callback<Category>() {
             @Override
             public void onResponse(Call<Category> call, Response<Category> response) {
-                /// TODO: 4/9/18  progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
                 final Category categoryData = response.body();
                 if (response.isSuccessful() && categoryData != null && isAdded() && isVisible()) {
 
@@ -103,7 +107,7 @@ public class ServiceCategoryDetailFrag extends Fragment {
             @Override
             public void onFailure(Call<Category> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
-                /// TODO: 4/9/18 progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
                 Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });

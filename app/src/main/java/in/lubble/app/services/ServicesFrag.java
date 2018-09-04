@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -28,6 +29,7 @@ public class ServicesFrag extends Fragment {
 
     private static final String TAG = "ServicesFrag";
 
+    private ProgressBar progressBar;
     private ServiceCategoryAdapter servicesAdapter;
 
     public ServicesFrag() {
@@ -53,6 +55,7 @@ public class ServicesFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_services, container, false);
 
+        progressBar = view.findViewById(R.id.progress_bar_categories);
         RecyclerView serviceCategoryRv = view.findViewById(R.id.rv_services);
         serviceCategoryRv.setLayoutManager(new GridLayoutManager(getContext(), 2));
         servicesAdapter = new ServiceCategoryAdapter(GlideApp.with(getContext()));
@@ -68,7 +71,7 @@ public class ServicesFrag extends Fragment {
         endpoints.fetchServiceCategories().enqueue(new Callback<ArrayList<Category>>() {
             @Override
             public void onResponse(Call<ArrayList<Category>> call, Response<ArrayList<Category>> response) {
-                /// TODO: 4/9/18  progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
                 final ArrayList<Category> categoriesList = response.body();
                 if (response.isSuccessful() && categoriesList != null && isAdded() && isVisible()) {
 
@@ -87,7 +90,7 @@ public class ServicesFrag extends Fragment {
             @Override
             public void onFailure(Call<ArrayList<Category>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
-                /// TODO: 4/9/18 progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(View.GONE);
                 Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
         });

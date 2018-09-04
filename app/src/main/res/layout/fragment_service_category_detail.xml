@@ -5,9 +5,15 @@
     android:background="@color/white"
     tools:context="in.lubble.app.services.ServiceCategoryDetailFrag">
 
+    <ProgressBar
+        android:id="@+id/progress_bar_service_detail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_services"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
 </RelativeLayout>
