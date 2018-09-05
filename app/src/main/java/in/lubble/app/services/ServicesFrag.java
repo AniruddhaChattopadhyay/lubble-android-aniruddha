@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -16,7 +17,10 @@ import com.crashlytics.android.Crashlytics;
 import java.util.ArrayList;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.marketplace.SellerDashActiv;
+import in.lubble.app.marketplace.SellerEditActiv;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.network.Endpoints;
@@ -57,11 +61,27 @@ public class ServicesFrag extends Fragment {
 
         progressBar = view.findViewById(R.id.progress_bar_categories);
         RecyclerView serviceCategoryRv = view.findViewById(R.id.rv_services);
+        LinearLayout newServiceContainer = view.findViewById(R.id.new_service_container);
+
         serviceCategoryRv.setLayoutManager(new GridLayoutManager(getContext(), 2));
         servicesAdapter = new ServiceCategoryAdapter(GlideApp.with(getContext()));
         serviceCategoryRv.setAdapter(servicesAdapter);
 
         fetchServiceCategories();
+
+        newServiceContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final int sellerId = LubbleSharedPrefs.getInstance().getSellerId();
+                if (sellerId == -1) {
+                    // no seller ID found, start activ to create a new seller
+                    SellerEditActiv.open(getContext());
+                } else {
+                    // seller ID found, open dashboard
+                    getContext().startActivity(SellerDashActiv.getIntent(getContext(), sellerId, false));
+                }
+            }
+        });
 
         return view;
     }
