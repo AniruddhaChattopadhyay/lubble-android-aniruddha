@@ -13,7 +13,7 @@
 
     <item
         android:id="@+id/navigation_services"
-        android:icon="@drawable/ic_event_black_24dp"
+        android:icon="@drawable/ic_services_black"
         android:title="Services" />
 
 </menu>
