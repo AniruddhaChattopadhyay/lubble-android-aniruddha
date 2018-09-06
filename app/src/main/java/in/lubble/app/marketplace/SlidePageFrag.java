@@ -12,6 +12,7 @@ import android.widget.TextView;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.models.marketplace.Item;
 
 import static in.lubble.app.marketplace.SliderData.CATEGORY;
 import static in.lubble.app.marketplace.SliderData.DASH;
@@ -93,7 +94,7 @@ public class SlidePageFrag extends Fragment {
                                 SellerEditActiv.open(getContext());
                             } else {
                                 // seller ID found, open dashboard
-                                getContext().startActivity(SellerDashActiv.getIntent(getContext(), sellerId, false));
+                                getContext().startActivity(SellerDashActiv.getIntent(getContext(), sellerId, false, Item.ITEM_PRODUCT));
                             }
                             break;
                     }

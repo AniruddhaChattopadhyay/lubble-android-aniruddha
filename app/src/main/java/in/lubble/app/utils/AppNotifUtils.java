@@ -28,6 +28,7 @@ import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.SellerDashActiv;
 import in.lubble.app.models.AppNotifData;
+import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 
 import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
@@ -176,7 +177,7 @@ public class AppNotifUtils {
         } else if (appNotifData.getType().equalsIgnoreCase("mplace_approval")) {
             Intent intent = ItemActivity.getIntent(context, Integer.parseInt(appNotifData.getNotifKey()));
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-            Intent sellerDashIntent = SellerDashActiv.getIntent(context, LubbleSharedPrefs.getInstance().getSellerId(), false);
+            Intent sellerDashIntent = SellerDashActiv.getIntent(context, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT);
             stackBuilder.addNextIntent(sellerDashIntent);
             stackBuilder.addNextIntent(intent);
             return stackBuilder;

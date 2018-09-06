@@ -420,7 +420,7 @@ public class ItemActivity extends AppCompatActivity {
                             editItemTv.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    NewItemActiv.open(ItemActivity.this, itemId);
+                                    NewItemActiv.open(ItemActivity.this, itemId, Item.ITEM_PRODUCT);
                                 }
                             });
                             if (LubbleSharedPrefs.getInstance().getIsViewCountEnabled()) {

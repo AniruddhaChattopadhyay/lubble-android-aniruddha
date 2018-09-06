@@ -78,7 +78,7 @@ public class ServicesFrag extends Fragment {
                     SellerEditActiv.open(getContext());
                 } else {
                     // seller ID found, open dashboard
-                    getContext().startActivity(SellerDashActiv.getIntent(getContext(), sellerId, false));
+                    getContext().startActivity(SellerDashActiv.getIntent(getContext(), sellerId, false, Item.ITEM_SERVICE));
                 }
             }
         });

@@ -37,6 +37,8 @@ public class SellerDashActiv extends AppCompatActivity {
     private static final String TAG = "SellerDashActiv";
     private static final String PARAM_SELLER_ID = "PARAM_SELLER_ID";
     private static final String PARAM_IS_NEW_SELLER = "PARAM_IS_NEW_SELLER";
+    private static final String PARAM_DEFAULT_ITEM_TYPE = "PARAM_DEFAULT_ITEM_TYPE";
+
     public static final String ACTION_IMG_DONE = "ACTION_IMG_DONE";
     public static final String EXTRA_IMG_TYPE = "EXTRA_IMG_TYPE";
     public static final String EXTRA_IMG_ID = "EXTRA_IMG_ID";
@@ -48,16 +50,18 @@ public class SellerDashActiv extends AppCompatActivity {
     private TextView sellerNameTv;
     private TextView sellerBioTv;
     private int sellerId;
+    private int defaultItemType = Item.ITEM_PRODUCT;
     private boolean isNewSeller;
     private RecyclerView recyclerView;
     private BigItemAdapter adapter;
     private BroadcastReceiver photoUploadReceiver;
     private TextView recommendationCount;
 
-    public static Intent getIntent(Context context, int sellerId, boolean isNewSeller) {
+    public static Intent getIntent(Context context, int sellerId, boolean isNewSeller, int defaultItemType) {
         final Intent intent = new Intent(context, SellerDashActiv.class);
         intent.putExtra(PARAM_SELLER_ID, sellerId);
         intent.putExtra(PARAM_IS_NEW_SELLER, isNewSeller);
+        intent.putExtra(PARAM_DEFAULT_ITEM_TYPE, defaultItemType);
         return intent;
     }
 
@@ -87,6 +91,7 @@ public class SellerDashActiv extends AppCompatActivity {
 
         sellerId = getIntent().getIntExtra(PARAM_SELLER_ID, -1);
         isNewSeller = getIntent().getBooleanExtra(PARAM_IS_NEW_SELLER, false);
+        defaultItemType = getIntent().getIntExtra(PARAM_DEFAULT_ITEM_TYPE, Item.ITEM_PRODUCT);
         if (sellerId == -1) {
             throw new IllegalArgumentException("no seller ID bruh");
         }
@@ -99,7 +104,7 @@ public class SellerDashActiv extends AppCompatActivity {
         newItemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                NewItemActiv.open(SellerDashActiv.this, -1);
+                NewItemActiv.open(SellerDashActiv.this, -1, defaultItemType);
             }
         });
         editProfileTv.setOnClickListener(new View.OnClickListener() {
