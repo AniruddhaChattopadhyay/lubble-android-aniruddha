@@ -162,6 +162,7 @@ public class SellerDashActiv extends AppCompatActivity {
     }
 
     private void fetchSellerProfile() {
+        progressBar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<SellerData>() {
             @Override
