@@ -168,7 +168,7 @@ public class SellerDashActiv extends AppCompatActivity {
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 progressBar.setVisibility(View.GONE);
                 final SellerData sellerData = response.body();
-                if (sellerData != null) {
+                if (sellerData != null && !isFinishing()) {
                     sellerNameTv.setText(sellerData.getName());
                     sellerBioTv.setText(sellerData.getBio());
 
@@ -183,7 +183,7 @@ public class SellerDashActiv extends AppCompatActivity {
                         adapter.addData(item);
                     }
                     recommendationCount.setText(sellerData.getRecommendationCount() + " recommendations");
-                } else {
+                } else if (!isFinishing()) {
                     Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
                     Toast.makeText(SellerDashActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }

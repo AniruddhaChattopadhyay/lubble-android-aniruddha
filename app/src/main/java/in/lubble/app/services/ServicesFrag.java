@@ -109,9 +109,11 @@ public class ServicesFrag extends Fragment {
 
             @Override
             public void onFailure(Call<ArrayList<Category>> call, Throwable t) {
-                Log.e(TAG, "onFailure: ");
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                if (isAdded() && isVisible()) {
+                    Log.e(TAG, "onFailure: ");
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
