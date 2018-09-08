@@ -100,6 +100,11 @@ public class SellerDashActiv extends AppCompatActivity {
         } else {
             sellerPicProgressBar.setVisibility(View.GONE);
         }
+        if (defaultItemType == Item.ITEM_PRODUCT) {
+            newItemBtn.setText("ADD NEW PRODUCT");
+        } else {
+            newItemBtn.setText("ADD NEW SERVICE");
+        }
 
         newItemBtn.setOnClickListener(new View.OnClickListener() {
             @Override
