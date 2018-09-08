@@ -239,7 +239,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                     if (picUri != null) {
                         // upload pic only if it has changed, might not when editing seller
                         Log.d(TAG, "OG file size: " + new File(picUri.getPath()).length() / 1024);
-                        picUri = Uri.fromFile(new File(compressImage(picUri.getPath())));
+                        picUri = Uri.fromFile(compressImage(picUri.getPath()));
                         Log.d(TAG, "NEW file size: " + new File(picUri.getPath()).length() / 1024);
                         startService(new Intent(SellerEditActiv.this, UploadFileService.class)
                                 .putExtra(UploadFileService.EXTRA_FILE_NAME, "seller_pic_" + System.currentTimeMillis() + ".jpg")

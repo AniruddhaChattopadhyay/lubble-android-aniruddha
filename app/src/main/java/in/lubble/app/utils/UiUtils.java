@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.design.widget.BottomSheetDialog;
@@ -125,7 +126,7 @@ public class UiUtils {
         }
     }
 
-    public static String compressImage(String ogFilepath) {
+    public static File compressImage(String ogFilepath) {
         Bitmap bmp = BitmapFactory.decodeFile(ogFilepath);
         File outFile = new File(ogFilepath);
         if (outFile.length() / 1024 > 50) {
@@ -134,12 +135,20 @@ public class UiUtils {
                 bmp.compress(Bitmap.CompressFormat.JPEG, 75, outStream);
                 outStream.flush();
                 outStream.close();
+
+                ExifInterface oldExif = new ExifInterface(ogFilepath);
+                String exifOrientation = oldExif.getAttribute(ExifInterface.TAG_ORIENTATION);
+                if (exifOrientation != null) {
+                    ExifInterface newExif = new ExifInterface(outFile.getPath());
+                    newExif.setAttribute(ExifInterface.TAG_ORIENTATION, exifOrientation);
+                    newExif.saveAttributes();
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 Crashlytics.logException(e);
             }
         }
-        return outFile.getAbsolutePath();
+        return outFile;
     }
 
 }

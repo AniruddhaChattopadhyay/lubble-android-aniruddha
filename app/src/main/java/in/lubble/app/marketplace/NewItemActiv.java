@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -630,7 +629,9 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 final Item item = response.body();
                 if (item != null) {
                     if (picUri != null) {
-                        compressPicWithExif();
+                        Log.d(TAG, "OG file size: " + new File(picUri.getPath()).length() / 1024);
+                        picUri = Uri.fromFile(compressImage(picUri.getPath()));
+                        Log.d(TAG, "NEW file size: " + new File(picUri.getPath()).length() / 1024);
                         startService(new Intent(NewItemActiv.this, UploadFileService.class)
                                 .putExtra(UploadFileService.EXTRA_FILE_NAME, "item_pic_" + System.currentTimeMillis() + ".jpg")
                                 .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
@@ -652,24 +653,6 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 Log.e(TAG, "onFailure: ");
             }
         });
-    }
-
-    private void compressPicWithExif() {
-        try {
-            Log.d(TAG, "OG file size: " + new File(picUri.getPath()).length() / 1024);
-            ExifInterface oldExif = new ExifInterface(picUri.getPath());
-            String exifOrientation = oldExif.getAttribute(ExifInterface.TAG_ORIENTATION);
-            picUri = Uri.fromFile(new File(compressImage(picUri.getPath())));
-            Log.d(TAG, "NEW file size: " + new File(picUri.getPath()).length() / 1024);
-            if (exifOrientation != null) {
-                ExifInterface newExif = new ExifInterface(picUri.getPath());
-                newExif.setAttribute(ExifInterface.TAG_ORIENTATION, exifOrientation);
-                newExif.saveAttributes();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
     }
 
     private int getMinValueService() {
