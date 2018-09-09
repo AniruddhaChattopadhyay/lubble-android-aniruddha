@@ -76,6 +76,7 @@ public class ItemActivity extends AppCompatActivity {
     private static final String PARAM_ITEM_ID = "PARAM_ITEM_ID";
 
     private ImageView imageIv;
+    private TextView savingPercentTv;
     private ProgressBar itemProgressBar;
     private ProgressBar progressBar;
     private TextView titleTv;
@@ -143,6 +144,7 @@ public class ItemActivity extends AppCompatActivity {
         itemProgressBar = findViewById(R.id.item_progress_bar);
         progressBar = findViewById(R.id.progress_bar);
         imageIv = findViewById(R.id.iv_item_image);
+        savingPercentTv = findViewById(R.id.tv_saving_text);
         titleTv = findViewById(R.id.tv_item_title);
 
         dealPriceContainer = findViewById(R.id.container_deal_price);
@@ -373,7 +375,12 @@ public class ItemActivity extends AppCompatActivity {
                                     normalSavingsTv.setText(item.getSavingsText());
                                     normalSavingsTv.setVisibility(View.VISIBLE);
                                 }
-
+                            }
+                            if (!TextUtils.isEmpty(item.getSavingPercentText())) {
+                                savingPercentTv.setVisibility(View.VISIBLE);
+                                savingPercentTv.setText(item.getSavingPercentText());
+                            } else {
+                                savingPercentTv.setVisibility(View.GONE);
                             }
                         }
                     } else {

@@ -14,15 +14,34 @@
 
         <include layout="@layout/text_toolbar" />
 
-        <ImageView
-            android:id="@+id/iv_item_image"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_below="@id/toolbar"
-            android:background="@color/very_light_gray"
-            android:scaleType="centerCrop"
-            android:transitionName="fullscreen_image"
-            tools:src="@tools:sample/avatars" />
+            android:layout_height="300dp">
+
+            <ImageView
+                android:id="@+id/iv_item_image"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:background="@color/very_light_gray"
+                android:scaleType="centerCrop"
+                android:transitionName="fullscreen_image"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_saving_text"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/red_circle"
+                android:gravity="center"
+                android:padding="8dp"
+                android:textColor="@color/white"
+                android:visibility="gone"
+                tools:text="30%\noff"
+                tools:visibility="visible" />
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -155,10 +174,10 @@
                     <TextView
                         android:id="@+id/tv_normal_savings"
                         android:layout_width="wrap_content"
-                        android:visibility="gone"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/tv_price"
-                        android:text="You Save: Rs.400 (30%)" />
+                        android:text="You Save: Rs.400 (30%)"
+                        android:visibility="gone" />
 
                 </RelativeLayout>
 

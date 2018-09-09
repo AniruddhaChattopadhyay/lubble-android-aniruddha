@@ -319,4 +319,16 @@ public class Item {
         }
     }
 
+    public String getSavingPercentText() {
+        if (this.dealPrice > 0) {
+            final int saving = this.mrp - this.dealPrice;
+            return Math.round(((float) saving / this.mrp) * 100) + "%\noff";
+        } else if (!this.mrp.equals(this.sellingPrice)) {
+            final int saving = this.mrp - this.sellingPrice;
+            return Math.round(((float) saving / this.mrp) * 100) + "%\noff";
+        } else {
+            return "";
+        }
+    }
+
 }

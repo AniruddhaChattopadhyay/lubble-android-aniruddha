@@ -3,6 +3,7 @@ package in.lubble.app.marketplace;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,6 +64,7 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             final Item item = itemList.get(position);
 
             viewHolder.nameTv.setText(item.getName());
+            viewHolder.savingTv.setVisibility(View.GONE);
             if (item.getType() == Item.ITEM_SERVICE) {
                 final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
                 if (item.getPricingOption() == ITEM_PRICING_PAID) {
@@ -73,13 +75,23 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 viewHolder.mrpTv.setVisibility(View.GONE);
             } else {
                 if (item.getPricingOption() == ITEM_PRICING_PAID) {
-                    viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+                    if (item.getDealPrice() > 0) {
+                        viewHolder.priceTv.setText("₹" + item.getDealPrice());
+                    } else {
+                        viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+                    }
                     if (item.getMrp().equals(item.getSellingPrice())) {
                         viewHolder.mrpTv.setVisibility(View.GONE);
                     } else {
                         viewHolder.mrpTv.setVisibility(View.VISIBLE);
                         viewHolder.mrpTv.setText("₹" + item.getMrp());
                         viewHolder.mrpTv.setPaintFlags(viewHolder.mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    }
+                    if (!TextUtils.isEmpty(item.getSavingPercentText())) {
+                        viewHolder.savingTv.setVisibility(View.VISIBLE);
+                        viewHolder.savingTv.setText(item.getSavingPercentText());
+                    } else {
+                        viewHolder.savingTv.setVisibility(View.GONE);
                     }
                 } else {
                     viewHolder.priceTv.setText("Request Price");
@@ -111,6 +123,7 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         final TextView nameTv;
         final TextView priceTv;
         final TextView mrpTv;
+        final TextView savingTv;
 
         ViewHolder(View view) {
             super(view);
@@ -118,6 +131,7 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             nameTv = view.findViewById(R.id.tv_name);
             priceTv = view.findViewById(R.id.tv_price);
             mrpTv = view.findViewById(R.id.tv_mrp);
+            savingTv = view.findViewById(R.id.tv_saving_text);
             view.setOnClickListener(this);
         }
 
