@@ -26,6 +26,7 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -37,6 +38,8 @@ import java.util.Map;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
@@ -49,6 +52,7 @@ import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class EventInfoActivity extends AppCompatActivity {
@@ -205,7 +209,22 @@ public class EventInfoActivity extends AppCompatActivity {
                 }
             }
         });
+        try {
+            Intent intent = this.getIntent();
+            if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(TRACK_NOTIF_ID)
+                    && (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0) {
+                int notifId = Integer.parseInt(this.getIntent().getExtras().getString(TRACK_NOTIF_ID));
 
+                if (notifId > 0) {
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("notifKey", String.valueOf(notifId));
+                    bundle.putString("eventId", eventId);
+                    Analytics.triggerEvent(AnalyticsEvents.NOTIF_OPENED, bundle, this);
+                }
+            }
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
     }
 
     @Override

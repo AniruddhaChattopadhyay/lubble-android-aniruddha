@@ -13,11 +13,16 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.utils.StringUtils;
 
+import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 
 public class ChatActivity extends AppCompatActivity {
@@ -121,6 +126,24 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+        try {
+            Intent intent = this.getIntent();
+            if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(TRACK_NOTIF_ID)
+                    && (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0) {
+                String notifId = this.getIntent().getExtras().getString(TRACK_NOTIF_ID);
+
+                if (!TextUtils.isEmpty(notifId)) {
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("notifId", String.valueOf(notifId));
+                    bundle.putString("groupId", String.valueOf(groupId));
+                    bundle.putString("dmId", String.valueOf(dmId));
+                    bundle.putString("msgId", String.valueOf(msgId));
+                    Analytics.triggerEvent(AnalyticsEvents.NOTIF_OPENED, bundle, this);
+                }
+            }
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
     }
 
     @Override

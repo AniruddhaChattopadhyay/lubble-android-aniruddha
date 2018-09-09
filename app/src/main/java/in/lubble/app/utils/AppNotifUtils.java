@@ -44,6 +44,7 @@ import static in.lubble.app.utils.DateTimeUtils.getTimeBasedUniqueInt;
 public class AppNotifUtils {
 
     private static final String TAG = "AppNotifUtils";
+    public static final String TRACK_NOTIF_ID = "TRACK_NOTIF_ID";
 
     public static void showAppNotif(Context context, RemoteMessage.Notification notification) {
         Log.d(TAG, "showAppNotif: notif");
@@ -146,36 +147,43 @@ public class AppNotifUtils {
         if (appNotifData.getType().equalsIgnoreCase("groupInvitation")) {
             Intent intent = new Intent(context, ChatActivity.class);
             intent.putExtra(EXTRA_GROUP_ID, appNotifData.getGroupId());
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
 
         } else if (appNotifData.getType().equalsIgnoreCase("notice")) {
             Intent intent = new Intent(context, AnnouncementsActivity.class);
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("events")) {
             Intent intent = new Intent(context, MainActivity.class);
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             intent.putExtra(EXTRA_TAB_NAME, "events");
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("marketplace")) {
             Intent intent = new Intent(context, MainActivity.class);
             intent.putExtra(EXTRA_TAB_NAME, "marketplace");
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("new_event")) {
             Intent intent = new Intent(context, EventInfoActivity.class);
             intent.putExtra(KEY_EVENT_ID, appNotifData.getNotifKey());
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
             Intent intent = new Intent(context, ChatActivity.class);
             intent.putExtra(EXTRA_GROUP_ID, appNotifData.getGroupId());
             intent.putExtra(EXTRA_MSG_ID, appNotifData.getMessageId());
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("mplace_approval")) {
             Intent intent = ItemActivity.getIntent(context, Integer.parseInt(appNotifData.getNotifKey()));
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             Intent sellerDashIntent = SellerDashActiv.getIntent(context, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT);
             stackBuilder.addNextIntent(sellerDashIntent);

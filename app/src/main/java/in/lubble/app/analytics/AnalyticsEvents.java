@@ -23,4 +23,7 @@ public class AnalyticsEvents {
     public static final String HELP_BTN_CLICKED = "HELP_BTN_CLICKED";
     public static final String HELP_PHONE_CLICKED = "HELP_PHONE_CLICKED";
 
+    public static final String NOTIF_SHOWN = "NOTIF_SHOWN";
+    public static final String NOTIF_OPENED = "NOTIF_OPENED";
+
 }

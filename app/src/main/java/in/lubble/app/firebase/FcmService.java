@@ -1,6 +1,7 @@
 package in.lubble.app.firebase;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ import com.google.gson.JsonElement;
 import java.util.Map;
 
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.AppNotifData;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
@@ -25,6 +27,7 @@ import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
 
+import static in.lubble.app.analytics.AnalyticsEvents.NOTIF_SHOWN;
 import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.marketplace.SellerDashActiv.ACTION_IMG_DONE;
@@ -52,6 +55,8 @@ public class FcmService extends FirebaseMessagingService {
         } else if (remoteMessage.getData().size() > 0) {
             final Map<String, String> dataMap = remoteMessage.getData();
             Log.d(TAG, "Message data payload: " + dataMap);
+
+            sendShownAnalyticEvent(dataMap);
 
             final String type = dataMap.get("type");
             if (StringUtils.isValidString(type) && "deleteUser".equalsIgnoreCase(type)
@@ -86,7 +91,7 @@ public class FcmService extends FirebaseMessagingService {
             } else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
                 // mplace image uploaded, send broadcast
                 sendMarketplaceImgBroadcast(dataMap);
-            }  else if (StringUtils.isValidString(type) && "mplace_approval".equalsIgnoreCase(type)) {
+            } else if (StringUtils.isValidString(type) && "mplace_approval".equalsIgnoreCase(type)) {
                 // mplace item approval status changed
                 Gson gson = new Gson();
                 JsonElement jsonElement = gson.toJsonTree(dataMap);
@@ -95,6 +100,20 @@ public class FcmService extends FirebaseMessagingService {
             } else {
                 Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
             }
+        }
+    }
+
+    private void sendShownAnalyticEvent(Map<String, String> dataMap) {
+        try {
+            final Bundle bundle = new Bundle();
+            for (Map.Entry<String, String> entry : dataMap.entrySet()) {
+                if (!entry.getKey().toLowerCase().contains("thumbnail")) {
+                    bundle.putString(entry.getKey(), entry.getValue());
+                }
+            }
+            Analytics.triggerEvent(NOTIF_SHOWN, bundle, this);
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 
@@ -194,7 +213,7 @@ public class FcmService extends FirebaseMessagingService {
 
     private void updateUnreadCounter(NotifData notifData, boolean isDm) {
         DatabaseReference unreadCountRef = RealtimeDbHelper.getUserGroupsRef().child(notifData.getGroupId()).child("unreadCount");
-        if(isDm){
+        if (isDm) {
             if (notifData.getIsSeller()) {
                 unreadCountRef = RealtimeDbHelper.getSellerRef()
                         .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))

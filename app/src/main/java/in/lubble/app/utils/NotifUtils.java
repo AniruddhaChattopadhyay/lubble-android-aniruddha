@@ -36,6 +36,7 @@ import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 
 /**
  * Created by ishaan on 11/3/18.
@@ -89,8 +90,10 @@ public class NotifUtils {
             if (TextUtils.isEmpty(map.getValue().getConversationTitle())) {
                 // it is a DM notif
                 intent.putExtra(EXTRA_DM_ID, groupId);
+                intent.putExtra(TRACK_NOTIF_ID, groupId);
             } else {
                 intent.putExtra(EXTRA_GROUP_ID, groupId);
+                intent.putExtra(TRACK_NOTIF_ID, groupId);
             }
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addNextIntentWithParentStack(intent);
@@ -166,6 +169,8 @@ public class NotifUtils {
     private static Notification buildSummary(Context context, String groupKey, ArrayList<NotifData> notifDataList) {
 
         Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra(TRACK_NOTIF_ID, groupKey);
+        Log.d(TAG, "TRACK_NOTIF_ID -> " + groupKey);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntentWithParentStack(intent);
 

@@ -17,6 +17,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,6 +35,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
@@ -48,6 +51,7 @@ import in.lubble.app.utils.UserUtils;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
@@ -182,6 +186,22 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
+        }
+        try {
+            Intent intent = this.getIntent();
+            if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(TRACK_NOTIF_ID)
+                    && (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0) {
+                String notifId = this.getIntent().getExtras().getString(TRACK_NOTIF_ID);
+
+                if (!TextUtils.isEmpty(notifId)) {
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("notifKey", notifId);
+                    bundle.putString("tabName", getIntent().getStringExtra(EXTRA_TAB_NAME));
+                    Analytics.triggerEvent(AnalyticsEvents.NOTIF_OPENED, bundle, this);
+                }
+            }
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 
