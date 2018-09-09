@@ -121,6 +121,14 @@ public class ItemActivity extends AppCompatActivity {
     private long recommendationCount = 0;
     private ServiceCatalogAdapter serviceCatalogAdapter;
 
+    private RelativeLayout dealPriceContainer;
+    private RelativeLayout normalPriceContainer;
+    private TextView dealMrpTv;
+    private TextView dealSellingPriceTv;
+    private TextView dealPriceTv;
+    private TextView dealSavingsTv;
+    private TextView normalSavingsTv;
+
     public static Intent getIntent(Context context, int itemId) {
         final Intent intent = new Intent(context, ItemActivity.class);
         intent.putExtra(PARAM_ITEM_ID, itemId);
@@ -136,8 +144,18 @@ public class ItemActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
         imageIv = findViewById(R.id.iv_item_image);
         titleTv = findViewById(R.id.tv_item_title);
+
+        dealPriceContainer = findViewById(R.id.container_deal_price);
+        normalPriceContainer = findViewById(R.id.container_normal_price);
+        dealMrpTv = findViewById(R.id.tv_deal_mrp);
+        dealSellingPriceTv = findViewById(R.id.tv_deal_selling_price);
+        dealPriceTv = findViewById(R.id.tv_deal_price);
+        dealSavingsTv = findViewById(R.id.tv_deal_savings);
+
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
+        normalSavingsTv = findViewById(R.id.tv_normal_savings);
+
         itemPvtInfoLayout = findViewById(R.id.relativelayout_item_pvt_info);
         editItemTv = findViewById(R.id.tv_edit_item);
         viewCountTv = findViewById(R.id.tv_view_count);
@@ -172,6 +190,9 @@ public class ItemActivity extends AppCompatActivity {
         visitShopTv = findViewById(R.id.tv_visit_shop);
 
         mrpTv.setPaintFlags(mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        dealMrpTv.setPaintFlags(dealMrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        dealSellingPriceTv.setPaintFlags(dealSellingPriceTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+
         reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         Toolbar toolbar = findViewById(R.id.text_toolbar);
@@ -332,12 +353,27 @@ public class ItemActivity extends AppCompatActivity {
                             }
                         } else {
                             // PRODUCT
-                            priceTv.setText("₹" + item.getSellingPrice());
-                            if (item.getMrp().equals(item.getSellingPrice())) {
-                                mrpTv.setVisibility(View.GONE);
+                            if (item.getDealPrice() > 0) {
+                                dealPriceContainer.setVisibility(View.VISIBLE);
+                                normalPriceContainer.setVisibility(View.GONE);
+                                dealMrpTv.setText("₹ " + String.valueOf(item.getMrp()));
+                                dealSellingPriceTv.setText("₹ " + String.valueOf(item.getSellingPrice()));
+                                dealPriceTv.setText("₹ " + String.valueOf(item.getDealPrice()));
+                                dealSavingsTv.setText(item.getSavingsText());
                             } else {
-                                mrpTv.setText(String.valueOf(item.getMrp()));
-                                mrpTv.setVisibility(View.VISIBLE);
+                                dealPriceContainer.setVisibility(View.GONE);
+                                normalPriceContainer.setVisibility(View.VISIBLE);
+                                priceTv.setText("₹" + item.getSellingPrice());
+                                if (item.getMrp().equals(item.getSellingPrice())) {
+                                    mrpTv.setVisibility(View.GONE);
+                                    normalSavingsTv.setVisibility(View.GONE);
+                                } else {
+                                    mrpTv.setText("₹ " + String.valueOf(item.getMrp()));
+                                    mrpTv.setVisibility(View.VISIBLE);
+                                    normalSavingsTv.setText(item.getSavingsText());
+                                    normalSavingsTv.setVisibility(View.VISIBLE);
+                                }
+
                             }
                         }
                     } else {

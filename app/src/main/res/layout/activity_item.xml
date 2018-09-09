@@ -18,10 +18,10 @@
             android:id="@+id/iv_item_image"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:transitionName="fullscreen_image"
             android:layout_below="@id/toolbar"
             android:background="@color/very_light_gray"
             android:scaleType="centerCrop"
+            android:transitionName="fullscreen_image"
             tools:src="@tools:sample/avatars" />
 
         <RelativeLayout
@@ -44,32 +44,132 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Title"
                 tools:text="Product Title" />
 
-            <TextView
-                android:id="@+id/tv_price"
+            <RelativeLayout
+                android:id="@+id/container_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_item_title"
-                android:textColor="@color/colorAccent"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                tools:text="Rs. 499" />
+                android:layout_below="@id/tv_item_title">
 
-            <TextView
-                android:id="@+id/tv_mrp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@id/tv_price"
-                android:layout_marginLeft="4dp"
-                android:layout_toRightOf="@id/tv_price"
-                android:textColor="@color/red"
-                tools:text="899" />
+                <RelativeLayout
+                    android:id="@+id/container_deal_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tv_mrp_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignRight="@id/tv_deal_price_hint"
+                        android:layout_marginTop="4dp"
+                        android:text="MRP: " />
+
+                    <TextView
+                        android:id="@+id/tv_deal_mrp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@id/tv_mrp_hint"
+                        android:layout_toRightOf="@id/tv_mrp_hint"
+                        tools:text="1000" />
+
+                    <TextView
+                        android:id="@+id/tv_selling_price_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignRight="@id/tv_deal_price_hint"
+                        android:layout_below="@id/tv_mrp_hint"
+                        android:layout_marginTop="4dp"
+                        android:text="Price: " />
+
+                    <TextView
+                        android:id="@+id/tv_deal_selling_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@id/tv_selling_price_hint"
+                        android:layout_toRightOf="@id/tv_selling_price_hint"
+                        tools:text="500" />
+
+                    <TextView
+                        android:id="@+id/tv_deal_price_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_selling_price_hint"
+                        android:layout_marginTop="4dp"
+                        android:text="Deal Price: " />
+
+                    <TextView
+                        android:id="@+id/tv_deal_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@id/tv_deal_price_hint"
+                        android:layout_toRightOf="@id/tv_deal_price_hint"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="18sp"
+                        tools:text="100" />
+
+                    <TextView
+                        android:id="@+id/tv_deal_savings_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignRight="@id/tv_deal_price_hint"
+                        android:layout_below="@id/tv_deal_price_hint"
+                        android:layout_marginTop="4dp"
+                        android:text="You Save: " />
+
+                    <TextView
+                        android:id="@+id/tv_deal_savings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@id/tv_deal_savings_hint"
+                        android:layout_toRightOf="@id/tv_deal_savings_hint"
+                        android:textColor="@color/colorAccent"
+                        tools:text="400 (30%)" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/container_normal_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:id="@+id/tv_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        tools:text="Rs. 499" />
+
+                    <TextView
+                        android:id="@+id/tv_mrp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignBaseline="@id/tv_price"
+                        android:layout_marginLeft="4dp"
+                        android:layout_toRightOf="@id/tv_price"
+                        android:textColor="@color/red"
+                        tools:text="899" />
+
+                    <TextView
+                        android:id="@+id/tv_normal_savings"
+                        android:layout_width="wrap_content"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_price"
+                        android:text="You Save: Rs.400 (30%)" />
+
+                </RelativeLayout>
+
+            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/relativelayout_item_pvt_info"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_price"
-                android:layout_marginTop="4dp"
+                android:layout_below="@id/container_price"
+                android:layout_marginTop="8dp"
                 android:background="@drawable/rounded_rect_super_light_gray"
                 android:padding="8dp"
                 android:visibility="gone"
@@ -131,8 +231,8 @@
                     android:layout_toRightOf="@id/tv_status_hint"
                     android:background="@drawable/rounded_rect_trans_border"
                     android:gravity="center"
-                    android:padding="4dp"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:padding="4dp">
 
                     <ImageView
                         android:id="@+id/iv_approval_icon"

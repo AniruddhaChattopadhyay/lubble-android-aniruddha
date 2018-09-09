@@ -150,7 +150,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         mrpIv = findViewById(R.id.iv_mrp);
         sellingPriceIv = findViewById(R.id.iv_selling_price);
         sellingPriceTil = findViewById(R.id.til_item_sellingprice);
-        priceHintTv = findViewById(R.id.tv_price_hint);
+        priceHintTv = findViewById(R.id.tv_selling_price_hint);
         submitBtn = findViewById(R.id.btn_submit);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,

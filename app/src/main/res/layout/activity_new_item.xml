@@ -223,7 +223,7 @@
                     android:layout_below="@id/spinner_price">
 
                     <TextView
-                        android:id="@+id/tv_price_hint"
+                        android:id="@+id/tv_selling_price_hint"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
@@ -235,7 +235,7 @@
                         android:id="@+id/linearlayout_catalogue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/tv_price_hint"
+                        android:layout_below="@id/tv_selling_price_hint"
                         android:layout_marginTop="14dp"
                         android:orientation="vertical" />
 
@@ -252,7 +252,7 @@
                         android:id="@+id/til_item_mrp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/tv_price_hint"
+                        android:layout_below="@id/tv_selling_price_hint"
                         android:layout_marginLeft="8dp"
                         android:layout_marginTop="8dp"
                         android:layout_toRightOf="@id/iv_mrp"

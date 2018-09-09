@@ -49,6 +49,9 @@ public class Item {
     @SerializedName("selling_price")
     @Expose
     private Integer sellingPrice;
+    @SerializedName("deal_price")
+    @Expose
+    private int dealPrice = 0;
     @SerializedName("starting_price")
     @Expose
     private Integer startingPrice;
@@ -295,4 +298,25 @@ public class Item {
     public void setPricingOption(int pricingOption) {
         this.pricingOption = pricingOption;
     }
+
+    public Integer getDealPrice() {
+        return dealPrice;
+    }
+
+    public void setDealPrice(Integer dealPrice) {
+        this.dealPrice = dealPrice;
+    }
+
+    public String getSavingsText() {
+        if (this.dealPrice > 0) {
+            final int saving = this.mrp - this.dealPrice;
+            return "₹ " + saving + " (" + Math.round(((float) saving / this.mrp) * 100) + "%)";
+        } else if (!this.mrp.equals(this.sellingPrice)) {
+            final int saving = this.mrp - this.sellingPrice;
+            return "You Save: ₹ " + saving + " (" + Math.round(((float) saving / this.mrp) * 100) + "%)";
+        } else {
+            return "";
+        }
+    }
+
 }
