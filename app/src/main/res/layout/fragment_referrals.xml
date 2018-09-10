@@ -136,7 +136,7 @@
             android:layout_alignTop="@id/iv_cup"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="28dp"
             android:background="@drawable/rect_rounded_border"
             android:gravity="center_horizontal"
             android:orientation="vertical">
@@ -157,12 +157,12 @@
 
         <ImageView
             android:id="@+id/iv_cup"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:layout_below="@id/container_referral_copy"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="8dp"
             android:background="@drawable/circle_white"
+            android:padding="4dp"
             app:srcCompat="@drawable/ic_cup" />
 
     </RelativeLayout>

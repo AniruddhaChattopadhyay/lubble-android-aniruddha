@@ -13,10 +13,12 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Item;
+import in.lubble.app.referrals.ReferralActivity;
 
 import static in.lubble.app.marketplace.SliderData.CATEGORY;
 import static in.lubble.app.marketplace.SliderData.DASH;
 import static in.lubble.app.marketplace.SliderData.ITEM;
+import static in.lubble.app.marketplace.SliderData.REFER;
 import static in.lubble.app.marketplace.SliderData.SELLER;
 
 public class SlidePageFrag extends Fragment {
@@ -96,6 +98,9 @@ public class SlidePageFrag extends Fragment {
                                 // seller ID found, open dashboard
                                 getContext().startActivity(SellerDashActiv.getIntent(getContext(), sellerId, false, Item.ITEM_PRODUCT));
                             }
+                            break;
+                        case REFER:
+                            ReferralActivity.open(getContext());
                             break;
                     }
                 }

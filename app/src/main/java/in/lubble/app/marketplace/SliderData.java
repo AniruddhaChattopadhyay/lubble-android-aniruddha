@@ -14,6 +14,7 @@ public class SliderData implements Serializable {
     public static final int CATEGORY = 1;
     public static final int SELLER = 2;
     public static final int DASH = 3;
+    public static final int REFER = 4;
 
     @SerializedName("photo")
     private String url;
