@@ -7,4 +7,5 @@
     <dimen name="app_bar_height">240dp</dimen>
     <dimen name="event_img_height">160dp</dimen>
     <dimen name="pager_margin">-30dp</dimen>
+    <dimen name="appbar_padding_top">8dp</dimen>
 </resources>
