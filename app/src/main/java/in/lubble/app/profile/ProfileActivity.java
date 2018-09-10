@@ -2,6 +2,7 @@ package in.lubble.app.profile;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
@@ -32,10 +33,19 @@ public class ProfileActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle(R.string.profile);
 
+        Uri data = getIntent().getData();
+
+        String userId;
+        if (data != null) {
+            userId = data.getQueryParameter("user_id");
+        } else {
+            userId = getIntent().getStringExtra(KEY_USER_ID);
+        }
+
         FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction()
                 .replace(R.id.frameLayout_fragContainer,
-                        ProfileFrag.newInstance(getIntent().getStringExtra(KEY_USER_ID)))
+                        ProfileFrag.newInstance(userId))
                 .commit();
     }
 

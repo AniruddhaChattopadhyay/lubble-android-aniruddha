@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 
 import in.lubble.app.R;
 
-public class ServciesActivity extends AppCompatActivity {
+public class ServicesActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

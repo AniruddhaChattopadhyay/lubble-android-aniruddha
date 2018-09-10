@@ -97,6 +97,11 @@ public class FcmService extends FirebaseMessagingService {
                 JsonElement jsonElement = gson.toJsonTree(dataMap);
                 AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
                 AppNotifUtils.showNormalAppNotif(this, appNotifData);
+            }  else if (StringUtils.isValidString(type) && "deep_link".equalsIgnoreCase(type)) {
+                Gson gson = new Gson();
+                JsonElement jsonElement = gson.toJsonTree(dataMap);
+                AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
+                AppNotifUtils.showNormalAppNotif(this, appNotifData);
             } else {
                 Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
             }
