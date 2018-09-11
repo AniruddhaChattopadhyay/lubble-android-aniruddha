@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
@@ -201,6 +202,12 @@ public class AppNotifUtils {
             Intent sellerDashIntent = SellerDashActiv.getIntent(context, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT);
             stackBuilder.addNextIntent(sellerDashIntent);
             stackBuilder.addNextIntent(intent);
+            return stackBuilder;
+        } else if (appNotifData.getType().equalsIgnoreCase("deeplink")) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(appNotifData.getDeepLink()));
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            stackBuilder.addNextIntentWithParentStack(intent);
             return stackBuilder;
         } else {
             Intent intent = new Intent(context, MainActivity.class);

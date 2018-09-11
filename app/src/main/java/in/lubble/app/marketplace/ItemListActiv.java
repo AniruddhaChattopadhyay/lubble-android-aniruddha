@@ -2,6 +2,7 @@ package in.lubble.app.marketplace;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -84,9 +85,21 @@ public class ItemListActiv extends AppCompatActivity {
         adapter = new BigItemAdapter(GlideApp.with(this), false);
         recyclerView.setAdapter(adapter);
 
-        isSeller = getIntent().getBooleanExtra(PARAM_IS_SELLER, false);
-        sellerId = getIntent().getIntExtra(PARAM_ID, -1);
-
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        if (data != null) {
+            try {
+                isSeller = data.getBooleanQueryParameter("is_seller", false);
+                sellerId = Integer.parseInt(data.getQueryParameter("id"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Crashlytics.logException(e);
+                finish();
+            }
+        } else {
+            isSeller = intent.getBooleanExtra(PARAM_IS_SELLER, false);
+            sellerId = intent.getIntExtra(PARAM_ID, -1);
+        }
         if (sellerId == -1 || !getIntent().hasExtra(PARAM_IS_SELLER)) {
             throw new IllegalArgumentException("no seller ID bruh");
         }

@@ -59,6 +59,8 @@ public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (item.getDealPercent() > 0) {
             viewHolder.dealTv.setVisibility(View.VISIBLE);
             viewHolder.dealTv.setText(item.getDealPercent() + "% off");
+        } else {
+            viewHolder.dealTv.setVisibility(View.GONE);
         }
 
     }

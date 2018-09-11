@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -203,7 +204,20 @@ public class ItemActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        itemId = getIntent().getIntExtra(PARAM_ITEM_ID, -1);
+
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        if (data != null) {
+            try {
+                itemId = Integer.parseInt(data.getQueryParameter("id"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Crashlytics.logException(e);
+                finish();
+            }
+        } else {
+            itemId = intent.getIntExtra(PARAM_ITEM_ID, -1);
+        }
         if (itemId == -1) {
             throw new IllegalArgumentException("No ITEM ID passed");
         }
