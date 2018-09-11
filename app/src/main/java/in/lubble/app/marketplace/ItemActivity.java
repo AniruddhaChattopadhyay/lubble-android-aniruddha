@@ -129,6 +129,7 @@ public class ItemActivity extends AppCompatActivity {
     private TextView dealPriceTv;
     private TextView dealSavingsTv;
     private TextView normalSavingsTv;
+    private TextView serviceDealTv;
 
     public static Intent getIntent(Context context, int itemId) {
         final Intent intent = new Intent(context, ItemActivity.class);
@@ -157,6 +158,7 @@ public class ItemActivity extends AppCompatActivity {
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
         normalSavingsTv = findViewById(R.id.tv_normal_savings);
+        serviceDealTv = findViewById(R.id.tv_service_deal);
 
         itemPvtInfoLayout = findViewById(R.id.relativelayout_item_pvt_info);
         editItemTv = findViewById(R.id.tv_edit_item);
@@ -386,6 +388,11 @@ public class ItemActivity extends AppCompatActivity {
                     } else {
                         priceTv.setText("Request Price");
                         mrpTv.setVisibility(View.GONE);
+                    }
+                    // show service deal if applicable, regardless of pricing option or anything
+                    if (item.getType() == Item.ITEM_SERVICE && item.getDealPercent() > 0) {
+                        serviceDealTv.setVisibility(View.VISIBLE);
+                        serviceDealTv.setText(item.getDealPercent() + "% off");
                     }
 
                     descTv.setText(item.getDescription());

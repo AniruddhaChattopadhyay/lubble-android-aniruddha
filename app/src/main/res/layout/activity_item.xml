@@ -181,6 +181,21 @@
 
                 </RelativeLayout>
 
+                <TextView
+                    android:id="@+id/tv_service_deal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/container_normal_price"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/pill_red"
+                    android:paddingBottom="4dp"
+                    android:visibility="gone"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="4dp"
+                    android:textColor="@color/white"
+                    tools:text="30% off" />
+
             </RelativeLayout>
 
             <RelativeLayout
