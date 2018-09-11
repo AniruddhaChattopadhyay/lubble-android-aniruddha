@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:descendantFocusability="blocksDescendants"
@@ -20,7 +20,7 @@
                 android:id="@+id/progressBar_groups"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true" />
+                android:layout_centerHorizontal="true" />
 
             <me.crosswall.lib.coverflow.core.PagerContainer
                 android:id="@+id/pager_container"
@@ -45,7 +45,7 @@
                 tools:context="in.lubble.app.groups.GroupListFragment"
                 tools:listitem="@layout/fragment_group_list" />
 
-        </LinearLayout>
+        </RelativeLayout>
 
     </android.support.v4.widget.NestedScrollView>
 
