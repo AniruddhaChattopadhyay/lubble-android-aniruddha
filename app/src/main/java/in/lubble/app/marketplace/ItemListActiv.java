@@ -100,7 +100,7 @@ public class ItemListActiv extends AppCompatActivity {
             isSeller = intent.getBooleanExtra(PARAM_IS_SELLER, false);
             sellerId = intent.getIntExtra(PARAM_ID, -1);
         }
-        if (sellerId == -1 || !getIntent().hasExtra(PARAM_IS_SELLER)) {
+        if (sellerId == -1) {
             throw new IllegalArgumentException("no seller ID bruh");
         }
 

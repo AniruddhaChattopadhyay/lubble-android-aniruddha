@@ -63,10 +63,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with "http://www.lubble.in/gizmos” -->
                 <data
-                    android:host="www.lubble.in"
-                    android:pathPrefix="/my_profile"
-                    android:scheme="http" />
-                <!-- note that the leading "/" is required for pathPrefix-->
+                    android:host="profile"
+                    android:scheme="lubble" />
             </intent-filter>
 
         </activity>
@@ -222,10 +220,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with "http://www.lubble.in/gizmos” -->
                 <data
-                    android:host="www.lubble.in"
-                    android:pathPrefix="/market/item"
-                    android:scheme="http" />
-                <!-- note that the leading "/" is required for pathPrefix-->
+                    android:host="market.item"
+                    android:scheme="lubble" />
             </intent-filter>
 
         </activity>
@@ -249,10 +245,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with "http://www.lubble.in/gizmos” -->
                 <data
-                    android:host="www.lubble.in"
-                    android:pathPrefix="/market/item_list"
-                    android:scheme="http" />
-                <!-- note that the leading "/" is required for pathPrefix-->
+                    android:host="market.item_list"
+                    android:scheme="lubble" />
             </intent-filter>
 
         </activity>
@@ -283,10 +277,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with "http://www.lubble.in/gizmos” -->
                 <data
-                    android:host="www.lubble.in"
-                    android:pathPrefix="/service/category"
-                    android:scheme="http" />
-                <!-- note that the leading "/" is required for pathPrefix-->
+                    android:host="service.category"
+                    android:scheme="lubble" />
             </intent-filter>
 
         </activity>
