@@ -10,85 +10,27 @@ public class ReferralLeaderboardData {
 
     @SerializedName("leaderboard")
     @Expose
-    private List<LeaderboardData> leaderboard = new ArrayList<>();
-    @SerializedName("rank")
-    @Expose
-    private Integer rank;
-    @SerializedName("points")
-    @Expose
-    private Integer points;
+    private List<LeaderboardPersonData> leaderboard = new ArrayList<>();
 
-    public List<LeaderboardData> getLeaderboardData() {
+    @SerializedName("current_user")
+    @Expose
+    private LeaderboardPersonData currentUser;
+
+
+    public List<LeaderboardPersonData> getLeaderboardData() {
         return leaderboard;
     }
 
-    public void setLeaderboardData(List<LeaderboardData> leaderboard) {
+    public void setLeaderboardData(List<LeaderboardPersonData> leaderboard) {
         this.leaderboard = leaderboard;
     }
 
-    public Integer getRank() {
-        return rank;
+    public LeaderboardPersonData getCurrentUser() {
+        return currentUser;
     }
 
-    public void setRank(Integer rank) {
-        this.rank = rank;
-    }
-
-    public Integer getPoints() {
-        return points;
-    }
-
-    public void setPoints(Integer points) {
-        this.points = points;
-    }
-
-    public class LeaderboardData {
-
-        @SerializedName("uid")
-        @Expose
-        private String uid;
-        @SerializedName("points")
-        @Expose
-        private Integer points;
-        @SerializedName("name")
-        @Expose
-        private String name;
-        @SerializedName("thumbnail")
-        @Expose
-        private String thumbnail;
-
-        public String getUid() {
-            return uid;
-        }
-
-        public void setUid(String uid) {
-            this.uid = uid;
-        }
-
-        public Integer getPoints() {
-            return points;
-        }
-
-        public void setPoints(Integer points) {
-            this.points = points;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getThumbnail() {
-            return thumbnail;
-        }
-
-        public void setThumbnail(String thumbnail) {
-            this.thumbnail = thumbnail;
-        }
-
+    public void setCurrentUser(LeaderboardPersonData currentUser) {
+        this.currentUser = currentUser;
     }
 
 }

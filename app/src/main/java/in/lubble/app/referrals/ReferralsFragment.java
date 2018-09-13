@@ -8,9 +8,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -24,6 +26,7 @@ public class ReferralsFragment extends Fragment {
 
     private static final String TAG = "ReferralsFragment";
 
+    private ProgressBar leaderboardProgressBar;
     private ReferralLeaderboardAdapter adapter;
 
     public ReferralsFragment() {
@@ -45,6 +48,7 @@ public class ReferralsFragment extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_referrals, container, false);
 
+        leaderboardProgressBar = view.findViewById(R.id.progressbar_leaderboard);
         RecyclerView rv = view.findViewById(R.id.rv_leaderboard);
         rv.setNestedScrollingEnabled(false);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -57,17 +61,25 @@ public class ReferralsFragment extends Fragment {
     }
 
     private void fetchReferralLeaderboard() {
-        //todo progressBar.setVisibility(View.VISIBLE);
+        leaderboardProgressBar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchReferralLeaderboard().enqueue(new Callback<ReferralLeaderboardData>() {
             @Override
             public void onResponse(Call<ReferralLeaderboardData> call, Response<ReferralLeaderboardData> response) {
-                //todo progressBar.setVisibility(View.GONE);
+                leaderboardProgressBar.setVisibility(View.GONE);
                 final ReferralLeaderboardData referralLeaderboardData = response.body();
                 if (response.isSuccessful() && referralLeaderboardData != null && isAdded() && isVisible()) {
 
-                    for (ReferralLeaderboardData.LeaderboardData referralPersonData : referralLeaderboardData.getLeaderboardData()) {
-                        adapter.addPerson(referralPersonData);
+                    for (LeaderboardPersonData referralPersonData : referralLeaderboardData.getLeaderboardData()) {
+                        if (referralPersonData.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                            adapter.addPerson(referralLeaderboardData.getCurrentUser());
+                        } else {
+                            adapter.addPerson(referralPersonData);
+                        }
+                    }
+
+                    if (referralLeaderboardData.getCurrentUser().getCurrentUserRank() > 10) {
+                        adapter.addPerson(referralLeaderboardData.getCurrentUser());
                     }
 
                 } else if (isAdded() && isVisible()) {
@@ -80,7 +92,7 @@ public class ReferralsFragment extends Fragment {
             public void onFailure(Call<ReferralLeaderboardData> call, Throwable t) {
                 if (isAdded() && isVisible()) {
                     Log.e(TAG, "onFailure: ");
-                    //todo progressBar.setVisibility(View.GONE);
+                    leaderboardProgressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
                 }
             }
