@@ -510,7 +510,7 @@ public class ItemActivity extends AppCompatActivity {
                                     final Bundle bundle = new Bundle();
                                     bundle.putInt("seller_id", sellerData.getId());
                                     Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, bundle, ItemActivity.this);
-                                    if (item.isCallEnabled()) {
+                                    if (sellerData.isCallEnabled()) {
                                         Intent intent = new Intent(Intent.ACTION_DIAL);
                                         intent.setData(Uri.parse("tel:" + sellerData.getPhone()));
                                         startActivity(intent);
@@ -533,7 +533,7 @@ public class ItemActivity extends AppCompatActivity {
                             userReviewContainer.setVisibility(View.VISIBLE);
                             ratingAccountIv.setVisibility(View.VISIBLE);
                         }
-                        if (item.isCallEnabled()) {
+                        if (sellerData.isCallEnabled()) {
                             chatBtn.getBackground().setColorFilter(ContextCompat.getColor(ItemActivity.this, R.color.mb_green), PorterDuff.Mode.MULTIPLY);
                             chatBtn.setText("Call for details");
                             chatHintTv.setText("Call or Message the seller to buy or know more");
