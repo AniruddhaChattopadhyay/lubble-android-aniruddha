@@ -12,6 +12,7 @@
         android:id="@+id/iv_referral_pic"
         android:layout_width="36dp"
         android:layout_height="36dp"
+        android:scaleType="centerCrop"
         tools:src="@tools:sample/avatars" />
 
     <TextView
@@ -33,7 +34,6 @@
         android:layout_alignLeft="@id/tv_name"
         android:layout_below="@id/tv_name"
         android:layout_marginTop="8dp"
-        android:tint="@color/colorAccent"
         app:srcCompat="@drawable/ic_check_circle_black_24dp" />
 
     <TextView
@@ -53,7 +53,7 @@
         android:layout_alignLeft="@id/tv_name"
         android:layout_below="@id/iv_joined"
         android:layout_marginTop="4dp"
-        app:srcCompat="@drawable/ic_check_circle_black_24dp" />
+        app:srcCompat="@drawable/ic_cancel_black_24dp" />
 
     <TextView
         android:id="@+id/tv_seller"
@@ -62,14 +62,25 @@
         android:layout_alignBottom="@id/iv_seller"
         android:layout_marginLeft="4dp"
         android:layout_toRightOf="@id/iv_seller"
-        android:text="Became a seller"
-        android:textColor="@color/black" />
+        android:text="Not yet a seller" />
+
+    <TextView
+        android:id="@+id/tv_bonus_reason"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/tv_name"
+        android:layout_below="@id/iv_referral_pic"
+        android:layout_marginTop="4dp"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        tools:text="Joining Bonus" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
+        android:layout_marginRight="4dp"
         android:gravity="right"
         android:orientation="vertical">
 

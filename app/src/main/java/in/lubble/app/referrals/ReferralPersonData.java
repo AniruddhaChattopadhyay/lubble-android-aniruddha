@@ -8,12 +8,16 @@ public class ReferralPersonData {
     private String name;
     @SerializedName("thumbnail")
     private String thumbnail;
+    @SerializedName("type")
+    private int type;
     @SerializedName("isJoined")
     private String isJoined;
     @SerializedName("isSeller")
-    private String isSeller;
+    private boolean isSeller;
     @SerializedName("points")
     private String points;
+    @SerializedName("bonus_reason")
+    private String bonusReason;
 
     public String getName() {
         return name;
@@ -39,11 +43,11 @@ public class ReferralPersonData {
         this.isJoined = isJoined;
     }
 
-    public String getIsSeller() {
+    public boolean getIsSeller() {
         return isSeller;
     }
 
-    public void setIsSeller(String isSeller) {
+    public void setIsSeller(boolean isSeller) {
         this.isSeller = isSeller;
     }
 
@@ -55,4 +59,19 @@ public class ReferralPersonData {
         this.points = points;
     }
 
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getBonusReason() {
+        return bonusReason;
+    }
+
+    public void setBonusReason(String bonusReason) {
+        this.bonusReason = bonusReason;
+    }
 }

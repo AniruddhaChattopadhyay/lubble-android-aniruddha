@@ -1,6 +1,8 @@
 package in.lubble.app.referrals;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ import java.util.List;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
+import in.lubble.app.utils.StringUtils;
 
 public class ReferralHistoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -20,10 +23,12 @@ public class ReferralHistoryAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     private final List<ReferralPersonData> referralList;
     private final GlideRequests glide;
+    private final Context context;
 
-    public ReferralHistoryAdapter(GlideRequests glide) {
+    public ReferralHistoryAdapter(GlideRequests glide, Context context) {
         referralList = new ArrayList<>();
         this.glide = glide;
+        this.context = context;
     }
 
     @NonNull
@@ -35,6 +40,48 @@ public class ReferralHistoryAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        final ReferralPersonData referralPersonData = referralList.get(position);
+
+        final ViewHolder viewHolder = (ViewHolder) holder;
+
+        viewHolder.nameTv.setText(StringUtils.getTitleCase(referralPersonData.getName()));
+        viewHolder.pointCountTv.setText(referralPersonData.getPoints());
+
+        if (referralPersonData.getType() <= 1) {
+            viewHolder.sellerIconIv.setVisibility(View.VISIBLE);
+            viewHolder.sellerTv.setVisibility(View.VISIBLE);
+            viewHolder.joinedIconIv.setVisibility(View.VISIBLE);
+            viewHolder.joinedTv.setVisibility(View.VISIBLE);
+            viewHolder.bonusReasonTv.setVisibility(View.GONE);
+
+            glide.load(referralPersonData.getThumbnail()).circleCrop()
+                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                    .error(R.drawable.ic_account_circle_black_no_padding)
+                    .into(viewHolder.iconIv);
+
+            if (referralPersonData.getIsSeller()) {
+                viewHolder.sellerTv.setText("Became a seller");
+                viewHolder.sellerTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+                viewHolder.sellerIconIv.setImageResource(R.drawable.ic_check_circle_black_24dp);
+            } else {
+                viewHolder.sellerTv.setText("Not yet a seller");
+                viewHolder.sellerTv.setTextColor(ContextCompat.getColor(context, R.color.default_text_color));
+                viewHolder.sellerIconIv.setImageResource(R.drawable.ic_cancel_black_24dp);
+            }
+        } else {
+            viewHolder.nameTv.setText("Bonus");
+            viewHolder.bonusReasonTv.setText(referralPersonData.getBonusReason());
+            viewHolder.bonusReasonTv.setVisibility(View.VISIBLE);
+            viewHolder.sellerIconIv.setVisibility(View.GONE);
+            viewHolder.sellerTv.setVisibility(View.GONE);
+            viewHolder.joinedIconIv.setVisibility(View.GONE);
+            viewHolder.joinedTv.setVisibility(View.GONE);
+
+            glide.load(R.drawable.ic_medal).circleCrop()
+                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                    .error(R.drawable.ic_account_circle_black_no_padding)
+                    .into(viewHolder.iconIv);
+        }
 
     }
 
@@ -61,6 +108,7 @@ public class ReferralHistoryAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         final TextView nameTv;
         final TextView joinedTv;
         final TextView sellerTv;
+        final TextView bonusReasonTv;
         final TextView pointCountTv;
 
         ViewHolder(View view) {
@@ -72,6 +120,7 @@ public class ReferralHistoryAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             joinedTv = view.findViewById(R.id.tv_joined);
             sellerIconIv = view.findViewById(R.id.iv_seller);
             sellerTv = view.findViewById(R.id.tv_seller);
+            bonusReasonTv = view.findViewById(R.id.tv_bonus_reason);
             pointCountTv = view.findViewById(R.id.tv_point_count);
         }
 

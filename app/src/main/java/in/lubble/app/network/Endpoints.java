@@ -11,6 +11,7 @@ import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
+import in.lubble.app.referrals.ReferralPersonData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -75,6 +76,9 @@ public interface Endpoints {
 
     @GET("/marketplace/servicecategories/")
     Call<ArrayList<Category>> fetchServiceCategories();
+
+    @GET("/referral/history/")
+    Call<ArrayList<ReferralPersonData>> fetchReferralHistory();
 
     class ResponseBean {
 
