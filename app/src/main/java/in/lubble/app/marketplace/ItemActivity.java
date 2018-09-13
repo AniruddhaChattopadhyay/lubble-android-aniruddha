@@ -18,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -399,8 +400,10 @@ public class ItemActivity extends AppCompatActivity {
                                 savingPercentTv.setVisibility(View.GONE);
                             }
                         }
+                        priceTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
                     } else {
                         priceTv.setText("Request Price");
+                        priceTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
                         mrpTv.setVisibility(View.GONE);
                     }
                     // show service deal if applicable, regardless of pricing option or anything
