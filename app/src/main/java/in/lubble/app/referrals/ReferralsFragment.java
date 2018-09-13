@@ -4,12 +4,21 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ReferralsFragment extends Fragment {
 
@@ -42,20 +51,41 @@ public class ReferralsFragment extends Fragment {
         adapter = new ReferralLeaderboardAdapter(GlideApp.with(getContext()), getContext());
         rv.setAdapter(adapter);
 
-        getdummylist();
+        fetchReferralLeaderboard();
 
         return view;
     }
 
-    private void getdummylist() {
-        for (int i = 0; i < 10; i++) {
-            final ReferralLeaderboardData data = new ReferralLeaderboardData();
-            data.setName("Bruce Wayne");
-            data.setPoints(999);
-            data.setThumbnail("https://imgur.com/I80W1Q0.png");
+    private void fetchReferralLeaderboard() {
+        //todo progressBar.setVisibility(View.VISIBLE);
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchReferralLeaderboard().enqueue(new Callback<ReferralLeaderboardData>() {
+            @Override
+            public void onResponse(Call<ReferralLeaderboardData> call, Response<ReferralLeaderboardData> response) {
+                //todo progressBar.setVisibility(View.GONE);
+                final ReferralLeaderboardData referralLeaderboardData = response.body();
+                if (response.isSuccessful() && referralLeaderboardData != null && isAdded() && isVisible()) {
 
-            adapter.addPerson(data);
-        }
+                    for (ReferralLeaderboardData.LeaderboardData referralPersonData : referralLeaderboardData.getLeaderboardData()) {
+                        adapter.addPerson(referralPersonData);
+                    }
+
+                } else if (isAdded() && isVisible()) {
+                    Crashlytics.log("referral leaderboard bad response");
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReferralLeaderboardData> call, Throwable t) {
+                if (isAdded() && isVisible()) {
+                    Log.e(TAG, "onFailure: ");
+                    //todo progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
+
 
 }

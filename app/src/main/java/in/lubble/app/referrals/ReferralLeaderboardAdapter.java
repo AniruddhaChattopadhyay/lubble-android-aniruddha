@@ -20,7 +20,7 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
 
     private static final String TAG = "ReferralLeaderboardAdapter";
 
-    private final List<ReferralLeaderboardData> referralList;
+    private final List<ReferralLeaderboardData.LeaderboardData> referralList;
     private final GlideRequests glide;
     private final Context context;
 
@@ -39,7 +39,7 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        final ReferralLeaderboardData referralPersonData = referralList.get(position);
+        final ReferralLeaderboardData.LeaderboardData referralPersonData = referralList.get(position);
 
         final ViewHolder viewHolder = (ViewHolder) holder;
 
@@ -59,7 +59,7 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
         return referralList.size();
     }
 
-    public void addPerson(ReferralLeaderboardData person) {
+    public void addPerson(ReferralLeaderboardData.LeaderboardData person) {
         referralList.add(person);
         notifyDataSetChanged();
     }
