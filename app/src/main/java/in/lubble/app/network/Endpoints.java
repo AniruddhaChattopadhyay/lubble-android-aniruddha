@@ -12,6 +12,7 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.referrals.ReferralHistoryData;
+import in.lubble.app.referrals.ReferralLeaderboardData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -79,6 +80,9 @@ public interface Endpoints {
 
     @GET("/referral/history/")
     Call<ReferralHistoryData> fetchReferralHistory();
+
+    @GET("/referral/leaderboard/")
+    Call<ReferralLeaderboardData> fetchReferralLeaderboard();
 
     class ResponseBean {
 
