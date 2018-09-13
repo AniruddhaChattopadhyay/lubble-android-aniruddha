@@ -665,7 +665,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private ChildEventListener msgListener(@NonNull DatabaseReference messagesReference) {
-        return messagesReference.addChildEventListener(new ChildEventListener() {
+        return messagesReference.orderByChild("serverTimestamp").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildAdded: ");
@@ -686,11 +686,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 if (lastPos > -1) {
                     lastMsg = chatAdapter.getChatMsgAt(lastPos);
                 }
-                if (lastMsg == null || !DateTimeUtils.getDateFromLong(lastMsg.getCreatedTimestamp())
-                        .equalsIgnoreCase(DateTimeUtils.getDateFromLong(chatData.getCreatedTimestamp()))) {
+                if (lastMsg == null || !DateTimeUtils.getDateFromLong(lastMsg.getServerTimestampInLong())
+                        .equalsIgnoreCase(DateTimeUtils.getDateFromLong(chatData.getServerTimestampInLong()))) {
                     // different date, insert date divider
                     final ChatData dateChatData = new ChatData();
-                    dateChatData.setMessage(DateTimeUtils.getDateFromLong(chatData.getCreatedTimestamp()));
+                    dateChatData.setMessage(DateTimeUtils.getDateFromLong(chatData.getServerTimestampInLong()));
                     dateChatData.setType(SYSTEM);
                     final HashMap<String, Long> readMap = new HashMap<>();
                     readMap.put(authorId, 0L);
