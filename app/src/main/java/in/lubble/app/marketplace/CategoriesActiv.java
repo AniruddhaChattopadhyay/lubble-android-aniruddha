@@ -19,6 +19,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Category;
+import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
@@ -72,7 +73,9 @@ public class CategoriesActiv extends AppCompatActivity {
                 final ArrayList<Category> categoryList = response.body();
                 if (categoryList != null && categoryList.size() > 0) {
                     for (Category category : categoryList) {
-                        categoryAdapter.addData(category);
+                        if (category.getType() == Item.ITEM_PRODUCT) {
+                            categoryAdapter.addData(category);
+                        }
                     }
                 }
             }
