@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -110,6 +111,7 @@ public class ItemActivity extends AppCompatActivity {
     private RecyclerView sellerItemsRv;
     private TextView visitShopTv;
     private Button chatBtn;
+    private TextView chatHintTv;
     private ValueEventListener sellerDmIdValueEventListener;
     private Query sellerDmQuery;
     @Nullable
@@ -168,6 +170,7 @@ public class ItemActivity extends AppCompatActivity {
         approvalIconIv = findViewById(R.id.iv_approval_icon);
         approvalStatusTv = findViewById(R.id.tv_approval_status);
         chatBtn = findViewById(R.id.btn_chat);
+        chatHintTv = findViewById(R.id.tv_chat_seller_hint);
         descTv = findViewById(R.id.tv_item_desc);
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
         serviceRv = findViewById(R.id.rv_service_catalog);
@@ -479,7 +482,7 @@ public class ItemActivity extends AppCompatActivity {
                             chatBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    Toast.makeText(ItemActivity.this, "You cannot chat with yourself :)", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ItemActivity.this, "You cannot contact yourself :)", Toast.LENGTH_SHORT).show();
                                 }
                             });
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.gray)));
@@ -507,22 +510,33 @@ public class ItemActivity extends AppCompatActivity {
                                     final Bundle bundle = new Bundle();
                                     bundle.putInt("seller_id", sellerData.getId());
                                     Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, bundle, ItemActivity.this);
-                                    if (!TextUtils.isEmpty(dmId)) {
-                                        ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
+                                    if (item.isCallEnabled()) {
+                                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                                        intent.setData(Uri.parse("tel:" + sellerData.getPhone()));
+                                        startActivity(intent);
                                     } else {
-                                        ChatActivity.openForEmptyDm(
-                                                ItemActivity.this,
-                                                String.valueOf(sellerData.getId()),
-                                                sellerData.getName(),
-                                                sellerData.getPhotoUrl(),
-                                                item.getName()
-                                        );
+                                        if (!TextUtils.isEmpty(dmId)) {
+                                            ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
+                                        } else {
+                                            ChatActivity.openForEmptyDm(
+                                                    ItemActivity.this,
+                                                    String.valueOf(sellerData.getId()),
+                                                    sellerData.getName(),
+                                                    sellerData.getPhotoUrl(),
+                                                    item.getName()
+                                            );
+                                        }
                                     }
                                 }
                             });
                             itemPvtInfoLayout.setVisibility(View.GONE);
                             userReviewContainer.setVisibility(View.VISIBLE);
                             ratingAccountIv.setVisibility(View.VISIBLE);
+                        }
+                        if (item.isCallEnabled()) {
+                            chatBtn.getBackground().setColorFilter(ContextCompat.getColor(ItemActivity.this, R.color.mb_green), PorterDuff.Mode.MULTIPLY);
+                            chatBtn.setText("Call for details");
+                            chatHintTv.setText("Call or Message the seller to buy or know more");
                         }
                         handleRecommendations(sellerData);
                     }

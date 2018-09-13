@@ -101,6 +101,9 @@ public class Item {
     @SerializedName("pricing_option")
     @Expose
     private int pricingOption = ITEM_PRICING_PAID;
+    @SerializedName("is_call_enabled")
+    @Expose
+    private boolean isCallEnabled;
 
     @Override
     public boolean equals(Object obj) {
@@ -340,5 +343,13 @@ public class Item {
 
     public void setDealPercent(int dealPercent) {
         this.dealPercent = dealPercent;
+    }
+
+    public boolean isCallEnabled() {
+        return isCallEnabled;
+    }
+
+    public void setCallEnabled(boolean callEnabled) {
+        isCallEnabled = callEnabled;
     }
 }
