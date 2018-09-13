@@ -18,14 +18,14 @@
             android:layout_width="match_parent"
             android:layout_height="300dp">
 
-        <ImageView
-            android:id="@+id/iv_item_image"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:transitionName="fullscreen_image"
-            android:background="@color/very_light_gray"
-            android:scaleType="centerCrop"
-            tools:src="@tools:sample/avatars" />
+            <ImageView
+                android:id="@+id/iv_item_image"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:background="@color/very_light_gray"
+                android:scaleType="centerCrop"
+                android:transitionName="fullscreen_image"
+                tools:src="@tools:sample/avatars" />
 
             <TextView
                 android:id="@+id/tv_saving_text"
@@ -189,11 +189,11 @@
                     android:layout_marginTop="4dp"
                     android:background="@drawable/pill_red"
                     android:paddingBottom="4dp"
-                    android:visibility="gone"
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp"
                     android:paddingTop="4dp"
                     android:textColor="@color/white"
+                    android:visibility="gone"
                     tools:text="30% off" />
 
             </RelativeLayout>
@@ -293,8 +293,9 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/relativelayout_item_pvt_info"
                 android:layout_marginTop="4dp"
-                android:text="@string/chat_with_seller"
-                android:theme="@style/AccentButton" />
+                tools:text="@string/chat_with_seller"
+                android:textColor="@color/white"
+                tools:theme="@style/AccentButton" />
 
             <TextView
                 android:id="@+id/tv_chat_seller_hint"

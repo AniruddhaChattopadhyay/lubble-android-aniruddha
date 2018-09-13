@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -478,6 +477,14 @@ public class ItemActivity extends AppCompatActivity {
                             }
                         });
                         syncDmId(sellerData);
+                        if (sellerData.isCallEnabled()) {
+                            ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.mb_green)));
+                            chatBtn.setText("Call for details");
+                            chatHintTv.setText("Call or Message the seller to buy or know more");
+                        } else {
+                            ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent)));
+                            chatBtn.setText("Ask For Details");
+                        }
                         if (sellerData.getId() == LubbleSharedPrefs.getInstance().getSellerId()) {
                             chatBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
@@ -503,7 +510,6 @@ public class ItemActivity extends AppCompatActivity {
                             userReviewContainer.setVisibility(View.GONE);
                             ratingAccountIv.setVisibility(View.GONE);
                         } else {
-                            ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent)));
                             chatBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -532,11 +538,6 @@ public class ItemActivity extends AppCompatActivity {
                             itemPvtInfoLayout.setVisibility(View.GONE);
                             userReviewContainer.setVisibility(View.VISIBLE);
                             ratingAccountIv.setVisibility(View.VISIBLE);
-                        }
-                        if (sellerData.isCallEnabled()) {
-                            chatBtn.getBackground().setColorFilter(ContextCompat.getColor(ItemActivity.this, R.color.mb_green), PorterDuff.Mode.MULTIPLY);
-                            chatBtn.setText("Call for details");
-                            chatHintTv.setText("Call or Message the seller to buy or know more");
                         }
                         handleRecommendations(sellerData);
                     }
