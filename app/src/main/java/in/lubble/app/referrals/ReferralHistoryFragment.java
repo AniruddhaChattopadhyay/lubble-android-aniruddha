@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +31,8 @@ public class ReferralHistoryFragment extends Fragment {
     private TextView totalPointsTv;
     private TextView totalPointsHintTv;
     private ProgressBar progressBar;
+    private RecyclerView rv;
+    private LinearLayout noHistoryContainer;
 
     public ReferralHistoryFragment() {
         // Required empty public constructor
@@ -53,7 +56,8 @@ public class ReferralHistoryFragment extends Fragment {
         progressBar = view.findViewById(R.id.progress_bar_history);
         totalPointsTv = view.findViewById(R.id.tv_total_points);
         totalPointsHintTv = view.findViewById(R.id.tv_total_points_hint);
-        RecyclerView rv = view.findViewById(R.id.rv_referral_history);
+        rv = view.findViewById(R.id.rv_referral_history);
+        noHistoryContainer = view.findViewById(R.id.container_no_history);
         rv.setNestedScrollingEnabled(false);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ReferralHistoryAdapter(GlideApp.with(getContext()), getContext());
@@ -76,8 +80,13 @@ public class ReferralHistoryFragment extends Fragment {
                     totalPointsTv.setText(String.valueOf(referralHistoryData.getTotalPoints()));
                     totalPointsHintTv.setText("Total Points");
 
-                    for (ReferralPersonData referralPersonData : referralHistoryData.getReferralPersonData()) {
-                        adapter.addReferral(referralPersonData);
+                    if (referralHistoryData.getReferralPersonData() != null && !referralHistoryData.getReferralPersonData().isEmpty()) {
+                        for (ReferralPersonData referralPersonData : referralHistoryData.getReferralPersonData()) {
+                            adapter.addReferral(referralPersonData);
+                        }
+                    } else {
+                        rv.setVisibility(View.GONE);
+                        noHistoryContainer.setVisibility(View.VISIBLE);
                     }
 
                 } else if (isAdded() && isVisible()) {
