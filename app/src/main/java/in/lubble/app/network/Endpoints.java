@@ -84,6 +84,9 @@ public interface Endpoints {
     @GET("/referral/leaderboard/")
     Call<ReferralLeaderboardData> fetchReferralLeaderboard();
 
+    @POST("/signup/")
+    Call<FeatureData> uploadSignUp(@Body RequestBody params);
+
     class ResponseBean {
 
         @SerializedName("message")

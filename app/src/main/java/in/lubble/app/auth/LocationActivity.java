@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -38,6 +39,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.BuildConfig;
@@ -46,8 +52,16 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.FeatureData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.StringUtils;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.Constants.SVR_LATI;
 import static in.lubble.app.Constants.SVR_LONGI;
 
@@ -219,6 +233,49 @@ public class LocationActivity extends AppCompatActivity {
     }
 
     private void validateUserLocation(Location location) {
+
+        HashMap<String, Object> params = new HashMap<>();
+
+        try {
+            final JSONObject locationObject = new JSONObject();
+            locationObject.put("loc_lati", location.getLatitude());
+            locationObject.put("loc_longi", location.getLongitude());
+            locationObject.put("loc_accuracy", location.getAccuracy());
+            locationObject.put("loc_time", location.getTime());
+            params.put("location", locationObject);
+            final JSONObject referralObject = new JSONObject();
+            referralObject.put("referrer_uid", LubbleSharedPrefs.getInstance().getReferrerUid());
+            params.put("referral", referralObject);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        final JSONObject jsonObject = new JSONObject(params);
+
+        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.uploadSignUp(body).enqueue(new Callback<FeatureData>() {
+            @Override
+            public void onResponse(Call<FeatureData> call, Response<FeatureData> response) {
+                final FeatureData featureData = response.body();
+                if (featureData != null && response.isSuccessful() && !isFinishing()) {
+                    final List<Integer> sellerList = featureData.getSellers();
+                    if (sellerList != null && sellerList.size() > 0) {
+                        LubbleSharedPrefs.getInstance().setSellerId(sellerList.get(0));
+                    }
+                    LubbleSharedPrefs.getInstance().setIsViewCountEnabled(featureData.isViewCountEnabled());
+                } else {
+                    /// TODO: 15/9/18
+                }
+            }
+
+            @Override
+            public void onFailure(Call<FeatureData> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+            }
+        });
+
         currLocation = location;
         final Location centralLocation = new Location("Saraswati Vihar");
         centralLocation.setLatitude(SVR_LATI);

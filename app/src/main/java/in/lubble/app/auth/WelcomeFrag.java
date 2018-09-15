@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +35,8 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.utils.DateTimeUtils;
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
 
 import static in.lubble.app.Constants.FAMILY_FUN_NIGHT;
 import static in.lubble.app.auth.LoginActivity.RC_SIGN_IN;
@@ -59,9 +64,8 @@ public class WelcomeFrag extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    public void onStart() {
+        super.onStart();
         referrerIntent = getArguments().getParcelable(ARG_REFERRER_INTENT);
         if (referrerIntent != null) {
             trackReferral();
@@ -115,6 +119,18 @@ public class WelcomeFrag extends Fragment {
     }
 
     private void trackReferral() {
+        Branch.getInstance().initSession(new Branch.BranchReferralInitListener() {
+            @Override
+            public void onInitFinished(JSONObject referringParams, BranchError error) {
+                if (error == null) {
+                    Log.i("BRANCH SDK", referringParams.toString());
+                    LubbleSharedPrefs.getInstance().setReferrerUid(referringParams.optString("referrer_uid"));
+                } else {
+                    Log.e("BRANCH SDK", error.getMessage());
+                }
+            }
+        }, getActivity().getIntent().getData(), getActivity());
+
         FirebaseDynamicLinks.getInstance()
                 .getDynamicLink(referrerIntent)
                 .addOnSuccessListener(getActivity(), new OnSuccessListener<PendingDynamicLinkData>() {
@@ -130,7 +146,6 @@ public class WelcomeFrag extends Fragment {
                                 && deepLink.getBooleanQueryParameter("invitedby", false)) {
 
                             String referrerUid = deepLink.getQueryParameter("invitedby");
-                            LubbleSharedPrefs.getInstance().setReferrerUid(referrerUid);
                             if (referrerUid.equalsIgnoreCase(FAMILY_FUN_NIGHT)) {
                                 if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
                                     referrerHintTv.setVisibility(View.VISIBLE);
