@@ -29,5 +29,6 @@ public class AnalyticsEvents {
     public static final String REFERRAL_FB_SHARE = "REFERRAL_FB_SHARE";
     public static final String REFERRAL_WA_SHARE = "REFERRAL_WA_SHARE";
     public static final String REFERRAL_MORE_SHARE = "REFERRAL_MORE_SHARE";
+    public static final String REFERRAL_PROFILE_SHARE = "REFERRAL_PROFILE_SHARE";
 
 }

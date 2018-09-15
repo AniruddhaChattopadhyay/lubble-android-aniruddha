@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,14 +29,14 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import io.branch.indexing.BranchUniversalObject;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-import io.branch.referral.util.ContentMetadata;
-import io.branch.referral.util.LinkProperties;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
+import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
 public class ReferralsFragment extends Fragment {
 
@@ -50,7 +49,6 @@ public class ReferralsFragment extends Fragment {
     private ReferralLeaderboardAdapter adapter;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
-    private Intent sharingIntent = new Intent(Intent.ACTION_SEND);
 
     public ReferralsFragment() {
         // Required empty public constructor
@@ -81,89 +79,53 @@ public class ReferralsFragment extends Fragment {
         adapter = new ReferralLeaderboardAdapter(GlideApp.with(getContext()), getContext());
         rv.setAdapter(adapter);
 
-        generateBranchUrl();
+        sharingProgressDialog = new ProgressDialog(getContext());
+        generateBranchUrl(getContext(), linkCreateListener);
         fetchReferralLeaderboard();
         initClickHandlers();
 
         return view;
     }
 
-    private void generateBranchUrl() {
-        BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
-                .setCanonicalIdentifier("lbl/referralCode/" + FirebaseAuth.getInstance().getUid())
-                .setTitle("Join your neighbours on Lubble")
-                .setContentDescription("Know what's happening in your neighbourhood, buy or sell items around you")
-                .setContentImageUrl("https://i.imgur.com/JFsrCOs.png")
-                .setContentIndexingMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
-                .setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
-                .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid()));
-
-        final LinkProperties linkProperties = new LinkProperties()
-                .setChannel("Android")
-                .setFeature("Referral")
-                .addControlParameter("$desktop_url", "https://lubble.in")
-                .addControlParameter("$ios_url", "https://lubble.in");
-
-        branchUniversalObject.generateShortUrl(getContext(), linkProperties, new Branch.BranchLinkCreateListener() {
-            @Override
-            public void onLinkCreate(String url, BranchError error) {
-                if (url != null) {
-                    Log.d(TAG, "got my Branch link to share: " + url);
-                    sharingUrl = url;
-                    if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
-                        sharingProgressDialog.dismiss();
-                    }
-                } else {
-                    Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
-                    Crashlytics.logException(new IllegalStateException(error.getMessage()));
+    final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
+        @Override
+        public void onLinkCreate(String url, BranchError error) {
+            if (url != null) {
+                Log.d(TAG, "got my Branch link to share: " + url);
+                sharingUrl = url;
+                if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
+                    sharingProgressDialog.dismiss();
+                }
+            } else {
+                Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
+                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                if (isAdded() && isVisible()) {
                     Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
-        });
-    }
-
-    private boolean isInviteLinkGeneratedAndIntentReady() {
-        if (TextUtils.isEmpty(sharingUrl)) {
-            sharingProgressDialog = new ProgressDialog(getContext());
-            sharingProgressDialog.setTitle("Generating Invite Link");
-            sharingProgressDialog.setMessage(getString(R.string.all_please_wait));
-            sharingProgressDialog.show();
-            generateBranchUrl();
-            return false;
-        } else {
-            sharingIntent = new Intent(Intent.ACTION_SEND);
-            sharingIntent.setType("text/plain");
-            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Join me & your neighbours on Lubble");
-            String message = "Hey,\n\nI would love to invite you to Lubble, a private social network just for you & your neighbours " +
-                    "living together in the same society.\n\nJoin Now: " + sharingUrl + "\n\nJoin the Lubble app to" +
-                    "\n- Connect & interact with your neighbours" +
-                    "\n- Buy & Sell items around you" +
-                    "\n- Get nearby recommendations for plumbers & such services" +
-                    "\n and get to know the lastest happenings around you!\n\n";
-            sharingIntent.putExtra(Intent.EXTRA_TEXT, message + "Check it out: " + sharingUrl);
         }
-        return true;
-    }
+    };
 
     private void initClickHandlers() {
         fbContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isInviteLinkGeneratedAndIntentReady()) {
+                Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
+                if (referralIntent != null) {
                     boolean facebookAppFound = false;
-                    List<ResolveInfo> matches = getContext().getPackageManager().queryIntentActivities(sharingIntent, 0);
+                    List<ResolveInfo> matches = getContext().getPackageManager().queryIntentActivities(referralIntent, 0);
                     for (ResolveInfo info : matches) {
                         if (info.activityInfo.packageName.toLowerCase().startsWith("com.facebook.katana")) {
-                            sharingIntent.setPackage(info.activityInfo.packageName);
+                            referralIntent.setPackage(info.activityInfo.packageName);
                             facebookAppFound = true;
                             break;
                         }
                     }
                     if (!facebookAppFound) {
                         String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + sharingUrl;
-                        sharingIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
+                        referralIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
                     }
-                    startActivity(sharingIntent);
+                    startActivity(referralIntent);
                     Analytics.triggerEvent(AnalyticsEvents.REFERRAL_FB_SHARE, getContext());
                 }
             }
@@ -171,15 +133,16 @@ public class ReferralsFragment extends Fragment {
         whatsappContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isInviteLinkGeneratedAndIntentReady()) {
+                final Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
+                if (referralIntent != null) {
                     PackageManager pm = getContext().getPackageManager();
                     try {
                         PackageInfo info = pm.getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA);
                         //Check if package exists or not. If not then code
                         //in catch block will be called
-                        sharingIntent.setPackage("com.whatsapp");
+                        referralIntent.setPackage("com.whatsapp");
 
-                        startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
+                        startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
 
                         Analytics.triggerEvent(AnalyticsEvents.REFERRAL_WA_SHARE, getContext());
 
@@ -192,8 +155,9 @@ public class ReferralsFragment extends Fragment {
         moreContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isInviteLinkGeneratedAndIntentReady()) {
-                    startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
+                final Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
+                if (referralIntent != null) {
+                    startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
                     Analytics.triggerEvent(AnalyticsEvents.REFERRAL_MORE_SHARE, getContext());
                 }
             }

@@ -1,10 +1,10 @@
 package in.lubble.app.profile;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
@@ -20,35 +20,36 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.dynamiclinks.DynamicLink;
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
-import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.UserUtils;
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
+import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class ProfileFrag extends Fragment {
@@ -71,6 +72,8 @@ public class ProfileFrag extends Fragment {
     private ValueEventListener valueEventListener;
     @Nullable
     private ProfileData profileData;
+    private String sharingUrl;
+    private ProgressDialog sharingProgressDialog;
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -110,6 +113,9 @@ public class ProfileFrag extends Fragment {
         progressBar = rootView.findViewById(R.id.progressBar_profile);
         TextView versionTv = rootView.findViewById(R.id.tv_version_name);
         RelativeLayout feedbackView = rootView.findViewById(R.id.feedback_container);
+
+        sharingProgressDialog = new ProgressDialog(getContext());
+        generateBranchUrl(getContext(), linkCreateListener);
 
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,6 +184,26 @@ public class ProfileFrag extends Fragment {
         fetchProfileFeed();
         fetchDevMenu();
     }
+
+
+    final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
+        @Override
+        public void onLinkCreate(String url, BranchError error) {
+            if (url != null) {
+                Log.d(TAG, "got my Branch link to share: " + url);
+                sharingUrl = url;
+                if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
+                    sharingProgressDialog.dismiss();
+                }
+            } else {
+                Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
+                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                if (isAdded() && isVisible()) {
+                    Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
 
     private void fetchProfileFeed() {
         valueEventListener = new ValueEventListener() {
@@ -284,54 +310,11 @@ public class ProfileFrag extends Fragment {
         });
     }
 
-
     private void onInviteClicked() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        String link = "https://lubble.in/?invitedby=" + uid;
-        FirebaseDynamicLinks.getInstance().createDynamicLink()
-                .setLink(Uri.parse(link))
-                .setSocialMetaTagParameters(new DynamicLink.SocialMetaTagParameters.Builder()
-                        .setTitle("Join Saraswati Vihar community")
-                        .setDescription("Get the Lubble App now")
-                        .setImageUrl(Uri.parse("https://i.imgur.com/JFsrCOs.png"))
-                        .build()
-                )
-                .setDynamicLinkDomain("bx5at.app.goo.gl")
-                .setAndroidParameters(
-                        new DynamicLink.AndroidParameters.Builder()
-                                .setMinimumVersion(1)
-                                .build())
-                .buildShortDynamicLink()
-                .addOnSuccessListener(new OnSuccessListener<ShortDynamicLink>() {
-                    @Override
-                    public void onSuccess(ShortDynamicLink shortDynamicLink) {
-                        Uri mInvitationUrl = shortDynamicLink.getShortLink();
-                        sendInvite(mInvitationUrl);
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "onFailure: " + e.toString());
-                    }
-                });
-    }
-
-    private void sendInvite(Uri mInvitationUrl) {
-        String referrerName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
-        String subject = String.format("%s wants you to join Lubble!", referrerName);
-        String invitationLink = mInvitationUrl.toString();
-        String msg = "Join me & others in the Saraswati Vihar community on Lubble.\nGet the Lubble app now: "
-                + invitationLink;
-        try {
-            Intent i = new Intent(Intent.ACTION_SEND);
-            i.setType("text/plain");
-            i.putExtra(Intent.EXTRA_SUBJECT, subject);
-            i.putExtra(Intent.EXTRA_TEXT, msg);
-            startActivity(Intent.createChooser(i, "choose one"));
-        } catch (Exception e) {
-            Log.e(TAG, "sendInvite: " + e.toString());
+        final Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
+        if (referralIntent != null) {
+            startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
+            Analytics.triggerEvent(AnalyticsEvents.REFERRAL_PROFILE_SHARE, getContext());
         }
     }
 
