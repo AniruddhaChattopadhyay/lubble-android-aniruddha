@@ -88,11 +88,8 @@ public class ReferralsFragment extends Fragment {
         return view;
     }
 
-    private BranchUniversalObject branchUniversalObject;
-
     private void generateBranchUrl() {
-
-        branchUniversalObject = new BranchUniversalObject()
+        BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
                 .setCanonicalIdentifier("lbl/referralCode/" + FirebaseAuth.getInstance().getUid())
                 .setTitle("Join your neighbours on Lubble")
                 .setContentDescription("Know what's happening in your neighbourhood, buy or sell items around you")
@@ -202,7 +199,6 @@ public class ReferralsFragment extends Fragment {
             }
         });
     }
-
 
     private void fetchReferralLeaderboard() {
         leaderboardProgressBar.setVisibility(View.VISIBLE);
