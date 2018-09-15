@@ -10,6 +10,7 @@
     tools:showIn="@layout/fragment_referrals">
 
     <LinearLayout
+        android:id="@+id/container_fb"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

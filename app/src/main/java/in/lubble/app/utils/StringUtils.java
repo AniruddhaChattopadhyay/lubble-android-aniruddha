@@ -2,6 +2,7 @@ package in.lubble.app.utils;
 
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.text.TextUtils;
 import android.util.Patterns;
 
 import java.util.regex.Matcher;
@@ -15,7 +16,7 @@ public class StringUtils {
     private static final String TAG = "StringUtils";
 
     public static boolean isValidString(String string) {
-        return string != null && !string.equalsIgnoreCase("") && !string.equalsIgnoreCase("null");
+        return !TextUtils.isEmpty(string);
     }
 
     @Nullable

@@ -18,6 +18,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,6 +36,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.json.JSONObject;
+
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
@@ -47,6 +50,8 @@ import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
 
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -142,6 +147,25 @@ public class MainActivity extends AppCompatActivity {
         fetchAndPersistMplaceItems();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        Branch branch = Branch.getInstance();
+
+        // Branch init
+        branch.initSession(new Branch.BranchReferralInitListener() {
+            @Override
+            public void onInitFinished(JSONObject referringParams, BranchError error) {
+                if (error == null) {
+                    // params are the deep linked params associated with the link that the user clicked -> was re-directed to this app
+                    // params will be empty if no data found
+                    Log.i("BRANCH SDK", referringParams.toString());
+                } else {
+                    Log.i("BRANCH SDK", error.getMessage());
+                }
+            }
+        }, this.getIntent().getData(), this);
+    }
 
     private void showMplaceBadge() {
         if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
@@ -212,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
         When MainActivity is called via Server Notification, if it's already open then onResume will be called but
         it'll have the old intent, so here we reset it. onNewIntent() is called before onResume.
         */
-        setIntent(intent);
+        this.setIntent(intent);
     }
 
     private void setDp() {

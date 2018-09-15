@@ -26,4 +26,6 @@ public class AnalyticsEvents {
     public static final String NOTIF_SHOWN = "NOTIF_SHOWN";
     public static final String NOTIF_OPENED = "NOTIF_OPENED";
 
+    public static final String REFERRAL_MORE_SHARE = "REFERRAL_MORE_SHARE";
+
 }
