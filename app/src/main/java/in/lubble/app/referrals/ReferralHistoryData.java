@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class ReferralHistoryData {
 
     @SerializedName("total_points")
-    private int totalPoints;
+    private int totalPoints = 0;
     @SerializedName("history")
     private ArrayList<ReferralPersonData> referralPersonData;
 
