@@ -7,7 +7,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import in.lubble.app.Constants;
 import in.lubble.app.R;
 import io.branch.indexing.BranchUniversalObject;
 import io.branch.referral.Branch;
@@ -50,13 +52,8 @@ public class ReferralUtils {
             Intent sharingIntent = new Intent(Intent.ACTION_SEND);
             sharingIntent.setType("text/plain");
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Join me & your neighbours on Lubble");
-            String message = "Hey,\n\nI would love to invite you to Lubble, a private social network just for you & your neighbours " +
-                    "living together in the same society.\n\nJoin Now: " + sharingUrl + "\n\nJoin the Lubble app to" +
-                    "\n- Connect & interact with your neighbours" +
-                    "\n- Buy & Sell items around you" +
-                    "\n- Get nearby recommendations for plumbers & such services" +
-                    "\n and get to know the lastest happenings around you!\n\n";
-            sharingIntent.putExtra(Intent.EXTRA_TEXT, message + "Check it out: " + sharingUrl);
+            String message = FirebaseRemoteConfig.getInstance().getString(Constants.REFER_MSG);
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, message + sharingUrl);
             return sharingIntent;
         }
     }

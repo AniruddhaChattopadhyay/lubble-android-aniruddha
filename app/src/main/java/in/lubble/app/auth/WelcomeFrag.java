@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -117,34 +118,34 @@ public class WelcomeFrag extends Fragment {
                 if (error == null) {
                     Log.i("BRANCH SDK", referringParams.toString());
                     final String referrerUid = referringParams.optString("referrer_uid");
-                    LubbleSharedPrefs.getInstance().setReferrerUid(referrerUid);
+                    if (!TextUtils.isEmpty(referrerUid)) {
+                        LubbleSharedPrefs.getInstance().setReferrerUid(referrerUid);
+                        // single listener as the user is new, has no cache.
+                        // referrer profile will be fetched via network, there wudnt be any cache hits.
+                        // Even if its cached, dsnt matter really, just shows who referred you, an outdated dp wont do much harm..
+                        RealtimeDbHelper.getUserInfoRef(referrerUid).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
 
-                    // single listener as the user is new, has no cache.
-                    // referrer profile will be fetched via network, there wudnt be any cache hits.
-                    // Even if its cached, dsnt matter really, just shows who referred you, an outdated dp wont do much harm..
-                    RealtimeDbHelper.getUserInfoRef(referrerUid).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                if (profileInfo != null) {
 
-                            final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                            if (profileInfo != null) {
-
-                                referrerHintTv.setVisibility(View.VISIBLE);
-                                referrerContainer.setVisibility(View.VISIBLE);
-                                referrerNameTv.setText(profileInfo.getName());
-                                GlideApp.with(getContext())
-                                        .load(profileInfo.getThumbnail())
-                                        .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                                        .circleCrop()
-                                        .into(referrerDpIv);
+                                    referrerHintTv.setVisibility(View.VISIBLE);
+                                    referrerContainer.setVisibility(View.VISIBLE);
+                                    referrerNameTv.setText(profileInfo.getName());
+                                    GlideApp.with(getContext())
+                                            .load(profileInfo.getThumbnail())
+                                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                                            .circleCrop()
+                                            .into(referrerDpIv);
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                        }
-                    });
-
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
+                    }
                 } else {
                     Log.e("BRANCH SDK", error.getMessage());
                 }

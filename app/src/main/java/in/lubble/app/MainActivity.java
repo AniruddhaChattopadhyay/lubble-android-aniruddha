@@ -28,6 +28,8 @@ import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,8 +37,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -53,6 +59,7 @@ import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
+import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -145,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
         showMplaceBadge();
         fetchAndPersistAppFeatures();
         fetchAndPersistMplaceItems();
+        initFirebaseRemoteConfig();
     }
 
     @Override
@@ -165,6 +173,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }, this.getIntent().getData(), this);
+    }
+
+    private void initFirebaseRemoteConfig() {
+        FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .build();
+        firebaseRemoteConfig.setConfigSettings(configSettings);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put(REFER_MSG, getString(R.string.refer_msg));
+        firebaseRemoteConfig.setDefaults(map);
     }
 
     private void showMplaceBadge() {
@@ -227,6 +246,16 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Crashlytics.logException(e);
         }
+
+        final FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        firebaseRemoteConfig.fetch().addOnCompleteListener(this, new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    firebaseRemoteConfig.activateFetched();
+                }
+            }
+        });
     }
 
     @Override

@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -243,9 +244,11 @@ public class LocationActivity extends AppCompatActivity {
             locationObject.put("loc_accuracy", location.getAccuracy());
             locationObject.put("loc_time", location.getTime());
             params.put("location", locationObject);
-            final JSONObject referralObject = new JSONObject();
-            referralObject.put("referrer_uid", LubbleSharedPrefs.getInstance().getReferrerUid());
-            params.put("referral", referralObject);
+            if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getReferrerUid())) {
+                final JSONObject referralObject = new JSONObject();
+                referralObject.put("referrer_uid", LubbleSharedPrefs.getInstance().getReferrerUid());
+                params.put("referral", referralObject);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
