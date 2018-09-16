@@ -175,5 +175,5 @@
     <string name="tab_text_3">Tab 3</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="refer_share_title">Share via:</string>
-    <string name="refer_msg">Join me &amp; other neighbours on Lubble, the free &amp; private social network for your neighbourhood: </string>
+    <string name="refer_msg"><![CDATA[Join me &amp; your neighbours on Lubble, a free &amp; private social network for your neighbourhood!<br><br>You can get local news, safety alerts, services, recommendations &amp; buy or sell unique custom-made items around you<br><br>Start Exploring:&nbsp;]]></string>
 </resources>

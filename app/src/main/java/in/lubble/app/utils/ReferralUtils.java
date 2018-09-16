@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
+import android.text.Html;
 import android.text.TextUtils;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,7 +25,7 @@ public class ReferralUtils {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
                 .setCanonicalIdentifier("lbl/referralCode/" + FirebaseAuth.getInstance().getUid())
                 .setTitle("Join your neighbours on Lubble")
-                .setContentDescription("Know what's happening in your neighbourhood, buy or sell items around you")
+                .setContentDescription("Explore your neighbourhood, buy or sell items around you & so much more")
                 .setContentImageUrl("https://i.imgur.com/JFsrCOs.png")
                 .setContentIndexingMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
                 .setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
@@ -53,7 +54,7 @@ public class ReferralUtils {
             sharingIntent.setType("text/plain");
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Join me & your neighbours on Lubble");
             String message = FirebaseRemoteConfig.getInstance().getString(Constants.REFER_MSG);
-            sharingIntent.putExtra(Intent.EXTRA_TEXT, message + sharingUrl);
+            sharingIntent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(context.getString(R.string.refer_msg)) + sharingUrl);
             return sharingIntent;
         }
     }
