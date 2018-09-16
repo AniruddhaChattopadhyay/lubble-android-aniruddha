@@ -21,6 +21,7 @@
         android:layout_marginEnd="0dp"
         android:layout_marginStart="0dp"
         android:background="@color/white"
+        android:elevation="7dp"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
         app:menu="@menu/navigation" />
@@ -32,10 +33,16 @@
         android:layout_above="@id/navigation"
         android:layout_below="@id/lubble_toolbar" />
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:layout_above="@id/navigation"
+        app:srcCompat="@drawable/gradient_black_light_trans" />
+
     <include
         layout="@layout/layout_shadow"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="4dp"
         android:layout_below="@+id/lubble_toolbar" />
 
 </RelativeLayout>
