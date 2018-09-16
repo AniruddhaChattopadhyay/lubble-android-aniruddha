@@ -188,10 +188,12 @@ public class MarketplaceFrag extends Fragment {
 
             @Override
             public void onFailure(Call<ArrayList<Item>> call, Throwable t) {
-                Log.e(TAG, "onFailure: ");
-                viewAllProgressBar.setVisibility(View.GONE);
-                viewAllTv.setText("View All");
-                Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                if (isAdded() && isVisible()) {
+                    Log.e(TAG, "onFailure: ");
+                    viewAllProgressBar.setVisibility(View.GONE);
+                    viewAllTv.setText("View All");
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -244,9 +246,11 @@ public class MarketplaceFrag extends Fragment {
 
             @Override
             public void onFailure(Call<MarketplaceData> call, Throwable t) {
-                Log.e(TAG, "onFailure: ");
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                if (isAdded() && isVisible()) {
+                    Log.e(TAG, "onFailure: ");
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

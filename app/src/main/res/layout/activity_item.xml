@@ -18,10 +18,10 @@
             android:id="@+id/iv_item_image"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:transitionName="fullscreen_image"
             android:layout_below="@id/toolbar"
             android:background="@color/very_light_gray"
             android:scaleType="centerCrop"
+            android:transitionName="fullscreen_image"
             tools:src="@tools:sample/avatars" />
 
         <RelativeLayout
@@ -131,8 +131,8 @@
                     android:layout_toRightOf="@id/tv_status_hint"
                     android:background="@drawable/rounded_rect_trans_border"
                     android:gravity="center"
-                    android:padding="4dp"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:padding="4dp">
 
                     <ImageView
                         android:id="@+id/iv_approval_icon"
@@ -162,11 +162,20 @@
                 android:text="@string/chat_with_seller"
                 android:theme="@style/AccentButton" />
 
+            <TextView
+                android:id="@+id/tv_chat_seller_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btn_chat"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="8dp"
+                android:text="Chat with seller to buy or know more" />
+
             <LinearLayout
                 android:id="@+id/container_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/btn_chat"
+                android:layout_below="@id/tv_chat_seller_hint"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/rect_rounded_border"
                 android:orientation="vertical"
