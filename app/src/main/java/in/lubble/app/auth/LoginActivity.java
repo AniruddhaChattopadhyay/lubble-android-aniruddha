@@ -26,7 +26,7 @@ import static in.lubble.app.utils.UserUtils.isNewUser;
 public class LoginActivity extends AppCompatActivity {
 
     public static final int RC_SIGN_IN = 777;
-    private static final int REQUEST_LOCATION = 636;
+    static final int REQUEST_LOCATION = 636;
 
     private FirebaseAuth firebaseAuth;
     private View rootLayout;
@@ -58,9 +58,8 @@ public class LoginActivity extends AppCompatActivity {
                 FirebaseUser currentUser = firebaseAuth.getCurrentUser();
                 if (currentUser != null && isNewUser(currentUser)) {
                     // start registration flow
-                    final Intent intent = new Intent(this, LocationActivity.class);
-                    intent.putExtra("idpResponse", response);
-                    startActivityForResult(intent, REQUEST_LOCATION);
+                    NameFrag nameFrag = NameFrag.newInstance(response);
+                    addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
                 } else {
                     Analytics.triggerLoginEvent(this);
                     startActivity(MainActivity.createIntent(LoginActivity.this, response));
