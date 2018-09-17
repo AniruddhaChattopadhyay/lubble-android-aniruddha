@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -44,8 +43,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
@@ -72,12 +69,14 @@ public class LocationActivity extends AppCompatActivity {
     private static final int REQUEST_SYSTEM_LOCATION = 859;
     private static final int REQUEST_LOCATION_ON = 150;
 
+    private static final float LOCATION_ACCURACY_THRESHOLD = 150;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout invalidLocContainer;
     private TextView locHintTv;
     private Button okBtn;
     private Parcelable idpResponse;
     private Location currLocation;
+    private int retryCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,34 +205,29 @@ public class LocationActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
-        fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+        // get fresh loc
+        fusedLocationClient.requestLocationUpdates(getLocationRequest().setNumUpdates(1), new LocationCallback() {
             @Override
-            public void onSuccess(Location location) {
-                // Got last known location. In some rare situations this can be null.
-                if (location != null &&
-                        SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()
-                                < TimeUnit.MINUTES.toNanos(10)) {
-                    // Logic to handle location object
-                    validateUserLocation(location);
-                } else {
-                    // get fresh loc
-                    fusedLocationClient.requestLocationUpdates(getLocationRequest().setNumUpdates(1), new LocationCallback() {
-                        @Override
-                        public void onLocationResult(LocationResult locationResult) {
-                            if (locationResult == null) {
-                                return;
-                            }
-                            validateUserLocation(locationResult.getLastLocation());
-                        }
-
-                        ;
-                    }, null);
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    getLocation();
+                    return;
                 }
+                validateUserLocation(locationResult.getLastLocation());
             }
-        });
+        }, null);
     }
 
-    private void validateUserLocation(Location location) {
+    private void validateUserLocation(final Location location) {
+
+        if ((!location.hasAccuracy() || location.getAccuracy() == 0.0 || location.getAccuracy() > LOCATION_ACCURACY_THRESHOLD)
+                && retryCount < 10) {
+            // bad location, refresh
+            Log.d(TAG, "location bad accuracy of " + location.getAccuracy() + " @ retry: " + retryCount);
+            retryCount++;
+            getLocation();
+            return;
+        }
 
         HashMap<String, Object> params = new HashMap<>();
 
@@ -243,12 +237,16 @@ public class LocationActivity extends AppCompatActivity {
             locationObject.put("loc_longi", location.getLongitude());
             locationObject.put("loc_accuracy", location.getAccuracy());
             locationObject.put("loc_time", location.getTime());
+            locationObject.put("retry_count", retryCount);
             params.put("location", locationObject);
             if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getReferrerUid())) {
                 final JSONObject referralObject = new JSONObject();
                 referralObject.put("referrer_uid", LubbleSharedPrefs.getInstance().getReferrerUid());
                 params.put("referral", referralObject);
             }
+            final JSONObject userInfoObject = new JSONObject();
+            userInfoObject.put("full_name", LubbleSharedPrefs.getInstance().getFullName());
+            params.put("user_info", userInfoObject);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -261,13 +259,16 @@ public class LocationActivity extends AppCompatActivity {
         endpoints.uploadSignUp(body).enqueue(new Callback<FeatureData>() {
             @Override
             public void onResponse(Call<FeatureData> call, Response<FeatureData> response) {
-                final FeatureData featureData = response.body();
-                if (featureData != null && response.isSuccessful() && !isFinishing()) {
-                    final List<Integer> sellerList = featureData.getSellers();
-                    if (sellerList != null && sellerList.size() > 0) {
-                        LubbleSharedPrefs.getInstance().setSellerId(sellerList.get(0));
+                if (response.isSuccessful() && !isFinishing()) {
+                    currLocation = location;
+                    final Location centralLocation = new Location("Saraswati Vihar");
+                    centralLocation.setLatitude(SVR_LATI);
+                    centralLocation.setLongitude(SVR_LONGI);
+                    if (location.distanceTo(centralLocation) < 700) {
+                        locationCheckSuccess();
+                    } else {
+                        checkBackdoorAccess();
                     }
-                    LubbleSharedPrefs.getInstance().setIsViewCountEnabled(featureData.isViewCountEnabled());
                 } else {
                     /// TODO: 15/9/18
                 }
@@ -278,16 +279,6 @@ public class LocationActivity extends AppCompatActivity {
                 Log.e(TAG, "onFailure: ");
             }
         });
-
-        currLocation = location;
-        final Location centralLocation = new Location("Saraswati Vihar");
-        centralLocation.setLatitude(SVR_LATI);
-        centralLocation.setLongitude(SVR_LONGI);
-        if (location.distanceTo(centralLocation) < 700) {
-            locationCheckSuccess();
-        } else {
-            checkBackdoorAccess();
-        }
     }
 
     private void checkBackdoorAccess() {
