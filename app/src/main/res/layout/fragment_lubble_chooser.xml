@@ -1,16 +1,18 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
     android:orientation="vertical"
-    android:padding="8dp"
     tools:context="in.lubble.app.auth.LubbleChooserFrag">
 
     <TextView
         android:id="@+id/tv_welcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:text="Welcome to"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
@@ -19,6 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_welcome"
+        android:layout_marginLeft="8dp"
         android:text="Saraswati Vihar"
         android:textColor="@color/colorAccent"
         android:textSize="36sp"
@@ -29,6 +32,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_lubble_name"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
         android:background="@drawable/rect_rounded_border"
         android:padding="4dp"
         android:text="Change society"
@@ -40,14 +45,31 @@
         android:layout_height="match_parent"
         android:layout_above="@id/btn_join"
         android:layout_below="@id/tv_change_lubble"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp" />
+        map:cameraZoom="16"
+        map:liteMode="true"
+        map:mapType="normal" />
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:layout_alignTop="@id/mapview"
+        android:background="@drawable/gradient_white_trans" />
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_above="@id/btn_join"
+        android:background="@drawable/gradient_white_trans"
+        android:rotation="180" />
 
     <Button
         android:id="@+id/btn_join"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:layout_alignParentBottom="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:text="Join Saraswati Vihar"
         android:theme="@style/AccentButton" />
 

@@ -12,6 +12,10 @@ public class LocationsData implements Serializable {
     private String lubbleName;
     @SerializedName("id")
     private String id;
+    @SerializedName("center_lati")
+    private double centerLati;
+    @SerializedName("center_longi")
+    private double centerLongi;
 
     public String getId() {
         return id;
@@ -27,6 +31,22 @@ public class LocationsData implements Serializable {
 
     public void setLubbleName(String lubbleName) {
         this.lubbleName = lubbleName;
+    }
+
+    public double getCenterLati() {
+        return centerLati;
+    }
+
+    public void setCenterLati(double centerLati) {
+        this.centerLati = centerLati;
+    }
+
+    public double getCenterLongi() {
+        return centerLongi;
+    }
+
+    public void setCenterLongi(double centerLongi) {
+        this.centerLongi = centerLongi;
     }
 
 }

@@ -1,5 +1,6 @@
 package in.lubble.app.auth;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.Fragment;
@@ -9,23 +10,34 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
 import in.lubble.app.R;
-import in.lubble.app.utils.DialogInterface;
 
+import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.auth.LubbleChooserDialogFrag.ARG_CHOSEN_LOCATION;
 import static in.lubble.app.utils.FragUtils.addFrag;
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
-public class LubbleChooserFrag extends Fragment {
+public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
 
     private static final String ARG_IDP_RESPONSE = "ARG_IDP_RESPONSE";
     private static final String ARG_LOCATION_DATA = "ARG_LOCATION_DATA";
 
+    static final int REQUEST_CODE_CHOOSE = 665;
+
     private Parcelable idpResponse;
     private ArrayList<LocationsData> locationsDataList;
     private LocationsData chosenLubbleData;
+    private TextView lubbleNameTv;
+    private Button joinbtn;
+    private GoogleMap map;
 
     public LubbleChooserFrag() {
         // Required empty public constructor
@@ -56,35 +68,63 @@ public class LubbleChooserFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_lubble_chooser, container, false);
 
-        TextView lubbleNameTv = view.findViewById(R.id.tv_lubble_name);
+        lubbleNameTv = view.findViewById(R.id.tv_lubble_name);
         TextView changeLubbleTv = view.findViewById(R.id.tv_change_lubble);
         MapView mapView = view.findViewById(R.id.mapview);
-        Button joinbtn = view.findViewById(R.id.btn_join);
+        joinbtn = view.findViewById(R.id.btn_join);
 
-        lubbleNameTv.setText(locationsDataList.get(0).getLubbleName());
-        joinbtn.setText("Join " + locationsDataList.get(0).getLubbleName());
+        mapView.onCreate(savedInstanceState);
+        mapView.onResume(); // needed to get the map to display immediately
+        mapView.getMapAsync(this);
 
-        changeLubbleTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new LubbleChooserDialog(getContext(), locationsDataList, new DialogInterface() {
-                    @Override
-                    public void onClick(Object object) {
-                        chosenLubbleData = (LocationsData) object;
-                    }
-                }).show();
-            }
-        });
+        lubbleNameTv.setText(chosenLubbleData.getLubbleName());
+        joinbtn.setText("Join " + chosenLubbleData.getLubbleName());
+
+        if (locationsDataList.size() > 1) {
+            changeLubbleTv.setVisibility(View.VISIBLE);
+            changeLubbleTv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final LubbleChooserDialogFrag lubbleChooserDialogFrag = LubbleChooserDialogFrag.newInstance(locationsDataList);
+                    lubbleChooserDialogFrag.setTargetFragment(LubbleChooserFrag.this, REQUEST_CODE_CHOOSE);
+                    lubbleChooserDialogFrag.show(getFragmentManager(), null);
+                }
+            });
+        } else {
+            changeLubbleTv.setVisibility(View.GONE);
+        }
 
         joinbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserNameFrag userNameFrag = UserNameFrag.newInstance(idpResponse);
+                UserNameFrag userNameFrag = UserNameFrag.newInstance(idpResponse, chosenLubbleData);
                 addFrag(getFragmentManager(), R.id.frame_fragContainer, userNameFrag);
             }
         });
 
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_CHOOSE) {
+            if (resultCode == RESULT_OK && data != null && data.hasExtra(ARG_CHOSEN_LOCATION)) {
+                chosenLubbleData = (LocationsData) data.getSerializableExtra(ARG_CHOSEN_LOCATION);
+                lubbleNameTv.setText(chosenLubbleData.getLubbleName());
+                joinbtn.setText("Join " + chosenLubbleData.getLubbleName());
+                map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(chosenLubbleData.getCenterLati(), chosenLubbleData.getCenterLongi())));
+            }
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        map.getUiSettings().setMapToolbarEnabled(false);
+        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(chosenLubbleData.getCenterLati(), chosenLubbleData.getCenterLongi())));
+        map.setPadding(0, dpToPx(140), 0, dpToPx(40));
+        map.setOnMapClickListener(null);
     }
 
 }
