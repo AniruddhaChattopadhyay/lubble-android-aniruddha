@@ -103,7 +103,7 @@ public class LubbleSharedPrefs {
     }
 
     public String getFullName() {
-        return preferences.getString(DEFAULT_GROUP_ID, "MYLUBBLE");
+        return preferences.getString(FULL_NAME, "");
     }
 
     public boolean setFullName(String fullName) {

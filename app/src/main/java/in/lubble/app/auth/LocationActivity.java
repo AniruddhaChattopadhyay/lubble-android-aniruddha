@@ -42,6 +42,7 @@ import com.google.firebase.database.ValueEventListener;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import in.lubble.app.BuildConfig;
@@ -50,7 +51,6 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.FeatureData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.StringUtils;
@@ -60,8 +60,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.Constants.SVR_LATI;
-import static in.lubble.app.Constants.SVR_LONGI;
 
 public class LocationActivity extends AppCompatActivity {
 
@@ -228,6 +226,7 @@ public class LocationActivity extends AppCompatActivity {
             getLocation();
             return;
         }
+        currLocation = location;
 
         HashMap<String, Object> params = new HashMap<>();
 
@@ -245,7 +244,7 @@ public class LocationActivity extends AppCompatActivity {
                 params.put("referral", referralObject);
             }
             final JSONObject userInfoObject = new JSONObject();
-            userInfoObject.put("full_name", LubbleSharedPrefs.getInstance().getFullName());
+            userInfoObject.put("name", LubbleSharedPrefs.getInstance().getFullName());
             params.put("user_info", userInfoObject);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -256,26 +255,23 @@ public class LocationActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.uploadSignUp(body).enqueue(new Callback<FeatureData>() {
+        endpoints.uploadSignUp(body).enqueue(new Callback<ArrayList<LocationsData>>() {
             @Override
-            public void onResponse(Call<FeatureData> call, Response<FeatureData> response) {
+            public void onResponse(Call<ArrayList<LocationsData>> call, Response<ArrayList<LocationsData>> response) {
                 if (response.isSuccessful() && !isFinishing()) {
-                    currLocation = location;
-                    final Location centralLocation = new Location("Saraswati Vihar");
-                    centralLocation.setLatitude(SVR_LATI);
-                    centralLocation.setLongitude(SVR_LONGI);
-                    if (location.distanceTo(centralLocation) < 700) {
-                        locationCheckSuccess();
+                    final ArrayList<LocationsData> locationsDataList = response.body();
+                    if (locationsDataList != null && !locationsDataList.isEmpty()) {
+                        locationCheckSuccess(locationsDataList);
                     } else {
                         checkBackdoorAccess();
                     }
                 } else {
-                    /// TODO: 15/9/18
+                    /// TODO: 15/9/18 !!
                 }
             }
 
             @Override
-            public void onFailure(Call<FeatureData> call, Throwable t) {
+            public void onFailure(Call<ArrayList<LocationsData>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
             }
         });
@@ -294,7 +290,7 @@ public class LocationActivity extends AppCompatActivity {
                         final String lubbleId = dataSnapshot.getValue(String.class);
                         if (StringUtils.isValidString(lubbleId)) {
                             LubbleSharedPrefs.getInstance().setLubbleId(lubbleId);
-                            locationCheckSuccess();
+                            /// TODO: 18/9/18  locationCheckSuccess(response.body());
                         } else {
                             locationCheckFailed();
                         }
@@ -308,9 +304,10 @@ public class LocationActivity extends AppCompatActivity {
                 });
     }
 
-    private void locationCheckSuccess() {
+    private void locationCheckSuccess(ArrayList<LocationsData> locationsData) {
         Intent intent = new Intent();
         intent.putExtra("idpResponse", idpResponse);
+        intent.putExtra("lubbleDataList", locationsData);
         setResult(RESULT_OK, intent);
         finish();
     }

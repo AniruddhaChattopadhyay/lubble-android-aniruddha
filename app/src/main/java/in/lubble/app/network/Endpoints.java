@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
+import in.lubble.app.auth.LocationsData;
 import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.marketplace.RatingData;
 import in.lubble.app.models.FeatureData;
@@ -85,7 +86,7 @@ public interface Endpoints {
     Call<ReferralLeaderboardData> fetchReferralLeaderboard();
 
     @POST("/signup/")
-    Call<FeatureData> uploadSignUp(@Body RequestBody params);
+    Call<ArrayList<LocationsData>> uploadSignUp(@Body RequestBody params);
 
     class ResponseBean {
 

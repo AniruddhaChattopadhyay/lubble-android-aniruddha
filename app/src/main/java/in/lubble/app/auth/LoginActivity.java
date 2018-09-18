@@ -13,6 +13,8 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
+
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
@@ -78,13 +80,18 @@ public class LoginActivity extends AppCompatActivity {
                     showSnackbar(R.string.no_internet_connection);
                     return;
                 }
-                
+
                 showSnackbar(R.string.unknown_error);
             }
         } else if (requestCode == REQUEST_LOCATION) {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
+                LubbleChooserFrag userNameFrag = LubbleChooserFrag.newInstance(
+                        data.getParcelableExtra("idpResponse"),
+                        (ArrayList<LocationsData>) data.getSerializableExtra("lubbleDataList")
+                );
                 addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);
+                /*UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
+                addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);*/
             } else {
                 replaceStack(this, WelcomeFrag.newInstance(getIntent()), R.id.frame_fragContainer);
             }

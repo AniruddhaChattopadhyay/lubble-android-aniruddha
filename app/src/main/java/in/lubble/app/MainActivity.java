@@ -173,6 +173,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }, this.getIntent().getData(), this);
+        branch.setIdentity(FirebaseAuth.getInstance().getUid());
     }
 
     private void initFirebaseRemoteConfig() {

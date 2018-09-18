@@ -11,7 +11,10 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.MapView;
 
+import java.util.ArrayList;
+
 import in.lubble.app.R;
+import in.lubble.app.utils.DialogInterface;
 
 import static in.lubble.app.utils.FragUtils.addFrag;
 
@@ -21,18 +24,18 @@ public class LubbleChooserFrag extends Fragment {
     private static final String ARG_LOCATION_DATA = "ARG_LOCATION_DATA";
 
     private Parcelable idpResponse;
-    private LocationsData locationsData;
-    private LocationsData.LubbleData chosenLubbleData;
+    private ArrayList<LocationsData> locationsDataList;
+    private LocationsData chosenLubbleData;
 
     public LubbleChooserFrag() {
         // Required empty public constructor
     }
 
-    public static LubbleChooserFrag newInstance(Parcelable idpResponse, LocationsData locationsData) {
+    public static LubbleChooserFrag newInstance(Parcelable idpResponse, ArrayList<LocationsData> locationsDataList) {
         LubbleChooserFrag fragment = new LubbleChooserFrag();
         Bundle args = new Bundle();
         args.putParcelable(ARG_IDP_RESPONSE, idpResponse);
-        args.putSerializable(ARG_LOCATION_DATA, locationsData);
+        args.putSerializable(ARG_LOCATION_DATA, locationsDataList);
         fragment.setArguments(args);
         return fragment;
     }
@@ -42,8 +45,8 @@ public class LubbleChooserFrag extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             idpResponse = getArguments().getParcelable(ARG_IDP_RESPONSE);
-            locationsData = (LocationsData) getArguments().getSerializable(ARG_LOCATION_DATA);
-            chosenLubbleData = locationsData.getDefaultLubble();
+            this.locationsDataList = (ArrayList<LocationsData>) getArguments().getSerializable(ARG_LOCATION_DATA);
+            chosenLubbleData = locationsDataList.get(0);
         }
     }
 
@@ -58,13 +61,18 @@ public class LubbleChooserFrag extends Fragment {
         MapView mapView = view.findViewById(R.id.mapview);
         Button joinbtn = view.findViewById(R.id.btn_join);
 
-        lubbleNameTv.setText(locationsData.getDefaultLubble().getLubbleName());
-        joinbtn.setText("Join " + locationsData.getDefaultLubble().getLubbleName());
+        lubbleNameTv.setText(locationsDataList.get(0).getLubbleName());
+        joinbtn.setText("Join " + locationsDataList.get(0).getLubbleName());
 
         changeLubbleTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                new LubbleChooserDialog(getContext(), locationsDataList, new DialogInterface() {
+                    @Override
+                    public void onClick(Object object) {
+                        chosenLubbleData = (LocationsData) object;
+                    }
+                }).show();
             }
         });
 
