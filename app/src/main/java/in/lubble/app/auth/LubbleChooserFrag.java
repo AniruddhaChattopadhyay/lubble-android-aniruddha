@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,6 +28,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 import in.lubble.app.LubbleSharedPrefs;
@@ -35,8 +39,15 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.auth.LubbleChooserDialogFrag.ARG_CHOSEN_LOCATION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
@@ -57,6 +68,7 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
     private TextView lubbleNameTv;
     private Button joinbtn;
     private GoogleMap map;
+    private ProgressDialog progressDialog;
 
     public LubbleChooserFrag() {
         // Required empty public constructor
@@ -116,8 +128,7 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
         joinbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                final ProgressDialog progressDialog = new ProgressDialog(getContext());
+                progressDialog = new ProgressDialog(getContext());
                 progressDialog.setMessage(getString(R.string.all_updating));
                 progressDialog.show();
 
@@ -144,12 +155,9 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
-                                progressDialog.dismiss();
                                 if (task.isSuccessful()) {
                                     Log.d(TAG, "User profile updated.");
-                                    Analytics.triggerSignUpEvent(getContext());
-                                    startActivity(MainActivity.createIntent(getContext(), ((IdpResponse) idpResponse)));
-                                    getActivity().finishAffinity();
+                                    completeSignup();
                                 } else {
                                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                 }
@@ -160,6 +168,40 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
         });
 
         return view;
+    }
+
+    private void completeSignup() {
+
+        final JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("lubble", chosenLubbleData.getId());
+
+            RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+
+            final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+            endpoints.uploadSignUpComplete(body).enqueue(new Callback<Endpoints.ResponseBean>() {
+                @Override
+                public void onResponse(Call<Endpoints.ResponseBean> call, Response<Endpoints.ResponseBean> response) {
+                    if (response.isSuccessful() && !isAdded() && isVisible()) {
+                        progressDialog.dismiss();
+                        Analytics.triggerSignUpEvent(getContext());
+                        startActivity(MainActivity.createIntent(getContext(), ((IdpResponse) idpResponse)));
+                        getActivity().finishAffinity();
+                    } else {
+
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Endpoints.ResponseBean> call, Throwable t) {
+                    Log.e(TAG, "onFailure: ");
+                    progressDialog.dismiss();
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
     }
 
     @Override

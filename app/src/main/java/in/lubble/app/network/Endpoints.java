@@ -88,7 +88,10 @@ public interface Endpoints {
     @POST("/signup/")
     Call<ArrayList<LocationsData>> uploadSignUp(@Body RequestBody params);
 
-    class ResponseBean {
+    @POST("/signup_complete/")
+    Call<ResponseBean> uploadSignUpComplete(@Body RequestBody params);
+
+    public class ResponseBean {
 
         @SerializedName("message")
         private String message;
