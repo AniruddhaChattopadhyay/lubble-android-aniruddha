@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,6 +18,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -108,6 +110,7 @@ public class ItemActivity extends AppCompatActivity {
     private RecyclerView sellerItemsRv;
     private TextView visitShopTv;
     private Button chatBtn;
+    private TextView chatHintTv;
     private ValueEventListener sellerDmIdValueEventListener;
     private Query sellerDmQuery;
     @Nullable
@@ -129,6 +132,7 @@ public class ItemActivity extends AppCompatActivity {
     private TextView dealPriceTv;
     private TextView dealSavingsTv;
     private TextView normalSavingsTv;
+    private TextView serviceDealTv;
 
     public static Intent getIntent(Context context, int itemId) {
         final Intent intent = new Intent(context, ItemActivity.class);
@@ -157,6 +161,7 @@ public class ItemActivity extends AppCompatActivity {
         priceTv = findViewById(R.id.tv_price);
         mrpTv = findViewById(R.id.tv_mrp);
         normalSavingsTv = findViewById(R.id.tv_normal_savings);
+        serviceDealTv = findViewById(R.id.tv_service_deal);
 
         itemPvtInfoLayout = findViewById(R.id.relativelayout_item_pvt_info);
         editItemTv = findViewById(R.id.tv_edit_item);
@@ -164,6 +169,7 @@ public class ItemActivity extends AppCompatActivity {
         approvalIconIv = findViewById(R.id.iv_approval_icon);
         approvalStatusTv = findViewById(R.id.tv_approval_status);
         chatBtn = findViewById(R.id.btn_chat);
+        chatHintTv = findViewById(R.id.tv_chat_seller_hint);
         descTv = findViewById(R.id.tv_item_desc);
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
         serviceRv = findViewById(R.id.rv_service_catalog);
@@ -201,7 +207,20 @@ public class ItemActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        itemId = getIntent().getIntExtra(PARAM_ITEM_ID, -1);
+
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        if (data != null) {
+            try {
+                itemId = Integer.parseInt(data.getQueryParameter("id"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Crashlytics.logException(e);
+                finish();
+            }
+        } else {
+            itemId = intent.getIntExtra(PARAM_ITEM_ID, -1);
+        }
         if (itemId == -1) {
             throw new IllegalArgumentException("No ITEM ID passed");
         }
@@ -383,9 +402,16 @@ public class ItemActivity extends AppCompatActivity {
                                 savingPercentTv.setVisibility(View.GONE);
                             }
                         }
+                        priceTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
                     } else {
                         priceTv.setText("Request Price");
+                        priceTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
                         mrpTv.setVisibility(View.GONE);
+                    }
+                    // show service deal if applicable, regardless of pricing option or anything
+                    if (item.getType() == Item.ITEM_SERVICE && item.getDealPercent() > 0) {
+                        serviceDealTv.setVisibility(View.VISIBLE);
+                        serviceDealTv.setText(item.getDealPercent() + "% off");
                     }
 
                     descTv.setText(item.getDescription());
@@ -451,11 +477,19 @@ public class ItemActivity extends AppCompatActivity {
                             }
                         });
                         syncDmId(sellerData);
+                        if (sellerData.isCallEnabled()) {
+                            ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.mb_green)));
+                            chatBtn.setText("Call for details");
+                            chatHintTv.setText("Call or Message the seller to buy or know more");
+                        } else {
+                            ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent)));
+                            chatBtn.setText("Ask For Details");
+                        }
                         if (sellerData.getId() == LubbleSharedPrefs.getInstance().getSellerId()) {
                             chatBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    Toast.makeText(ItemActivity.this, "You cannot chat with yourself :)", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(ItemActivity.this, "You cannot contact yourself :)", Toast.LENGTH_SHORT).show();
                                 }
                             });
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.gray)));
@@ -476,23 +510,28 @@ public class ItemActivity extends AppCompatActivity {
                             userReviewContainer.setVisibility(View.GONE);
                             ratingAccountIv.setVisibility(View.GONE);
                         } else {
-                            ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent)));
                             chatBtn.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     final Bundle bundle = new Bundle();
                                     bundle.putInt("seller_id", sellerData.getId());
                                     Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, bundle, ItemActivity.this);
-                                    if (!TextUtils.isEmpty(dmId)) {
-                                        ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
+                                    if (sellerData.isCallEnabled()) {
+                                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                                        intent.setData(Uri.parse("tel:" + sellerData.getPhone()));
+                                        startActivity(intent);
                                     } else {
-                                        ChatActivity.openForEmptyDm(
-                                                ItemActivity.this,
-                                                String.valueOf(sellerData.getId()),
-                                                sellerData.getName(),
-                                                sellerData.getPhotoUrl(),
-                                                item.getName()
-                                        );
+                                        if (!TextUtils.isEmpty(dmId)) {
+                                            ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
+                                        } else {
+                                            ChatActivity.openForEmptyDm(
+                                                    ItemActivity.this,
+                                                    String.valueOf(sellerData.getId()),
+                                                    sellerData.getName(),
+                                                    sellerData.getPhotoUrl(),
+                                                    item.getName()
+                                            );
+                                        }
                                     }
                                 }
                             });

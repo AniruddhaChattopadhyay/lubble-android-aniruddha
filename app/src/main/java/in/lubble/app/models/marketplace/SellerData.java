@@ -34,6 +34,9 @@ public class SellerData {
     @SerializedName("is_recommended")
     @Expose
     private boolean isRecommended;
+    @SerializedName("is_call_enabled")
+    @Expose
+    private boolean isCallEnabled;
 
     public Integer getId() {
         return id;
@@ -105,5 +108,13 @@ public class SellerData {
 
     public void setIsRecommended(boolean recommended) {
         isRecommended = recommended;
+    }
+
+    public boolean isCallEnabled() {
+        return isCallEnabled;
+    }
+
+    public void setCallEnabled(boolean callEnabled) {
+        isCallEnabled = callEnabled;
     }
 }

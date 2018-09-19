@@ -6,24 +6,36 @@
     tools:background="@color/very_light_gray"
     tools:context="in.lubble.app.marketplace.MarketplaceFrag">
 
-    <RelativeLayout
-        android:id="@+id/content_container"
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/scrollview_content"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context="in.lubble.app.services.ServicesFrag">
+        android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progress_bar_categories"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_services"
+        <RelativeLayout
+            android:id="@+id/content_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            tools:context="in.lubble.app.services.ServicesFrag">
 
-    </RelativeLayout>
+            <ProgressBar
+                android:id="@+id/progress_bar_categories"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv_services"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_below="@id/rv_services" />
+
+        </RelativeLayout>
+
+    </android.support.v4.widget.NestedScrollView>
 
     <LinearLayout
         android:id="@+id/new_service_container"
@@ -37,7 +49,7 @@
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="8dp"
-        app:layout_anchor="@id/content_container"
+        app:layout_anchor="@id/scrollview_content"
         app:layout_anchorGravity="bottom|right|end"
         app:srcCompat="@drawable/ic_add_black_24dp">
 

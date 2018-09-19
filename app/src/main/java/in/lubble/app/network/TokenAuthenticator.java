@@ -60,7 +60,7 @@ public class TokenAuthenticator implements Authenticator {
             }
             try {
                 // Block on the task for a maximum of 1000 milliseconds, otherwise time out.
-                final GetTokenResult getTokenResult = Tasks.await(FirebaseAuth.getInstance().getAccessToken(true), 1000, TimeUnit.MILLISECONDS);
+                final GetTokenResult getTokenResult = Tasks.await(FirebaseAuth.getInstance().getAccessToken(true), 3000, TimeUnit.MILLISECONDS);
                 newToken = getTokenResult.getToken();
 
                 if (TextUtils.isEmpty(newToken)) {
@@ -81,7 +81,6 @@ public class TokenAuthenticator implements Authenticator {
                 // Task timed out before it could complete.
                 // Drop the API request. Can do nothing.
                 Crashlytics.logException(e);
-                return null;
             }
         }
         // retry the 401 failed call with new token

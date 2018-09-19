@@ -59,6 +59,10 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.priceTv.setText("Request Price");
             }
             viewHolder.mrpTv.setVisibility(View.GONE);
+            if ((item.getDealPercent() > 0)) {
+                viewHolder.savingTv.setVisibility(View.VISIBLE);
+                viewHolder.savingTv.setText(item.getDealPercent() + "%\nOFF");
+            }
         } else {
             if (item.getPricingOption() == ITEM_PRICING_PAID) {
                 if (item.getDealPrice() > 0) {

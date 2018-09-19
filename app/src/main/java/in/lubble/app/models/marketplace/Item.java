@@ -55,6 +55,9 @@ public class Item {
     @SerializedName("starting_price")
     @Expose
     private Integer startingPrice;
+    @SerializedName("deal_percent")
+    @Expose
+    private int dealPercent = 0;
     @SerializedName("view_count")
     @Expose
     private Integer viewCount;
@@ -329,6 +332,14 @@ public class Item {
         } else {
             return "";
         }
+    }
+
+    public int getDealPercent() {
+        return dealPercent;
+    }
+
+    public void setDealPercent(int dealPercent) {
+        this.dealPercent = dealPercent;
     }
 
 }

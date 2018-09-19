@@ -62,6 +62,7 @@ public class ServicesFrag extends Fragment {
         progressBar = view.findViewById(R.id.progress_bar_categories);
         RecyclerView serviceCategoryRv = view.findViewById(R.id.rv_services);
         LinearLayout newServiceContainer = view.findViewById(R.id.new_service_container);
+        serviceCategoryRv.setNestedScrollingEnabled(false);
 
         serviceCategoryRv.setLayoutManager(new GridLayoutManager(getContext(), 2));
         servicesAdapter = new ServiceCategoryAdapter(GlideApp.with(getContext()));

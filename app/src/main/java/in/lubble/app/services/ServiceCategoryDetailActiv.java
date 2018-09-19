@@ -2,10 +2,13 @@ package in.lubble.app.services;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
+import com.crashlytics.android.Crashlytics;
 
 import in.lubble.app.R;
 
@@ -30,7 +33,22 @@ public class ServiceCategoryDetailActiv extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        replaceFrag(getSupportFragmentManager(), ServiceCategoryDetailFrag.newInstance(getIntent().getIntExtra(ARG_CAT_ID, -1)), R.id.frame_fragContainer);
+        int catId = -1;
+
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        if (data != null) {
+            try {
+                catId = Integer.parseInt(data.getQueryParameter("id"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Crashlytics.logException(e);
+                finish();
+            }
+        } else {
+            catId = getIntent().getIntExtra(ARG_CAT_ID, -1);
+        }
+        replaceFrag(getSupportFragmentManager(), ServiceCategoryDetailFrag.newInstance(catId), R.id.frame_fragContainer);
     }
 
     @Override

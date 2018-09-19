@@ -56,6 +56,13 @@ public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     .into(viewHolder.iconIv);
         }
 
+        if (item.getDealPercent() > 0) {
+            viewHolder.dealTv.setVisibility(View.VISIBLE);
+            viewHolder.dealTv.setText(item.getDealPercent() + "% off");
+        } else {
+            viewHolder.dealTv.setVisibility(View.GONE);
+        }
+
     }
 
     @Override
@@ -77,12 +84,14 @@ public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         final View view;
         final ImageView iconIv;
         final TextView nameTv;
+        final TextView dealTv;
 
         ViewHolder(View view) {
             super(view);
             this.view = view;
             iconIv = view.findViewById(R.id.iv_service_icon);
             nameTv = view.findViewById(R.id.tv_service_name);
+            dealTv = view.findViewById(R.id.tv_deal);
             view.setOnClickListener(this);
         }
 

@@ -181,6 +181,21 @@
 
                 </RelativeLayout>
 
+                <TextView
+                    android:id="@+id/tv_service_deal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/container_normal_price"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/pill_red"
+                    android:paddingBottom="4dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingTop="4dp"
+                    android:textColor="@color/white"
+                    android:visibility="gone"
+                    tools:text="30% off" />
+
             </RelativeLayout>
 
             <RelativeLayout
@@ -278,14 +293,24 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/relativelayout_item_pvt_info"
                 android:layout_marginTop="4dp"
-                android:text="@string/chat_with_seller"
-                android:theme="@style/AccentButton" />
+                tools:text="@string/chat_with_seller"
+                android:textColor="@color/white"
+                tools:theme="@style/AccentButton" />
+
+            <TextView
+                android:id="@+id/tv_chat_seller_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/btn_chat"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="8dp"
+                android:text="Chat with seller to buy or know more" />
 
             <LinearLayout
                 android:id="@+id/container_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/btn_chat"
+                android:layout_below="@id/tv_chat_seller_hint"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/rect_rounded_border"
                 android:orientation="vertical"

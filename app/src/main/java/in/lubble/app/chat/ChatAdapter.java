@@ -202,7 +202,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
 
-        sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getCreatedTimestamp()));
+        sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
         if (chatData.getType().equalsIgnoreCase(LINK)) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
@@ -292,7 +292,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }
-        recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getCreatedTimestamp()));
+        recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
         recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         if (chatData.getLubbReceipts().containsKey(authorId)) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);

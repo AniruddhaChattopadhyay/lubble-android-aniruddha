@@ -97,6 +97,8 @@ public class ChatData {
         this.id = id;
     }
 
+    @Deprecated
+    // use getServerTimestampInLong() instead
     public long getCreatedTimestamp() {
         return createdTimestamp;
     }

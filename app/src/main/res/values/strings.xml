@@ -159,7 +159,7 @@
     <string name="edit_seller_profile">Edit Seller Profile</string>
     <string name="seller_phone_hint"><![CDATA[Seller phone number will be publicly visible on your seller profile & on products/services you sell on Lubble]]></string>
     <string name="phone_error">Please enter your phone number</string>
-    <string name="chat_with_seller">Chat with Seller</string>
+    <string name="chat_with_seller">ASK FOR DETAILS</string>
     <string name="edit_item">Edit Item</string>
     <string-array name="price_options_array">
         <item>Paid</item>
