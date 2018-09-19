@@ -39,10 +39,4 @@
         android:layout_above="@id/navigation"
         app:srcCompat="@drawable/gradient_black_light_trans" />
 
-    <include
-        layout="@layout/layout_shadow"
-        android:layout_width="match_parent"
-        android:layout_height="4dp"
-        android:layout_below="@+id/lubble_toolbar" />
-
 </RelativeLayout>

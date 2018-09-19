@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Item;
@@ -89,11 +90,13 @@ public class SellerDashActiv extends AppCompatActivity {
         adapter = new BigItemAdapter(GlideApp.with(this), true);
         recyclerView.setAdapter(adapter);
 
-        sellerId = getIntent().getIntExtra(PARAM_SELLER_ID, -1);
+        sellerId = getIntent().getIntExtra(PARAM_SELLER_ID, LubbleSharedPrefs.getInstance().getSellerId());
         isNewSeller = getIntent().getBooleanExtra(PARAM_IS_NEW_SELLER, false);
         defaultItemType = getIntent().getIntExtra(PARAM_DEFAULT_ITEM_TYPE, Item.ITEM_PRODUCT);
         if (sellerId == -1) {
-            throw new IllegalArgumentException("no seller ID bruh");
+            // no seller ID found, even in sharedPrefs, start activ to create a new seller
+            SellerEditActiv.open(this);
+            finish();
         }
         if (isNewSeller) {
             sellerPicProgressBar.setVisibility(View.VISIBLE);

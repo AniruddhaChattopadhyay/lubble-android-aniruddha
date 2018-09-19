@@ -87,7 +87,6 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "http://www.lubble.in/gizmos” -->
                 <data
                     android:host="profile"
                     android:scheme="lubble" />
@@ -241,10 +240,8 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "http://www.lubble.in/gizmos” -->
                 <data
                     android:host="market.item"
                     android:scheme="lubble" />
@@ -258,7 +255,18 @@
         <activity
             android:name=".marketplace.SellerDashActiv"
             android:configChanges="orientation"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="market.seller_dash"
+                    android:scheme="lubble" />
+            </intent-filter>
+
+        </activity>
         <activity
             android:name=".marketplace.ItemListActiv"
             android:configChanges="orientation"
@@ -266,10 +274,8 @@
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "http://www.lubble.in/gizmos” -->
                 <data
                     android:host="market.item_list"
                     android:scheme="lubble" />
@@ -301,7 +307,6 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "http://www.lubble.in/gizmos” -->
                 <data
                     android:host="service.category"
                     android:scheme="lubble" />
@@ -315,7 +320,18 @@
             android:label="@string/title_activity_referral"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
+            android:theme="@style/AppTheme">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="referrals"
+                    android:scheme="lubble" />
+            </intent-filter>
+
+        </activity>
 
         <!-- Branch install referrer tracking -->
         <receiver

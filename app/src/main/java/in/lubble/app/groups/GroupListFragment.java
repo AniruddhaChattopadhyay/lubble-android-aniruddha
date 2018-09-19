@@ -103,13 +103,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         viewPager = view.findViewById(R.id.viewpager);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
-        final SliderData sliderData = new SliderData();
-        sliderData.setUrl("https://i.imgur.com/uqsfQdM.jpg");
-        /// TODO: 19/9/18  sliderData.setDeepLink(SliderData.REFER);
-        final SliderData sliderData1 = new SliderData();
-        sliderData1.setUrl("https://i.imgur.com/k45335x.jpg");
-        sliderDataList.add(sliderData);
-        sliderDataList.add(sliderData1);
         groupsRecyclerView.setNestedScrollingEnabled(false);
 
         groupInvitedByMap = new HashMap<>();
@@ -129,6 +122,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 startActivity(new Intent(getContext(), NewGroupActivity.class));
             }
         });
+
+        final SliderData sliderData = new SliderData();
+        sliderDataList.add(sliderData);
+
         setupSlider();
         fetchHomeBanners();
         return view;
@@ -197,8 +194,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onResponse(Call<ArrayList<SliderData>> call, Response<ArrayList<SliderData>> response) {
                 final ArrayList<SliderData> bannerDataList = response.body();
-                if (response.isSuccessful() && bannerDataList != null && isAdded()&&isVisible() && !bannerDataList.isEmpty()) {
-
+                if (response.isSuccessful() && bannerDataList != null && isAdded() && isVisible() && !bannerDataList.isEmpty()) {
+                    sliderDataList = bannerDataList;
+                    setupSlider();
                 }
             }
 
