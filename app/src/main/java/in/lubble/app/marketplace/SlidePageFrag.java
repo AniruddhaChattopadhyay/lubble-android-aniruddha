@@ -52,7 +52,7 @@ public class SlidePageFrag extends Fragment {
         ImageView slideIv = view.findViewById(R.id.iv_slide_image);
 
         RequestOptions requestOptions = new RequestOptions();
-        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(UiUtils.dpToPx(16)));
+        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(UiUtils.dpToPx(8)));
         GlideApp.with(getContext()).load(sliderData.getUrl()).placeholder(R.color.gray).error(R.color.gray)
                 .apply(requestOptions)
                 .into(slideIv);

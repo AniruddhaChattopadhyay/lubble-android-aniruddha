@@ -7,6 +7,7 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DividerItemDecoration;
@@ -101,6 +102,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
+        TabLayout tabLayout = view.findViewById(R.id.tab_dots);
+        tabLayout.setupWithViewPager(viewPager, true);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
         groupsRecyclerView.setNestedScrollingEnabled(false);
