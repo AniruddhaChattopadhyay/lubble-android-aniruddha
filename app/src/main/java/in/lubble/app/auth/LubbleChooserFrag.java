@@ -1,31 +1,50 @@
 package in.lubble.app.auth;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.auth.LubbleChooserDialogFrag.ARG_CHOSEN_LOCATION;
-import static in.lubble.app.utils.FragUtils.addFrag;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
+
+    private static final String TAG = "LubbleChooserFrag";
 
     private static final String ARG_IDP_RESPONSE = "ARG_IDP_RESPONSE";
     private static final String ARG_LOCATION_DATA = "ARG_LOCATION_DATA";
@@ -97,8 +116,46 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
         joinbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                UserNameFrag userNameFrag = UserNameFrag.newInstance(idpResponse, chosenLubbleData);
-                addFrag(getFragmentManager(), R.id.frame_fragContainer, userNameFrag);
+
+                final ProgressDialog progressDialog = new ProgressDialog(getContext());
+                progressDialog.setMessage(getString(R.string.all_updating));
+                progressDialog.show();
+
+                LubbleSharedPrefs.getInstance().setLubbleId(chosenLubbleData.getId());
+
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                ProfileData profileData = new ProfileData();
+                final ProfileInfo profileInfo = new ProfileInfo();
+                profileInfo.setId(user.getUid());
+                profileInfo.setName(LubbleSharedPrefs.getInstance().getFullName());
+                profileData.setInfo(profileInfo);
+                profileData.setToken(FirebaseInstanceId.getInstance().getToken());
+                profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
+
+                getThisUserRef().setValue(profileData);
+                getUserLubbleRef().setValue("true");
+
+                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                        .setDisplayName(LubbleSharedPrefs.getInstance().getFullName())
+                        .build();
+
+                user.updateProfile(profileUpdates)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                progressDialog.dismiss();
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "User profile updated.");
+                                    Analytics.triggerSignUpEvent(getContext());
+                                    startActivity(MainActivity.createIntent(getContext(), ((IdpResponse) idpResponse)));
+                                    getActivity().finishAffinity();
+                                } else {
+                                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
             }
         });
 
