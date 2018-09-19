@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import in.lubble.app.auth.LocationsData;
 import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.marketplace.RatingData;
+import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
@@ -88,5 +89,8 @@ public interface Endpoints {
 
     @POST("/signup_complete/")
     Call<Void> uploadSignUpComplete(@Body RequestBody params);
+
+    @GET("/home/")
+    Call<ArrayList<SliderData>> fetchHomeData();
 
 }
