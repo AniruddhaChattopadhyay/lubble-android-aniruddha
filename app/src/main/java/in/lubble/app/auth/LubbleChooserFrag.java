@@ -179,23 +179,26 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
             final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-            endpoints.uploadSignUpComplete(body).enqueue(new Callback<Endpoints.ResponseBean>() {
+            endpoints.uploadSignUpComplete(body).enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<Endpoints.ResponseBean> call, Response<Endpoints.ResponseBean> response) {
-                    if (response.isSuccessful() && !isAdded() && isVisible()) {
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful() && isAdded() && isVisible()) {
                         progressDialog.dismiss();
                         Analytics.triggerSignUpEvent(getContext());
                         startActivity(MainActivity.createIntent(getContext(), ((IdpResponse) idpResponse)));
                         getActivity().finishAffinity();
-                    } else {
-
+                    } else if (isAdded() && isVisible()) {
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
-                public void onFailure(Call<Endpoints.ResponseBean> call, Throwable t) {
+                public void onFailure(Call<Void> call, Throwable t) {
                     Log.e(TAG, "onFailure: ");
-                    progressDialog.dismiss();
+                    if (isAdded() && isVisible()) {
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                    }
                 }
             });
         } catch (JSONException e) {

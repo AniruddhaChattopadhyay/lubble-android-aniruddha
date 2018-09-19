@@ -1,7 +1,5 @@
 package in.lubble.app.network;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.ArrayList;
 
 import in.lubble.app.auth.LocationsData;
@@ -89,20 +87,6 @@ public interface Endpoints {
     Call<ArrayList<LocationsData>> uploadSignUp(@Body RequestBody params);
 
     @POST("/signup_complete/")
-    Call<ResponseBean> uploadSignUpComplete(@Body RequestBody params);
-
-    public class ResponseBean {
-
-        @SerializedName("message")
-        private String message;
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-    }
+    Call<Void> uploadSignUpComplete(@Body RequestBody params);
 
 }
