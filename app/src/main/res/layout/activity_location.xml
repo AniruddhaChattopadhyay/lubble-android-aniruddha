@@ -5,11 +5,12 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/invalid_loc_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="16dp"
         android:gravity="center"
         android:orientation="vertical"
@@ -17,38 +18,60 @@
         tools:visibility="visible">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Whoops!"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+            android:text="We are not open in your\nneighbourhood yet"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+            android:textColor="@color/dk_colorAccent"
+            android:textSize="24sp" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_desc"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="We are currently not available in your area yet."
+            android:layout_below="@id/tv_title"
+            android:text="If you're not at home, please try again from your society.\n\nTo get useful local help &amp; connections, Lubble is waiting for more neighbours in your area to join.\n\nWe'll notify you when we open in your area."
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle" />
 
         <ImageView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            app:srcCompat="@drawable/ic_location_city_black_24dp" />
-
-        <TextView
+            android:id="@+id/iv_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
-            android:text="If you're away from home,\nplease try again later when you reach home." />
+            android:layout_above="@id/container_action"
+            android:layout_below="@id/tv_desc"
+            app:srcCompat="@drawable/ic_society" />
 
-        <Button
-            android:id="@+id/btn_invalid_loc_ok"
+        <LinearLayout
+            android:id="@+id/container_action"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="OK"
-            android:theme="@style/AccentButton" />
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/half_rounded_rectangle_blue_top"
+            android:orientation="vertical"
+            android:padding="8dp">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_action"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/btn_action"
+                android:gravity="center"
+                android:text="Invite your neighbours and friends to Lubble to open your area sooner"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btn_action"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text="Invite Friends"
+                android:theme="@style/WhiteButton" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/tv_loc_hint"
@@ -59,6 +82,7 @@
         android:layout_margin="8dp"
         android:gravity="center"
         android:text="We need your location to connect you with people nearby."
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+        tools:visibility="gone" />
 
 </RelativeLayout>

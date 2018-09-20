@@ -19,7 +19,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -34,10 +34,6 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -45,15 +41,12 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.utils.StringUtils;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -69,7 +62,7 @@ public class LocationActivity extends AppCompatActivity {
 
     private static final float LOCATION_ACCURACY_THRESHOLD = 150;
     private FusedLocationProviderClient fusedLocationClient;
-    private LinearLayout invalidLocContainer;
+    private RelativeLayout invalidLocContainer;
     private TextView locHintTv;
     private Button okBtn;
     private Parcelable idpResponse;
@@ -83,17 +76,17 @@ public class LocationActivity extends AppCompatActivity {
 
         invalidLocContainer = findViewById(R.id.invalid_loc_container);
         locHintTv = findViewById(R.id.tv_loc_hint);
-        okBtn = findViewById(R.id.btn_invalid_loc_ok);
+        //okBtn = findViewById(R.id.btn_invalid_loc_ok);
 
         idpResponse = getIntent().getParcelableExtra("idpResponse");
 
-        okBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setResult(Activity.RESULT_CANCELED);
-                finish();
-            }
-        });
+        //okBtn.setOnClickListener(new View.OnClickListener() {
+        //    @Override
+        //    public void onClick(View v) {
+        //        setResult(Activity.RESULT_CANCELED);
+        //        finish();
+        //    }
+        //});
 
         checkSystemLocPerm();
     }
@@ -263,22 +256,23 @@ public class LocationActivity extends AppCompatActivity {
                     if (locationsDataList != null && !locationsDataList.isEmpty()) {
                         locationCheckSuccess(locationsDataList);
                     } else {
-                        checkBackdoorAccess();
+                        locationCheckFailed();
                     }
                 } else {
-                    /// TODO: 15/9/18 !!
+                    locationCheckFailed();
                 }
             }
 
             @Override
             public void onFailure(Call<ArrayList<LocationsData>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
+                locationCheckFailed();
             }
         });
     }
 
     private void checkBackdoorAccess() {
-        String backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+        /*String backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
         if (backdoorKey == null && BuildConfig.DEBUG) {
             // just for ishaan's emulator to allow email ID
             backdoorKey = FirebaseAuth.getInstance().getUid();
@@ -301,7 +295,7 @@ public class LocationActivity extends AppCompatActivity {
                         // user has NO backdoor access
                         locationCheckFailed();
                     }
-                });
+                });*/
     }
 
     private void locationCheckSuccess(ArrayList<LocationsData> locationsData) {
