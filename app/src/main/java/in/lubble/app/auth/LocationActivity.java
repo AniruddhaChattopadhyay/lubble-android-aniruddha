@@ -1,6 +1,8 @@
 package in.lubble.app.auth;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.DialogInterface;
@@ -19,6 +21,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -63,6 +66,8 @@ public class LocationActivity extends AppCompatActivity {
     private static final float LOCATION_ACCURACY_THRESHOLD = 150;
     private FusedLocationProviderClient fusedLocationClient;
     private RelativeLayout invalidLocContainer;
+    private ImageView pulseIv;
+    private ImageView locIv;
     private TextView locHintTv;
     private Button okBtn;
     private Parcelable idpResponse;
@@ -75,6 +80,8 @@ public class LocationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_location);
 
         invalidLocContainer = findViewById(R.id.invalid_loc_container);
+        pulseIv = findViewById(R.id.iv_pulse);
+        locIv = findViewById(R.id.iv_loc);
         locHintTv = findViewById(R.id.tv_loc_hint);
         //okBtn = findViewById(R.id.btn_invalid_loc_ok);
 
@@ -87,10 +94,24 @@ public class LocationActivity extends AppCompatActivity {
         //        finish();
         //    }
         //});
-
+        pulseIv.setVisibility(View.GONE);
+        locIv.setVisibility(View.GONE);
         checkSystemLocPerm();
     }
 
+    private void startAnims() {
+        ObjectAnimator scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
+                pulseIv,
+                PropertyValuesHolder.ofFloat("scaleX", 1.5f),
+                PropertyValuesHolder.ofFloat("alpha", 0.1f),
+                PropertyValuesHolder.ofFloat("scaleY", 1.5f));
+        scaleAnim.setDuration(1000);
+
+        scaleAnim.setRepeatCount(ObjectAnimator.INFINITE);
+        scaleAnim.setRepeatMode(ObjectAnimator.RESTART);
+
+        scaleAnim.start();
+    }
 
     private void checkSystemLocPerm() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -196,6 +217,9 @@ public class LocationActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
+        pulseIv.setVisibility(View.VISIBLE);
+        locIv.setVisibility(View.VISIBLE);
+        startAnims();
         // get fresh loc
         fusedLocationClient.requestLocationUpdates(getLocationRequest().setNumUpdates(1), new LocationCallback() {
             @Override
@@ -307,6 +331,8 @@ public class LocationActivity extends AppCompatActivity {
     }
 
     private void locationCheckFailed() {
+        pulseIv.setVisibility(View.GONE);
+        locIv.setVisibility(View.GONE);
         locHintTv.setVisibility(View.GONE);
         invalidLocContainer.setVisibility(View.VISIBLE);
         final Bundle bundle = new Bundle();
