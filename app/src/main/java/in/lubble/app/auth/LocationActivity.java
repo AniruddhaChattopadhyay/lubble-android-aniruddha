@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -24,7 +25,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -50,12 +53,16 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
+import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
 public class LocationActivity extends AppCompatActivity {
 
@@ -69,10 +76,12 @@ public class LocationActivity extends AppCompatActivity {
     private ImageView pulseIv;
     private ImageView locIv;
     private TextView locHintTv;
-    private Button okBtn;
+    private Button shareBtn;
     private Parcelable idpResponse;
     private Location currLocation;
     private int retryCount = 0;
+    private String sharingUrl;
+    private ProgressDialog sharingProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,21 +92,50 @@ public class LocationActivity extends AppCompatActivity {
         pulseIv = findViewById(R.id.iv_pulse);
         locIv = findViewById(R.id.iv_loc);
         locHintTv = findViewById(R.id.tv_loc_hint);
-        //okBtn = findViewById(R.id.btn_invalid_loc_ok);
+        shareBtn = findViewById(R.id.btn_action);
 
         idpResponse = getIntent().getParcelableExtra("idpResponse");
 
-        //okBtn.setOnClickListener(new View.OnClickListener() {
-        //    @Override
-        //    public void onClick(View v) {
-        //        setResult(Activity.RESULT_CANCELED);
-        //        finish();
-        //    }
-        //});
+        shareBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onInviteClicked();
+            }
+        });
         pulseIv.setVisibility(View.GONE);
         locIv.setVisibility(View.GONE);
         checkSystemLocPerm();
+
+        sharingProgressDialog = new ProgressDialog(this);
+        generateBranchUrl(this, linkCreateListener);
     }
+
+    private void onInviteClicked() {
+        final Intent referralIntent = getReferralIntent(this, sharingUrl, sharingProgressDialog, linkCreateListener);
+        if (referralIntent != null) {
+            startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
+            Analytics.triggerEvent(AnalyticsEvents.REFERRAL_PROFILE_SHARE, this);
+        }
+    }
+
+    final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
+        @Override
+        public void onLinkCreate(String url, BranchError error) {
+            if (url != null) {
+                Log.d(TAG, "got my Branch link to share: " + url);
+                sharingUrl = url;
+                if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
+                    sharingProgressDialog.dismiss();
+                }
+            } else {
+                Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
+                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                if (!isFinishing()) {
+                    Toast.makeText(LocationActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
 
     private void startAnims() {
         ObjectAnimator scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
