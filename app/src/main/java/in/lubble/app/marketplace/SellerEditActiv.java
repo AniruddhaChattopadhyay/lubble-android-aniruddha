@@ -10,11 +10,14 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +26,7 @@ import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -70,6 +74,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
     private TextInputLayout sellerNameTil;
     private TextInputLayout phoneNumberTil;
     private TextInputLayout sellerAboutTil;
+    private EditText shopWebNameEt;
     private Button submitBtn;
     private int sellerId = -1;
 
@@ -90,6 +95,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
         sellerNameTil = findViewById(R.id.til_seller_name);
         phoneNumberTil = findViewById(R.id.til_mobile_number);
         sellerAboutTil = findViewById(R.id.til_seller_about);
+        shopWebNameEt = findViewById(R.id.et_shop_name);
         submitBtn = findViewById(R.id.btn_submit);
 
         Toolbar toolbar = findViewById(R.id.text_toolbar);
@@ -117,7 +123,33 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
             submitBtn.setText(R.string.all_update);
         } else {
             fetchSellerId();
+            syncSellerWebName();
         }
+    }
+
+    private void syncSellerWebName() {
+        sellerNameTil.getEditText().addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0) {
+                    setShopWebLink(s.toString());
+                }
+            }
+        });
+    }
+
+    private void setShopWebLink(String s) {
+        shopWebNameEt.setText(s.trim().toLowerCase().replace(" ", "-"));
     }
 
     private void fetchSellerId() {
@@ -168,6 +200,17 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                         phoneNumberTil.getEditText().setText(sellerData.getPhone());
                     }
                     sellerAboutTil.getEditText().setText(sellerData.getBio());
+                    final String webLink = sellerData.getWebLink();
+                    if (!TextUtils.isEmpty(webLink)) {
+                        // web link exists, do not allow updation
+                        shopWebNameEt.setText(webLink);
+                        shopWebNameEt.setEnabled(false);
+                    } else {
+                        // web link does NOT exist
+                        shopWebNameEt.setEnabled(true);
+                        setShopWebLink(sellerData.getName());
+                        syncSellerWebName();
+                    }
 
                     GlideApp.with(SellerEditActiv.this)
                             .load(sellerData.getPhotoUrl())
@@ -206,13 +249,14 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
     }
 
     private void uploadSellerProfile() {
+        shopWebNameEt.setError(null);
 
         HashMap<String, Object> params = new HashMap<>();
 
         params.put("name", sellerNameTil.getEditText().getText().toString().trim());
         params.put("phone", phoneNumberTil.getEditText().getText().toString().trim());
         params.put("bio", sellerAboutTil.getEditText().getText().toString().trim());
-
+        params.put("web_link", shopWebNameEt.getText().toString().trim());
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final Call<SellerData> sellerDataCall;
@@ -234,7 +278,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 final SellerData sellerData = response.body();
                 progressDialog.dismiss();
-                if (sellerData != null) {
+                if (response.isSuccessful() && sellerData != null && !isFinishing()) {
                     if (picUri != null) {
                         // upload pic only if it has changed, might not when editing seller
                         Log.d(TAG, "OG file size: " + new File(picUri.getPath()).length() / 1024);
@@ -250,6 +294,22 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                     LubbleSharedPrefs.getInstance().setSellerId(sellerData.getId());
                     startActivity(SellerDashActiv.getIntent(SellerEditActiv.this, sellerData.getId(), true));
                     finish();
+                } else if (!isFinishing()) {
+                    try {
+                        final String errorString = response.errorBody().string();
+                        if (!TextUtils.isEmpty(errorString)) {
+                            final JSONObject jsonObject = new JSONObject(errorString);
+                            if (jsonObject.get("web_link_failure") == Boolean.TRUE) {
+                                shopWebNameEt.setError("Already Taken. Try a unique name");
+                            } else {
+                                shopWebNameEt.setError(null);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -300,6 +360,12 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
             return false;
         } else {
             sellerAboutTil.setError(null);
+        }
+        if (!isValidString(shopWebNameEt.getText().toString())) {
+            shopWebNameEt.setError(getString(R.string.all_fill_details));
+            return false;
+        } else {
+            shopWebNameEt.setError(null);
         }
         if (picUri == null && sellerId == -1) {
             // new seller; pic is reqd

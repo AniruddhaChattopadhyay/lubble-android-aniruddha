@@ -34,6 +34,9 @@ public class SellerData {
     @SerializedName("is_recommended")
     @Expose
     private boolean isRecommended;
+    @SerializedName("web_link")
+    @Expose
+    private String webLink;
 
     public Integer getId() {
         return id;
@@ -106,4 +109,13 @@ public class SellerData {
     public void setIsRecommended(boolean recommended) {
         isRecommended = recommended;
     }
+
+    public String getWebLink() {
+        return webLink;
+    }
+
+    public void setWebLink(String webLink) {
+        this.webLink = webLink;
+    }
+
 }
