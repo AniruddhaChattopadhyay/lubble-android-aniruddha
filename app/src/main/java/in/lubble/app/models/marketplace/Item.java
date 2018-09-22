@@ -95,6 +95,9 @@ public class Item {
     @SerializedName("pricing_option")
     @Expose
     private int pricingOption = ITEM_PRICING_PAID;
+    @SerializedName("share_link")
+    @Expose
+    private String shareLink;
 
     @Override
     public boolean equals(Object obj) {
@@ -294,5 +297,13 @@ public class Item {
 
     public void setPricingOption(int pricingOption) {
         this.pricingOption = pricingOption;
+    }
+
+    public String getShareLink() {
+        return shareLink;
+    }
+
+    public void setShareLink(String shareLink) {
+        this.shareLink = shareLink;
     }
 }

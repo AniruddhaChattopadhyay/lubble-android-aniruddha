@@ -88,6 +88,7 @@ public class ItemActivity extends AppCompatActivity {
     private ImageView approvalIconIv;
     private TextView approvalStatusTv;
     private TextView descTv;
+    private RelativeLayout shareContainer;
     private TextView serviceHintTv;
     private RecyclerView serviceRv;
     private RelativeLayout userReviewContainer;
@@ -146,6 +147,7 @@ public class ItemActivity extends AppCompatActivity {
         approvalStatusTv = findViewById(R.id.tv_approval_status);
         chatBtn = findViewById(R.id.btn_chat);
         descTv = findViewById(R.id.tv_item_desc);
+        shareContainer = findViewById(R.id.container_share);
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
         serviceRv = findViewById(R.id.rv_service_catalog);
 
@@ -478,6 +480,19 @@ public class ItemActivity extends AppCompatActivity {
                     if (item.getUserRatingsList() != null) {
                         reviewsRecyclerView.setAdapter(new ReviewAdapter(GlideApp.with(ItemActivity.this), item.getUserRatingsList()));
                     }
+
+                    shareContainer.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (!TextUtils.isEmpty(item.getShareLink())) {
+                                Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.setType("text/plain");
+                                intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing item I found: " + item.getShareLink());
+                                startActivity(Intent.createChooser(intent, "Share"));
+                            }
+                        }
+                    });
+
                 } else {
                     if (response.code() == 404) {
                         final Bundle bundle = new Bundle();
