@@ -55,6 +55,9 @@ public interface Endpoints {
     @GET("marketplace/items/seller/{seller_id}/")
     Call<SellerData> fetchSellerItems(@Path("seller_id") int sellerId);
 
+    @GET("marketplace/items/seller/{seller_name}/")
+    Call<SellerData> fetchSellerItems(@Path("seller_name") String sellerName);
+
     @GET("marketplace/itemlist/")
     Call<ArrayList<ItemSearchData>> fetchItemList();
 

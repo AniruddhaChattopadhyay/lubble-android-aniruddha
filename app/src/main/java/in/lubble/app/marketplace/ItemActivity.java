@@ -212,7 +212,7 @@ public class ItemActivity extends AppCompatActivity {
         Uri data = intent.getData();
         if (data != null) {
             try {
-                itemId = Integer.parseInt(data.getQueryParameter("id"));
+                itemId = Integer.parseInt(data.getLastPathSegment());
             } catch (Exception e) {
                 e.printStackTrace();
                 Crashlytics.logException(e);
