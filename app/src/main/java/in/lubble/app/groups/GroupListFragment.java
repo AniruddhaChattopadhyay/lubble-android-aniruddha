@@ -79,6 +79,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private HashMap<String, UserGroupData> userGroupDataMap;
     private HashMap<String, Long> dmMap;
     private PagerContainer pagerContainer;
+    private SliderViewPagerAdapter sliderViewPagerAdapter;
     private ViewPager viewPager;
     private int currentPage = 0;
     private Handler handler = new Handler();
@@ -129,33 +130,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         final SliderData sliderData = new SliderData();
         sliderDataList.add(sliderData);
 
-        setupSlider();
+        initSliders();
+        updateSliders();
         fetchHomeBanners();
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        adapter.clearGroups();
-        groupsRecyclerView.setVisibility(View.INVISIBLE);
-        syncUserGroupIds();
-        syncUserDmIds();
-        syncSellerDmIds();
-    }
-
-    private void setupSlider() {
-        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList));
-
-        new CoverFlow.Builder()
-                .with(viewPager)
-                .pagerMargin(getResources().getDimensionPixelSize(R.dimen.pager_margin))
-                .scale(0.3f)
-                .spaceSize(0f)
-                .rotationY(0f)
-                .build();
-
+    private void initSliders() {
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -172,6 +153,32 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             }
         });
+
+        new CoverFlow.Builder()
+                .with(viewPager)
+                .pagerMargin(getResources().getDimensionPixelSize(R.dimen.pager_margin))
+                .scale(0.3f)
+                .spaceSize(0f)
+                .rotationY(0f)
+                .build();
+        sliderViewPagerAdapter = new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList);
+        viewPager.setAdapter(sliderViewPagerAdapter);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        adapter.clearGroups();
+        groupsRecyclerView.setVisibility(View.INVISIBLE);
+        syncUserGroupIds();
+        syncUserDmIds();
+        syncSellerDmIds();
+    }
+
+    private synchronized void updateSliders() {
+
+        sliderViewPagerAdapter.updateList(sliderDataList);
 
         new Timer().schedule(new TimerTask() {
             @Override
@@ -199,7 +206,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 final ArrayList<SliderData> bannerDataList = response.body();
                 if (response.isSuccessful() && bannerDataList != null && isAdded() && isVisible() && !bannerDataList.isEmpty()) {
                     sliderDataList = bannerDataList;
-                    setupSlider();
+                    updateSliders();
                 }
             }
 

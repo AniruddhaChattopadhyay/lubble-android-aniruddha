@@ -20,6 +20,12 @@ public class SliderViewPagerAdapter extends FragmentStatePagerAdapter {
         return SlidePageFrag.newInstance(sliderData.get(position));
     }
 
+    public void updateList(ArrayList<SliderData> questionData) {
+        this.sliderData.clear();
+        this.sliderData = questionData;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getCount() {
         return sliderData.size();

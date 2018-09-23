@@ -10,7 +10,10 @@ import java.util.List;
 
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
+import in.lubble.app.marketplace.SellerDashActiv;
+import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServiceCategoryDetailActiv;
 
 public class DeepLinkRouterActiv extends AppCompatActivity {
@@ -54,6 +57,12 @@ public class DeepLinkRouterActiv extends AppCompatActivity {
                 break;
             case "service.category":
                 ServiceCategoryDetailActiv.open(this, Integer.parseInt(uri.getLastPathSegment()));
+                break;
+            case "referrals":
+                ReferralActivity.open(this);
+                break;
+            case "seller_dash":
+                startActivity(SellerDashActiv.getIntent(this, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT));
                 break;
         }
     }
