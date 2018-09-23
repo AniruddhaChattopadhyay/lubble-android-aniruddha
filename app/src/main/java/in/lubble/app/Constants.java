@@ -23,6 +23,12 @@ public class Constants {
 
     public static final String DEFAULT_GROUP = LubbleSharedPrefs.getInstance().getDefaultGroupId();
 
+    /**
+     * FIREBASE REMOTE CONFIG KEYS
+     */
+    public static final String REFER_MSG = "REFER_MSG";
+
+
     public static final String LAST_GROUP_MAPPING_ID = "LAST_GROUP_MAPPING_ID";
     public static final String LAST_KEY_MAPPING_ID = "LAST_KEY_MAPPING_ID";
 

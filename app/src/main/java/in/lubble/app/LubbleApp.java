@@ -15,6 +15,7 @@ import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
+import io.branch.referral.Branch;
 import io.fabric.sdk.android.Fabric;
 
 /**
@@ -36,6 +37,11 @@ public class LubbleApp extends Application {
         DbSingleton.initializeInstance(getApplicationContext());
 
         appContext = this;
+
+        // Initialize the Branch object
+        Branch.getAutoInstance(this);
+        // Branch logging for debugging
+        Branch.enableLogging();
 
         LubbleSharedPrefs.initializeInstance(getApplicationContext());
         GroupMappingSharedPrefs.initializeInstance(getApplicationContext());

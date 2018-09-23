@@ -20,13 +20,40 @@
             android:name=".MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Branch URI scheme -->
+            <intent-filter>
+                <data
+                    android:host="open"
+                    android:scheme="lubble" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
         </activity>
+
+        <!-- Branch init -->
+        <meta-data
+            android:name="io.branch.sdk.BranchKey"
+            android:value="key_live_niB5GEB5sh3CprlT2Bx3EimiDFeN6RN4" />
+        <meta-data
+            android:name="io.branch.sdk.BranchKey.test"
+            android:value="key_test_hpqXJAxWDk3CexmNZyIBSepcAuoH9P4h" />
+
+        <!-- Branch testing (TestMode "true" to simulate fresh installs on dev environment) -->
+        <meta-data
+            android:name="io.branch.sdk.TestMode"
+            android:value="false" />
+
         <activity
             android:name=".auth.LoginActivity"
             android:configChanges="orientation"
@@ -231,6 +258,14 @@
             android:parentActivityName=".services.ServicesActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".referrals.ReferralActivity"
+            android:configChanges="orientation"
+            android:label="@string/title_activity_referral"
+            android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"/>
+
+        <activity
             android:name=".DeepLinkRouterActiv"
             android:launchMode="singleTask"
             android:noHistory="true">
@@ -263,6 +298,15 @@
         <activity
             android:name="com.firebase.ui.auth.ui.provider.GitHubLoginActivity"
             tools:node="remove" />
+
+        <!-- Branch install referrer tracking -->
+        <receiver
+            android:name="io.branch.referral.InstallListener"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
 
     </application>
 

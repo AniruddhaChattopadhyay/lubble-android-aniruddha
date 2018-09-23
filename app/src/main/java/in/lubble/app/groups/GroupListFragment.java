@@ -3,10 +3,12 @@ package in.lubble.app.groups;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,15 +27,21 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.marketplace.SliderData;
+import in.lubble.app.marketplace.SliderViewPagerAdapter;
 import in.lubble.app.models.DmData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
+import me.crosswall.lib.coverflow.CoverFlow;
+import me.crosswall.lib.coverflow.core.PagerContainer;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
@@ -63,6 +71,11 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private HashMap<String, Set<String>> groupInvitedByMap;
     private HashMap<String, UserGroupData> userGroupDataMap;
     private HashMap<String, Long> dmMap;
+    private PagerContainer pagerContainer;
+    private ViewPager viewPager;
+    private int currentPage = 0;
+    private Handler handler = new Handler();
+    private ArrayList<SliderData> sliderDataList = new ArrayList<>();
 
     public GroupListFragment() {
     }
@@ -80,6 +93,19 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
         progressBar = view.findViewById(R.id.progressBar_groups);
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
+        pagerContainer = view.findViewById(R.id.pager_container);
+        viewPager = view.findViewById(R.id.viewpager);
+        viewPager.setClipChildren(false);
+        viewPager.setOffscreenPageLimit(4);
+        final SliderData sliderData = new SliderData();
+        sliderData.setUrl("https://i.imgur.com/uqsfQdM.jpg");
+        sliderData.setClickType(SliderData.REFER);
+        final SliderData sliderData1 = new SliderData();
+        sliderData1.setUrl("https://i.imgur.com/k45335x.jpg");
+        sliderDataList.add(sliderData);
+        sliderDataList.add(sliderData1);
+        groupsRecyclerView.setNestedScrollingEnabled(false);
+
         groupInvitedByMap = new HashMap<>();
         userGroupDataMap = new HashMap<>();
         dmMap = new HashMap<>();
@@ -97,7 +123,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 startActivity(new Intent(getContext(), NewGroupActivity.class));
             }
         });
-
+        setupSlider();
         return view;
     }
 
@@ -111,6 +137,51 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         syncUserDmIds();
         syncSellerDmIds();
     }
+
+    private void setupSlider() {
+        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList));
+
+        new CoverFlow.Builder()
+                .with(viewPager)
+                .pagerMargin(getResources().getDimensionPixelSize(R.dimen.pager_margin))
+                .scale(0.3f)
+                .spaceSize(0f)
+                .rotationY(0f)
+                .build();
+
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                currentPage = position;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(update);
+            }
+        }, 100, 5000);
+    }
+
+    private Runnable update = new Runnable() {
+        public void run() {
+            if (currentPage == sliderDataList.size()) {
+                currentPage = 0;
+            }
+            viewPager.setCurrentItem(currentPage++, true);
+        }
+    };
 
     private void syncSellerDmIds() {
         getSellerRef().child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())).child("dms").addChildEventListener(new ChildEventListener() {
