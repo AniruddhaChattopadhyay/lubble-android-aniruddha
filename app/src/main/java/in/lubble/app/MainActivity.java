@@ -17,6 +17,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -34,20 +35,23 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
-import in.lubble.app.events.EventsFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
@@ -174,14 +178,30 @@ public class MainActivity extends AppCompatActivity {
 
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
-                case "events":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
+                case "services":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_services);
                     break;
                 case "marketplace":
                     bottomNavigation.setSelectedItemId(R.id.navigation_mplace);
                     break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
+        }
+        try {
+            Intent intent = this.getIntent();
+            if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(TRACK_NOTIF_ID)
+                    && (intent.getFlags() & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0) {
+                String notifId = this.getIntent().getExtras().getString(TRACK_NOTIF_ID);
+
+                if (!TextUtils.isEmpty(notifId)) {
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("notifKey", notifId);
+                    bundle.putString("tabName", getIntent().getStringExtra(EXTRA_TAB_NAME));
+                    Analytics.triggerEvent(AnalyticsEvents.NOTIF_OPENED, bundle, this);
+                }
+            }
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 
@@ -347,8 +367,8 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_mplace:
                     switchFrag(MarketplaceFrag.newInstance());
                     return true;
-                case R.id.navigation_events:
-                    switchFrag(EventsFrag.newInstance());
+                case R.id.navigation_services:
+                    switchFrag(ServicesFrag.newInstance());
                     return true;
             }
             return false;

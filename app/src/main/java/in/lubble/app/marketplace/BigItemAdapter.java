@@ -4,6 +4,7 @@ import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,7 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         final Item item = itemList.get(position);
 
         viewHolder.nameTv.setText(item.getName());
+        viewHolder.savingTv.setVisibility(View.GONE);
         if (item.getType() == Item.ITEM_SERVICE) {
             final Integer startingPrice = item.getStartingPrice() == null ? item.getSellingPrice() : item.getStartingPrice();
             if (item.getPricingOption() == ITEM_PRICING_PAID) {
@@ -57,15 +59,29 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.priceTv.setText("Request Price");
             }
             viewHolder.mrpTv.setVisibility(View.GONE);
+            if ((item.getDealPercent() > 0)) {
+                viewHolder.savingTv.setVisibility(View.VISIBLE);
+                viewHolder.savingTv.setText(item.getDealPercent() + "%\nOFF");
+            }
         } else {
             if (item.getPricingOption() == ITEM_PRICING_PAID) {
-                viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+                if (item.getDealPrice() > 0) {
+                    viewHolder.priceTv.setText("₹" + item.getDealPrice());
+                } else {
+                    viewHolder.priceTv.setText("₹" + item.getSellingPrice());
+                }
                 if (item.getMrp().equals(item.getSellingPrice())) {
                     viewHolder.mrpTv.setVisibility(View.GONE);
                 } else {
                     viewHolder.mrpTv.setVisibility(View.VISIBLE);
                     viewHolder.mrpTv.setText("₹" + item.getMrp());
                     viewHolder.mrpTv.setPaintFlags(viewHolder.mrpTv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                }
+                if (!TextUtils.isEmpty(item.getSavingPercentText())) {
+                    viewHolder.savingTv.setVisibility(View.VISIBLE);
+                    viewHolder.savingTv.setText(item.getSavingPercentText());
+                } else {
+                    viewHolder.savingTv.setVisibility(View.GONE);
                 }
             } else {
                 viewHolder.priceTv.setText("Request Price");
@@ -147,6 +163,7 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         final TextView nameTv;
         final TextView priceTv;
         final TextView mrpTv;
+        final TextView savingTv;
 
         ViewHolder(View view) {
             super(view);
@@ -157,6 +174,7 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             nameTv = view.findViewById(R.id.tv_name);
             priceTv = view.findViewById(R.id.tv_price);
             mrpTv = view.findViewById(R.id.tv_mrp);
+            savingTv = view.findViewById(R.id.tv_saving_text);
             view.setOnClickListener(this);
         }
 

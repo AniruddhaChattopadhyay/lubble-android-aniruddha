@@ -7,9 +7,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.bumptech.glide.request.target.Target;
@@ -28,6 +30,7 @@ import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.SellerDashActiv;
 import in.lubble.app.models.AppNotifData;
+import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 
 import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
@@ -35,6 +38,7 @@ import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_MSG_ID;
 import static in.lubble.app.events.EventInfoActivity.KEY_EVENT_ID;
 import static in.lubble.app.utils.DateTimeUtils.getTimeBasedUniqueInt;
+import static in.lubble.app.utils.StringUtils.isValidString;
 
 /**
  * Created by ishaan on 24/4/18.
@@ -43,6 +47,7 @@ import static in.lubble.app.utils.DateTimeUtils.getTimeBasedUniqueInt;
 public class AppNotifUtils {
 
     private static final String TAG = "AppNotifUtils";
+    public static final String TRACK_NOTIF_ID = "TRACK_NOTIF_ID";
 
     public static void showAppNotif(Context context, RemoteMessage.Notification notification) {
         Log.d(TAG, "showAppNotif: notif");
@@ -86,7 +91,7 @@ public class AppNotifUtils {
                 .setContentText(appNotifData.getMsg());
 
         try {
-            if (StringUtils.isValidString(appNotifData.getIconUrl())) {
+            if (isValidString(appNotifData.getIconUrl())) {
                 final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getIconUrl()).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
                 builder.setLargeIcon(bitmap);
             } else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
@@ -123,10 +128,21 @@ public class AppNotifUtils {
                 .setContentText(appNotifData.getMsg());
 
         try {
-            if (StringUtils.isValidString(appNotifData.getIconUrl())) {
+            if (isValidString(appNotifData.getIconUrl())) {
                 final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getIconUrl()).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
                 builder.setLargeIcon(bitmap);
             }
+
+            if (!TextUtils.isEmpty(appNotifData.getImageUrl())) {
+                final NotificationCompat.BigPictureStyle picNotificationStyle = new NotificationCompat.BigPictureStyle();
+                final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getImageUrl()).submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
+                picNotificationStyle.bigPicture(bitmap);
+                if (isValidString(appNotifData.getMsg())) {
+                    picNotificationStyle.setSummaryText(appNotifData.getMsg());
+                }
+                builder.setStyle(picNotificationStyle);
+            }
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -145,40 +161,53 @@ public class AppNotifUtils {
         if (appNotifData.getType().equalsIgnoreCase("groupInvitation")) {
             Intent intent = new Intent(context, ChatActivity.class);
             intent.putExtra(EXTRA_GROUP_ID, appNotifData.getGroupId());
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
 
         } else if (appNotifData.getType().equalsIgnoreCase("notice")) {
             Intent intent = new Intent(context, AnnouncementsActivity.class);
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("events")) {
             Intent intent = new Intent(context, MainActivity.class);
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             intent.putExtra(EXTRA_TAB_NAME, "events");
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("marketplace")) {
             Intent intent = new Intent(context, MainActivity.class);
             intent.putExtra(EXTRA_TAB_NAME, "marketplace");
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("new_event")) {
             Intent intent = new Intent(context, EventInfoActivity.class);
             intent.putExtra(KEY_EVENT_ID, appNotifData.getNotifKey());
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
             Intent intent = new Intent(context, ChatActivity.class);
             intent.putExtra(EXTRA_GROUP_ID, appNotifData.getGroupId());
             intent.putExtra(EXTRA_MSG_ID, appNotifData.getMessageId());
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("mplace_approval")) {
             Intent intent = ItemActivity.getIntent(context, Integer.parseInt(appNotifData.getNotifKey()));
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-            Intent sellerDashIntent = SellerDashActiv.getIntent(context, LubbleSharedPrefs.getInstance().getSellerId(), false);
+            Intent sellerDashIntent = SellerDashActiv.getIntent(context, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT);
             stackBuilder.addNextIntent(sellerDashIntent);
             stackBuilder.addNextIntent(intent);
+            return stackBuilder;
+        } else if (appNotifData.getType().equalsIgnoreCase("deep_link")) {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse(appNotifData.getDeepLink()));
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+            stackBuilder.addNextIntentWithParentStack(intent);
             return stackBuilder;
         } else {
             Intent intent = new Intent(context, MainActivity.class);

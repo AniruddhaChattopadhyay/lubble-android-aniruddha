@@ -22,6 +22,10 @@ public class AppNotifData {
     private String messageId;
     @SerializedName("iconUrl")
     private String iconUrl;
+    @SerializedName("imageUrl")
+    private String imageUrl;
+    @SerializedName("deepLink")
+    private String deepLink;
 
     public String getNotifKey() {
         return notifKey;
@@ -77,5 +81,21 @@ public class AppNotifData {
 
     public void setIconUrl(String iconUrl) {
         this.iconUrl = iconUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public String getDeepLink() {
+        return deepLink;
+    }
+
+    public void setDeepLink(String deepLink) {
+        this.deepLink = deepLink;
     }
 }

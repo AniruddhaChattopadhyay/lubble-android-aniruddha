@@ -90,6 +90,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "NewItemActiv";
     private static final String ARG_EDIT_ITEM_ID = "ARG_EDIT_ITEM_ID";
+    private static final String ARG_DEFAULT_ITEM_TYPE = "ARG_DEFAULT_ITEM_TYPE";
 
     private static final int REQUEST_CODE_ITEM_PIC = 469;
     private static final int REQUEST_CODE_CATEGORY = 339;
@@ -122,9 +123,10 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
     private Item item;
     private int selectedPriceOption = Item.ITEM_PRICING_PAID;
 
-    public static void open(Context context, int itemId) {
+    public static void open(Context context, int itemId, int defaultType) {
         final Intent intent = new Intent(context, NewItemActiv.class);
         intent.putExtra(ARG_EDIT_ITEM_ID, itemId);
+        intent.putExtra(ARG_DEFAULT_ITEM_TYPE, defaultType);
         context.startActivity(intent);
     }
 
@@ -148,7 +150,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
         mrpIv = findViewById(R.id.iv_mrp);
         sellingPriceIv = findViewById(R.id.iv_selling_price);
         sellingPriceTil = findViewById(R.id.til_item_sellingprice);
-        priceHintTv = findViewById(R.id.tv_price_hint);
+        priceHintTv = findViewById(R.id.tv_selling_price_hint);
         submitBtn = findViewById(R.id.btn_submit);
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -167,21 +169,14 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        productRadioBtn.setChecked(true);
-
         Analytics.triggerScreenEvent(this, this.getClass());
-
+        productRadioBtn.setChecked(true);
         itemId = getIntent().getIntExtra(ARG_EDIT_ITEM_ID, -1);
-
+        selectedItemType = getIntent().getIntExtra(ARG_DEFAULT_ITEM_TYPE, Item.ITEM_PRODUCT);
         Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (itemId != -1) {
-            setTitle("Edit Item");
-            fetchItemDetails();
-        } else {
-            setTitle("New Item");
-        }
+
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -218,6 +213,20 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+
+        if (selectedItemType == ITEM_PRODUCT) {
+            productRadioBtn.setChecked(true);
+            serviceRadioBtn.setChecked(false);
+        } else {
+            productRadioBtn.setChecked(false);
+            serviceRadioBtn.setChecked(true);
+        }
+        if (itemId != -1) {
+            setTitle("Edit Item");
+            fetchItemDetails();
+        } else {
+            setTitle("New Item");
+        }
     }
 
     private void handleChangeInPriceOptions(int selectedOption) {
@@ -526,7 +535,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                         .startPhotoPickerWithPermissionCheck(NewItemActiv.this, REQUEST_CODE_ITEM_PIC);
                 break;
             case R.id.et_category:
-                startActivityForResult(CategoryChooserActiv.getIntent(NewItemActiv.this), REQUEST_CODE_CATEGORY);
+                startActivityForResult(CategoryChooserActiv.getIntent(NewItemActiv.this, selectedItemType), REQUEST_CODE_CATEGORY);
                 break;
         }
     }
@@ -621,7 +630,7 @@ public class NewItemActiv extends AppCompatActivity implements View.OnClickListe
                 if (item != null) {
                     if (picUri != null) {
                         Log.d(TAG, "OG file size: " + new File(picUri.getPath()).length() / 1024);
-                        picUri = Uri.fromFile(new File(compressImage(picUri.getPath())));
+                        picUri = Uri.fromFile(compressImage(picUri.getPath()));
                         Log.d(TAG, "NEW file size: " + new File(picUri.getPath()).length() / 1024);
                         startService(new Intent(NewItemActiv.this, UploadFileService.class)
                                 .putExtra(UploadFileService.EXTRA_FILE_NAME, "item_pic_" + System.currentTimeMillis() + ".jpg")

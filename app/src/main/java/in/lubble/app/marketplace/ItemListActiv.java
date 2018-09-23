@@ -2,7 +2,9 @@ package in.lubble.app.marketplace;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -46,6 +48,8 @@ public class ItemListActiv extends AppCompatActivity {
     private TextView sellerBioTv;
     private boolean isSeller;
     private int sellerId;
+    @Nullable
+    private String sellerUniqueName = null;
     private RecyclerView recyclerView;
     private TextView noItemsHintTv;
     private BigItemAdapter adapter;
@@ -90,15 +94,34 @@ public class ItemListActiv extends AppCompatActivity {
         adapter = new BigItemAdapter(GlideApp.with(this), false);
         recyclerView.setAdapter(adapter);
 
-        isSeller = getIntent().getBooleanExtra(PARAM_IS_SELLER, false);
-        sellerId = getIntent().getIntExtra(PARAM_ID, -1);
-
-        if (sellerId == -1 || !getIntent().hasExtra(PARAM_IS_SELLER)) {
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        if (data != null) {
+            try {
+                if (data.toString().contains("category")) {
+                    sellerId = Integer.parseInt(data.getLastPathSegment());
+                    isSeller = false;
+                } else {
+                    sellerUniqueName = data.getLastPathSegment();
+                    isSeller = true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Crashlytics.logException(e);
+                finish();
+            }
+        } else {
+            isSeller = intent.getBooleanExtra(PARAM_IS_SELLER, false);
+            sellerId = intent.getIntExtra(PARAM_ID, -1);
+        }
+        if (sellerId == -1 && TextUtils.isEmpty(sellerUniqueName)) {
             throw new IllegalArgumentException("no seller ID bruh");
         }
 
         final Bundle attrs = new Bundle();
         attrs.putBoolean("is_seller", isSeller);
+        attrs.putInt("seller_id", sellerId);
+        attrs.putString("seller_name", sellerUniqueName);
         Analytics.triggerScreenEvent(this, this.getClass());
     }
 
@@ -203,12 +226,19 @@ public class ItemListActiv extends AppCompatActivity {
 
     private void fetchSellerItems() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchSellerItems(sellerId).enqueue(new Callback<SellerData>() {
+        final Call<SellerData> sellerDataCall;
+        if (sellerId != -1) {
+            sellerDataCall = endpoints.fetchSellerItems(sellerId);
+        } else {
+            sellerDataCall = endpoints.fetchSellerItems(sellerUniqueName);
+        }
+        sellerDataCall.enqueue(new Callback<SellerData>() {
             @Override
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 progressBar.setVisibility(View.GONE);
                 final SellerData sellerData = response.body();
                 if (sellerData != null) {
+                    sellerId = sellerData.getId();
                     sellerNameTv.setText(sellerData.getName());
                     sellerBioTv.setText(sellerData.getBio());
 

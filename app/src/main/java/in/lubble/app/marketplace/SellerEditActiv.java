@@ -40,6 +40,7 @@ import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.FeatureData;
+import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -168,7 +169,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                     if (sellerList != null && sellerList.size() > 0) {
                         sellerId = sellerList.get(0);
                         LubbleSharedPrefs.getInstance().setSellerId(sellerId);
-                        startActivity(SellerDashActiv.getIntent(SellerEditActiv.this, sellerId, false));
+                        startActivity(SellerDashActiv.getIntent(SellerEditActiv.this, sellerId, false, Item.ITEM_PRODUCT));
                         finish();
                     }
                 }
@@ -282,7 +283,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                     if (picUri != null) {
                         // upload pic only if it has changed, might not when editing seller
                         Log.d(TAG, "OG file size: " + new File(picUri.getPath()).length() / 1024);
-                        picUri = Uri.fromFile(new File(compressImage(picUri.getPath())));
+                        picUri = Uri.fromFile(compressImage(picUri.getPath()));
                         Log.d(TAG, "NEW file size: " + new File(picUri.getPath()).length() / 1024);
                         startService(new Intent(SellerEditActiv.this, UploadFileService.class)
                                 .putExtra(UploadFileService.EXTRA_FILE_NAME, "seller_pic_" + System.currentTimeMillis() + ".jpg")
@@ -292,7 +293,7 @@ public class SellerEditActiv extends AppCompatActivity implements View.OnClickLi
                                 .setAction(UploadFileService.ACTION_UPLOAD));
                     }
                     LubbleSharedPrefs.getInstance().setSellerId(sellerData.getId());
-                    startActivity(SellerDashActiv.getIntent(SellerEditActiv.this, sellerData.getId(), true));
+                    startActivity(SellerDashActiv.getIntent(SellerEditActiv.this, sellerData.getId(), true, Item.ITEM_PRODUCT));
                     finish();
                 } else if (!isFinishing()) {
                     try {

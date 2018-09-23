@@ -24,7 +24,6 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
-import in.lubble.app.domestic_directory.DomesticDirectoryActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 
@@ -35,7 +34,7 @@ public class LubbleActivity extends AppCompatActivity {
     private ImageView lubbleIv;
     private TextView lubbleInfoTv;
     private TextView noticeBoardTv;
-    private TextView domesticDirectoryTv;
+    private TextView eventsTv;
     private ProgressBar progressBar;
 
     public static void open(Context context) {
@@ -55,7 +54,7 @@ public class LubbleActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar_lubbleInfo);
         lubbleInfoTv = findViewById(R.id.tv_lubble_info);
         noticeBoardTv = findViewById(R.id.tv_notice_board);
-        domesticDirectoryTv = findViewById(R.id.tv_domestic_directory);
+        eventsTv = findViewById(R.id.tv_events);
 
         lubbleInfoTv.setText(R.string.about_svr);
 
@@ -100,10 +99,10 @@ public class LubbleActivity extends AppCompatActivity {
             }
         });
 
-        domesticDirectoryTv.setOnClickListener(new View.OnClickListener() {
+        eventsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DomesticDirectoryActivity.open(LubbleActivity.this);
+                //todo EventsFrag.open(LubbleActivity.this);
             }
         });
     }

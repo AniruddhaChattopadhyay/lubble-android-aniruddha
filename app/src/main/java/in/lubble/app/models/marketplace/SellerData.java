@@ -34,6 +34,9 @@ public class SellerData {
     @SerializedName("is_recommended")
     @Expose
     private boolean isRecommended;
+    @SerializedName("is_call_enabled")
+    @Expose
+    private boolean isCallEnabled;
     @SerializedName("web_link")
     @Expose
     private String webLink; // this is just the unique name, like "Pocketables"
@@ -111,6 +114,14 @@ public class SellerData {
 
     public void setIsRecommended(boolean recommended) {
         isRecommended = recommended;
+    }
+
+    public boolean isCallEnabled() {
+        return isCallEnabled;
+    }
+
+    public void setCallEnabled(boolean callEnabled) {
+        isCallEnabled = callEnabled;
     }
 
     public String getWebLink() {
