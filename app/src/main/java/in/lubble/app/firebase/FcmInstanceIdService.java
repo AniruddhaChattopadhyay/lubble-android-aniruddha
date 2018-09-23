@@ -2,6 +2,7 @@ package in.lubble.app.firebase;
 
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
@@ -22,6 +23,10 @@ public class FcmInstanceIdService extends FirebaseInstanceIdService {
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
-        getThisUserRef().child("token").setValue(refreshedToken);
+        try {
+            getThisUserRef().child("token").setValue(refreshedToken);
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
     }
 }

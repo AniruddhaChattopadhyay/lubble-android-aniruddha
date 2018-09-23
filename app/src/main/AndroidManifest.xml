@@ -54,28 +54,7 @@
             android:label="Profile"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="lubble.in"
-                    android:pathPrefix="/profile"
-                    android:scheme="https" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="profile"
-                    android:scheme="lubble" />
-            </intent-filter>
-
-        </activity>
+            android:windowSoftInputMode="adjustPan" />
 
         <service android:name=".UploadFileService" />
         <service android:name=".firebase.FcmService">
@@ -219,28 +198,7 @@
             android:name=".marketplace.ItemActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="shop.lubble.in"
-                    android:pathPattern="/item/.*"
-                    android:scheme="https" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="market.item"
-                    android:scheme="lubble" />
-            </intent-filter>
-
-        </activity>
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".marketplace.SellerEditActiv"
             android:configChanges="orientation"
@@ -252,29 +210,8 @@
         <activity
             android:name=".marketplace.ItemListActiv"
             android:configChanges="orientation"
-            android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="shop.lubble.in"
-                    android:pathPattern="/.*"
-                    android:scheme="https" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="market.item_list"
-                    android:scheme="lubble" />
-            </intent-filter>
-
-        </activity>
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".marketplace.CategoriesActiv"
             android:configChanges="orientation"
@@ -288,22 +225,28 @@
             android:configChanges="orientation"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".services.ServiceCategoryDetailActiv"
             android:configChanges="orientation"
             android:parentActivityName=".services.ServicesActivity"
-            android:screenOrientation="portrait">
-            <intent-filter>
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".DeepLinkRouterActiv"
+            android:launchMode="singleTask"
+            android:noHistory="true">
+
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="lubble.in"
-                    android:pathPrefix="/service/category"
+                    android:host="shop.lubble.in"
+                    android:pathPattern="/.*"
                     android:scheme="https" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -311,11 +254,16 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="service.category"
+                    android:host="*"
                     android:scheme="lubble" />
             </intent-filter>
 
         </activity>
+        <!--This is for removing Firebase conflict for verification of app links-->
+        <activity
+            android:name="com.firebase.ui.auth.ui.provider.GitHubLoginActivity"
+            tools:node="remove" />
+
     </application>
 
 </manifest>
