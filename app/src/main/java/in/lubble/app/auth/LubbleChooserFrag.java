@@ -132,7 +132,7 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
                 progressDialog.setMessage(getString(R.string.all_updating));
                 progressDialog.show();
 
-                LubbleSharedPrefs.getInstance().setLubbleId(chosenLubbleData.getLubbleId());
+                LubbleSharedPrefs.getInstance().setLubbleId(chosenLubbleData.getLubbleFirebaseId());
 
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -142,7 +142,6 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
                 profileInfo.setName(LubbleSharedPrefs.getInstance().getFullName());
                 profileData.setInfo(profileInfo);
                 profileData.setToken(FirebaseInstanceId.getInstance().getToken());
-                profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
 
                 getThisUserRef().setValue(profileData);
                 getUserLubbleRef().setValue("true");
@@ -174,7 +173,7 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
 
         final JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("lubble", chosenLubbleData.getLubbleId());
+            jsonObject.put("lubble", chosenLubbleData.getId());
 
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 

@@ -51,7 +51,7 @@ public class LocationsData implements Serializable {
         this.centerLongi = centerLongi;
     }
 
-    public String getLubbleId() {
+    public String getLubbleFirebaseId() {
         return lubbleId;
     }
 
