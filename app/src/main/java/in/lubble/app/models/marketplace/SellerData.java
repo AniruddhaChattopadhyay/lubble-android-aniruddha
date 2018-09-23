@@ -36,7 +36,10 @@ public class SellerData {
     private boolean isRecommended;
     @SerializedName("web_link")
     @Expose
-    private String webLink;
+    private String webLink; // this is just the unique name, like "Pocketables"
+    @SerializedName("share_link")
+    @Expose
+    private String shareLink; // this is the complete share URL, like "https://shop...."
 
     public Integer getId() {
         return id;
@@ -118,4 +121,11 @@ public class SellerData {
         this.webLink = webLink;
     }
 
+    public String getShareLink() {
+        return shareLink;
+    }
+
+    public void setShareLink(String shareLink) {
+        this.shareLink = shareLink;
+    }
 }

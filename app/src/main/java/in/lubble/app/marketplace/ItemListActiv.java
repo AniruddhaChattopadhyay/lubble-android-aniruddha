@@ -7,12 +7,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -48,6 +50,8 @@ public class ItemListActiv extends AppCompatActivity {
     private TextView noItemsHintTv;
     private BigItemAdapter adapter;
     private TextView recommendationCountTv;
+    private RelativeLayout sellerActionContainer;
+    private LinearLayout shareContainer;
     private LinearLayout recommendContainer;
     private ImageView recommendIv;
     private TextView recommendHintTV;
@@ -80,6 +84,8 @@ public class ItemListActiv extends AppCompatActivity {
         recommendHintTV = findViewById(R.id.tv_recommend_hint);
         recommendContainer = findViewById(R.id.container_recommend_btn);
         recommendationCountTv = findViewById(R.id.tv_recommendation_count);
+        sellerActionContainer = findViewById(R.id.container_action);
+        shareContainer = findViewById(R.id.container_seller_share);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new BigItemAdapter(GlideApp.with(this), false);
         recyclerView.setAdapter(adapter);
@@ -100,13 +106,13 @@ public class ItemListActiv extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (!isSeller) {
+            sellerActionContainer.setVisibility(View.GONE);
             sellerBioTv.setVisibility(View.GONE);
-            recommendContainer.setVisibility(View.GONE);
             recommendationCountTv.setVisibility(View.GONE);
             fetchCategoryItems();
         } else {
             fetchSellerItems();
-            recommendContainer.setVisibility(View.VISIBLE);
+            sellerActionContainer.setVisibility(View.VISIBLE);
             recommendationCountTv.setVisibility(View.VISIBLE);
         }
     }
@@ -230,6 +236,17 @@ public class ItemListActiv extends AppCompatActivity {
                             bundle.putInt("seller_id", sellerId);
                             Analytics.triggerEvent(RECOMMEND_BTN_CLICK, bundle, ItemListActiv.this);
                             updateRecommendation();
+                        }
+                    });
+                    shareContainer.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (!TextUtils.isEmpty(sellerData.getShareLink())) {
+                                Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.setType("text/plain");
+                                    intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());
+                                startActivity(Intent.createChooser(intent, "Share"));
+                            }
                         }
                     });
                 } else {

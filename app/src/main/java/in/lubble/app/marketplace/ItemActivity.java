@@ -88,7 +88,7 @@ public class ItemActivity extends AppCompatActivity {
     private ImageView approvalIconIv;
     private TextView approvalStatusTv;
     private TextView descTv;
-    private RelativeLayout shareContainer;
+    private RelativeLayout itemShareContainer;
     private TextView serviceHintTv;
     private RecyclerView serviceRv;
     private RelativeLayout userReviewContainer;
@@ -116,6 +116,7 @@ public class ItemActivity extends AppCompatActivity {
 
     private int itemId;
     private TextView recommendationCountTv;
+    private LinearLayout sellerShareContainer;
     private LinearLayout recommendBtnContainer;
     private ImageView recommendIv;
     private TextView recommendHintTV;
@@ -147,7 +148,7 @@ public class ItemActivity extends AppCompatActivity {
         approvalStatusTv = findViewById(R.id.tv_approval_status);
         chatBtn = findViewById(R.id.btn_chat);
         descTv = findViewById(R.id.tv_item_desc);
-        shareContainer = findViewById(R.id.container_share);
+        itemShareContainer = findViewById(R.id.container_item_share);
         serviceHintTv = findViewById(R.id.tv_service_catalog_hint);
         serviceRv = findViewById(R.id.rv_service_catalog);
 
@@ -171,6 +172,7 @@ public class ItemActivity extends AppCompatActivity {
         recommendHintTV = findViewById(R.id.tv_recommend_hint);
         recommendBtnContainer = findViewById(R.id.container_recommend_btn);
         recommendationCountTv = findViewById(R.id.tv_recommendation_count);
+        sellerShareContainer = findViewById(R.id.container_seller_share);
         sellerItemsRv = findViewById(R.id.rv_items);
         visitShopTv = findViewById(R.id.tv_visit_shop);
 
@@ -466,6 +468,17 @@ public class ItemActivity extends AppCompatActivity {
                             ratingAccountIv.setVisibility(View.VISIBLE);
                         }
                         handleRecommendations(sellerData);
+                        sellerShareContainer.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (!TextUtils.isEmpty(sellerData.getShareLink())) {
+                                    Intent intent = new Intent(Intent.ACTION_SEND);
+                                    intent.setType("text/plain");
+                                    intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());
+                                    startActivity(Intent.createChooser(intent, "Share"));
+                                }
+                            }
+                        });
                     }
                     if (item.getRatingData() != null) {
                         showMyRatingLayout(item.getRatingData());
@@ -481,7 +494,7 @@ public class ItemActivity extends AppCompatActivity {
                         reviewsRecyclerView.setAdapter(new ReviewAdapter(GlideApp.with(ItemActivity.this), item.getUserRatingsList()));
                     }
 
-                    shareContainer.setOnClickListener(new View.OnClickListener() {
+                    itemShareContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             if (!TextUtils.isEmpty(item.getShareLink())) {

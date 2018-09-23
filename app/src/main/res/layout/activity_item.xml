@@ -172,7 +172,7 @@
                 android:text="Chat with seller to buy or know more" />
 
             <RelativeLayout
-                android:id="@+id/container_share"
+                android:id="@+id/container_item_share"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_chat_seller_hint">
@@ -227,7 +227,7 @@
                 android:id="@+id/container_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/container_share"
+                android:layout_below="@id/container_item_share"
                 android:layout_marginTop="8dp"
                 android:background="@drawable/rect_rounded_border"
                 android:orientation="vertical"

@@ -33,47 +33,137 @@
         android:gravity="center_horizontal"
         tools:text="@tools:sample/lorem" />
 
-    <LinearLayout
-        android:id="@+id/container_recommend_btn"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:id="@+id/container_action"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_seller_bio"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/rect_rounded_border"
-        android:gravity="center"
-        android:padding="8dp">
+        android:layout_marginTop="8dp">
 
-        <ImageView
-            android:id="@+id/iv_recommend"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_favorite_border_24dp" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/light_gray" />
 
         <TextView
-            android:id="@+id/tv_recommend_hint"
+            android:id="@+id/tv_action_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:gravity="center_vertical"
-            android:text="Recommend" />
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:text="Help this small business grow"
+            android:textColor="@color/black" />
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/container_actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_action_hint"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-    <TextView
-        android:id="@+id/tv_recommendation_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/container_recommend_btn"
-        android:layout_centerHorizontal="true"
-        android:textColor="@color/black"
-        tools:text="143 recommendations" />
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/container_recommend_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/rect_rounded_border"
+                    android:gravity="center"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:id="@+id/iv_recommend"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tint="@color/dk_red"
+                        app:srcCompat="@drawable/ic_favorite_border_24dp" />
+
+                    <TextView
+                        android:id="@+id/tv_recommend_hint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:gravity="center_vertical"
+                        android:text="Recommend"
+                        android:textColor="@color/dk_red" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_recommendation_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/container_recommend_btn"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="@color/black"
+                    tools:text="143 recommendations" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <LinearLayout
+                    android:id="@+id/container_seller_share"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/rect_rounded_border"
+                    android:gravity="center"
+                    android:padding="8dp">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:tint="@color/dk_colorAccent"
+                        app:srcCompat="@drawable/ic_share_black_24dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:gravity="center_vertical"
+                        android:text="Share"
+                        android:textColor="@color/dk_colorAccent" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/container_seller_share"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text="Share with your friends"
+                    android:textColor="@color/black" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/container_actions"
+            android:layout_marginTop="8dp"
+            android:background="@color/light_gray" />
+
+    </RelativeLayout>
 
     <ProgressBar
         android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_recommendation_count"
+        android:layout_below="@id/container_action"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp" />
 
@@ -81,7 +171,7 @@
         android:id="@+id/rv_items"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_recommendation_count"
+        android:layout_below="@id/container_action"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
@@ -92,12 +182,12 @@
         android:id="@+id/tv_no_items_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_recommendation_count"
+        android:layout_below="@id/container_action"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:gravity="center"
-        android:visibility="gone"
         android:text="No items yet in this category\n Be the first one to add new items"
-        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />
+        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+        android:visibility="gone" />
 
 </RelativeLayout>

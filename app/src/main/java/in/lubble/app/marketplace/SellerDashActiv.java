@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +54,7 @@ public class SellerDashActiv extends AppCompatActivity {
     private BigItemAdapter adapter;
     private BroadcastReceiver photoUploadReceiver;
     private TextView recommendationCount;
+    private LinearLayout shareContainer;
 
     public static Intent getIntent(Context context, int sellerId, boolean isNewSeller) {
         final Intent intent = new Intent(context, SellerDashActiv.class);
@@ -80,6 +82,7 @@ public class SellerDashActiv extends AppCompatActivity {
         final TextView editProfileTv = findViewById(R.id.tv_edit_seller_profile);
         final Button newItemBtn = findViewById(R.id.btn_new_item);
         recommendationCount = findViewById(R.id.tv_recommendation_count);
+        shareContainer = findViewById(R.id.container_seller_share);
         recyclerView = findViewById(R.id.rv_items);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new BigItemAdapter(GlideApp.with(this), true);
@@ -173,6 +176,19 @@ public class SellerDashActiv extends AppCompatActivity {
                         adapter.addData(item);
                     }
                     recommendationCount.setText(sellerData.getRecommendationCount() + " recommendations");
+
+                    shareContainer.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (!TextUtils.isEmpty(sellerData.getShareLink())) {
+                                Intent intent = new Intent(Intent.ACTION_SEND);
+                                intent.setType("text/plain");
+                                intent.putExtra(Intent.EXTRA_TEXT, "View all my products here: " + sellerData.getShareLink());
+                                startActivity(Intent.createChooser(intent, "Share"));
+                            }
+                        }
+                    });
+
                 } else {
                     Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
                     Toast.makeText(SellerDashActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
