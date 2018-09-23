@@ -30,9 +30,9 @@
                     android:layout_height="wrap_content"
                     android:elevation="7dp"
                     android:layout_gravity="center"
+                    android:background="@color/gray"
                     android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    tools:background="?attr/colorPrimary" />
+                    android:layout_marginRight="16dp" />
 
             </me.crosswall.lib.coverflow.core.PagerContainer>
 

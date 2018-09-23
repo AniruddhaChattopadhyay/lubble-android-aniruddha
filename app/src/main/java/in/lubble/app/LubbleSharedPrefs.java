@@ -21,7 +21,6 @@ public class LubbleSharedPrefs {
     private final String IS_DEFAULT_GROUP_INFO_SHOWN = "IS_DEFAULT_GROUP_INFO_SHOWN";
     private final String IS_PUBLIC_GROUP_INFO_SHOWN = "IS_PUBLIC_GROUP_INFO_SHOWN";
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
-    private final String SHOW_PVT_GROUP_INFO = "SHOW_PVT_GROUP_INFO";
     private final String IS_GROUP_INFO_OPENED = "IS_GROUP_INFO_OPENED";
     private final String IS_MPLACE_OPENED = "IS_MPLACE_OPENED";
     private final String SELLER_ID = "SELLER_ID";
@@ -148,14 +147,6 @@ public class LubbleSharedPrefs {
     public boolean setIsLogoutPending(boolean isLogoutPending) {
 
         return preferences.edit().putBoolean(IS_LOGOUT_PENDING, isLogoutPending).commit();
-    }
-
-    public boolean getShowPvtGroupInfo() {
-        return preferences.getBoolean(SHOW_PVT_GROUP_INFO, false);
-    }
-
-    public boolean setShowPvtGroupInfo(boolean toShow) {
-        return preferences.edit().putBoolean(SHOW_PVT_GROUP_INFO, toShow).commit();
     }
 
     public boolean getIsGroupInfoOpened() {

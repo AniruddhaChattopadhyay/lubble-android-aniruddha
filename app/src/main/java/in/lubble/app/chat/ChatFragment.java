@@ -619,9 +619,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                                 @Override
                                 public void onClick(View v) {
                                     LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
-                                    if (!LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown()) {
-                                        LubbleSharedPrefs.getInstance().setShowPvtGroupInfo(true);
-                                    }
                                 }
                             });
                 }
@@ -641,9 +638,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         @Override
                         public void onClick(View v) {
                             LubbleSharedPrefs.getInstance().setIsPublicGroupInfoShown(true);
-                            if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown()) {
-                                LubbleSharedPrefs.getInstance().setShowPvtGroupInfo(true);
-                            }
                         }
                     });
         }
