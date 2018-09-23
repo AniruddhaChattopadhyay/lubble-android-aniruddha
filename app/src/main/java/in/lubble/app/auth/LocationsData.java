@@ -16,6 +16,8 @@ public class LocationsData implements Serializable {
     private double centerLati;
     @SerializedName("center_longi")
     private double centerLongi;
+    @SerializedName("lubble_firebase_id")
+    private String lubbleId;
 
     public String getId() {
         return id;
@@ -49,4 +51,11 @@ public class LocationsData implements Serializable {
         this.centerLongi = centerLongi;
     }
 
+    public String getLubbleId() {
+        return lubbleId;
+    }
+
+    public void setLubbleId(String lubbleId) {
+        this.lubbleId = lubbleId;
+    }
 }

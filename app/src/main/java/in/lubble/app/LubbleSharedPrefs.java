@@ -27,6 +27,7 @@ public class LubbleSharedPrefs {
     private final String SELLER_ID = "SELLER_ID";
     private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
     private final String FULL_NAME = "FULL_NAME";
+    private final String REFERRAL_CODE = "REFERRAL_CODE";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -112,6 +113,14 @@ public class LubbleSharedPrefs {
 
     public boolean setFullName(String fullName) {
         return preferences.edit().putString(FULL_NAME, fullName).commit();
+    }
+
+    public String getReferralCode() {
+        return preferences.getString(REFERRAL_CODE, "");
+    }
+
+    public boolean setReferralCode(String referralCode) {
+        return preferences.edit().putString(REFERRAL_CODE, referralCode).commit();
     }
 
     public boolean getIsDefaultGroupInfoShown() {

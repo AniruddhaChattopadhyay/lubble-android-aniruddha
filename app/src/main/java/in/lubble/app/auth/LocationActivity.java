@@ -297,6 +297,10 @@ public class LocationActivity extends AppCompatActivity {
                 final JSONObject referralObject = new JSONObject();
                 referralObject.put("referrer_uid", LubbleSharedPrefs.getInstance().getReferrerUid());
                 params.put("referral", referralObject);
+            } else if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getReferralCode())) {
+                final JSONObject referralObject = new JSONObject();
+                referralObject.put("referral_code", LubbleSharedPrefs.getInstance().getReferralCode());
+                params.put("referral", referralObject);
             }
             final JSONObject userInfoObject = new JSONObject();
             userInfoObject.put("name", LubbleSharedPrefs.getInstance().getFullName());
@@ -331,33 +335,6 @@ public class LocationActivity extends AppCompatActivity {
                 locationCheckFailed();
             }
         });
-    }
-
-    private void checkBackdoorAccess() {
-        /*String backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
-        if (backdoorKey == null && BuildConfig.DEBUG) {
-            // just for ishaan's emulator to allow email ID
-            backdoorKey = FirebaseAuth.getInstance().getUid();
-        }
-        RealtimeDbHelper.getBackdoorRef().child(backdoorKey)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        final String lubbleId = dataSnapshot.getValue(String.class);
-                        if (StringUtils.isValidString(lubbleId)) {
-                            LubbleSharedPrefs.getInstance().setLubbleId(lubbleId);
-                            /// TODO: 18/9/18  locationCheckSuccess(response.body());
-                        } else {
-                            locationCheckFailed();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        // user has NO backdoor access
-                        locationCheckFailed();
-                    }
-                });*/
     }
 
     private void locationCheckSuccess(ArrayList<LocationsData> locationsData) {

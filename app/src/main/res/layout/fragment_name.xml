@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_gravity="center_horizontal"
     android:layout_margin="8dp"
     android:background="@color/white"
@@ -34,6 +35,21 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:hint="Full Name">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/til_referral_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:hint="Referral Code">
 
         <EditText
             android:layout_width="match_parent"

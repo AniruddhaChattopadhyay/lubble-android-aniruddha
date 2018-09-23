@@ -24,6 +24,7 @@ public class NameFrag extends Fragment {
     private static final String TAG = "NameFrag";
 
     private TextInputLayout fullNameTil;
+    private TextInputLayout referralCodeTil;
     private Button continueBtn;
 
     public NameFrag() {
@@ -53,18 +54,27 @@ public class NameFrag extends Fragment {
         final View rootView = inflater.inflate(R.layout.fragment_name, container, false);
 
         fullNameTil = rootView.findViewById(R.id.til_full_name);
+        referralCodeTil = rootView.findViewById(R.id.til_referral_code);
         continueBtn = rootView.findViewById(R.id.btn_continue);
 
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         final Parcelable idpResponse = getArguments().getParcelable("idpResponse");
 
+        if (TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getReferrerUid())) {
+            referralCodeTil.setVisibility(View.VISIBLE);
+        } else {
+            referralCodeTil.setVisibility(View.GONE);
+        }
+
         continueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!TextUtils.isEmpty(fullNameTil.getEditText().getText())) {
                     LubbleSharedPrefs.getInstance().setFullName(fullNameTil.getEditText().getText().toString().trim());
-
+                    if (!TextUtils.isEmpty(referralCodeTil.getEditText().getText().toString())) {
+                        LubbleSharedPrefs.getInstance().setReferralCode(referralCodeTil.getEditText().getText().toString().trim());
+                    }
                     final Intent intent = new Intent(getContext(), LocationActivity.class);
                     intent.putExtra("idpResponse", idpResponse);
                     getActivity().startActivityForResult(intent, REQUEST_LOCATION);
