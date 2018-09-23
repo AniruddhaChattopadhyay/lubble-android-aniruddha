@@ -29,12 +29,11 @@ public class Constants {
     public static final String REFER_MSG = "REFER_MSG";
 
 
-    public static final String LAST_GROUP_MAPPING_ID = "LAST_GROUP_MAPPING_ID";
-    public static final String LAST_KEY_MAPPING_ID = "LAST_KEY_MAPPING_ID";
-
     public static final double SVR_LATI = 28.696660;
     public static final double SVR_LONGI = 77.124772;
-    public static final String FAMILY_FUN_NIGHT = "FAMILY_FUN_NIGHT";
+
+    public static final String LAST_GROUP_MAPPING_ID = "LAST_GROUP_MAPPING_ID";
+    public static final String LAST_KEY_MAPPING_ID = "LAST_KEY_MAPPING_ID";
 
     public static final MediaType MEDIA_TYPE = MediaType.parse("application/json");
 

@@ -13,6 +13,8 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
+
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
@@ -26,7 +28,7 @@ import static in.lubble.app.utils.UserUtils.isNewUser;
 public class LoginActivity extends AppCompatActivity {
 
     public static final int RC_SIGN_IN = 777;
-    private static final int REQUEST_LOCATION = 636;
+    static final int REQUEST_LOCATION = 636;
 
     private FirebaseAuth firebaseAuth;
     private View rootLayout;
@@ -58,9 +60,8 @@ public class LoginActivity extends AppCompatActivity {
                 FirebaseUser currentUser = firebaseAuth.getCurrentUser();
                 if (currentUser != null && isNewUser(currentUser)) {
                     // start registration flow
-                    final Intent intent = new Intent(this, LocationActivity.class);
-                    intent.putExtra("idpResponse", response);
-                    startActivityForResult(intent, REQUEST_LOCATION);
+                    NameFrag nameFrag = NameFrag.newInstance(response);
+                    addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
                 } else {
                     Analytics.triggerLoginEvent(this);
                     startActivity(MainActivity.createIntent(LoginActivity.this, response));
@@ -79,13 +80,18 @@ public class LoginActivity extends AppCompatActivity {
                     showSnackbar(R.string.no_internet_connection);
                     return;
                 }
-                
+
                 showSnackbar(R.string.unknown_error);
             }
         } else if (requestCode == REQUEST_LOCATION) {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
+                LubbleChooserFrag userNameFrag = LubbleChooserFrag.newInstance(
+                        data.getParcelableExtra("idpResponse"),
+                        (ArrayList<LocationsData>) data.getSerializableExtra("lubbleDataList")
+                );
                 addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);
+                /*UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
+                addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);*/
             } else {
                 replaceStack(this, WelcomeFrag.newInstance(getIntent()), R.id.frame_fragContainer);
             }

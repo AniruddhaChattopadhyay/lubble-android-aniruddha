@@ -1,8 +1,11 @@
 package in.lubble.app.auth;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -10,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,9 +22,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -35,36 +40,29 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.FeatureData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.utils.StringUtils;
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.Constants.SVR_LATI;
-import static in.lubble.app.Constants.SVR_LONGI;
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
+import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
 public class LocationActivity extends AppCompatActivity {
 
@@ -72,12 +70,18 @@ public class LocationActivity extends AppCompatActivity {
     private static final int REQUEST_SYSTEM_LOCATION = 859;
     private static final int REQUEST_LOCATION_ON = 150;
 
+    private static final float LOCATION_ACCURACY_THRESHOLD = 150;
     private FusedLocationProviderClient fusedLocationClient;
-    private LinearLayout invalidLocContainer;
+    private RelativeLayout invalidLocContainer;
+    private ImageView pulseIv;
+    private ImageView locIv;
     private TextView locHintTv;
-    private Button okBtn;
+    private Button shareBtn;
     private Parcelable idpResponse;
     private Location currLocation;
+    private int retryCount = 0;
+    private String sharingUrl;
+    private ProgressDialog sharingProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,22 +89,67 @@ public class LocationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_location);
 
         invalidLocContainer = findViewById(R.id.invalid_loc_container);
+        pulseIv = findViewById(R.id.iv_pulse);
+        locIv = findViewById(R.id.iv_loc);
         locHintTv = findViewById(R.id.tv_loc_hint);
-        okBtn = findViewById(R.id.btn_invalid_loc_ok);
+        shareBtn = findViewById(R.id.btn_action);
 
         idpResponse = getIntent().getParcelableExtra("idpResponse");
 
-        okBtn.setOnClickListener(new View.OnClickListener() {
+        shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setResult(Activity.RESULT_CANCELED);
-                finish();
+                onInviteClicked();
             }
         });
-
+        pulseIv.setVisibility(View.GONE);
+        locIv.setVisibility(View.GONE);
         checkSystemLocPerm();
+
+        sharingProgressDialog = new ProgressDialog(this);
+        generateBranchUrl(this, linkCreateListener);
     }
 
+    private void onInviteClicked() {
+        final Intent referralIntent = getReferralIntent(this, sharingUrl, sharingProgressDialog, linkCreateListener);
+        if (referralIntent != null) {
+            startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
+            Analytics.triggerEvent(AnalyticsEvents.REFERRAL_PROFILE_SHARE, this);
+        }
+    }
+
+    final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
+        @Override
+        public void onLinkCreate(String url, BranchError error) {
+            if (url != null) {
+                Log.d(TAG, "got my Branch link to share: " + url);
+                sharingUrl = url;
+                if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
+                    sharingProgressDialog.dismiss();
+                }
+            } else {
+                Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
+                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                if (!isFinishing()) {
+                    Toast.makeText(LocationActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
+
+    private void startAnims() {
+        ObjectAnimator scaleAnim = ObjectAnimator.ofPropertyValuesHolder(
+                pulseIv,
+                PropertyValuesHolder.ofFloat("scaleX", 1.5f),
+                PropertyValuesHolder.ofFloat("alpha", 0.1f),
+                PropertyValuesHolder.ofFloat("scaleY", 1.5f));
+        scaleAnim.setDuration(1000);
+
+        scaleAnim.setRepeatCount(ObjectAnimator.INFINITE);
+        scaleAnim.setRepeatMode(ObjectAnimator.RESTART);
+
+        scaleAnim.start();
+    }
 
     private void checkSystemLocPerm() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -206,34 +255,33 @@ public class LocationActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
-        fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+        pulseIv.setVisibility(View.VISIBLE);
+        locIv.setVisibility(View.VISIBLE);
+        startAnims();
+        // get fresh loc
+        fusedLocationClient.requestLocationUpdates(getLocationRequest().setNumUpdates(1), new LocationCallback() {
             @Override
-            public void onSuccess(Location location) {
-                // Got last known location. In some rare situations this can be null.
-                if (location != null &&
-                        SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos()
-                                < TimeUnit.MINUTES.toNanos(10)) {
-                    // Logic to handle location object
-                    validateUserLocation(location);
-                } else {
-                    // get fresh loc
-                    fusedLocationClient.requestLocationUpdates(getLocationRequest().setNumUpdates(1), new LocationCallback() {
-                        @Override
-                        public void onLocationResult(LocationResult locationResult) {
-                            if (locationResult == null) {
-                                return;
-                            }
-                            validateUserLocation(locationResult.getLastLocation());
-                        }
-
-                        ;
-                    }, null);
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    getLocation();
+                    return;
                 }
+                validateUserLocation(locationResult.getLastLocation());
             }
-        });
+        }, null);
     }
 
-    private void validateUserLocation(Location location) {
+    private void validateUserLocation(final Location location) {
+
+        if ((!location.hasAccuracy() || location.getAccuracy() == 0.0 || location.getAccuracy() > LOCATION_ACCURACY_THRESHOLD)
+                && retryCount < 10) {
+            // bad location, refresh
+            Log.d(TAG, "location bad accuracy of " + location.getAccuracy() + " @ retry: " + retryCount);
+            retryCount++;
+            getLocation();
+            return;
+        }
+        currLocation = location;
 
         HashMap<String, Object> params = new HashMap<>();
 
@@ -243,12 +291,16 @@ public class LocationActivity extends AppCompatActivity {
             locationObject.put("loc_longi", location.getLongitude());
             locationObject.put("loc_accuracy", location.getAccuracy());
             locationObject.put("loc_time", location.getTime());
+            locationObject.put("retry_count", retryCount);
             params.put("location", locationObject);
             if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getReferrerUid())) {
                 final JSONObject referralObject = new JSONObject();
                 referralObject.put("referrer_uid", LubbleSharedPrefs.getInstance().getReferrerUid());
                 params.put("referral", referralObject);
             }
+            final JSONObject userInfoObject = new JSONObject();
+            userInfoObject.put("name", LubbleSharedPrefs.getInstance().getFullName());
+            params.put("user_info", userInfoObject);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -258,40 +310,31 @@ public class LocationActivity extends AppCompatActivity {
         RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.uploadSignUp(body).enqueue(new Callback<FeatureData>() {
+        endpoints.uploadSignUp(body).enqueue(new Callback<ArrayList<LocationsData>>() {
             @Override
-            public void onResponse(Call<FeatureData> call, Response<FeatureData> response) {
-                final FeatureData featureData = response.body();
-                if (featureData != null && response.isSuccessful() && !isFinishing()) {
-                    final List<Integer> sellerList = featureData.getSellers();
-                    if (sellerList != null && sellerList.size() > 0) {
-                        LubbleSharedPrefs.getInstance().setSellerId(sellerList.get(0));
+            public void onResponse(Call<ArrayList<LocationsData>> call, Response<ArrayList<LocationsData>> response) {
+                if (response.isSuccessful() && !isFinishing()) {
+                    final ArrayList<LocationsData> locationsDataList = response.body();
+                    if (locationsDataList != null && !locationsDataList.isEmpty()) {
+                        locationCheckSuccess(locationsDataList);
+                    } else {
+                        locationCheckFailed();
                     }
-                    LubbleSharedPrefs.getInstance().setIsViewCountEnabled(featureData.isViewCountEnabled());
                 } else {
-                    /// TODO: 15/9/18
+                    locationCheckFailed();
                 }
             }
 
             @Override
-            public void onFailure(Call<FeatureData> call, Throwable t) {
+            public void onFailure(Call<ArrayList<LocationsData>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
+                locationCheckFailed();
             }
         });
-
-        currLocation = location;
-        final Location centralLocation = new Location("Saraswati Vihar");
-        centralLocation.setLatitude(SVR_LATI);
-        centralLocation.setLongitude(SVR_LONGI);
-        if (location.distanceTo(centralLocation) < 700) {
-            locationCheckSuccess();
-        } else {
-            checkBackdoorAccess();
-        }
     }
 
     private void checkBackdoorAccess() {
-        String backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+        /*String backdoorKey = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
         if (backdoorKey == null && BuildConfig.DEBUG) {
             // just for ishaan's emulator to allow email ID
             backdoorKey = FirebaseAuth.getInstance().getUid();
@@ -303,7 +346,7 @@ public class LocationActivity extends AppCompatActivity {
                         final String lubbleId = dataSnapshot.getValue(String.class);
                         if (StringUtils.isValidString(lubbleId)) {
                             LubbleSharedPrefs.getInstance().setLubbleId(lubbleId);
-                            locationCheckSuccess();
+                            /// TODO: 18/9/18  locationCheckSuccess(response.body());
                         } else {
                             locationCheckFailed();
                         }
@@ -314,17 +357,20 @@ public class LocationActivity extends AppCompatActivity {
                         // user has NO backdoor access
                         locationCheckFailed();
                     }
-                });
+                });*/
     }
 
-    private void locationCheckSuccess() {
+    private void locationCheckSuccess(ArrayList<LocationsData> locationsData) {
         Intent intent = new Intent();
         intent.putExtra("idpResponse", idpResponse);
+        intent.putExtra("lubbleDataList", locationsData);
         setResult(RESULT_OK, intent);
         finish();
     }
 
     private void locationCheckFailed() {
+        pulseIv.setVisibility(View.GONE);
+        locIv.setVisibility(View.GONE);
         locHintTv.setVisibility(View.GONE);
         invalidLocContainer.setVisibility(View.VISIBLE);
         final Bundle bundle = new Bundle();

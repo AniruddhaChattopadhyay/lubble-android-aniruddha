@@ -252,6 +252,7 @@
             android:configChanges="orientation"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
+
         <activity
             android:name=".services.ServiceCategoryDetailActiv"
             android:configChanges="orientation"
@@ -298,6 +299,7 @@
         <activity
             android:name="com.firebase.ui.auth.ui.provider.GitHubLoginActivity"
             tools:node="remove" />
+
 
         <!-- Branch install referrer tracking -->
         <receiver

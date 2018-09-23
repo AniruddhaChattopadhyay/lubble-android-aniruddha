@@ -192,7 +192,7 @@ public class ReferralHistoryFragment extends Fragment {
                         Analytics.triggerEvent(AnalyticsEvents.REFERRAL_WA_SHARE, getContext());
 
                     } catch (PackageManager.NameNotFoundException e) {
-                        Toast.makeText(getContext(), "You don't have WhatsApp whaaaaaaaaat!?!!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "You don't have WhaaaaatsApp! Please share with another app", Toast.LENGTH_SHORT).show();
                     }
                 }
             }

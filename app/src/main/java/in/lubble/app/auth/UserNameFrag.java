@@ -47,8 +47,10 @@ import static in.lubble.app.utils.UiUtils.hideKeyboard;
 public class UserNameFrag extends Fragment {
     private static final String TAG = "UserNameFrag";
     private static final String ARG_IDP_RESPONSE = "arg_idp_response";
+    private static final String ARG_CHOSEN_LOCATION_DATA = "ARG_CHOSEN_LOCATION_DATA";
 
     private Parcelable idpResponse;
+    private LocationsData chosenLocationData;
 
     private TextInputLayout firstNameTil;
     private TextInputLayout lastNameTil;
@@ -69,10 +71,11 @@ public class UserNameFrag extends Fragment {
         // Required empty public constructor
     }
 
-    public static UserNameFrag newInstance(Parcelable idpResponse) {
+    public static UserNameFrag newInstance(Parcelable idpResponse, LocationsData chosenLocationData) {
         UserNameFrag fragment = new UserNameFrag();
         Bundle args = new Bundle();
         args.putParcelable(ARG_IDP_RESPONSE, idpResponse);
+        args.putSerializable(ARG_CHOSEN_LOCATION_DATA, chosenLocationData);
         fragment.setArguments(args);
         return fragment;
     }
@@ -82,6 +85,7 @@ public class UserNameFrag extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             idpResponse = getArguments().getParcelable(ARG_IDP_RESPONSE);
+            chosenLocationData = (LocationsData) getArguments().getSerializable(ARG_CHOSEN_LOCATION_DATA);
         }
     }
 

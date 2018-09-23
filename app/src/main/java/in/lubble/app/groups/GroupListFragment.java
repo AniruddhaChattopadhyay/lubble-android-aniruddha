@@ -7,11 +7,13 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,8 +42,13 @@ import in.lubble.app.models.DmData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import me.crosswall.lib.coverflow.CoverFlow;
 import me.crosswall.lib.coverflow.core.PagerContainer;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
@@ -95,15 +102,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
+        TabLayout tabLayout = view.findViewById(R.id.tab_dots);
+        tabLayout.setupWithViewPager(viewPager, true);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
-        final SliderData sliderData = new SliderData();
-        sliderData.setUrl("https://i.imgur.com/uqsfQdM.jpg");
-        sliderData.setClickType(SliderData.REFER);
-        final SliderData sliderData1 = new SliderData();
-        sliderData1.setUrl("https://i.imgur.com/k45335x.jpg");
-        sliderDataList.add(sliderData);
-        sliderDataList.add(sliderData1);
         groupsRecyclerView.setNestedScrollingEnabled(false);
 
         groupInvitedByMap = new HashMap<>();
@@ -123,7 +125,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 startActivity(new Intent(getContext(), NewGroupActivity.class));
             }
         });
+
+        final SliderData sliderData = new SliderData();
+        sliderDataList.add(sliderData);
+
         setupSlider();
+        fetchHomeBanners();
         return view;
     }
 
@@ -182,6 +189,27 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             viewPager.setCurrentItem(currentPage++, true);
         }
     };
+
+    private void fetchHomeBanners() {
+
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchHomeData().enqueue(new Callback<ArrayList<SliderData>>() {
+            @Override
+            public void onResponse(Call<ArrayList<SliderData>> call, Response<ArrayList<SliderData>> response) {
+                final ArrayList<SliderData> bannerDataList = response.body();
+                if (response.isSuccessful() && bannerDataList != null && isAdded() && isVisible() && !bannerDataList.isEmpty()) {
+                    sliderDataList = bannerDataList;
+                    setupSlider();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<SliderData>> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+            }
+        });
+
+    }
 
     private void syncSellerDmIds() {
         getSellerRef().child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())).child("dms").addChildEventListener(new ChildEventListener() {

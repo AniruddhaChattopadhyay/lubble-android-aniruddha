@@ -1,11 +1,11 @@
 package in.lubble.app.network;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.ArrayList;
 
+import in.lubble.app.auth.LocationsData;
 import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.marketplace.RatingData;
+import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
@@ -88,20 +88,12 @@ public interface Endpoints {
     Call<ReferralLeaderboardData> fetchReferralLeaderboard();
 
     @POST("/signup/")
-    Call<FeatureData> uploadSignUp(@Body RequestBody params);
+    Call<ArrayList<LocationsData>> uploadSignUp(@Body RequestBody params);
 
-    class ResponseBean {
+    @POST("/signup_complete/")
+    Call<Void> uploadSignUpComplete(@Body RequestBody params);
 
-        @SerializedName("message")
-        private String message;
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-    }
+    @GET("/home/")
+    Call<ArrayList<SliderData>> fetchHomeData();
 
 }

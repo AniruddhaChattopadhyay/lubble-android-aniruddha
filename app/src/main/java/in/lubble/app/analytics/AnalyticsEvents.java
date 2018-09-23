@@ -7,7 +7,7 @@ package in.lubble.app.analytics;
 public class AnalyticsEvents {
 
     /**
-     *  String value must be separated with UNDERSCORES (_)
+     * String value must be separated with UNDERSCORES (_)
      */
     public static final String LOGOUT_SUCCESS_EVENT = "LOGOUT_SUCCESS_EVENT";
     public static final String LOC_CHECK_FAILED = "LOC_CHECK_FAILED";
@@ -30,5 +30,6 @@ public class AnalyticsEvents {
     public static final String REFERRAL_WA_SHARE = "REFERRAL_WA_SHARE";
     public static final String REFERRAL_MORE_SHARE = "REFERRAL_MORE_SHARE";
     public static final String REFERRAL_PROFILE_SHARE = "REFERRAL_PROFILE_SHARE";
+    public static final String REFERRAL_LOCATION_SCREEN = "REFERRAL_LOCATION_SCREEN";
 
 }

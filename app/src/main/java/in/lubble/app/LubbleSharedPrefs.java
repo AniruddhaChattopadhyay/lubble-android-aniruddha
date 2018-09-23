@@ -26,6 +26,7 @@ public class LubbleSharedPrefs {
     private final String IS_MPLACE_OPENED = "IS_MPLACE_OPENED";
     private final String SELLER_ID = "SELLER_ID";
     private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
+    private final String FULL_NAME = "FULL_NAME";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -85,7 +86,11 @@ public class LubbleSharedPrefs {
     }
 
     public String getLubbleId() {
-        return preferences.getString(LUBBLE_ID, "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "DEV" : "saraswati_vihar");
+        if ("dev".equalsIgnoreCase(BuildConfig.FLAVOR)) {
+            return "DEV";
+        } else {
+            return preferences.getString(LUBBLE_ID, "");
+        }
     }
 
     public boolean setLubbleId(String lubbleId) {
@@ -99,6 +104,14 @@ public class LubbleSharedPrefs {
 
     public boolean setDefaultGroupId(String defaultGroupId) {
         return preferences.edit().putString(DEFAULT_GROUP_ID, defaultGroupId).commit();
+    }
+
+    public String getFullName() {
+        return preferences.getString(FULL_NAME, "");
+    }
+
+    public boolean setFullName(String fullName) {
+        return preferences.edit().putString(FULL_NAME, fullName).commit();
     }
 
     public boolean getIsDefaultGroupInfoShown() {
