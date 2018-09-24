@@ -129,6 +129,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         final SliderData sliderData = new SliderData();
         sliderDataList.add(sliderData);
 
+        setupSlider();
         fetchHomeBanners();
         return view;
     }
