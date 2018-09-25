@@ -159,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
     private void initEverything() {
         syncFcmToken();
         logUser(FirebaseAuth.getInstance().getCurrentUser());
+        Branch.getInstance().setIdentity(FirebaseAuth.getInstance().getUid());
 
         switchFrag(GroupListFragment.newInstance());
 
