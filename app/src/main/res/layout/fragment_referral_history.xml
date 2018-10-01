@@ -66,14 +66,27 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/container_total_points"
             android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
             android:layout_marginRight="8dp" />
+
+        <TextView
+            android:id="@+id/tv_no_referrals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rv_referral_history"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:text="You have not invited anyone yet :("
+            android:textSize="18sp" />
 
         <LinearLayout
             android:id="@+id/container_no_history"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/rv_referral_history"
-            android:layout_marginTop="8dp"
+            android:layout_below="@id/tv_no_referrals"
+            android:layout_marginTop="24dp"
             android:orientation="vertical"
             tools:visibility="visible">
 
@@ -91,9 +104,9 @@
                 android:id="@+id/tv_invite_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
                 android:gravity="center"
                 android:text="Even if they are not your neighbour, they can still join the queue &amp; you earn points!" />
 
