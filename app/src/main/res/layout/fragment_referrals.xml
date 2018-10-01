@@ -23,6 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/iv_refer_header"
             android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
             android:text="Share your referral link with:"
             android:textColor="@color/colorAccent"
             android:textStyle="bold" />
@@ -36,6 +37,7 @@
             android:layout_below="@id/container_social_apps"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
+            android:visibility="gone"
             android:background="@drawable/rect_rounded_border">
 
             <TextView
