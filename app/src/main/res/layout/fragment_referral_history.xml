@@ -116,7 +116,7 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:text="Even if they are not your neighbour, they can still join the queue &amp; you earn points!" />
+                android:text="Even if they are not your neighbour, they can still join the queue &amp; you'll earn points!" />
 
             <include layout="@layout/layout_social_invite" />
 
