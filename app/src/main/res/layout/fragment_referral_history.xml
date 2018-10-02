@@ -76,10 +76,10 @@
             android:layout_below="@id/rv_referral_history"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:visibility="gone"
-            tools:visibility="visible"
             android:text="You have not invited anyone yet :("
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/container_no_history"
@@ -89,6 +89,14 @@
             android:layout_marginTop="24dp"
             android:orientation="vertical"
             tools:visibility="visible">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginLeft="24dp"
+                android:layout_marginRight="24dp"
+                android:layout_marginBottom="24dp"
+                android:background="@color/very_light_gray" />
 
             <TextView
                 android:id="@+id/tv_invite_title"
