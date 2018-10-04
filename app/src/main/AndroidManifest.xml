@@ -308,6 +308,7 @@
             android:name=".events.EventsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
+        <activity android:name=".explore.ExploreActiv"></activity>
     </application>
 
 </manifest>

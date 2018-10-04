@@ -47,6 +47,7 @@ import java.util.HashMap;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
@@ -154,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        ExploreActiv.open(this);
+
     }
 
     private void initEverything() {
