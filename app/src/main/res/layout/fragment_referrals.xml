@@ -15,6 +15,7 @@
             android:id="@+id/iv_refer_header"
             android:layout_width="match_parent"
             android:layout_height="200dp"
+            android:src="@drawable/referral_info"
             android:background="@color/super_light_gray" />
 
         <TextView
