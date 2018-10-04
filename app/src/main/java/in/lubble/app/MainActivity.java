@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String EXTRA_TAB_NAME = "extra_tab_name";
 
+    private Toolbar toolbar;
     private FirebaseAuth firebaseAuth;
     private DatabaseReference connectedReference;
     private ValueEventListener presenceValueListener;
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = findViewById(R.id.lubble_toolbar);
+        toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
         profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -130,8 +131,35 @@ public class MainActivity extends AppCompatActivity {
                 .circleCrop()
                 .into(profileIcon);
 
+        if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
+            initEverything();
+        } else {
+            RealtimeDbHelper.getThisUserRef().child("lubbles").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                    if (map != null && !map.isEmpty()) {
+                        LubbleSharedPrefs.getInstance().setLubbleId((String) map.keySet().toArray()[0]);
+                        initEverything();
+                    } else {
+                        Crashlytics.logException(new IllegalAccessException("User has NO lubble ID"));
+                        UserUtils.logout(MainActivity.this);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
+                    UserUtils.logout(MainActivity.this);
+                }
+            });
+        }
+    }
+
+    private void initEverything() {
         syncFcmToken();
-        logUser(currentUser);
+        logUser(FirebaseAuth.getInstance().getCurrentUser());
+        Branch.getInstance().setIdentity(FirebaseAuth.getInstance().getUid());
 
         switchFrag(GroupListFragment.newInstance());
 

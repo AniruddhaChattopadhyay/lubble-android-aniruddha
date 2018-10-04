@@ -33,12 +33,12 @@
                 <data
                     android:host="open"
                     android:scheme="lubble" />
+
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
-
         </activity>
 
         <!-- Branch init -->
@@ -252,7 +252,6 @@
             android:configChanges="orientation"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".services.ServiceCategoryDetailActiv"
             android:configChanges="orientation"
@@ -264,13 +263,11 @@
             android:label="@string/title_activity_referral"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme"/>
-
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".DeepLinkRouterActiv"
             android:launchMode="singleTask"
             android:noHistory="true">
-
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -282,7 +279,6 @@
                     android:pathPattern="/.*"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -293,13 +289,11 @@
                     android:host="*"
                     android:scheme="lubble" />
             </intent-filter>
-
         </activity>
-        <!--This is for removing Firebase conflict for verification of app links-->
+        <!-- This is for removing Firebase conflict for verification of app links -->
         <activity
             android:name="com.firebase.ui.auth.ui.provider.GitHubLoginActivity"
             tools:node="remove" />
-
 
         <!-- Branch install referrer tracking -->
         <receiver
@@ -310,6 +304,10 @@
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".events.EventsActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

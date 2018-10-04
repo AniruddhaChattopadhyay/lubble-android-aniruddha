@@ -24,6 +24,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
+import in.lubble.app.events.EventsActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 
@@ -102,7 +103,7 @@ public class LubbleActivity extends AppCompatActivity {
         eventsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //todo EventsFrag.open(LubbleActivity.this);
+                EventsActivity.open(LubbleActivity.this);
             }
         });
     }

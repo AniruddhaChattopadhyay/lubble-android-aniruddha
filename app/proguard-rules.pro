@@ -39,3 +39,5 @@
 # crashlytics
 -keep public class * extends java.lang.Exception
 -keep class org.jsoup.**
+-dontwarn com.google.firebase.appindexing.**
+-dontwarn com.android.installreferrer.api.**

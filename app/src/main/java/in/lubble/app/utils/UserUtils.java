@@ -17,6 +17,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.auth.LoginActivity;
+import io.branch.referral.Branch;
 
 import static in.lubble.app.utils.StringUtils.isValidString;
 
@@ -44,6 +45,7 @@ public class UserUtils {
                         progressDialog.dismiss();
                         // user is now signed out
                         LubbleSharedPrefs.getInstance().clearAll();
+                        Branch.getInstance().logout();
                         Intent intent = new Intent(activity, LoginActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         activity.startActivity(intent);
