@@ -6,9 +6,27 @@
     android:layout_height="match_parent"
     tools:context="in.lubble.app.explore.ExploreActiv">
 
+    <ImageView
+        android:id="@+id/iv_cross"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:padding="8dp"
+        app:srcCompat="@drawable/ic_close_black_24dp" />
+
     <FrameLayout
         android:id="@+id/frag_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_above="@id/btn_join"
+        android:layout_below="@id/iv_cross" />
+
+    <Button
+        android:id="@+id/btn_join"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Join"
+        android:theme="@style/AccentButton" />
 
 </RelativeLayout>
