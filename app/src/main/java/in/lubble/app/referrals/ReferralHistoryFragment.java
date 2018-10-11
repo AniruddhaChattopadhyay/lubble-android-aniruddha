@@ -50,6 +50,7 @@ public class ReferralHistoryFragment extends Fragment {
     private LinearLayout whatsappContainer;
     private LinearLayout moreContainer;
     private RecyclerView rv;
+    private TextView noReferralsTv;
     private LinearLayout noHistoryContainer;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
@@ -77,6 +78,7 @@ public class ReferralHistoryFragment extends Fragment {
         totalPointsTv = view.findViewById(R.id.tv_total_points);
         totalPointsHintTv = view.findViewById(R.id.tv_total_points_hint);
         rv = view.findViewById(R.id.rv_referral_history);
+        noReferralsTv = view.findViewById(R.id.tv_no_referrals);
         noHistoryContainer = view.findViewById(R.id.container_no_history);
         fbContainer = view.findViewById(R.id.container_fb);
         whatsappContainer = view.findViewById(R.id.container_whatsapp);
@@ -107,12 +109,14 @@ public class ReferralHistoryFragment extends Fragment {
                     totalPointsHintTv.setText("Total Points");
 
                     if (referralHistoryData.getReferralPersonData() != null && !referralHistoryData.getReferralPersonData().isEmpty()) {
+                        rv.setVisibility(View.VISIBLE);
+                        noReferralsTv.setVisibility(View.GONE);
                         for (ReferralPersonData referralPersonData : referralHistoryData.getReferralPersonData()) {
                             adapter.addReferral(referralPersonData);
                         }
                     } else {
                         rv.setVisibility(View.GONE);
-                        noHistoryContainer.setVisibility(View.VISIBLE);
+                        noReferralsTv.setVisibility(View.VISIBLE);
                     }
 
                 } else if (isAdded() && isVisible()) {

@@ -15,6 +15,7 @@
             android:id="@+id/iv_refer_header"
             android:layout_width="match_parent"
             android:layout_height="200dp"
+            android:src="@drawable/referral_info"
             android:background="@color/super_light_gray" />
 
         <TextView
@@ -23,7 +24,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/iv_refer_header"
             android:layout_centerHorizontal="true"
-            android:text="Share your referral link with:"
+            android:layout_marginTop="24dp"
+            android:text="Share your invite link with:"
             android:textColor="@color/colorAccent"
             android:textStyle="bold" />
 
@@ -36,6 +38,7 @@
             android:layout_below="@id/container_social_apps"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
+            android:visibility="gone"
             android:background="@drawable/rect_rounded_border">
 
             <TextView
@@ -62,7 +65,7 @@
             android:layout_below="@id/container_referral_copy"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginTop="28dp"
+            android:layout_marginTop="32dp"
             android:background="@drawable/rect_rounded_border"
             android:gravity="center_horizontal"
             android:orientation="vertical">
@@ -70,7 +73,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/gradient_blue_dark"
+                android:background="@drawable/half_rounded_rectangle_dk_blue_top"
                 android:paddingLeft="8dp">
 
                 <TextView
@@ -95,10 +98,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:text="Top 10 in Saraswati Vihar"
                 android:textColor="@color/colorAccent"
-                android:visibility="gone" />
+                android:visibility="visible" />
 
             <ProgressBar
                 android:id="@+id/progressbar_leaderboard"
@@ -119,7 +123,7 @@
         <View
             android:layout_below="@id/container_leaderboard"
             android:layout_width="match_parent"
-            android:layout_height="40dp" />
+            android:layout_height="60dp" />
 
     </RelativeLayout>
 
