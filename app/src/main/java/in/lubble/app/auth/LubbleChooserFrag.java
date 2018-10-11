@@ -26,7 +26,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,8 +36,6 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.models.ProfileData;
-import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import okhttp3.RequestBody;
@@ -49,7 +46,6 @@ import retrofit2.Response;
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.auth.LubbleChooserDialogFrag.ARG_CHOSEN_LOCATION;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -136,14 +132,14 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
 
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                ProfileData profileData = new ProfileData();
+                /*ProfileData profileData = new ProfileData();
                 final ProfileInfo profileInfo = new ProfileInfo();
                 profileInfo.setId(user.getUid());
                 profileInfo.setName(LubbleSharedPrefs.getInstance().getFullName());
                 profileData.setInfo(profileInfo);
                 profileData.setToken(FirebaseInstanceId.getInstance().getToken());
 
-                getThisUserRef().setValue(profileData);
+                getThisUserRef().setValue(profileData);*/
                 getUserLubbleRef().setValue("true");
 
                 UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
