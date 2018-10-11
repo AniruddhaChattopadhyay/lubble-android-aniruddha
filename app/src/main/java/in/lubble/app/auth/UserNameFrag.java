@@ -29,17 +29,12 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
 
-import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.ProfileData;
-import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.utils.FragUtils;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserLubbleRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.hideKeyboard;
@@ -189,7 +184,7 @@ public class UserNameFrag extends Fragment {
         String lastName = lastNameTil.getEditText().getText().toString();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        uploadNewUserData(user, firstName + " " + lastName);
+        getUserLubbleRef().setValue("true");
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setDisplayName(firstName + " " + lastName)
                 .build();
@@ -211,22 +206,6 @@ public class UserNameFrag extends Fragment {
                         }
                     }
                 });
-    }
-
-    private void uploadNewUserData(FirebaseUser currentUser, String fullName) {
-        ProfileData profileData = new ProfileData();
-        final ProfileInfo profileInfo = new ProfileInfo();
-        profileInfo.setId(currentUser.getUid());
-        profileInfo.setName(fullName);
-        profileData.setInfo(profileInfo);
-        profileData.setLocality(getSelectedBlock());
-        profileData.setIsOwner(isOwner);
-        profileData.setBio(bioTil.getEditText().getText().toString());
-        profileData.setToken(FirebaseInstanceId.getInstance().getToken());
-        profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
-
-        getThisUserRef().setValue(profileData);
-        getUserLubbleRef().setValue("true");
     }
 
     private String getSelectedBlock() {
