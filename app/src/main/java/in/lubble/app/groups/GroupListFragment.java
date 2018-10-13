@@ -178,7 +178,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void run() {
                 handler.post(update);
             }
-        }, 100, 5000);
+        }, 7000, 5000);
     }
 
     private Runnable update = new Runnable() {
