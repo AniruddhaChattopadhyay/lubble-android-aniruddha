@@ -20,7 +20,7 @@
         android:layout_alignParentBottom="true"
         android:layout_marginEnd="0dp"
         android:layout_marginStart="0dp"
-        android:background="@color/white"
+        android:background="@color/dk_colorAccent"
         android:elevation="7dp"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
