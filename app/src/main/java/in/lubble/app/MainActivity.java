@@ -483,9 +483,18 @@ public class MainActivity extends AppCompatActivity {
         ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
     }
 
-    public void removeBadge() {
+    public void removeMplaceBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
         View v = bottomNavigationMenuView.getChildAt(1);
+        BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        if (itemView != null && itemView.getChildAt(2) != null) {
+            itemView.removeViewAt(2);
+        }
+    }
+
+    public void removeServicesBadge() {
+        BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+        View v = bottomNavigationMenuView.getChildAt(2);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);

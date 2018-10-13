@@ -149,7 +149,7 @@ public class MarketplaceFrag extends Fragment {
         if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
             LubbleSharedPrefs.getInstance().setIsMplaceOpened(true);
             if (getActivity() != null) {
-                ((MainActivity) getActivity()).removeBadge();
+                ((MainActivity) getActivity()).removeMplaceBadge();
             }
         }
 

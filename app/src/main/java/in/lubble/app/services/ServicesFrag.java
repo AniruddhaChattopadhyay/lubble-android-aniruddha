@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.marketplace.SellerDashActiv;
 import in.lubble.app.marketplace.SellerEditActiv;
@@ -84,7 +85,12 @@ public class ServicesFrag extends Fragment {
             }
         });
 
-        LubbleSharedPrefs.getInstance().setIsServicesOpened(true);
+        if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
+            LubbleSharedPrefs.getInstance().setIsServicesOpened(true);
+            if (getActivity() != null) {
+                ((MainActivity) getActivity()).removeServicesBadge();
+            }
+        }
 
         return view;
     }
