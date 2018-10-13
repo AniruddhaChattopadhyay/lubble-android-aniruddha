@@ -151,4 +151,13 @@ public class UiUtils {
         return outFile;
     }
 
+    public static void animateSlideUpShow(Context context, View view) {
+        if (context != null && view.getVisibility() != View.VISIBLE) {
+            Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_up_show);
+            slideUp.setDuration(500);
+            view.startAnimation(slideUp);
+            view.setVisibility(View.VISIBLE);
+        }
+    }
+
 }

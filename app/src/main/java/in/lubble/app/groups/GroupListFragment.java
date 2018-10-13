@@ -6,10 +6,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,6 +45,7 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.UiUtils;
 import me.crosswall.lib.coverflow.CoverFlow;
 import me.crosswall.lib.coverflow.core.PagerContainer;
 import retrofit2.Call;
@@ -67,6 +69,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private static final String TAG = "GroupListFragment";
 
     private OnListFragmentInteractionListener mListener;
+    private LinearLayout newGroupContainer;
     private GroupRecyclerAdapter adapter;
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private HashMap<Query, ValueEventListener> dmListenersMap = new HashMap<>();
@@ -97,9 +100,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         View view = inflater.inflate(R.layout.fragment_group_item, container, false);
         Context context = view.getContext();
 
+        NestedScrollView nestedScrollView = view.findViewById(R.id.container_scrollview);
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
         progressBar = view.findViewById(R.id.progressBar_groups);
-        FloatingActionButton fab = view.findViewById(R.id.btn_create_group);
+        newGroupContainer = view.findViewById(R.id.container_create_group);
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
         TabLayout tabLayout = view.findViewById(R.id.tab_dots);
@@ -119,7 +123,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL);
         groupsRecyclerView.addItemDecoration(itemDecor);
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        newGroupContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getContext(), NewGroupActivity.class));
@@ -128,6 +132,17 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         final SliderData sliderData = new SliderData();
         sliderDataList.add(sliderData);
+
+        nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (scrollY > oldScrollY) {
+                    UiUtils.animateSlideDownHide(getContext(), newGroupContainer);
+                } else {
+                    UiUtils.animateSlideUpShow(getContext(), newGroupContainer);
+                }
+            }
+        });
 
         setupSlider();
         fetchHomeBanners();
