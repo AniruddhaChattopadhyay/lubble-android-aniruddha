@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                 LubbleActivity.open(MainActivity.this);
             }
         });
-        showMplaceBadge();
+        showBottomNavBadge();
         fetchAndPersistAppFeatures();
         fetchAndPersistMplaceItems();
         initFirebaseRemoteConfig();
@@ -215,11 +215,22 @@ public class MainActivity extends AppCompatActivity {
         firebaseRemoteConfig.setDefaults(map);
     }
 
-    private void showMplaceBadge() {
+    private void showBottomNavBadge() {
         if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
             BottomNavigationMenuView bottomNavigationMenuView =
                     (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
             View v = bottomNavigationMenuView.getChildAt(1);
+            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+
+            View badge = LayoutInflater.from(this)
+                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+
+            itemView.addView(badge);
+        }
+        if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
+            BottomNavigationMenuView bottomNavigationMenuView =
+                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+            View v = bottomNavigationMenuView.getChildAt(2);
             BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
             View badge = LayoutInflater.from(this)

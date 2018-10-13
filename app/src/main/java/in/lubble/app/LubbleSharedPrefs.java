@@ -23,6 +23,7 @@ public class LubbleSharedPrefs {
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
     private final String IS_GROUP_INFO_OPENED = "IS_GROUP_INFO_OPENED";
     private final String IS_MPLACE_OPENED = "IS_MPLACE_OPENED";
+    private final String IS_SERVICES_OPENED = "IS_SERVICES_OPENED";
     private final String SELLER_ID = "SELLER_ID";
     private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
     private final String FULL_NAME = "FULL_NAME";
@@ -159,6 +160,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsMplaceOpened(boolean isOpened) {
         return preferences.edit().putBoolean(IS_MPLACE_OPENED, isOpened).commit();
+    }
+
+    public boolean getIsServicesOpened() {
+        return preferences.getBoolean(IS_SERVICES_OPENED, false);
+    }
+
+    public boolean setIsServicesOpened(boolean isOpened) {
+        return preferences.edit().putBoolean(IS_SERVICES_OPENED, isOpened).commit();
     }
 
     public int getSellerId() {

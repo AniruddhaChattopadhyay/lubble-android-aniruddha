@@ -84,6 +84,8 @@ public class ServicesFrag extends Fragment {
             }
         });
 
+        LubbleSharedPrefs.getInstance().setIsServicesOpened(true);
+
         return view;
     }
 
