@@ -41,6 +41,7 @@ public class ItemListActiv extends AppCompatActivity {
     private static final String TAG = "SellerDashActiv";
     private static final String PARAM_IS_SELLER = "PARAM_IS_SELLER";
     private static final String PARAM_ID = "PARAM_ID";
+    private static final String PARAM_SELLER_NAME = "PARAM_SELLER_NAME";
 
     private ImageView sellerPicIv;
     private ProgressBar progressBar;
@@ -69,6 +70,13 @@ public class ItemListActiv extends AppCompatActivity {
         context.startActivity(intent);
     }
 
+    public static void open(Context context, boolean isSeller, String sellerUniqueName) {
+        final Intent intent = new Intent(context, ItemListActiv.class);
+        intent.putExtra(PARAM_IS_SELLER, isSeller);
+        intent.putExtra(PARAM_SELLER_NAME, sellerUniqueName);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,26 +102,11 @@ public class ItemListActiv extends AppCompatActivity {
         adapter = new BigItemAdapter(GlideApp.with(this), false);
         recyclerView.setAdapter(adapter);
 
-        Intent intent = getIntent();
-        Uri data = intent.getData();
-        if (data != null) {
-            try {
-                if (data.toString().contains("category")) {
-                    sellerId = Integer.parseInt(data.getLastPathSegment());
-                    isSeller = false;
-                } else {
-                    sellerUniqueName = data.getLastPathSegment();
-                    isSeller = true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Crashlytics.logException(e);
-                finish();
-            }
-        } else {
-            isSeller = intent.getBooleanExtra(PARAM_IS_SELLER, false);
-            sellerId = intent.getIntExtra(PARAM_ID, -1);
-        }
+
+        isSeller = getIntent().getBooleanExtra(PARAM_IS_SELLER, false);
+        sellerId = getIntent().getIntExtra(PARAM_ID, -1);
+        sellerUniqueName = getIntent().getStringExtra(PARAM_SELLER_NAME);
+
         if (sellerId == -1 && TextUtils.isEmpty(sellerUniqueName)) {
             throw new IllegalArgumentException("no seller ID bruh");
         }
@@ -274,7 +267,7 @@ public class ItemListActiv extends AppCompatActivity {
                             if (!TextUtils.isEmpty(sellerData.getShareLink())) {
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/plain");
-                                    intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());
+                                intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());
                                 startActivity(Intent.createChooser(intent, "Share"));
                             }
                         }

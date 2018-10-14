@@ -86,7 +86,7 @@ public class DeepLinkRouterActiv extends AppCompatActivity {
                 ItemListActiv.open(this, false, Integer.parseInt(uri.getLastPathSegment()));
                 break;
             default:
-                ItemListActiv.open(this, true, Integer.parseInt(uri.getLastPathSegment()));
+                ItemListActiv.open(this, true, uri.getLastPathSegment());
                 break;
         }
     }
