@@ -15,6 +15,7 @@
             android:id="@+id/iv_refer_header"
             android:layout_width="match_parent"
             android:layout_height="200dp"
+            android:layout_marginTop="8dp"
             android:background="@color/super_light_gray"
             android:src="@drawable/referral_info"/>
 
