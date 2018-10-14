@@ -140,7 +140,7 @@ public class SellerDashActiv extends AppCompatActivity {
         photoUploadReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (intent.getAction() != null) {
+                if (intent.getAction() != null && !isFinishing()) {
                     switch (intent.getAction()) {
                         case ACTION_IMG_DONE:
                             final String imgType = intent.getStringExtra(EXTRA_IMG_TYPE);

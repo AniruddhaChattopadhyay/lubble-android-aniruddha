@@ -363,7 +363,7 @@ public class ItemActivity extends AppCompatActivity {
                 final Item item = response.body();
                 itemProgressBar.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
-                if (item != null) {
+                if (item != null && !isFinishing()) {
                     titleTv.setText(item.getName());
 
                     if (item.getPricingOption() == Item.ITEM_PRICING_PAID) {
@@ -582,7 +582,7 @@ public class ItemActivity extends AppCompatActivity {
                         }
                     });
 
-                } else {
+                } else if (!isFinishing()) {
                     if (response.code() == 404) {
                         final Bundle bundle = new Bundle();
                         bundle.putInt("item_id", itemId);
