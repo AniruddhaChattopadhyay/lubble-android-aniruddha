@@ -74,9 +74,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/rv_referral_history"
+            android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             android:gravity="center"
-            android:text="You have not invited anyone yet :("
+            android:text="Nobody has joined from your invite yet :("
             android:textSize="18sp"
             android:visibility="gone"
             tools:visibility="visible" />
