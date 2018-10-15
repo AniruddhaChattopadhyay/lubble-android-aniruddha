@@ -15,6 +15,7 @@ android {
         applicationId "in.lubble.app"
         minSdkVersion 17
         targetSdkVersion 26
+        multiDexEnabled true
         versionCode 71
         versionName "1.4.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -22,6 +23,7 @@ android {
     }
     buildTypes {
         release {
+            debuggable true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -31,6 +33,7 @@ android {
         dev {
             applicationIdSuffix = ".dev"
             dimension = "type"
+            signingConfig signingConfigs.config
         }
         prod {
             dimension = "type"
@@ -82,6 +85,7 @@ dependencies {
     implementation 'com.android.support:support-v4:26.1.0'
     implementation 'com.google.firebase:firebase-config:16.0.0'
     implementation 'com.google.android.gms:play-services-location:15.0.1'
+    implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.android.gms:play-services-maps:15.0.1'
     implementation 'com.google.android.gms:play-services-places:15.0.1'
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
