@@ -130,7 +130,6 @@
             android:textSize="16sp"
             android:textColor="@color/black"
             android:layout_alignTop="@id/btn_bottom_invite"
-            android:layout_alignBottom="@id/btn_bottom_invite"
             android:layout_toLeftOf="@id/btn_bottom_invite"
             android:layout_height="wrap_content" />
 
