@@ -21,16 +21,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RatingBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -41,12 +32,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -63,9 +48,13 @@ import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.FullScreenImageActivity;
 import okhttp3.RequestBody;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.analytics.AnalyticsEvents.MPLACE_CHAT_BTN_CLICKED;
@@ -574,6 +563,7 @@ public class ItemActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             if (!TextUtils.isEmpty(item.getShareLink())) {
+                                Analytics.triggerEvent(AnalyticsEvents.SHARE_ITEM, ItemActivity.this);
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/plain");
                                 intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing item I found: " + item.getShareLink());

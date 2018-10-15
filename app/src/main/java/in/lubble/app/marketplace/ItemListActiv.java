@@ -2,7 +2,6 @@ package in.lubble.app.marketplace;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -13,18 +12,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.crashlytics.android.Crashlytics;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.SellerData;
@@ -265,6 +258,7 @@ public class ItemListActiv extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             if (!TextUtils.isEmpty(sellerData.getShareLink())) {
+                                Analytics.triggerEvent(AnalyticsEvents.SHARE_CATALOGUE, ItemListActiv.this);
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/plain");
                                 intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());

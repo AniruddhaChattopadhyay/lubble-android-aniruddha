@@ -34,5 +34,7 @@ public class AnalyticsEvents {
     public static final String REFERRAL_LEADERBOARD_BOTTOM_SHARE = "REFERRAL_LEADERBOARD_BOTTOM_SHARE";
 
     public static final String SERVICES_FRAG = "SERVICES_FRAG";
+    public static final String SHARE_ITEM = "SHARE_ITEM";
+    public static final String SHARE_CATALOGUE = "SHARE_CATALOGUE";
 
 }
