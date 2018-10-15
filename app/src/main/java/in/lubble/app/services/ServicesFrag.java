@@ -11,15 +11,13 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.crashlytics.android.Crashlytics;
-
-import java.util.ArrayList;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.marketplace.SellerDashActiv;
 import in.lubble.app.marketplace.SellerEditActiv;
 import in.lubble.app.models.marketplace.Category;
@@ -29,6 +27,8 @@ import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.ArrayList;
 
 public class ServicesFrag extends Fragment {
 
@@ -91,6 +91,8 @@ public class ServicesFrag extends Fragment {
                 ((MainActivity) getActivity()).removeServicesBadge();
             }
         }
+
+        Analytics.triggerEvent(AnalyticsEvents.SERVICES_FRAG, getContext());
 
         return view;
     }
