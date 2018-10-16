@@ -11,18 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.crashlytics.android.Crashlytics;
-
-import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
@@ -39,13 +29,17 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class MarketplaceFrag extends Fragment {
 
     private static final String TAG = "MarketplaceFrag";
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    private TextView searchTv;
+    private LinearLayout searchContainer;
     private TextView viewAllTv;
     private ProgressBar viewAllProgressBar;
     private RecyclerView categoriesRv;
@@ -80,7 +74,7 @@ public class MarketplaceFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_marketplace, container, false);
 
-        searchTv = view.findViewById(R.id.tv_search);
+        searchContainer = view.findViewById(R.id.container_search);
         viewAllTv = view.findViewById(R.id.tv_view_all_items);
         viewAllProgressBar = view.findViewById(R.id.progressbar_view_all);
         categoriesRv = view.findViewById(R.id.rv_categories);
@@ -139,7 +133,7 @@ public class MarketplaceFrag extends Fragment {
             }
         });
 
-        searchTv.setOnClickListener(new View.OnClickListener() {
+        searchContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 SearchActivity.open(getContext());
