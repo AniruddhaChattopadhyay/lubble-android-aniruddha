@@ -123,10 +123,31 @@
 
         </LinearLayout>
 
+        <TextView
+            android:text="Rise to the top of the Leaderboard by inviting friends!"
+            android:layout_width="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:layout_alignTop="@id/btn_bottom_invite"
+            android:layout_toLeftOf="@id/btn_bottom_invite"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btn_bottom_invite"
+            android:text="Invite Friends"
+            android:layout_below="@id/container_leaderboard"
+            android:layout_alignParentRight="true"
+            android:theme="@style/AccentButton"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_below="@id/container_leaderboard"/>
+            android:layout_below="@id/btn_bottom_invite"/>
 
     </RelativeLayout>
 

@@ -49,7 +49,7 @@
         android:layout_marginTop="8dp"
         android:visibility="gone"
         tools:visibility="visible"
-        android:hint="Referral Code">
+        android:hint="Referral Code (optional)">
 
         <EditText
             android:layout_width="match_parent"

@@ -141,7 +141,7 @@
                     android:layout_alignBottom="@id/til_event_date"
                     android:layout_marginBottom="10dp"
                     android:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_services_black" />
+                    app:srcCompat="@drawable/ic_event_black_24dp" />
 
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/til_event_date"

@@ -15,22 +15,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/tv_search"
+            <LinearLayout
+                android:id="@+id/container_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:background="@drawable/rect_rounded_border"
-                android:drawableLeft="@drawable/ic_search_gray_24dp"
-                android:gravity="center_vertical"
-                android:padding="8dp"
-                android:text="Search Lubble Market" />
+                android:padding="8dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_search_gray_24dp" />
+
+                <TextView
+                    android:id="@+id/tv_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="Search Products Near You" />
+
+            </LinearLayout>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_categories"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_search"
+                android:layout_below="@id/container_search"
                 android:layout_marginLeft="8dp"
                 android:orientation="horizontal"
                 app:layoutManager="android.support.v7.widget.LinearLayoutManager" />
@@ -83,8 +94,8 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/layout_cat2"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp" />
 
             <TextView
                 android:id="@+id/tv_view_all_items"
@@ -92,8 +103,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/rv_all_items"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
                 android:background="@drawable/rect_rounded_border_blue"
                 android:gravity="center"
                 android:padding="8dp"
@@ -105,8 +116,8 @@
                 style="?android:attr/progressBarStyleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/tv_view_all_items"
                 android:layout_alignTop="@id/tv_view_all_items"
+                android:layout_alignBottom="@id/tv_view_all_items"
                 android:layout_centerHorizontal="true"
                 android:visibility="gone" />
 
@@ -125,8 +136,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/pill_button"
         android:elevation="6dp"
         android:gravity="center"

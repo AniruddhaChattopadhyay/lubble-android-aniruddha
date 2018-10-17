@@ -11,20 +11,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.EventData;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static in.lubble.app.utils.DateTimeUtils.EVENT_DATE_TIME;
 import static in.lubble.app.utils.DateTimeUtils.getTimeFromLong;
@@ -133,7 +131,11 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     private void insertWithSort(EventData eventData, int pos) {
-        final EventData prevEventData = eventDataList.get(pos - 1 < 0 ? 0 : pos - 1);
+        int prevPos = pos - 1 < 0 ? 0 : pos - 1;
+        if (prevPos == eventDataList.size()) {
+            prevPos = eventDataList.size() - 1;
+        }
+        final EventData prevEventData = eventDataList.get(prevPos);
         if (prevEventData != null) {
             if (eventData.getStartTimestamp() >= prevEventData.getStartTimestamp() || pos == 0) {
                 eventDataList.add(pos, eventData);

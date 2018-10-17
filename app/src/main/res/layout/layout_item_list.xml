@@ -132,7 +132,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="8dp"
                         android:gravity="center_vertical"
-                        android:text="Share"
+                        android:text="Share Catalogue"
                         android:textColor="@color/dk_colorAccent" />
 
                 </LinearLayout>
@@ -143,7 +143,7 @@
                     android:layout_below="@id/container_seller_share"
                     android:layout_centerHorizontal="true"
                     android:gravity="center"
-                    android:text="Share with your friends"
+                    android:text="Share with friends"
                     android:textColor="@color/black" />
 
             </RelativeLayout>
