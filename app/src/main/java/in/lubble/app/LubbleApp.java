@@ -1,9 +1,9 @@
 package in.lubble.app;
 
-import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
+import android.support.multidex.MultiDexApplication;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
@@ -20,7 +20,7 @@ import io.fabric.sdk.android.Fabric;
  * Created by ishaan on 20/1/18.
  */
 
-public class LubbleApp extends Application {
+public class LubbleApp extends MultiDexApplication {
 
     private static LubbleApp appContext;
 
