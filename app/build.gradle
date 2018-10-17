@@ -3,12 +3,6 @@ apply plugin: 'io.fabric'
 
 android {
     signingConfigs {
-        config {
-            keyAlias 'LubbleKiKey'
-            keyPassword 'AcrilaN543'
-            storeFile file('C:/Users/ishaa/AndroidProjects/LubbleKaKeystore.jks')
-            storePassword 'AcrilaN543'
-        }
     }
     compileSdkVersion 26
     defaultConfig {
