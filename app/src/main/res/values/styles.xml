@@ -75,11 +75,6 @@
         <item name="android:textColor">#FFF</item>
     </style>
 
-    <style name="LubbleTooltipStyle" parent="ToolTipLayoutDefaultStyle">
-        <item name="ttlm_backgroundColor">@color/darker_gray</item>
-        <item name="android:textAppearance">@style/TextOnDark</item>
-    </style>
-
     <style name="BigRatingBar" parent="Theme.AppCompat">
         <item name="colorControlNormal">@color/dark_gold</item>
         <item name="colorControlActivated">@color/dark_gold</item>
