@@ -2,21 +2,19 @@ package in.lubble.app.network;
 
 import android.text.TextUtils;
 import android.util.Log;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import okhttp3.Authenticator;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.Route;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class TokenAuthenticator implements Authenticator {
 
@@ -45,8 +43,7 @@ public class TokenAuthenticator implements Authenticator {
         if (accessTokenTask.isComplete() && accessTokenTask.getResult().getToken() != null) {
             savedToken = accessTokenTask.getResult().getToken();
         }
-        String newToken = "";
-        if (savedToken.equalsIgnoreCase(requestToken)) {
+        if (savedToken.equalsIgnoreCase(requestToken) || TextUtils.isEmpty(savedToken)) {
             // Only refresh token if API request was made with the same token that we have in SharedPrefs
             // If the sharedPrefs has a different token, then it must be the new one, so just re-make the request with saved token (logic after this if block)
             Log.d(TAG, "Authenticating for response: " + response);
@@ -61,9 +58,9 @@ public class TokenAuthenticator implements Authenticator {
             try {
                 // Block on the task for a maximum of 1000 milliseconds, otherwise time out.
                 final GetTokenResult getTokenResult = Tasks.await(FirebaseAuth.getInstance().getAccessToken(true), 3000, TimeUnit.MILLISECONDS);
-                newToken = getTokenResult.getToken();
+                savedToken = getTokenResult.getToken();
 
-                if (TextUtils.isEmpty(newToken)) {
+                if (TextUtils.isEmpty(savedToken)) {
                     // Unable to renew token
                     // Drop the API request. Can do nothing.
                     Crashlytics.logException(new IllegalArgumentException("New TOKEN is NULL"));
