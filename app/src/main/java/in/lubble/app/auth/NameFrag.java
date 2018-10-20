@@ -87,6 +87,7 @@ public class NameFrag extends Fragment {
                     profileInfo.setName(LubbleSharedPrefs.getInstance().getFullName());
                     profileData.setInfo(profileInfo);
                     profileData.setToken(FirebaseInstanceId.getInstance().getToken());
+                    profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
 
                     getThisUserRef().setValue(profileData);
 

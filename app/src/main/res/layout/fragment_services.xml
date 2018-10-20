@@ -34,8 +34,8 @@
                 <TextView
                     android:id="@+id/tv_search"
                     android:layout_width="match_parent"
-                    android:layout_gravity="center_vertical"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:text="Search Services Near You" />
 
             </LinearLayout>
@@ -50,7 +50,11 @@
                 android:id="@+id/rv_services"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/container_search" />
+                android:layout_below="@id/container_search"
+                tools:itemCount="5"
+                tools:layoutManager="android.support.v7.widget.GridLayoutManager"
+                tools:listitem="@layout/item_service_category"
+                tools:spanCount="2" />
 
             <View
                 android:layout_width="match_parent"
