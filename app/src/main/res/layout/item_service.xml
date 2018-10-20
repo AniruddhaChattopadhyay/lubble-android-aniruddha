@@ -8,22 +8,25 @@
 
     <ImageView
         android:id="@+id/iv_service_icon"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:layout_centerVertical="true"
-        android:scaleType="centerCrop" />
+        android:scaleType="fitCenter"
+        tools:src="@tools:sample/avatars" />
 
     <TextView
         android:id="@+id/tv_service_name"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_toLeftOf="@id/tv_deal"
         android:layout_toRightOf="@id/iv_service_icon"
         android:ellipsize="end"
-        android:maxLines="1"
+        android:maxLines="4"
         android:textColor="@color/black"
-        android:textSize="16sp"
+        android:textSize="18sp"
         tools:text="@tools:sample/lorem" />
 
     <TextView
@@ -33,11 +36,12 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:background="@drawable/pill_red"
-        android:paddingBottom="4dp"
+        android:gravity="center"
         android:paddingLeft="8dp"
-        android:paddingRight="8dp"
         android:paddingTop="4dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="4dp"
         android:textColor="@color/white"
-        tools:text="30% off" />
+        tools:text="30%\noff" />
 
 </RelativeLayout>
