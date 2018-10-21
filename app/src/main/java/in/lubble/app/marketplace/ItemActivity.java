@@ -566,7 +566,13 @@ public class ItemActivity extends AppCompatActivity {
                                 Analytics.triggerEvent(AnalyticsEvents.SHARE_ITEM, ItemActivity.this);
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/plain");
-                                intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing item I found: " + item.getShareLink());
+                                String msg = "";
+                                if (item.getType() == Item.ITEM_PRODUCT) {
+                                    msg = "Hey! Look at this amazing item I found: ";
+                                } else {
+                                    msg = "Hey, here's a service you might be interested in: ";
+                                }
+                                intent.putExtra(Intent.EXTRA_TEXT, msg + item.getShareLink());
                                 startActivity(Intent.createChooser(intent, "Share"));
                             }
                         }
