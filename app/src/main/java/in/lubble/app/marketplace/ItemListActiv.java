@@ -261,7 +261,7 @@ public class ItemListActiv extends AppCompatActivity {
                                 Analytics.triggerEvent(AnalyticsEvents.SHARE_CATALOGUE, ItemListActiv.this);
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/plain");
-                                intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());
+                                intent.putExtra(Intent.EXTRA_TEXT, "Hey! Look at this amazing listing I found: " + sellerData.getShareLink());
                                 startActivity(Intent.createChooser(intent, "Share"));
                             }
                         }

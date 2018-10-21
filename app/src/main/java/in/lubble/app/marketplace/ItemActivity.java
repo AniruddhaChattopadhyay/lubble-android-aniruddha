@@ -549,7 +549,11 @@ public class ItemActivity extends AppCompatActivity {
                                 if (!TextUtils.isEmpty(sellerData.getShareLink())) {
                                     Intent intent = new Intent(Intent.ACTION_SEND);
                                     intent.setType("text/plain");
-                                    intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());
+                                    String msg = "Look at this amazing shop I found: ";
+                                    if (item.getType() == Item.ITEM_SERVICE) {
+                                        msg = "Hey, check out this great service provider: ";
+                                    }
+                                    intent.putExtra(Intent.EXTRA_TEXT, msg + sellerData.getShareLink());
                                     startActivity(Intent.createChooser(intent, "Share"));
                                 }
                             }
