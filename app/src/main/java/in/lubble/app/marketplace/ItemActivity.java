@@ -482,7 +482,7 @@ public class ItemActivity extends AppCompatActivity {
                         if (sellerData.isCallEnabled()) {
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.mb_green)));
                             chatBtn.setText("Call for details");
-                            chatHintTv.setText("Call or Message the seller to buy or know more");
+                            chatHintTv.setText("Call the seller to buy or know more");
                         } else {
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent)));
                             chatBtn.setText("Ask For Details");
