@@ -60,6 +60,7 @@ import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.analytics.AnalyticsEvents.MPLACE_CHAT_BTN_CLICKED;
 import static in.lubble.app.analytics.AnalyticsEvents.VISIT_SHOP_CLICK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.models.marketplace.Item.ITEM_APPROVED;
 
 public class ItemActivity extends AppCompatActivity {
 
@@ -571,7 +572,7 @@ public class ItemActivity extends AppCompatActivity {
                     itemShareContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (!TextUtils.isEmpty(item.getShareLink())) {
+                            if (!TextUtils.isEmpty(item.getShareLink()) && item.getApprovalStatus() == ITEM_APPROVED) {
                                 Analytics.triggerEvent(AnalyticsEvents.SHARE_ITEM, ItemActivity.this);
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/plain");
@@ -583,6 +584,8 @@ public class ItemActivity extends AppCompatActivity {
                                 }
                                 intent.putExtra(Intent.EXTRA_TEXT, msg + item.getShareLink());
                                 startActivity(Intent.createChooser(intent, "Share"));
+                            } else {
+                                Toast.makeText(ItemActivity.this, "Please wait for the item to be approved", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
@@ -618,7 +621,7 @@ public class ItemActivity extends AppCompatActivity {
                 approvalStatusTv.setText("Pending Approval");
                 approvalStatusTv.setTextColor(ContextCompat.getColor(this, R.color.black));
                 break;
-            case Item.ITEM_APPROVED:
+            case ITEM_APPROVED:
                 approvalIconIv.setImageResource(R.drawable.ic_check_circle_black_24dp);
                 approvalStatusTv.setText("Approved");
                 approvalStatusTv.setTextColor(ContextCompat.getColor(this, R.color.black));
