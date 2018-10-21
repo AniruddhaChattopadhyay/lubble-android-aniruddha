@@ -3,12 +3,8 @@ package in.lubble.app;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.List;
-
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.SellerDashActiv;
@@ -16,6 +12,8 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServiceCategoryDetailActiv;
+
+import java.util.List;
 
 public class DeepLinkRouterActiv extends AppCompatActivity {
 
@@ -60,7 +58,7 @@ public class DeepLinkRouterActiv extends AppCompatActivity {
                 if (uri.toString().contains("category")) {
                     ItemListActiv.open(this, false, Integer.parseInt(uri.getLastPathSegment()));
                 } else {
-                    ItemListActiv.open(this, true, Integer.parseInt(uri.getLastPathSegment()));
+                    ItemListActiv.open(this, true, uri.getLastPathSegment());
                 }
                 break;
             case "service.category":
