@@ -52,7 +52,6 @@ public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         final ArrayList<PhotoData> photoList = item.getPhotos();
         if (photoList.size() > 0) {
             glide.load(photoList.get(0).getUrl())
-                    .thumbnail(0.1f)
                     .apply(requestOptions)
                     .into(viewHolder.iconIv);
         } else {
