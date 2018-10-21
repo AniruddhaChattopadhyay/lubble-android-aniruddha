@@ -349,7 +349,7 @@
                     android:layout_marginBottom="8dp"
                     android:layout_toRightOf="@id/tv_share_hint"
                     android:breakStrategy="simple"
-                    android:text="Friends can view this item even without the Lubble app" />
+                    android:text="Friends can view this even without the Lubble app" />
 
                 <View
                     android:layout_width="match_parent"
@@ -382,7 +382,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    tools:text="@tools:sample/lorem/random" />
+                    tools:text="@tools:sample/lorem/" />
 
             </LinearLayout>
 
@@ -460,6 +460,7 @@
         </RelativeLayout>
 
         <TextView
+            android:id="@+id/tv_seller_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
@@ -467,7 +468,7 @@
             android:layout_marginRight="16dp"
             android:background="@drawable/half_rounded_rectangle_hollow_top"
             android:padding="8dp"
-            android:text="Sold By"
+            android:text="Listed By"
             android:textColor="@color/black" />
 
         <LinearLayout
@@ -488,13 +489,16 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp"
             android:background="@drawable/half_rounded_rectangle_blue_bottom"
             android:gravity="center"
             android:padding="16dp"
             android:text="Visit Shop"
             android:textColor="@color/white"
             android:textStyle="bold" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="40dp"/>
 
     </LinearLayout>
 

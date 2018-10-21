@@ -93,6 +93,7 @@ public class ItemActivity extends AppCompatActivity {
     private RecyclerView reviewsRecyclerView;
     private TextView avgRatingTv;
     private TextView ratingCountTv;
+    private TextView sellerHeaderTv;
     private RatingBar avgRatingBar;
     private ImageView sellerIv;
     private TextView sellerNameTv;
@@ -179,6 +180,7 @@ public class ItemActivity extends AppCompatActivity {
         ratingCountTv = findViewById(R.id.tv_rating_count);
         avgRatingBar = findViewById(R.id.ratingbar_avg);
 
+        sellerHeaderTv = findViewById(R.id.tv_seller_header);
         sellerIv = findViewById(R.id.iv_seller_pic);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
@@ -365,8 +367,10 @@ public class ItemActivity extends AppCompatActivity {
                                 priceTv.setText("₹" + startingPrice + " onwards");
                                 mrpTv.setVisibility(View.GONE);
                             }
+                            sellerHeaderTv.setText("Service Provider");
                         } else {
                             // PRODUCT
+                            sellerHeaderTv.setText("Sold By");
                             if (item.getDealPrice() > 0) {
                                 dealPriceContainer.setVisibility(View.VISIBLE);
                                 normalPriceContainer.setVisibility(View.GONE);
@@ -460,15 +464,20 @@ public class ItemActivity extends AppCompatActivity {
                         for (Item sellerItem : sellerData.getItemList()) {
                             itemAdapter.addData(sellerItem);
                         }
-                        visitShopTv.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                final Bundle bundle = new Bundle();
-                                bundle.putInt("seller_id", sellerData.getId());
-                                Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
-                                ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
-                            }
-                        });
+                        if (sellerData.getItemList().size() > 1) {
+                            visitShopTv.setVisibility(View.VISIBLE);
+                            visitShopTv.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    final Bundle bundle = new Bundle();
+                                    bundle.putInt("seller_id", sellerData.getId());
+                                    Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
+                                    ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
+                                }
+                            });
+                        } else {
+                            visitShopTv.setVisibility(View.GONE);
+                        }
                         syncDmId(sellerData);
                         if (sellerData.isCallEnabled()) {
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.mb_green)));
