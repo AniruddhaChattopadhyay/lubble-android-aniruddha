@@ -6,20 +6,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
+import in.lubble.app.GlideRequests;
+import in.lubble.app.R;
+import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.UiUtils;
 
 import java.util.List;
 
-import in.lubble.app.GlideRequests;
-import in.lubble.app.R;
-import in.lubble.app.explore.dummy.DummyContent.DummyItem;
+import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 
 public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final List<ExploreGroupData> mValues;
     private final OnListFragmentInteractionListener mListener;
     private final GlideRequests glide;
 
-    public ExploreGroupAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener, GlideRequests glide) {
+    public ExploreGroupAdapter(List<ExploreGroupData> items, OnListFragmentInteractionListener listener, GlideRequests glide) {
         mValues = items;
         mListener = listener;
         this.glide = glide;
@@ -35,7 +39,14 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         holder.groupItem = mValues.get(position);
-        holder.titleTv.setText(mValues.get(position).content);
+        holder.titleTv.setText(mValues.get(position).getTitle());
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, TOP));
+        glide.load(mValues.get(position).getPhotoUrl())
+                .placeholder(R.drawable.rounded_rect_gray)
+                .error(R.drawable.rounded_rect_gray)
+                .apply(requestOptions)
+                .into(holder.imageView);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,7 +69,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         final View mView;
         final ImageView imageView;
         final TextView titleTv;
-        public DummyItem groupItem;
+        public ExploreGroupData groupItem;
 
         public ViewHolder(View view) {
             super(view);
@@ -71,6 +82,6 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
 
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(ExploreGroupData item);
     }
 }

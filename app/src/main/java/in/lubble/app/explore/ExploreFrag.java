@@ -5,19 +5,27 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.explore.dummy.DummyContent;
-import in.lubble.app.explore.dummy.DummyContent.DummyItem;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+import java.util.ArrayList;
 
 public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
+    private static final String TAG = "ExploreFrag";
     private ExploreGroupAdapter.OnListFragmentInteractionListener mListener;
+    private RecyclerView recyclerView;
 
     public ExploreFrag() {
     }
@@ -39,11 +47,30 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
 
         Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view;
+        recyclerView = (RecyclerView) view;
         recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
-        recyclerView.setAdapter(new ExploreGroupAdapter(DummyContent.ITEMS, mListener, GlideApp.with(getContext())));
+
+        fetchExploreGroups();
 
         return view;
+    }
+
+    private void fetchExploreGroups() {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchExploreGroups(LubbleSharedPrefs.getInstance().getLubbleId()).enqueue(new Callback<ArrayList<ExploreGroupData>>() {
+            @Override
+            public void onResponse(Call<ArrayList<ExploreGroupData>> call, Response<ArrayList<ExploreGroupData>> response) {
+                final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();
+                if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty()) {
+                    recyclerView.setAdapter(new ExploreGroupAdapter(exploreGroupDataList, mListener, GlideApp.with(getContext())));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<ExploreGroupData>> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+            }
+        });
     }
 
     @Override
@@ -59,7 +86,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     }
 
     @Override
-    public void onListFragmentInteraction(DummyItem item) {
+    public void onListFragmentInteraction(ExploreGroupData item) {
 
     }
 

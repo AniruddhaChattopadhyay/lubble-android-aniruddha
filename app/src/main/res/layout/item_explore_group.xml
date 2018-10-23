@@ -2,18 +2,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginRight="8dp"
+    android:layout_marginBottom="8dp"
+    android:background="@drawable/rect_rounded_border">
 
     <ImageView
         android:id="@+id/iv_group_pic"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         android:scaleType="centerCrop"
         tools:src="@tools:sample/backgrounds/scenic" />
 
     <View
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         android:alpha="0.5"
         android:background="@drawable/gradient_black_trans_dark"
         android:rotation="180" />
@@ -22,9 +25,24 @@
         android:id="@+id/tv_group_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@id/iv_group_pic"
         android:layout_margin="8dp"
-        android:text="Yoga"
-        android:textColor="@color/white" />
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        tools:text="@tools:sample/lorem/random" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_group_title"
+        android:padding="12dp"
+        android:text="ADD"
+        android:drawableLeft="@drawable/ic_add_circle_black_24dp"
+        android:drawableTint="@color/trans_colorAccent"
+        android:drawablePadding="4dp"
+        android:textColor="@color/colorAccent"
+        android:textSize="18sp" />
 
 </RelativeLayout>
