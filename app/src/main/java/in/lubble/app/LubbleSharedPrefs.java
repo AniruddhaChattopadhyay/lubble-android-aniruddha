@@ -105,7 +105,7 @@ public class LubbleSharedPrefs {
         }
     }
 
-    public String getLubbleIdForMainActivity() {
+    public String getLubbleIdWithoutRestartingApp() {
         return preferences.getString(LUBBLE_ID, "");
     }
 
