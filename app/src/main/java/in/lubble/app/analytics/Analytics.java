@@ -60,7 +60,7 @@ public class Analytics {
         String riderId = FirebaseAuth.getInstance().getUid();
         firebaseAnalytics.setUserId(riderId);
         firebaseAnalytics.setUserProperty("uid", riderId);
-        firebaseAnalytics.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleIdWithoutRestartingApp());
+        firebaseAnalytics.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
     }
 
     private static void unSetUser(Context context) {
@@ -86,7 +86,7 @@ public class Analytics {
             if (StringUtils.isValidString(uid)) {
                 attributes.putString("uid", uid);
             }
-            String lubbleId = LubbleSharedPrefs.getInstance().getLubbleIdWithoutRestartingApp();
+            String lubbleId = LubbleSharedPrefs.getInstance().getLubbleId();
             attributes.putString("lubble_id", lubbleId);
         }
     }

@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 .circleCrop()
                 .into(profileIcon);
 
-        if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleIdWithoutRestartingApp())) {
+        if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
             initEverything();
         } else {
             RealtimeDbHelper.getThisUserRef().child("lubbles").addListenerForSingleValueEvent(new ValueEventListener() {
