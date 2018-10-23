@@ -87,6 +87,7 @@ public class LubbleSharedPrefs {
     }
 
     public String getLubbleId() {
+        setLubbleId("dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "DEV" : "saraswati_vihar");
         return preferences.getString(LUBBLE_ID, "");
     }
 
