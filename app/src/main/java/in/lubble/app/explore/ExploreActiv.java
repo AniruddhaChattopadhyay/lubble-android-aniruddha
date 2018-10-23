@@ -6,11 +6,12 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.utils.FragUtils;
 
-public class ExploreActiv extends AppCompatActivity {
+public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, ExploreActiv.class));
@@ -34,5 +35,10 @@ public class ExploreActiv extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onListFragmentInteraction(ExploreGroupData item) {
+        Toast.makeText(this, "from activ", Toast.LENGTH_SHORT).show();
     }
 }

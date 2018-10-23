@@ -87,7 +87,9 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
 
     @Override
     public void onListFragmentInteraction(ExploreGroupData item) {
-
+        if (getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener) {
+            ((ExploreGroupAdapter.OnListFragmentInteractionListener) getActivity()).onListFragmentInteraction(item);
+        }
     }
 
 }
