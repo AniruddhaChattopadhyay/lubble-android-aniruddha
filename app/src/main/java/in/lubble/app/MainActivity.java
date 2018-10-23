@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void switchFrag(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().replace(R.id.content, fragment).commit();
+        fm.beginTransaction().replace(R.id.content, fragment).commitAllowingStateLoss();
     }
 
     @Override
