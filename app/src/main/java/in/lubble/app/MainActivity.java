@@ -1,10 +1,6 @@
 package in.lubble.app;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,11 +34,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-
-import org.json.JSONObject;
-
-import java.util.HashMap;
-
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
@@ -58,6 +48,9 @@ import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
@@ -131,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 .circleCrop()
                 .into(profileIcon);
 
-        if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
+        if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleIdForMainActivity())) {
             initEverything();
         } else {
             RealtimeDbHelper.getThisUserRef().child("lubbles").addListenerForSingleValueEvent(new ValueEventListener() {

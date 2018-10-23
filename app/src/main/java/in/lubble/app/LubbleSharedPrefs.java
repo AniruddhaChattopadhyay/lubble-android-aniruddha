@@ -1,7 +1,10 @@
 package in.lubble.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
+import com.google.firebase.auth.FirebaseAuth;
 
 /**
  * Created by ishaan on 17/2/18.
@@ -87,7 +90,22 @@ public class LubbleSharedPrefs {
     }
 
     public String getLubbleId() {
-        setLubbleId("dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "DEV" : "saraswati_vihar");
+        if (!TextUtils.isEmpty(preferences.getString(LUBBLE_ID, ""))) {
+            return preferences.getString(LUBBLE_ID, "");
+        } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            // user is signed in but has no lubble ID
+            // start Main Activity to fetch & update lubble ID
+            final Intent intent = new Intent(LubbleApp.getAppContext(), MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            LubbleApp.getAppContext().startActivity(intent);
+            return "";
+        } else {
+            // user is logged out, Lubble ID does not exist at this time
+            return "";
+        }
+    }
+
+    public String getLubbleIdForMainActivity() {
         return preferences.getString(LUBBLE_ID, "");
     }
 

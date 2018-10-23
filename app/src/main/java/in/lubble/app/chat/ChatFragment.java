@@ -394,12 +394,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         resetUnreadCount();
                         showBottomBar(groupData);
                         showPublicGroupWarning();
+                    } else {
+                        Crashlytics.logException(new NullPointerException("groupdata is null for group id: " + groupId));
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    Crashlytics.logException(databaseError.toException());
                 }
             });
         } else if (!TextUtils.isEmpty(dmId)) {
@@ -440,6 +442,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                             }
                         }
                         resetUnreadCount();
+                    } else {
+                        Crashlytics.logException(new NullPointerException("dmData is null for dm id: " + dmId));
                     }
                 }
 
@@ -484,7 +488,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                    Crashlytics.logException(databaseError.toException());
                 }
             });
         } else if (!TextUtils.isEmpty(receiverId)) {
