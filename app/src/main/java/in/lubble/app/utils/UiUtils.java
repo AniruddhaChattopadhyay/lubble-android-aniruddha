@@ -1,5 +1,7 @@
 package in.lubble.app.utils;
 
+import android.animation.AnimatorInflater;
+import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
@@ -18,13 +20,11 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.crashlytics.android.Crashlytics;
+import in.lubble.app.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
-
-import in.lubble.app.R;
 
 /**
  * Created by ishaangarg on 05/11/17.
@@ -45,12 +45,26 @@ public class UiUtils {
         inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
-    public static void animateFadeHide(Context context, View view) {
+    public static void animateFadeHide(Context context, final View view) {
         if (view != null && view.getVisibility() == View.VISIBLE) {
             Animation animFadeOut = AnimationUtils.loadAnimation(context, R.anim.fade_out);
+            animFadeOut.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
 
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    view.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
             view.startAnimation(animFadeOut);
-            view.setVisibility(View.GONE);
         }
     }
 
@@ -122,6 +136,24 @@ public class UiUtils {
             Animation slideDown = AnimationUtils.loadAnimation(context, R.anim.slide_down_show);
             slideDown.setDuration(500);
             view.startAnimation(slideDown);
+            view.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public static void animateFlipHide(Context context, View view) {
+        if (context != null && view.getVisibility() == View.VISIBLE) {
+            AnimatorSet shrinkSet = (AnimatorSet) AnimatorInflater.loadAnimator(context, R.animator.shrink_to_middle);
+            shrinkSet.setTarget(view);
+            shrinkSet.start();
+            view.setVisibility(View.GONE);
+        }
+    }
+
+    public static void animateFlipShow(Context context, View view) {
+        if (context != null && view.getVisibility() != View.VISIBLE) {
+            AnimatorSet growSet = (AnimatorSet) AnimatorInflater.loadAnimator(context, R.animator.grow_from_middle);
+            growSet.setTarget(view);
+            growSet.start();
             view.setVisibility(View.VISIBLE);
         }
     }

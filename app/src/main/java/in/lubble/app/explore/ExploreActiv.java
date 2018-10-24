@@ -6,12 +6,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.utils.FragUtils;
 
+import java.util.ArrayList;
+
 public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
+
+    private ArrayList<ExploreGroupData> selectedGroupList = new ArrayList<>();
+    private Button joinBtn;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, ExploreActiv.class));
@@ -22,7 +26,7 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_explore);
 
-        final Button joinBtn = findViewById(R.id.btn_join);
+        joinBtn = findViewById(R.id.btn_join);
 
         Analytics.triggerScreenEvent(this, this.getClass());
 
@@ -39,6 +43,16 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
 
     @Override
     public void onListFragmentInteraction(ExploreGroupData item) {
-        Toast.makeText(this, "from activ", Toast.LENGTH_SHORT).show();
+        if (selectedGroupList.contains(item)) {
+            selectedGroupList.remove(item);
+            if (joinBtn.getVisibility() == View.VISIBLE && selectedGroupList.size() == 0) {
+                joinBtn.setVisibility(View.GONE);
+            }
+        } else {
+            selectedGroupList.add(item);
+            if (joinBtn.getVisibility() != View.VISIBLE) {
+                joinBtn.setVisibility(View.VISIBLE);
+            }
+        }
     }
 }

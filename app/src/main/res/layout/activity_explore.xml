@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:animateLayoutChanges="true"
     tools:context="in.lubble.app.explore.ExploreActiv">
 
     <ImageView
@@ -40,6 +41,8 @@
         android:layout_alignParentBottom="true"
         android:text="continue"
         android:textSize="18sp"
-        android:theme="@style/AccentButton" />
+        android:theme="@style/AccentButton"
+        android:visibility="gone"
+        tools:visibility="visible" />
 
 </RelativeLayout>

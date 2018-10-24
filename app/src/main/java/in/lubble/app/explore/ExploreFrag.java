@@ -62,7 +62,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
             public void onResponse(Call<ArrayList<ExploreGroupData>> call, Response<ArrayList<ExploreGroupData>> response) {
                 final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();
                 if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty()) {
-                    recyclerView.setAdapter(new ExploreGroupAdapter(exploreGroupDataList, mListener, GlideApp.with(getContext())));
+                    recyclerView.setAdapter(new ExploreGroupAdapter(exploreGroupDataList, mListener, GlideApp.with(getContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener));
                 }
             }
 
