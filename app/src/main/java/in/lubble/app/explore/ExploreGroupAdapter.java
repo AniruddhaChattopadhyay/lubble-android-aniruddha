@@ -12,6 +12,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
+import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 
@@ -41,16 +42,25 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.groupItem = mValues.get(position);
-        holder.titleTv.setText(mValues.get(position).getTitle());
+    public void onBindViewHolder(final ViewHolder holder, final int position) {
+        final ExploreGroupData exploreGroupData = mValues.get(position);
+        holder.groupItem = exploreGroupData;
+        holder.titleTv.setText(exploreGroupData.getTitle());
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, TOP));
-        glide.load(mValues.get(position).getPhotoUrl())
+        glide.load(exploreGroupData.getPhotoUrl())
                 .placeholder(R.drawable.rounded_rect_gray)
                 .error(R.drawable.rounded_rect_gray)
                 .apply(requestOptions)
                 .into(holder.imageView);
+
+        if (isOnboarding) {
+            holder.joinTv.setText("SELECT");
+            holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
+        } else {
+            holder.joinTv.setText("JOIN");
+            holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
+        }
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -61,18 +71,17 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                     mListener.onListFragmentInteraction(holder.groupItem);
                     if (isOnboarding) {
                         if (holder.selectedContainer.getVisibility() == View.GONE) {
-                            //holder.selectedContainer.setVisibility(View.VISIBLE);
                             UiUtils.animateFadeShow(holder.mView.getContext(), holder.selectedContainer);
                             holder.joinTv.setText("REMOVE");
                             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
                         } else {
-                            //holder.selectedContainer.setVisibility(View.GONE);
                             UiUtils.animateFadeHide(holder.mView.getContext(), holder.selectedContainer);
                             holder.joinTv.setText("SELECT");
                             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
                         }
                     } else {
                         // for explore bottom tab
+                        ChatActivity.openForGroup(holder.mView.getContext(), exploreGroupData.getFirebaseGroupId(), false, null);
                     }
                 }
             }
