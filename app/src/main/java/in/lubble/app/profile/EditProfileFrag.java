@@ -5,52 +5,38 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-
-import java.io.File;
-import java.io.IOException;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.StringUtils;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
+import permissions.dispatcher.*;
+
+import java.io.File;
+import java.io.IOException;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.utils.FileUtils.createImageFile;
-import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
-import static in.lubble.app.utils.FileUtils.getPickImageIntent;
-import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
+import static in.lubble.app.utils.FileUtils.*;
 
 @RuntimePermissions
 public class EditProfileFrag extends Fragment {

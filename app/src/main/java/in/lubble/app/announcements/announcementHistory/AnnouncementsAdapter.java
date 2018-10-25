@@ -1,17 +1,16 @@
 package in.lubble.app.announcements.announcementHistory;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.R;
 import in.lubble.app.models.AnnouncementData;
 import in.lubble.app.utils.DateTimeUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AnnouncementsAdapter extends RecyclerView.Adapter<AnnouncementsAdapter.AnnouncementViewHolder> {
 

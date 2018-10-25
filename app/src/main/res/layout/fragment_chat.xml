@@ -23,7 +23,7 @@
             android:background="@drawable/chat_bubble_border"
             android:visibility="visible">
 
-            <android.support.constraint.ConstraintLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp">
@@ -132,7 +132,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/iv_send_btn" />
 
-                <android.support.constraint.Group
+                <androidx.constraintlayout.widget.Group
                     android:id="@+id/group_link_meta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -140,7 +140,7 @@
                     app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title,iv_link_cancel"
                     tools:visibility="visible" />
 
-            </android.support.constraint.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </RelativeLayout>
 
@@ -188,7 +188,7 @@
         </RelativeLayout>
     </RelativeLayout>
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

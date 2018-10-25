@@ -3,7 +3,7 @@ package in.lubble.app.utils;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 import android.text.Html;
 import android.text.TextUtils;
 

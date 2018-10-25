@@ -1,6 +1,6 @@
 package in.lubble.app.utils;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.text.format.DateUtils;
 
 import java.text.DateFormat;
