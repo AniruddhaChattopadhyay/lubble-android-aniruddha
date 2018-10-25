@@ -3,6 +3,7 @@ package in.lubble.app.explore;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +18,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
     private ArrayList<ExploreGroupData> selectedGroupList = new ArrayList<>();
+    private ImageView crossIv;
     private Button joinBtn;
 
     public static void open(Context context) {
@@ -28,6 +30,7 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_explore);
 
+        crossIv = findViewById(R.id.iv_cross);
         joinBtn = findViewById(R.id.btn_join);
 
         Analytics.triggerScreenEvent(this, this.getClass());
@@ -45,20 +48,29 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
             }
         });
 
+        crossIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
     }
 
     @Override
     public void onListFragmentInteraction(ExploreGroupData item) {
         if (selectedGroupList.contains(item)) {
             selectedGroupList.remove(item);
-            if (joinBtn.getVisibility() == View.VISIBLE && selectedGroupList.size() == 0) {
+            if (selectedGroupList.size() == 0) {
                 joinBtn.setVisibility(View.GONE);
             }
         } else {
             selectedGroupList.add(item);
-            if (joinBtn.getVisibility() != View.VISIBLE) {
-                joinBtn.setVisibility(View.VISIBLE);
-            }
+            joinBtn.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
     }
 }

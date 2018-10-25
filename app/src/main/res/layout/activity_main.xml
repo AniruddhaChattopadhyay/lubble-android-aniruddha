@@ -22,6 +22,7 @@
         android:layout_marginStart="0dp"
         android:background="@color/dk_colorAccent"
         android:elevation="7dp"
+        app:labelVisibilityMode="labeled"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
         app:menu="@menu/navigation" />

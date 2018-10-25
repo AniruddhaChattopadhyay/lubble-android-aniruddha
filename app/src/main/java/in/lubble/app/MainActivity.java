@@ -38,6 +38,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.explore.ExploreActiv;
+import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
@@ -453,6 +454,9 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
                     switchFrag(GroupListFragment.newInstance());
+                    return true;
+                case R.id.navigation_explore:
+                    switchFrag(ExploreFrag.newInstance());
                     return true;
                 case R.id.navigation_mplace:
                     switchFrag(MarketplaceFrag.newInstance());

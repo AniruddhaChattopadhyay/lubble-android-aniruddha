@@ -66,12 +66,14 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
             @Override
             public void onResponse(Call<ArrayList<ExploreGroupData>> call, Response<ArrayList<ExploreGroupData>> response) {
                 final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();
-                if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty()) {
+                if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty() && isAdded() && isVisible()) {
                     progressbar.setVisibility(View.GONE);
-                    recyclerView.setAdapter(new ExploreGroupAdapter(exploreGroupDataList, mListener, GlideApp.with(getContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener));
+                    recyclerView.setAdapter(new ExploreGroupAdapter(exploreGroupDataList, mListener, GlideApp.with(requireContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener));
                 } else {
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                    progressbar.setVisibility(View.GONE);
+                    if (isAdded() && isVisible()) {
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        progressbar.setVisibility(View.GONE);
+                    }
                 }
             }
 
