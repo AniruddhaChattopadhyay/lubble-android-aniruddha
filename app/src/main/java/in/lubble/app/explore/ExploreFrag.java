@@ -9,6 +9,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -26,6 +28,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private static final String TAG = "ExploreFrag";
     private ExploreGroupAdapter.OnListFragmentInteractionListener mListener;
     private RecyclerView recyclerView;
+    private ProgressBar progressbar;
 
     public ExploreFrag() {
     }
@@ -47,7 +50,8 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
 
         Context context = view.getContext();
-        recyclerView = (RecyclerView) view;
+        recyclerView = view.findViewById(R.id.rv_interest_groups);
+        progressbar = view.findViewById(R.id.progressbar);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
 
         fetchExploreGroups();
@@ -56,19 +60,26 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     }
 
     private void fetchExploreGroups() {
+        progressbar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchExploreGroups(LubbleSharedPrefs.getInstance().getLubbleId()).enqueue(new Callback<ArrayList<ExploreGroupData>>() {
             @Override
             public void onResponse(Call<ArrayList<ExploreGroupData>> call, Response<ArrayList<ExploreGroupData>> response) {
                 final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();
                 if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty()) {
+                    progressbar.setVisibility(View.GONE);
                     recyclerView.setAdapter(new ExploreGroupAdapter(exploreGroupDataList, mListener, GlideApp.with(getContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener));
+                } else {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    progressbar.setVisibility(View.GONE);
                 }
             }
 
             @Override
             public void onFailure(Call<ArrayList<ExploreGroupData>> call, Throwable t) {
+                Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "onFailure: ");
+                progressbar.setVisibility(View.GONE);
             }
         });
     }
