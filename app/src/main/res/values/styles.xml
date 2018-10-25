@@ -41,6 +41,14 @@
         <item name="android:minHeight">56dp</item>
     </style>
 
+    <style name="PinkButton" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="colorControlHighlight">@color/white</item>
+        <item name="colorButtonNormal">@color/pink</item>
+        <item name="colorAccent">@color/pink</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+
     <style name="WhiteButton" parent="Widget.AppCompat.Button.Colored">
         <item name="colorButtonNormal">@color/white</item>
         <item name="colorControlHighlight">@color/gray</item>

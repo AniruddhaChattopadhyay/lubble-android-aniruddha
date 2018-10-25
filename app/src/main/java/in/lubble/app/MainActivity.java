@@ -213,11 +213,15 @@ public class MainActivity extends AppCompatActivity {
         firebaseRemoteConfig.setDefaults(map);
     }
 
+    public void openExplore() {
+        bottomNavigation.findViewById(R.id.navigation_explore).performClick();
+    }
+
     private void showBottomNavBadge() {
         if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
             BottomNavigationMenuView bottomNavigationMenuView =
                     (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-            View v = bottomNavigationMenuView.getChildAt(1);
+            View v = bottomNavigationMenuView.getChildAt(2);
             BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
             View badge = LayoutInflater.from(this)
@@ -228,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
         if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
             BottomNavigationMenuView bottomNavigationMenuView =
                     (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-            View v = bottomNavigationMenuView.getChildAt(2);
+            View v = bottomNavigationMenuView.getChildAt(3);
             BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
             View badge = LayoutInflater.from(this)

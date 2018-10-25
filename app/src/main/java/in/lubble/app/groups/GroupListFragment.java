@@ -4,39 +4,30 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.google.android.material.tabs.TabLayout;
-import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
-import androidx.core.widget.NestedScrollView;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import com.google.firebase.database.*;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
 import in.lubble.app.models.DmData;
@@ -52,17 +43,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_DP_URL;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_NAME;
-import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import java.util.*;
+
+import static in.lubble.app.chat.ChatActivity.*;
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
@@ -106,6 +90,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
         TabLayout tabLayout = view.findViewById(R.id.tab_dots);
+        Button exploreBtn = view.findViewById(R.id.btn_explore);
         tabLayout.setupWithViewPager(viewPager, true);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
@@ -145,6 +130,16 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         setupSlider();
         fetchHomeBanners();
+
+        exploreBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() != null) {
+                    ((MainActivity) getActivity()).openExplore();
+                }
+            }
+        });
+
         return view;
     }
 
