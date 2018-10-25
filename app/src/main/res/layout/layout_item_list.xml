@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="8dp"
-            android:text="Help this small business grow"
+            android:text="Help their services reach more people"
             android:textColor="@color/black" />
 
         <LinearLayout
@@ -143,7 +143,7 @@
                     android:layout_below="@id/container_seller_share"
                     android:layout_centerHorizontal="true"
                     android:gravity="center"
-                    android:text="Share with your friends"
+                    android:text="Share with friends"
                     android:textColor="@color/black" />
 
             </RelativeLayout>

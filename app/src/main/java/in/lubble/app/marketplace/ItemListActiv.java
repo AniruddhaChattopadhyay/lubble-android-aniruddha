@@ -2,7 +2,6 @@ package in.lubble.app.marketplace;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -13,18 +12,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.crashlytics.android.Crashlytics;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.SellerData;
@@ -41,6 +34,7 @@ public class ItemListActiv extends AppCompatActivity {
     private static final String TAG = "SellerDashActiv";
     private static final String PARAM_IS_SELLER = "PARAM_IS_SELLER";
     private static final String PARAM_ID = "PARAM_ID";
+    private static final String PARAM_SELLER_NAME = "PARAM_SELLER_NAME";
 
     private ImageView sellerPicIv;
     private ProgressBar progressBar;
@@ -69,6 +63,13 @@ public class ItemListActiv extends AppCompatActivity {
         context.startActivity(intent);
     }
 
+    public static void open(Context context, boolean isSeller, String sellerUniqueName) {
+        final Intent intent = new Intent(context, ItemListActiv.class);
+        intent.putExtra(PARAM_IS_SELLER, isSeller);
+        intent.putExtra(PARAM_SELLER_NAME, sellerUniqueName);
+        context.startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,26 +95,11 @@ public class ItemListActiv extends AppCompatActivity {
         adapter = new BigItemAdapter(GlideApp.with(this), false);
         recyclerView.setAdapter(adapter);
 
-        Intent intent = getIntent();
-        Uri data = intent.getData();
-        if (data != null) {
-            try {
-                if (data.toString().contains("category")) {
-                    sellerId = Integer.parseInt(data.getLastPathSegment());
-                    isSeller = false;
-                } else {
-                    sellerUniqueName = data.getLastPathSegment();
-                    isSeller = true;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Crashlytics.logException(e);
-                finish();
-            }
-        } else {
-            isSeller = intent.getBooleanExtra(PARAM_IS_SELLER, false);
-            sellerId = intent.getIntExtra(PARAM_ID, -1);
-        }
+
+        isSeller = getIntent().getBooleanExtra(PARAM_IS_SELLER, false);
+        sellerId = getIntent().getIntExtra(PARAM_ID, -1);
+        sellerUniqueName = getIntent().getStringExtra(PARAM_SELLER_NAME);
+
         if (sellerId == -1 && TextUtils.isEmpty(sellerUniqueName)) {
             throw new IllegalArgumentException("no seller ID bruh");
         }
@@ -272,9 +258,10 @@ public class ItemListActiv extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             if (!TextUtils.isEmpty(sellerData.getShareLink())) {
+                                Analytics.triggerEvent(AnalyticsEvents.SHARE_CATALOGUE, ItemListActiv.this);
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/plain");
-                                    intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());
+                                intent.putExtra(Intent.EXTRA_TEXT, "Hey! Look at this amazing listing I found: " + sellerData.getShareLink());
                                 startActivity(Intent.createChooser(intent, "Share"));
                             }
                         }

@@ -23,6 +23,7 @@ public class LubbleSharedPrefs {
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
     private final String IS_GROUP_INFO_OPENED = "IS_GROUP_INFO_OPENED";
     private final String IS_MPLACE_OPENED = "IS_MPLACE_OPENED";
+    private final String IS_SERVICES_OPENED = "IS_SERVICES_OPENED";
     private final String SELLER_ID = "SELLER_ID";
     private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
     private final String FULL_NAME = "FULL_NAME";
@@ -86,7 +87,20 @@ public class LubbleSharedPrefs {
     }
 
     public String getLubbleId() {
-        return preferences.getString(LUBBLE_ID, "");
+        /*if (!TextUtils.isEmpty(preferences.getString(LUBBLE_ID, ""))) {
+            return preferences.getString(LUBBLE_ID, "");
+        } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            // user is signed in but has no lubble ID
+            // start Main Activity to fetch & update lubble ID
+            final Intent intent = new Intent(LubbleApp.getAppContext(), MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            LubbleApp.getAppContext().startActivity(intent);
+            return "";
+        } else {
+            // user is logged out, Lubble ID does not exist at this time
+            return "";
+        }*/
+        return preferences.getString(LUBBLE_ID, "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "DEV" : "saraswati_vihar");
     }
 
     public boolean setLubbleId(String lubbleId) {
@@ -159,6 +173,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsMplaceOpened(boolean isOpened) {
         return preferences.edit().putBoolean(IS_MPLACE_OPENED, isOpened).commit();
+    }
+
+    public boolean getIsServicesOpened() {
+        return preferences.getBoolean(IS_SERVICES_OPENED, false);
+    }
+
+    public boolean setIsServicesOpened(boolean isOpened) {
+        return preferences.edit().putBoolean(IS_SERVICES_OPENED, isOpened).commit();
     }
 
     public int getSellerId() {

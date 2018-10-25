@@ -14,15 +14,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.List;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -35,6 +29,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.List;
+
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
@@ -46,6 +42,8 @@ public class ReferralsFragment extends Fragment {
     private LinearLayout fbContainer;
     private LinearLayout whatsappContainer;
     private LinearLayout moreContainer;
+    private Button bottomInviteBtn;
+    private TextView emptyTv;
     private ReferralLeaderboardAdapter adapter;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
@@ -73,6 +71,8 @@ public class ReferralsFragment extends Fragment {
         fbContainer = view.findViewById(R.id.container_fb);
         whatsappContainer = view.findViewById(R.id.container_whatsapp);
         moreContainer = view.findViewById(R.id.container_more);
+        bottomInviteBtn = view.findViewById(R.id.btn_bottom_invite);
+        emptyTv = view.findViewById(R.id.tv_empty);
         RecyclerView rv = view.findViewById(R.id.rv_leaderboard);
         rv.setNestedScrollingEnabled(false);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -162,6 +162,16 @@ public class ReferralsFragment extends Fragment {
                 }
             }
         });
+        bottomInviteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
+                if (referralIntent != null) {
+                    startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
+                    Analytics.triggerEvent(AnalyticsEvents.REFERRAL_LEADERBOARD_BOTTOM_SHARE, getContext());
+                }
+            }
+        });
     }
 
     private void fetchReferralLeaderboard() {
@@ -173,19 +183,22 @@ public class ReferralsFragment extends Fragment {
                 leaderboardProgressBar.setVisibility(View.GONE);
                 final ReferralLeaderboardData referralLeaderboardData = response.body();
                 if (response.isSuccessful() && referralLeaderboardData != null && isAdded() && isVisible()) {
+                    if (referralLeaderboardData.getLeaderboardData() == null || referralLeaderboardData.getLeaderboardData().isEmpty()) {
+                        emptyTv.setVisibility(View.VISIBLE);
+                    } else {
+                        emptyTv.setVisibility(View.GONE);
+                        for (LeaderboardPersonData referralPersonData : referralLeaderboardData.getLeaderboardData()) {
+                            if (referralPersonData.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                                adapter.addPerson(referralLeaderboardData.getCurrentUser());
+                            } else {
+                                adapter.addPerson(referralPersonData);
+                            }
+                        }
 
-                    for (LeaderboardPersonData referralPersonData : referralLeaderboardData.getLeaderboardData()) {
-                        if (referralPersonData.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                        if (referralLeaderboardData.getCurrentUser().getCurrentUserRank() > 10) {
                             adapter.addPerson(referralLeaderboardData.getCurrentUser());
-                        } else {
-                            adapter.addPerson(referralPersonData);
                         }
                     }
-
-                    if (referralLeaderboardData.getCurrentUser().getCurrentUserRank() > 10) {
-                        adapter.addPerson(referralLeaderboardData.getCurrentUser());
-                    }
-
                 } else if (isAdded() && isVisible()) {
                     Crashlytics.log("referral leaderboard bad response");
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();

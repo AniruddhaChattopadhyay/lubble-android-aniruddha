@@ -114,7 +114,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="8dp"
                             android:gravity="center_vertical"
-                            android:text="Share Catalogue"
+                            android:text="Share"
                             android:textColor="@color/dk_colorAccent" />
 
                     </LinearLayout>

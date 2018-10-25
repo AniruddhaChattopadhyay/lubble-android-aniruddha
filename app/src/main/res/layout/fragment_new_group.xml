@@ -48,7 +48,7 @@
         android:layout_below="@id/et_group_desc" />
 
     <Button
-        android:id="@+id/btn_create_group"
+        android:id="@+id/container_create_group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/spinner_privacy"

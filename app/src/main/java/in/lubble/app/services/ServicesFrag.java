@@ -11,14 +11,14 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import com.crashlytics.android.Crashlytics;
-
-import java.util.ArrayList;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.marketplace.SearchActivity;
 import in.lubble.app.marketplace.SellerDashActiv;
 import in.lubble.app.marketplace.SellerEditActiv;
 import in.lubble.app.models.marketplace.Category;
@@ -29,10 +29,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.ArrayList;
+
 public class ServicesFrag extends Fragment {
 
     private static final String TAG = "ServicesFrag";
 
+    private LinearLayout searchContainer;
     private ProgressBar progressBar;
     private ServiceCategoryAdapter servicesAdapter;
 
@@ -59,6 +62,7 @@ public class ServicesFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_services, container, false);
 
+        searchContainer = view.findViewById(R.id.container_search);
         progressBar = view.findViewById(R.id.progress_bar_categories);
         RecyclerView serviceCategoryRv = view.findViewById(R.id.rv_services);
         LinearLayout newServiceContainer = view.findViewById(R.id.new_service_container);
@@ -83,6 +87,22 @@ public class ServicesFrag extends Fragment {
                 }
             }
         });
+
+        if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
+            LubbleSharedPrefs.getInstance().setIsServicesOpened(true);
+            if (getActivity() != null) {
+                ((MainActivity) getActivity()).removeServicesBadge();
+            }
+        }
+
+        searchContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SearchActivity.open(getContext());
+            }
+        });
+
+        Analytics.triggerEvent(AnalyticsEvents.SERVICES_FRAG, getContext());
 
         return view;
     }

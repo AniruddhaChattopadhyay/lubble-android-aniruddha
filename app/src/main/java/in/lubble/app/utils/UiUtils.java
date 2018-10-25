@@ -13,6 +13,7 @@ import android.media.ExifInterface;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DrawableRes;
 import android.support.design.widget.BottomSheetDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -159,28 +160,38 @@ public class UiUtils {
     }
 
     public static File compressImage(String ogFilepath) {
-        Bitmap bmp = BitmapFactory.decodeFile(ogFilepath);
-        File outFile = new File(ogFilepath);
-        if (outFile.length() / 1024 > 50) {
-            try {
+        try {
+            String exifOrientation = new ExifInterface(ogFilepath).getAttribute(ExifInterface.TAG_ORIENTATION);
+            Bitmap bmp = BitmapFactory.decodeFile(ogFilepath);
+            File outFile = new File(ogFilepath);
+            if (outFile.length() / 1024 > 50) {
                 FileOutputStream outStream = new FileOutputStream(outFile);
                 bmp.compress(Bitmap.CompressFormat.JPEG, 75, outStream);
                 outStream.flush();
                 outStream.close();
 
-                ExifInterface oldExif = new ExifInterface(ogFilepath);
-                String exifOrientation = oldExif.getAttribute(ExifInterface.TAG_ORIENTATION);
                 if (exifOrientation != null) {
                     ExifInterface newExif = new ExifInterface(outFile.getPath());
                     newExif.setAttribute(ExifInterface.TAG_ORIENTATION, exifOrientation);
                     newExif.saveAttributes();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Crashlytics.logException(e);
+
             }
+            return outFile;
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+            return new File(ogFilepath);
         }
-        return outFile;
+    }
+
+    public static void animateSlideUpShow(Context context, View view) {
+        if (context != null && view.getVisibility() != View.VISIBLE) {
+            Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_up_show);
+            slideUp.setDuration(500);
+            view.startAnimation(slideUp);
+            view.setVisibility(View.VISIBLE);
+        }
     }
 
 }

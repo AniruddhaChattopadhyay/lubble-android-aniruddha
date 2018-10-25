@@ -17,6 +17,29 @@
             android:layout_height="match_parent"
             tools:context="in.lubble.app.services.ServicesFrag">
 
+            <LinearLayout
+                android:id="@+id/container_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:background="@drawable/rect_rounded_border"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/ic_search_gray_24dp" />
+
+                <TextView
+                    android:id="@+id/tv_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="Search Services Near You" />
+
+            </LinearLayout>
+
             <ProgressBar
                 android:id="@+id/progress_bar_categories"
                 android:layout_width="wrap_content"
@@ -26,7 +49,12 @@
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rv_services"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_below="@id/container_search"
+                tools:itemCount="5"
+                tools:layoutManager="android.support.v7.widget.GridLayoutManager"
+                tools:listitem="@layout/item_service_category"
+                tools:spanCount="2" />
 
             <View
                 android:layout_width="match_parent"
@@ -42,8 +70,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
         android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/pill_button"
         android:elevation="6dp"
         android:gravity="center"

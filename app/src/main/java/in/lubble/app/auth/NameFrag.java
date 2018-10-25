@@ -12,12 +12,17 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.firebase.ui.auth.IdpResponse;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
 
 import static in.lubble.app.auth.LoginActivity.REQUEST_LOCATION;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 
 public class NameFrag extends Fragment {
 
@@ -75,6 +80,17 @@ public class NameFrag extends Fragment {
                     if (!TextUtils.isEmpty(referralCodeTil.getEditText().getText().toString())) {
                         LubbleSharedPrefs.getInstance().setReferralCode(referralCodeTil.getEditText().getText().toString().trim());
                     }
+
+                    ProfileData profileData = new ProfileData();
+                    final ProfileInfo profileInfo = new ProfileInfo();
+                    profileInfo.setId(FirebaseAuth.getInstance().getUid());
+                    profileInfo.setName(LubbleSharedPrefs.getInstance().getFullName());
+                    profileData.setInfo(profileInfo);
+                    profileData.setToken(FirebaseInstanceId.getInstance().getToken());
+                    profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
+
+                    getThisUserRef().setValue(profileData);
+
                     final Intent intent = new Intent(getContext(), LocationActivity.class);
                     intent.putExtra("idpResponse", idpResponse);
                     getActivity().startActivityForResult(intent, REQUEST_LOCATION);

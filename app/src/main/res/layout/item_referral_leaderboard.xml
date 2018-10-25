@@ -34,6 +34,7 @@
         android:layout_toLeftOf="@id/tv_points"
         android:layout_toRightOf="@id/iv_icon"
         android:ellipsize="end"
+        android:layout_marginRight="8dp"
         android:maxLines="1"
         android:textColor="@color/black"
         android:textSize="18sp"

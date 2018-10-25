@@ -12,9 +12,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-
-import java.util.ArrayList;
-
+import android.widget.Toast;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -25,6 +23,8 @@ import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.ArrayList;
 
 public class CategoriesActiv extends AppCompatActivity {
 
@@ -77,6 +77,9 @@ public class CategoriesActiv extends AppCompatActivity {
                             categoryAdapter.addData(category);
                         }
                     }
+                } else {
+                    Toast.makeText(CategoriesActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    finish();
                 }
             }
 
@@ -84,6 +87,8 @@ public class CategoriesActiv extends AppCompatActivity {
             public void onFailure(Call<ArrayList<Category>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
                 progressBar.setVisibility(View.GONE);
+                Toast.makeText(CategoriesActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
     }

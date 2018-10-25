@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -15,9 +14,6 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-
-import java.util.Map;
-
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.AppNotifData;
@@ -27,13 +23,12 @@ import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
 
+import java.util.Map;
+
 import static in.lubble.app.analytics.AnalyticsEvents.NOTIF_SHOWN;
 import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
-import static in.lubble.app.marketplace.SellerDashActiv.ACTION_IMG_DONE;
-import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_ID;
-import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_TYPE;
-import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_URL;
+import static in.lubble.app.marketplace.SellerDashActiv.*;
 
 /**
  * Created by ishaan on 26/1/18.
@@ -68,7 +63,7 @@ public class FcmService extends FirebaseMessagingService {
                     || "notice".equalsIgnoreCase(type)
                     || "referralJoined".equalsIgnoreCase(type)
                     || "new_event".equalsIgnoreCase(type)
-                    || "events".equalsIgnoreCase(type)) {
+                    || "services".equalsIgnoreCase(type)) {
                 Log.d(TAG, "onMessageReceived: type -> " + type);
                 Gson gson = new Gson();
                 JsonElement jsonElement = gson.toJsonTree(dataMap);

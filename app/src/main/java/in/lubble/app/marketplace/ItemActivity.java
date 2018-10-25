@@ -21,16 +21,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RatingBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -41,12 +32,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -63,14 +48,19 @@ import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.FullScreenImageActivity;
 import okhttp3.RequestBody;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.analytics.AnalyticsEvents.MPLACE_CHAT_BTN_CLICKED;
 import static in.lubble.app.analytics.AnalyticsEvents.VISIT_SHOP_CLICK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.models.marketplace.Item.ITEM_APPROVED;
 
 public class ItemActivity extends AppCompatActivity {
 
@@ -104,6 +94,7 @@ public class ItemActivity extends AppCompatActivity {
     private RecyclerView reviewsRecyclerView;
     private TextView avgRatingTv;
     private TextView ratingCountTv;
+    private TextView sellerHeaderTv;
     private RatingBar avgRatingBar;
     private ImageView sellerIv;
     private TextView sellerNameTv;
@@ -190,6 +181,7 @@ public class ItemActivity extends AppCompatActivity {
         ratingCountTv = findViewById(R.id.tv_rating_count);
         avgRatingBar = findViewById(R.id.ratingbar_avg);
 
+        sellerHeaderTv = findViewById(R.id.tv_seller_header);
         sellerIv = findViewById(R.id.iv_seller_pic);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
@@ -363,7 +355,7 @@ public class ItemActivity extends AppCompatActivity {
                 final Item item = response.body();
                 itemProgressBar.setVisibility(View.GONE);
                 progressBar.setVisibility(View.GONE);
-                if (item != null) {
+                if (item != null && !isFinishing()) {
                     titleTv.setText(item.getName());
 
                     if (item.getPricingOption() == Item.ITEM_PRICING_PAID) {
@@ -376,8 +368,10 @@ public class ItemActivity extends AppCompatActivity {
                                 priceTv.setText("₹" + startingPrice + " onwards");
                                 mrpTv.setVisibility(View.GONE);
                             }
+                            sellerHeaderTv.setText("Service Provider");
                         } else {
                             // PRODUCT
+                            sellerHeaderTv.setText("Sold By");
                             if (item.getDealPrice() > 0) {
                                 dealPriceContainer.setVisibility(View.VISIBLE);
                                 normalPriceContainer.setVisibility(View.GONE);
@@ -471,20 +465,25 @@ public class ItemActivity extends AppCompatActivity {
                         for (Item sellerItem : sellerData.getItemList()) {
                             itemAdapter.addData(sellerItem);
                         }
-                        visitShopTv.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                final Bundle bundle = new Bundle();
-                                bundle.putInt("seller_id", sellerData.getId());
-                                Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
-                                ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
-                            }
-                        });
+                        if (sellerData.getItemList().size() > 1) {
+                            visitShopTv.setVisibility(View.VISIBLE);
+                            visitShopTv.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    final Bundle bundle = new Bundle();
+                                    bundle.putInt("seller_id", sellerData.getId());
+                                    Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
+                                    ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
+                                }
+                            });
+                        } else {
+                            visitShopTv.setVisibility(View.GONE);
+                        }
                         syncDmId(sellerData);
                         if (sellerData.isCallEnabled()) {
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.mb_green)));
                             chatBtn.setText("Call for details");
-                            chatHintTv.setText("Call or Message the seller to buy or know more");
+                            chatHintTv.setText("Call the seller to buy or know more");
                         } else {
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.colorAccent)));
                             chatBtn.setText("Ask For Details");
@@ -550,7 +549,11 @@ public class ItemActivity extends AppCompatActivity {
                                 if (!TextUtils.isEmpty(sellerData.getShareLink())) {
                                     Intent intent = new Intent(Intent.ACTION_SEND);
                                     intent.setType("text/plain");
-                                    intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing shop I found: " + sellerData.getShareLink());
+                                    String msg = "Look at this amazing shop I found: ";
+                                    if (item.getType() == Item.ITEM_SERVICE) {
+                                        msg = "Hey, check out this great service provider: ";
+                                    }
+                                    intent.putExtra(Intent.EXTRA_TEXT, msg + sellerData.getShareLink());
                                     startActivity(Intent.createChooser(intent, "Share"));
                                 }
                             }
@@ -573,16 +576,25 @@ public class ItemActivity extends AppCompatActivity {
                     itemShareContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (!TextUtils.isEmpty(item.getShareLink())) {
+                            if (!TextUtils.isEmpty(item.getShareLink()) && item.getApprovalStatus() == ITEM_APPROVED) {
+                                Analytics.triggerEvent(AnalyticsEvents.SHARE_ITEM, ItemActivity.this);
                                 Intent intent = new Intent(Intent.ACTION_SEND);
                                 intent.setType("text/plain");
-                                intent.putExtra(Intent.EXTRA_TEXT, "Look at this amazing item I found: " + item.getShareLink());
+                                String msg = "";
+                                if (item.getType() == Item.ITEM_PRODUCT) {
+                                    msg = "Hey! Look at this amazing item I found: ";
+                                } else {
+                                    msg = "Hey, here's a service you might be interested in: ";
+                                }
+                                intent.putExtra(Intent.EXTRA_TEXT, msg + item.getShareLink());
                                 startActivity(Intent.createChooser(intent, "Share"));
+                            } else {
+                                Toast.makeText(ItemActivity.this, "Please wait for the item to be approved", Toast.LENGTH_SHORT).show();
                             }
                         }
                     });
 
-                } else {
+                } else if (!isFinishing()) {
                     if (response.code() == 404) {
                         final Bundle bundle = new Bundle();
                         bundle.putInt("item_id", itemId);
@@ -613,7 +625,7 @@ public class ItemActivity extends AppCompatActivity {
                 approvalStatusTv.setText("Pending Approval");
                 approvalStatusTv.setTextColor(ContextCompat.getColor(this, R.color.black));
                 break;
-            case Item.ITEM_APPROVED:
+            case ITEM_APPROVED:
                 approvalIconIv.setImageResource(R.drawable.ic_check_circle_black_24dp);
                 approvalStatusTv.setText("Approved");
                 approvalStatusTv.setTextColor(ContextCompat.getColor(this, R.color.black));

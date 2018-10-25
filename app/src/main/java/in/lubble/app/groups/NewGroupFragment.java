@@ -95,7 +95,7 @@ public class NewGroupFragment extends Fragment {
         groupName = view.findViewById(R.id.et_group_title);
         groupDesc = view.findViewById(R.id.et_group_desc);
         spinner = view.findViewById(R.id.spinner_privacy);
-        Button createBtn = view.findViewById(R.id.btn_create_group);
+        Button createBtn = view.findViewById(R.id.container_create_group);
 
         createBtn.setOnClickListener(new View.OnClickListener() {
             @Override
