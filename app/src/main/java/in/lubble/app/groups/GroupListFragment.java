@@ -74,7 +74,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private HashMap<Query, ValueEventListener> dmListenersMap = new HashMap<>();
     private ChildEventListener joinedGroupListener;
-    private ChildEventListener unjoinedGroupListener;
     private ChildEventListener userDmsListener;
     private RecyclerView groupsRecyclerView;
     private ProgressBar progressBar;
@@ -462,11 +461,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (progressBar.getVisibility() == View.VISIBLE) {
                     progressBar.setVisibility(View.GONE);
                 }
-                ArrayList<String> list = new ArrayList<>();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    list.add(child.getKey());
-                }
-                syncAllPublicGroups(list);
+                groupsRecyclerView.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -522,49 +517,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         map.put(getLubbleGroupsRef().child(groupId), joinedGroupListener);
     }
 
-    private void syncAllPublicGroups(final ArrayList<String> joinedGroupIdList) {
-        unjoinedGroupListener = getLubbleGroupsRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                final GroupData unJoinedGroup = dataSnapshot.getValue(GroupData.class);
-                if (unJoinedGroup != null && unJoinedGroup.getId() != null && !joinedGroupIdList.contains(unJoinedGroup.getId()) && !unJoinedGroup.getIsPrivate()) {
-                    adapter.addPublicGroup(unJoinedGroup);
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        getLubbleGroupsRef().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                groupsRecyclerView.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -576,9 +528,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         super.onPause();
         if (joinedGroupListener != null) {
             getUserGroupsRef().removeEventListener(joinedGroupListener);
-        }
-        if (unjoinedGroupListener != null) {
-            getLubbleGroupsRef().removeEventListener(unjoinedGroupListener);
         }
         if (userDmsListener != null) {
             getUserDmsRef().removeEventListener(userDmsListener);
