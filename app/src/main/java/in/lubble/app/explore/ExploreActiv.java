@@ -12,6 +12,8 @@ import in.lubble.app.utils.FragUtils;
 
 import java.util.ArrayList;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+
 public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
     private ArrayList<ExploreGroupData> selectedGroupList = new ArrayList<>();
@@ -35,7 +37,11 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
         joinBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                joinBtn.setEnabled(false);
+                for (ExploreGroupData groupData : selectedGroupList) {
+                    getCreateOrJoinGroupRef().child(groupData.getFirebaseGroupId()).setValue(true);
+                }
+                finish();
             }
         });
 
