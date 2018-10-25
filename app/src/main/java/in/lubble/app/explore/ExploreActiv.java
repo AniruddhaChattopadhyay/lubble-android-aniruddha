@@ -11,13 +11,13 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.utils.FragUtils;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 
 public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
-    private ArrayList<ExploreGroupData> selectedGroupList = new ArrayList<>();
+    private HashMap<String, Boolean> selectedGroupIdMap = new HashMap<>();
     private ImageView crossIv;
     private Button joinBtn;
 
@@ -41,8 +41,8 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
             @Override
             public void onClick(View v) {
                 joinBtn.setEnabled(false);
-                for (ExploreGroupData groupData : selectedGroupList) {
-                    getCreateOrJoinGroupRef().child(groupData.getFirebaseGroupId()).setValue(true);
+                for (String groupId : selectedGroupIdMap.keySet()) {
+                    getCreateOrJoinGroupRef().child(groupId).setValue(true);
                 }
                 finish();
             }
@@ -58,15 +58,16 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
     }
 
     @Override
-    public void onListFragmentInteraction(ExploreGroupData item) {
-        if (selectedGroupList.contains(item)) {
-            selectedGroupList.remove(item);
-            if (selectedGroupList.size() == 0) {
+    public void onListFragmentInteraction(ExploreGroupData item, boolean isAdded) {
+        if (isAdded) {
+            selectedGroupIdMap.put(item.getFirebaseGroupId(), true);
+            joinBtn.setVisibility(View.VISIBLE);
+
+        } else {
+            selectedGroupIdMap.remove(item.getFirebaseGroupId());
+            if (selectedGroupIdMap.size() == 0) {
                 joinBtn.setVisibility(View.GONE);
             }
-        } else {
-            selectedGroupList.add(item);
-            joinBtn.setVisibility(View.VISIBLE);
         }
     }
 

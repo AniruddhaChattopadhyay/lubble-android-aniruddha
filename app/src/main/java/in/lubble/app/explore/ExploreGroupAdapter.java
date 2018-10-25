@@ -108,15 +108,14 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.groupItem);
                     if (isOnboarding) {
                         if (holder.selectedContainer.getVisibility() == View.GONE) {
+                            mListener.onListFragmentInteraction(holder.groupItem, true);
                             UiUtils.animateFadeShow(holder.mView.getContext(), holder.selectedContainer);
                             holder.joinTv.setText("REMOVE");
                             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
                         } else {
+                            mListener.onListFragmentInteraction(holder.groupItem, false);
                             UiUtils.animateFadeHide(holder.mView.getContext(), holder.selectedContainer);
                             holder.joinTv.setText("SELECT");
                             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
@@ -157,6 +156,6 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     }
 
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(ExploreGroupData item);
+        void onListFragmentInteraction(ExploreGroupData item, boolean isAdded);
     }
 }

@@ -1,8 +1,21 @@
 package in.lubble.app.explore;
 
+import androidx.annotation.Nullable;
 import com.google.gson.annotations.SerializedName;
 
 public class ExploreGroupData {
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof ExploreGroupData) {
+            ExploreGroupData objectToCompare = (ExploreGroupData) obj;
+            if (this.firebaseGroupId.equalsIgnoreCase(objectToCompare.getFirebaseGroupId())) {
+                return true;
+            }
+            return false;
+        }
+        return super.equals(obj);
+    }
 
     @SerializedName("title")
     private String title;
