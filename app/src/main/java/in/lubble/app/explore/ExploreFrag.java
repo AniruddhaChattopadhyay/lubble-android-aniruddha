@@ -2,15 +2,16 @@ package in.lubble.app.explore;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -29,6 +30,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private ExploreGroupAdapter.OnListFragmentInteractionListener mListener;
     private RecyclerView recyclerView;
     private ProgressBar progressbar;
+    private TextView joinedAllTv;
 
     public ExploreFrag() {
     }
@@ -50,9 +52,11 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
 
         Context context = view.getContext();
+        joinedAllTv = view.findViewById(R.id.tv_joined_all);
         recyclerView = view.findViewById(R.id.rv_interest_groups);
         progressbar = view.findViewById(R.id.progressbar);
-        recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        joinedAllTv.setVisibility(View.GONE);
 
         return view;
     }
@@ -75,8 +79,18 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
                     recyclerView.setAdapter(new ExploreGroupAdapter(exploreGroupDataList, mListener, GlideApp.with(requireContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener));
                 } else {
                     if (isAdded() && isVisible()) {
-                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                         progressbar.setVisibility(View.GONE);
+                        if (exploreGroupDataList != null && exploreGroupDataList.isEmpty()) {
+                            if (getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener) {
+                                // exit the explore activity if opened during onboarding & there are no unjoined groups to be shown
+                                // will happen if an existing user logs back in and has already joined every group
+                                getActivity().finish();
+                            } else {
+                                joinedAllTv.setVisibility(View.VISIBLE);
+                            }
+                        } else {
+                            Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             }
