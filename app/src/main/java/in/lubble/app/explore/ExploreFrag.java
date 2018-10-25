@@ -54,9 +54,13 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         progressbar = view.findViewById(R.id.progressbar);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 2));
 
-        fetchExploreGroups();
-
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchExploreGroups();
     }
 
     private void fetchExploreGroups() {
@@ -102,6 +106,8 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     public void onListFragmentInteraction(ExploreGroupData item) {
         if (getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener) {
             ((ExploreGroupAdapter.OnListFragmentInteractionListener) getActivity()).onListFragmentInteraction(item);
+        } else {
+
         }
     }
 

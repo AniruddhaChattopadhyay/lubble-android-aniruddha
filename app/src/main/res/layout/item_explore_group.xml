@@ -11,7 +11,7 @@
 
     <ImageView
         android:id="@+id/iv_group_pic"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="200dp"
         android:scaleType="centerCrop"
         tools:src="@tools:sample/backgrounds/scenic" />
@@ -26,8 +26,8 @@
     <RelativeLayout
         android:id="@+id/container_selected"
         android:layout_width="match_parent"
-        android:animateLayoutChanges="true"
         android:layout_height="200dp"
+        android:animateLayoutChanges="true"
         android:visibility="gone"
         tools:visibility="visible">
 
@@ -66,5 +66,15 @@
         android:padding="8dp"
         android:text="SELECT"
         android:textColor="@color/colorAccent" />
+
+    <ProgressBar
+        android:id="@+id/progressbar_join"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_margin="8dp"
+        android:layout_below="@id/tv_group_title"
+        android:visibility="gone"
+        android:layout_alignTop="@id/tv_join"
+        android:layout_alignBottom="@id/tv_join" />
 
 </RelativeLayout>

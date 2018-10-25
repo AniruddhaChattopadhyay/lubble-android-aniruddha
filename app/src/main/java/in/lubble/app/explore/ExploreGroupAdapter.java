@@ -1,15 +1,16 @@
 package in.lubble.app.explore;
 
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
@@ -18,6 +19,8 @@ import in.lubble.app.utils.UiUtils;
 
 import java.util.List;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 
 public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapter.ViewHolder> {
@@ -62,6 +65,45 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
         }
 
+        if (!isOnboarding) {
+            holder.joinTv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!isOnboarding) {
+                        String groupId = exploreGroupData.getFirebaseGroupId();
+                        holder.joinTv.setVisibility(View.GONE);
+                        holder.joinProgressbar.setVisibility(View.VISIBLE);
+                        getCreateOrJoinGroupRef().child(groupId).setValue(true);
+                        holder.mView.setOnClickListener(null);
+
+                        getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                holder.joinTv.setVisibility(View.VISIBLE);
+                                holder.joinProgressbar.setVisibility(View.GONE);
+                                holder.joinTv.setText("Member");
+                                initCardClickListener(holder, exploreGroupData);
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                                holder.joinProgressbar.setVisibility(View.GONE);
+                                Toast.makeText(holder.mView.getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                initCardClickListener(holder, exploreGroupData);
+                            }
+                        });
+                    }
+                }
+            });
+        } else {
+            holder.joinTv.setOnClickListener(null);
+            holder.joinTv.setClickable(false);
+        }
+
+        initCardClickListener(holder, exploreGroupData);
+    }
+
+    private void initCardClickListener(final ViewHolder holder, final ExploreGroupData exploreGroupData) {
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -99,6 +141,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         final RelativeLayout selectedContainer;
         final TextView titleTv;
         final TextView joinTv;
+        final ProgressBar joinProgressbar;
         public ExploreGroupData groupItem;
 
         public ViewHolder(View view) {
@@ -108,6 +151,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             selectedContainer = view.findViewById(R.id.container_selected);
             titleTv = view.findViewById(R.id.tv_group_title);
             joinTv = view.findViewById(R.id.tv_join);
+            joinProgressbar = view.findViewById(R.id.progressbar_join);
         }
 
     }
