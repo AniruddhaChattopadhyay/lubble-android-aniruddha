@@ -129,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 .circleCrop()
                 .into(profileIcon);
 
+        isNewUser = getIntent().hasExtra(EXTRA_IDP_RESPONSE) && ((IdpResponse) getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE)).isNewUser();
+
         if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
             initEverything();
         } else {
@@ -153,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        isNewUser = getIntent().hasExtra(EXTRA_IDP_RESPONSE) && ((IdpResponse) getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE)).isNewUser();
         handleExploreActivity();
 
     }
@@ -243,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                     overridePendingTransition(R.anim.slide_from_bottom, R.anim.none);
                 }
             }
-        }, 500);
+        }, 300);
     }
 
     private void initFirebaseRemoteConfig() {
@@ -262,27 +263,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showBottomNavBadge() {
-        if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
-            BottomNavigationMenuView bottomNavigationMenuView =
-                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-            View v = bottomNavigationMenuView.getChildAt(2);
-            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        if (!isNewUser) {
+            if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
+                BottomNavigationMenuView bottomNavigationMenuView =
+                        (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+                View v = bottomNavigationMenuView.getChildAt(2);
+                BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
-            View badge = LayoutInflater.from(this)
-                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+                View badge = LayoutInflater.from(this)
+                        .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
-            itemView.addView(badge);
-        }
-        if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
-            BottomNavigationMenuView bottomNavigationMenuView =
-                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-            View v = bottomNavigationMenuView.getChildAt(3);
-            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+                itemView.addView(badge);
+            }
+            if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
+                BottomNavigationMenuView bottomNavigationMenuView =
+                        (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+                View v = bottomNavigationMenuView.getChildAt(3);
+                BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
-            View badge = LayoutInflater.from(this)
-                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+                View badge = LayoutInflater.from(this)
+                        .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
-            itemView.addView(badge);
+                itemView.addView(badge);
+            }
         }
     }
 
