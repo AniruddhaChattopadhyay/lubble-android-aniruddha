@@ -28,6 +28,7 @@ public class LubbleSharedPrefs {
     private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
     private final String FULL_NAME = "FULL_NAME";
     private final String REFERRAL_CODE = "REFERRAL_CODE";
+    private final String IS_EXPLORE_SHOWN = "IS_EXPLORE_SHOWN";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -197,6 +198,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsViewCountEnabled(boolean isViewCountEnabled) {
         return preferences.edit().putBoolean(IS_VIEW_COUNT_ENABLED, isViewCountEnabled).commit();
+    }
+
+    public boolean getIsExploreShown() {
+        return preferences.getBoolean(IS_EXPLORE_SHOWN, false);
+    }
+
+    public boolean setIsExploreShown(boolean isShown) {
+        return preferences.edit().putBoolean(IS_EXPLORE_SHOWN, isShown).commit();
     }
 
 }

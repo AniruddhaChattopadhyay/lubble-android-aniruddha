@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
     private ValueEventListener dpEventListener;
     private BottomNavigationView bottomNavigation;
     private boolean isActive;
+    private boolean isNewUser;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -152,12 +153,8 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        if (getIntent().hasExtra(EXTRA_IDP_RESPONSE) && ((IdpResponse) getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE)).isNewUser()) {
-            // new signup
-            ExploreActiv.open(this, true);
-        } else {
-            openExploreWithDelay();
-        }
+        isNewUser = getIntent().hasExtra(EXTRA_IDP_RESPONSE) && ((IdpResponse) getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE)).isNewUser();
+        handleExploreActivity();
 
     }
 
@@ -209,6 +206,32 @@ public class MainActivity extends AppCompatActivity {
         }, this.getIntent().getData(), this);
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
+    }
+
+    private void handleExploreActivity() {
+        if (isNewUser) {
+            // new signup
+            ExploreActiv.open(this, true);
+        } else {
+            if (!LubbleSharedPrefs.getInstance().getIsExploreShown()) {
+                RealtimeDbHelper.getThisUserRef().child("isExploreShown").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null && isActive && !isFinishing()) {
+                            final Boolean isExploreShownInRdb = dataSnapshot.getValue() == null ? false : dataSnapshot.getValue(Boolean.class);
+                            LubbleSharedPrefs.getInstance().setIsExploreShown(isExploreShownInRdb);
+                            if (!isExploreShownInRdb) {
+                                openExploreWithDelay();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+            }
+        }
     }
 
     private void openExploreWithDelay() {

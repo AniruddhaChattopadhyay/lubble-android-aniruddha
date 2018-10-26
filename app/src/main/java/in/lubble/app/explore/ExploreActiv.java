@@ -8,8 +8,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.utils.FragUtils;
 
 import java.util.HashMap;
@@ -68,6 +70,9 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
                 overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
             }
         });
+
+        LubbleSharedPrefs.getInstance().setIsExploreShown(true);
+        RealtimeDbHelper.getThisUserRef().child("isExploreShown").setValue(true);
 
     }
 
