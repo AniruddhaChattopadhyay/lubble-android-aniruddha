@@ -57,7 +57,7 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
             }
         });
 
-        if (isNewUser) {
+        if (!isNewUser) {
             crossIv.setColorFilter(ContextCompat.getColor(this, R.color.black), android.graphics.PorterDuff.Mode.SRC_IN);
         }
 
@@ -90,6 +90,7 @@ public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapt
         if (!isNewUser) {
             // allow old user to go back
             super.onBackPressed();
+            overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
         }
     }
 }

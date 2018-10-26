@@ -152,6 +152,13 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        if (getIntent().hasExtra(EXTRA_IDP_RESPONSE) && ((IdpResponse) getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE)).isNewUser()) {
+            // new signup
+            ExploreActiv.open(this, true);
+        } else {
+            openExploreWithDelay();
+        }
+
     }
 
     private void initEverything() {
@@ -202,24 +209,18 @@ public class MainActivity extends AppCompatActivity {
         }, this.getIntent().getData(), this);
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
-        if (getIntent().hasExtra(EXTRA_IDP_RESPONSE)) {
-            final IdpResponse idpResponse = getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE);
-            if (idpResponse.isNewUser()) {
-                // new signup
-                ExploreActiv.open(this, true);
-            } else {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (isActive && !isFinishing()) {
-                            ExploreActiv.open(MainActivity.this, false);
-                            overridePendingTransition(R.anim.slide_from_bottom, R.anim.none);
-                        }
-                    }
-                }, 500);
-            }
-        }
+    }
 
+    private void openExploreWithDelay() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isActive && !isFinishing()) {
+                    ExploreActiv.open(MainActivity.this, false);
+                    overridePendingTransition(R.anim.slide_from_bottom, R.anim.none);
+                }
+            }
+        }, 500);
     }
 
     private void initFirebaseRemoteConfig() {
