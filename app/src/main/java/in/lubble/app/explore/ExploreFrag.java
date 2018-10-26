@@ -85,6 +85,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
                                 // exit the explore activity if opened during onboarding & there are no unjoined groups to be shown
                                 // will happen if an existing user logs back in and has already joined every group
                                 getActivity().finish();
+                                getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
                             } else {
                                 joinedAllTv.setVisibility(View.VISIBLE);
                             }

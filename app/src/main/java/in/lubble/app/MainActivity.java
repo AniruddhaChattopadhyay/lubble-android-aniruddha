@@ -3,6 +3,7 @@ package in.lubble.app;
 import android.content.*;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -78,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
     private View lubbleClickTarget;
     private ValueEventListener dpEventListener;
     private BottomNavigationView bottomNavigation;
+    private boolean isActive;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -150,8 +152,6 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        ExploreActiv.open(this);
-
     }
 
     private void initEverything() {
@@ -184,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        isActive = true;
         Branch branch = Branch.getInstance();
 
         // Branch init
@@ -200,6 +201,25 @@ public class MainActivity extends AppCompatActivity {
             }
         }, this.getIntent().getData(), this);
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
+
+        if (getIntent().hasExtra(EXTRA_IDP_RESPONSE)) {
+            final IdpResponse idpResponse = getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE);
+            if (idpResponse.isNewUser()) {
+                // new signup
+                ExploreActiv.open(this, true);
+            } else {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (isActive && !isFinishing()) {
+                            ExploreActiv.open(MainActivity.this, false);
+                            overridePendingTransition(R.anim.slide_from_bottom, R.anim.none);
+                        }
+                    }
+                }, 500);
+            }
+        }
+
     }
 
     private void initFirebaseRemoteConfig() {
@@ -509,6 +529,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        isActive = false;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
     }
 }
