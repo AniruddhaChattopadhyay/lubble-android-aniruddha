@@ -537,7 +537,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void removeMplaceBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-        View v = bottomNavigationMenuView.getChildAt(1);
+        View v = bottomNavigationMenuView.getChildAt(2);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
@@ -546,7 +546,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void removeServicesBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-        View v = bottomNavigationMenuView.getChildAt(2);
+        View v = bottomNavigationMenuView.getChildAt(3);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);

@@ -113,6 +113,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
     private ProgressBar sendBtnProgressBtn;
+    private ProgressBar chatProgressBar;
     @Nullable
     private ValueEventListener bottomBarListener;
     @Nullable
@@ -206,6 +207,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         bottomContainer = view.findViewById(R.id.bottom_container);
         pvtSystemMsg = view.findViewById(R.id.view_pvt_sys_msg);
         sendBtnProgressBtn = view.findViewById(R.id.progress_bar_send);
+        chatProgressBar = view.findViewById(R.id.progressbar_chat);
 
         groupMembersMap = new HashMap<>();
 
@@ -254,6 +256,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         chatRecyclerView.setAdapter(chatAdapter);
         if (messagesReference != null) {
             msgChildListener = msgListener(messagesReference);
+            initMsgListenerToKnowWhenSyncComplete();
         }
 
         deleteUnreadMsgsForGroupId(groupId, getContext());
@@ -343,6 +346,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         });
 
         resetActionBar();
+    }
+
+    private void initMsgListenerToKnowWhenSyncComplete() {
+        messagesReference.orderByChild("serverTimestamp").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // this is only called after all chats have been synced
+                // use this to hide the progressbar
+                if (chatProgressBar.getVisibility() == View.VISIBLE) {
+                    chatProgressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void resetActionBar() {
@@ -636,7 +657,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     chatData.setId(dataSnapshot.getKey());
                     chatAdapter.addChatData(chatData);
                     sendReadReceipt(chatData);
-                } else{
+                } else {
                     Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey()));
                 }
             }

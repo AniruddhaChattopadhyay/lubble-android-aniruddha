@@ -17,9 +17,9 @@
             android:id="@+id/compose_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
             android:layout_marginLeft="4dp"
             android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
             android:background="@drawable/chat_bubble_border"
             android:visibility="visible">
 
@@ -42,8 +42,8 @@
                     android:id="@+id/tv_link_title"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
                     android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textStyle="bold"
@@ -59,8 +59,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:paddingRight="4dp"
                     android:paddingTop="4dp"
+                    android:paddingRight="4dp"
                     app:layout_constraintBottom_toTopOf="@+id/tv_link_desc"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -70,8 +70,8 @@
                     android:id="@+id/view_separator"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginBottom="16dp"
                     android:layout_marginRight="16dp"
+                    android:layout_marginBottom="16dp"
                     android:background="@color/light_gray"
                     app:layout_constraintBottom_toTopOf="@+id/et_new_message" />
 
@@ -91,9 +91,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
+                    android:background="@drawable/blue_circle"
                     android:theme="@style/AppTheme.WhiteAccent"
                     android:visibility="gone"
-                    android:background="@drawable/blue_circle"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent" />
 
@@ -102,9 +102,9 @@
                     android:layout_width="40dp"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
+                    android:layout_marginTop="8dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginRight="8dp"
-                    android:layout_marginTop="8dp"
                     android:layout_toLeftOf="@id/iv_send_btn"
                     android:padding="10dp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -117,10 +117,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginLeft="8dp"
                     android:layout_marginStart="8dp"
+                    android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
                     android:layout_toLeftOf="@id/iv_attach"
                     android:background="@android:color/transparent"
                     android:gravity="top|left"
@@ -187,6 +187,12 @@
 
         </RelativeLayout>
     </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/progressbar_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat"
