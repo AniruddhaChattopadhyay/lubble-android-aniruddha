@@ -37,39 +37,74 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     private void checkMinAppVersion() {
-        minAppEventListener = RealtimeDbHelper.getAppInfoRef().addValueEventListener(new ValueEventListener() {
+        // orderByKey to ensure we always check for hard stop firstm then evaluate the soft block
+        minAppEventListener = RealtimeDbHelper.getAppInfoRef().orderByKey().addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    Integer minAppVersion = child.getValue(Integer.class);
-                    minAppVersion = minAppVersion == null ? 27 : minAppVersion;
+                    if (child.getKey().equalsIgnoreCase("minApp")) {
+                        Integer minAppVersion = child.getValue(Integer.class);
+                        minAppVersion = minAppVersion == null ? 27 : minAppVersion;
 
-                    if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing()) {
-                        // block app
-                        final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
-                        alertDialog.setTitle(getString(R.string.update_dialog_title));
-                        alertDialog.setMessage(getString(R.string.update_dialog_msg));
-                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_update), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                alertDialog.dismiss();
-                                final String appPackageName = getPackageName();
-                                try {
-                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                                } catch (ActivityNotFoundException anfe) {
-                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                        if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing()) {
+                            // block app
+                            final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
+                            alertDialog.setTitle(getString(R.string.update_dialog_title));
+                            alertDialog.setMessage(getString(R.string.update_dialog_msg));
+                            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_update), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    alertDialog.dismiss();
+                                    final String appPackageName = getPackageName();
+                                    try {
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                                    } catch (ActivityNotFoundException anfe) {
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                                    }
                                 }
-                            }
-                        });
-                        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.update_recheck), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                alertDialog.dismiss();
-                                checkMinAppVersion();
-                            }
-                        });
-                        alertDialog.setCancelable(false);
-                        alertDialog.show();
+                            });
+                            alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.update_recheck), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    alertDialog.dismiss();
+                                    checkMinAppVersion();
+                                }
+                            });
+                            alertDialog.setCancelable(false);
+                            alertDialog.show();
+                            return;
+                        }
+                    } else if (child.getKey().equalsIgnoreCase("softMinApp") && BaseActivity.this instanceof MainActivity) {
+                        Integer minAppVersion = child.getValue(Integer.class);
+                        minAppVersion = minAppVersion == null ? 27 : minAppVersion;
+
+                        if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing()) {
+                            // prompt to optionally update app
+                            final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
+                            alertDialog.setTitle(getString(R.string.soft_update_dialog_title));
+                            alertDialog.setMessage(getString(R.string.soft_update_dialog_msg));
+                            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_update), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    alertDialog.dismiss();
+                                    final String appPackageName = getPackageName();
+                                    try {
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                                    } catch (ActivityNotFoundException anfe) {
+                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                                    }
+                                }
+                            });
+                            alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.all_later), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    alertDialog.dismiss();
+                                }
+                            });
+                            alertDialog.setCancelable(false);
+                            alertDialog.show();
+                            return;
+                        }
                     }
                 }
             }
@@ -86,7 +121,7 @@ public class BaseActivity extends AppCompatActivity {
         super.onPause();
         isActive = false;
         if (minAppEventListener != null) {
-            RealtimeDbHelper.getAppInfoRef().removeEventListener(minAppEventListener);
+            RealtimeDbHelper.getAppInfoRef().orderByKey().removeEventListener(minAppEventListener);
         }
     }
 }

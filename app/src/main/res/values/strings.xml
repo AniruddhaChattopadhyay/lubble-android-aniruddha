@@ -45,6 +45,8 @@
     <string name="domestic_directory">Domestic Directory</string>
     <string name="update_dialog_title">Please Update App</string>
     <string name="update_dialog_msg">You haven\'t updated Lubble app in a while. Please download the latest update from play store.</string>
+    <string name="soft_update_dialog_title">New App Update 🎁</string>
+    <string name="soft_update_dialog_msg">Cool new features await you! Get the latest update now 😍</string>
     <string name="all_update">UPDATE</string>
     <string name="update_recheck">Re-check</string>
     <string name="new_notice_title">New Notice</string>
@@ -174,4 +176,5 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="refer_share_title">Share via:</string>
     <string name="refer_msg"><![CDATA[Join me &amp; your neighbours on Lubble, a free &amp; private social network for your neighbourhood!<br><br>Join now &amp; win prizes:&nbsp;]]></string>
+    <string name="all_later">Later</string>
 </resources>
