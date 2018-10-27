@@ -31,6 +31,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private RecyclerView recyclerView;
     private ProgressBar progressbar;
     private TextView joinedAllTv;
+    private ExploreGroupAdapter exploreGroupAdapter;
 
     public ExploreFrag() {
     }
@@ -58,6 +59,9 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         joinedAllTv.setVisibility(View.GONE);
 
+        exploreGroupAdapter = new ExploreGroupAdapter(new ArrayList<ExploreGroupData>(), mListener, GlideApp.with(requireContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener);
+        recyclerView.setAdapter(exploreGroupAdapter);
+
         return view;
     }
 
@@ -76,7 +80,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
                 final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();
                 if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty() && isAdded() && isVisible()) {
                     progressbar.setVisibility(View.GONE);
-                    recyclerView.setAdapter(new ExploreGroupAdapter(exploreGroupDataList, mListener, GlideApp.with(requireContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener));
+                    exploreGroupAdapter.updateList(exploreGroupDataList);
                 } else {
                     if (isAdded() && isVisible()) {
                         progressbar.setVisibility(View.GONE);

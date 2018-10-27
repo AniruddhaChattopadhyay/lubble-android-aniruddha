@@ -25,7 +25,7 @@ import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 
 public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapter.ViewHolder> {
 
-    private final List<ExploreGroupData> mValues;
+    private List<ExploreGroupData> mValues;
     private final OnListFragmentInteractionListener mListener;
     private final GlideRequests glide;
     private final boolean isOnboarding;
@@ -35,6 +35,11 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         mListener = listener;
         this.glide = glide;
         this.isOnboarding = isOnboarding;
+    }
+
+    public void updateList(List<ExploreGroupData> items){
+        this.mValues = items;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -82,6 +87,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                                 holder.joinTv.setVisibility(View.VISIBLE);
                                 holder.joinProgressbar.setVisibility(View.GONE);
                                 holder.joinTv.setText("Member");
+                                holder.joinTv.setOnClickListener(null);
                                 initCardClickListener(holder, exploreGroupData);
                             }
 
