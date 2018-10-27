@@ -4,8 +4,6 @@ import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.crashlytics.android.Crashlytics;
@@ -21,19 +19,14 @@ public class BaseActivity extends AppCompatActivity {
     private ValueEventListener minAppEventListener;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onResume() {
+        super.onResume();
+        isActive = true;
         try {
             checkMinAppVersion();
         } catch (Exception e) {
             Crashlytics.logException(e);
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isActive = true;
     }
 
     private void checkMinAppVersion() {
@@ -46,7 +39,7 @@ public class BaseActivity extends AppCompatActivity {
                         Integer minAppVersion = child.getValue(Integer.class);
                         minAppVersion = minAppVersion == null ? 27 : minAppVersion;
 
-                        if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing()) {
+                        if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing() && isActive) {
                             // block app
                             final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
                             alertDialog.setTitle(getString(R.string.update_dialog_title));
@@ -78,7 +71,7 @@ public class BaseActivity extends AppCompatActivity {
                         Integer minAppVersion = child.getValue(Integer.class);
                         minAppVersion = minAppVersion == null ? 27 : minAppVersion;
 
-                        if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing()) {
+                        if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing() && isActive) {
                             // prompt to optionally update app
                             final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
                             alertDialog.setTitle(getString(R.string.soft_update_dialog_title));
