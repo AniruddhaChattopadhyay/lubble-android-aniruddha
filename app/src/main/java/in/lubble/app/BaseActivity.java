@@ -24,7 +24,7 @@ public class BaseActivity extends AppCompatActivity {
         isActive = true;
         try {
             checkMinAppVersion();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             Crashlytics.logException(e);
         }
     }
