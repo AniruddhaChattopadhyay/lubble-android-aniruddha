@@ -1,5 +1,6 @@
 package in.lubble.app;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import com.crashlytics.android.Crashlytics;
@@ -69,6 +70,11 @@ public class DeepLinkRouterActiv extends BaseActivity {
             case "seller_dash":
                 startActivity(SellerDashActiv.getIntent(this, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT));
                 break;
+            case "chats":
+                startActivity(new Intent(this, MainActivity.class));
+                break;
+            default:
+                startActivity(new Intent(this, MainActivity.class));
         }
     }
 
