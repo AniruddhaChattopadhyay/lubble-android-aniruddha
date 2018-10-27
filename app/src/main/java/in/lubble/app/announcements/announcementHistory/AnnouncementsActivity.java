@@ -12,7 +12,7 @@ import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 
-public class AnnouncementsActivity extends AppCompatActivity {
+public class AnnouncementsActivity extends BaseActivity {
 
     public static void open(Context context) {
         final Intent intent = new Intent(context, AnnouncementsActivity.class);

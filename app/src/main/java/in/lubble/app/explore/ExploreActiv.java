@@ -18,7 +18,7 @@ import java.util.HashMap;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 
-public class ExploreActiv extends AppCompatActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
+public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
     private static final String IS_NEW_USER = "IS_NEW_USER";
 

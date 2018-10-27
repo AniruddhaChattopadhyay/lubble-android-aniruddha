@@ -25,7 +25,7 @@ import retrofit2.Response;
 
 import java.util.ArrayList;
 
-public class CategoryChooserActiv extends AppCompatActivity {
+public class CategoryChooserActiv extends BaseActivity {
 
     private static final String TAG = "CategoryChooserActiv";
 

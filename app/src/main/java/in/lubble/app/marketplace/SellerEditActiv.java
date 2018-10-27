@@ -65,7 +65,7 @@ import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.compressImage;
 
 @RuntimePermissions
-public class SellerEditActiv extends AppCompatActivity implements View.OnClickListener {
+public class SellerEditActiv extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "SellerEditActiv";
     private static final int REQUEST_PHOTO = 304;

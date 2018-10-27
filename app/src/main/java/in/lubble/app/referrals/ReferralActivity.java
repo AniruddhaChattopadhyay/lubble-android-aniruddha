@@ -13,7 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import in.lubble.app.R;
 
-public class ReferralActivity extends AppCompatActivity {
+public class ReferralActivity extends BaseActivity {
     private static final String TAG = "ReferralActivity";
 
     private SectionsPagerAdapter mSectionsPagerAdapter;

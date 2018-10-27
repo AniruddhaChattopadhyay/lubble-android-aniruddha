@@ -11,7 +11,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.utils.FragUtils;
 
-public class EventsActivity extends AppCompatActivity {
+public class EventsActivity extends BaseActivity {
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, EventsActivity.class));

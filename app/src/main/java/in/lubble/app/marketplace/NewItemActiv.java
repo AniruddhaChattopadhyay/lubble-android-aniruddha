@@ -59,7 +59,7 @@ import static in.lubble.app.utils.UiUtils.compressImage;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 @RuntimePermissions
-public class NewItemActiv extends AppCompatActivity implements View.OnClickListener {
+public class NewItemActiv extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "NewItemActiv";
     private static final String ARG_EDIT_ITEM_ID = "ARG_EDIT_ITEM_ID";

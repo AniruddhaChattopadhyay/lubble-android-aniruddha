@@ -89,7 +89,7 @@ import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 @RuntimePermissions
-public class NewEventActivity extends AppCompatActivity {
+public class NewEventActivity extends BaseActivity {
 
     private static final String TAG = "NewEventActivity";
     private static final int PLACE_PICKER_REQUEST = 828;

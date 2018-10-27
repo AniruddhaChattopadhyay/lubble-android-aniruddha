@@ -33,7 +33,7 @@ import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 
-public class EventGroupJoinedActivity extends AppCompatActivity {
+public class EventGroupJoinedActivity extends BaseActivity {
 
     private static final String TAG = "EventGroupJoinedActiv";
     private static final String STATUS = "STATUS";

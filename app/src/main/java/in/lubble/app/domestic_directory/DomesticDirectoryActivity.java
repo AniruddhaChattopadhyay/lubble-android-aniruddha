@@ -11,7 +11,7 @@ import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 
-public class DomesticDirectoryActivity extends AppCompatActivity {
+public class DomesticDirectoryActivity extends BaseActivity {
 
     public static void open(Context context) {
         final Intent intent = new Intent(context, DomesticDirectoryActivity.class);

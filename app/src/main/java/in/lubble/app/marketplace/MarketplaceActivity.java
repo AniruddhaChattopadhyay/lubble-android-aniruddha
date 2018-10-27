@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import in.lubble.app.R;
 
-public class MarketplaceActivity extends AppCompatActivity {
+public class MarketplaceActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

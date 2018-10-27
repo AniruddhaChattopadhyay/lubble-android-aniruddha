@@ -62,7 +62,7 @@ import static in.lubble.app.analytics.AnalyticsEvents.VISIT_SHOP_CLICK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.marketplace.Item.ITEM_APPROVED;
 
-public class ItemActivity extends AppCompatActivity {
+public class ItemActivity extends BaseActivity {
 
     private static final String TAG = "ItemActivity";
     private static final String PARAM_ITEM_ID = "PARAM_ITEM_ID";

@@ -50,7 +50,7 @@ import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
-public class LocationActivity extends AppCompatActivity {
+public class LocationActivity extends BaseActivity {
 
     private static final String TAG = "LocationActivity";
     private static final int REQUEST_SYSTEM_LOCATION = 859;

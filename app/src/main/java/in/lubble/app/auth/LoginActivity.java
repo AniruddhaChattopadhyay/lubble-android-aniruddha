@@ -25,7 +25,7 @@ import static in.lubble.app.utils.FragUtils.replaceFrag;
 import static in.lubble.app.utils.FragUtils.replaceStack;
 import static in.lubble.app.utils.UserUtils.isNewUser;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
 
     public static final int RC_SIGN_IN = 777;
     static final int REQUEST_LOCATION = 636;

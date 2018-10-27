@@ -39,7 +39,7 @@ import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 
 @RuntimePermissions
-public class FullScreenImageActivity extends AppCompatActivity {
+public class FullScreenImageActivity extends BaseActivity {
 
     private static final int REQUEST_CODE_GROUP_DP = 418;
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";

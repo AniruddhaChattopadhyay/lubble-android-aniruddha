@@ -29,7 +29,7 @@ import retrofit2.Response;
 
 import static in.lubble.app.analytics.AnalyticsEvents.RECOMMEND_BTN_CLICK;
 
-public class ItemListActiv extends AppCompatActivity {
+public class ItemListActiv extends BaseActivity {
 
     private static final String TAG = "SellerDashActiv";
     private static final String PARAM_IS_SELLER = "PARAM_IS_SELLER";

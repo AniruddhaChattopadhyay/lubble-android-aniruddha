@@ -34,7 +34,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SellerDashActiv extends AppCompatActivity {
+public class SellerDashActiv extends BaseActivity {
 
     private static final String TAG = "SellerDashActiv";
     private static final String PARAM_SELLER_ID = "PARAM_SELLER_ID";

@@ -15,7 +15,7 @@ import in.lubble.app.services.ServiceCategoryDetailActiv;
 
 import java.util.List;
 
-public class DeepLinkRouterActiv extends AppCompatActivity {
+public class DeepLinkRouterActiv extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

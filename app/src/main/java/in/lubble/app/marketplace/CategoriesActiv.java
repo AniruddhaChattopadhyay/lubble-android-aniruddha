@@ -26,7 +26,7 @@ import retrofit2.Response;
 
 import java.util.ArrayList;
 
-public class CategoriesActiv extends AppCompatActivity {
+public class CategoriesActiv extends BaseActivity {
 
     private static final String TAG = "CategoriesActiv";
     private ProgressBar progressBar;

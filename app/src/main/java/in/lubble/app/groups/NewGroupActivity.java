@@ -9,7 +9,7 @@ import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 
-public class NewGroupActivity extends AppCompatActivity {
+public class NewGroupActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

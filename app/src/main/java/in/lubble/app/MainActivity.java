@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -63,7 +62,7 @@ import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
     private static final String EXTRA_IDP_RESPONSE = "extra_idp_response";
@@ -304,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        checkMinAppVersion();
+        //checkMinAppVersion();
         handlePresence();
         setDp();
 

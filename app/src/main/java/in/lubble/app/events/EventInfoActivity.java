@@ -55,7 +55,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
-public class EventInfoActivity extends AppCompatActivity {
+public class EventInfoActivity extends BaseActivity {
 
     public static final String KEY_EVENT_ID = "KEY_EVENT_ID";
 

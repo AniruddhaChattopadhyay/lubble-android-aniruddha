@@ -14,7 +14,7 @@ import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 
-public class ServiceCategoryDetailActiv extends AppCompatActivity {
+public class ServiceCategoryDetailActiv extends BaseActivity {
 
     private static final String ARG_CAT_ID = "ARG_CAT_ID";
 

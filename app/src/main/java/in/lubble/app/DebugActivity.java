@@ -9,7 +9,7 @@ import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 
-public class DebugActivity extends AppCompatActivity {
+public class DebugActivity extends BaseActivity {
 
     private static final String TAG = "DebugActivity";
 

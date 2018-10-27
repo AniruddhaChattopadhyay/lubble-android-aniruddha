@@ -12,7 +12,7 @@ import in.lubble.app.R;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
-public class UserSearchActivity extends AppCompatActivity {
+public class UserSearchActivity extends BaseActivity {
 
     private static final String EXTRA_GROUP_ID = "UserSearchActivity_GroupId";
 

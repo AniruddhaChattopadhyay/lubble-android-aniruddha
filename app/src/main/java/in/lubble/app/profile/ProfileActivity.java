@@ -12,7 +12,7 @@ import android.view.MenuItem;
 import in.lubble.app.R;
 
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
 
     public static final String KEY_USER_ID = "profileActivUserId";
 

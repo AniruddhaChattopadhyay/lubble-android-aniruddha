@@ -54,7 +54,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
-public class ScrollingGroupInfoActivity extends AppCompatActivity {
+public class ScrollingGroupInfoActivity extends BaseActivity {
 
     private static final String EXTRA_GROUP_ID = "GroupInfoActivity_GroupId";
 

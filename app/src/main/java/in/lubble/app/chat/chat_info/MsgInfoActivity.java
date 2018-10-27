@@ -9,7 +9,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,6 +17,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -31,7 +31,7 @@ import java.util.HashMap;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
-public class MsgInfoActivity extends AppCompatActivity {
+public class MsgInfoActivity extends BaseActivity {
 
     private static final String TAG = "MsgInfoActivity";
     private static final String ARG_GROUP_ID = "ARG_GROUP_ID";

@@ -28,7 +28,7 @@ import in.lubble.app.events.EventsActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 
-public class LubbleActivity extends AppCompatActivity {
+public class LubbleActivity extends BaseActivity {
 
     private static final String TAG = "LubbleActivity";
 
