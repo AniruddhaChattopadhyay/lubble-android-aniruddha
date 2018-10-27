@@ -3,16 +3,7 @@ package in.lubble.app;
 import android.content.*;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.internal.BottomNavigationItemView;
-import android.support.design.internal.BottomNavigationMenuView;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,10 +12,20 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -37,6 +38,8 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.explore.ExploreActiv;
+import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
@@ -76,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
     private View lubbleClickTarget;
     private ValueEventListener dpEventListener;
     private BottomNavigationView bottomNavigation;
+    private boolean isActive;
+    private boolean isNewUser;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -124,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 .circleCrop()
                 .into(profileIcon);
 
+        isNewUser = getIntent().hasExtra(EXTRA_IDP_RESPONSE) && ((IdpResponse) getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE)).isNewUser();
+
         if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
             initEverything();
         } else {
@@ -147,6 +154,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        handleExploreActivity();
+
     }
 
     private void initEverything() {
@@ -179,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        isActive = true;
         Branch branch = Branch.getInstance();
 
         // Branch init
@@ -195,6 +206,45 @@ public class MainActivity extends AppCompatActivity {
             }
         }, this.getIntent().getData(), this);
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
+
+    }
+
+    private void handleExploreActivity() {
+        if (isNewUser) {
+            // new signup
+            ExploreActiv.open(this, true);
+        } else {
+            if (!LubbleSharedPrefs.getInstance().getIsExploreShown()) {
+                RealtimeDbHelper.getThisUserRef().child("isExploreShown").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null && isActive && !isFinishing()) {
+                            final Boolean isExploreShownInRdb = dataSnapshot.getValue() == null ? false : dataSnapshot.getValue(Boolean.class);
+                            LubbleSharedPrefs.getInstance().setIsExploreShown(isExploreShownInRdb);
+                            if (!isExploreShownInRdb) {
+                                openExploreWithDelay();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+            }
+        }
+    }
+
+    private void openExploreWithDelay() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isActive && !isFinishing()) {
+                    ExploreActiv.open(MainActivity.this, false);
+                    overridePendingTransition(R.anim.slide_from_bottom, R.anim.none);
+                }
+            }
+        }, 300);
     }
 
     private void initFirebaseRemoteConfig() {
@@ -208,28 +258,34 @@ public class MainActivity extends AppCompatActivity {
         firebaseRemoteConfig.setDefaults(map);
     }
 
+    public void openExplore() {
+        bottomNavigation.findViewById(R.id.navigation_explore).performClick();
+    }
+
     private void showBottomNavBadge() {
-        if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
-            BottomNavigationMenuView bottomNavigationMenuView =
-                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-            View v = bottomNavigationMenuView.getChildAt(1);
-            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        if (!isNewUser) {
+            if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
+                BottomNavigationMenuView bottomNavigationMenuView =
+                        (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+                View v = bottomNavigationMenuView.getChildAt(2);
+                BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
-            View badge = LayoutInflater.from(this)
-                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+                View badge = LayoutInflater.from(this)
+                        .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
-            itemView.addView(badge);
-        }
-        if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
-            BottomNavigationMenuView bottomNavigationMenuView =
-                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-            View v = bottomNavigationMenuView.getChildAt(2);
-            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+                itemView.addView(badge);
+            }
+            if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
+                BottomNavigationMenuView bottomNavigationMenuView =
+                        (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+                View v = bottomNavigationMenuView.getChildAt(3);
+                BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
-            View badge = LayoutInflater.from(this)
-                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+                View badge = LayoutInflater.from(this)
+                        .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
-            itemView.addView(badge);
+                itemView.addView(badge);
+            }
         }
     }
 
@@ -450,6 +506,9 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_chats:
                     switchFrag(GroupListFragment.newInstance());
                     return true;
+                case R.id.navigation_explore:
+                    switchFrag(ExploreFrag.newInstance());
+                    return true;
                 case R.id.navigation_mplace:
                     switchFrag(MarketplaceFrag.newInstance());
                     return true;
@@ -478,7 +537,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void removeMplaceBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-        View v = bottomNavigationMenuView.getChildAt(1);
+        View v = bottomNavigationMenuView.getChildAt(2);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
@@ -487,7 +546,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void removeServicesBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-        View v = bottomNavigationMenuView.getChildAt(2);
+        View v = bottomNavigationMenuView.getChildAt(3);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
@@ -497,6 +556,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        isActive = false;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
     }
 }

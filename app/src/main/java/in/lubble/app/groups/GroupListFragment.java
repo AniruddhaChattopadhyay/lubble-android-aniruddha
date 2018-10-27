@@ -4,39 +4,30 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.NestedScrollView;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-
+import com.google.firebase.database.*;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
 import in.lubble.app.models.DmData;
@@ -52,17 +43,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_DP_URL;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_NAME;
-import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import java.util.*;
+
+import static in.lubble.app.chat.ChatActivity.*;
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
@@ -74,7 +58,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private HashMap<Query, ValueEventListener> dmListenersMap = new HashMap<>();
     private ChildEventListener joinedGroupListener;
-    private ChildEventListener unjoinedGroupListener;
     private ChildEventListener userDmsListener;
     private RecyclerView groupsRecyclerView;
     private ProgressBar progressBar;
@@ -107,6 +90,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
         TabLayout tabLayout = view.findViewById(R.id.tab_dots);
+        Button exploreBtn = view.findViewById(R.id.btn_explore);
         tabLayout.setupWithViewPager(viewPager, true);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
@@ -146,6 +130,16 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         setupSlider();
         fetchHomeBanners();
+
+        exploreBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getActivity() != null) {
+                    ((MainActivity) getActivity()).openExplore();
+                }
+            }
+        });
+
         return view;
     }
 
@@ -462,11 +456,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (progressBar.getVisibility() == View.VISIBLE) {
                     progressBar.setVisibility(View.GONE);
                 }
-                ArrayList<String> list = new ArrayList<>();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    list.add(child.getKey());
-                }
-                syncAllPublicGroups(list);
+                groupsRecyclerView.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -522,49 +512,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         map.put(getLubbleGroupsRef().child(groupId), joinedGroupListener);
     }
 
-    private void syncAllPublicGroups(final ArrayList<String> joinedGroupIdList) {
-        unjoinedGroupListener = getLubbleGroupsRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                final GroupData unJoinedGroup = dataSnapshot.getValue(GroupData.class);
-                if (unJoinedGroup != null && unJoinedGroup.getId() != null && !joinedGroupIdList.contains(unJoinedGroup.getId()) && !unJoinedGroup.getIsPrivate()) {
-                    adapter.addPublicGroup(unJoinedGroup);
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        getLubbleGroupsRef().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                groupsRecyclerView.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -576,9 +523,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         super.onPause();
         if (joinedGroupListener != null) {
             getUserGroupsRef().removeEventListener(joinedGroupListener);
-        }
-        if (unjoinedGroupListener != null) {
-            getLubbleGroupsRef().removeEventListener(unjoinedGroupListener);
         }
         if (userDmsListener != null) {
             getUserDmsRef().removeEventListener(userDmsListener);

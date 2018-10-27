@@ -1,8 +1,7 @@
 package in.lubble.app.network;
 
-import java.util.ArrayList;
-
 import in.lubble.app.auth.LocationsData;
+import in.lubble.app.explore.ExploreGroupData;
 import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.marketplace.RatingData;
 import in.lubble.app.marketplace.SliderData;
@@ -15,12 +14,9 @@ import in.lubble.app.referrals.ReferralHistoryData;
 import in.lubble.app.referrals.ReferralLeaderboardData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.DELETE;
-import retrofit2.http.GET;
-import retrofit2.http.POST;
-import retrofit2.http.PUT;
-import retrofit2.http.Path;
+import retrofit2.http.*;
+
+import java.util.ArrayList;
 
 public interface Endpoints {
 
@@ -95,5 +91,8 @@ public interface Endpoints {
 
     @GET("/home/")
     Call<ArrayList<SliderData>> fetchHomeData();
+
+    @GET("/explore/{lubble_id}/")
+    Call<ArrayList<ExploreGroupData>> fetchExploreGroups(@Path("lubble_id") String lubbleId);
 
 }

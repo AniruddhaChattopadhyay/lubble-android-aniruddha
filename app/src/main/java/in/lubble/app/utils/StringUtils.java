@@ -1,7 +1,7 @@
 package in.lubble.app.utils;
 
-import android.support.annotation.Nullable;
-import android.support.design.widget.TextInputLayout;
+import androidx.annotation.Nullable;
+import com.google.android.material.textfield.TextInputLayout;
 import android.text.TextUtils;
 import android.util.Patterns;
 

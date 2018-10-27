@@ -41,6 +41,14 @@
         <item name="android:minHeight">56dp</item>
     </style>
 
+    <style name="PinkButton" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="colorControlHighlight">@color/white</item>
+        <item name="colorButtonNormal">@color/pink</item>
+        <item name="colorAccent">@color/pink</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+
     <style name="WhiteButton" parent="Widget.AppCompat.Button.Colored">
         <item name="colorButtonNormal">@color/white</item>
         <item name="colorControlHighlight">@color/gray</item>
@@ -85,5 +93,15 @@
         <item name="colorControlActivated">@color/dark_gold</item>
     </style>
 
+    <style name="SlideAnimation" parent="android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_from_bottom</item>
+        <item name="android:activityOpenExitAnimation">@anim/none</item>
+        <item name="android:activityCloseEnterAnimation">@anim/none</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_to_bottom</item>
+    </style>
+
+    <style name="Theme.SlideAnimWindow" parent="AppTheme">
+        <item name="android:windowAnimationStyle">@style/SlideAnimation</item>
+    </style>
 
 </resources>

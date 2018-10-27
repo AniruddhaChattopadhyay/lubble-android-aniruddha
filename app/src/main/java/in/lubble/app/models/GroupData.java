@@ -1,6 +1,6 @@
 package in.lubble.app.models;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.Exclude;

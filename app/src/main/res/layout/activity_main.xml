@@ -13,7 +13,7 @@
         android:id="@+id/lubble_toolbar"
         layout="@layout/lubble_toolbar" />
 
-    <android.support.design.widget.BottomNavigationView
+    <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,6 +22,7 @@
         android:layout_marginStart="0dp"
         android:background="@color/dk_colorAccent"
         android:elevation="7dp"
+        app:labelVisibilityMode="labeled"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
         app:menu="@menu/navigation" />

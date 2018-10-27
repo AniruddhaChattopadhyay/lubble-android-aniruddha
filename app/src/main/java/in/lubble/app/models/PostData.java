@@ -1,6 +1,6 @@
 package in.lubble.app.models;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import in.lubble.app.utils.DateTimeUtils;
 
