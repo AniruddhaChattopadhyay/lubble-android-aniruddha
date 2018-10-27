@@ -8,23 +8,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.TextUtils;
+import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
-import android.text.TextUtils;
-import android.util.Log;
-
 import com.bumptech.glide.request.target.Target;
 import com.google.gson.Gson;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
@@ -33,6 +24,9 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
+
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;

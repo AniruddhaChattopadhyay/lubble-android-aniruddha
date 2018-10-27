@@ -9,24 +9,18 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
+import in.lubble.app.BuildConfig;
+import in.lubble.app.R;
+import permissions.dispatcher.PermissionRequest;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import in.lubble.app.BuildConfig;
-import in.lubble.app.R;
-import permissions.dispatcher.PermissionRequest;
 
 /**
  * Created by ishaangarg on 17/11/17.

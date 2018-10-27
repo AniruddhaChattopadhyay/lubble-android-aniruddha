@@ -2,7 +2,6 @@ package in.lubble.app;
 
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.marketplace.ItemActivity;

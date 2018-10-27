@@ -1,12 +1,11 @@
 package in.lubble.app.network;
 
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.io.IOException;
-
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
+
+import java.io.IOException;
 
 public class AuthenticationInterceptor implements Interceptor {
 

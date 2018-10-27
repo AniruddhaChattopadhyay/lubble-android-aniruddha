@@ -3,26 +3,22 @@ package in.lubble.app.auth;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.StringRes;
-import com.google.android.material.snackbar.Snackbar;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
-
+import androidx.annotation.StringRes;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.util.ArrayList;
-
+import in.lubble.app.BaseActivity;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 
-import static in.lubble.app.utils.FragUtils.addFrag;
-import static in.lubble.app.utils.FragUtils.replaceFrag;
-import static in.lubble.app.utils.FragUtils.replaceStack;
+import java.util.ArrayList;
+
+import static in.lubble.app.utils.FragUtils.*;
 import static in.lubble.app.utils.UserUtils.isNewUser;
 
 public class LoginActivity extends BaseActivity {

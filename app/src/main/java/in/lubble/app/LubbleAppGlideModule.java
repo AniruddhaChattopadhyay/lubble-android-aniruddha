@@ -1,7 +1,6 @@
 package in.lubble.app;
 
 import android.content.Context;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;

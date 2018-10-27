@@ -2,9 +2,9 @@ package in.lubble.app.utils;
 
 import android.content.Context;
 import androidx.annotation.IdRes;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 /**

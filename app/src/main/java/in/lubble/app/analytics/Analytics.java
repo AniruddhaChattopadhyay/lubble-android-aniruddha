@@ -3,10 +3,8 @@ package in.lubble.app.analytics;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
-
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.utils.StringUtils;
 

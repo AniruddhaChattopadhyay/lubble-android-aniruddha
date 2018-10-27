@@ -3,10 +3,8 @@ package in.lubble.app;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-
 import com.google.firebase.auth.FirebaseAuth;
 
 public class DebugActivity extends BaseActivity {

@@ -6,38 +6,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-
-import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.*;
 import in.lubble.app.R;
-import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.marketplace.Item;
@@ -45,22 +28,21 @@ import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import okhttp3.RequestBody;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
+import org.json.JSONException;
+import org.json.JSONObject;
+import permissions.dispatcher.*;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.BUCKET_MARKETPLACE;
-import static in.lubble.app.utils.FileUtils.createImageFile;
-import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
-import static in.lubble.app.utils.FileUtils.getPickImageIntent;
-import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
+import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.compressImage;
 

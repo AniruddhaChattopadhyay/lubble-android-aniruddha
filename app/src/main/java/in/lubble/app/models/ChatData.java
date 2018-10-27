@@ -1,7 +1,6 @@
 package in.lubble.app.models;
 
 import androidx.annotation.Nullable;
-
 import com.google.firebase.database.Exclude;
 
 import java.util.HashMap;

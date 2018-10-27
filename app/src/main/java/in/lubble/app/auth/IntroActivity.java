@@ -2,13 +2,11 @@ package in.lubble.app.auth;
 
 import android.os.Bundle;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
-
+import androidx.fragment.app.Fragment;
 import com.github.paolorotolo.appintro.AppIntro;
 import com.github.paolorotolo.appintro.AppIntroFragment;
 import com.github.paolorotolo.appintro.model.SliderPage;
-
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 

@@ -8,12 +8,13 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.firebase.RealtimeDbHelper;
 
-public class BaseActivity extends BaseActivity {
+public class BaseActivity extends AppCompatActivity {
 
     private static final String TAG = "BaseActivity";
     private boolean isActive;
@@ -22,7 +23,11 @@ public class BaseActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        checkMinAppVersion();
+        try {
+            checkMinAppVersion();
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
     }
 
     @Override

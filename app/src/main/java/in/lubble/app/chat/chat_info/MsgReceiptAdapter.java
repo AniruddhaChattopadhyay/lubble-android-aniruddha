@@ -1,20 +1,19 @@
 package in.lubble.app.chat.chat_info;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.MsgInfoData;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static in.lubble.app.analytics.AnalyticsEvents.EXPAND_LIKES;
 import static in.lubble.app.utils.DateTimeUtils.getHumanTimestampWithTime;
