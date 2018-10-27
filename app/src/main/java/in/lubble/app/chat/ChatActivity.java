@@ -3,18 +3,16 @@ package in.lubble.app.chat;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import com.crashlytics.android.Crashlytics;
-
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -25,7 +23,7 @@ import in.lubble.app.utils.StringUtils;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends BaseActivity {
 
     public static final String EXTRA_GROUP_ID = "chat_activ_group_id";
     public static final String EXTRA_MSG_ID = "chat_activ_msg_id";

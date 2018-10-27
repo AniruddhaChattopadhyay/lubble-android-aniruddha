@@ -60,6 +60,12 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".BaseActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

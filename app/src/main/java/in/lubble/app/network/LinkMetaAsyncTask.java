@@ -1,7 +1,6 @@
 package in.lubble.app.network;
 
 import android.os.AsyncTask;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 

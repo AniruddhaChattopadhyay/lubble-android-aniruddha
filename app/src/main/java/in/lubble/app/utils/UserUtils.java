@@ -3,16 +3,14 @@ package in.lubble.app.utils;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
-import android.widget.ImageView;
-
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;

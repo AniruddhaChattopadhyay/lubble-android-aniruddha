@@ -4,12 +4,10 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
-
 import in.lubble.app.database.DbSingleton;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;

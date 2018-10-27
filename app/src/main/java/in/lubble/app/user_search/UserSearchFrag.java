@@ -2,10 +2,6 @@ package in.lubble.app.user_search;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.OrientationHelper;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -14,22 +10,20 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.OrientationHelper;
+import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.database.*;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;

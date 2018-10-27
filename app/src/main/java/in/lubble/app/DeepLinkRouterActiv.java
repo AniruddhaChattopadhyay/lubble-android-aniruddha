@@ -1,8 +1,8 @@
 package in.lubble.app;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.marketplace.ItemActivity;
@@ -15,7 +15,7 @@ import in.lubble.app.services.ServiceCategoryDetailActiv;
 
 import java.util.List;
 
-public class DeepLinkRouterActiv extends AppCompatActivity {
+public class DeepLinkRouterActiv extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +70,11 @@ public class DeepLinkRouterActiv extends AppCompatActivity {
             case "seller_dash":
                 startActivity(SellerDashActiv.getIntent(this, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT));
                 break;
+            case "chats":
+                startActivity(new Intent(this, MainActivity.class));
+                break;
+            default:
+                startActivity(new Intent(this, MainActivity.class));
         }
     }
 

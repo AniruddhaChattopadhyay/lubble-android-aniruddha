@@ -13,21 +13,21 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Parcelable;
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.*;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.*;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -50,7 +50,7 @@ import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
-public class LocationActivity extends AppCompatActivity {
+public class LocationActivity extends BaseActivity {
 
     private static final String TAG = "LocationActivity";
     private static final int REQUEST_SYSTEM_LOCATION = 859;

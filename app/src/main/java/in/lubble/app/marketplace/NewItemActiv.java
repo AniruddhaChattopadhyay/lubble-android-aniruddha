@@ -14,17 +14,14 @@ import android.view.View;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
-import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.*;
 import in.lubble.app.R;
-import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.marketplace.Item;
@@ -59,7 +56,7 @@ import static in.lubble.app.utils.UiUtils.compressImage;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 @RuntimePermissions
-public class NewItemActiv extends AppCompatActivity implements View.OnClickListener {
+public class NewItemActiv extends BaseActivity implements View.OnClickListener {
 
     private static final String TAG = "NewItemActiv";
     private static final String ARG_EDIT_ITEM_ID = "ARG_EDIT_ITEM_ID";

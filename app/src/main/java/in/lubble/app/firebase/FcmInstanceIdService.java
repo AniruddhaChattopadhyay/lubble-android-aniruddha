@@ -1,7 +1,6 @@
 package in.lubble.app.firebase;
 
 import android.util.Log;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;

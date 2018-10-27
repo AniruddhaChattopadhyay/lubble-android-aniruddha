@@ -3,16 +3,16 @@ package in.lubble.app.marketplace;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -26,7 +26,7 @@ import retrofit2.Response;
 
 import java.util.ArrayList;
 
-public class CategoriesActiv extends AppCompatActivity {
+public class CategoriesActiv extends BaseActivity {
 
     private static final String TAG = "CategoriesActiv";
     private ProgressBar progressBar;

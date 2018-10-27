@@ -3,7 +3,6 @@ package in.lubble.app.firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import in.lubble.app.LubbleSharedPrefs;
 
 import static in.lubble.app.utils.UserUtils.getLubbleId;

@@ -2,7 +2,6 @@
 package in.lubble.app.models.marketplace;
 
 import androidx.annotation.Nullable;
-
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 

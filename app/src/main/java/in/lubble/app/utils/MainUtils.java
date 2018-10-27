@@ -1,10 +1,6 @@
 package in.lubble.app.utils;
 
 import android.util.Log;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.database.DbSingleton;
 import in.lubble.app.marketplace.ItemSearchData;
@@ -14,6 +10,9 @@ import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainUtils {
 

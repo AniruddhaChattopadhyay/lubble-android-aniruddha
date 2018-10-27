@@ -3,21 +3,20 @@ package in.lubble.app.marketplace;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.EditText;
-
-import java.util.ArrayList;
-
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.database.DbSingleton;
 
-public class SearchActivity extends AppCompatActivity {
+import java.util.ArrayList;
+
+public class SearchActivity extends BaseActivity {
 
     private static final String TAG = "SearchActivity";
 

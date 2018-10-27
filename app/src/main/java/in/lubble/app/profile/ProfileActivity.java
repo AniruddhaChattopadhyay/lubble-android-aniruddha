@@ -4,15 +4,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import android.view.MenuItem;
-
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends BaseActivity {
 
     public static final String KEY_USER_ID = "profileActivUserId";
 

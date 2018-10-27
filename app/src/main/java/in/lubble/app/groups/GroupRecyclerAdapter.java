@@ -1,28 +1,23 @@
 package in.lubble.app.groups;
 
 import android.graphics.Color;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.UiUtils;
+
+import java.util.*;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.utils.StringUtils.isValidString;

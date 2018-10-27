@@ -3,17 +3,17 @@ package in.lubble.app.marketplace;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -29,7 +29,7 @@ import retrofit2.Response;
 
 import static in.lubble.app.analytics.AnalyticsEvents.RECOMMEND_BTN_CLICK;
 
-public class ItemListActiv extends AppCompatActivity {
+public class ItemListActiv extends BaseActivity {
 
     private static final String TAG = "SellerDashActiv";
     private static final String PARAM_IS_SELLER = "PARAM_IS_SELLER";
