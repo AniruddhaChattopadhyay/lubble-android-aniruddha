@@ -61,7 +61,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
 
         exploreGroupAdapter = new ExploreGroupAdapter(new ArrayList<ExploreGroupData>(), mListener, GlideApp.with(requireContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener);
         recyclerView.setAdapter(exploreGroupAdapter);
-
+        recyclerView.setItemAnimator(null);
         return view;
     }
 
