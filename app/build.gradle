@@ -64,6 +64,7 @@ dependencies {
     // FirebaseUI for Firebase Realtime Database
     implementation 'com.firebaseui:firebase-ui-database:4.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
+    implementation "androidx.emoji:emoji:1.0.0"
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
     implementation 'androidx.vectordrawable:vectordrawable:1.0.0'

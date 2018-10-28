@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -593,10 +594,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private TextView authorNameTv;
-        private TextView messageTv;
+        private EmojiTextView messageTv;
         private LinearLayout linkContainer;
         private TextView linkTitleTv;
-        private TextView linkDescTv;
+        private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
         private ProgressBar progressBar;
         private ImageView chatIv;
@@ -764,10 +765,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-        private TextView messageTv;
+        private EmojiTextView messageTv;
         private LinearLayout linkContainer;
         private TextView linkTitleTv;
-        private TextView linkDescTv;
+        private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
         private ProgressBar progressBar;
         private ImageView chatIv;
