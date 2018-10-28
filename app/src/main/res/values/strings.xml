@@ -45,8 +45,8 @@
     <string name="domestic_directory">Domestic Directory</string>
     <string name="update_dialog_title">Please Update App</string>
     <string name="update_dialog_msg">You haven\'t updated Lubble app in a while. Please download the latest update from play store.</string>
-    <string name="soft_update_dialog_title">New App Update 🎁</string>
-    <string name="soft_update_dialog_msg">Cool new features await you! Get the latest update now 😍</string>
+    <string name="soft_update_dialog_title">New App Update</string>
+    <string name="soft_update_dialog_msg">Cool new features await you! Get the latest update now</string>
     <string name="all_update">UPDATE</string>
     <string name="update_recheck">Re-check</string>
     <string name="new_notice_title">New Notice</string>
