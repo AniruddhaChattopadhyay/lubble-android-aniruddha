@@ -46,7 +46,7 @@
 
     </RelativeLayout>
 
-    <TextView
+    <androidx.emoji.widget.EmojiTextView
         android:id="@+id/tv_group_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -71,10 +71,10 @@
         android:id="@+id/progressbar_join"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_margin="8dp"
         android:layout_below="@id/tv_group_title"
-        android:visibility="gone"
         android:layout_alignTop="@id/tv_join"
-        android:layout_alignBottom="@id/tv_join" />
+        android:layout_alignBottom="@id/tv_join"
+        android:layout_margin="8dp"
+        android:visibility="gone" />
 
 </RelativeLayout>

@@ -4,6 +4,14 @@ apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'io.fabric'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'LubbleKiKey'
+            keyPassword 'AcrilaN543'
+            storeFile file('C:/Users/ishaa/AndroidProjects/LubbleKaKeystore.jks')
+            storePassword 'AcrilaN543'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "in.lubble.app"
@@ -18,6 +26,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
     flavorDimensions("type")
@@ -28,6 +37,7 @@ android {
         }
         prod {
             dimension = "type"
+            signingConfig signingConfigs.config
         }
     }
 }
@@ -64,7 +74,7 @@ dependencies {
     // FirebaseUI for Firebase Realtime Database
     implementation 'com.firebaseui:firebase-ui-database:4.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation "androidx.emoji:emoji:1.0.0"
+    implementation 'androidx.emoji:emoji:1.0.0'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
     implementation 'androidx.vectordrawable:vectordrawable:1.0.0'

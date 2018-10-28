@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
@@ -58,7 +59,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, TOP));
         glide.load(exploreGroupData.getPhotoUrl())
                 .placeholder(R.drawable.rounded_rect_gray)
-                .error(R.drawable.rounded_rect_gray)
+                .error(R.drawable.explore_default)
                 .apply(requestOptions)
                 .into(holder.imageView);
 
@@ -144,7 +145,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         final View mView;
         final ImageView imageView;
         final RelativeLayout selectedContainer;
-        final TextView titleTv;
+        final EmojiTextView titleTv;
         final TextView joinTv;
         final ProgressBar joinProgressbar;
         public ExploreGroupData groupItem;

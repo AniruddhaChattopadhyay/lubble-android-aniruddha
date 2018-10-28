@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -255,8 +256,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final View mView;
         final ImageView iconIv;
         final ImageView lockIv;
-        final TextView titleTv;
-        final TextView subtitleTv;
+        final EmojiTextView titleTv;
+        final EmojiTextView subtitleTv;
         final TextView unreadCountTv;
         final TextView timestampTv;
         final Button joinBtn;
