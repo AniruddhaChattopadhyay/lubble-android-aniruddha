@@ -4,6 +4,9 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
+import androidx.core.provider.FontRequest;
+import androidx.emoji.text.EmojiCompat;
+import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
@@ -51,6 +54,15 @@ public class LubbleApp extends Application {
 
         createNotifChannel();
         FirebaseAnalytics.getInstance(this);
+
+        FontRequest fontRequest = new FontRequest(
+                "com.google.android.gms.fonts",
+                "com.google.android.gms",
+                "Noto Color Emoji Compat",
+                R.array.com_google_android_gms_fonts_certs);
+        EmojiCompat.Config config = new FontRequestEmojiCompatConfig(this, fontRequest);
+        EmojiCompat.init(config);
+
     }
 
     public static LubbleApp getAppContext() {

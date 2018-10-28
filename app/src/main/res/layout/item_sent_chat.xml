@@ -46,7 +46,7 @@
                         android:textStyle="bold"
                         tools:text="LINK TITLE" />
 
-                    <TextView
+                    <androidx.emoji.widget.EmojiTextView
                         android:id="@+id/tv_link_desc"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -94,7 +94,7 @@
 
                         </FrameLayout>
 
-                        <TextView
+                        <androidx.emoji.widget.EmojiTextView
                             android:id="@+id/tv_message"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
