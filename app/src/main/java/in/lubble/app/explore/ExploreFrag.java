@@ -31,7 +31,10 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private RecyclerView recyclerView;
     private ProgressBar progressbar;
     private TextView joinedAllTv;
+    private TextView titleTv;
+    private TextView descTv;
     private ExploreGroupAdapter exploreGroupAdapter;
+    private boolean isOnboarding;
 
     public ExploreFrag() {
     }
@@ -45,6 +48,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         super.onCreate(savedInstanceState);
 
         Analytics.triggerScreenEvent(getContext(), this.getClass());
+        isOnboarding = getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener;
     }
 
     @Override
@@ -54,12 +58,21 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
 
         Context context = view.getContext();
         joinedAllTv = view.findViewById(R.id.tv_joined_all);
+        titleTv = view.findViewById(R.id.tv_title);
+        descTv = view.findViewById(R.id.tv_desc);
         recyclerView = view.findViewById(R.id.rv_interest_groups);
         progressbar = view.findViewById(R.id.progressbar);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         joinedAllTv.setVisibility(View.GONE);
+        if (isOnboarding) {
+            titleTv.setVisibility(View.GONE);
+            descTv.setVisibility(View.GONE);
+        } else {
+            titleTv.setVisibility(View.VISIBLE);
+            descTv.setVisibility(View.VISIBLE);
+        }
 
-        exploreGroupAdapter = new ExploreGroupAdapter(new ArrayList<ExploreGroupData>(), mListener, GlideApp.with(requireContext()), getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener);
+        exploreGroupAdapter = new ExploreGroupAdapter(new ArrayList<ExploreGroupData>(), mListener, GlideApp.with(requireContext()), isOnboarding);
         recyclerView.setAdapter(exploreGroupAdapter);
         recyclerView.setItemAnimator(null);
         return view;
@@ -81,17 +94,26 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
                 if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty() && isAdded() && isVisible()) {
                     progressbar.setVisibility(View.GONE);
                     exploreGroupAdapter.updateList(exploreGroupDataList);
+                    if (isOnboarding) {
+                        titleTv.setVisibility(View.GONE);
+                        descTv.setVisibility(View.GONE);
+                    } else {
+                        titleTv.setVisibility(View.VISIBLE);
+                        descTv.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     if (isAdded() && isVisible()) {
                         progressbar.setVisibility(View.GONE);
                         if (exploreGroupDataList != null && exploreGroupDataList.isEmpty()) {
-                            if (getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener) {
+                            if (isOnboarding) {
                                 // exit the explore activity if opened during onboarding & there are no unjoined groups to be shown
                                 // will happen if an existing user logs back in and has already joined every group
                                 getActivity().finish();
                                 getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
                             } else {
                                 joinedAllTv.setVisibility(View.VISIBLE);
+                                titleTv.setVisibility(View.GONE);
+                                descTv.setVisibility(View.GONE);
                             }
                         } else {
                             Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
