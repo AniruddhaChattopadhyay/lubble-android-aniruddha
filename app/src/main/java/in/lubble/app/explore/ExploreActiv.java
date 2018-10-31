@@ -16,6 +16,8 @@ import in.lubble.app.utils.FragUtils;
 
 import java.util.HashMap;
 
+import static in.lubble.app.analytics.AnalyticsEvents.EXPLORE_CONTINUE_CLICKED;
+import static in.lubble.app.analytics.AnalyticsEvents.EXPLORE_DIALOG_SHOWN;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 
 public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
@@ -51,6 +53,7 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
             @Override
             public void onClick(View v) {
                 joinBtn.setEnabled(false);
+                Analytics.triggerEvent(EXPLORE_CONTINUE_CLICKED, ExploreActiv.this);
                 for (String groupId : selectedGroupIdMap.keySet()) {
                     getCreateOrJoinGroupRef().child(groupId).setValue(true);
                 }
@@ -73,6 +76,7 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
 
         LubbleSharedPrefs.getInstance().setIsExploreShown(true);
         RealtimeDbHelper.getThisUserRef().child("isExploreShown").setValue(true);
+        Analytics.triggerEvent(EXPLORE_DIALOG_SHOWN, this);
 
     }
 
