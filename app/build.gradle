@@ -23,10 +23,12 @@ android {
     flavorDimensions("type")
     productFlavors {
         dev {
+            minSdkVersion 21
             applicationIdSuffix = ".dev"
             dimension = "type"
         }
         prod {
+            minSdkVersion 17
             dimension = "type"
         }
     }
