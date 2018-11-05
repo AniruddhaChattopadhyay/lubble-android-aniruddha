@@ -6,40 +6,28 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.DrawableRes;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Toast;
-
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityOptionsCompat;
 import com.bumptech.glide.signature.ObjectKey;
+import in.lubble.app.*;
+import in.lubble.app.BuildConfig;
+import in.lubble.app.R;
+import permissions.dispatcher.*;
 
 import java.io.File;
 import java.io.IOException;
 
-import in.lubble.app.BuildConfig;
-import in.lubble.app.GlideApp;
-import in.lubble.app.R;
-import in.lubble.app.UploadFileService;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
-
-import static in.lubble.app.utils.FileUtils.createImageFile;
-import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
-import static in.lubble.app.utils.FileUtils.getPickImageIntent;
-import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
+import static in.lubble.app.utils.FileUtils.*;
 
 @RuntimePermissions
-public class FullScreenImageActivity extends AppCompatActivity {
+public class FullScreenImageActivity extends BaseActivity {
 
     private static final int REQUEST_CODE_GROUP_DP = 418;
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";

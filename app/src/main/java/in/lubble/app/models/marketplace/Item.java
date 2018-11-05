@@ -1,14 +1,12 @@
 
 package in.lubble.app.models.marketplace;
 
-import android.support.annotation.Nullable;
-
+import androidx.annotation.Nullable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import in.lubble.app.marketplace.RatingData;
 
 import java.util.ArrayList;
-
-import in.lubble.app.marketplace.RatingData;
 
 public class Item {
 

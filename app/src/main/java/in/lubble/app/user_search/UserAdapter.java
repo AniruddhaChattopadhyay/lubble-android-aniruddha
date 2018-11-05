@@ -1,6 +1,5 @@
 package in.lubble.app.user_search;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,16 +7,12 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-
+import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
+
+import java.util.*;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> implements Filterable {
 

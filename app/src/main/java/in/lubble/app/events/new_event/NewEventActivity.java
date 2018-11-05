@@ -7,57 +7,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.DatePicker;
-import android.widget.ImageView;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.TimePicker;
-import android.widget.Toast;
-
+import android.widget.*;
+import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.firebase.database.*;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
@@ -66,30 +34,26 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.utils.mapUtils.SphericalUtil;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
+import permissions.dispatcher.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static in.lubble.app.Constants.SVR_LATI;
 import static in.lubble.app.Constants.SVR_LONGI;
-import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.EventData.GOING;
 import static in.lubble.app.utils.DateTimeUtils.APP_NORMAL_DATE_YEAR;
 import static in.lubble.app.utils.DateTimeUtils.APP_SHORT_TIME;
-import static in.lubble.app.utils.FileUtils.createImageFile;
-import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
-import static in.lubble.app.utils.FileUtils.getPickImageIntent;
-import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
+import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 @RuntimePermissions
-public class NewEventActivity extends AppCompatActivity {
+public class NewEventActivity extends BaseActivity {
 
     private static final String TAG = "NewEventActivity";
     private static final int PLACE_PICKER_REQUEST = 828;

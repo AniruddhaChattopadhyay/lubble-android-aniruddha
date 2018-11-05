@@ -8,22 +8,14 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
-
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.TaskStackBuilder;
+import androidx.core.content.ContextCompat;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.messaging.RemoteMessage;
-
-import java.util.concurrent.ExecutionException;
-
-import in.lubble.app.Constants;
-import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.MainActivity;
-import in.lubble.app.R;
+import in.lubble.app.*;
 import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
@@ -32,6 +24,8 @@ import in.lubble.app.marketplace.SellerDashActiv;
 import in.lubble.app.models.AppNotifData;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
+
+import java.util.concurrent.ExecutionException;
 
 import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
@@ -170,10 +164,10 @@ public class AppNotifUtils {
             intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
-        } else if (appNotifData.getType().equalsIgnoreCase("events")) {
+        } else if (appNotifData.getType().equalsIgnoreCase("services")) {
             Intent intent = new Intent(context, MainActivity.class);
             intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
-            intent.putExtra(EXTRA_TAB_NAME, "events");
+            intent.putExtra(EXTRA_TAB_NAME, "services");
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             return stackBuilder.addNextIntentWithParentStack(intent);
         } else if (appNotifData.getType().equalsIgnoreCase("marketplace")) {

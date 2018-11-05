@@ -1,14 +1,10 @@
 package in.lubble.app;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.util.List;
-
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.SellerDashActiv;
@@ -17,7 +13,9 @@ import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServiceCategoryDetailActiv;
 
-public class DeepLinkRouterActiv extends AppCompatActivity {
+import java.util.List;
+
+public class DeepLinkRouterActiv extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +58,7 @@ public class DeepLinkRouterActiv extends AppCompatActivity {
                 if (uri.toString().contains("category")) {
                     ItemListActiv.open(this, false, Integer.parseInt(uri.getLastPathSegment()));
                 } else {
-                    ItemListActiv.open(this, true, Integer.parseInt(uri.getLastPathSegment()));
+                    ItemListActiv.open(this, true, uri.getLastPathSegment());
                 }
                 break;
             case "service.category":
@@ -72,6 +70,11 @@ public class DeepLinkRouterActiv extends AppCompatActivity {
             case "seller_dash":
                 startActivity(SellerDashActiv.getIntent(this, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT));
                 break;
+            case "chats":
+                startActivity(new Intent(this, MainActivity.class));
+                break;
+            default:
+                startActivity(new Intent(this, MainActivity.class));
         }
     }
 

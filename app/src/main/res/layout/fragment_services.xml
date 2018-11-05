@@ -1,4 +1,4 @@
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -6,7 +6,7 @@
     tools:background="@color/very_light_gray"
     tools:context="in.lubble.app.marketplace.MarketplaceFrag">
 
-    <android.support.v4.widget.NestedScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollview_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -34,8 +34,8 @@
                 <TextView
                     android:id="@+id/tv_search"
                     android:layout_width="match_parent"
-                    android:layout_gravity="center_vertical"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:text="Search Services Near You" />
 
             </LinearLayout>
@@ -46,11 +46,15 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true" />
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_services"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/container_search" />
+                android:layout_below="@id/container_search"
+                tools:itemCount="5"
+                tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                tools:listitem="@layout/item_service_category"
+                tools:spanCount="2" />
 
             <View
                 android:layout_width="match_parent"
@@ -59,7 +63,7 @@
 
         </RelativeLayout>
 
-    </android.support.v4.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:id="@+id/new_service_container"
@@ -92,4 +96,4 @@
 
     </LinearLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

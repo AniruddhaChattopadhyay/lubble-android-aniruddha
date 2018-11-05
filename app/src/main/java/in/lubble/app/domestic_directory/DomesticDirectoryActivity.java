@@ -3,15 +3,14 @@ package in.lubble.app.domestic_directory;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-
+import androidx.appcompat.widget.Toolbar;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 
-public class DomesticDirectoryActivity extends AppCompatActivity {
+public class DomesticDirectoryActivity extends BaseActivity {
 
     public static void open(Context context) {
         final Intent intent = new Intent(context, DomesticDirectoryActivity.class);

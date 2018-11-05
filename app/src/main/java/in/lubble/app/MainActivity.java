@@ -2,21 +2,10 @@ package in.lubble.app;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.internal.BottomNavigationItemView;
-import android.support.design.internal.BottomNavigationMenuView;
-import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,11 +14,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
+import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -39,14 +35,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-
-import org.json.JSONObject;
-
-import java.util.HashMap;
-
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.explore.ExploreActiv;
+import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
@@ -58,6 +51,9 @@ import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
@@ -67,7 +63,7 @@ import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
     private static final String EXTRA_IDP_RESPONSE = "extra_idp_response";
@@ -83,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
     private View lubbleClickTarget;
     private ValueEventListener dpEventListener;
     private BottomNavigationView bottomNavigation;
+    private boolean isActive;
+    private boolean isNewUser;
 
     public static Intent createIntent(Context context, IdpResponse idpResponse) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -131,6 +129,8 @@ public class MainActivity extends AppCompatActivity {
                 .circleCrop()
                 .into(profileIcon);
 
+        isNewUser = getIntent().hasExtra(EXTRA_IDP_RESPONSE) && ((IdpResponse) getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE)).isNewUser();
+
         if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
             initEverything();
         } else {
@@ -154,6 +154,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        handleExploreActivity();
+
     }
 
     private void initEverything() {
@@ -186,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
+        isActive = true;
         Branch branch = Branch.getInstance();
 
         // Branch init
@@ -202,6 +206,45 @@ public class MainActivity extends AppCompatActivity {
             }
         }, this.getIntent().getData(), this);
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
+
+    }
+
+    private void handleExploreActivity() {
+        if (isNewUser) {
+            // new signup
+            ExploreActiv.open(this, true);
+        } else {
+            if (!LubbleSharedPrefs.getInstance().getIsExploreShown()) {
+                RealtimeDbHelper.getThisUserRef().child("isExploreShown").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot != null && isActive && !isFinishing()) {
+                            final Boolean isExploreShownInRdb = dataSnapshot.getValue() == null ? false : dataSnapshot.getValue(Boolean.class);
+                            LubbleSharedPrefs.getInstance().setIsExploreShown(isExploreShownInRdb);
+                            if (!isExploreShownInRdb) {
+                                openExploreWithDelay();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+            }
+        }
+    }
+
+    private void openExploreWithDelay() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isActive && !isFinishing()) {
+                    ExploreActiv.open(MainActivity.this, false);
+                    overridePendingTransition(R.anim.slide_from_bottom, R.anim.none);
+                }
+            }
+        }, 300);
     }
 
     private void initFirebaseRemoteConfig() {
@@ -215,28 +258,34 @@ public class MainActivity extends AppCompatActivity {
         firebaseRemoteConfig.setDefaults(map);
     }
 
+    public void openExplore() {
+        bottomNavigation.findViewById(R.id.navigation_explore).performClick();
+    }
+
     private void showBottomNavBadge() {
-        if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
-            BottomNavigationMenuView bottomNavigationMenuView =
-                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-            View v = bottomNavigationMenuView.getChildAt(1);
-            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        if (!isNewUser) {
+            if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
+                BottomNavigationMenuView bottomNavigationMenuView =
+                        (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+                View v = bottomNavigationMenuView.getChildAt(2);
+                BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
-            View badge = LayoutInflater.from(this)
-                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+                View badge = LayoutInflater.from(this)
+                        .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
-            itemView.addView(badge);
-        }
-        if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
-            BottomNavigationMenuView bottomNavigationMenuView =
-                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-            View v = bottomNavigationMenuView.getChildAt(2);
-            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+                itemView.addView(badge);
+            }
+            if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
+                BottomNavigationMenuView bottomNavigationMenuView =
+                        (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+                View v = bottomNavigationMenuView.getChildAt(3);
+                BottomNavigationItemView itemView = (BottomNavigationItemView) v;
 
-            View badge = LayoutInflater.from(this)
-                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+                View badge = LayoutInflater.from(this)
+                        .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
-            itemView.addView(badge);
+                itemView.addView(badge);
+            }
         }
     }
 
@@ -255,7 +304,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        checkMinAppVersion();
         handlePresence();
         setDp();
 
@@ -396,51 +444,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void checkMinAppVersion() {
-        RealtimeDbHelper.getAppInfoRef().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    Integer minAppVersion = child.getValue(Integer.class);
-                    minAppVersion = minAppVersion == null ? 27 : minAppVersion;
-
-                    if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing()) {
-                        // block app
-                        final AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-                        alertDialog.setTitle(getString(R.string.update_dialog_title));
-                        alertDialog.setMessage(getString(R.string.update_dialog_msg));
-                        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_update), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                alertDialog.dismiss();
-                                final String appPackageName = getPackageName();
-                                try {
-                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                                } catch (android.content.ActivityNotFoundException anfe) {
-                                    startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                                }
-                            }
-                        });
-                        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.update_recheck), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                alertDialog.dismiss();
-                                checkMinAppVersion();
-                            }
-                        });
-                        alertDialog.setCancelable(false);
-                        alertDialog.show();
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -457,6 +460,9 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_chats:
                     switchFrag(GroupListFragment.newInstance());
                     return true;
+                case R.id.navigation_explore:
+                    switchFrag(ExploreFrag.newInstance());
+                    return true;
                 case R.id.navigation_mplace:
                     switchFrag(MarketplaceFrag.newInstance());
                     return true;
@@ -470,7 +476,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void switchFrag(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().replace(R.id.content, fragment).commit();
+        fm.beginTransaction().replace(R.id.content, fragment).commitAllowingStateLoss();
     }
 
     @Override
@@ -485,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void removeMplaceBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-        View v = bottomNavigationMenuView.getChildAt(1);
+        View v = bottomNavigationMenuView.getChildAt(2);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
@@ -494,7 +500,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void removeServicesBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-        View v = bottomNavigationMenuView.getChildAt(2);
+        View v = bottomNavigationMenuView.getChildAt(3);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
@@ -504,6 +510,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        isActive = false;
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
     }
 }

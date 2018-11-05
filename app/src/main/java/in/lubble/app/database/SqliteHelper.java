@@ -6,10 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import in.lubble.app.marketplace.ItemSearchData;
 
 import java.util.ArrayList;
-
-import in.lubble.app.marketplace.ItemSearchData;
 
 public class SqliteHelper extends SQLiteOpenHelper {
 

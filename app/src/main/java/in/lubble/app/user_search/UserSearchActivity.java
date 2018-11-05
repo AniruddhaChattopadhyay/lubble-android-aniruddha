@@ -3,16 +3,15 @@ package in.lubble.app.user_search;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-
+import androidx.appcompat.widget.Toolbar;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
-public class UserSearchActivity extends AppCompatActivity {
+public class UserSearchActivity extends BaseActivity {
 
     private static final String EXTRA_GROUP_ID = "UserSearchActivity_GroupId";
 

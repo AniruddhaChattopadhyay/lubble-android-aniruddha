@@ -3,15 +3,14 @@ package in.lubble.app.events;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-
+import androidx.appcompat.widget.Toolbar;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.utils.FragUtils;
 
-public class EventsActivity extends AppCompatActivity {
+public class EventsActivity extends BaseActivity {
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, EventsActivity.class));

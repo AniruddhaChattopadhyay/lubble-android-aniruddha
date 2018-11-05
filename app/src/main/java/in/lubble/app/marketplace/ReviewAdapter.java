@@ -1,7 +1,5 @@
 package in.lubble.app.marketplace;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,17 +7,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
-
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
+
+import java.util.ArrayList;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 

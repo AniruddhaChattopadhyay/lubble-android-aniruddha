@@ -4,11 +4,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,12 +20,9 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
 import in.lubble.app.models.ChatData;
 
-import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
-import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
-import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
+import static in.lubble.app.firebase.FirebaseStorageHelper.*;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 

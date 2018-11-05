@@ -28,6 +28,7 @@ public class LubbleSharedPrefs {
     private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
     private final String FULL_NAME = "FULL_NAME";
     private final String REFERRAL_CODE = "REFERRAL_CODE";
+    private final String IS_EXPLORE_SHOWN = "IS_EXPLORE_SHOWN";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -87,7 +88,20 @@ public class LubbleSharedPrefs {
     }
 
     public String getLubbleId() {
-        return preferences.getString(LUBBLE_ID, "");
+        /*if (!TextUtils.isEmpty(preferences.getString(LUBBLE_ID, ""))) {
+            return preferences.getString(LUBBLE_ID, "");
+        } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            // user is signed in but has no lubble ID
+            // start Main Activity to fetch & update lubble ID
+            final Intent intent = new Intent(LubbleApp.getAppContext(), MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            LubbleApp.getAppContext().startActivity(intent);
+            return "";
+        } else {
+            // user is logged out, Lubble ID does not exist at this time
+            return "";
+        }*/
+        return preferences.getString(LUBBLE_ID, "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "DEV" : "saraswati_vihar");
     }
 
     public boolean setLubbleId(String lubbleId) {
@@ -184,6 +198,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsViewCountEnabled(boolean isViewCountEnabled) {
         return preferences.edit().putBoolean(IS_VIEW_COUNT_ENABLED, isViewCountEnabled).commit();
+    }
+
+    public boolean getIsExploreShown() {
+        return preferences.getBoolean(IS_EXPLORE_SHOWN, false);
+    }
+
+    public boolean setIsExploreShown(boolean isShown) {
+        return preferences.edit().putBoolean(IS_EXPLORE_SHOWN, isShown).commit();
     }
 
 }

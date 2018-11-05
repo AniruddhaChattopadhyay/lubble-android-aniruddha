@@ -11,41 +11,23 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ActionMode;
-import android.support.v7.widget.RecyclerView;
 import android.text.style.URLSpan;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
+import android.view.*;
+import android.widget.*;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
+import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiTextView;
+import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.MutableData;
-import com.google.firebase.database.Transaction;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.google.firebase.database.*;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
@@ -60,15 +42,11 @@ import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.MsgFlexBoxLayout;
 import in.lubble.app.utils.UiUtils;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getSellerInfoRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
-import static in.lubble.app.models.ChatData.HIDDEN;
-import static in.lubble.app.models.ChatData.LINK;
-import static in.lubble.app.models.ChatData.REPLY;
-import static in.lubble.app.models.ChatData.SYSTEM;
-import static in.lubble.app.models.ChatData.UNREAD;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import static in.lubble.app.models.ChatData.*;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -616,10 +594,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private TextView authorNameTv;
-        private TextView messageTv;
+        private EmojiTextView messageTv;
         private LinearLayout linkContainer;
         private TextView linkTitleTv;
-        private TextView linkDescTv;
+        private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
         private ProgressBar progressBar;
         private ImageView chatIv;
@@ -787,10 +765,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-        private TextView messageTv;
+        private EmojiTextView messageTv;
         private LinearLayout linkContainer;
         private TextView linkTitleTv;
-        private TextView linkDescTv;
+        private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
         private ProgressBar progressBar;
         private ImageView chatIv;

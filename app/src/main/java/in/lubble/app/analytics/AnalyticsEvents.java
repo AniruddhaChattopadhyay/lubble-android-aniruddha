@@ -37,4 +37,7 @@ public class AnalyticsEvents {
     public static final String SHARE_ITEM = "SHARE_ITEM";
     public static final String SHARE_CATALOGUE = "SHARE_CATALOGUE";
 
+    public static final String EXPLORE_DIALOG_SHOWN = "EXPLORE_DIALOG_SHOWN";
+    public static final String EXPLORE_CONTINUE_CLICKED = "EXPLORE_CONTINUE_CLICKED";
+
 }

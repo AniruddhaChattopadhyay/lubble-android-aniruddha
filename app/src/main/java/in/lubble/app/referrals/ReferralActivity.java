@@ -3,17 +3,16 @@ package in.lubble.app.referrals;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import com.google.android.material.tabs.TabLayout;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 
-public class ReferralActivity extends AppCompatActivity {
+public class ReferralActivity extends BaseActivity {
     private static final String TAG = "ReferralActivity";
 
     private SectionsPagerAdapter mSectionsPagerAdapter;

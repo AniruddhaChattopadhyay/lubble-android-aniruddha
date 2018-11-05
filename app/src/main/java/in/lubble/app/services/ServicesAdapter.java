@@ -1,21 +1,24 @@
 package in.lubble.app.services;
 
-import android.support.annotation.NonNull;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.PhotoData;
+import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.UiUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -43,16 +46,17 @@ public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         final Item item = itemList.get(position);
 
         viewHolder.nameTv.setText(item.getName());
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0));
 
         final ArrayList<PhotoData> photoList = item.getPhotos();
         if (photoList.size() > 0) {
             glide.load(photoList.get(0).getUrl())
-                    .thumbnail(0.1f)
-                    .circleCrop()
+                    .apply(requestOptions)
                     .into(viewHolder.iconIv);
         } else {
             glide.load(R.drawable.blue_circle)
-                    .circleCrop()
+                    .apply(requestOptions)
                     .into(viewHolder.iconIv);
         }
 

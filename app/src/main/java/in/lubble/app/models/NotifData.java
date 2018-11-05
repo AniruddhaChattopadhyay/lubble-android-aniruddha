@@ -1,7 +1,6 @@
 package in.lubble.app.models;
 
 import com.google.gson.annotations.SerializedName;
-
 import in.lubble.app.utils.StringUtils;
 
 /**

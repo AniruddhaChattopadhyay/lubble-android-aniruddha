@@ -3,7 +3,9 @@ package in.lubble.app;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
-import android.support.multidex.MultiDexApplication;
+import androidx.core.provider.FontRequest;
+import androidx.emoji.text.EmojiCompat;
+import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
@@ -20,7 +22,7 @@ import io.fabric.sdk.android.Fabric;
  * Created by ishaan on 20/1/18.
  */
 
-public class LubbleApp extends MultiDexApplication {
+public class LubbleApp extends Application {
 
     private static LubbleApp appContext;
 
@@ -51,6 +53,15 @@ public class LubbleApp extends MultiDexApplication {
 
         createNotifChannel();
         FirebaseAnalytics.getInstance(this);
+
+        FontRequest fontRequest = new FontRequest(
+                "com.google.android.gms.fonts",
+                "com.google.android.gms",
+                "Noto Color Emoji Compat",
+                R.array.com_google_android_gms_fonts_certs);
+        EmojiCompat.Config config = new FontRequestEmojiCompatConfig(this, fontRequest);
+        EmojiCompat.init(config);
+
     }
 
     public static LubbleApp getAppContext() {

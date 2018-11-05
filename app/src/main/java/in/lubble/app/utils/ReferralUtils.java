@@ -3,13 +3,11 @@ package in.lubble.app.utils;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.text.Html;
 import android.text.TextUtils;
-
+import androidx.annotation.Nullable;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-
 import in.lubble.app.Constants;
 import in.lubble.app.R;
 import io.branch.indexing.BranchUniversalObject;

@@ -1,24 +1,22 @@
 package in.lubble.app.user_search;
 
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
+import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import in.lubble.app.GlideRequests;
+import in.lubble.app.R;
+import in.lubble.app.models.ProfileInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import in.lubble.app.GlideRequests;
-import in.lubble.app.R;
-import in.lubble.app.models.ProfileInfo;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 

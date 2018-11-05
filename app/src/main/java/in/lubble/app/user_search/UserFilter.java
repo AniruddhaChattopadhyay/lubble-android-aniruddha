@@ -1,12 +1,11 @@
 package in.lubble.app.user_search;
 
 import android.widget.Filter;
+import in.lubble.app.models.ProfileInfo;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import in.lubble.app.models.ProfileInfo;
 
 /**
  * Created by ishaan on 25/3/18.

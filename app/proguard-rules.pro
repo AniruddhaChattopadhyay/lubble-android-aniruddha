@@ -24,6 +24,7 @@
 -dontwarn javax.annotation.Nullable
 -dontwarn javax.annotation.ParametersAreNonnullByDefault
 -keep public class * extends com.bumptech.glide.module.AppGlideModule
+-keep public class * implements com.bumptech.glide.module.GlideModule
 -keep class com.bumptech.glide.GeneratedAppGlideModuleImpl
 # Add this global rule for firebase realtime db
 -keepattributes Signature

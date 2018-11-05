@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="8dp"
-            android:text="Help this small business grow"
+            android:text="Help their services reach more people"
             android:textColor="@color/black" />
 
         <LinearLayout
@@ -132,7 +132,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="8dp"
                         android:gravity="center_vertical"
-                        android:text="Share Catalogue"
+                        android:text="Share"
                         android:textColor="@color/dk_colorAccent" />
 
                 </LinearLayout>
@@ -167,7 +167,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp" />
 
-    <android.support.v7.widget.RecyclerView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_items"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

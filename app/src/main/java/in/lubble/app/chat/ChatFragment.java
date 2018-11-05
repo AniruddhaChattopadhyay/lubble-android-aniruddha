@@ -6,47 +6,25 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.constraint.Group;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ActionMode;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.view.*;
+import android.widget.*;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
+import androidx.constraintlayout.widget.Group;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ServerValue;
-import com.google.firebase.database.ValueEventListener;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-
+import com.google.firebase.database.*;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -54,38 +32,21 @@ import in.lubble.app.R;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
-import in.lubble.app.models.ChatData;
-import in.lubble.app.models.DmData;
-import in.lubble.app.models.GroupData;
-import in.lubble.app.models.ProfileInfo;
-import in.lubble.app.models.UserGroupData;
+import in.lubble.app.models.*;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.DateTimeUtils;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
+import permissions.dispatcher.*;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 
 import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
-import static in.lubble.app.models.ChatData.LINK;
-import static in.lubble.app.models.ChatData.REPLY;
-import static in.lubble.app.models.ChatData.SYSTEM;
-import static in.lubble.app.models.ChatData.UNREAD;
-import static in.lubble.app.utils.FileUtils.createImageFile;
-import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
-import static in.lubble.app.utils.FileUtils.getPickImageIntent;
-import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import static in.lubble.app.models.ChatData.*;
+import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -152,6 +113,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
     private ProgressBar sendBtnProgressBtn;
+    private ProgressBar chatProgressBar;
     @Nullable
     private ValueEventListener bottomBarListener;
     @Nullable
@@ -245,6 +207,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         bottomContainer = view.findViewById(R.id.bottom_container);
         pvtSystemMsg = view.findViewById(R.id.view_pvt_sys_msg);
         sendBtnProgressBtn = view.findViewById(R.id.progress_bar_send);
+        chatProgressBar = view.findViewById(R.id.progressbar_chat);
 
         groupMembersMap = new HashMap<>();
 
@@ -293,6 +256,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         chatRecyclerView.setAdapter(chatAdapter);
         if (messagesReference != null) {
             msgChildListener = msgListener(messagesReference);
+            initMsgListenerToKnowWhenSyncComplete();
         }
 
         deleteUnreadMsgsForGroupId(groupId, getContext());
@@ -384,6 +348,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         resetActionBar();
     }
 
+    private void initMsgListenerToKnowWhenSyncComplete() {
+        messagesReference.orderByChild("serverTimestamp").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // this is only called after all chats have been synced
+                // use this to hide the progressbar
+                if (chatProgressBar.getVisibility() == View.VISIBLE) {
+                    chatProgressBar.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     private void resetActionBar() {
         final ActionMode actionMode = ((AppCompatActivity) getContext()).startSupportActionMode(new ActionMode.Callback() {
             @Override
@@ -433,12 +415,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         resetUnreadCount();
                         showBottomBar(groupData);
                         showPublicGroupWarning();
+                    } else {
+                        Crashlytics.logException(new NullPointerException("groupdata is null for group id: " + groupId));
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    Crashlytics.logException(databaseError.toException());
                 }
             });
         } else if (!TextUtils.isEmpty(dmId)) {
@@ -479,6 +463,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                             }
                         }
                         resetUnreadCount();
+                    } else {
+                        Crashlytics.logException(new NullPointerException("dmData is null for dm id: " + dmId));
                     }
                 }
 
@@ -523,7 +509,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                    Crashlytics.logException(databaseError.toException());
                 }
             });
         } else if (!TextUtils.isEmpty(receiverId)) {
@@ -671,6 +657,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     chatData.setId(dataSnapshot.getKey());
                     chatAdapter.addChatData(chatData);
                     sendReadReceipt(chatData);
+                } else {
+                    Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey()));
                 }
             }
 
@@ -715,7 +703,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Crashlytics.logException(databaseError.toException());
             }
         });
     }
