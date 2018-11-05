@@ -38,7 +38,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         this.isOnboarding = isOnboarding;
     }
 
-    public void updateList(List<ExploreGroupData> items){
+    public void updateList(List<ExploreGroupData> items) {
         this.mValues = items;
         notifyDataSetChanged();
     }
