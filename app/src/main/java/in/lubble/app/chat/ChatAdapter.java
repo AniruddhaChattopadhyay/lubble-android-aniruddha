@@ -11,6 +11,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.*;
@@ -47,7 +48,7 @@ import java.util.Random;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
-import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.StringUtils.*;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 /**
@@ -79,6 +80,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
     private int playingPos = -1;
+    YouTubePlayer mYouTubePlayer = null;
 
     public ChatAdapter(Activity activity, Context context, String groupId,
                        RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
@@ -316,19 +318,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
         showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
 
-        handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
+        handleYoutube(recvdChatViewHolder.youtubeThumbnailView, recvdChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position);
     }
 
-    YouTubePlayer mYouTubePlayer = null;
-
-    private void handleYoutube(final RecvdChatViewHolder recvdChatViewHolder, String message, final int position) {
-
+    private void handleYoutube(final YouTubeThumbnailView youTubeThumbnailView, final FrameLayout youtubeFrameLayout, final String message, final int position) {
         if (playingPos == position) {
             // PLAY VIDEO
-            //recvdChatViewHolder.youtubeThumbnailView.setVisibility(View.GONE);
-            recvdChatViewHolder.youtubeFrameLayout.setVisibility(View.VISIBLE);
+            youTubeThumbnailView.setVisibility(View.INVISIBLE);
+            youtubeFrameLayout.setVisibility(View.VISIBLE);
             // Delete old fragment
-            int containerId = recvdChatViewHolder.youtubeFrameLayout.getId();// Get container id
+            int containerId = youtubeFrameLayout.getId();// Get container id
             Fragment oldFragment = chatFragment.getChildFragmentManager().findFragmentById(containerId);
             if (oldFragment != null) {
                 chatFragment.getChildFragmentManager().beginTransaction().remove(oldFragment).commit();
@@ -337,14 +336,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
             final YouTubePlayerSupportFragment youTubePlayerFragment = YouTubePlayerSupportFragment.newInstance();
             // Must set a unique id to the framelayout holding the fragment or else it's always added to the first item in the recyclerView
             final int id = new Random().nextInt();
-            recvdChatViewHolder.youtubeFrameLayout.setId(id);
+            youtubeFrameLayout.setId(id);
             chatFragment.getChildFragmentManager().beginTransaction().replace(id, youTubePlayerFragment).commit();
             youTubePlayerFragment.initialize(Constants.YOUTUBE_DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
                 @Override
                 public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer youTubePlayer, boolean b) {
                     Log.d(TAG, "onInitializationSuccess: ");
                     mYouTubePlayer = youTubePlayer;
-                    youTubePlayer.loadVideo("uqa0BvYy03I");
+                    youTubePlayer.loadVideo(extractYoutubeId(extractFirstLink(message)));
                     youTubePlayer.setShowFullscreenButton(false);
                 }
 
@@ -361,14 +360,17 @@ public class ChatAdapter extends RecyclerView.Adapter {
             });
         } else {
             // STOP VIDEO - SHOW THUMBNAIL
-            if (message.contains("youtube") || true) {
-                recvdChatViewHolder.youtubeThumbnailView.setVisibility(View.VISIBLE);
-                recvdChatViewHolder.youtubeFrameLayout.setVisibility(View.GONE);
+            final String extractedLink = extractFirstLink(message);
+            String videoId = null;
+            if (!TextUtils.isEmpty(extractedLink) && (videoId = extractYoutubeId(extractedLink)) != null) {
+                youTubeThumbnailView.setVisibility(View.VISIBLE);
+                youtubeFrameLayout.setVisibility(View.GONE);
 
-                recvdChatViewHolder.youtubeThumbnailView.initialize(Constants.YOUTUBE_DEVELOPER_KEY, new YouTubeThumbnailView.OnInitializedListener() {
+                final String finalVideoId = videoId;
+                youTubeThumbnailView.initialize(Constants.YOUTUBE_DEVELOPER_KEY, new YouTubeThumbnailView.OnInitializedListener() {
                     @Override
                     public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, final YouTubeThumbnailLoader youTubeThumbnailLoader) {
-                        youTubeThumbnailLoader.setVideo("uqa0BvYy03I");
+                        youTubeThumbnailLoader.setVideo(finalVideoId);
                         youTubeThumbnailLoader.setOnThumbnailLoadedListener(new YouTubeThumbnailLoader.OnThumbnailLoadedListener() {
                             @Override
                             public void onThumbnailLoaded(YouTubeThumbnailView youTubeThumbnailView, String s) {
@@ -387,7 +389,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                     }
                 });
-                recvdChatViewHolder.youtubeThumbnailView.setOnClickListener(new View.OnClickListener() {
+                youTubeThumbnailView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         playingPos = position;
@@ -396,7 +398,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 });
 
             } else {
-                //todo
+                youTubeThumbnailView.setVisibility(View.GONE);
+                youtubeFrameLayout.setVisibility(View.GONE);
             }
         }
     }

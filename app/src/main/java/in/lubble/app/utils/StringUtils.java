@@ -1,11 +1,12 @@
 package in.lubble.app.utils;
 
-import androidx.annotation.Nullable;
-import com.google.android.material.textfield.TextInputLayout;
 import android.text.TextUtils;
 import android.util.Patterns;
+import androidx.annotation.Nullable;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by ishaangarg on 11/11/17.
@@ -60,6 +61,18 @@ public class StringUtils {
         }
 
         return null;
+    }
+
+    public static String extractYoutubeId(String ytUrl) {
+        String vId = null;
+        Pattern pattern = Pattern.compile(
+                "^https?://.*(?:youtu.be/|v/|u/\\w/|embed/|watch?v=)([^#&?]*).*$",
+                Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(ytUrl);
+        if (matcher.matches()) {
+            vId = matcher.group(1);
+        }
+        return vId;
     }
 
 }
