@@ -235,6 +235,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 break;
             }
         }
+
+        handleYoutube(sentChatViewHolder.youtubeThumbnailView, sentChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position);
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -386,7 +388,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                     @Override
                     public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
-
+                        Log.e(TAG, "onInitializationFailure: ");
                     }
                 });
                 youTubeThumbnailView.setOnClickListener(new View.OnClickListener() {
@@ -407,8 +409,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Override
     public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
-        if (mYouTubePlayer != null && mYouTubePlayer.isPlaying() && holder instanceof RecvdChatViewHolder
-                && ((RecvdChatViewHolder) holder).youtubeFrameLayout.getVisibility() == View.VISIBLE) {
+        if (mYouTubePlayer != null && mYouTubePlayer.isPlaying() && (holder instanceof RecvdChatViewHolder
+                && ((RecvdChatViewHolder) holder).youtubeFrameLayout.getVisibility() == View.VISIBLE) ||
+                (holder instanceof SentChatViewHolder
+                        && ((SentChatViewHolder) holder).youtubeFrameLayout.getVisibility() == View.VISIBLE)) {
             mYouTubePlayer.pause();
             mYouTubePlayer.release();
             mYouTubePlayer = null;
@@ -887,6 +891,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ActionMode actionMode;
         private ImageView lubbIv;
         private TextView lubbHintTv;
+        private YouTubeThumbnailView youtubeThumbnailView;
+        private FrameLayout youtubeFrameLayout;
 
         SentChatViewHolder(final View itemView) {
             super(itemView);
@@ -906,6 +912,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbPopOutContainer = itemView.findViewById(R.id.linear_layout_lubb_pop);
             lubbIv = itemView.findViewById(R.id.iv_lubb_icon);
             lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
+            youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
+            youtubeFrameLayout = itemView.findViewById(R.id.youtube_frag);
 
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
