@@ -3,10 +3,14 @@ package in.lubble.app.analytics;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.utils.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Analytics {
 
@@ -29,6 +33,7 @@ public class Analytics {
             Bundle attributes = new Bundle();
             setupDefaultAttributes(context, attributes);
             FirebaseAnalytics.getInstance(context).logEvent(title, attributes);
+            CleverTapAPI.getDefaultInstance(context).pushEvent(title, bundleToMap(attributes));
         }
     }
 
@@ -36,6 +41,7 @@ public class Analytics {
         if (context != null) {
             setupDefaultAttributes(context, attributes);
             FirebaseAnalytics.getInstance(context).logEvent(title, attributes);
+            CleverTapAPI.getDefaultInstance(context).pushEvent(title, bundleToMap(attributes));
         }
     }
 
@@ -43,6 +49,7 @@ public class Analytics {
         Bundle attributes = new Bundle();
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, attributes);
+        CleverTapAPI.getDefaultInstance(context).pushEvent("LOGIN", bundleToMap(attributes));
         setUser(context);
     }
 
@@ -50,6 +57,7 @@ public class Analytics {
         Bundle attributes = new Bundle();
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SIGN_UP, attributes);
+        CleverTapAPI.getDefaultInstance(context).pushEvent("SIGNUP", bundleToMap(attributes));
         setUser(context);
     }
 
@@ -74,6 +82,7 @@ public class Analytics {
             setupDefaultAttributes(context, attributes);
             FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
             firebaseAnalytics.logEvent(AnalyticsEvents.LOGOUT_SUCCESS_EVENT, attributes);
+            CleverTapAPI.getDefaultInstance(context).pushEvent("LOGOUT", bundleToMap(attributes));
             unSetUser(context);
         }
     }
@@ -88,5 +97,14 @@ public class Analytics {
             attributes.putString("lubble_id", lubbleId);
         }
     }
+
+    private static Map<String, Object> bundleToMap(Bundle attributes) {
+        final Map<String, Object> map = new HashMap<>();
+        for (String key : attributes.keySet()) {
+            map.put(key, attributes.get(key));
+        }
+        return map;
+    }
+
 
 }

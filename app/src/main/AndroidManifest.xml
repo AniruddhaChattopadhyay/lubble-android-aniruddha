@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Recommended so that CleverTap knows when to attempt a network call -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".LubbleApp"
@@ -99,12 +101,6 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="Notice Notifications" />
-
-        <service android:name=".firebase.FcmInstanceIdService">
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-            </intent-filter>
-        </service>
 
         <activity
             android:name=".groups.NewGroupActivity"
@@ -315,6 +311,12 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
         <activity android:name=".explore.ExploreActiv"></activity>
+
+        <receiver
+            android:name="com.clevertap.android.sdk.CTPushNotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
+
     </application>
 
 </manifest>
