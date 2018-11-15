@@ -124,9 +124,11 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
 
             @Override
             public void onFailure(Call<ArrayList<ExploreGroupData>> call, Throwable t) {
-                Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "onFailure: ");
-                progressbar.setVisibility(View.GONE);
+                if (isAdded() && isVisible()) {
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ");
+                    progressbar.setVisibility(View.GONE);
+                }
             }
         });
     }
