@@ -881,24 +881,28 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         return new LinkMetaListener() {
             @Override
             public void onMetaFetched(final String title, final String desc) {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        linkMetaContainer.setVisibility(View.VISIBLE);
-                        linkTitle.setText(title);
-                        linkDesc.setText(desc);
-                    }
-                });
+                if (isAdded() && isVisible() && getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            linkMetaContainer.setVisibility(View.VISIBLE);
+                            linkTitle.setText(title);
+                            linkDesc.setText(desc);
+                        }
+                    });
+                }
             }
 
             @Override
             public void onMetaFailed() {
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        linkMetaContainer.setVisibility(View.GONE);
-                    }
-                });
+                if (isAdded() && isVisible() && getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            linkMetaContainer.setVisibility(View.GONE);
+                        }
+                    });
+                }
             }
         };
     }
