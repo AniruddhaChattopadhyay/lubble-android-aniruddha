@@ -57,7 +57,7 @@ public class TokenAuthenticator implements Authenticator {
             }
             try {
                 // Block on the task for a maximum of 1000 milliseconds, otherwise time out.
-                final GetTokenResult getTokenResult = Tasks.await(FirebaseAuth.getInstance().getAccessToken(true), 3000, TimeUnit.MILLISECONDS);
+                final GetTokenResult getTokenResult = Tasks.await(FirebaseAuth.getInstance().getAccessToken(false), 3000, TimeUnit.MILLISECONDS);
                 savedToken = getTokenResult.getToken();
 
                 if (TextUtils.isEmpty(savedToken)) {
