@@ -237,7 +237,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         }
 
-        handleYoutube(sentChatViewHolder.youtubeThumbnailView, sentChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position, sentChatViewHolder.linkContainer);
+        handleYoutube(sentChatViewHolder.youtubeThumbnailView, sentChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position, sentChatViewHolder.linkContainer, sentChatViewHolder.youtubeProgressBar);
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -321,10 +321,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
         showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
 
-        handleYoutube(recvdChatViewHolder.youtubeThumbnailView, recvdChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position, recvdChatViewHolder.linkContainer);
+        handleYoutube(recvdChatViewHolder.youtubeThumbnailView, recvdChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position, recvdChatViewHolder.linkContainer, recvdChatViewHolder.youtubeProgressBar);
     }
 
-    private void handleYoutube(final YouTubeThumbnailView youTubeThumbnailView, final FrameLayout youtubeFrameLayout, final String message, final int position, LinearLayout linkContainer) {
+    private void handleYoutube(final YouTubeThumbnailView youTubeThumbnailView, final FrameLayout youtubeFrameLayout, final String message, final int position, LinearLayout linkContainer, ProgressBar youtubeProgressBar) {
+        youtubeProgressBar.setVisibility(View.GONE);
         if (playingPos == position) {
             // PLAY VIDEO
             linkContainer.setVisibility(View.GONE);
@@ -370,6 +371,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 youTubeThumbnailView.setVisibility(View.VISIBLE);
                 youtubeFrameLayout.setVisibility(View.GONE);
                 linkContainer.setVisibility(View.GONE);
+                youtubeProgressBar.setVisibility(View.VISIBLE);
 
                 final String finalVideoId = videoId;
                 youTubeThumbnailView.initialize(Constants.YOUTUBE_DEVELOPER_KEY, new YouTubeThumbnailView.OnInitializedListener() {
@@ -724,6 +726,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView lubbHintTv;
         private YouTubeThumbnailView youtubeThumbnailView;
         private FrameLayout youtubeFrameLayout;
+        private ProgressBar youtubeProgressBar;
 
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
@@ -749,6 +752,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
             youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
             youtubeFrameLayout = itemView.findViewById(R.id.youtube_frag);
+            youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
 
             lubbAnyHintTv.setSelected(true);
             lubbAnyHintTv.setHorizontallyScrolling(true);
@@ -896,6 +900,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView lubbHintTv;
         private YouTubeThumbnailView youtubeThumbnailView;
         private FrameLayout youtubeFrameLayout;
+        private ProgressBar youtubeProgressBar;
 
         SentChatViewHolder(final View itemView) {
             super(itemView);
@@ -917,6 +922,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
             youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
             youtubeFrameLayout = itemView.findViewById(R.id.youtube_frag);
+            youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
 
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
