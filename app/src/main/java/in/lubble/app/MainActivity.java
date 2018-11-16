@@ -19,6 +19,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -47,6 +48,7 @@ import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.ServicesFrag;
+import in.lubble.app.utils.ClevertapUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
@@ -163,6 +165,7 @@ public class MainActivity extends BaseActivity {
         syncFcmToken();
         logUser(FirebaseAuth.getInstance().getCurrentUser());
         Branch.getInstance().setIdentity(FirebaseAuth.getInstance().getUid());
+        ClevertapUtils.setUser(this);
 
         switchFrag(GroupListFragment.newInstance());
 
@@ -427,6 +430,7 @@ public class MainActivity extends BaseActivity {
     private void syncFcmToken() {
         getThisUserRef().child("token")
                 .setValue(FirebaseInstanceId.getInstance().getToken());
+        CleverTapAPI.getDefaultInstance(this).pushFcmRegistrationId(FirebaseInstanceId.getInstance().getToken(), true);
     }
 
     private void updateDefaultGroupId() {

@@ -42,3 +42,5 @@
 -keep class org.jsoup.**
 -dontwarn com.google.firebase.appindexing.**
 -dontwarn com.android.installreferrer.api.**
+# For CleverTap SDK
+-dontwarn com.clevertap.android.sdk.**

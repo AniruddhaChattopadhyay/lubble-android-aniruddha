@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import com.clevertap.android.sdk.CleverTapAPI;
+import com.clevertap.android.sdk.NotificationInfo;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -26,8 +28,7 @@ import in.lubble.app.utils.StringUtils;
 import java.util.Map;
 
 import static in.lubble.app.analytics.AnalyticsEvents.NOTIF_SHOWN;
-import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.marketplace.SellerDashActiv.*;
 
 /**
@@ -53,52 +54,64 @@ public class FcmService extends FirebaseMessagingService {
 
             sendShownAnalyticEvent(dataMap);
 
-            final String type = dataMap.get("type");
-            if (StringUtils.isValidString(type) && "deleteUser".equalsIgnoreCase(type)
-                    && dataMap.get("uid").equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                // nuke user!!
-                deleteUser(dataMap);
-            } else if (StringUtils.isValidString(type) && (
-                    "groupInvitation".equalsIgnoreCase(type))
-                    || "notice".equalsIgnoreCase(type)
-                    || "referralJoined".equalsIgnoreCase(type)
-                    || "new_event".equalsIgnoreCase(type)
-                    || "services".equalsIgnoreCase(type)) {
-                Log.d(TAG, "onMessageReceived: type -> " + type);
-                Gson gson = new Gson();
-                JsonElement jsonElement = gson.toJsonTree(dataMap);
-                AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
-                AppNotifUtils.showAppNotif(this, appNotifData);
-                // prefetch notices
-                pullNotices(dataMap);
-            } else if (StringUtils.isValidString(type) && "lubb".equalsIgnoreCase(type)) {
-                // create like notif
-                Gson gson = new Gson();
-                JsonElement jsonElement = gson.toJsonTree(dataMap);
-                AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
-                AppNotifUtils.showAppNotif(this, appNotifData);
-            } else if (StringUtils.isValidString(type) && ("chat".equalsIgnoreCase(type))) {
-                // create chat notif
-                createChatNotif(dataMap);
-            } else if (StringUtils.isValidString(type) && ("dm".equalsIgnoreCase(type))) {
-                // create chat notif
-                createDmNotif(dataMap);
-            } else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
-                // mplace image uploaded, send broadcast
-                sendMarketplaceImgBroadcast(dataMap);
-            } else if (StringUtils.isValidString(type) && "mplace_approval".equalsIgnoreCase(type)) {
-                // mplace item approval status changed
-                Gson gson = new Gson();
-                JsonElement jsonElement = gson.toJsonTree(dataMap);
-                AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
-                AppNotifUtils.showNormalAppNotif(this, appNotifData);
-            }  else if (StringUtils.isValidString(type) && "deep_link".equalsIgnoreCase(type)) {
-                Gson gson = new Gson();
-                JsonElement jsonElement = gson.toJsonTree(dataMap);
-                AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
-                AppNotifUtils.showNormalAppNotif(this, appNotifData);
+            Bundle extras = new Bundle();
+            for (Map.Entry<String, String> entry : remoteMessage.getData().entrySet()) {
+                extras.putString(entry.getKey(), entry.getValue());
+            }
+
+            NotificationInfo info = CleverTapAPI.getNotificationInfo(extras);
+
+            if (info.fromCleverTap) {
+                CleverTapAPI.createNotification(getApplicationContext(), extras);
             } else {
-                Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
+                // not from CleverTap handle yourself
+                final String type = dataMap.get("type");
+                if (StringUtils.isValidString(type) && "deleteUser".equalsIgnoreCase(type)
+                        && dataMap.get("uid").equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                    // nuke user!!
+                    deleteUser(dataMap);
+                } else if (StringUtils.isValidString(type) && (
+                        "groupInvitation".equalsIgnoreCase(type))
+                        || "notice".equalsIgnoreCase(type)
+                        || "referralJoined".equalsIgnoreCase(type)
+                        || "new_event".equalsIgnoreCase(type)
+                        || "services".equalsIgnoreCase(type)) {
+                    Log.d(TAG, "onMessageReceived: type -> " + type);
+                    Gson gson = new Gson();
+                    JsonElement jsonElement = gson.toJsonTree(dataMap);
+                    AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
+                    AppNotifUtils.showAppNotif(this, appNotifData);
+                    // prefetch notices
+                    pullNotices(dataMap);
+                } else if (StringUtils.isValidString(type) && "lubb".equalsIgnoreCase(type)) {
+                    // create like notif
+                    Gson gson = new Gson();
+                    JsonElement jsonElement = gson.toJsonTree(dataMap);
+                    AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
+                    AppNotifUtils.showAppNotif(this, appNotifData);
+                } else if (StringUtils.isValidString(type) && ("chat".equalsIgnoreCase(type))) {
+                    // create chat notif
+                    createChatNotif(dataMap);
+                } else if (StringUtils.isValidString(type) && ("dm".equalsIgnoreCase(type))) {
+                    // create chat notif
+                    createDmNotif(dataMap);
+                } else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
+                    // mplace image uploaded, send broadcast
+                    sendMarketplaceImgBroadcast(dataMap);
+                } else if (StringUtils.isValidString(type) && "mplace_approval".equalsIgnoreCase(type)) {
+                    // mplace item approval status changed
+                    Gson gson = new Gson();
+                    JsonElement jsonElement = gson.toJsonTree(dataMap);
+                    AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
+                    AppNotifUtils.showNormalAppNotif(this, appNotifData);
+                } else if (StringUtils.isValidString(type) && "deep_link".equalsIgnoreCase(type)) {
+                    Gson gson = new Gson();
+                    JsonElement jsonElement = gson.toJsonTree(dataMap);
+                    AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
+                    AppNotifUtils.showNormalAppNotif(this, appNotifData);
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
+                }
             }
         }
     }
@@ -246,6 +259,19 @@ public class FcmService extends FirebaseMessagingService {
                 .child("deliveryReceipts")
                 .child(FirebaseAuth.getInstance().getUid())
                 .setValue(System.currentTimeMillis());
+    }
+
+    @Override
+    public void onNewToken(String token) {
+        super.onNewToken(token);
+        // Get updated InstanceID token.
+        Log.d(TAG, "Refreshed token: " + token);
+        CleverTapAPI.getDefaultInstance(this).pushFcmRegistrationId(token, true);
+        try {
+            getThisUserRef().child("token").setValue(token);
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
     }
 
     @Override
