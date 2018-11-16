@@ -34,10 +34,10 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/chat_bubble_border"
                 android:orientation="vertical"
-                android:paddingBottom="8dp"
                 android:paddingLeft="8dp"
+                android:paddingTop="8dp"
                 android:paddingRight="8dp"
-                android:paddingTop="8dp">
+                android:paddingBottom="8dp">
 
                 <TextView
                     android:id="@+id/tv_author"
@@ -45,17 +45,41 @@
                     android:layout_height="wrap_content"
                     tools:text="@tools:sample/full_names" />
 
+                <RelativeLayout
+                    android:id="@+id/relativelayout_youtube"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <com.google.android.youtube.player.YouTubeThumbnailView
+                        android:id="@+id/youtube_thumbnail_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="150dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp" />
+
+                    <FrameLayout
+                        android:id="@+id/youtube_frag"
+                        android:name="com.google.android.youtube.player.YouTubePlayerFragment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:visibility="gone" />
+
+                </RelativeLayout>
+
                 <LinearLayout
                     android:id="@+id/link_meta_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
                     android:background="@drawable/sent_chat_bubble_border"
                     android:orientation="vertical"
                     android:padding="8dp"
                     android:visibility="gone"
-                    tools:visibility="visible">
+                    tools:visibility="gone">
 
                     <TextView
                         android:id="@+id/tv_link_title"
@@ -106,8 +130,8 @@
                                 android:id="@+id/iv_chat_img"
                                 android:layout_width="wrap_content"
                                 android:layout_height="240dp"
-                                android:layout_marginBottom="4dp"
                                 android:layout_marginTop="4dp"
+                                android:layout_marginBottom="4dp"
                                 android:minWidth="240dp"
                                 android:scaleType="centerCrop"
                                 android:transitionName="fullscreen_image"
@@ -166,8 +190,8 @@
                 android:id="@+id/linearLayout_lubb_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignRight="@id/frame_msg"
                 android:layout_below="@id/frame_msg"
+                android:layout_alignRight="@id/frame_msg"
                 android:layout_marginTop="4dp"
                 android:gravity="left|center_vertical"
                 android:orientation="horizontal">

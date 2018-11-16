@@ -15,22 +15,32 @@ import android.text.style.URLSpan;
 import android.util.Log;
 import android.view.*;
 import android.widget.*;
+import android.text.TextUtils;
+import android.text.style.URLSpan;
+import android.util.Log;
+import android.view.*;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.youtube.player.*;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
+import com.google.firebase.database.*;
+import in.lubble.app.*;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -48,6 +58,13 @@ import java.util.HashMap;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Random;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import static in.lubble.app.models.ChatData.*;
+import static in.lubble.app.utils.StringUtils.*;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 /**
@@ -77,7 +94,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private static HashMap<String, ProfileInfo> profileInfoMap = new HashMap<>();
     private String authorId = FirebaseAuth.getInstance().getUid();
     @Nullable
-    private String dmId;
+    private String dmId;// Allows to remember the last item shown on screen
+    private int playingPos = -1;
+    YouTubePlayer mYouTubePlayer = null;
 
     public ChatAdapter(Activity activity, Context context, String groupId,
                        RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
@@ -232,6 +251,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 break;
             }
         }
+
+        handleYoutube(sentChatViewHolder.youtubeThumbnailView, sentChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position);
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -314,6 +335,105 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
         showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
+
+        handleYoutube(recvdChatViewHolder.youtubeThumbnailView, recvdChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position);
+    }
+
+    private void handleYoutube(final YouTubeThumbnailView youTubeThumbnailView, final FrameLayout youtubeFrameLayout, final String message, final int position) {
+        if (playingPos == position) {
+            // PLAY VIDEO
+            youTubeThumbnailView.setVisibility(View.INVISIBLE);
+            youtubeFrameLayout.setVisibility(View.VISIBLE);
+            // Delete old fragment
+            int containerId = youtubeFrameLayout.getId();// Get container id
+            Fragment oldFragment = chatFragment.getChildFragmentManager().findFragmentById(containerId);
+            if (oldFragment != null) {
+                chatFragment.getChildFragmentManager().beginTransaction().remove(oldFragment).commit();
+            }
+            // Add the YouTube fragment to view
+            final YouTubePlayerSupportFragment youTubePlayerFragment = YouTubePlayerSupportFragment.newInstance();
+            // Must set a unique id to the framelayout holding the fragment or else it's always added to the first item in the recyclerView
+            final int id = new Random().nextInt();
+            youtubeFrameLayout.setId(id);
+            chatFragment.getChildFragmentManager().beginTransaction().replace(id, youTubePlayerFragment).commit();
+            youTubePlayerFragment.initialize(Constants.YOUTUBE_DEVELOPER_KEY, new YouTubePlayer.OnInitializedListener() {
+                @Override
+                public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer youTubePlayer, boolean b) {
+                    Log.d(TAG, "onInitializationSuccess: ");
+                    mYouTubePlayer = youTubePlayer;
+                    youTubePlayer.loadVideo(extractYoutubeId(extractFirstLink(message)));
+                    youTubePlayer.setShowFullscreenButton(false);
+                }
+
+                @Override
+                public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+                    Log.e(TAG, "Could not initialize YouTubePlayer");
+                    Log.i("Detail", "Failed: " + youTubeInitializationResult);
+                    if (youTubeInitializationResult.isUserRecoverableError()) {
+                        // youTubeInitializationResult.getErrorDialog(getMainActivity(), RECOVERY_DIALOG_REQUEST).show();
+                    } else {
+                        //callToast(youTubeInitializationResult.toString(), true);
+                    }
+                }
+            });
+        } else {
+            // STOP VIDEO - SHOW THUMBNAIL
+            final String extractedLink = extractFirstLink(message);
+            String videoId = null;
+            if (!TextUtils.isEmpty(extractedLink) && (videoId = extractYoutubeId(extractedLink)) != null) {
+                youTubeThumbnailView.setVisibility(View.VISIBLE);
+                youtubeFrameLayout.setVisibility(View.GONE);
+
+                final String finalVideoId = videoId;
+                youTubeThumbnailView.initialize(Constants.YOUTUBE_DEVELOPER_KEY, new YouTubeThumbnailView.OnInitializedListener() {
+                    @Override
+                    public void onInitializationSuccess(YouTubeThumbnailView youTubeThumbnailView, final YouTubeThumbnailLoader youTubeThumbnailLoader) {
+                        youTubeThumbnailLoader.setVideo(finalVideoId);
+                        youTubeThumbnailLoader.setOnThumbnailLoadedListener(new YouTubeThumbnailLoader.OnThumbnailLoadedListener() {
+                            @Override
+                            public void onThumbnailLoaded(YouTubeThumbnailView youTubeThumbnailView, String s) {
+                                youTubeThumbnailLoader.release();
+                            }
+
+                            @Override
+                            public void onThumbnailError(YouTubeThumbnailView youTubeThumbnailView, YouTubeThumbnailLoader.ErrorReason errorReason) {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onInitializationFailure(YouTubeThumbnailView youTubeThumbnailView, YouTubeInitializationResult youTubeInitializationResult) {
+                        Log.e(TAG, "onInitializationFailure: ");
+                    }
+                });
+                youTubeThumbnailView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        playingPos = position;
+                        notifyDataSetChanged();
+                    }
+                });
+
+            } else {
+                youTubeThumbnailView.setVisibility(View.GONE);
+                youtubeFrameLayout.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull RecyclerView.ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        if (mYouTubePlayer != null && mYouTubePlayer.isPlaying() && (holder instanceof RecvdChatViewHolder
+                && ((RecvdChatViewHolder) holder).youtubeFrameLayout.getVisibility() == View.VISIBLE) ||
+                (holder instanceof SentChatViewHolder
+                        && ((SentChatViewHolder) holder).youtubeFrameLayout.getVisibility() == View.VISIBLE)) {
+            mYouTubePlayer.pause();
+            mYouTubePlayer.release();
+            mYouTubePlayer = null;
+            playingPos = -1;
+        }
     }
 
     private void handleLubbs(RecvdChatViewHolder recvdChatViewHolder, ChatData chatData, boolean toAnimate) {
@@ -615,6 +735,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ActionMode actionMode;
         private ImageView lubbIv;
         private TextView lubbHintTv;
+        private YouTubeThumbnailView youtubeThumbnailView;
+        private FrameLayout youtubeFrameLayout;
 
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
@@ -638,6 +760,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbPopOutContainer = itemView.findViewById(R.id.linear_layout_lubb_pop);
             lubbIv = itemView.findViewById(R.id.iv_lubb_icon);
             lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
+            youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
+            youtubeFrameLayout = itemView.findViewById(R.id.youtube_frag);
 
             lubbAnyHintTv.setSelected(true);
             lubbAnyHintTv.setHorizontallyScrolling(true);
@@ -783,6 +907,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ActionMode actionMode;
         private ImageView lubbIv;
         private TextView lubbHintTv;
+        private YouTubeThumbnailView youtubeThumbnailView;
+        private FrameLayout youtubeFrameLayout;
 
         SentChatViewHolder(final View itemView) {
             super(itemView);
@@ -802,6 +928,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbPopOutContainer = itemView.findViewById(R.id.linear_layout_lubb_pop);
             lubbIv = itemView.findViewById(R.id.iv_lubb_icon);
             lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
+            youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
+            youtubeFrameLayout = itemView.findViewById(R.id.youtube_frag);
 
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
