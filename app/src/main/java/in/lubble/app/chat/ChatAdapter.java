@@ -237,7 +237,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         }
 
-        handleYoutube(sentChatViewHolder.youtubeThumbnailView, sentChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position);
+        handleYoutube(sentChatViewHolder.youtubeThumbnailView, sentChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position, sentChatViewHolder.linkContainer);
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -321,12 +321,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData);
         showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
 
-        handleYoutube(recvdChatViewHolder.youtubeThumbnailView, recvdChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position);
+        handleYoutube(recvdChatViewHolder.youtubeThumbnailView, recvdChatViewHolder.youtubeFrameLayout, chatData.getMessage(), position, recvdChatViewHolder.linkContainer);
     }
 
-    private void handleYoutube(final YouTubeThumbnailView youTubeThumbnailView, final FrameLayout youtubeFrameLayout, final String message, final int position) {
+    private void handleYoutube(final YouTubeThumbnailView youTubeThumbnailView, final FrameLayout youtubeFrameLayout, final String message, final int position, LinearLayout linkContainer) {
         if (playingPos == position) {
             // PLAY VIDEO
+            linkContainer.setVisibility(View.GONE);
             youTubeThumbnailView.setVisibility(View.INVISIBLE);
             youtubeFrameLayout.setVisibility(View.VISIBLE);
             // Delete old fragment
@@ -368,6 +369,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (!TextUtils.isEmpty(extractedLink) && (videoId = extractYoutubeId(extractedLink)) != null) {
                 youTubeThumbnailView.setVisibility(View.VISIBLE);
                 youtubeFrameLayout.setVisibility(View.GONE);
+                linkContainer.setVisibility(View.GONE);
 
                 final String finalVideoId = videoId;
                 youTubeThumbnailView.initialize(Constants.YOUTUBE_DEVELOPER_KEY, new YouTubeThumbnailView.OnInitializedListener() {
