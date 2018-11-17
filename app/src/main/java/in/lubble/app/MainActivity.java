@@ -39,12 +39,12 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
-import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.ServicesFrag;
@@ -437,7 +437,7 @@ public class MainActivity extends BaseActivity {
         RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                toolbarTitle.setText(dataSnapshot.child("title").getValue(String.class));
+                toolbarTitle.setText("IIM Bangalore");
                 LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
             }
 
@@ -468,7 +468,7 @@ public class MainActivity extends BaseActivity {
                     switchFrag(ExploreFrag.newInstance());
                     return true;
                 case R.id.navigation_mplace:
-                    switchFrag(MarketplaceFrag.newInstance());
+                    switchFrag(EventsFrag.newInstance());
                     return true;
                 case R.id.navigation_services:
                     switchFrag(ServicesFrag.newInstance());

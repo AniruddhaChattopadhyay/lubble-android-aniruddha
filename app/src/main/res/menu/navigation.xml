@@ -13,8 +13,8 @@
 
     <item
         android:id="@+id/navigation_mplace"
-        android:icon="@drawable/ic_shopping_cart_black_24dp"
-        android:title="Market" />
+        android:icon="@drawable/ic_event_black_24dp"
+        android:title="Events" />
 
     <item
         android:id="@+id/navigation_services"
