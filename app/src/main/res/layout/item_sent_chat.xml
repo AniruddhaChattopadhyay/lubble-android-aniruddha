@@ -41,10 +41,10 @@
                     <ImageView
                         android:id="@+id/youtube_thumbnail_view"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="160dp"
+                        android:scaleType="center"
                         android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp"
-                        android:minHeight="150dp" />
+                        android:layout_marginBottom="4dp" />
 
                     <ImageView
                         android:id="@+id/iv_youtube_play"
