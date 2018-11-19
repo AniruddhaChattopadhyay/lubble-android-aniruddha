@@ -862,7 +862,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                sendBtn.setEnabled(editable.length() > 0);
+                sendBtn.setEnabled(editable.length() > 0 && editable.toString().trim().length() > 0);
                 final String extractedUrl = extractFirstLink(editable.toString());
                 if (extractedUrl != null && (!prevUrl.equalsIgnoreCase(extractedUrl))) {
                     prevUrl = extractedUrl;

@@ -12,6 +12,7 @@ import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.referrals.ReferralHistoryData;
 import in.lubble.app.referrals.ReferralLeaderboardData;
+import in.lubble.app.utils.YoutubeData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.*;
@@ -95,4 +96,6 @@ public interface Endpoints {
     @GET("/explore/{lubble_id}/")
     Call<ArrayList<ExploreGroupData>> fetchExploreGroups(@Path("lubble_id") String lubbleId);
 
+    @GET
+    public Call<YoutubeData> getYoutubeData(@Url String url);
 }

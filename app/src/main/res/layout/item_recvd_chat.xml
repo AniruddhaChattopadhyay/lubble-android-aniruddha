@@ -52,17 +52,29 @@
 
                     <ProgressBar
                         android:id="@+id/progressbar_youtube"
-                        android:layout_centerInParent="true"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                    <com.google.android.youtube.player.YouTubeThumbnailView
-                        android:id="@+id/youtube_thumbnail_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minHeight="150dp"
+                        android:layout_centerInParent="true" />
+
+                    <ImageView
+                        android:id="@+id/youtube_thumbnail_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scaleType="center"
+                        tools:src="@tools:sample/avatars"
                         android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_marginBottom="4dp"
+                        android:minHeight="150dp" />
+
+                    <ImageView
+                        android:id="@+id/iv_youtube_play"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_centerInParent="true"
+                        android:background="@drawable/circle_white_trans"
+                        android:visibility="gone"
+                        app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp"
+                        tools:visibility="visible" />
 
                     <FrameLayout
                         android:id="@+id/youtube_frag"
