@@ -61,7 +61,6 @@
             android:configChanges="orientation"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".BaseActivity"
             android:configChanges="orientation"
@@ -310,13 +309,26 @@
             android:name=".events.EventsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
-        <activity android:name=".explore.ExploreActiv"></activity>
+        <activity
+            android:name=".explore.ExploreActiv"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
 
         <receiver
             android:name="com.clevertap.android.sdk.CTPushNotificationReceiver"
             android:enabled="true"
             android:exported="false" />
 
+        <activity
+            android:name=".chat.FullscreenYoutubeActiv"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_fullscreen_youtube"
+            android:parentActivityName=".chat.ChatActivity"
+            android:theme="@style/FullscreenTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="in.lubble.app.chat.ChatActivity" />
+        </activity>
     </application>
 
 </manifest>

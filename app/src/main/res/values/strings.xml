@@ -175,4 +175,8 @@
     <string name="refer_share_title">Share via:</string>
     <string name="refer_msg"><![CDATA[Join me &amp; your neighbours on Lubble, a free &amp; private social network for your neighbourhood!<br><br>Join now &amp; win prizes:&nbsp;]]></string>
     <string name="all_later">Later</string>
+
+    <string name="title_activity_fullscreen_youtube">Full screen Youtube</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

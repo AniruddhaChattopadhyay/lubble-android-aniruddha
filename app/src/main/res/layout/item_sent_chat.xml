@@ -56,15 +56,6 @@
                         android:layout_centerInParent="true"
                         app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp" />
 
-                    <FrameLayout
-                        android:id="@+id/youtube_frag"
-                        android:name="com.google.android.youtube.player.YouTubePlayerFragment"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp"
-                        android:visibility="gone" />
-
                 </RelativeLayout>
 
                 <LinearLayout
