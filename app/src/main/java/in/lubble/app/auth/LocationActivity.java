@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
@@ -34,6 +35,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.LocationUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import okhttp3.RequestBody;
@@ -241,6 +243,10 @@ public class LocationActivity extends BaseActivity {
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
+        if (LocationUtils.isMockLocationsON(this)) {
+            showMockLocationDialog();
+            return;
+        }
         pulseIv.setVisibility(View.VISIBLE);
         locIv.setVisibility(View.VISIBLE);
         startAnims();
@@ -257,7 +263,38 @@ public class LocationActivity extends BaseActivity {
         }, null);
     }
 
+    private void showMockLocationDialog() {
+        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle("Disable Mock Locations");
+        alertDialog.setMessage("We verify your location to ensure only residents get access to their neighbourhood. Please disable fake GPS or Mock Locations");
+        alertDialog.setCancelable(false);
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Open Settings", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+            }
+        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.all_retry), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                getLocation();
+            }
+        });
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+            }
+        });
+    }
+
     private void validateUserLocation(final Location location) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && location.isFromMockProvider()) {
+            showMockLocationDialog();
+            return;
+        }
 
         if ((!location.hasAccuracy() || location.getAccuracy() == 0.0 || location.getAccuracy() > LOCATION_ACCURACY_THRESHOLD)
                 && retryCount < 10) {
