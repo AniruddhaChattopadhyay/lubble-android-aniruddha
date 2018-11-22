@@ -65,6 +65,17 @@
                         android:scaleType="center"
                         tools:src="@tools:sample/avatars" />
 
+                    <TextView
+                        android:id="@+id/tv_yt_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@id/youtube_thumbnail_view"
+                        android:background="@drawable/gradient_black_trans"
+                        android:maxLines="1"
+                        android:padding="4dp"
+                        tools:text="This is the title video"
+                        android:textColor="@color/white" />
+
                     <ImageView
                         android:id="@+id/iv_youtube_play"
                         android:layout_width="48dp"

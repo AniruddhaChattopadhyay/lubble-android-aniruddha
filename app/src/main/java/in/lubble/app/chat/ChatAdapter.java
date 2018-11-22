@@ -333,6 +333,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final ProgressBar youtubeProgressBar;
         LinearLayout linkContainer;
         final RelativeLayout youtubeContainer;
+        final TextView titleTv;
         if (baseViewHolder instanceof RecvdChatViewHolder) {
             final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) baseViewHolder;
             youTubeThumbnailIv = recvdChatViewHolder.youtubeThumbnailView;
@@ -340,6 +341,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeProgressBar = recvdChatViewHolder.youtubeProgressBar;
             linkContainer = recvdChatViewHolder.linkContainer;
             youtubeContainer = recvdChatViewHolder.youtubeContainer;
+            titleTv = recvdChatViewHolder.youtubeTitleTv;
         } else {
             final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) baseViewHolder;
             youTubeThumbnailIv = sentChatViewHolder.youtubeThumbnailView;
@@ -347,6 +349,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeProgressBar = sentChatViewHolder.youtubeProgressBar;
             linkContainer = sentChatViewHolder.linkContainer;
             youtubeContainer = sentChatViewHolder.youtubeContainer;
+            titleTv = sentChatViewHolder.youtubeTitleTv;
         }
         youtubeProgressBar.setVisibility(View.GONE);
         /**
@@ -383,6 +386,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             }
                         }).error(R.drawable.rounded_rect_gray)
                                 .into(youTubeThumbnailIv);
+
+                        if (!TextUtils.isEmpty(youtubeData.getTitle())) {
+                            titleTv.setText(youtubeData.getTitle());
+                        }
 
                     } else if (activity != null && context != null && !activity.isFinishing()) {
                         Crashlytics.log("youtube thumbnail failed to fetch with error code: " + response.code());
@@ -719,6 +726,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar youtubeProgressBar;
         private ImageView youtubePlayIv;
         private RelativeLayout youtubeContainer;
+        private TextView youtubeTitleTv;
 
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
@@ -746,6 +754,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
             youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
             youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
+            youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
 
             lubbAnyHintTv.setSelected(true);
             lubbAnyHintTv.setHorizontallyScrolling(true);
@@ -895,6 +904,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar youtubeProgressBar;
         private ImageView youtubePlayIv;
         private RelativeLayout youtubeContainer;
+        private TextView youtubeTitleTv;
 
         SentChatViewHolder(final View itemView) {
             super(itemView);
@@ -918,6 +928,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
             youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
             youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
+            youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
 
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
