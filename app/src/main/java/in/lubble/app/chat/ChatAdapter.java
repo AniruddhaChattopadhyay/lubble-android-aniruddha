@@ -411,7 +411,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youTubeThumbnailIv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (YouTubeIntents.isYouTubeInstalled(context)) {
+                    if (YouTubeIntents.isYouTubeInstalled(context) && YouTubeIntents.canResolvePlayVideoIntent(context)) {
                         FullscreenYoutubeActiv.open(context, extractYoutubeId(extractedLink));
                     } else {
                         YoutubeUtils.openYoutubeAppOrWeb(activity, message);
