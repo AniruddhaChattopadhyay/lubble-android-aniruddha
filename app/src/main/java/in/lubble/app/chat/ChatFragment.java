@@ -51,6 +51,7 @@ import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
+import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
 @RuntimePermissions
 public class ChatFragment extends Fragment implements View.OnClickListener {
@@ -123,6 +124,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ChatAdapter chatAdapter;
     private String authorId = FirebaseAuth.getInstance().getUid();
     private boolean isCurrUserSeller;
+    private LinkMetaAsyncTask linkMetaAsyncTask;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -782,6 +784,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 linkDesc.setText("");
                 linkMetaContainer.setVisibility(View.GONE);
                 replyMsgId = null;
+                if (linkMetaAsyncTask != null) {
+                    linkMetaAsyncTask.cancel(true);
+                }
                 break;
             case R.id.iv_attach:
                 if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
@@ -864,13 +869,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             public void afterTextChanged(Editable editable) {
                 sendBtn.setEnabled(editable.length() > 0 && editable.toString().trim().length() > 0);
                 final String extractedUrl = extractFirstLink(editable.toString());
-                if (extractedUrl != null && (!prevUrl.equalsIgnoreCase(extractedUrl))) {
+                if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl) && extractYoutubeId(extractedUrl) == null) {
+                    // ignore youtube URLs
                     prevUrl = extractedUrl;
-                    new LinkMetaAsyncTask(prevUrl, getLinkMetaListener())
-                            .execute();
+                    linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
+                    linkMetaAsyncTask.execute();
                 } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId)) {
                     linkMetaContainer.setVisibility(View.GONE);
                     prevUrl = "";
+                    linkTitle.setText("");
+                    linkDesc.setText("");
                 }
             }
         });

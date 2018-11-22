@@ -52,8 +52,10 @@ import java.util.HashMap;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
-import static in.lubble.app.utils.StringUtils.*;
+import static in.lubble.app.utils.StringUtils.extractFirstLink;
+import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
+import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
 /**
  * Created by ishaan on 21/1/18.
