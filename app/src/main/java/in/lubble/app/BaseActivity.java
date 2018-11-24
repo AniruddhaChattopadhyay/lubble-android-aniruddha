@@ -8,10 +8,12 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.emoji.text.EmojiCompat;
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.utils.ClevertapUtils;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -23,10 +25,14 @@ public class BaseActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         isActive = true;
-        try {
-            checkMinAppVersion();
-        } catch (Throwable e) {
-            Crashlytics.logException(e);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            // logged in
+            try {
+                checkMinAppVersion();
+            } catch (Throwable e) {
+                Crashlytics.logException(e);
+            }
+            ClevertapUtils.setUser(this);
         }
     }
 

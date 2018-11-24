@@ -48,7 +48,6 @@ import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.ServicesFrag;
-import in.lubble.app.utils.ClevertapUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
@@ -165,7 +164,6 @@ public class MainActivity extends BaseActivity {
         syncFcmToken();
         logUser(FirebaseAuth.getInstance().getCurrentUser());
         Branch.getInstance().setIdentity(FirebaseAuth.getInstance().getUid());
-        ClevertapUtils.setUser(this);
 
         switchFrag(GroupListFragment.newInstance());
 
