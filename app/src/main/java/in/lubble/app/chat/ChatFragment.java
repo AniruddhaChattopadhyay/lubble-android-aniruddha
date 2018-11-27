@@ -41,6 +41,8 @@ import permissions.dispatcher.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import static android.app.Activity.RESULT_OK;
@@ -125,6 +127,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private String authorId = FirebaseAuth.getInstance().getUid();
     private boolean isCurrUserSeller;
     private LinkMetaAsyncTask linkMetaAsyncTask;
+    private boolean isLoadingMoreChats;
+    private boolean isLastPage;
+    private String endAtKey;
+    private final static int PAGE_SIZE = 20;
+    private ChildEventListener moreChatsListener;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -276,59 +283,61 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onItemRangeInserted(int positionStart, int itemCount) {
                 super.onItemRangeInserted(positionStart, itemCount);
-                int msgCount = chatAdapter.getItemCount();
-                int lastVisiblePosition =
-                        layoutManager.findLastCompletelyVisibleItemPosition();
-                if (recyclerViewState != null) {
-                    chatRecyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
-                    if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
-                            lastVisiblePosition == (positionStart - 1))) {
-                        // If the user is at the bottom of the list, scroll to the bottom
-                        // of the list to show the newly added message.
-                        recyclerViewState = null;
-                        chatRecyclerView.scrollToPosition(positionStart);
-                    } else {
-                        chatRecyclerView.scrollToPosition(positionStart);
-                    }
-                } else if (msgIdToOpen != null) {
-                    final int indexOfChatMsg = chatAdapter.getIndexOfChatMsg(msgIdToOpen);
-                    if (indexOfChatMsg != -1) {
-                        chatRecyclerView.scrollToPosition(indexOfChatMsg);
-                        chatAdapter.setPosToFlash(indexOfChatMsg);
+                if (!isLoadingMoreChats) {
+                    int msgCount = chatAdapter.getItemCount();
+                    int lastVisiblePosition =
+                            layoutManager.findLastCompletelyVisibleItemPosition();
+                    if (recyclerViewState != null) {
+                        chatRecyclerView.getLayoutManager().onRestoreInstanceState(recyclerViewState);
                         if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
                                 lastVisiblePosition == (positionStart - 1))) {
                             // If the user is at the bottom of the list, scroll to the bottom
                             // of the list to show the newly added message.
-                            msgIdToOpen = null;
+                            recyclerViewState = null;
                             chatRecyclerView.scrollToPosition(positionStart);
-                        }
-                    }
-                } else {
-                    // If the recycler view is initially being loaded
-                    if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
-                        final int pos = msgCount - 1;
-                        final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
-                        if (chatMsg.getReadReceipts().get(authorId) == null) {
-                            // unread msg found
-                            foundFirstUnreadMsg = true;
-                            final ChatData unreadChatData = new ChatData();
-                            unreadChatData.setType(UNREAD);
-                            chatAdapter.addChatData(pos, unreadChatData);
-                            chatRecyclerView.scrollToPosition(pos - 1);
                         } else {
-                            // all msgs read, scroll to last msg
                             chatRecyclerView.scrollToPosition(positionStart);
                         }
-                    } else if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
-                            lastVisiblePosition == (positionStart - 1))) {
-                        // If the user is at the bottom of the list, scroll to the bottom
-                        // of the list to show the newly added message.
-                        chatRecyclerView.scrollToPosition(positionStart);
-                    } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
-                            chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(authorId)) {
-                        chatRecyclerView.scrollToPosition(positionStart);
+                    } else if (msgIdToOpen != null) {
+                        final int indexOfChatMsg = chatAdapter.getIndexOfChatMsg(msgIdToOpen);
+                        if (indexOfChatMsg != -1) {
+                            chatRecyclerView.scrollToPosition(indexOfChatMsg);
+                            chatAdapter.setPosToFlash(indexOfChatMsg);
+                            if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                                    lastVisiblePosition == (positionStart - 1))) {
+                                // If the user is at the bottom of the list, scroll to the bottom
+                                // of the list to show the newly added message.
+                                msgIdToOpen = null;
+                                chatRecyclerView.scrollToPosition(positionStart);
+                            }
+                        }
                     } else {
-                        chatRecyclerView.scrollToPosition(positionStart);
+                        // If the recycler view is initially being loaded
+                        if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
+                            final int pos = msgCount - 1;
+                            final ChatData chatMsg = chatAdapter.getChatMsgAt(pos);
+                            if (chatMsg.getReadReceipts().get(authorId) == null) {
+                                // unread msg found
+                                foundFirstUnreadMsg = true;
+                                final ChatData unreadChatData = new ChatData();
+                                unreadChatData.setType(UNREAD);
+                                chatAdapter.addChatData(pos, unreadChatData);
+                                chatRecyclerView.scrollToPosition(pos - 1);
+                            } else {
+                                // all msgs read, scroll to last msg
+                                chatRecyclerView.scrollToPosition(positionStart);
+                            }
+                        } else if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
+                                lastVisiblePosition == (positionStart - 1))) {
+                            // If the user is at the bottom of the list, scroll to the bottom
+                            // of the list to show the newly added message.
+                            chatRecyclerView.scrollToPosition(positionStart);
+                        } else if (isValidString(chatAdapter.getChatMsgAt(positionStart).getAuthorUid()) &&
+                                chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(authorId)) {
+                            chatRecyclerView.scrollToPosition(positionStart);
+                        } else {
+                            chatRecyclerView.scrollToPosition(positionStart);
+                        }
                     }
                 }
             }
@@ -341,9 +350,27 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     int position = chatAdapter.getItemCount() - 1;
                     if (position != -1) {
                         // scrollToPosition() doesn't work here. why?
+                        // opening keyboard will now shift recyclerview above
                         chatRecyclerView.smoothScrollToPosition(position);
                     }
                 }
+            }
+        });
+
+        chatRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                //if (!isLoading && !isLastPage) {
+                if (firstVisibleItemPosition == 0 && !isLoadingMoreChats && !isLastPage) {
+                    moreMsgListener(messagesReference);
+                }
+                //}
             }
         });
 
@@ -647,7 +674,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private ChildEventListener msgListener(@NonNull DatabaseReference messagesReference) {
-        return messagesReference.orderByChild("serverTimestamp").addChildEventListener(new ChildEventListener() {
+        final ArrayList<ChatData> tempChatList = new ArrayList<>();
+        return messagesReference.orderByChild("serverTimestamp").limitToLast(PAGE_SIZE).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildAdded: ");
@@ -655,31 +683,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 if (chatData != null) {
                     sendBtnProgressBtn.setVisibility(View.GONE);
                     Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
-                    checkAndInsertDate(chatData);
                     chatData.setId(dataSnapshot.getKey());
-                    chatAdapter.addChatData(chatData);
+                    tempChatList.add(chatData);
                     sendReadReceipt(chatData);
+                    final int lastPos = chatAdapter.getItemCount() - 1;
+                    ChatData lastMsg = null;
+                    if (lastPos > -1) {
+                        lastMsg = chatAdapter.getChatMsgAt(lastPos);
+                    }
+                    checkAndInsertDate(chatData, lastMsg, chatAdapter.getItemCount());
+                    chatAdapter.addChatData(chatData);
+                    if (tempChatList.size() == PAGE_SIZE) {
+                        endAtKey = tempChatList.get(0).getId();
+                        /*for (int i = 0; i < tempChatList.size(); i++) {
+                            final ChatData currChatData = tempChatList.get(i);
+                        }*/
+                    }
                 } else {
                     Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey()));
-                }
-            }
-
-            private void checkAndInsertDate(ChatData chatData) {
-                final int lastPos = chatAdapter.getItemCount() - 1;
-                ChatData lastMsg = null;
-                if (lastPos > -1) {
-                    lastMsg = chatAdapter.getChatMsgAt(lastPos);
-                }
-                if (lastMsg == null || !DateTimeUtils.getDateFromLong(lastMsg.getServerTimestampInLong())
-                        .equalsIgnoreCase(DateTimeUtils.getDateFromLong(chatData.getServerTimestampInLong()))) {
-                    // different date, insert date divider
-                    final ChatData dateChatData = new ChatData();
-                    dateChatData.setMessage(DateTimeUtils.getDateFromLong(chatData.getServerTimestampInLong()));
-                    dateChatData.setType(SYSTEM);
-                    final HashMap<String, Long> readMap = new HashMap<>();
-                    readMap.put(authorId, 0L);
-                    dateChatData.setReadReceipts(readMap);
-                    chatAdapter.addChatData(dateChatData);
                 }
             }
 
@@ -708,6 +729,99 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 Crashlytics.logException(databaseError.toException());
             }
         });
+    }
+
+    private ChildEventListener moreMsgListener(@NonNull DatabaseReference messagesReference) {
+        final ArrayList<ChatData> newChatDataList = new ArrayList<>();
+        isLoadingMoreChats = true;
+        final Query query = messagesReference.orderByChild("serverTimestamp").endAt(endAtKey).limitToLast(PAGE_SIZE);
+        moreChatsListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "onChildAdded: ");
+                final ChatData chatData = dataSnapshot.getValue(ChatData.class);
+                if (chatData != null) {
+                    Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
+                    chatData.setId(dataSnapshot.getKey());
+                    sendReadReceipt(chatData);
+                    newChatDataList.add(chatData);
+                    if (newChatDataList.size() == PAGE_SIZE) {
+                        endAtKey = newChatDataList.get(0).getId();
+                        query.removeEventListener(moreChatsListener);
+                        newChatDataList.remove(newChatDataList.size() - 1);
+                        Collections.reverse(newChatDataList);
+                        for (int i = 0; i < newChatDataList.size(); i++) {
+                            final ChatData currChatData = newChatDataList.get(i);
+                            chatAdapter.addChatData(0, currChatData);
+                            checkAndInsertDate(currChatData, i + 1 >= newChatDataList.size() ? null : newChatDataList.get(i + 1), 0);
+                        }
+                        newChatDataList.clear();
+                        isLoadingMoreChats = false;
+                    } else if (endAtKey.equalsIgnoreCase(chatData.getId())) {
+                        // last page
+                        query.removeEventListener(moreChatsListener);
+                        isLastPage = true;
+                        if (newChatDataList.size() == 1) {
+                            // for edge case wherein prev page was the last one
+                            checkAndInsertDate(newChatDataList.get(0), null, 0);
+                        } else {
+                            newChatDataList.remove(newChatDataList.size() - 1);
+                            Collections.reverse(newChatDataList);
+                            for (int i = 0; i < newChatDataList.size(); i++) {
+                                final ChatData currChatData = newChatDataList.get(i);
+                                chatAdapter.addChatData(0, currChatData);
+                                checkAndInsertDate(currChatData, i + 1 >= newChatDataList.size() ? null : newChatDataList.get(i + 1), 0);
+                            }
+                        }
+                        newChatDataList.clear();
+                        isLoadingMoreChats = false;
+                    }
+                } else {
+                    Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey()));
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.d(TAG, "onChildChanged: ");
+                final ChatData chatData = dataSnapshot.getValue(ChatData.class);
+                if (chatData != null) {
+                    chatData.setId(dataSnapshot.getKey());
+                    chatAdapter.updateChatData(chatData);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "onChildRemoved: ");
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Crashlytics.logException(databaseError.toException());
+            }
+        };
+        return query.addChildEventListener(moreChatsListener);
+    }
+
+    private void checkAndInsertDate(ChatData chatData, @Nullable ChatData prevChatData, int posToInsert) {
+        ChatData lastMsg = prevChatData;
+        if ((lastMsg == null && isLastPage) || (lastMsg != null && lastMsg.getServerTimestampInLong() != null &&
+                !DateTimeUtils.getDateFromLong(lastMsg.getServerTimestampInLong()).equalsIgnoreCase(DateTimeUtils.getDateFromLong(chatData.getServerTimestampInLong())))) {
+            // different date, insert date divider
+            final ChatData dateChatData = new ChatData();
+            dateChatData.setMessage(DateTimeUtils.getDateFromLong(chatData.getServerTimestampInLong()));
+            dateChatData.setType(SYSTEM);
+            final HashMap<String, Long> readMap = new HashMap<>();
+            readMap.put(authorId, 0L);
+            dateChatData.setReadReceipts(readMap);
+            chatAdapter.addChatData(posToInsert, dateChatData);
+        }
     }
 
     private void sendReadReceipt(ChatData chatData) {
@@ -977,6 +1091,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onPause();
         recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
+        endAtKey = null;
+        isLastPage = false;
+        isLoadingMoreChats = false;
         if (messagesReference != null && msgChildListener != null) {
             messagesReference.removeEventListener(msgChildListener);
         }
