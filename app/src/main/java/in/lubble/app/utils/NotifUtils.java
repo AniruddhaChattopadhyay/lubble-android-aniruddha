@@ -101,12 +101,13 @@ public class NotifUtils {
             deleteIntent.putExtra("groupId", groupId);
             PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), notifId, deleteIntent, 0);
 
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.NEW_CHAT_NOTIF_CHANNEL)
                     .setStyle(map.getValue())
                     .setSmallIcon(R.drawable.ic_lubble_notif)
                     .setShowWhen(true)
                     .setGroup(GROUP_KEY)
                     .setDefaults(0)
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
                     .setAutoCancel(true)
                     .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                     .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
@@ -204,7 +205,7 @@ public class NotifUtils {
         deleteIntent.putExtra("groupId", groupKey);
         PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), 0, deleteIntent, 0);
 
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.NEW_CHAT_NOTIF_CHANNEL)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Lubble")
                 .setWhen(notifDataList.get(notifDataList.size() - 1).getTimestamp())
@@ -212,6 +213,7 @@ public class NotifUtils {
                 .setShowWhen(true)
                 .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                 .setGroup(groupKey)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setAutoCancel(true)
                 .setContentIntent(stackBuilder.getPendingIntent(SUMMARY_ID, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setGroupSummary(true)
@@ -222,6 +224,7 @@ public class NotifUtils {
         for (NotifData notifData : notifDataList) {
             inbox.addLine(notifData.getMessageBody());
         }
+        builder.setContentText(notifDataList.get(notifDataList.size() - 1).getMessageBody());
 
         inbox.setSummaryText(String.format("+ %d", notifDataList.size()));
 

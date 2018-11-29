@@ -17,6 +17,7 @@ public class AnalyticsEvents {
 
     public static final String ITEM_NOT_FOUND = "ITEM_NOT_FOUND";
     public static final String MPLACE_CHAT_BTN_CLICKED = "MPLACE_CHAT_BTN_CLICKED";
+    public static final String CALL_BTN_CLICKED = "CALL_BTN_CLICKED";
     public static final String RECOMMEND_BTN_CLICK = "RECOMMEND_BTN_CLICK";
     public static final String VISIT_SHOP_CLICK = "VISIT_SHOP_CLICK";
 

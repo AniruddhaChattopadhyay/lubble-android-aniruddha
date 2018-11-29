@@ -15,7 +15,9 @@ public class Constants {
     public static final int FINISHED_NOTIFICATION_ID = 101;
     public static final int CHAT_NOTIFICATION_ID = 102;
 
+    @Deprecated
     public static final String CHAT_NOTIF_CHANNEL = "Chat Notifications";
+    public static final String NEW_CHAT_NOTIF_CHANNEL = "Chat Messages";
     public static final String SENDING_MEDIA_NOTIF_CHANNEL = "Sending Media";
     public static final String NOTICE_NOTIF_CHANNEL = "Notice Notifications";
     public static final String LUBB_NOTIF_CHANNEL = "Message Like Notifications";

@@ -20,6 +20,8 @@ import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import io.branch.referral.Branch;
 import io.fabric.sdk.android.Fabric;
 
+import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
+
 /**
  * Created by ishaan on 20/1/18.
  */
@@ -75,11 +77,21 @@ public class LubbleApp extends Application {
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            /*
+            ///////////DELETED////////////
             mNotifyMgr.createNotificationChannel(
                     new NotificationChannel(
                             Constants.CHAT_NOTIF_CHANNEL,
                             "Chat Notifications",
-                            NotificationManager.IMPORTANCE_HIGH));
+                            NotificationManager.IMPORTANCE_HIGH));*/
+
+            mNotifyMgr.deleteNotificationChannel(CHAT_NOTIF_CHANNEL);
+
+            mNotifyMgr.createNotificationChannel(
+                    new NotificationChannel(
+                            Constants.NEW_CHAT_NOTIF_CHANNEL,
+                            "Chat Messages",
+                            NotificationManager.IMPORTANCE_LOW));
 
             final NotificationChannel mediaChannel = new NotificationChannel(
                     Constants.SENDING_MEDIA_NOTIF_CHANNEL,
