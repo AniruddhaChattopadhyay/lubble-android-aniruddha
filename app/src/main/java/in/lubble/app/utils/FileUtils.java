@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
@@ -156,6 +157,55 @@ public class FileUtils {
             }
         });
         alertDialog.show();
+    }
+
+    public static String saveImageInGallery(Bitmap image, String msgId, Context context) {
+        String savedImagePath = null;
+
+        String imageFileName = "JPEG_" + msgId + ".jpg";
+        File storageDir = new File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                        + File.separator + "Lubble_pics");
+        boolean success = true;
+        if (!storageDir.exists()) {
+            success = storageDir.mkdirs();
+        }
+        if (success) {
+            File imageFile = new File(storageDir, imageFileName);
+            savedImagePath = imageFile.getAbsolutePath();
+            try {
+                OutputStream fOut = new FileOutputStream(imageFile);
+                image.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+                fOut.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Add the image to the system gallery
+            galleryAddPic(context, savedImagePath);
+        }
+        return savedImagePath;
+    }
+
+    private static void galleryAddPic(Context context, String imagePath) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(imagePath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        context.sendBroadcast(mediaScanIntent);
+    }
+
+    @Nullable
+    public static String getSavedImageForMsgId(String msgId) {
+
+        File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + ".jpg");
+
+        if (imgFile.exists()) {
+            //return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            return imgFile.getAbsolutePath();
+        }
+        return null;
     }
 
 }

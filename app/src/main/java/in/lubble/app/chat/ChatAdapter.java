@@ -5,6 +5,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -26,7 +27,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
@@ -52,6 +55,7 @@ import java.util.HashMap;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
+import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -576,33 +580,47 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getImgUrl())) {
             imageView.setOnClickListener(null);
             imgContainer.setVisibility(View.VISIBLE);
-            glide
-                    .load(chatData.getImgUrl())
-                    .centerCrop()
-                    .listener(new RequestListener<Drawable>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                            progressBar.setVisibility(View.GONE);
-                            imageView.setOnClickListener(null);
-                            return false;
+
+            String savedPath = getSavedImageForMsgId(chatData.getId());
+            if (savedPath != null) {
+                progressBar.setVisibility(View.GONE);
+                glide.load(savedPath).centerCrop().into(imageView);
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (isValidString(chatData.getImgUrl())) {
+                            FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
                         }
+                    }
+                });
+            } else {
+                glide.asBitmap()
+                        .load(chatData.getImgUrl())
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                FileUtils.saveImageInGallery(resource, chatData.getId(), context);
+                                progressBar.setVisibility(View.GONE);
+                                glide.load(resource).centerCrop().into(imageView);
 
-                        @Override
-                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                            progressBar.setVisibility(View.GONE);
-
-                            imageView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    if (isValidString(chatData.getImgUrl())) {
-                                        FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
+                                imageView.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        if (isValidString(chatData.getImgUrl())) {
+                                            FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
+                                        }
                                     }
-                                }
-                            });
-                            return false;
-                        }
-                    })
-                    .into(imageView);
+                                });
+                            }
+
+                            @Override
+                            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                                super.onLoadFailed(errorDrawable);
+                                progressBar.setVisibility(View.GONE);
+                                imageView.setOnClickListener(null);
+                            }
+                        });
+            }
         } else {
             imgContainer.setVisibility(View.GONE);
         }
