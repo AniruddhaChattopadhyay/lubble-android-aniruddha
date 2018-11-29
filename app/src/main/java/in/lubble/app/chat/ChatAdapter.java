@@ -57,6 +57,7 @@ import java.util.HashMap;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
+import static in.lubble.app.utils.FileUtils.deleteCache;
 import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -740,6 +741,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     void writePermGranted() {
+        deleteCache(context);
         Analytics.triggerEvent(AnalyticsEvents.WRITE_PERM_GRANTED, context);
     }
 
