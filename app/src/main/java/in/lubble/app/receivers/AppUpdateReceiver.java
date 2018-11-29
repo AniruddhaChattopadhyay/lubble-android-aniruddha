@@ -17,8 +17,8 @@ public class AppUpdateReceiver extends BroadcastReceiver {
         NotifUtils.showAllPendingChatNotifs(context);
         ClevertapUtils.setUser(context);
         final Bundle bundle = new Bundle();
-        bundle.putString("new version name", BuildConfig.VERSION_NAME);
-        bundle.putInt("new version code", BuildConfig.VERSION_CODE);
+        bundle.putString("new_version_name", BuildConfig.VERSION_NAME);
+        bundle.putInt("new_version_code", BuildConfig.VERSION_CODE);
         Analytics.triggerEvent(AnalyticsEvents.APP_UPDATED, bundle, context);
     }
 }
