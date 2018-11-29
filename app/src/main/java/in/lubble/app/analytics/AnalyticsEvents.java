@@ -28,7 +28,9 @@ public class AnalyticsEvents {
     public static final String NOTIF_MUTED = "NOTIF_MUTED";
     public static final String NOTIF_CREATED = "NOTIF_CREATED";
     public static final String NOTIF_DISPLAYED = "NOTIF_DISPLAYED";
+    public static final String NOTIF_SUMMARY_DISPLAYED = "NOTIF_DISPLAYED";
     public static final String NOTIF_OPENED = "NOTIF_OPENED";
+    public static final String NOTIF_DISMISSED = "NOTIF_DISMISSED";
 
     public static final String REFERRAL_FB_SHARE = "REFERRAL_FB_SHARE";
     public static final String REFERRAL_WA_SHARE = "REFERRAL_WA_SHARE";

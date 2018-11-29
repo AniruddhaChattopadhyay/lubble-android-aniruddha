@@ -97,14 +97,20 @@ public class NotifUtils {
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addNextIntentWithParentStack(intent);
 
+            Intent deleteIntent = new Intent(context, NotifDeleteBroadcastRecvr.class);
+            deleteIntent.putExtra("groupId", groupId);
+            PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), notifId, deleteIntent, 0);
+
             final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                     .setStyle(map.getValue())
                     .setSmallIcon(R.drawable.ic_lubble_notif)
                     .setShowWhen(true)
                     .setGroup(GROUP_KEY)
                     .setDefaults(0)
+                    .setAutoCancel(true)
                     .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                     .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
+                    .setDeleteIntent(deletePendingIntent)
                     .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
             if (StringUtils.isValidString(groupDpUrl)) {
@@ -144,6 +150,7 @@ public class NotifUtils {
         }
         Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
         notificationManager.notify(SUMMARY_ID, summary);
+        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SUMMARY_DISPLAYED, GROUP_KEY, context);
     }
 
     @Nullable
@@ -193,6 +200,10 @@ public class NotifUtils {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntentWithParentStack(intent);
 
+        Intent deleteIntent = new Intent(context, NotifDeleteBroadcastRecvr.class);
+        deleteIntent.putExtra("groupId", groupKey);
+        PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), 0, deleteIntent, 0);
+
         final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Lubble")
@@ -201,8 +212,10 @@ public class NotifUtils {
                 .setShowWhen(true)
                 .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                 .setGroup(groupKey)
+                .setAutoCancel(true)
                 .setContentIntent(stackBuilder.getPendingIntent(SUMMARY_ID, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setGroupSummary(true)
+                .setDeleteIntent(deletePendingIntent)
                 .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
         NotificationCompat.InboxStyle inbox = new NotificationCompat.InboxStyle();

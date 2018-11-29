@@ -340,6 +340,11 @@
             </intent-filter>
 
         </receiver>
+
+        <receiver
+            android:name=".utils.NotifDeleteBroadcastRecvr"
+            android:enabled="true"
+            android:exported="true"></receiver>
     </application>
 
 </manifest>
