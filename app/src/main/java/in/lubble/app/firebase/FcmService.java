@@ -18,16 +18,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.AppNotifData;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.utils.AppNotifUtils;
+import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
 
 import java.util.Map;
 
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
-import static in.lubble.app.analytics.AnalyticsEvents.NOTIF_SHOWN;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.marketplace.SellerDashActiv.*;
 
@@ -52,7 +52,7 @@ public class FcmService extends FirebaseMessagingService {
             final Map<String, String> dataMap = remoteMessage.getData();
             Log.d(TAG, "Message data payload: " + dataMap);
 
-            sendShownAnalyticEvent(dataMap);
+            NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SHOWN, dataMap, this);
 
             Bundle extras = new Bundle();
             for (Map.Entry<String, String> entry : remoteMessage.getData().entrySet()) {
@@ -114,20 +114,6 @@ public class FcmService extends FirebaseMessagingService {
                     Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
                 }
             }
-        }
-    }
-
-    private void sendShownAnalyticEvent(Map<String, String> dataMap) {
-        try {
-            final Bundle bundle = new Bundle();
-            for (Map.Entry<String, String> entry : dataMap.entrySet()) {
-                if (!entry.getKey().toLowerCase().contains("thumbnail")) {
-                    bundle.putString(entry.getKey(), entry.getValue());
-                }
-            }
-            Analytics.triggerEvent(NOTIF_SHOWN, bundle, this);
-        } catch (Exception e) {
-            Crashlytics.logException(e);
         }
     }
 

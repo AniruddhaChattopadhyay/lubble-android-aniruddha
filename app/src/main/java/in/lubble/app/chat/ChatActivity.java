@@ -28,10 +28,12 @@ import in.lubble.app.models.NotifData;
 import in.lubble.app.utils.StringUtils;
 
 import java.util.Map;
+import java.util.MissingFormatArgumentException;
 
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
+import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class ChatActivity extends BaseActivity {
 
@@ -175,12 +177,18 @@ public class ChatActivity extends BaseActivity {
                 if ("chat".equalsIgnoreCase(type)) {
                     if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
                         abortBroadcast();
+                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_ABORTED, dataMap, ChatActivity.this);
                     }
                 } else if ("dm".equalsIgnoreCase(type)) {
                     if (notifData.getGroupId().equalsIgnoreCase(dmId)) {
                         abortBroadcast();
+                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_ABORTED, dataMap, ChatActivity.this);
                     }
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("chatactiv: notif recvd with illegal type"));
                 }
+            } else {
+                Crashlytics.logException(new MissingFormatArgumentException("chatactiv: notif broadcast recvd with no intent data"));
             }
         }
     };

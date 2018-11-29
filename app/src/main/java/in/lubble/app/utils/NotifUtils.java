@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.Nullable;
@@ -16,11 +17,14 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.request.target.Target;
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
@@ -129,11 +133,13 @@ public class NotifUtils {
                             builder.setLargeIcon(theBitmap);
                         }
                         notificationManager.notify(notifId, builder.build());
+                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DISPLAYED, groupId, context);
                     }
                 }.execute();
             } else {
                 builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
                 notificationManager.notify(notifId, builder.build());
+                sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DISPLAYED, groupId, context);
             }
         }
         Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
@@ -264,6 +270,30 @@ public class NotifUtils {
 
         if (chatSharedPrefs.getAll().size() == 0) {
             notificationManager.cancel(SUMMARY_ID);
+        }
+    }
+
+    public static void sendNotifAnalyticEvent(String eventName, Map<String, String> dataMap, Context context) {
+        try {
+            final Bundle bundle = new Bundle();
+            for (Map.Entry<String, String> entry : dataMap.entrySet()) {
+                if (!entry.getKey().toLowerCase().contains("thumbnail")) {
+                    bundle.putString(entry.getKey(), entry.getValue());
+                }
+            }
+            Analytics.triggerEvent(eventName, bundle, context);
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
+    }
+
+    public static void sendNotifAnalyticEvent(String eventName, String groupId, Context context) {
+        try {
+            final Bundle bundle = new Bundle();
+            bundle.putString("groupId", groupId);
+            Analytics.triggerEvent(eventName, bundle, context);
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 

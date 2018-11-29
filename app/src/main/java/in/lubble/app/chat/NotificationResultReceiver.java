@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -12,12 +13,16 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.utils.NotifUtils;
 
 import java.util.Map;
+import java.util.MissingFormatArgumentException;
+
+import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class NotificationResultReceiver extends BroadcastReceiver {
     private static final String TAG = "NotificationResultRecei";
@@ -33,9 +38,11 @@ public class NotificationResultReceiver extends BroadcastReceiver {
                 createChatNotif(context, dataMap);
             } else if ("dm".equalsIgnoreCase(type)) {
                 createDmNotif(context, dataMap);
+            } else {
+                Crashlytics.logException(new IllegalArgumentException("NotifResultRecvr: notif recvd with illegal type"));
             }
         } else {
-            /// TODO: 29-11-2018
+            Crashlytics.logException(new MissingFormatArgumentException("NotifResultRecvr: notif broadcast recvd with no intent data"));
         }
     }
 
@@ -46,9 +53,12 @@ public class NotificationResultReceiver extends BroadcastReceiver {
         // only show notif if that group is not in foreground & the group's notifs are not muted
         if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
             NotifUtils.updateChatNotifs(context, notifData);
+        } else {
+            sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_MUTED, dataMap, context);
         }
         updateUnreadCounter(notifData, false);
         pullNewMsgs(notifData);
+        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_CREATED, dataMap, context);
         //sendDeliveryReceipt(notifData);
     }
 
@@ -59,9 +69,12 @@ public class NotificationResultReceiver extends BroadcastReceiver {
         // only show notif if that group is not in foreground & the group's notifs are not muted
         if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
             NotifUtils.updateChatNotifs(context, notifData);
+        } else {
+            sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_MUTED, dataMap, context);
         }
         updateUnreadCounter(notifData, true);
         pullNewDmMsgs(notifData);
+        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_CREATED, dataMap, context);
         //sendDeliveryReceipt(notifData);
     }
 
