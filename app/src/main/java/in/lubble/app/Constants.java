@@ -38,4 +38,6 @@ public class Constants {
     public static final MediaType MEDIA_TYPE = MediaType.parse("application/json");
     public static final String YOUTUBE_DEVELOPER_KEY = "AIzaSyBu0jLDE8AOSzC1MqZrbJVsXud1D0e_UPM";
 
+    public static final String NEW_CHAT_ACTION = "in.lubble.app.NEW_MSG_INTENT";
+
 }

@@ -431,7 +431,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             chatRecyclerView.setVisibility(View.VISIBLE);
             deleteUnreadMsgsForGroupId(dmId, getContext());
             AppNotifUtils.deleteAppNotif(getContext(), dmId);
-            LubbleSharedPrefs.getInstance().setCurrentActiveGroupId(dmId);
             dmEventListener = dmInfoReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

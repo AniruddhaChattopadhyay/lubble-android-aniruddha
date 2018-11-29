@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.Nullable;
@@ -65,7 +66,7 @@ public class NotifUtils {
         });
     }
 
-    private static void sendAllNotifs(Context context, ArrayList<NotifData> notifDataList) {
+    private static void sendAllNotifs(final Context context, ArrayList<NotifData> notifDataList) {
 
         final NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -78,7 +79,7 @@ public class NotifUtils {
             final String groupId = map.getKey();
             final Integer notifId = getNotifId(groupId);
 
-            String groupDpUrl = getGroupDp(notifDataList, groupId);
+            final String groupDpUrl = getGroupDp(notifDataList, groupId);
 
             Intent intent = new Intent(context, ChatActivity.class);
             if (TextUtils.isEmpty(map.getValue().getConversationTitle())) {
@@ -100,20 +101,38 @@ public class NotifUtils {
                     .setDefaults(0)
                     .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                     .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
-                    .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
+                    .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
-            try {
-                if (StringUtils.isValidString(groupDpUrl)) {
-                    final Bitmap bitmap = GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
-                    builder.setLargeIcon(bitmap);
-                } else {
-                    builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } finally {
+            if (StringUtils.isValidString(groupDpUrl)) {
+                new AsyncTask<Void, Void, Void>() {
+                    Bitmap theBitmap = null;
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        try {
+                            theBitmap = GlideApp.with(context).asBitmap()
+                                    .load(groupDpUrl).circleCrop()
+                                    .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                                    .get();
+                        } catch (final ExecutionException e) {
+                            Log.e(TAG, e.getMessage());
+                        } catch (final InterruptedException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void dummy) {
+                        if (null != theBitmap) {
+                            // The full bitmap should be available here
+                            builder.setLargeIcon(theBitmap);
+                        }
+                        notificationManager.notify(notifId, builder.build());
+                    }
+                }.execute();
+            } else {
+                builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
                 notificationManager.notify(notifId, builder.build());
             }
         }
@@ -178,7 +197,7 @@ public class NotifUtils {
                 .setGroup(groupKey)
                 .setContentIntent(stackBuilder.getPendingIntent(SUMMARY_ID, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setGroupSummary(true)
-                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
+                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
         NotificationCompat.InboxStyle inbox = new NotificationCompat.InboxStyle();
         for (NotifData notifData : notifDataList) {

@@ -329,6 +329,17 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.chat.ChatActivity" />
         </activity>
+
+        <receiver
+            android:name=".chat.NotificationResultReceiver"
+            android:enabled="true"
+            android:exported="true">
+
+            <intent-filter android:priority="0">
+                <action android:name="in.lubble.app.NEW_MSG_INTENT" />
+            </intent-filter>
+
+        </receiver>
     </application>
 
 </manifest>
