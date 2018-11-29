@@ -1,8 +1,10 @@
 package in.lubble.app.utils;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -11,6 +13,7 @@ import android.os.Parcelable;
 import android.provider.MediaStore;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
@@ -159,32 +162,33 @@ public class FileUtils {
         alertDialog.show();
     }
 
-    public static String saveImageInGallery(Bitmap image, String msgId, Context context) {
-        String savedImagePath = null;
+    public static void saveImageInGallery(Bitmap image, String msgId, Context context) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            String savedImagePath = null;
 
-        String imageFileName = "JPEG_" + msgId + ".jpg";
-        File storageDir = new File(
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                        + File.separator + "Lubble_pics");
-        boolean success = true;
-        if (!storageDir.exists()) {
-            success = storageDir.mkdirs();
-        }
-        if (success) {
-            File imageFile = new File(storageDir, imageFileName);
-            savedImagePath = imageFile.getAbsolutePath();
-            try {
-                OutputStream fOut = new FileOutputStream(imageFile);
-                image.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
-                fOut.close();
-            } catch (Exception e) {
-                e.printStackTrace();
+            String imageFileName = "JPEG_" + msgId + ".jpg";
+            File storageDir = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                            + File.separator + "Lubble_pics");
+            boolean success = true;
+            if (!storageDir.exists()) {
+                success = storageDir.mkdirs();
             }
+            if (success) {
+                File imageFile = new File(storageDir, imageFileName);
+                savedImagePath = imageFile.getAbsolutePath();
+                try {
+                    OutputStream fOut = new FileOutputStream(imageFile);
+                    image.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+                    fOut.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-            // Add the image to the system gallery
-            galleryAddPic(context, savedImagePath);
+                // Add the image to the system gallery
+                galleryAddPic(context, savedImagePath);
+            }
         }
-        return savedImagePath;
     }
 
     private static void galleryAddPic(Context context, String imagePath) {
@@ -196,14 +200,15 @@ public class FileUtils {
     }
 
     @Nullable
-    public static String getSavedImageForMsgId(String msgId) {
+    public static String getSavedImageForMsgId(Context context, String msgId) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + ".jpg");
 
-        File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + ".jpg");
-
-        if (imgFile.exists()) {
-            //return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            return imgFile.getAbsolutePath();
+            if (imgFile.exists()) {
+                //return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                return imgFile.getAbsolutePath();
+            }
         }
         return null;
     }

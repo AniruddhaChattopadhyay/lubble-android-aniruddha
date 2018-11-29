@@ -58,4 +58,6 @@ public class AnalyticsEvents {
     public static final String APP_UPDATED = "APP_UPDATED";
     public static final String PHONE_BOOT_COMPLETE = "PHONE_BOOT_COMPLETE";
 
+    public static final String WRITE_PERM_GRANTED = "WRITE_PERM_GRANTED";
+
 }

@@ -59,6 +59,8 @@
     <string name="all_ok">OK</string>
     <string name="storage_perm_denied_text">Please grant permission to upload your photos</string>
     <string name="storage_perm_never_text">To enable permissions again, go to app settings of Lubble</string>
+    <string name="write_storage_perm_denied_text">Please grant permission to download your photos</string>
+    <string name="write_storage_perm_never_text">To download photos, allow storage permission from app settings of Lubble</string>
     <string name="select_block">Select Block</string>
     <string name="all_updating">Updating</string>
     <string name="all_try_again">Try Again</string>
