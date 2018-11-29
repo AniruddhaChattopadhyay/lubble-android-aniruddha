@@ -55,4 +55,7 @@ public class AnalyticsEvents {
     public static final String APP_UPDATE_REMINDER_POSITIVE = "APP_UPDATE_REMINDER_POSITIVE";
     public static final String APP_UPDATE_REMINDER_LATER = "APP_UPDATE_REMINDER_LATER";
 
+    public static final String APP_UPDATED = "APP_UPDATED";
+    public static final String PHONE_BOOT_COMPLETE = "PHONE_BOOT_COMPLETE";
+
 }

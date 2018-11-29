@@ -49,6 +49,14 @@ public class NotifUtils {
 
     private static HashMap<String, NotificationCompat.MessagingStyle> messagingStyleMap;
 
+    public static void showAllPendingChatNotifs(Context context) {
+        messagingStyleMap = new HashMap<>();
+
+        ArrayList<NotifData> msgList = getAllMsgs();
+        sortListByTime(msgList);
+        sendAllNotifs(context, msgList);
+    }
+
     public static void updateChatNotifs(Context context, NotifData notifData) {
         messagingStyleMap = new HashMap<>();
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 
 import java.util.HashMap;
@@ -20,6 +21,8 @@ public class ClevertapUtils {
         profileUpdate.put("Lubble Id", LubbleSharedPrefs.getInstance().getLubbleId());
         profileUpdate.put("Phone", currentUser.getPhoneNumber());
         profileUpdate.put("Photo", currentUser.getPhotoUrl());
+        profileUpdate.put("version name", BuildConfig.VERSION_NAME);
+        profileUpdate.put("version code", BuildConfig.VERSION_CODE);
 
         CleverTapAPI.getDefaultInstance(context).pushProfile(profileUpdate);
     }
