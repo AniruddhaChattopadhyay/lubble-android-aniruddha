@@ -53,8 +53,10 @@ public class NotifUtils {
         messagingStyleMap = new HashMap<>();
 
         ArrayList<NotifData> msgList = getAllMsgs();
-        sortListByTime(msgList);
-        sendAllNotifs(context, msgList);
+        if (!msgList.isEmpty()) {
+            sortListByTime(msgList);
+            sendAllNotifs(context, msgList);
+        }
     }
 
     public static void updateChatNotifs(Context context, NotifData notifData) {
