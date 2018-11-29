@@ -12,6 +12,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.utils.ClevertapUtils;
 
@@ -55,6 +57,7 @@ public class BaseActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     alertDialog.dismiss();
+                                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_POSITIVE, BaseActivity.this);
                                     final String appPackageName = getPackageName();
                                     try {
                                         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
@@ -67,11 +70,13 @@ public class BaseActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     alertDialog.dismiss();
+                                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_RETRY, BaseActivity.this);
                                     checkMinAppVersion();
                                 }
                             });
                             alertDialog.setCancelable(false);
                             alertDialog.show();
+                            Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK, BaseActivity.this);
                             return;
                         }
                     } else if (child.getKey().equalsIgnoreCase("softMinApp") && BaseActivity.this instanceof MainActivity) {
@@ -88,6 +93,7 @@ public class BaseActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         alertDialog.dismiss();
+                                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_POSITIVE, BaseActivity.this);
                                         final String appPackageName = getPackageName();
                                         try {
                                             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
@@ -100,10 +106,12 @@ public class BaseActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         alertDialog.dismiss();
+                                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
                                     }
                                 });
                                 alertDialog.setCancelable(false);
                                 alertDialog.show();
+                                Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER, BaseActivity.this);
                             } catch (Exception e) {
                                 Crashlytics.logException(e);
                             }
