@@ -1,9 +1,12 @@
 package in.lubble.app.chat;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -12,16 +15,25 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.models.NotifData;
 import in.lubble.app.utils.StringUtils;
 
+import java.util.Map;
+import java.util.MissingFormatArgumentException;
+
+import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
+import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class ChatActivity extends BaseActivity {
 
@@ -40,6 +52,8 @@ public class ChatActivity extends BaseActivity {
     private ImageView toolbarLockIcon;
     private TextView toolbarTv;
     private ChatFragment targetFrag = null;
+    private String groupId;
+    private String dmId;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -83,10 +97,10 @@ public class ChatActivity extends BaseActivity {
 
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
-        final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
+        groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
         final String msgId = getIntent().getStringExtra(EXTRA_MSG_ID);
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);
-        final String dmId = getIntent().getStringExtra(EXTRA_DM_ID);
+        dmId = getIntent().getStringExtra(EXTRA_DM_ID);
 
         if (!LubbleSharedPrefs.getInstance().getIsGroupInfoOpened() && !TextUtils.isEmpty(groupId)) {
             toolbarInviteHint.setVisibility(View.VISIBLE);
@@ -144,14 +158,48 @@ public class ChatActivity extends BaseActivity {
         }
     }
 
+    /**
+     * ensures that notifs for this chat do not appear when activity is in foreground
+     */
+    private BroadcastReceiver notificationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Since we will process the message and update the UI, we don't need to show a notif in Status Bar
+            // To do this, we call abortBroadcast()
+            Log.d("NotificationResultRecei", "onReceive: in activity");
+            if (intent != null && intent.hasExtra("remoteMessage")) {
+                final RemoteMessage remoteMessage = intent.getParcelableExtra("remoteMessage");
+                Gson gson = new Gson();
+                final Map<String, String> dataMap = remoteMessage.getData();
+                JsonElement jsonElement = gson.toJsonTree(dataMap);
+                NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
+                String type = dataMap.get("type");
+                if ("chat".equalsIgnoreCase(type)) {
+                    if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                        abortBroadcast();
+                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_ABORTED, dataMap, ChatActivity.this);
+                    }
+                } else if ("dm".equalsIgnoreCase(type)) {
+                    if (notifData.getGroupId().equalsIgnoreCase(dmId)) {
+                        abortBroadcast();
+                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_ABORTED, dataMap, ChatActivity.this);
+                    }
+                } else {
+                    Crashlytics.logException(new IllegalArgumentException("chatactiv: notif recvd with illegal type"));
+                }
+            } else {
+                Crashlytics.logException(new MissingFormatArgumentException("chatactiv: notif broadcast recvd with no intent data"));
+            }
+        }
+    };
+
     @Override
     protected void onResume() {
         super.onResume();
-        if (getIntent().hasExtra(EXTRA_GROUP_ID)) {
-            LubbleSharedPrefs.getInstance().setCurrentActiveGroupId(getIntent().getStringExtra(EXTRA_GROUP_ID));
-        } else if (getIntent().hasExtra(EXTRA_DM_ID)) {
-            LubbleSharedPrefs.getInstance().setCurrentActiveGroupId(getIntent().getStringExtra(EXTRA_DM_ID));
-        }
+        IntentFilter filter = new IntentFilter(NEW_CHAT_ACTION);
+        filter.setPriority(1);
+        registerReceiver(notificationReceiver, filter);
+
     }
 
     public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate) {
@@ -165,7 +213,29 @@ public class ChatActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        LubbleSharedPrefs.getInstance().setCurrentActiveGroupId("");
+        unregisterReceiver(notificationReceiver);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        try {
+            unregisterReceiver(notificationReceiver);
+        } catch (IllegalArgumentException e) {
+            //already unregistered
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            unregisterReceiver(notificationReceiver);
+        } catch (IllegalArgumentException e) {
+            //already unregistered
+            e.printStackTrace();
+        }
     }
 
     @Override

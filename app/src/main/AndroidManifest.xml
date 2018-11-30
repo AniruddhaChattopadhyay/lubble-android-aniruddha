@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <!-- Recommended so that CleverTap knows when to attempt a network call -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:name=".LubbleApp"
@@ -329,6 +330,37 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.chat.ChatActivity" />
         </activity>
+
+        <receiver
+            android:name=".chat.NotificationResultReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="0">
+                <action android:name="in.lubble.app.NEW_MSG_INTENT" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".utils.NotifDeleteBroadcastRecvr"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".receivers.AppUpdateReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receivers.BootCompleteReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

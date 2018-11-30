@@ -17,6 +17,7 @@ public class AnalyticsEvents {
 
     public static final String ITEM_NOT_FOUND = "ITEM_NOT_FOUND";
     public static final String MPLACE_CHAT_BTN_CLICKED = "MPLACE_CHAT_BTN_CLICKED";
+    public static final String CALL_BTN_CLICKED = "CALL_BTN_CLICKED";
     public static final String RECOMMEND_BTN_CLICK = "RECOMMEND_BTN_CLICK";
     public static final String VISIT_SHOP_CLICK = "VISIT_SHOP_CLICK";
 
@@ -24,7 +25,13 @@ public class AnalyticsEvents {
     public static final String HELP_PHONE_CLICKED = "HELP_PHONE_CLICKED";
 
     public static final String NOTIF_SHOWN = "NOTIF_SHOWN";
+    public static final String NOTIF_ABORTED = "NOTIF_ABORTED";
+    public static final String NOTIF_MUTED = "NOTIF_MUTED";
+    public static final String NOTIF_CREATED = "NOTIF_CREATED";
+    public static final String NOTIF_DISPLAYED = "NOTIF_DISPLAYED";
+    public static final String NOTIF_SUMMARY_DISPLAYED = "NOTIF_DISPLAYED";
     public static final String NOTIF_OPENED = "NOTIF_OPENED";
+    public static final String NOTIF_DISMISSED = "NOTIF_DISMISSED";
 
     public static final String REFERRAL_FB_SHARE = "REFERRAL_FB_SHARE";
     public static final String REFERRAL_WA_SHARE = "REFERRAL_WA_SHARE";
@@ -39,5 +46,16 @@ public class AnalyticsEvents {
 
     public static final String EXPLORE_DIALOG_SHOWN = "EXPLORE_DIALOG_SHOWN";
     public static final String EXPLORE_CONTINUE_CLICKED = "EXPLORE_CONTINUE_CLICKED";
+
+    public static final String APP_UPDATE_BLOCK = "APP_UPDATE_BLOCK";
+    public static final String APP_UPDATE_BLOCK_POSITIVE = "APP_UPDATE_BLOCK_POSITIVE";
+    public static final String APP_UPDATE_BLOCK_RETRY = "APP_UPDATE_BLOCK_RETRY";
+
+    public static final String APP_UPDATE_REMINDER = "APP_UPDATE_REMINDER";
+    public static final String APP_UPDATE_REMINDER_POSITIVE = "APP_UPDATE_REMINDER_POSITIVE";
+    public static final String APP_UPDATE_REMINDER_LATER = "APP_UPDATE_REMINDER_LATER";
+
+    public static final String APP_UPDATED = "APP_UPDATED";
+    public static final String PHONE_BOOT_COMPLETE = "PHONE_BOOT_COMPLETE";
 
 }

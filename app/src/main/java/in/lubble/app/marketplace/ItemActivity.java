@@ -57,8 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.analytics.AnalyticsEvents.MPLACE_CHAT_BTN_CLICKED;
-import static in.lubble.app.analytics.AnalyticsEvents.VISIT_SHOP_CLICK;
+import static in.lubble.app.analytics.AnalyticsEvents.*;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.marketplace.Item.ITEM_APPROVED;
 
@@ -518,12 +517,14 @@ public class ItemActivity extends BaseActivity {
                                 public void onClick(View v) {
                                     final Bundle bundle = new Bundle();
                                     bundle.putInt("seller_id", sellerData.getId());
-                                    Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, bundle, ItemActivity.this);
+                                    bundle.putInt("item_id", item.getId());
                                     if (sellerData.isCallEnabled()) {
+                                        Analytics.triggerEvent(CALL_BTN_CLICKED, bundle, ItemActivity.this);
                                         Intent intent = new Intent(Intent.ACTION_DIAL);
                                         intent.setData(Uri.parse("tel:" + sellerData.getPhone()));
                                         startActivity(intent);
                                     } else {
+                                        Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, bundle, ItemActivity.this);
                                         if (!TextUtils.isEmpty(dmId)) {
                                             ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
                                         } else {

@@ -1,5 +1,6 @@
 package in.lubble.app.firebase;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,24 +11,23 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.AppNotifData;
 import in.lubble.app.models.NotifData;
-import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
 
 import java.util.Map;
 
-import static in.lubble.app.analytics.AnalyticsEvents.NOTIF_SHOWN;
+import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.marketplace.SellerDashActiv.*;
 
@@ -52,7 +52,7 @@ public class FcmService extends FirebaseMessagingService {
             final Map<String, String> dataMap = remoteMessage.getData();
             Log.d(TAG, "Message data payload: " + dataMap);
 
-            sendShownAnalyticEvent(dataMap);
+            NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SHOWN, dataMap, this);
 
             Bundle extras = new Bundle();
             for (Map.Entry<String, String> entry : remoteMessage.getData().entrySet()) {
@@ -89,12 +89,13 @@ public class FcmService extends FirebaseMessagingService {
                     JsonElement jsonElement = gson.toJsonTree(dataMap);
                     AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
                     AppNotifUtils.showAppNotif(this, appNotifData);
-                } else if (StringUtils.isValidString(type) && ("chat".equalsIgnoreCase(type))) {
+                } else if (StringUtils.isValidString(type) && (("chat".equalsIgnoreCase(type)) || "dm".equalsIgnoreCase(type))) {
                     // create chat notif
-                    createChatNotif(dataMap);
-                } else if (StringUtils.isValidString(type) && ("dm".equalsIgnoreCase(type))) {
-                    // create chat notif
-                    createDmNotif(dataMap);
+                    Intent broadcast = new Intent();
+                    broadcast.putExtra("remoteMessage", remoteMessage);
+                    broadcast.setAction(NEW_CHAT_ACTION);
+                    broadcast.setPackage(BuildConfig.APPLICATION_ID);
+                    sendOrderedBroadcast(broadcast, null, null, null, Activity.RESULT_OK, null, null);
                 } else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
                     // mplace image uploaded, send broadcast
                     sendMarketplaceImgBroadcast(dataMap);
@@ -113,20 +114,6 @@ public class FcmService extends FirebaseMessagingService {
                     Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
                 }
             }
-        }
-    }
-
-    private void sendShownAnalyticEvent(Map<String, String> dataMap) {
-        try {
-            final Bundle bundle = new Bundle();
-            for (Map.Entry<String, String> entry : dataMap.entrySet()) {
-                if (!entry.getKey().toLowerCase().contains("thumbnail")) {
-                    bundle.putString(entry.getKey(), entry.getValue());
-                }
-            }
-            Analytics.triggerEvent(NOTIF_SHOWN, bundle, this);
-        } catch (Exception e) {
-            Crashlytics.logException(e);
         }
     }
 
@@ -162,96 +149,6 @@ public class FcmService extends FirebaseMessagingService {
         Intent intent = new Intent(LOGOUT_ACTION);
         intent.putExtra("UID", dataMap.get("uid"));
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-    }
-
-    private void createChatNotif(Map<String, String> dataMap) {
-        Gson gson = new Gson();
-        JsonElement jsonElement = gson.toJsonTree(dataMap);
-        NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
-
-        if (!notifData.getGroupId().equalsIgnoreCase(LubbleSharedPrefs.getInstance().getCurrentActiveGroupId())) {
-            // only show notif if that group is not in foreground & the group's notifs are not muted
-            if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
-                NotifUtils.updateChatNotifs(this, notifData);
-            }
-            updateUnreadCounter(notifData, false);
-            pullNewMsgs(notifData);
-            //sendDeliveryReceipt(notifData);
-        }
-    }
-
-    private void createDmNotif(Map<String, String> dataMap) {
-        Gson gson = new Gson();
-        JsonElement jsonElement = gson.toJsonTree(dataMap);
-        NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
-
-        if (!notifData.getGroupId().equalsIgnoreCase(LubbleSharedPrefs.getInstance().getCurrentActiveGroupId())) {
-            // only show notif if that group is not in foreground & the group's notifs are not muted
-            if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
-                NotifUtils.updateChatNotifs(this, notifData);
-            }
-            updateUnreadCounter(notifData, true);
-            pullNewDmMsgs(notifData);
-            //sendDeliveryReceipt(notifData);
-        }
-    }
-
-    private void pullNewMsgs(NotifData notifData) {
-        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "Pulled: " + dataSnapshot.getKey());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void pullNewDmMsgs(NotifData notifData) {
-        RealtimeDbHelper.getDmMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "Pulled: " + dataSnapshot.getKey());
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void updateUnreadCounter(NotifData notifData, boolean isDm) {
-        DatabaseReference unreadCountRef = RealtimeDbHelper.getUserGroupsRef().child(notifData.getGroupId()).child("unreadCount");
-        if (isDm) {
-            if (notifData.getIsSeller()) {
-                unreadCountRef = RealtimeDbHelper.getSellerRef()
-                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
-                        .child("dms")
-                        .child(notifData.getGroupId())
-                        .child("unreadCount");
-            } else {
-                unreadCountRef = RealtimeDbHelper.getUserDmsRef().child(notifData.getGroupId()).child("unreadCount");
-            }
-        }
-        unreadCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Long oldCount = 0L;
-                if (dataSnapshot.getValue() != null) {
-                    oldCount = dataSnapshot.getValue(Long.class);
-                }
-                dataSnapshot.getRef().setValue(++oldCount);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void sendDeliveryReceipt(NotifData notifData) {

@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.Nullable;
@@ -15,11 +17,14 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.request.target.Target;
+import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
@@ -44,6 +49,16 @@ public class NotifUtils {
 
     private static HashMap<String, NotificationCompat.MessagingStyle> messagingStyleMap;
 
+    public static void showAllPendingChatNotifs(Context context) {
+        messagingStyleMap = new HashMap<>();
+
+        ArrayList<NotifData> msgList = getAllMsgs();
+        if (!msgList.isEmpty()) {
+            sortListByTime(msgList);
+            sendAllNotifs(context, msgList);
+        }
+    }
+
     public static void updateChatNotifs(Context context, NotifData notifData) {
         messagingStyleMap = new HashMap<>();
 
@@ -65,7 +80,7 @@ public class NotifUtils {
         });
     }
 
-    private static void sendAllNotifs(Context context, ArrayList<NotifData> notifDataList) {
+    private static void sendAllNotifs(final Context context, ArrayList<NotifData> notifDataList) {
 
         final NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -78,7 +93,7 @@ public class NotifUtils {
             final String groupId = map.getKey();
             final Integer notifId = getNotifId(groupId);
 
-            String groupDpUrl = getGroupDp(notifDataList, groupId);
+            final String groupDpUrl = getGroupDp(notifDataList, groupId);
 
             Intent intent = new Intent(context, ChatActivity.class);
             if (TextUtils.isEmpty(map.getValue().getConversationTitle())) {
@@ -92,33 +107,61 @@ public class NotifUtils {
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addNextIntentWithParentStack(intent);
 
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
+            Intent deleteIntent = new Intent(context, NotifDeleteBroadcastRecvr.class);
+            deleteIntent.putExtra("groupId", groupId);
+            PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), notifId, deleteIntent, 0);
+
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.NEW_CHAT_NOTIF_CHANNEL)
                     .setStyle(map.getValue())
                     .setSmallIcon(R.drawable.ic_lubble_notif)
                     .setShowWhen(true)
                     .setGroup(GROUP_KEY)
                     .setDefaults(0)
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setAutoCancel(true)
                     .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                     .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
-                    .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
+                    .setDeleteIntent(deletePendingIntent)
+                    .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
-            try {
-                if (StringUtils.isValidString(groupDpUrl)) {
-                    final Bitmap bitmap = GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
-                    builder.setLargeIcon(bitmap);
-                } else {
-                    builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } finally {
+            if (StringUtils.isValidString(groupDpUrl)) {
+                new AsyncTask<Void, Void, Void>() {
+                    Bitmap theBitmap = null;
+
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        try {
+                            theBitmap = GlideApp.with(context).asBitmap()
+                                    .load(groupDpUrl).circleCrop()
+                                    .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                                    .get();
+                        } catch (final ExecutionException e) {
+                            Log.e(TAG, e.getMessage());
+                        } catch (final InterruptedException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void onPostExecute(Void dummy) {
+                        if (null != theBitmap) {
+                            // The full bitmap should be available here
+                            builder.setLargeIcon(theBitmap);
+                        }
+                        notificationManager.notify(notifId, builder.build());
+                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DISPLAYED, groupId, context);
+                    }
+                }.execute();
+            } else {
+                builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
                 notificationManager.notify(notifId, builder.build());
+                sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DISPLAYED, groupId, context);
             }
         }
         Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
         notificationManager.notify(SUMMARY_ID, summary);
+        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SUMMARY_DISPLAYED, GROUP_KEY, context);
     }
 
     @Nullable
@@ -168,7 +211,11 @@ public class NotifUtils {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntentWithParentStack(intent);
 
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.CHAT_NOTIF_CHANNEL)
+        Intent deleteIntent = new Intent(context, NotifDeleteBroadcastRecvr.class);
+        deleteIntent.putExtra("groupId", groupKey);
+        PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), 0, deleteIntent, 0);
+
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.NEW_CHAT_NOTIF_CHANNEL)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Lubble")
                 .setWhen(notifDataList.get(notifDataList.size() - 1).getTimestamp())
@@ -176,14 +223,18 @@ public class NotifUtils {
                 .setShowWhen(true)
                 .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                 .setGroup(groupKey)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setAutoCancel(true)
                 .setContentIntent(stackBuilder.getPendingIntent(SUMMARY_ID, PendingIntent.FLAG_UPDATE_CURRENT))
                 .setGroupSummary(true)
-                .setGroupAlertBehavior(Notification.GROUP_ALERT_SUMMARY);
+                .setDeleteIntent(deletePendingIntent)
+                .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
         NotificationCompat.InboxStyle inbox = new NotificationCompat.InboxStyle();
         for (NotifData notifData : notifDataList) {
             inbox.addLine(notifData.getMessageBody());
         }
+        builder.setContentText(notifDataList.get(notifDataList.size() - 1).getMessageBody());
 
         inbox.setSummaryText(String.format("+ %d", notifDataList.size()));
 
@@ -245,6 +296,30 @@ public class NotifUtils {
 
         if (chatSharedPrefs.getAll().size() == 0) {
             notificationManager.cancel(SUMMARY_ID);
+        }
+    }
+
+    public static void sendNotifAnalyticEvent(String eventName, Map<String, String> dataMap, Context context) {
+        try {
+            final Bundle bundle = new Bundle();
+            for (Map.Entry<String, String> entry : dataMap.entrySet()) {
+                if (!entry.getKey().toLowerCase().contains("thumbnail")) {
+                    bundle.putString(entry.getKey(), entry.getValue());
+                }
+            }
+            Analytics.triggerEvent(eventName, bundle, context);
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
+    }
+
+    public static void sendNotifAnalyticEvent(String eventName, String groupId, Context context) {
+        try {
+            final Bundle bundle = new Bundle();
+            bundle.putString("groupId", groupId);
+            Analytics.triggerEvent(eventName, bundle, context);
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 
