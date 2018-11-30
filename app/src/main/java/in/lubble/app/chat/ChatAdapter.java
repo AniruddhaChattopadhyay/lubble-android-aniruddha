@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -585,7 +586,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             imgContainer.setVisibility(View.VISIBLE);
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
                 // Permission is not granted
-                glide.load(chatData.getImgUrl()).override(18, 18).centerCrop().into(imageView);
+                glide.load(chatData.getImgUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
                 downloadIv.setVisibility(View.VISIBLE);
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -602,7 +603,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 String savedPath = getSavedImageForMsgId(context, chatData.getId());
                 if (savedPath != null) {
                     progressBar.setVisibility(View.GONE);
-                    glide.load(savedPath).centerCrop().into(imageView);
+                    glide.load(savedPath).centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
                     imageView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -623,12 +624,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void downloadAndSavePic(final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
         glide.asBitmap()
                 .load(chatData.getImgUrl())
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         FileUtils.saveImageInGallery(resource, chatData.getId(), context);
                         progressBar.setVisibility(View.GONE);
-                        glide.load(resource).centerCrop().into(imageView);
+                        glide.load(resource).centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
                         imageView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {

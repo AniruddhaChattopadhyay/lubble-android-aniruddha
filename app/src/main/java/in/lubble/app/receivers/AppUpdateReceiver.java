@@ -8,6 +8,7 @@ import in.lubble.app.BuildConfig;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.utils.ClevertapUtils;
+import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.NotifUtils;
 
 public class AppUpdateReceiver extends BroadcastReceiver {
@@ -20,5 +21,6 @@ public class AppUpdateReceiver extends BroadcastReceiver {
         bundle.putString("new version name", BuildConfig.VERSION_NAME);
         bundle.putInt("new version code", BuildConfig.VERSION_CODE);
         Analytics.triggerEvent(AnalyticsEvents.APP_UPDATED, bundle, context);
+        FileUtils.deleteCache(context);
     }
 }
