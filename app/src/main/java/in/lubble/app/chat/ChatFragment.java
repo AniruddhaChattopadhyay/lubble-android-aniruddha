@@ -2,6 +2,7 @@ package in.lubble.app.chat;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -228,6 +230,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             // new DM chat, pre-fill help text in editText
             newMessageEt.setText("Hi! I am interested in \"" + itemTitle + "\"");
             newMessageEt.selectAll();
+
+            newMessageEt.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (getContext() != null) {
+                        InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputMethodManager.showSoftInput(newMessageEt, InputMethodManager.SHOW_IMPLICIT);
+                    }
+                }
+            }, 1000);
             newMessageEt.requestFocus();
         }
 
