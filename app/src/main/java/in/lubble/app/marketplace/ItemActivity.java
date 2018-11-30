@@ -517,6 +517,7 @@ public class ItemActivity extends BaseActivity {
                                 public void onClick(View v) {
                                     final Bundle bundle = new Bundle();
                                     bundle.putInt("seller_id", sellerData.getId());
+                                    bundle.putInt("item_id", item.getId());
                                     if (sellerData.isCallEnabled()) {
                                         Analytics.triggerEvent(CALL_BTN_CLICKED, bundle, ItemActivity.this);
                                         Intent intent = new Intent(Intent.ACTION_DIAL);

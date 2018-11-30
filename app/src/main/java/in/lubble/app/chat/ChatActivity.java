@@ -217,6 +217,28 @@ public class ChatActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        try {
+            unregisterReceiver(notificationReceiver);
+        } catch (IllegalArgumentException e) {
+            //already unregistered
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            unregisterReceiver(notificationReceiver);
+        } catch (IllegalArgumentException e) {
+            //already unregistered
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
