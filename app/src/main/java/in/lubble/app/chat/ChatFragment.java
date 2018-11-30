@@ -259,6 +259,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         if (messagesReference != null) {
             msgChildListener = msgListener(messagesReference);
             initMsgListenerToKnowWhenSyncComplete();
+        } else {
+            chatProgressBar.setVisibility(View.GONE);
         }
 
         deleteUnreadMsgsForGroupId(groupId, getContext());
