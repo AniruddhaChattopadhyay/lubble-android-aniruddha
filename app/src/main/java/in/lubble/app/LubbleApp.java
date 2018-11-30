@@ -93,6 +93,12 @@ public class LubbleApp extends Application {
                             "Chat Messages",
                             NotificationManager.IMPORTANCE_LOW));
 
+            mNotifyMgr.createNotificationChannel(
+                    new NotificationChannel(
+                            Constants.DM_CHAT_NOTIF_CHANNEL,
+                            "Direct Messages",
+                            NotificationManager.IMPORTANCE_HIGH));
+
             final NotificationChannel mediaChannel = new NotificationChannel(
                     Constants.SENDING_MEDIA_NOTIF_CHANNEL,
                     "Send Media",
