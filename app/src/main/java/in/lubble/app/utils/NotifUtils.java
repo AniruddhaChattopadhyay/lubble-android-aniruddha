@@ -80,7 +80,7 @@ public class NotifUtils {
         });
     }
 
-    private static void sendAllNotifs(final Context context, ArrayList<NotifData> notifDataList) {
+    private static void sendAllNotifs(final Context context, final ArrayList<NotifData> notifDataList) {
 
         final NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -151,14 +151,19 @@ public class NotifUtils {
                         }
                         notificationManager.notify(notifId, builder.build());
                         sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DISPLAYED, groupId, context);
+                        ṁakeSummaryNotif(context, notifDataList, notificationManager);
                     }
                 }.execute();
             } else {
                 builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
                 notificationManager.notify(notifId, builder.build());
                 sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DISPLAYED, groupId, context);
+                ṁakeSummaryNotif(context, notifDataList, notificationManager);
             }
         }
+    }
+
+    private static void ṁakeSummaryNotif(Context context, ArrayList<NotifData> notifDataList, NotificationManager notificationManager) {
         Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
         notificationManager.notify(SUMMARY_ID, summary);
         sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SUMMARY_DISPLAYED, GROUP_KEY, context);
