@@ -8,15 +8,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
 import in.lubble.app.Constants;
@@ -24,14 +25,12 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
@@ -125,48 +124,21 @@ public class NotifUtils {
                     .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
             if (StringUtils.isValidString(groupDpUrl)) {
-                new AsyncTask<Void, Void, Void>() {
-                    Bitmap theBitmap = null;
-
+                GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().into(new SimpleTarget<Bitmap>() {
                     @Override
-                    protected Void doInBackground(Void... params) {
-                        try {
-                            theBitmap = GlideApp.with(context).asBitmap()
-                                    .load(groupDpUrl).circleCrop()
-                                    .submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                                    .get();
-                        } catch (final ExecutionException e) {
-                            Log.e(TAG, e.getMessage());
-                        } catch (final InterruptedException e) {
-                            Log.e(TAG, e.getMessage());
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    protected void onPostExecute(Void dummy) {
-                        if (null != theBitmap) {
-                            // The full bitmap should be available here
-                            builder.setLargeIcon(theBitmap);
-                        }
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        builder.setLargeIcon(resource);
                         notificationManager.notify(notifId, builder.build());
-                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DISPLAYED, groupId, context);
-                        ṁakeSummaryNotif(context, notifDataList, notificationManager);
+                        Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
+                        notificationManager.notify(SUMMARY_ID, summary);
                     }
-                }.execute();
+                });
             } else {
                 builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
-                notificationManager.notify(notifId, builder.build());
-                sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DISPLAYED, groupId, context);
-                ṁakeSummaryNotif(context, notifDataList, notificationManager);
+                Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
+                notificationManager.notify(SUMMARY_ID, summary);
             }
         }
-    }
-
-    private static void ṁakeSummaryNotif(Context context, ArrayList<NotifData> notifDataList, NotificationManager notificationManager) {
-        Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
-        notificationManager.notify(SUMMARY_ID, summary);
-        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SUMMARY_DISPLAYED, GROUP_KEY, context);
     }
 
     @Nullable
@@ -210,8 +182,23 @@ public class NotifUtils {
 
     private static Notification buildSummary(Context context, String groupKey, ArrayList<NotifData> notifDataList) {
 
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.putExtra(TRACK_NOTIF_ID, groupKey);
+        Intent intent;
+        if (isSummaryForOneGroup(notifDataList)) {
+            intent = new Intent(context, ChatActivity.class);
+            final NotifData firstNotifData = notifDataList.get(0);
+            String groupId = firstNotifData.getGroupId();
+            if (firstNotifData.getNotifType().equalsIgnoreCase("dm")) {
+                // it is a DM notif
+                intent.putExtra(EXTRA_DM_ID, groupId);
+                intent.putExtra(TRACK_NOTIF_ID, groupId);
+            } else {
+                intent.putExtra(EXTRA_GROUP_ID, groupId);
+                intent.putExtra(TRACK_NOTIF_ID, groupId);
+            }
+        } else {
+            intent = new Intent(context, MainActivity.class);
+            intent.putExtra(TRACK_NOTIF_ID, groupKey);
+        }
         Log.d(TAG, "TRACK_NOTIF_ID -> " + groupKey);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntentWithParentStack(intent);
@@ -247,6 +234,14 @@ public class NotifUtils {
         return builder.build();
     }
 
+    private static boolean isSummaryForOneGroup(ArrayList<NotifData> notifDataList) {
+        for (int i = 1; i < notifDataList.size(); i++) {
+            if (!notifDataList.get(i).getGroupId().equalsIgnoreCase(notifDataList.get(i - 1).getGroupId())) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     private static void persistNewMessage(NotifData notifData) {
         UnreadChatsSharedPrefs.getInstance().getPreferences().edit().putString(notifData.getMessageId(), new Gson().toJson(notifData)).commit();
