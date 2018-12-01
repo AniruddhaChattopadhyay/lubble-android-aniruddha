@@ -135,6 +135,7 @@ public class NotifUtils {
                 });
             } else {
                 builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
+                notificationManager.notify(notifId, builder.build());
                 Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
                 notificationManager.notify(SUMMARY_ID, summary);
             }
