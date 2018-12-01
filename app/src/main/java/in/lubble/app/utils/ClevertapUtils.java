@@ -15,16 +15,19 @@ public class ClevertapUtils {
         HashMap<String, Object> profileUpdate = new HashMap<>();
 
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        profileUpdate.put("Name", currentUser.getDisplayName());
-        profileUpdate.put("Identity", FirebaseAuth.getInstance().getUid());
-        profileUpdate.put("Firebase ID", FirebaseAuth.getInstance().getUid());
-        profileUpdate.put("Lubble Id", LubbleSharedPrefs.getInstance().getLubbleId());
-        profileUpdate.put("Phone", currentUser.getPhoneNumber());
-        profileUpdate.put("Photo", currentUser.getPhotoUrl());
-        profileUpdate.put("version name", BuildConfig.VERSION_NAME);
-        profileUpdate.put("version code", BuildConfig.VERSION_CODE);
+        if (currentUser != null) {
+            // user is logged in
+            profileUpdate.put("Name", currentUser.getDisplayName());
+            profileUpdate.put("Identity", FirebaseAuth.getInstance().getUid());
+            profileUpdate.put("Firebase ID", FirebaseAuth.getInstance().getUid());
+            profileUpdate.put("Lubble Id", LubbleSharedPrefs.getInstance().getLubbleId());
+            profileUpdate.put("Phone", currentUser.getPhoneNumber());
+            profileUpdate.put("Photo", currentUser.getPhotoUrl());
+            profileUpdate.put("version name", BuildConfig.VERSION_NAME);
+            profileUpdate.put("version code", BuildConfig.VERSION_CODE);
 
-        CleverTapAPI.getDefaultInstance(context).pushProfile(profileUpdate);
+            CleverTapAPI.getDefaultInstance(context).pushProfile(profileUpdate);
+        }
     }
 
 }

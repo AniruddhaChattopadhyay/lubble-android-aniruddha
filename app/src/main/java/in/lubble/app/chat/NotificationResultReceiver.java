@@ -109,7 +109,7 @@ public class NotificationResultReceiver extends BroadcastReceiver {
     }
 
     private void pullNewMsgs(NotifData notifData) {
-        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).limitToLast(1).addValueEventListener(new ValueEventListener() {
+        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "Pulled: " + dataSnapshot.getKey());
@@ -123,7 +123,7 @@ public class NotificationResultReceiver extends BroadcastReceiver {
     }
 
     private void pullNewDmMsgs(NotifData notifData) {
-        RealtimeDbHelper.getDmMessagesRef().child(notifData.getGroupId()).limitToLast(1).addValueEventListener(new ValueEventListener() {
+        RealtimeDbHelper.getDmMessagesRef().child(notifData.getGroupId()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "Pulled: " + dataSnapshot.getKey());
