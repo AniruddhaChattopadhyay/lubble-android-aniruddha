@@ -135,7 +135,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private LinkMetaAsyncTask linkMetaAsyncTask;
     private boolean isLoadingMoreChats;
     private boolean isLastPage;
-    private String endAtKey;
+    private long endAtTimestamp;
     private final static int PAGE_SIZE = 20;
     private ChildEventListener moreChatsListener;
     private int unreadCount = 0;
@@ -724,7 +724,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     checkAndInsertDate(chatData, lastMsg, chatAdapter.getItemCount());
                     chatAdapter.addChatData(chatData);
                     if (tempChatList.size() == PAGE_SIZE) {
-                        endAtKey = tempChatList.get(0).getId();
+                        endAtTimestamp = tempChatList.get(0).getServerTimestampInLong();
                         /*for (int i = 0; i < tempChatList.size(); i++) {
                             final ChatData currChatData = tempChatList.get(i);
                         }*/
@@ -764,7 +764,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ChildEventListener moreMsgListener(@NonNull DatabaseReference messagesReference) {
         final ArrayList<ChatData> newChatDataList = new ArrayList<>();
         isLoadingMoreChats = true;
-        final Query query = messagesReference.orderByChild("serverTimestamp").endAt(endAtKey).limitToLast(PAGE_SIZE);
+        final Query query = messagesReference.orderByChild("serverTimestamp").endAt(endAtTimestamp).limitToLast(PAGE_SIZE);
         moreChatsListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -776,7 +776,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     sendReadReceipt(chatData);
                     newChatDataList.add(chatData);
                     if (newChatDataList.size() == PAGE_SIZE) {
-                        endAtKey = newChatDataList.get(0).getId();
+                        endAtTimestamp = newChatDataList.get(0).getServerTimestampInLong();
                         query.removeEventListener(moreChatsListener);
                         newChatDataList.remove(newChatDataList.size() - 1);
                         Collections.reverse(newChatDataList);
@@ -787,7 +787,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         }
                         newChatDataList.clear();
                         isLoadingMoreChats = false;
-                    } else if (endAtKey.equalsIgnoreCase(chatData.getId())) {
+                    } else if (endAtTimestamp == chatData.getServerTimestampInLong()) {
                         // last page
                         query.removeEventListener(moreChatsListener);
                         isLastPage = true;
@@ -808,6 +808,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     }
                 } else {
                     Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey()));
+                    isLoadingMoreChats = false;
                 }
             }
 
@@ -834,6 +835,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Crashlytics.logException(databaseError.toException());
+                isLoadingMoreChats = false;
             }
         };
         return query.addChildEventListener(moreChatsListener);
@@ -1121,7 +1123,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onPause();
         recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
-        endAtKey = null;
+        endAtTimestamp = 0L;
         isLastPage = false;
         isLoadingMoreChats = false;
         if (messagesReference != null && msgChildListener != null) {
