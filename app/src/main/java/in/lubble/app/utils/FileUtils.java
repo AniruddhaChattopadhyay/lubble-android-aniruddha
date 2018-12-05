@@ -222,9 +222,7 @@ public class FileUtils {
     public static void deleteCache(Context context) {
         try {
             File dir = context.getCacheDir();
-            if (dir.length() > 3 * 1024 * 1024) {
-                deleteDir(dir);
-            }
+            deleteDir(dir);
         } catch (Exception e) {
             Crashlytics.logException(e);
             e.printStackTrace();
