@@ -58,6 +58,7 @@ import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
@@ -123,6 +124,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private ProgressDialog joiningProgressDialog;
     private ProgressBar sendBtnProgressBtn;
     private ProgressBar chatProgressBar;
+    private ProgressBar paginationProgressBar;
     @Nullable
     private ValueEventListener bottomBarListener;
     @Nullable
@@ -224,6 +226,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         pvtSystemMsg = view.findViewById(R.id.view_pvt_sys_msg);
         sendBtnProgressBtn = view.findViewById(R.id.progress_bar_send);
         chatProgressBar = view.findViewById(R.id.progressbar_chat);
+        paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
 
         groupMembersMap = new HashMap<>();
 
@@ -386,11 +389,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
-                //if (!isLoading && !isLastPage) {
-                if (firstVisibleItemPosition == 0 && !isLoadingMoreChats && !isLastPage) {
+                if (firstVisibleItemPosition == 0 && !isLoadingMoreChats && !isLastPage && totalItemCount != visibleItemCount) {
+                    paginationProgressBar.setVisibility(View.VISIBLE);
                     moreMsgListener(messagesReference);
                 }
-                //}
             }
         });
 
@@ -409,18 +411,21 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     private void initMsgListenerToKnowWhenSyncComplete() {
-        messagesReference.orderByChild("serverTimestamp").addValueEventListener(new ValueEventListener() {
+        messagesReference.orderByChild("serverTimestamp").limitToLast(PAGE_SIZE + unreadCount).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // this is only called after all chats have been synced
                 // use this to hide the progressbar
-                if (chatProgressBar.getVisibility() == View.VISIBLE) {
+                if (paginationProgressBar.getVisibility() == View.VISIBLE) {
+                    paginationProgressBar.setVisibility(View.GONE);
+                }
+                if (chatProgressBar != null && chatProgressBar.getVisibility() == View.VISIBLE) {
                     chatProgressBar.setVisibility(View.GONE);
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
@@ -787,7 +792,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         }
                         newChatDataList.clear();
                         isLoadingMoreChats = false;
-                    } else if (endAtTimestamp == chatData.getServerTimestampInLong()) {
+                        paginationProgressBar.setVisibility(View.GONE);
+                        chatRecyclerView.scrollBy(0, -dpToPx(40));
+                    } else if (endAtTimestamp == chatData.getServerTimestampInLong() && newChatDataList.size() > 1) {
                         // last page
                         query.removeEventListener(moreChatsListener);
                         isLastPage = true;
@@ -805,10 +812,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         }
                         newChatDataList.clear();
                         isLoadingMoreChats = false;
+                        paginationProgressBar.setVisibility(View.GONE);
+                        chatRecyclerView.scrollBy(0, -dpToPx(40));
                     }
                 } else {
                     Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey()));
                     isLoadingMoreChats = false;
+                    paginationProgressBar.setVisibility(View.GONE);
+                    chatRecyclerView.scrollBy(0, -dpToPx(40));
                 }
             }
 

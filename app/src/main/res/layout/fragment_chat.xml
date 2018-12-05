@@ -118,13 +118,13 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_marginStart="8dp"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
                     android:layout_toLeftOf="@id/iv_attach"
                     android:background="@android:color/transparent"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
                     android:gravity="top|left"
                     android:hint="What's new"
                     android:maxLines="5"
@@ -196,11 +196,21 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true" />
 
+    <ProgressBar
+        android:id="@+id/progressbar_pagination"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_centerHorizontal="true"
+        android:background="@color/white"
+        android:padding="8dp"
+        android:visibility="gone" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_container"
+        android:layout_below="@id/progressbar_pagination"
         android:visibility="invisible"
         tools:listitem="@layout/item_recvd_chat"
         tools:visibility="visible" />
