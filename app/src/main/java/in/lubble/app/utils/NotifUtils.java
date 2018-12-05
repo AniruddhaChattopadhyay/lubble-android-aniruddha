@@ -95,13 +95,16 @@ public class NotifUtils {
             final String groupDpUrl = getGroupDp(notifDataList, groupId);
 
             Intent intent = new Intent(context, ChatActivity.class);
+            String channel = Constants.NEW_CHAT_NOTIF_CHANNEL;
             if (TextUtils.isEmpty(map.getValue().getConversationTitle())) {
                 // it is a DM notif
                 intent.putExtra(EXTRA_DM_ID, groupId);
                 intent.putExtra(TRACK_NOTIF_ID, groupId);
+                channel = Constants.DM_CHAT_NOTIF_CHANNEL;
             } else {
                 intent.putExtra(EXTRA_GROUP_ID, groupId);
                 intent.putExtra(TRACK_NOTIF_ID, groupId);
+                channel = Constants.NEW_CHAT_NOTIF_CHANNEL;
             }
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addNextIntentWithParentStack(intent);
@@ -110,7 +113,7 @@ public class NotifUtils {
             deleteIntent.putExtra("groupId", groupId);
             PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), notifId, deleteIntent, 0);
 
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.NEW_CHAT_NOTIF_CHANNEL)
+            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channel)
                     .setStyle(map.getValue())
                     .setSmallIcon(R.drawable.ic_lubble_notif)
                     .setShowWhen(true)
@@ -208,10 +211,12 @@ public class NotifUtils {
         deleteIntent.putExtra("groupId", groupKey);
         PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), 0, deleteIntent, 0);
 
-        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, Constants.NEW_CHAT_NOTIF_CHANNEL)
+        final NotifData lastNotifData = notifDataList.get(notifDataList.size() - 1);
+        String channel = "dm".equalsIgnoreCase(lastNotifData.getNotifType()) ? Constants.DM_CHAT_NOTIF_CHANNEL : Constants.NEW_CHAT_NOTIF_CHANNEL;
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channel)
                 .setStyle(new NotificationCompat.MessagingStyle("Me"))
                 .setContentTitle("Lubble")
-                .setWhen(notifDataList.get(notifDataList.size() - 1).getTimestamp())
+                .setWhen(lastNotifData.getTimestamp())
                 .setSmallIcon(R.drawable.ic_lubble_notif)
                 .setShowWhen(true)
                 .setColor(ContextCompat.getColor(context, R.color.colorAccent))
@@ -227,7 +232,7 @@ public class NotifUtils {
         for (NotifData notifData : notifDataList) {
             inbox.addLine(notifData.getMessageBody());
         }
-        builder.setContentText(notifDataList.get(notifDataList.size() - 1).getMessageBody());
+        builder.setContentText(lastNotifData.getMessageBody());
 
         inbox.setSummaryText(String.format("+ %d", notifDataList.size()));
 
