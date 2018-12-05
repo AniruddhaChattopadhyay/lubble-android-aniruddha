@@ -988,6 +988,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         }
     }
 
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public void getWritePerm() {
+        chatAdapter.writePermGranted();
+    }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -1171,5 +1176,20 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
     void showNeverAskForCamera() {
         Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
+    }
+
+    @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showRationaleForExtStorage(final PermissionRequest request) {
+        showStoragePermRationale(getContext(), request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showDeniedForExtStorage() {
+        Toast.makeText(getContext(), getString(R.string.write_storage_perm_denied_text), Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showNeverAskForExtStorage() {
+        Toast.makeText(getContext(), R.string.write_storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
 }

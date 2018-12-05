@@ -1,16 +1,21 @@
 package in.lubble.app.utils;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import com.crashlytics.android.Crashlytics;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
 import permissions.dispatcher.PermissionRequest;
@@ -156,6 +161,110 @@ public class FileUtils {
             }
         });
         alertDialog.show();
+    }
+
+    public static void saveImageInGallery(Bitmap image, String msgId, Context context) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && isExternalStorageWritable()) {
+            String savedImagePath = null;
+
+            String imageFileName = "JPEG_" + msgId + ".jpg";
+            File storageDir = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                            + File.separator + "Lubble_pics");
+            boolean success = true;
+            if (!storageDir.exists()) {
+                success = storageDir.mkdirs();
+            }
+            if (success) {
+                File imageFile = new File(storageDir, imageFileName);
+                savedImagePath = imageFile.getAbsolutePath();
+                try {
+                    OutputStream fOut = new FileOutputStream(imageFile);
+                    image.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
+                    fOut.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                // Add the image to the system gallery
+                galleryAddPic(context, savedImagePath);
+            }
+        }
+    }
+
+    private static void galleryAddPic(Context context, String imagePath) {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(imagePath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        context.sendBroadcast(mediaScanIntent);
+    }
+
+    @Nullable
+    public static String getSavedImageForMsgId(Context context, String msgId) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && isExternalStorageReadable()) {
+            File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + ".jpg");
+
+            if (imgFile.exists()) {
+                //return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                return imgFile.getAbsolutePath();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * only if cache size exceeds 3MB
+     */
+    public static void deleteCache(Context context) {
+        try {
+            File dir = context.getCacheDir();
+            if (dir.length() > 3 * 1024 * 1024) {
+                deleteDir(dir);
+            }
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+            return dir.delete();
+        } else if (dir != null && dir.isFile()) {
+            return dir.delete();
+        } else {
+            return false;
+        }
+    }
+
+    /* Checks if external storage is available for read and write */
+    public static boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+
+    /* Checks if external storage is available to at least read */
+    public static boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
     }
 
 }

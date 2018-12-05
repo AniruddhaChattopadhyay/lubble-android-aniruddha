@@ -73,8 +73,8 @@
                         android:background="@drawable/gradient_black_trans"
                         android:maxLines="1"
                         android:padding="4dp"
-                        tools:text="This is the title video"
-                        android:textColor="@color/white" />
+                        android:textColor="@color/white"
+                        tools:text="This is the title video" />
 
                     <ImageView
                         android:id="@+id/iv_youtube_play"
@@ -155,6 +155,16 @@
                                 android:scaleType="centerCrop"
                                 android:transitionName="fullscreen_image"
                                 tools:src="@tools:sample/backgrounds/scenic" />
+
+                            <ImageView
+                                android:id="@+id/iv_download"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:layout_gravity="center"
+                                android:visibility="gone"
+                                android:background="@drawable/circle_white_trans"
+                                android:padding="8dp"
+                                app:srcCompat="@drawable/ic_file_download_black_24dp" />
 
                         </FrameLayout>
 
