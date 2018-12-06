@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import in.lubble.app.GlideRequests;
@@ -52,10 +53,12 @@ public class ServicesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         final ArrayList<PhotoData> photoList = item.getPhotos();
         if (photoList.size() > 0) {
             glide.load(photoList.get(0).getUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .apply(requestOptions)
                     .into(viewHolder.iconIv);
         } else {
             glide.load(R.drawable.blue_circle)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .apply(requestOptions)
                     .into(viewHolder.iconIv);
         }

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Item;
@@ -104,7 +105,9 @@ public class SmallItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
             final ArrayList<PhotoData> photoList = item.getPhotos();
             if (photoList.size() > 0) {
-                glide.load(photoList.get(0).getUrl()).into(viewHolder.itemIv);
+                glide.load(photoList.get(0).getUrl())
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(viewHolder.itemIv);
             }
         } else {
             // nothing to do here..

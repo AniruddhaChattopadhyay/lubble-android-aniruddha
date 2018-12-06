@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Item;
@@ -92,11 +93,13 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (photoList.size() > 0) {
             viewHolder.itemPicProgressBar.setVisibility(View.GONE);
             glide.load(photoList.get(0).getUrl())
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .thumbnail(0.1f)
                     .into(viewHolder.itemIv);
         } else {
             viewHolder.itemPicProgressBar.setVisibility(View.VISIBLE);
             glide.load("")
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .thumbnail(0.1f)
                     .into(viewHolder.itemIv);
         }
