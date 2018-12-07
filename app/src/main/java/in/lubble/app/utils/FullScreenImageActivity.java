@@ -4,17 +4,25 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityOptionsCompat;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.signature.ObjectKey;
 import in.lubble.app.*;
 import in.lubble.app.BuildConfig;
@@ -38,6 +46,7 @@ public class FullScreenImageActivity extends BaseActivity {
     private TouchImageView touchImageView;
     @Nullable
     private String uploadPath;
+    private ProgressBar progressbar;
 
     /**
      * @param activity
@@ -70,15 +79,31 @@ public class FullScreenImageActivity extends BaseActivity {
         setTitle("");
 
         touchImageView = findViewById(R.id.tiv_fullscreen);
+        progressbar = findViewById(R.id.progress_bar_full);
 
         if (getIntent() != null) {
             String imgPath = getIntent().getStringExtra(EXTRA_IMG_PATH);
             int errorPic = getIntent().getIntExtra(EXTRA_ERROR_PIC, R.drawable.ic_cancel_black_24dp);
             uploadPath = getIntent().getStringExtra(EXTRA_UPLOAD_PATH);
+            progressbar.setVisibility(View.VISIBLE);
             GlideApp.with(this)
                     .load(imgPath)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .error(errorPic)
                     .fitCenter()
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                            progressbar.setVisibility(View.GONE);
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                            progressbar.setVisibility(View.GONE);
+                            return false;
+                        }
+                    })
                     .into(touchImageView);
         }
     }

@@ -7,6 +7,7 @@ import android.widget.*;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.database.DataSnapshot;
@@ -58,6 +59,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, TOP));
         glide.load(exploreGroupData.getPhotoUrl())
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(R.drawable.rounded_rect_gray)
                 .error(R.drawable.explore_default)
                 .apply(requestOptions)
