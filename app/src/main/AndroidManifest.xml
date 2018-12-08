@@ -352,7 +352,6 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
-
         <receiver
             android:name=".receivers.BootCompleteReceiver"
             android:enabled="true"
@@ -362,6 +361,12 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name=".gate.GateCallActiv"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_gate_call"
+            android:theme="@style/FullscreenTheme"></activity>
     </application>
 
 </manifest>

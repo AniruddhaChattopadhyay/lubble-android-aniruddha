@@ -42,6 +42,7 @@ import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.gate.GateCallActiv;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.MarketplaceFrag;
@@ -157,6 +158,8 @@ public class MainActivity extends BaseActivity {
         }
 
         handleExploreActivity();
+
+        startActivity(new Intent(this, GateCallActiv.class));
 
     }
 
