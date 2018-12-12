@@ -24,8 +24,8 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
-            android:textColor="@color/white"
-            tools:text="C-123, Pika Apartments" />
+            android:text="C-123, Jyoti Apartments"
+            android:textColor="@color/white" />
 
         <ImageView
             android:layout_width="wrap_content"
@@ -52,10 +52,10 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
+            android:text="Surinder Sharma"
             android:textColor="@color/white"
             android:textSize="24sp"
-            android:textStyle="bold"
-            tools:text="Pikachu Bulba" />
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tv_purpose"
@@ -73,6 +73,8 @@
             android:layout_above="@id/tv_name"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="16dp"
+            android:tint="@color/white"
+            app:srcCompat="@drawable/ic_account_circle_black_24dp"
             tools:src="@tools:sample/avatars" />
 
         <LinearLayout
