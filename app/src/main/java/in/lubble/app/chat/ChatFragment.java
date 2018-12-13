@@ -256,7 +256,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             }, 1000);
             newMessageEt.requestFocus();
         }
-
+        init();
         return view;
     }
 
@@ -267,10 +267,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         joiningProgressDialog.show();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
+    private void init() {
+        endAtTimestamp = 0L;
         syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         chatRecyclerView.setLayoutManager(layoutManager);
@@ -290,8 +288,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             chatProgressBar.setVisibility(View.GONE);
         }
 
-        deleteUnreadMsgsForGroupId(groupId, getContext());
-        AppNotifUtils.deleteAppNotif(getContext(), groupId);
         foundFirstUnreadMsg = false;
         chatRecyclerView.setOnFlingListener(new RecyclerView.OnFlingListener() {
             @Override
@@ -396,6 +392,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         });
 
         resetActionBar();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        deleteUnreadMsgsForGroupId(groupId, getContext());
+        AppNotifUtils.deleteAppNotif(getContext(), groupId);
+        resetUnreadCount();
     }
 
     private void calcUnreadCount() {
@@ -714,7 +718,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildAdded: ");
                 final ChatData chatData = dataSnapshot.getValue(ChatData.class);
-                if (chatData != null) {
+                if (chatData != null && isAdded() && isVisible()) {
                     sendBtnProgressBtn.setVisibility(View.GONE);
                     Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
                     chatData.setId(dataSnapshot.getKey());
@@ -740,11 +744,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.d(TAG, "onChildChanged: ");
-                final ChatData chatData = dataSnapshot.getValue(ChatData.class);
-                if (chatData != null) {
-                    chatData.setId(dataSnapshot.getKey());
-                    chatAdapter.updateChatData(chatData);
+                if (isAdded() && isVisible()) {
+                    Log.d(TAG, "onChildChanged: ");
+                    final ChatData chatData = dataSnapshot.getValue(ChatData.class);
+                    if (chatData != null) {
+                        chatData.setId(dataSnapshot.getKey());
+                        chatAdapter.updateChatData(chatData);
+                    }
                 }
             }
 
@@ -760,7 +766,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Crashlytics.logException(databaseError.toException());
+                if (isAdded() && isVisible()) {
+                    Crashlytics.logException(databaseError.toException());
+                }
             }
         });
     }
@@ -1117,12 +1125,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         super.onPause();
         recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
-        endAtTimestamp = 0L;
-        isLastPage = false;
-        isLoadingMoreChats = false;
-        if (messagesReference != null && msgChildListener != null) {
-            messagesReference.removeEventListener(msgChildListener);
-        }
         if (groupReference != null && groupInfoListener != null) {
             groupReference.removeEventListener(groupInfoListener);
         }
