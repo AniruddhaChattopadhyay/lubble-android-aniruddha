@@ -139,7 +139,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     private boolean isLastPage;
     private long endAtTimestamp;
     private final static int PAGE_SIZE = 20;
-    private ChildEventListener moreChatsListener;
     private int unreadCount = 0;
 
     public ChatFragment() {
@@ -766,42 +765,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
         });
     }
 
-    private ChildEventListener moreMsgListener(@NonNull DatabaseReference messagesReference) {
-        final ArrayList<ChatData> newChatDataList = new ArrayList<>();
+    private void moreMsgListener(@NonNull DatabaseReference messagesReference) {
         isLoadingMoreChats = true;
         final Query query = messagesReference.orderByChild("serverTimestamp").endAt(endAtTimestamp).limitToLast(PAGE_SIZE);
-        moreChatsListener = new ChildEventListener() {
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            final ArrayList<ChatData> newChatDataList = new ArrayList<>();
+
             @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d(TAG, "onChildAdded: ");
-                final ChatData chatData = dataSnapshot.getValue(ChatData.class);
-                if (chatData != null) {
-                    Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
-                    chatData.setId(dataSnapshot.getKey());
-                    sendReadReceipt(chatData);
-                    newChatDataList.add(chatData);
-                    if (newChatDataList.size() == PAGE_SIZE) {
-                        endAtTimestamp = newChatDataList.get(0).getServerTimestampInLong();
-                        query.removeEventListener(moreChatsListener);
-                        newChatDataList.remove(newChatDataList.size() - 1);
-                        Collections.reverse(newChatDataList);
-                        for (int i = 0; i < newChatDataList.size(); i++) {
-                            final ChatData currChatData = newChatDataList.get(i);
-                            chatAdapter.addChatData(0, currChatData);
-                            checkAndInsertDate(currChatData, i + 1 >= newChatDataList.size() ? null : newChatDataList.get(i + 1), 0);
-                        }
-                        newChatDataList.clear();
-                        isLoadingMoreChats = false;
-                        paginationProgressBar.setVisibility(View.GONE);
-                        chatRecyclerView.scrollBy(0, -dpToPx(40));
-                    } else if (endAtTimestamp == chatData.getServerTimestampInLong() && newChatDataList.size() > 1) {
-                        // last page
-                        query.removeEventListener(moreChatsListener);
-                        isLastPage = true;
-                        if (newChatDataList.size() == 1) {
-                            // for edge case wherein prev page was the last one
-                            checkAndInsertDate(newChatDataList.get(0), null, 0);
-                        } else {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
+                    final ChatData chatData = childDataSnapshot.getValue(ChatData.class);
+                    if (chatData != null) {
+                        Log.d(TAG, "onChildAdded: " + childDataSnapshot.getKey());
+                        chatData.setId(childDataSnapshot.getKey());
+                        sendReadReceipt(chatData);
+                        newChatDataList.add(chatData);
+                        if (newChatDataList.size() == PAGE_SIZE) {
+                            endAtTimestamp = newChatDataList.get(0).getServerTimestampInLong();
                             newChatDataList.remove(newChatDataList.size() - 1);
                             Collections.reverse(newChatDataList);
                             for (int i = 0; i < newChatDataList.size(); i++) {
@@ -809,47 +790,44 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                                 chatAdapter.addChatData(0, currChatData);
                                 checkAndInsertDate(currChatData, i + 1 >= newChatDataList.size() ? null : newChatDataList.get(i + 1), 0);
                             }
+                            newChatDataList.clear();
+                            isLoadingMoreChats = false;
+                            paginationProgressBar.setVisibility(View.GONE);
+                            chatRecyclerView.scrollBy(0, -dpToPx(40));
+                        } else if (endAtTimestamp == chatData.getServerTimestampInLong() && newChatDataList.size() >= 1) {
+                            // last page
+                            isLastPage = true;
+                            if (newChatDataList.size() == 1) {
+                                // for edge case wherein prev page was the last one
+                                checkAndInsertDate(newChatDataList.get(0), null, 0);
+                            } else {
+                                newChatDataList.remove(newChatDataList.size() - 1);
+                                Collections.reverse(newChatDataList);
+                                for (int i = 0; i < newChatDataList.size(); i++) {
+                                    final ChatData currChatData = newChatDataList.get(i);
+                                    chatAdapter.addChatData(0, currChatData);
+                                    checkAndInsertDate(currChatData, i + 1 >= newChatDataList.size() ? null : newChatDataList.get(i + 1), 0);
+                                }
+                            }
+                            newChatDataList.clear();
+                            isLoadingMoreChats = false;
+                            paginationProgressBar.setVisibility(View.GONE);
+                            chatRecyclerView.scrollBy(0, -dpToPx(40));
                         }
-                        newChatDataList.clear();
+                    } else {
+                        Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + childDataSnapshot.getKey()));
                         isLoadingMoreChats = false;
                         paginationProgressBar.setVisibility(View.GONE);
                         chatRecyclerView.scrollBy(0, -dpToPx(40));
                     }
-                } else {
-                    Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey()));
-                    isLoadingMoreChats = false;
-                    paginationProgressBar.setVisibility(View.GONE);
-                    chatRecyclerView.scrollBy(0, -dpToPx(40));
                 }
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Log.d(TAG, "onChildChanged: ");
-                final ChatData chatData = dataSnapshot.getValue(ChatData.class);
-                if (chatData != null) {
-                    chatData.setId(dataSnapshot.getKey());
-                    chatAdapter.updateChatData(chatData);
-                }
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onChildRemoved: ");
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Crashlytics.logException(databaseError.toException());
-                isLoadingMoreChats = false;
-            }
-        };
-        return query.addChildEventListener(moreChatsListener);
+        });
     }
 
     private void checkAndInsertDate(ChatData chatData, @Nullable ChatData prevChatData, int posToInsert) {
