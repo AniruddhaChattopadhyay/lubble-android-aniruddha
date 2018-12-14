@@ -20,7 +20,7 @@ public class DebugActivity extends BaseActivity {
     }
 
     public void iAmTouched(View view) {
-        NewPollActiv.open(this);
+        NewPollActiv.open(this, "MYLUBBLE");
     }
 
     private void sendInvite(Uri mInvitationUrl) {

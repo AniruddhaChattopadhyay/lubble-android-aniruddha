@@ -4,22 +4,35 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ServerValue;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.models.ChatData;
+import in.lubble.app.models.ChoiceData;
+
+import java.util.HashMap;
+import java.util.MissingFormatArgumentException;
 
 import static android.widget.RelativeLayout.ALIGN_BOTTOM;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.models.ChatData.POLL;
 
 public class NewPollActiv extends AppCompatActivity {
 
     private static final String TAG = "NewPollActiv";
 
+    private static final String EXTRA_GROUP_ID = "in.lubble.app.newpoll.GROUP_ID";
+
+    private EditText askQuesEt;
     private RelativeLayout pollChoiceRelLayout;
+    private EditText choice1Et;
     private EditText choice2Et;
     private EditText choice3Et;
     private EditText choice4Et;
@@ -28,9 +41,12 @@ public class NewPollActiv extends AppCompatActivity {
     private TextView pollExpiryTv;
     private int choiceCount = 2;
     private int expiryDayCount = 1;
+    private String groupId;
 
-    public static void open(Context context) {
-        context.startActivity(new Intent(context, NewPollActiv.class));
+    public static void open(Context context, String grouId) {
+        final Intent intent = new Intent(context, NewPollActiv.class);
+        intent.putExtra(EXTRA_GROUP_ID, grouId);
+        context.startActivity(intent);
     }
 
     @Override
@@ -38,13 +54,19 @@ public class NewPollActiv extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_poll);
 
+        if (getIntent().hasExtra(EXTRA_GROUP_ID)) {
+            groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
+        } else {
+            throw new MissingFormatArgumentException("no GROUP ID passed while opening NewPollActiv");
+        }
+
         ImageView closeIv = findViewById(R.id.iv_poll_close);
-        Button sendPollBtn = findViewById(R.id.btn_send_poll);
+        LinearLayout sendPollContainer = findViewById(R.id.container_send_poll);
         ImageView pollDpIv = findViewById(R.id.iv_poll_dp);
-        EditText askQuesEt = findViewById(R.id.et_ask_question);
+        askQuesEt = findViewById(R.id.et_ask_question);
 
         pollChoiceRelLayout = findViewById(R.id.container_poll_choices);
-        EditText choice1Et = findViewById(R.id.et_poll_choice_1);
+        choice1Et = findViewById(R.id.et_poll_choice_1);
         choice2Et = findViewById(R.id.et_poll_choice_2);
         choice3Et = findViewById(R.id.et_poll_choice_3);
         choice4Et = findViewById(R.id.et_poll_choice_4);
@@ -82,6 +104,41 @@ public class NewPollActiv extends AppCompatActivity {
         GlideApp.with(this).load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
                 .placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(pollDpIv);
 
+        sendPollContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!TextUtils.isEmpty(askQuesEt.getText()) && !TextUtils.isEmpty(choice1Et.getText()) && !TextUtils.isEmpty(choice2Et.getText())) {
+
+                    final ChatData chatData = new ChatData();
+                    chatData.setAuthorUid(FirebaseAuth.getInstance().getUid());
+                    chatData.setIsDm(false);
+                    chatData.setMessage(askQuesEt.getText().toString());
+                    chatData.setCreatedTimestamp(System.currentTimeMillis());
+                    chatData.setServerTimestamp(ServerValue.TIMESTAMP);
+                    chatData.setType(POLL);
+                    chatData.setChoices(getChoices());
+
+                    getMessagesRef().child(groupId).push().setValue(chatData);
+                    finish();
+                }
+            }
+        });
+
+    }
+
+    private HashMap<String, ChoiceData> getChoices() {
+        final HashMap<String, ChoiceData> map = new HashMap<>();
+        final ChoiceData choiceData = new ChoiceData();
+        choiceData.setCount(0);
+        map.put(choice1Et.getText().toString(), choiceData);
+        map.put(choice2Et.getText().toString(), choiceData);
+        if (!TextUtils.isEmpty(choice3Et.getText())) {
+            map.put(choice3Et.getText().toString(), choiceData);
+        }
+        if (!TextUtils.isEmpty(choice4Et.getText())) {
+            map.put(choice4Et.getText().toString(), choiceData);
+        }
+        return map;
     }
 
     private void openDatePicker() {

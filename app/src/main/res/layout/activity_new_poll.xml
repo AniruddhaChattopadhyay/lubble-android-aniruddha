@@ -16,13 +16,33 @@
         android:tint="@color/colorAccent"
         app:srcCompat="@drawable/ic_close_black_24dp" />
 
-    <Button
-        android:id="@+id/btn_send_poll"
+    <LinearLayout
+        android:id="@+id/container_send_poll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:text="send"
-        android:theme="@style/AccentButton" />
+        android:background="@drawable/pill_button"
+        android:clickable="true"
+        android:gravity="center"
+        android:paddingLeft="12dp"
+        android:paddingTop="8dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SEND"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Button"
+            android:textColor="@color/white" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            app:srcCompat="@drawable/ic_send_white_24dp" />
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/iv_poll_dp"

@@ -17,6 +17,7 @@ public class ChatData {
     public static final String SYSTEM = "SYSTEM";
     public static final String UNREAD = "UNREAD";
     public static final String REPLY = "REPLY";
+    public static final String POLL = "POLL";
 
     private String id;
     private String authorUid;
@@ -35,6 +36,8 @@ public class ChatData {
     @Nullable
     private String replyMsgId = null;
     private boolean isDm;
+    // for polls
+    private HashMap<String, ChoiceData> choices;
 
     @Override
     public boolean equals(Object obj) {
@@ -182,5 +185,13 @@ public class ChatData {
 
     public void setIsDm(boolean dm) {
         isDm = dm;
+    }
+
+    public HashMap<String, ChoiceData> getChoices() {
+        return choices;
+    }
+
+    public void setChoices(HashMap<String, ChoiceData> choices) {
+        this.choices = choices;
     }
 }
