@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:padding="8dp"
+    tools:context="in.lubble.app.chat.NewPollActiv">
+
+    <ImageView
+        android:id="@+id/iv_poll_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:tint="@color/colorAccent"
+        app:srcCompat="@drawable/ic_close_black_24dp" />
+
+    <Button
+        android:id="@+id/btn_send_poll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="send"
+        android:theme="@style/AccentButton" />
+
+    <ImageView
+        android:id="@+id/iv_poll_dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_below="@id/iv_poll_close"
+        android:layout_margin="8dp"
+        app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
+
+    <EditText
+        android:id="@+id/et_ask_question"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/iv_poll_dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_toRightOf="@id/iv_poll_dp"
+        android:background="@null"
+        android:gravity="left|start"
+        android:hint="Ask a question..."
+        android:maxLines="5"
+        android:padding="8dp" />
+
+    <RelativeLayout
+        android:id="@+id/container_poll_choices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/et_ask_question"
+        android:layout_alignLeft="@id/et_ask_question"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="8dp"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/half_rounded_rectangle_hollow_top"
+        android:padding="8dp">
+
+        <EditText
+            android:id="@+id/et_poll_choice_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@id/iv_poll_add"
+            android:background="@drawable/rect_rounded_border"
+            android:hint="Choice 1"
+            android:maxEms="25"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/et_poll_choice_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/et_poll_choice_1"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@id/iv_poll_add"
+            android:background="@drawable/rect_rounded_border"
+            android:hint="Choice 2"
+            android:maxEms="25"
+            android:padding="8dp" />
+
+        <EditText
+            android:id="@+id/et_poll_choice_3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/et_poll_choice_2"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@id/iv_poll_add"
+            android:background="@drawable/rect_rounded_border"
+            android:hint="Choice 3"
+            android:maxEms="25"
+            android:padding="8dp"
+            android:visibility="gone" />
+
+        <EditText
+            android:id="@+id/et_poll_choice_4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/et_poll_choice_3"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@id/iv_poll_add"
+            android:background="@drawable/rect_rounded_border"
+            android:hint="Choice 4"
+            android:maxEms="25"
+            android:padding="8dp"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/iv_poll_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/et_poll_choice_2"
+            android:layout_alignParentRight="true"
+            android:padding="8dp"
+            android:tint="@color/colorAccent"
+            app:srcCompat="@drawable/ic_add_black_24dp" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/container_poll_expiry"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/container_poll_choices"
+        android:layout_alignLeft="@id/container_poll_choices"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/half_rounded_rectangle_hollow_bottom">
+
+        <TextView
+            android:id="@+id/tv_poll_expiry_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Poll expires after" />
+
+        <TextView
+            android:id="@+id/tv_poll_expiry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_poll_expiry_hint"
+            android:layout_marginLeft="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="1 day"
+            android:textColor="@color/colorAccent"
+            android:textSize="20sp" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

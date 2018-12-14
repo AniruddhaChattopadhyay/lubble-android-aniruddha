@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import com.google.firebase.auth.FirebaseAuth;
+import in.lubble.app.chat.NewPollActiv;
 
 public class DebugActivity extends BaseActivity {
 
@@ -19,7 +20,7 @@ public class DebugActivity extends BaseActivity {
     }
 
     public void iAmTouched(View view) {
-
+        NewPollActiv.open(this);
     }
 
     private void sendInvite(Uri mInvitationUrl) {
