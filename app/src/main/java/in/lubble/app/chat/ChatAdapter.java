@@ -44,6 +44,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.models.ChoiceData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -249,6 +250,34 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
+
+        if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
+            sentChatViewHolder.pollContainer.setVisibility(View.VISIBLE);
+            ((TextView) sentChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques)).setText(chatData.getPollQues());
+            sentChatViewHolder.pollContainer.findViewById(R.id.container_poll_btns).setVisibility(View.GONE);
+            final LinearLayout resultsView = sentChatViewHolder.pollContainer.findViewById(R.id.container_poll_results);
+            resultsView.setVisibility(View.VISIBLE);
+
+            final ArrayList<ChoiceData> choiceList = chatData.getChoiceList();
+            int j = 1;
+            for (ChoiceData choiceData : choiceList) {
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                final View choiceContainer = inflater.inflate(R.layout.layout_poll_choice, null);
+                int percent = 20 * j;
+                j++;
+                ((EmojiTextView) choiceContainer.findViewById(R.id.tv_choice_text)).setText(choiceData.getTitle());
+                ((TextView) choiceContainer.findViewById(R.id.tv_choice_percent)).setText(percent + "%");
+                final View choiceBackground = choiceContainer.findViewById(R.id.iv_choice_background);
+                final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) choiceBackground.getLayoutParams();
+                layoutParams.weight = percent;
+                choiceBackground.setLayoutParams(layoutParams);
+
+                resultsView.addView(choiceContainer);
+            }
+
+        } else {
+            sentChatViewHolder.pollContainer.setVisibility(View.GONE);
+        }
     }
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -332,6 +361,30 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
         showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
+
+        if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
+            recvdChatViewHolder.pollContainer.setVisibility(View.VISIBLE);
+            ((TextView) recvdChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques)).setText(chatData.getPollQues());
+            recvdChatViewHolder.pollContainer.findViewById(R.id.container_poll_results).setVisibility(View.GONE);
+            final LinearLayout buttonsContainer = recvdChatViewHolder.pollContainer.findViewById(R.id.container_poll_btns);
+            buttonsContainer.setVisibility(View.VISIBLE);
+
+            final ArrayList<ChoiceData> choiceList = chatData.getChoiceList();
+            for (ChoiceData choiceData : choiceList) {
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                final View btnContainer = inflater.inflate(R.layout.layout_poll_choice_btn, null);
+                final EmojiTextView choiceBtnTv = btnContainer.findViewById(R.id.tv_poll_btn);
+                choiceBtnTv.setText(choiceData.getTitle());
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                params.setMargins(0, dpToPx(4), 0, 0);
+                choiceBtnTv.setLayoutParams(params);
+                buttonsContainer.addView(btnContainer);
+            }
+
+        } else {
+            recvdChatViewHolder.pollContainer.setVisibility(View.GONE);
+        }
+
     }
 
     private void handleYoutube(RecyclerView.ViewHolder baseViewHolder, final String message, final int position) {
@@ -777,6 +830,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private RelativeLayout youtubeContainer;
         private TextView youtubeTitleTv;
         private ImageView downloadIv;
+        private LinearLayout pollContainer;
 
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
@@ -806,6 +860,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
             youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
             downloadIv = itemView.findViewById(R.id.iv_download);
+            pollContainer = itemView.findViewById(R.id.container_polls);
 
             lubbAnyHintTv.setSelected(true);
             lubbAnyHintTv.setHorizontallyScrolling(true);
@@ -956,6 +1011,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView youtubePlayIv;
         private RelativeLayout youtubeContainer;
         private TextView youtubeTitleTv;
+        private LinearLayout pollContainer;
 
         SentChatViewHolder(final View itemView) {
             super(itemView);
@@ -980,6 +1036,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
             youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
             youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
+            pollContainer = itemView.findViewById(R.id.container_polls);
 
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);

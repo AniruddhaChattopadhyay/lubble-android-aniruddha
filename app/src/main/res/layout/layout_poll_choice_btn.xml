@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.emoji.widget.EmojiTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="4dp"
+    android:background="@drawable/rect_rounded_border_blue"
+    android:gravity="center"
+    android:padding="12dp"
+    android:id="@+id/tv_poll_btn"
+    android:textColor="@color/colorAccent"
+    tools:text="CHOICE BTN" />

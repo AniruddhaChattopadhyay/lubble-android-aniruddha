@@ -30,7 +30,8 @@
                 <RelativeLayout
                     android:id="@+id/relativelayout_youtube"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    tools:visibility="gone">
 
                     <ProgressBar
                         android:id="@+id/progressbar_youtube"
@@ -42,9 +43,9 @@
                         android:id="@+id/youtube_thumbnail_view"
                         android:layout_width="match_parent"
                         android:layout_height="160dp"
-                        android:scaleType="center"
                         android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_marginBottom="4dp"
+                        android:scaleType="center" />
 
                     <TextView
                         android:id="@+id/tv_yt_title"
@@ -54,18 +55,18 @@
                         android:background="@drawable/gradient_black_trans"
                         android:maxLines="1"
                         android:padding="4dp"
-                        tools:text="This is the title video"
-                        android:textColor="@color/white" />
+                        android:textColor="@color/white"
+                        tools:text="This is the title video" />
 
                     <ImageView
                         android:id="@+id/iv_youtube_play"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:visibility="gone"
-                        tools:visibility="visible"
-                        android:background="@drawable/circle_white_trans"
                         android:layout_centerInParent="true"
-                        app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp" />
+                        android:background="@drawable/circle_white_trans"
+                        android:visibility="gone"
+                        app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp"
+                        tools:visibility="visible" />
 
                 </RelativeLayout>
 
@@ -78,7 +79,7 @@
                     android:orientation="vertical"
                     android:padding="8dp"
                     android:visibility="gone"
-                    tools:visibility="visible">
+                    tools:visibility="gone">
 
                     <TextView
                         android:id="@+id/tv_link_title"
@@ -109,6 +110,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
+
+                        <include layout="@layout/layout_poll" />
 
                         <FrameLayout
                             android:id="@+id/img_container"

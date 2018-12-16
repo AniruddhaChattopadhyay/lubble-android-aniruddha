@@ -3,6 +3,7 @@ package in.lubble.app.models;
 import androidx.annotation.Nullable;
 import com.google.firebase.database.Exclude;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -37,7 +38,8 @@ public class ChatData {
     private String replyMsgId = null;
     private boolean isDm;
     // for polls
-    private HashMap<String, ChoiceData> choices;
+    private ArrayList<ChoiceData> choiceList;
+    private String pollQues = "";
 
     @Override
     public boolean equals(Object obj) {
@@ -187,11 +189,19 @@ public class ChatData {
         isDm = dm;
     }
 
-    public HashMap<String, ChoiceData> getChoices() {
-        return choices;
+    public ArrayList<ChoiceData> getChoiceList() {
+        return choiceList;
     }
 
-    public void setChoices(HashMap<String, ChoiceData> choices) {
-        this.choices = choices;
+    public void setChoiceList(ArrayList<ChoiceData> choiceList) {
+        this.choiceList = choiceList;
+    }
+
+    public String getPollQues() {
+        return pollQues;
+    }
+
+    public void setPollQues(String pollQues) {
+        this.pollQues = pollQues;
     }
 }

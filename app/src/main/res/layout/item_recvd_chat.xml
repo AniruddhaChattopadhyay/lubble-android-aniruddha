@@ -45,6 +45,8 @@
                     android:layout_height="wrap_content"
                     tools:text="@tools:sample/full_names" />
 
+                <include layout="@layout/layout_poll" />
+
                 <RelativeLayout
                     android:id="@+id/relativelayout_youtube"
                     android:layout_width="match_parent"

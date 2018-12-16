@@ -17,7 +17,7 @@ import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.MissingFormatArgumentException;
 
 import static android.widget.RelativeLayout.ALIGN_BOTTOM;
@@ -112,11 +112,12 @@ public class NewPollActiv extends AppCompatActivity {
                     final ChatData chatData = new ChatData();
                     chatData.setAuthorUid(FirebaseAuth.getInstance().getUid());
                     chatData.setIsDm(false);
-                    chatData.setMessage(askQuesEt.getText().toString());
+                    chatData.setMessage("");
+                    chatData.setPollQues(askQuesEt.getText().toString());
                     chatData.setCreatedTimestamp(System.currentTimeMillis());
                     chatData.setServerTimestamp(ServerValue.TIMESTAMP);
                     chatData.setType(POLL);
-                    chatData.setChoices(getChoices());
+                    chatData.setChoiceList(getChoices());
 
                     getMessagesRef().child(groupId).push().setValue(chatData);
                     finish();
@@ -126,19 +127,25 @@ public class NewPollActiv extends AppCompatActivity {
 
     }
 
-    private HashMap<String, ChoiceData> getChoices() {
-        final HashMap<String, ChoiceData> map = new HashMap<>();
-        final ChoiceData choiceData = new ChoiceData();
-        choiceData.setCount(0);
-        map.put(choice1Et.getText().toString(), choiceData);
-        map.put(choice2Et.getText().toString(), choiceData);
+    private ArrayList<ChoiceData> getChoices() {
+        final ArrayList<ChoiceData> list = new ArrayList<>();
+        ChoiceData choiceData = new ChoiceData();
+        choiceData.setTitle(choice1Et.getText().toString());
+        list.add(choiceData);
+        choiceData = new ChoiceData();
+        choiceData.setTitle(choice2Et.getText().toString());
+        list.add(choiceData);
         if (!TextUtils.isEmpty(choice3Et.getText())) {
-            map.put(choice3Et.getText().toString(), choiceData);
+            choiceData = new ChoiceData();
+            choiceData.setTitle(choice3Et.getText().toString());
+            list.add(choiceData);
         }
         if (!TextUtils.isEmpty(choice4Et.getText())) {
-            map.put(choice4Et.getText().toString(), choiceData);
+            choiceData = new ChoiceData();
+            choiceData.setTitle(choice4Et.getText().toString());
+            list.add(choiceData);
         }
-        return map;
+        return list;
     }
 
     private void openDatePicker() {

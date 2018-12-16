@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/tv_choice_text"
+        android:layout_alignBottom="@id/tv_choice_text"
+        android:weightSum="100">
+
+        <ImageView
+            android:id="@+id/iv_choice_background"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="40"
+            app:srcCompat="@drawable/rounded_rect_gray" />
+
+    </LinearLayout>
+
+    <androidx.emoji.widget.EmojiTextView
+        android:id="@+id/tv_choice_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:layout_marginBottom="4dp"
+        android:textColor="@color/black"
+        tools:text="Choice 1" />
+
+    <TextView
+        android:id="@+id/tv_choice_percent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/tv_choice_text"
+        android:layout_alignBottom="@id/tv_choice_text"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="8dp"
+        android:gravity="center"
+        android:textColor="@color/black"
+        tools:text="40%" />
+
+</RelativeLayout>
