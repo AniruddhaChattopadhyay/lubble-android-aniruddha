@@ -7,10 +7,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
+import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Handler;
@@ -254,33 +251,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
             sentChatViewHolder.pollContainer.setVisibility(View.VISIBLE);
             ((TextView) sentChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques)).setText(chatData.getPollQues());
-            sentChatViewHolder.pollContainer.findViewById(R.id.container_poll_btns).setVisibility(View.GONE);
-            final LinearLayout resultsView = sentChatViewHolder.pollContainer.findViewById(R.id.container_poll_results);
-            resultsView.setVisibility(View.VISIBLE);
 
-            final ArrayList<ChoiceData> choiceList = chatData.getChoiceList();
-            int j = 1;
-            for (ChoiceData choiceData : choiceList) {
-                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                final View choiceContainer = inflater.inflate(R.layout.layout_poll_choice, null);
-                int percent = 20 * j;
-                j++;
-                ((EmojiTextView) choiceContainer.findViewById(R.id.tv_choice_text)).setText(choiceData.getTitle());
-                ((TextView) choiceContainer.findViewById(R.id.tv_choice_percent)).setText(percent + "%");
-                final View choiceBackground = choiceContainer.findViewById(R.id.iv_choice_background);
-                final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) choiceBackground.getLayoutParams();
-                layoutParams.weight = percent;
-                choiceBackground.setLayoutParams(layoutParams);
-
-                resultsView.addView(choiceContainer);
-            }
+            showPollResults(sentChatViewHolder, chatData);
 
         } else {
             sentChatViewHolder.pollContainer.setVisibility(View.GONE);
         }
     }
 
-    private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, int position) {
+    private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
 
@@ -365,26 +344,125 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
             recvdChatViewHolder.pollContainer.setVisibility(View.VISIBLE);
             ((TextView) recvdChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques)).setText(chatData.getPollQues());
-            recvdChatViewHolder.pollContainer.findViewById(R.id.container_poll_results).setVisibility(View.GONE);
-            final LinearLayout buttonsContainer = recvdChatViewHolder.pollContainer.findViewById(R.id.container_poll_btns);
-            buttonsContainer.setVisibility(View.VISIBLE);
 
-            final ArrayList<ChoiceData> choiceList = chatData.getChoiceList();
-            for (ChoiceData choiceData : choiceList) {
-                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                final View btnContainer = inflater.inflate(R.layout.layout_poll_choice_btn, null);
-                final EmojiTextView choiceBtnTv = btnContainer.findViewById(R.id.tv_poll_btn);
-                choiceBtnTv.setText(choiceData.getTitle());
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                params.setMargins(0, dpToPx(4), 0, 0);
-                choiceBtnTv.setLayoutParams(params);
-                buttonsContainer.addView(btnContainer);
+            if (chatData.getPollReceipts().containsKey(FirebaseAuth.getInstance().getUid())) {
+                // this user has voted. Show results UI
+                showPollResults(recvdChatViewHolder, chatData);
+            } else {
+                showPollButtons(recvdChatViewHolder, chatData);
             }
-
         } else {
             recvdChatViewHolder.pollContainer.setVisibility(View.GONE);
         }
 
+    }
+
+    private void showPollButtons(final RecyclerView.ViewHolder baseViewHolder, final ChatData chatData) {
+        final LinearLayout pollContainer;
+        if (baseViewHolder instanceof RecvdChatViewHolder) {
+            pollContainer = ((RecvdChatViewHolder) baseViewHolder).pollContainer;
+        } else {
+            pollContainer = ((SentChatViewHolder) baseViewHolder).pollContainer;
+        }
+        pollContainer.findViewById(R.id.container_poll_results).setVisibility(View.GONE);
+        final LinearLayout buttonsContainer = pollContainer.findViewById(R.id.container_poll_btns);
+        buttonsContainer.setVisibility(View.VISIBLE);
+        if (buttonsContainer.getChildCount() > 0) {
+            buttonsContainer.removeAllViews();
+        }
+        final ArrayList<ChoiceData> choiceList = chatData.getChoiceList();
+        for (int i = 0; i < choiceList.size(); i++) {
+            ChoiceData choiceData = choiceList.get(i);
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View btnContainer = inflater.inflate(R.layout.layout_poll_choice_btn, null);
+            final EmojiTextView choiceBtnTv = btnContainer.findViewById(R.id.tv_poll_btn);
+            choiceBtnTv.setText(choiceData.getTitle());
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(0, dpToPx(4), 0, 0);
+            choiceBtnTv.setLayoutParams(params);
+            buttonsContainer.addView(btnContainer);
+            choiceBtnTv.setTag(i);
+
+            choiceBtnTv.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    if (groupId != null) {
+                        DatabaseReference pollRef = getMessagesRef().child(groupId).child(chatData.getId())/*.child("choiceList").child(String.valueOf(v.getTag()))*/;
+                        pollRef.runTransaction(new Transaction.Handler() {
+                            @Override
+                            public Transaction.Result doTransaction(MutableData mutableData) {
+                                ChatData chatData = mutableData.getValue(ChatData.class);
+                                if (chatData == null) {
+                                    return Transaction.success(mutableData);
+                                }
+                                final ChoiceData choiceData1 = chatData.getChoiceList().get((Integer) v.getTag());
+                                choiceData1.setCount(choiceData1.getCount() + 1);
+                                chatData.getPollReceipts().put(FirebaseAuth.getInstance().getUid(), (Integer) v.getTag());
+                                // Set value and report transaction success
+                                mutableData.setValue(chatData);
+                                return Transaction.success(mutableData);
+                            }
+
+                            @Override
+                            public void onComplete(DatabaseError databaseError, boolean isCompleted, DataSnapshot dataSnapshot) {
+                                // Transaction completed
+                                Log.d(TAG, "postTransaction:onComplete:" + databaseError);
+                                if (isCompleted) {
+                                    showPollResults(baseViewHolder, chatData);
+                                } else {
+                                    if (databaseError != null) {
+                                        Crashlytics.logException(new Exception("poll button click error code: " + databaseError.getCode()));
+                                        Toast.makeText(context, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(context, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    private void showPollResults(RecyclerView.ViewHolder baseViewHolder, ChatData chatData) {
+        final LinearLayout pollContainer;
+        if (baseViewHolder instanceof RecvdChatViewHolder) {
+            pollContainer = ((RecvdChatViewHolder) baseViewHolder).pollContainer;
+        } else {
+            pollContainer = ((SentChatViewHolder) baseViewHolder).pollContainer;
+        }
+        final LinearLayout resultsView = pollContainer.findViewById(R.id.container_poll_results);
+        resultsView.setVisibility(View.VISIBLE);
+        pollContainer.findViewById(R.id.container_poll_btns).setVisibility(View.GONE);
+        if (resultsView.getChildCount() > 0) {
+            resultsView.removeAllViews();
+        }
+        @Nullable Integer votedIndex = chatData.getPollReceipts().get(FirebaseAuth.getInstance().getUid());
+        // add choices with bar graph
+        ArrayList<ChoiceData> choiceList = chatData.getChoiceList();
+        for (int i = 0; i < choiceList.size(); i++) {
+            ChoiceData choiceData = choiceList.get(i);
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final View choiceContainer = inflater.inflate(R.layout.layout_poll_choice, null);
+            final EmojiTextView choiceTv = choiceContainer.findViewById(R.id.tv_choice_text);
+            choiceTv.setText(choiceData.getTitle());
+            int percent = chatData.getPollReceipts().size() == 0 ? 0 : (choiceData.getCount() / chatData.getPollReceipts().size()) * 100;
+            final TextView percentTv = choiceContainer.findViewById(R.id.tv_choice_percent);
+            percentTv.setText(percent + "%");
+            final View choiceBackground = choiceContainer.findViewById(R.id.iv_choice_background);
+            final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) choiceBackground.getLayoutParams();
+            layoutParams.weight = percent;
+            choiceBackground.setLayoutParams(layoutParams);
+
+            if (votedIndex != null && votedIndex == i) {
+                choiceTv.setTypeface(choiceTv.getTypeface(), Typeface.BOLD);
+                percentTv.setTypeface(percentTv.getTypeface(), Typeface.BOLD);
+                ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.trans_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+            }
+
+            resultsView.addView(choiceContainer);
+        }
     }
 
     private void handleYoutube(RecyclerView.ViewHolder baseViewHolder, final String message, final int position) {

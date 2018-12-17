@@ -4,6 +4,7 @@
     android:id="@+id/container_polls"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minWidth="240dp"
     android:layout_margin="8dp"
     android:orientation="vertical">
 

@@ -40,6 +40,7 @@ public class ChatData {
     // for polls
     private ArrayList<ChoiceData> choiceList;
     private String pollQues = "";
+    private HashMap<String, Integer> pollReceipts = new HashMap<>();
 
     @Override
     public boolean equals(Object obj) {
@@ -203,5 +204,13 @@ public class ChatData {
 
     public void setPollQues(String pollQues) {
         this.pollQues = pollQues;
+    }
+
+    public HashMap<String, Integer> getPollReceipts() {
+        return pollReceipts;
+    }
+
+    public void setPollReceipts(HashMap<String, Integer> pollReceipts) {
+        this.pollReceipts = pollReceipts;
     }
 }

@@ -45,7 +45,11 @@
                     android:layout_height="wrap_content"
                     tools:text="@tools:sample/full_names" />
 
-                <include layout="@layout/layout_poll" />
+                <include
+                    layout="@layout/layout_poll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minWidth="240dp" />
 
                 <RelativeLayout
                     android:id="@+id/relativelayout_youtube"
@@ -163,9 +167,9 @@
                                 android:layout_width="64dp"
                                 android:layout_height="64dp"
                                 android:layout_gravity="center"
-                                android:visibility="gone"
                                 android:background="@drawable/circle_white_trans"
                                 android:padding="8dp"
+                                android:visibility="gone"
                                 app:srcCompat="@drawable/ic_file_download_black_24dp" />
 
                         </FrameLayout>
