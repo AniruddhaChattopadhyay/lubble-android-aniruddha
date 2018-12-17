@@ -1,7 +1,10 @@
 package in.lubble.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
+import com.google.firebase.auth.FirebaseAuth;
 
 /**
  * Created by ishaan on 17/2/18.
@@ -78,7 +81,7 @@ public class LubbleSharedPrefs {
     }
 
     public String getLubbleId() {
-        /*if (!TextUtils.isEmpty(preferences.getString(LUBBLE_ID, ""))) {
+        if (!TextUtils.isEmpty(preferences.getString(LUBBLE_ID, ""))) {
             return preferences.getString(LUBBLE_ID, "");
         } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             // user is signed in but has no lubble ID
@@ -90,8 +93,7 @@ public class LubbleSharedPrefs {
         } else {
             // user is logged out, Lubble ID does not exist at this time
             return "";
-        }*/
-        return preferences.getString(LUBBLE_ID, "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "DEV" : "saraswati_vihar");
+        }
     }
 
     public boolean setLubbleId(String lubbleId) {
