@@ -629,7 +629,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                         RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (isAdded() && isVisible()) {
+                                if (isAdded()) {
                                     final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                                     joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
                                     declineTv.setVisibility(View.VISIBLE);
@@ -718,7 +718,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildAdded: ");
                 final ChatData chatData = dataSnapshot.getValue(ChatData.class);
-                if (chatData != null && isAdded() && isVisible()) {
+                if (chatData != null && isAdded()) {
                     sendBtnProgressBtn.setVisibility(View.GONE);
                     Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
                     chatData.setId(dataSnapshot.getKey());
@@ -744,7 +744,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                if (isAdded() && isVisible()) {
+                if (isAdded()) {
                     Log.d(TAG, "onChildChanged: ");
                     final ChatData chatData = dataSnapshot.getValue(ChatData.class);
                     if (chatData != null) {
@@ -766,7 +766,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                if (isAdded() && isVisible()) {
+                if (isAdded()) {
                     Crashlytics.logException(databaseError.toException());
                 }
             }
@@ -782,6 +782,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
 
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() == 0) {
+                    isLoadingMoreChats = false;
+                    isLastPage = true;
+                    paginationProgressBar.setVisibility(View.GONE);
+                    return;
+                }
                 for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
                     final ChatData chatData = childDataSnapshot.getValue(ChatData.class);
                     if (chatData != null) {
