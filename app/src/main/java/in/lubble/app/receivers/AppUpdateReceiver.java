@@ -4,12 +4,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.utils.ClevertapUtils;
 import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.NotifUtils;
+
+import java.util.HashMap;
 
 public class AppUpdateReceiver extends BroadcastReceiver {
 
@@ -23,7 +33,7 @@ public class AppUpdateReceiver extends BroadcastReceiver {
         Analytics.triggerEvent(AnalyticsEvents.APP_UPDATED, bundle, context);
         FileUtils.deleteCache(context);
 
-        /*if (TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId()) && FirebaseAuth.getInstance().getUid() != null) {
+        if (TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId()) && FirebaseAuth.getInstance().getUid() != null) {
             RealtimeDbHelper.getThisUserRef().child("lubbles").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -40,7 +50,7 @@ public class AppUpdateReceiver extends BroadcastReceiver {
                     Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
                 }
             });
-        }*/
+        }
 
     }
 }
