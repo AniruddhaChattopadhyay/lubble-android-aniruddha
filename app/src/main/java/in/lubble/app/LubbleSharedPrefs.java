@@ -1,10 +1,15 @@
 package in.lubble.app;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import in.lubble.app.firebase.RealtimeDbHelper;
+
+import java.util.HashMap;
 
 /**
  * Created by ishaan on 17/2/18.
@@ -81,24 +86,56 @@ public class LubbleSharedPrefs {
     }
 
     public String getLubbleId() {
-        if (!TextUtils.isEmpty(preferences.getString(LUBBLE_ID, ""))) {
+        /*if (!TextUtils.isEmpty(preferences.getString(LUBBLE_ID, ""))) {
             return preferences.getString(LUBBLE_ID, "");
         } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             // user is signed in but has no lubble ID
             // start Main Activity to fetch & update lubble ID
-            final Intent intent = new Intent(LubbleApp.getAppContext(), MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            LubbleApp.getAppContext().startActivity(intent);
+            try {
+                final Intent intent = new Intent(LubbleApp.getAppContext(), MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                LubbleApp.getAppContext().startActivity(intent);
+            } catch (Exception e) {
+                return "";
+            }
             return "";
         } else {
             // user is logged out, Lubble ID does not exist at this time
             return "";
+        }*/
+        final String lubbleId = preferences.getString(LUBBLE_ID, "");
+        if (lubbleId == null || lubbleId.isEmpty()) {
+            fetchAndUpdateLubbleId();
+            return "saraswati_vihar";
+        } else {
+            return lubbleId;
         }
     }
 
     public boolean setLubbleId(String lubbleId) {
 
         return preferences.edit().putString(LUBBLE_ID, lubbleId).commit();
+    }
+
+    private void fetchAndUpdateLubbleId() {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            RealtimeDbHelper.getThisUserRef().child("lubbles").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                    if (map != null && !map.isEmpty()) {
+                        setLubbleId((String) map.keySet().toArray()[0]);
+                    } else {
+                        Crashlytics.logException(new IllegalAccessException("User has NO lubble ID"));
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
+                }
+            });
+        }
     }
 
     public String getDefaultGroupId() {
