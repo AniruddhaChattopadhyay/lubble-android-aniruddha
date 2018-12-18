@@ -2,6 +2,7 @@ package in.lubble.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -104,9 +105,10 @@ public class LubbleSharedPrefs {
             return "";
         }*/
         final String lubbleId = preferences.getString(LUBBLE_ID, "");
+        Log.d("yelee", "getLubbleId: yelee: " + lubbleId);
         if (lubbleId == null || lubbleId.isEmpty()) {
             fetchAndUpdateLubbleId();
-            return "saraswati_vihar";
+            return "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "DEV" : "saraswati_vihar";
         } else {
             return lubbleId;
         }
