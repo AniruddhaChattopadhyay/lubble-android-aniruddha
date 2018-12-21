@@ -14,7 +14,7 @@ import in.lubble.app.utils.NotifUtils;
 public class AppUpdateReceiver extends BroadcastReceiver {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         NotifUtils.showAllPendingChatNotifs(context);
         ClevertapUtils.setUser(context);
         final Bundle bundle = new Bundle();

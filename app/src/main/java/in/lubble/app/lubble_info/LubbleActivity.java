@@ -48,14 +48,27 @@ public class LubbleActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        setTitle("Saraswati Vihar");
         lubbleIv = findViewById(R.id.iv_lubble_image);
         progressBar = findViewById(R.id.progressBar_lubbleInfo);
         lubbleInfoTv = findViewById(R.id.tv_lubble_info);
         noticeBoardTv = findViewById(R.id.tv_notice_board);
         eventsTv = findViewById(R.id.tv_events);
 
-        lubbleInfoTv.setText(R.string.about_svr);
+        setTitle("");
+
+        RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                setTitle(dataSnapshot.child("title").getValue(String.class));
+                lubbleInfoTv.setText(dataSnapshot.child("info").getValue(String.class));
+                LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         RealtimeDbHelper.getLubbleGroupsRef().child(LubbleSharedPrefs.getInstance().getDefaultGroupId())
                 .addListenerForSingleValueEvent(new ValueEventListener() {

@@ -876,6 +876,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     void writePermGranted() {
         deleteCache(context);
         Analytics.triggerEvent(AnalyticsEvents.WRITE_PERM_GRANTED, context);
+        notifyDataSetChanged();
     }
 
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
