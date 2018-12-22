@@ -450,16 +450,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
             int percent = chatData.getPollReceipts().size() == 0 ? 0 : (choiceData.getCount() / chatData.getPollReceipts().size()) * 100;
             final TextView percentTv = choiceContainer.findViewById(R.id.tv_choice_percent);
             percentTv.setText(percent + "%");
-            final View choiceBackground = choiceContainer.findViewById(R.id.iv_choice_background);
-            final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) choiceBackground.getLayoutParams();
-            layoutParams.weight = percent;
-            choiceBackground.setLayoutParams(layoutParams);
-
-            if (votedIndex != null && votedIndex == i) {
-                choiceTv.setTypeface(choiceTv.getTypeface(), Typeface.BOLD);
-                percentTv.setTypeface(percentTv.getTypeface(), Typeface.BOLD);
-                ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.trans_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+            if (percent > 0) {
+                final View choiceBackground = choiceContainer.findViewById(R.id.iv_choice_background);
+                final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) choiceBackground.getLayoutParams();
+                layoutParams.weight = percent;
+                choiceBackground.setLayoutParams(layoutParams);
+                if (votedIndex != null && votedIndex == i) {
+                    // tint the choice voted by user to differentiate it from rest of the choices
+                    choiceTv.setTypeface(choiceTv.getTypeface(), Typeface.BOLD);
+                    percentTv.setTypeface(percentTv.getTypeface(), Typeface.BOLD);
+                    ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.trans_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+                }
+            } else {
+                // percent is ZERO
+                choiceTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_rect_trans_border));
+                choiceContainer.findViewById(R.id.iv_choice_background).setVisibility(View.GONE);
             }
+
 
             resultsView.addView(choiceContainer);
         }
