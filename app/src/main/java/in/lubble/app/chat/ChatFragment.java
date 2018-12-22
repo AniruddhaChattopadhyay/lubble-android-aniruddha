@@ -63,7 +63,7 @@ import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
 @RuntimePermissions
-public class ChatFragment extends Fragment implements View.OnClickListener {
+public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener {
 
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
@@ -943,7 +943,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                     break;
                 }
                 ChatFragmentPermissionsDispatcher
-                        .startPhotoPickerWithPermissionCheck(ChatFragment.this, REQUEST_CODE_IMG);
+                        .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
                 break;
             case R.id.btn_join:
                 getCreateOrJoinGroupRef().child(groupId).setValue(true);
@@ -969,15 +969,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
     }
 
     @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-    public void startPhotoPicker(int REQUEST_CODE) {
-        try {
-            File cameraPic = createImageFile(getContext());
-            currentPhotoPath = cameraPic.getAbsolutePath();
-            Intent pickImageIntent = getPickImageIntent(getContext(), cameraPic);
-            startActivityForResult(pickImageIntent, REQUEST_CODE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void showAttachmentBottomSheet() {
+        AttachmentListDialogFrag.newInstance().show(getFragmentManager(), null);
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -1004,6 +997,29 @@ public class ChatFragment extends Fragment implements View.OnClickListener {
                 chatId = dmId;
             }
             AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+        }
+    }
+
+    @Override
+    public void onAttachmentClicked(int position) {
+        switch (position) {
+            case 0:
+                startPhotoPicker();
+                break;
+            case 1:
+                NewPollActiv.open(getContext(), groupId);
+                break;
+        }
+    }
+
+    private void startPhotoPicker() {
+        try {
+            File cameraPic = createImageFile(getContext());
+            currentPhotoPath = cameraPic.getAbsolutePath();
+            Intent pickImageIntent = getPickImageIntent(getContext(), cameraPic);
+            startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

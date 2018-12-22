@@ -9,4 +9,6 @@
     <dimen name="pager_margin">-30dp</dimen>
     <dimen name="appbar_padding_top">8dp</dimen>
     <dimen name="popup_width">500dp</dimen>
+    <dimen name="list_item_spacing">16dp</dimen>
+    <dimen name="list_item_spacing_half">8dp</dimen>
 </resources>
