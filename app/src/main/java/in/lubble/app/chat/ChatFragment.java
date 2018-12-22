@@ -970,7 +970,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
     public void showAttachmentBottomSheet() {
-        AttachmentListDialogFrag.newInstance().show(getFragmentManager(), null);
+        AttachmentListDialogFrag.newInstance().show(getChildFragmentManager(), null);
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)

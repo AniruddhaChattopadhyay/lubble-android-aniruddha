@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -16,7 +15,7 @@ import in.lubble.app.R;
 
 import java.util.ArrayList;
 
-public class AttachmentListDialogFrag extends BottomSheetDialogFragment implements AttachmentClickListener {
+public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
 
     private static final int ITEM_COUNT = 3;
     private AttachmentClickListener mListener;
@@ -59,24 +58,13 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment implemen
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        final Fragment parent = getParentFragment();
-        if (parent != null) {
-            mListener = (AttachmentClickListener) parent;
-        } else {
-            mListener = (AttachmentClickListener) context;
-        }
-        mListener = this;
+        mListener = (AttachmentClickListener) getParentFragment();
     }
 
     @Override
     public void onDetach() {
         mListener = null;
         super.onDetach();
-    }
-
-    @Override
-    public void onAttachmentClicked(int position) {
-
     }
 
     private class ViewHolder extends RecyclerView.ViewHolder {
@@ -88,7 +76,7 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment implemen
             super(inflater.inflate(R.layout.item_attachment, parent, false));
             attachmentIconIv = itemView.findViewById(R.id.iv_attachment_icon);
             attachmentTextTv = itemView.findViewById(R.id.tv_attachment_text);
-            parent.setOnClickListener(new View.OnClickListener() {
+            itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (mListener != null) {
