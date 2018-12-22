@@ -75,7 +75,13 @@ public class FileUtils {
         return list;
     }
 
-    private static Intent getTakePhotoIntent(Context context, File cameraPic) {
+    public static Intent getGalleryIntent(Context context) {
+        Intent takePhotoIntent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        return takePhotoIntent;
+    }
+
+    public static Intent getTakePhotoIntent(Context context, File cameraPic) {
         Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Continue only if the File was successfully created
         if (cameraPic != null) {

@@ -1004,19 +1004,33 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public void onAttachmentClicked(int position) {
         switch (position) {
             case 0:
-                startPhotoPicker();
+                startCameraIntent();
                 break;
             case 1:
                 NewPollActiv.open(getContext(), groupId);
                 break;
+            case 2:
+                startGalleryPicker();
+                break;
         }
     }
 
-    private void startPhotoPicker() {
+    private void startCameraIntent() {
         try {
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
-            Intent pickImageIntent = getPickImageIntent(getContext(), cameraPic);
+            Intent pickImageIntent = getTakePhotoIntent(getContext(), cameraPic);
+            startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void startGalleryPicker() {
+        try {
+            File cameraPic = createImageFile(getContext());
+            currentPhotoPath = cameraPic.getAbsolutePath();
+            Intent pickImageIntent = getGalleryIntent(getContext());
             startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
         } catch (IOException e) {
             e.printStackTrace();

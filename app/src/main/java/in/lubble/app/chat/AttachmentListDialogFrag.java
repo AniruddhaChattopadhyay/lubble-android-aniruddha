@@ -45,12 +45,16 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
     private ArrayList<AttachmentData> getAttachmentList() {
         final ArrayList<AttachmentData> list = new ArrayList<>();
         AttachmentData attachmentData = new AttachmentData();
-        attachmentData.setIcon(R.drawable.ic_landscape);
-        attachmentData.setText("Gallery");
+        attachmentData.setIcon(R.drawable.ic_camera);
+        attachmentData.setText("Camera");
         list.add(attachmentData);
         attachmentData = new AttachmentData();
         attachmentData.setIcon(R.drawable.ic_poll);
         attachmentData.setText("Poll");
+        list.add(attachmentData);
+        attachmentData = new AttachmentData();
+        attachmentData.setIcon(R.drawable.ic_landscape);
+        attachmentData.setText("Gallery");
         list.add(attachmentData);
         return list;
     }
