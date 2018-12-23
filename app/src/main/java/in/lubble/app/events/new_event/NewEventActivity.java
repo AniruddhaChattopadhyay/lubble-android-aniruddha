@@ -25,10 +25,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-import in.lubble.app.BaseActivity;
-import in.lubble.app.GlideApp;
+import in.lubble.app.*;
 import in.lubble.app.R;
-import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
@@ -42,8 +40,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static in.lubble.app.Constants.SVR_LATI;
-import static in.lubble.app.Constants.SVR_LONGI;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.EventData.GOING;
 import static in.lubble.app.utils.DateTimeUtils.APP_NORMAL_DATE_YEAR;
@@ -115,7 +111,7 @@ public class NewEventActivity extends BaseActivity {
 
         myCalendar = Calendar.getInstance();
 
-        defaultLatLng = new LatLng(SVR_LATI, SVR_LONGI);
+        defaultLatLng = new LatLng(LubbleSharedPrefs.getInstance().getCenterLati(), LubbleSharedPrefs.getInstance().getCenterLongi());
         loadMapAt(defaultLatLng);
 
         dateTil.setOnClickListener(getOnDateClickListener());

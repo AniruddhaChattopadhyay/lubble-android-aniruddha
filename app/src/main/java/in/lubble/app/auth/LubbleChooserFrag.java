@@ -126,6 +126,8 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
                 progressDialog.show();
 
                 LubbleSharedPrefs.getInstance().setLubbleId(chosenLubbleData.getLubbleFirebaseId());
+                LubbleSharedPrefs.getInstance().setCenterLati(chosenLubbleData.getCenterLati());
+                LubbleSharedPrefs.getInstance().setCenterLongi(chosenLubbleData.getCenterLongi());
 
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
