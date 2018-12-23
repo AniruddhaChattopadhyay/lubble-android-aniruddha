@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,6 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.events.new_event.NewEventActivity;
@@ -24,6 +27,7 @@ public class EventsFrag extends Fragment {
 
     private RecyclerView recyclerView;
     private FloatingActionButton fab;
+    private LinearLayout emptyEventContainer;
     private EventsAdapter adapter;
     private ChildEventListener childEventListener;
     private ProgressBar progressBar;
@@ -45,6 +49,7 @@ public class EventsFrag extends Fragment {
         progressBar = view.findViewById(R.id.progressBar_events);
         recyclerView = view.findViewById(R.id.rv_events);
         fab = view.findViewById(R.id.fab_new_event);
+        emptyEventContainer = view.findViewById(R.id.container_empty_events);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new EventsAdapter(getContext());
@@ -67,6 +72,8 @@ public class EventsFrag extends Fragment {
         super.onResume();
 
         progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.VISIBLE);
+        emptyEventContainer.setVisibility(View.GONE);
 
         childEventListener = getEventsRef().orderByChild("startTimestamp").addChildEventListener(new ChildEventListener() {
             @Override
@@ -98,6 +105,24 @@ public class EventsFrag extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+        getEventsRef().orderByChild("startTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null) {
+                    // zero events
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                    recyclerView.setVisibility(View.GONE);
+                    emptyEventContainer.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });

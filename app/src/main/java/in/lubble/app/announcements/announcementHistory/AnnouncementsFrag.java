@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
@@ -27,6 +28,7 @@ public class AnnouncementsFrag extends Fragment {
     private AnnouncementsAdapter announcementsAdapter;
     private ProgressBar progressBar;
     private RecyclerView recyclerView;
+    private LinearLayout emptyNoticesContainer;
 
     public static AnnouncementsFrag newInstance() {
         return new AnnouncementsFrag();
@@ -44,6 +46,7 @@ public class AnnouncementsFrag extends Fragment {
 
         progressBar = view.findViewById(R.id.progressBar_notices);
         recyclerView = view.findViewById(R.id.rv_announcements);
+        emptyNoticesContainer = view.findViewById(R.id.container_empty_notices);
         final FloatingActionButton fab = view.findViewById(R.id.fab_new_announcement);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         announcementsAdapter = new AnnouncementsAdapter();
@@ -74,10 +77,15 @@ public class AnnouncementsFrag extends Fragment {
             if (progressBar.getVisibility() == View.VISIBLE) {
                 progressBar.setVisibility(View.GONE);
             }
+            emptyNoticesContainer.setVisibility(View.GONE);
             announcementsAdapter.clear();
             for (DataSnapshot child : dataSnapshot.getChildren()) {
                 announcementsAdapter.addAnnouncement(child.getValue(AnnouncementData.class));
                 AppNotifUtils.deleteAppNotif(getContext(), child.getKey());
+            }
+            if (dataSnapshot.getValue() == null) {
+                // zero notices
+                emptyNoticesContainer.setVisibility(View.VISIBLE);
             }
         }
 
