@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
@@ -45,15 +46,18 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
     private ArrayList<AttachmentData> getAttachmentList() {
         final ArrayList<AttachmentData> list = new ArrayList<>();
         AttachmentData attachmentData = new AttachmentData();
-        attachmentData.setIcon(R.drawable.ic_camera);
+        attachmentData.setIcon(R.drawable.ic_camera_alt_white_24dp);
+        attachmentData.setColor(R.color.dk_green);
         attachmentData.setText("Camera");
         list.add(attachmentData);
         attachmentData = new AttachmentData();
         attachmentData.setIcon(R.drawable.ic_poll);
+        attachmentData.setColor(R.color.link_blue);
         attachmentData.setText("Poll");
         list.add(attachmentData);
         attachmentData = new AttachmentData();
-        attachmentData.setIcon(R.drawable.ic_landscape);
+        attachmentData.setIcon(R.drawable.ic_image_white_24dp);
+        attachmentData.setColor(R.color.orange);
         attachmentData.setText("Gallery");
         list.add(attachmentData);
         return list;
@@ -73,11 +77,13 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
 
     private class ViewHolder extends RecyclerView.ViewHolder {
 
+        final ImageView attachmentbgIv;
         final ImageView attachmentIconIv;
         final TextView attachmentTextTv;
 
         ViewHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.item_attachment, parent, false));
+            attachmentbgIv = itemView.findViewById(R.id.iv_attachment_bg);
             attachmentIconIv = itemView.findViewById(R.id.iv_attachment_icon);
             attachmentTextTv = itemView.findViewById(R.id.tv_attachment_text);
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -110,6 +116,7 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
         public void onBindViewHolder(ViewHolder holder, int position) {
             final AttachmentData attachmentData = attachmentList.get(position);
             holder.attachmentIconIv.setImageResource(attachmentData.getIcon());
+            holder.attachmentbgIv.setColorFilter(ContextCompat.getColor(getContext(), attachmentData.getColor()), android.graphics.PorterDuff.Mode.SRC_IN);
             holder.attachmentTextTv.setText(attachmentData.getText());
         }
 
