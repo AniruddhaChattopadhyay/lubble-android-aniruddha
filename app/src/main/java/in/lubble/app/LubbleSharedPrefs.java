@@ -36,6 +36,8 @@ public class LubbleSharedPrefs {
     private final String FULL_NAME = "FULL_NAME";
     private final String REFERRAL_CODE = "REFERRAL_CODE";
     private final String IS_EXPLORE_SHOWN = "IS_EXPLORE_SHOWN";
+    private final String CENTER_LATI = "CENTER_LATI";
+    private final String CENTER_LONGI = "CENTER_LONGI";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -235,6 +237,32 @@ public class LubbleSharedPrefs {
 
     public boolean setIsExploreShown(boolean isShown) {
         return preferences.edit().putBoolean(IS_EXPLORE_SHOWN, isShown).commit();
+    }
+
+
+    public double getCenterLati() {
+        return getDouble(preferences, CENTER_LATI, Constants.SVR_LATI);
+    }
+
+    public boolean setCenterLati(double lati) {
+        return putDouble(preferences.edit(), CENTER_LATI, lati).commit();
+    }
+
+
+    public double getCenterLongi() {
+        return getDouble(preferences, CENTER_LONGI, Constants.SVR_LONGI);
+    }
+
+    public boolean setCenterLongi(double longi) {
+        return putDouble(preferences.edit(), CENTER_LONGI, longi).commit();
+    }
+
+    SharedPreferences.Editor putDouble(final SharedPreferences.Editor edit, final String key, final double value) {
+        return edit.putLong(key, Double.doubleToRawLongBits(value));
+    }
+
+    double getDouble(final SharedPreferences prefs, final String key, final double defaultValue) {
+        return Double.longBitsToDouble(prefs.getLong(key, Double.doubleToLongBits(defaultValue)));
     }
 
 }

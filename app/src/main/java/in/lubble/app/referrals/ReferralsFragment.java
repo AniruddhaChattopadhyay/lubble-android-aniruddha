@@ -12,15 +12,20 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import io.branch.referral.Branch;
@@ -39,6 +44,7 @@ public class ReferralsFragment extends Fragment {
     private static final String TAG = "ReferralsFragment";
 
     private ProgressBar leaderboardProgressBar;
+    private ImageView referralHeaderIv;
     private LinearLayout fbContainer;
     private LinearLayout whatsappContainer;
     private LinearLayout moreContainer;
@@ -47,6 +53,7 @@ public class ReferralsFragment extends Fragment {
     private ReferralLeaderboardAdapter adapter;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
+    private ValueEventListener referralHdrImgListener;
 
     public ReferralsFragment() {
         // Required empty public constructor
@@ -68,6 +75,7 @@ public class ReferralsFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_referrals, container, false);
 
         leaderboardProgressBar = view.findViewById(R.id.progressbar_leaderboard);
+        referralHeaderIv = view.findViewById(R.id.iv_refer_header);
         fbContainer = view.findViewById(R.id.container_fb);
         whatsappContainer = view.findViewById(R.id.container_whatsapp);
         moreContainer = view.findViewById(R.id.container_more);
@@ -85,6 +93,26 @@ public class ReferralsFragment extends Fragment {
         initClickHandlers();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        referralHdrImgListener = RealtimeDbHelper.getLubbleRef().child("referralHdrImg").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                GlideApp.with(getContext())
+                        .load(dataSnapshot.getValue(String.class))
+                        .placeholder(R.drawable.referral_info_common)
+                        .error(R.drawable.referral_info_common)
+                        .into(referralHeaderIv);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
@@ -216,5 +244,11 @@ public class ReferralsFragment extends Fragment {
         });
     }
 
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (referralHdrImgListener != null) {
+            RealtimeDbHelper.getLubbleRef().child("referralHdrImg").removeEventListener(referralHdrImgListener);
+        }
+    }
 }
