@@ -4,18 +4,25 @@
     android:id="@+id/container_polls"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minWidth="240dp"
     android:layout_margin="8dp"
+    android:minWidth="240dp"
     android:orientation="vertical">
 
     <androidx.emoji.widget.EmojiTextView
         android:id="@+id/tv_poll_ques"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
         android:textColor="@color/black"
         android:textSize="16sp"
         tools:text="Poll: What is the answer to life, the universe &amp; everything?" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:textSize="12sp"
+        android:textColor="@color/colorAccent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Anonymous Poll" />
 
     <LinearLayout
         android:id="@+id/container_poll_results"
@@ -33,5 +40,15 @@
         android:orientation="vertical">
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_poll_vote_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_weight="1"
+        android:text="No votes"
+        android:textColor="@color/black"
+        android:textSize="12sp" />
 
 </LinearLayout>

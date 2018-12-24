@@ -184,9 +184,9 @@
     <string name="all_retry">Retry</string>
     <string name="signing_in">Signing in…</string>
 
-    <plurals name="day_count">
-        <item quantity="one">%d day</item>
-        <item quantity="other">%d days</item>
+    <plurals name="vote_count">
+        <item quantity="one">%d vote</item>
+        <item quantity="other">%d votes</item>
     </plurals>
 
 </resources>

@@ -75,7 +75,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginRight="8dp"
         android:animateLayoutChanges="true"
-        android:background="@drawable/half_rounded_rectangle_hollow_top"
+        android:background="@drawable/rect_rounded_border"
         android:padding="8dp">
 
         <EditText

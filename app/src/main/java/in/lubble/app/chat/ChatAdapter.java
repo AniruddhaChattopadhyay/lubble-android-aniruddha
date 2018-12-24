@@ -432,6 +432,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             pollContainer = ((SentChatViewHolder) baseViewHolder).pollContainer;
         }
+        final TextView voteCountTv = pollContainer.findViewById(R.id.tv_poll_vote_count);
+        final int voteCount = chatData.getPollReceipts().size();
+        String voteCountStr = "No votes";
+        if (voteCount > 0) {
+            voteCountStr = context.getResources().getQuantityString(R.plurals.vote_count, voteCount, voteCount);
+        }
+        voteCountTv.setText(voteCountStr);
         final LinearLayout resultsView = pollContainer.findViewById(R.id.container_poll_results);
         resultsView.setVisibility(View.VISIBLE);
         pollContainer.findViewById(R.id.container_poll_btns).setVisibility(View.GONE);

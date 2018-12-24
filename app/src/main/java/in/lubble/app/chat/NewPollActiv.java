@@ -1,14 +1,11 @@
 package in.lubble.app.chat;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ServerValue;
@@ -73,6 +70,7 @@ public class NewPollActiv extends AppCompatActivity {
 
         addChoiceIv = findViewById(R.id.iv_poll_add);
         pollExpiryContainer = findViewById(R.id.container_poll_expiry);
+        pollExpiryContainer.setVisibility(View.GONE);
         pollExpiryTv = findViewById(R.id.tv_poll_expiry);
 
         closeIv.setOnClickListener(new View.OnClickListener() {
@@ -97,7 +95,7 @@ public class NewPollActiv extends AppCompatActivity {
         pollExpiryContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openDatePicker();
+                //openDatePicker();
             }
         });
 
@@ -149,7 +147,7 @@ public class NewPollActiv extends AppCompatActivity {
     }
 
     private void openDatePicker() {
-        final NumberPicker picker = new NumberPicker(this);
+        /*final NumberPicker picker = new NumberPicker(this);
         picker.setMinValue(1);
         picker.setMaxValue(7);
         picker.setValue(expiryDayCount);
@@ -172,7 +170,7 @@ public class NewPollActiv extends AppCompatActivity {
                     }
                 })
                 .setNegativeButton(android.R.string.cancel, null)
-                .show();
+                .show();*/
     }
 
     private void addPollChoice(EditText editText) {
