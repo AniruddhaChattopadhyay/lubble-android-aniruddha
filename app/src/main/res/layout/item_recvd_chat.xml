@@ -45,12 +45,6 @@
                     android:layout_height="wrap_content"
                     tools:text="@tools:sample/full_names" />
 
-                <include
-                    layout="@layout/layout_poll"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minWidth="240dp" />
-
                 <RelativeLayout
                     android:id="@+id/relativelayout_youtube"
                     android:layout_width="match_parent"
@@ -135,6 +129,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
+
+                        <include
+                            layout="@layout/layout_poll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="240dp" />
 
                         <FrameLayout
                             android:id="@+id/img_container"

@@ -249,12 +249,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
+            sentChatViewHolder.messageTv.setVisibility(View.GONE);
             sentChatViewHolder.pollContainer.setVisibility(View.VISIBLE);
             ((TextView) sentChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques)).setText(chatData.getPollQues());
 
             showPollResults(sentChatViewHolder, chatData);
 
         } else {
+            sentChatViewHolder.messageTv.setVisibility(View.VISIBLE);
             sentChatViewHolder.pollContainer.setVisibility(View.GONE);
         }
     }
@@ -342,6 +344,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
+            recvdChatViewHolder.messageTv.setVisibility(View.GONE);
             recvdChatViewHolder.pollContainer.setVisibility(View.VISIBLE);
             ((TextView) recvdChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques)).setText(chatData.getPollQues());
 
@@ -352,6 +355,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 showPollButtons(recvdChatViewHolder, chatData);
             }
         } else {
+            recvdChatViewHolder.messageTv.setVisibility(View.VISIBLE);
             recvdChatViewHolder.pollContainer.setVisibility(View.GONE);
         }
 
@@ -365,6 +369,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             pollContainer = ((SentChatViewHolder) baseViewHolder).pollContainer;
         }
         pollContainer.findViewById(R.id.container_poll_results).setVisibility(View.GONE);
+        setPollCount(chatData, pollContainer);
         final LinearLayout buttonsContainer = pollContainer.findViewById(R.id.container_poll_btns);
         buttonsContainer.setVisibility(View.VISIBLE);
         if (buttonsContainer.getChildCount() > 0) {
@@ -432,13 +437,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             pollContainer = ((SentChatViewHolder) baseViewHolder).pollContainer;
         }
-        final TextView voteCountTv = pollContainer.findViewById(R.id.tv_poll_vote_count);
-        final int voteCount = chatData.getPollReceipts().size();
-        String voteCountStr = "No votes";
-        if (voteCount > 0) {
-            voteCountStr = context.getResources().getQuantityString(R.plurals.vote_count, voteCount, voteCount);
-        }
-        voteCountTv.setText(voteCountStr);
+        setPollCount(chatData, pollContainer);
         final LinearLayout resultsView = pollContainer.findViewById(R.id.container_poll_results);
         resultsView.setVisibility(View.VISIBLE);
         pollContainer.findViewById(R.id.container_poll_btns).setVisibility(View.GONE);
@@ -477,6 +476,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             resultsView.addView(choiceContainer);
         }
+    }
+
+    private void setPollCount(ChatData chatData, LinearLayout pollContainer) {
+        final TextView voteCountTv = pollContainer.findViewById(R.id.tv_poll_vote_count);
+        final int voteCount = chatData.getPollReceipts().size();
+        String voteCountStr = "No votes";
+        if (voteCount > 0) {
+            voteCountStr = context.getResources().getQuantityString(R.plurals.vote_count, voteCount, voteCount);
+        }
+        voteCountTv.setText(voteCountStr);
     }
 
     private void handleYoutube(RecyclerView.ViewHolder baseViewHolder, final String message, final int position) {

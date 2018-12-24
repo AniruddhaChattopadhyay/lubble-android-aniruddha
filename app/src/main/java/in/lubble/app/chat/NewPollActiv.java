@@ -110,7 +110,7 @@ public class NewPollActiv extends AppCompatActivity {
                     final ChatData chatData = new ChatData();
                     chatData.setAuthorUid(FirebaseAuth.getInstance().getUid());
                     chatData.setIsDm(false);
-                    chatData.setMessage(" ");
+                    chatData.setMessage("[ Poll ]\nPlease update the app to vote on this poll");
                     chatData.setPollQues(askQuesEt.getText().toString());
                     chatData.setCreatedTimestamp(System.currentTimeMillis());
                     chatData.setServerTimestamp(ServerValue.TIMESTAMP);
