@@ -1,6 +1,8 @@
 package in.lubble.app.models;
 
 import com.google.gson.annotations.SerializedName;
+import in.lubble.app.LubbleApp;
+import in.lubble.app.R;
 import in.lubble.app.utils.StringUtils;
 
 /**
@@ -87,6 +89,8 @@ public class NotifData {
     public String getMessageBody() {
         if (StringUtils.isValidString(hasImage) && hasImage.equalsIgnoreCase("True")) {
             return "\uD83D\uDCF7 " + messageBody;
+        } else if (this.messageBody.equalsIgnoreCase(LubbleApp.getAppContext().getString(R.string.poll_msg_body))) {
+            return "\uD83D\uDCCA POLL";
         } else {
             return messageBody;
         }

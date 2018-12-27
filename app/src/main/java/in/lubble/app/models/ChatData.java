@@ -63,6 +63,9 @@ public class ChatData {
     }
 
     public String getMessage() {
+        if (this.type.equalsIgnoreCase(POLL)) {
+            return "POLL";
+        }
         return message;
     }
 

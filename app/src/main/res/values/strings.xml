@@ -183,6 +183,7 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="all_retry">Retry</string>
     <string name="signing_in">Signing in…</string>
+    <string name="poll_msg_body">[ Poll ]\nPlease update the app to vote on this poll</string>
 
     <plurals name="vote_count">
         <item quantity="one">%d vote</item>
