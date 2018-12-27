@@ -256,7 +256,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             showPollResults(sentChatViewHolder, chatData);
 
         } else {
-            sentChatViewHolder.messageTv.setVisibility(View.VISIBLE);
             sentChatViewHolder.pollContainer.setVisibility(View.GONE);
         }
     }
@@ -355,7 +354,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 showPollButtons(recvdChatViewHolder, chatData);
             }
         } else {
-            recvdChatViewHolder.messageTv.setVisibility(View.VISIBLE);
             recvdChatViewHolder.pollContainer.setVisibility(View.GONE);
         }
 
