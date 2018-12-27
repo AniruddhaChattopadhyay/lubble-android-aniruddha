@@ -453,7 +453,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             final View choiceContainer = inflater.inflate(R.layout.layout_poll_choice, null);
             final EmojiTextView choiceTv = choiceContainer.findViewById(R.id.tv_choice_text);
             choiceTv.setText(choiceData.getTitle());
-            int percent = chatData.getPollReceipts().size() == 0 ? 0 : (choiceData.getCount() / chatData.getPollReceipts().size()) * 100;
+            int percent = chatData.getPollReceipts().size() == 0 ? 0 : (int) ((((double) choiceData.getCount() / (double) chatData.getPollReceipts().size())) * 100);
             final TextView percentTv = choiceContainer.findViewById(R.id.tv_choice_percent);
             percentTv.setText(percent + "%");
             if (percent > 0) {
