@@ -16,6 +16,8 @@ import in.lubble.app.database.DbSingleton;
 
 import java.util.ArrayList;
 
+import static in.lubble.app.analytics.AnalyticsEvents.FAILED_SEARCH;
+
 public class SearchActivity extends BaseActivity {
 
     private static final String TAG = "SearchActivity";
@@ -58,6 +60,12 @@ public class SearchActivity extends BaseActivity {
                 if (s != null && s.length() > 0) {
                     final ArrayList<ItemSearchData> itemSearchDataList = DbSingleton.getInstance().readAllItemSearchData(s.toString());
                     adapter.addData(itemSearchDataList);
+                    if (itemSearchDataList.isEmpty()) {
+                        // failed search
+                        final Bundle bundle = new Bundle();
+                        bundle.putString("search_term", s.toString());
+                        Analytics.triggerEvent(FAILED_SEARCH, bundle, SearchActivity.this);
+                    }
                 } else {
                     adapter.clearAll();
                 }
