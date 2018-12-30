@@ -2,12 +2,17 @@ package in.lubble.app;
 
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -21,6 +26,8 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import in.lubble.app.models.ChatData;
+
+import java.io.ByteArrayOutputStream;
 
 import static in.lubble.app.firebase.FirebaseStorageHelper.*;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
@@ -139,21 +146,60 @@ public class UploadFileService extends BaseTaskService {
         });
     }
 
+    private Uri getImageUri(Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
     private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId,
-                               final boolean toTransmit, @Nullable StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) {
+                               final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference photoRef = mStorageRef.child(uploadPath)
                 .child(fileName);
 
+        GlideApp.with(this).asBitmap()
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .load(fileUri)
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        if (resource.getWidth() > 1000 || resource.getHeight() > 1000) {
+                            compressAndUpload(fileUri, caption, groupId, toTransmit, metadata, dmInfoData, photoRef);
+                        } else {
+                            uploadFile(fileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
+                        }
+                    }
+                });
+    }
+
+    private void compressAndUpload(Uri fileUri, final String caption, final String groupId, final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData, final StorageReference photoRef) {
+        GlideApp.with(this).asBitmap()
+                .override(1000, 1000)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .load(fileUri)
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        final Uri compressedFileUri = getImageUri(resource);
+                        uploadFile(compressedFileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
+                    }
+                });
+    }
+
+    private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, @Nullable StorageMetadata metadata, final boolean toTransmit, final String caption, final String groupId, @Nullable final DmInfoData dmInfoData) {
         // Upload file to Firebase Storage
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
         final UploadTask uploadTask;
         if (metadata != null) {
-            uploadTask = photoRef.putFile(fileUri, metadata);
+            uploadTask = photoRef.putFile(compressedFileUri, metadata);
         } else {
-            uploadTask = photoRef.putFile(fileUri);
+            uploadTask = photoRef.putFile(compressedFileUri);
         }
         uploadTask.
                 addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
@@ -177,16 +223,16 @@ public class UploadFileService extends BaseTaskService {
                                 if (task.isSuccessful()) {
                                     final Uri downloadUri = task.getResult();
                                     // [START_EXCLUDE]
-                                    broadcastUploadFinished(downloadUri, fileUri, toTransmit, caption, groupId, dmInfoData);
-                                    showUploadFinishedNotification(downloadUri, fileUri, toTransmit);
+                                    broadcastUploadFinished(downloadUri, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
+                                    showUploadFinishedNotification(downloadUri, compressedFileUri, toTransmit);
                                     taskCompleted();
                                     // [END_EXCLUDE]
                                 } else {
                                     Log.d(TAG, "onComplete: failed");
 
                                     // [START_EXCLUDE]
-                                    broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId, dmInfoData);
-                                    showUploadFinishedNotification(null, fileUri, toTransmit);
+                                    broadcastUploadFinished(null, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
+                                    showUploadFinishedNotification(null, compressedFileUri, toTransmit);
                                     taskCompleted();
                                     // [END_EXCLUDE]
                                 }
@@ -202,8 +248,8 @@ public class UploadFileService extends BaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null, fileUri, toTransmit, caption, groupId, dmInfoData);
-                        showUploadFinishedNotification(null, fileUri, toTransmit);
+                        broadcastUploadFinished(null, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
+                        showUploadFinishedNotification(null, compressedFileUri, toTransmit);
                         taskCompleted();
                         // [END_EXCLUDE]
                     }
