@@ -143,6 +143,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private final static int PAGE_SIZE = 20;
     private int unreadCount = 0;
     private String attachedGroupId;
+    private String attachedGroupPicUrl;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -897,6 +898,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     chatData.setAttachedGroupId(attachedGroupId);
                     chatData.setLinkTitle(linkTitle.getText().toString());
                     chatData.setLinkDesc(linkDesc.getText().toString());
+                    chatData.setLinkPicUrl(attachedGroupPicUrl);
                 } else if (isValidString(replyMsgId)) {
                     chatData.setType(REPLY);
                     chatData.setReplyMsgId(replyMsgId);
@@ -1032,6 +1034,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 .placeholder(R.drawable.ic_circle_group_24dp)
                                 .error(R.drawable.ic_circle_group_24dp)
                                 .into(linkPicIv);
+                        attachedGroupPicUrl = groupData.getThumbnail();
                     }
                 }
 

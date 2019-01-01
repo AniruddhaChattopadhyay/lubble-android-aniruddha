@@ -35,6 +35,7 @@ public class ChatData {
     private String type = "";
     private String linkTitle;
     private String linkDesc;
+    private String linkPicUrl;
     @Nullable
     private String replyMsgId = null;
     private boolean isDm;
@@ -225,5 +226,13 @@ public class ChatData {
 
     public void setAttachedGroupId(String attachedGroupId) {
         this.attachedGroupId = attachedGroupId;
+    }
+
+    public String getLinkPicUrl() {
+        return linkPicUrl;
+    }
+
+    public void setLinkPicUrl(String linkPicUrl) {
+        this.linkPicUrl = linkPicUrl;
     }
 }
