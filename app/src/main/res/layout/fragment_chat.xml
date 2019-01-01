@@ -28,14 +28,24 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp">
 
+                <ImageView
+                    android:id="@+id/iv_link_pic"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    app:layout_constraintBottom_toTopOf="@+id/view_separator"
+                    app:layout_constraintStart_toStartOf="@+id/et_new_message"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_public_black_24dp" />
+
                 <TextView
                     android:id="@+id/tv_link_desc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
                     android:layout_marginBottom="8dp"
                     android:maxLines="2"
                     app:layout_constraintBottom_toTopOf="@+id/view_separator"
-                    app:layout_constraintStart_toStartOf="@+id/et_new_message"
+                    app:layout_constraintStart_toEndOf="@+id/iv_link_pic"
                     tools:text="link desc goes here" />
 
                 <TextView
@@ -139,7 +149,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title,iv_link_cancel"
+                    app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title,iv_link_cancel,iv_link_pic"
                     tools:visibility="visible" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

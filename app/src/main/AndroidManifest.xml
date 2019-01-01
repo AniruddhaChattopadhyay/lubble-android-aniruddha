@@ -362,7 +362,8 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".chat.NewPollActiv"></activity>
+        <activity android:name=".chat.NewPollActiv" />
+        <activity android:name=".chat.GroupPickerActiv"></activity>
     </application>
 
 </manifest>
