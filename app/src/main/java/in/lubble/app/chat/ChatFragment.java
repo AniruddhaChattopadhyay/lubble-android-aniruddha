@@ -944,6 +944,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 linkDesc.setText("");
                 linkMetaContainer.setVisibility(View.GONE);
                 replyMsgId = null;
+                attachedGroupId = null;
                 if (linkMetaAsyncTask != null) {
                     linkMetaAsyncTask.cancel(true);
                 }
@@ -1109,7 +1110,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     prevUrl = extractedUrl;
                     linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
                     linkMetaAsyncTask.execute();
-                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId)) {
+                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId) && !isValidString(attachedGroupId)) {
                     linkMetaContainer.setVisibility(View.GONE);
                     prevUrl = "";
                     linkTitle.setText("");

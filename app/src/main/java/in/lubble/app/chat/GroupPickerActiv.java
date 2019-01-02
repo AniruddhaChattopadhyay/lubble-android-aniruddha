@@ -64,7 +64,7 @@ public class GroupPickerActiv extends AppCompatActivity {
 
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     final GroupData groupData = child.getValue(GroupData.class);
-                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())) {
+                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && !groupData.getIsPrivate()) {
                         groupDataList.add(groupData);
                     }
                 }
