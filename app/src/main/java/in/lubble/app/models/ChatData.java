@@ -3,6 +3,7 @@ package in.lubble.app.models;
 import androidx.annotation.Nullable;
 import com.google.firebase.database.Exclude;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,7 +11,8 @@ import java.util.HashMap;
  * Created by ishaan on 21/1/18.
  */
 
-public class ChatData {
+public class ChatData implements Serializable {
+    private static final long serialVersionUID = -7409872225384209027L;
 
     /*POST TYPES*/
     public static final String LINK = "LINK";

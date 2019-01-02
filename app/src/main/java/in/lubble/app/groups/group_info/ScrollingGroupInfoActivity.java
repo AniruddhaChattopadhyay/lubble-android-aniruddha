@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import in.lubble.app.*;
 import in.lubble.app.R;
+import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
@@ -51,6 +52,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
     private ImageView privacyIcon;
     private TextView privacyTv;
     private LinearLayout inviteMembersContainer;
+    private LinearLayout shareGroupContainer;
     private RecyclerView recyclerView;
     private TextView leaveGroupTV;
     private RelativeLayout muteNotifsContainer;
@@ -80,6 +82,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
         privacyIcon = findViewById(R.id.iv_privacy_icon);
         privacyTv = findViewById(R.id.tv_privacy);
         inviteMembersContainer = findViewById(R.id.linearLayout_invite_container);
+        shareGroupContainer = findViewById(R.id.linearLayout_share_group);
         recyclerView = findViewById(R.id.rv_group_members);
         leaveGroupTV = findViewById(R.id.tv_leave_group);
         muteNotifsContainer = findViewById(R.id.mute_container);
@@ -278,18 +281,32 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
         muteNotifsContainer.setVisibility(isJoined ? View.VISIBLE : View.GONE);
         if (isJoined) {
             inviteMembersContainer.setAlpha(1f);
+            shareGroupContainer.setAlpha(1f);
             inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     UserSearchActivity.newInstance(ScrollingGroupInfoActivity.this, groupId);
                 }
             });
+            shareGroupContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ShareActiv.open(ScrollingGroupInfoActivity.this, groupId);
+                }
+            });
         } else {
             inviteMembersContainer.setAlpha(0.5f);
+            shareGroupContainer.setAlpha(0.5f);
             inviteMembersContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(ScrollingGroupInfoActivity.this, R.string.joing_group_to_invite, Toast.LENGTH_SHORT).show();
+                }
+            });
+            shareGroupContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(ScrollingGroupInfoActivity.this, R.string.joing_group_to_share, Toast.LENGTH_SHORT).show();
                 }
             });
         }

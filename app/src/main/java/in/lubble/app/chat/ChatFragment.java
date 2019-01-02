@@ -76,6 +76,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_RECEIVER_NAME = "KEY_RECEIVER_NAME";
     private static final String KEY_RECEIVER_DP_URL = "KEY_RECEIVER_DP_URL";
     private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
+    private static final String KEY_CHAT_DATA = "KEY_CHAT_DATA";
 
     @Nullable
     private GroupData groupData;
@@ -149,21 +150,23 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         // Required empty public constructor
     }
 
-    public static ChatFragment newInstanceForGroup(@NonNull String groupId, boolean isJoining, @Nullable String msgId) {
+    public static ChatFragment newInstanceForGroup(@NonNull String groupId, boolean isJoining, @Nullable String msgId, @Nullable ChatData chatData) {
         Bundle args = new Bundle();
         args.putString(KEY_GROUP_ID, groupId);
         args.putString(KEY_MSG_ID, msgId);
+        args.putSerializable(KEY_CHAT_DATA, chatData);
         args.putBoolean(KEY_IS_JOINING, isJoining);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
-    public static ChatFragment newInstanceForDm(@NonNull String dmId, @Nullable String msgId, @Nullable String itemName) {
+    public static ChatFragment newInstanceForDm(@NonNull String dmId, @Nullable String msgId, @Nullable String itemName, @Nullable ChatData chatData) {
         Bundle args = new Bundle();
         args.putString(KEY_MSG_ID, msgId);
         args.putString(KEY_DM_ID, dmId);
         args.putString(KEY_ITEM_TITLE, itemName);
+        args.putSerializable(KEY_CHAT_DATA, chatData);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
@@ -192,6 +195,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         receiverDpUrl = getArguments().getString(KEY_RECEIVER_DP_URL);
         itemTitle = getArguments().getString(KEY_ITEM_TITLE);
         isJoining = getArguments().getBoolean(KEY_IS_JOINING);
+        ChatData chatData = (ChatData) getArguments().getSerializable(KEY_CHAT_DATA);
+        if (chatData != null) {
+            populateChatData(chatData);
+        }
 
         if (groupId != null) {
             groupReference = getLubbleGroupsRef().child(groupId);
@@ -205,6 +212,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             throw new RuntimeException("khuch to params dega bhai?");
         }
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    }
+
+    private void populateChatData(ChatData chatData) {
+        switch (chatData.getType()) {
+            case GROUP:
+                attachedGroupId = chatData.getAttachedGroupId();
+                fetchAndShowAttachedGroupInfo();
+                break;
+        }
+        if (!TextUtils.isEmpty(chatData.getMessage())) {
+            newMessageEt.setText(chatData.getMessage());
+        }
     }
 
     @Override
@@ -1014,12 +1033,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             String chosenGroupId = data.getStringExtra("group_id");
             if (!TextUtils.isEmpty(chosenGroupId)) {
                 attachedGroupId = chosenGroupId;
-                fetchAttachedGroupInfo();
+                fetchAndShowAttachedGroupInfo();
             }
         }
     }
 
-    private void fetchAttachedGroupInfo() {
+    private void fetchAndShowAttachedGroupInfo() {
         if (!TextUtils.isEmpty(attachedGroupId)) {
             RealtimeDbHelper.getLubbleGroupsRef().child(attachedGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override

@@ -23,10 +23,7 @@ import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.DmData;
-import in.lubble.app.models.GroupData;
-import in.lubble.app.models.ProfileInfo;
-import in.lubble.app.models.UserGroupData;
+import in.lubble.app.models.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,14 +34,18 @@ import static in.lubble.app.firebase.RealtimeDbHelper.*;
 public class ShareActiv extends AppCompatActivity {
 
     private static final String TAG = "ShareActiv";
+    private static final String ARG_GROUP_ID = "ARG_GROUP_ID";
 
     private RecyclerView recyclerView;
     private Query query;
     private ValueEventListener valueEventListener;
     private ChatsAdapter chatsAdapter;
+    private String groupIdToShare;
 
-    public static void open(Context context) {
-        context.startActivity(new Intent(context, ShareActiv.class));
+    public static void open(Context context, String groupIdToShare) {
+        final Intent intent = new Intent(context, ShareActiv.class);
+        intent.putExtra(ARG_GROUP_ID, groupIdToShare);
+        context.startActivity(intent);
     }
 
     @Override
@@ -59,11 +60,7 @@ public class ShareActiv extends AppCompatActivity {
         DividerItemDecoration itemDecor = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(itemDecor);
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
+        groupIdToShare = getIntent().getStringExtra(ARG_GROUP_ID);
 
         syncGroups();
         syncUserDmIds();
@@ -305,9 +302,12 @@ public class ShareActiv extends AppCompatActivity {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        final Intent intent = new Intent();
-                        intent.putExtra("group_id", groupList.get(getAdapterPosition()).getId());
-                        setResult(RESULT_OK, intent);
+                        final ChatData chatData = new ChatData();
+                        if (groupIdToShare != null) {
+                            chatData.setType(ChatData.GROUP);
+                            chatData.setAttachedGroupId(groupIdToShare);
+                        }
+                        ChatActivity.openForGroup(ShareActiv.this, groupList.get(getAdapterPosition()).getId(), false, null, chatData);
                         finish();
                     }
                 });

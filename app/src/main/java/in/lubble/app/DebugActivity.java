@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import com.google.firebase.auth.FirebaseAuth;
-import in.lubble.app.chat.ShareActiv;
 
 public class DebugActivity extends BaseActivity {
 
@@ -20,7 +19,7 @@ public class DebugActivity extends BaseActivity {
     }
 
     public void iAmTouched(View view) {
-        ShareActiv.open(this);
+        //ShareActiv.open(this);
     }
 
     private void sendInvite(Uri mInvitationUrl) {
