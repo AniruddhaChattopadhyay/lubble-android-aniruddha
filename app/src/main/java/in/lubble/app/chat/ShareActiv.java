@@ -305,7 +305,12 @@ public class ShareActiv extends AppCompatActivity {
                             chatData.setType(ChatData.GROUP);
                             chatData.setAttachedGroupId(groupIdToShare);
                         }
-                        ChatActivity.openForGroup(ShareActiv.this, groupList.get(getAdapterPosition()).getId(), false, null, chatData);
+                        final GroupData groupData = groupList.get(getAdapterPosition());
+                        if (groupData.isDm()) {
+                            ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatData);
+                        } else {
+                            ChatActivity.openForGroup(ShareActiv.this, groupData.getId(), false, null, chatData);
+                        }
                         finish();
                     }
                 });
