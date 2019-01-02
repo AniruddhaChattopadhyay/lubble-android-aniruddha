@@ -99,11 +99,6 @@ public class ShareActiv extends AppCompatActivity {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     final String dmId = snapshot.getKey();
                     if (dmId != null) {
-                        HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
-                        Long count = 0L;
-                        if (map != null && map.containsKey("unreadCount")) {
-                            count = (Long) map.get("unreadCount");
-                        }
                         fetchDmFrom(dmId);
                     }
                 }
@@ -266,20 +261,23 @@ public class ShareActiv extends AppCompatActivity {
         }
 
         void addGroup(GroupData newGroupData, UserGroupData userGroupData) {
-            for (int i = 0; i < groupList.size(); i++) {
-                final GroupData groupData = groupList.get(i);
-                if (newGroupData.getLastMessageTimestamp() >= groupData.getLastMessageTimestamp()) {
-                    groupList.add(i, newGroupData);
-                    userGroupDataMap.put(newGroupData.getId(), userGroupData);
-                    break;
-                }
-            }
             if (!userGroupDataMap.containsKey(newGroupData.getId())) {
-                // wasn't placed, add to last
-                groupList.add(newGroupData);
-                userGroupDataMap.put(newGroupData.getId(), userGroupData);
+                // if not already present
+                for (int i = 0; i < groupList.size(); i++) {
+                    final GroupData groupData = groupList.get(i);
+                    if (newGroupData.getLastMessageTimestamp() >= groupData.getLastMessageTimestamp()) {
+                        groupList.add(i, newGroupData);
+                        userGroupDataMap.put(newGroupData.getId(), userGroupData);
+                        break;
+                    }
+                }
+                if (!userGroupDataMap.containsKey(newGroupData.getId())) {
+                    // wasn't placed, add to last
+                    groupList.add(newGroupData);
+                    userGroupDataMap.put(newGroupData.getId(), userGroupData);
+                }
+                notifyDataSetChanged();
             }
-            notifyDataSetChanged();
         }
 
         void addGroupList(ArrayList<GroupData> groupDataList) {
