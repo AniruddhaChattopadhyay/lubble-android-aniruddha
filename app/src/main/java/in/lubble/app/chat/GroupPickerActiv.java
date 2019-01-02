@@ -11,6 +11,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +26,7 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class GroupPickerActiv extends AppCompatActivity {
 
@@ -46,9 +48,21 @@ public class GroupPickerActiv extends AppCompatActivity {
 
         progressbar = findViewById(R.id.progressbar_group_picker);
         recyclerView = findViewById(R.id.rv_group_picker);
+        ImageView closeIv = findViewById(R.id.iv_group_picker_close);
 
         progressbar.setVisibility(View.VISIBLE);
+        recyclerView.setNestedScrollingEnabled(false);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        DividerItemDecoration itemDecor = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
+        recyclerView.addItemDecoration(itemDecor);
+
+        closeIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        });
     }
 
     @Override
@@ -68,6 +82,7 @@ public class GroupPickerActiv extends AppCompatActivity {
                         groupDataList.add(groupData);
                     }
                 }
+                Collections.reverse(groupDataList);
                 progressbar.setVisibility(View.GONE);
                 recyclerView.setAdapter(new GroupPickerAdapter(groupDataList, GlideApp.with(GroupPickerActiv.this)));
             }

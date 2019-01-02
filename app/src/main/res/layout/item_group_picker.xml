@@ -2,14 +2,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:padding="8dp">
+    android:layout_height="96dp"
+    android:layout_margin="4dp"
+    android:gravity="center_vertical"
+    android:paddingLeft="18dp"
+    android:paddingRight="18dp">
 
     <ImageView
         android:id="@+id/iv_group_dp"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         tools:src="@tools:sample/avatars" />
 
     <LinearLayout
@@ -22,7 +24,7 @@
         android:gravity="center_vertical"
         android:orientation="vertical">
 
-        <TextView
+        <androidx.emoji.widget.EmojiTextView
             android:id="@+id/tv_group_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,7 +34,7 @@
             android:textSize="16sp"
             tools:text="Group Name sdfiu hsifuhs dfhsud fhsudfh usisi" />
 
-        <TextView
+        <androidx.emoji.widget.EmojiTextView
             android:id="@+id/tv_group_desc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
