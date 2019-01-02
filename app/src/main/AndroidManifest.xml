@@ -363,7 +363,8 @@
         </receiver>
 
         <activity android:name=".chat.NewPollActiv" />
-        <activity android:name=".chat.GroupPickerActiv"></activity>
+        <activity android:name=".chat.GroupPickerActiv" />
+        <activity android:name=".chat.ShareActiv"></activity>
     </application>
 
 </manifest>
