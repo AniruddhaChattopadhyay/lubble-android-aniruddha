@@ -27,6 +27,24 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginBottom="4dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <androidx.emoji.widget.EmojiTextView
+                        android:id="@+id/tv_sender_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="@tools:sample/full_names" />
+
+                    <include layout="@layout/container_msg_badge" />
+
+                </LinearLayout>
+
                 <RelativeLayout
                     android:id="@+id/relativelayout_youtube"
                     android:layout_width="match_parent"

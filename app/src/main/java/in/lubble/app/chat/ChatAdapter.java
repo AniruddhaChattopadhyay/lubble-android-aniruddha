@@ -42,6 +42,7 @@ import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
 import in.lubble.app.models.ProfileInfo;
@@ -159,6 +160,28 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void bindSentChatViewHolder(RecyclerView.ViewHolder holder, int position) {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
+
+        final String authorUid = chatData.getAuthorUid();
+        if (!chatData.getIsDm())
+            if (profileInfoMap.containsKey(authorUid)) {
+                final ProfileInfo profileInfo = profileInfoMap.get(authorUid);
+                sentChatViewHolder.senderTv.setVisibility(View.VISIBLE);
+                sentChatViewHolder.senderTv.setText(profileInfo.getName());
+                if (!TextUtils.isEmpty(profileInfo.getBadge())) {
+                    sentChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
+                    sentChatViewHolder.badgeTextTv.setText(profileInfo.getBadge());
+                } else {
+                    sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+                }
+            } else {
+                sentChatViewHolder.senderTv.setVisibility(View.GONE);
+                sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+                updateProfileInfoMap(RealtimeDbHelper.getUserInfoRef(authorUid), authorUid, position);
+            }
+        else {
+            sentChatViewHolder.senderTv.setVisibility(View.GONE);
+            sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+        }
 
         if (posToFlash == position) {
             UiUtils.animateColor(sentChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
@@ -310,6 +333,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (!chatData.getIsDm()) {
             showDpAndName(recvdChatViewHolder, chatData);
         } else {
+            recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
             recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
             recvdChatViewHolder.dpIv.setVisibility(View.GONE);
         }
@@ -786,6 +810,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .error(R.drawable.ic_account_circle_black_no_padding)
                     .into(recvdChatViewHolder.dpIv);
             recvdChatViewHolder.authorNameTv.setText(profileInfo.getName());
+            recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+            if (!TextUtils.isEmpty(profileInfo.getBadge())) {
+                recvdChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
+                recvdChatViewHolder.badgeTextTv.setText(profileInfo.getBadge());
+            } else {
+                recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+            }
         } else {
             updateProfileInfoMap(getUserInfoRef(chatData.getAuthorUid()), chatData.getAuthorUid(), recvdChatViewHolder.getAdapterPosition());
         }
@@ -991,6 +1022,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView youtubeTitleTv;
         private ImageView downloadIv;
         private LinearLayout pollContainer;
+        private TextView badgeTextTv;
 
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
@@ -1022,6 +1054,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
             downloadIv = itemView.findViewById(R.id.iv_download);
             pollContainer = itemView.findViewById(R.id.container_polls);
+
+            badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
 
             lubbAnyHintTv.setSelected(true);
             lubbAnyHintTv.setHorizontallyScrolling(true);
@@ -1176,6 +1210,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private RelativeLayout youtubeContainer;
         private TextView youtubeTitleTv;
         private LinearLayout pollContainer;
+        private TextView badgeTextTv;
+        private TextView senderTv;
 
         SentChatViewHolder(final View itemView) {
             super(itemView);
@@ -1202,6 +1238,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
             youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
             pollContainer = itemView.findViewById(R.id.container_polls);
+            senderTv = itemView.findViewById(R.id.tv_sender_name);
+            badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
 
             linkContainer.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);

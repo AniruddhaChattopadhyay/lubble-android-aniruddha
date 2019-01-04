@@ -12,6 +12,7 @@ public class ProfileInfo {
     private String id;
     private String name;
     private String thumbnail;
+    private String badge;
 
     @Override
     public boolean equals(Object obj) {
@@ -51,4 +52,11 @@ public class ProfileInfo {
         this.thumbnail = thumbnail;
     }
 
+    public String getBadge() {
+        return badge;
+    }
+
+    public void setBadge(String badge) {
+        this.badge = badge;
+    }
 }
