@@ -24,6 +24,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.models.ChatData;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.utils.StringUtils;
 
@@ -39,6 +40,7 @@ public class ChatActivity extends BaseActivity {
 
     public static final String EXTRA_GROUP_ID = "chat_activ_group_id";
     public static final String EXTRA_MSG_ID = "chat_activ_msg_id";
+    public static final String EXTRA_CHAT_DATA = "chat_activ_chat_data";
     // if we need to show joining progress dialog
     public static final String EXTRA_IS_JOINING = "chat_activ_is_joining";
     // for when DM exists
@@ -63,11 +65,29 @@ public class ChatActivity extends BaseActivity {
         context.startActivity(intent);
     }
 
+    public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId, ChatData chatData) {
+        final Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(EXTRA_GROUP_ID, groupId);
+        intent.putExtra(EXTRA_IS_JOINING, isJoining);
+        intent.putExtra(EXTRA_MSG_ID, msgId);
+        intent.putExtra(EXTRA_CHAT_DATA, chatData);
+        context.startActivity(intent);
+    }
+
     public static void openForDm(@NonNull Context context, @NonNull String dmId, @Nullable String msgId, @Nullable String itemTitle) {
         final Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(EXTRA_DM_ID, dmId);
         intent.putExtra(EXTRA_MSG_ID, msgId);
         intent.putExtra(EXTRA_ITEM_TITLE, itemTitle);
+        context.startActivity(intent);
+    }
+
+    public static void openForDm(@NonNull Context context, @NonNull String dmId, @Nullable String msgId, @Nullable String itemTitle, ChatData chatData) {
+        final Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(EXTRA_DM_ID, dmId);
+        intent.putExtra(EXTRA_MSG_ID, msgId);
+        intent.putExtra(EXTRA_ITEM_TITLE, itemTitle);
+        intent.putExtra(EXTRA_CHAT_DATA, chatData);
         context.startActivity(intent);
     }
 
@@ -111,12 +131,12 @@ public class ChatActivity extends BaseActivity {
         }
         if (!TextUtils.isEmpty(groupId)) {
             targetFrag = ChatFragment.newInstanceForGroup(
-                    groupId, isJoining, msgId
+                    groupId, isJoining, msgId, (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA)
             );
         } else if (!TextUtils.isEmpty(dmId)) {
             targetFrag = ChatFragment.newInstanceForDm(
                     dmId, msgId,
-                    getIntent().getStringExtra(EXTRA_ITEM_TITLE)
+                    getIntent().getStringExtra(EXTRA_ITEM_TITLE), (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA)
             );
         } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
             targetFrag = ChatFragment.newInstanceForEmptyDm(

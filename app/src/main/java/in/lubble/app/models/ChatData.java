@@ -3,6 +3,7 @@ package in.lubble.app.models;
 import androidx.annotation.Nullable;
 import com.google.firebase.database.Exclude;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -10,7 +11,8 @@ import java.util.HashMap;
  * Created by ishaan on 21/1/18.
  */
 
-public class ChatData {
+public class ChatData implements Serializable {
+    private static final long serialVersionUID = -7409872225384209027L;
 
     /*POST TYPES*/
     public static final String LINK = "LINK";
@@ -19,6 +21,7 @@ public class ChatData {
     public static final String UNREAD = "UNREAD";
     public static final String REPLY = "REPLY";
     public static final String POLL = "POLL";
+    public static final String GROUP = "GROUP";
 
     private String id;
     private String authorUid;
@@ -34,6 +37,7 @@ public class ChatData {
     private String type = "";
     private String linkTitle;
     private String linkDesc;
+    private String linkPicUrl;
     @Nullable
     private String replyMsgId = null;
     private boolean isDm;
@@ -41,6 +45,7 @@ public class ChatData {
     private ArrayList<ChoiceData> choiceList;
     private String pollQues = "";
     private HashMap<String, Integer> pollReceipts = new HashMap<>();
+    private String attachedGroupId;
 
     @Override
     public boolean equals(Object obj) {
@@ -215,5 +220,21 @@ public class ChatData {
 
     public void setPollReceipts(HashMap<String, Integer> pollReceipts) {
         this.pollReceipts = pollReceipts;
+    }
+
+    public String getAttachedGroupId() {
+        return attachedGroupId;
+    }
+
+    public void setAttachedGroupId(String attachedGroupId) {
+        this.attachedGroupId = attachedGroupId;
+    }
+
+    public String getLinkPicUrl() {
+        return linkPicUrl;
+    }
+
+    public void setLinkPicUrl(String linkPicUrl) {
+        this.linkPicUrl = linkPicUrl;
     }
 }

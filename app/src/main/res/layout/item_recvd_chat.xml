@@ -88,7 +88,7 @@
 
                 </RelativeLayout>
 
-                <LinearLayout
+                <RelativeLayout
                     android:id="@+id/link_meta_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -98,24 +98,44 @@
                     android:orientation="vertical"
                     android:padding="8dp"
                     android:visibility="gone"
-                    tools:visibility="gone">
+                    tools:visibility="visible">
 
-                    <TextView
-                        android:id="@+id/tv_link_title"
-                        android:layout_width="wrap_content"
+
+                    <ImageView
+                        android:id="@+id/iv_link_pic"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        app:srcCompat="@drawable/ic_public_black_24dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:maxLines="1"
-                        android:text="LINK TITLE"
-                        android:textStyle="bold" />
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="4dp"
+                        android:layout_toRightOf="@id/iv_link_pic"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical">
 
-                    <androidx.emoji.widget.EmojiTextView
-                        android:id="@+id/tv_link_desc"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:maxLines="2"
-                        android:text="Link description" />
+                        <TextView
+                            android:id="@+id/tv_link_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:maxLines="1"
+                            android:textColor="@color/black"
+                            android:textStyle="bold"
+                            tools:text="LINK TITLE" />
 
-                </LinearLayout>
+                        <androidx.emoji.widget.EmojiTextView
+                            android:id="@+id/tv_link_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            tools:text="@tools:sample/lorem/random" />
+
+                    </LinearLayout>
+
+                </RelativeLayout>
 
                 <in.lubble.app.utils.MsgFlexBoxLayout
                     android:id="@+id/msgFlexBox_text"

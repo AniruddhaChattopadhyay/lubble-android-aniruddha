@@ -21,7 +21,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.emoji.widget.EmojiTextView;
+import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -194,10 +196,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
-        if (chatData.getType().equalsIgnoreCase(LINK)) {
+        if (chatData.getType().equalsIgnoreCase(GROUP) && isValidString(chatData.getAttachedGroupId())) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
+            sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            glide.load(chatData.getLinkPicUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_circle_group_24dp)
+                    .error(R.drawable.ic_circle_group_24dp)
+                    .into(sentChatViewHolder.linkPicIv);
+
+            setBgColor(sentChatViewHolder.linkContainer, chatData);
+
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv);
@@ -214,6 +226,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     }
                 }
             });*/
+        } else if (chatData.getType().equalsIgnoreCase(LINK)) {
+            sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
+            sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            glide.load(chatData.getLinkPicUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_public_black_24dp)
+                    .error(R.drawable.ic_public_black_24dp)
+                    .into(sentChatViewHolder.linkPicIv);
         } else {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -257,6 +278,28 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         } else {
             sentChatViewHolder.pollContainer.setVisibility(View.GONE);
+        }
+    }
+
+    private void setBgColor(final RelativeLayout linkContainer, ChatData chatData) {
+        if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
+            glide.asBitmap().load(chatData.getLinkPicUrl()).into(new SimpleTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                    Palette.from(resource)
+                            .maximumColorCount(8)
+                            .addFilter(UiUtils.DEFAULT_FILTER)
+                            .generate(new Palette.PaletteAsyncListener() {
+                                public void onGenerated(Palette p) {
+                                    // Use generated instance
+                                    Drawable normalDrawable = context.getResources().getDrawable(R.drawable.rounded_rect_gray);
+                                    Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
+                                    DrawableCompat.setTint(wrapDrawable, p.getDarkVibrantColor(ContextCompat.getColor(context, R.color.fb_color)));
+                                    linkContainer.setBackground(wrapDrawable);
+                                }
+                            });
+                }
+            });
         }
     }
 
@@ -307,11 +350,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
         }
-
-        if (chatData.getType().equalsIgnoreCase(LINK)) {
+        if (chatData.getType().equalsIgnoreCase(GROUP) && isValidString(chatData.getAttachedGroupId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
+            recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            glide.load(chatData.getLinkPicUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_circle_group_24dp)
+                    .error(R.drawable.ic_circle_group_24dp)
+                    .into(recvdChatViewHolder.linkPicIv);
+            setBgColor(recvdChatViewHolder.linkContainer, chatData);
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             addReplyData(chatData.getReplyMsgId(), recvdChatViewHolder.linkTitleTv, recvdChatViewHolder.linkDescTv);
@@ -334,6 +384,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     }
                 }
             });*/
+        } else if (chatData.getType().equalsIgnoreCase(LINK)) {
+            recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
+            recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            glide.load(chatData.getLinkPicUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_public_black_24dp)
+                    .error(R.drawable.ic_public_black_24dp)
+                    .into(recvdChatViewHolder.linkPicIv);
         } else {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
@@ -493,7 +552,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final ImageView youTubeThumbnailIv;
         final ImageView youtubePlayIv;
         final ProgressBar youtubeProgressBar;
-        LinearLayout linkContainer;
+        RelativeLayout linkContainer;
         final RelativeLayout youtubeContainer;
         final TextView titleTv;
         if (baseViewHolder instanceof RecvdChatViewHolder) {
@@ -904,7 +963,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         private TextView authorNameTv;
         private EmojiTextView messageTv;
-        private LinearLayout linkContainer;
+        private RelativeLayout linkContainer;
+        private ImageView linkPicIv;
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
@@ -937,6 +997,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             authorNameTv = itemView.findViewById(R.id.tv_author);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
+            linkPicIv = itemView.findViewById(R.id.iv_link_pic);
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);
@@ -1036,14 +1097,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.link_meta_container:
                     ChatData chatData = chatDataList.get(getAdapterPosition());
-                    if (LINK.equalsIgnoreCase(chatData.getType())) {
-                        final URLSpan[] urls = messageTv.getUrls();
-                        final String url = urls[0].getURL();
-                        if (isValidString(url)) {
-                            Intent i = new Intent(Intent.ACTION_VIEW);
-                            i.setData(Uri.parse(url));
-                            context.startActivity(i);
-                        }
+                    if (GROUP.equalsIgnoreCase(chatData.getType())) {
+                        ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
                     } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
                         ChatData emptyReplyChatData = new ChatData();
                         emptyReplyChatData.setId(chatData.getReplyMsgId());
@@ -1052,6 +1107,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             recyclerView.scrollToPosition(pos);
                             posToFlash = pos;
                             notifyItemChanged(pos);
+                        }
+                    } else if (LINK.equalsIgnoreCase(chatData.getType())) {
+                        final URLSpan[] urls = messageTv.getUrls();
+                        final String url = urls[0].getURL();
+                        if (isValidString(url)) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
                         }
                     }
                     break;
@@ -1089,7 +1152,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private EmojiTextView messageTv;
-        private LinearLayout linkContainer;
+        private RelativeLayout linkContainer;
+        private ImageView linkPicIv;
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
@@ -1117,6 +1181,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             super(itemView);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
+            linkPicIv = itemView.findViewById(R.id.iv_link_pic);
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);
@@ -1202,14 +1267,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.link_meta_container:
                     ChatData chatData = chatDataList.get(getAdapterPosition());
-                    if (LINK.equalsIgnoreCase(chatData.getType())) {
-                        final URLSpan[] urls = messageTv.getUrls();
-                        final String url = urls[0].getURL();
-                        if (isValidString(url)) {
-                            Intent i = new Intent(Intent.ACTION_VIEW);
-                            i.setData(Uri.parse(url));
-                            context.startActivity(i);
-                        }
+                    if (GROUP.equalsIgnoreCase(chatData.getType())) {
+                        ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
                     } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
                         ChatData emptyReplyChatData = new ChatData();
                         emptyReplyChatData.setId(chatData.getReplyMsgId());
@@ -1218,6 +1277,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             recyclerView.scrollToPosition(pos);
                             posToFlash = pos;
                             notifyItemChanged(pos);
+                        }
+                    } else if (LINK.equalsIgnoreCase(chatData.getType())) {
+                        final URLSpan[] urls = messageTv.getUrls();
+                        final String url = urls[0].getURL();
+                        if (isValidString(url)) {
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            context.startActivity(i);
                         }
                     }
                     break;

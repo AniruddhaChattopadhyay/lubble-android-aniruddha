@@ -108,6 +108,7 @@
     <string name="private_group">Private Group</string>
     <string name="public_group">Public Group</string>
     <string name="joing_group_to_invite">Join the group to invite people</string>
+    <string name="joing_group_to_share">Join the group to share it</string>
     <string name="check_internet">Please check your internet connection</string>
     <string name="invite_pending">Invitation Pending</string>
     <string name="public_group_desc">Visible to everyone. Anyone can join</string>

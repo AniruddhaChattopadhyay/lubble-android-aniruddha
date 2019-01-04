@@ -147,4 +147,9 @@ public class GroupData {
         }
     }
 
+    public boolean isDm() {
+        // Yeah. Weird.
+        return getMembers().size() == 0;
+    }
+
 }

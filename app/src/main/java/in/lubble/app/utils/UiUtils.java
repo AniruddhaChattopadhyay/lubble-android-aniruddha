@@ -19,6 +19,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
+import androidx.palette.graphics.Palette;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import in.lubble.app.R;
@@ -192,5 +193,26 @@ public class UiUtils {
             view.setVisibility(View.VISIBLE);
         }
     }
+
+    public static final Palette.Filter DEFAULT_FILTER = new Palette.Filter() {
+        private static final float BLACK_MAX_LIGHTNESS = 0.05F;
+        private static final float WHITE_MIN_LIGHTNESS = 0.95F;
+
+        public boolean isAllowed(int rgb, float[] hsl) {
+            return !this.isWhite(hsl) && !this.isBlack(hsl) && !this.isNearRedILine(hsl);
+        }
+
+        private boolean isBlack(float[] hslColor) {
+            return hslColor[2] <= BLACK_MAX_LIGHTNESS;
+        }
+
+        private boolean isWhite(float[] hslColor) {
+            return hslColor[2] >= WHITE_MIN_LIGHTNESS;
+        }
+
+        private boolean isNearRedILine(float[] hslColor) {
+            return hslColor[0] >= 10.0F && hslColor[0] <= 37.0F && hslColor[1] <= 0.82F;
+        }
+    };
 
 }
