@@ -1151,6 +1151,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             linkMetaContainer.setVisibility(View.VISIBLE);
                             linkTitle.setText(title);
                             linkDesc.setText(desc);
+                            linkPicIv.setImageResource(R.drawable.ic_public_black_24dp);
                         }
                     });
                 }
