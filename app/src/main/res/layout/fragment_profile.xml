@@ -34,10 +34,26 @@
                 tools:text="Shivam Gupta" />
 
             <TextView
-                android:id="@+id/tv_locality"
+                android:id="@+id/tv_badge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_name"
+                android:gravity="center"
+                android:minWidth="56dp"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:layout_marginBottom="8dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/rect_rounded_border_blue"
+                android:padding="4dp"
+                android:textColor="@color/colorAccent"
+                tools:text="RWA" />
+
+            <TextView
+                android:id="@+id/tv_locality"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_badge"
                 android:layout_centerHorizontal="true"
                 android:textStyle="bold"
                 tools:text="C - Block" />
@@ -49,8 +65,8 @@
                 android:layout_below="@id/tv_locality"
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
                 tools:text="Edit Profile to add a bio" />
@@ -61,10 +77,10 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/tv_bio"
                 android:layout_centerHorizontal="true"
-                android:textStyle="bold"
                 android:padding="8dp"
                 android:text="@string/edit_profile"
                 android:textColor="@color/link_blue"
+                android:textStyle="bold"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
@@ -76,8 +92,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/relativelayout_profile_info"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -121,8 +137,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/card_referral"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             android:background="@drawable/rectangle_border"
             android:visibility="gone"
             tools:visibility="visible" />
@@ -130,10 +146,10 @@
         <RelativeLayout
             android:id="@+id/feedback_container"
             android:layout_width="match_parent"
-            android:background="@drawable/rectangle_border"
             android:layout_height="wrap_content"
             android:layout_below="@id/spinner_envo"
-            android:layout_margin="8dp">
+            android:layout_margin="8dp"
+            android:background="@drawable/rectangle_border">
 
             <TextView
                 android:layout_width="match_parent"
@@ -148,8 +164,8 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_alignParentRight="true"
-                android:layout_marginRight="8dp"
                 android:layout_centerVertical="true"
+                android:layout_marginRight="8dp"
                 app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
 
         </RelativeLayout>

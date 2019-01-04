@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,6 +52,7 @@ public class ProfileFrag extends Fragment {
     private ImageView coverPicIv;
     private ImageView profilePicIv;
     private TextView userName;
+    private TextView badgeTv;
     private TextView locality;
     private TextView userBio;
     private TextView editProfileTV;
@@ -94,6 +96,7 @@ public class ProfileFrag extends Fragment {
         coverPicIv = rootView.findViewById(R.id.iv_cover);
         profilePicIv = rootView.findViewById(R.id.iv_profilePic);
         userName = rootView.findViewById(R.id.tv_name);
+        badgeTv = rootView.findViewById(R.id.tv_badge);
         locality = rootView.findViewById(R.id.tv_locality);
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
@@ -202,6 +205,12 @@ public class ProfileFrag extends Fragment {
                 profileData = dataSnapshot.getValue(ProfileData.class);
                 assert profileData != null;
                 userName.setText(profileData.getInfo().getName());
+                if (!TextUtils.isEmpty(profileData.getInfo().getBadge())) {
+                    badgeTv.setVisibility(View.VISIBLE);
+                    badgeTv.setText(profileData.getInfo().getBadge());
+                } else {
+                    badgeTv.setVisibility(View.GONE);
+                }
                 locality.setText(profileData.getLocality());
                 if (isValidString(profileData.getBio())) {
                     userBio.setText(profileData.getBio());
