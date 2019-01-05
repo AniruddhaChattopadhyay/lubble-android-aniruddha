@@ -1,5 +1,6 @@
 package in.lubble.app.groups.group_info;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +47,13 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
                 .circleCrop()
                 .into(holder.iconIv);
 
+        if (!TextUtils.isEmpty(profileInfo.getBadge())) {
+            holder.badgeTV.setVisibility(View.VISIBLE);
+            holder.badgeTV.setText(profileInfo.getBadge());
+        } else {
+            holder.badgeTV.setVisibility(View.GONE);
+        }
+
         if (adminList.containsKey(profileInfo.getId())) {
             holder.infoTv.setVisibility(View.VISIBLE);
         } else {
@@ -89,12 +97,14 @@ public class GroupMembersAdapter extends RecyclerView.Adapter<GroupMembersAdapte
         final ImageView iconIv;
         final TextView titleTv;
         final TextView infoTv;
+        final TextView badgeTV;
 
         public MemberHolder(View view) {
             super(view);
             iconIv = view.findViewById(R.id.iv_icon);
             titleTv = view.findViewById(R.id.tv_title);
             infoTv = view.findViewById(R.id.tv_info);
+            badgeTV = view.findViewById(R.id.tv_member_badge);
             view.setOnClickListener(this);
         }
 
