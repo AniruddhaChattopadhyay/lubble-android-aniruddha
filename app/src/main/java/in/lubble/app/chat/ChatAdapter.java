@@ -780,7 +780,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         });
     }
 
-    private void addReplyData(String replyMsgId, TextView linkTitleTv, TextView linkDescTv) {
+    private void addReplyData(String replyMsgId, final TextView linkTitleTv, final TextView linkDescTv) {
         ChatData emptyReplyChatData = new ChatData();
         emptyReplyChatData.setId(replyMsgId);
         int index = chatDataList.indexOf(emptyReplyChatData);
@@ -797,6 +797,31 @@ public class ChatAdapter extends RecyclerView.Adapter {
             desc = desc.concat(quotedChatData.getMessage());
             linkDescTv.setText(desc);
             showName(linkTitleTv, quotedChatData.getAuthorUid());
+        } else {
+            // chat not found, must have not been loaded yet due to pagination
+            RealtimeDbHelper.getMessagesRef().child(groupId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue() != null) {
+                        final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                        String desc = "";
+                        if (isValidString(quotedChatData.getImgUrl())) {
+                            desc = desc.concat("\uD83D\uDCF7 ");
+                            if (!isValidString(quotedChatData.getMessage())) {
+                                // add the word photo if there is no caption
+                                desc = desc.concat("Photo ");
+                            }
+                        }
+                        desc = desc.concat(quotedChatData.getMessage());
+                        linkDescTv.setText(desc);
+                        showName(linkTitleTv, quotedChatData.getAuthorUid());
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
         }
     }
 
