@@ -762,7 +762,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         }*/
                     }
                 } else {
-                    Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey()));
+                    Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey() + " and group ID: " + groupId));
                 }
             }
 
@@ -853,7 +853,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             chatRecyclerView.scrollBy(0, -dpToPx(40));
                         }
                     } else {
-                        Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + childDataSnapshot.getKey()));
+                        Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + childDataSnapshot.getKey() + " and group ID: " + groupId));
                         isLoadingMoreChats = false;
                         paginationProgressBar.setVisibility(View.GONE);
                         chatRecyclerView.scrollBy(0, -dpToPx(40));
