@@ -236,7 +236,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
-            addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv);
+            addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv, chatData.getIsDm());
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.rounded_rect_gray);
             DrawableCompat.setTintList(drawable, null);
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
@@ -404,7 +404,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
             recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.black));
-            addReplyData(chatData.getReplyMsgId(), recvdChatViewHolder.linkTitleTv, recvdChatViewHolder.linkDescTv);
+            addReplyData(chatData.getReplyMsgId(), recvdChatViewHolder.linkTitleTv, recvdChatViewHolder.linkDescTv, chatData.getIsDm());
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.sent_chat_bubble_border);
             DrawableCompat.setTintList(drawable, null);
             recvdChatViewHolder.linkContainer.setBackground(drawable);
@@ -780,7 +780,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         });
     }
 
-    private void addReplyData(String replyMsgId, final TextView linkTitleTv, final TextView linkDescTv) {
+    private void addReplyData(String replyMsgId, final TextView linkTitleTv, final TextView linkDescTv, boolean isDm) {
         ChatData emptyReplyChatData = new ChatData();
         emptyReplyChatData.setId(replyMsgId);
         int index = chatDataList.indexOf(emptyReplyChatData);
@@ -799,29 +799,55 @@ public class ChatAdapter extends RecyclerView.Adapter {
             showName(linkTitleTv, quotedChatData.getAuthorUid());
         } else {
             // chat not found, must have not been loaded yet due to pagination
-            RealtimeDbHelper.getMessagesRef().child(groupId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.getValue() != null) {
-                        final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                        String desc = "";
-                        if (isValidString(quotedChatData.getImgUrl())) {
-                            desc = desc.concat("\uD83D\uDCF7 ");
-                            if (!isValidString(quotedChatData.getMessage())) {
-                                // add the word photo if there is no caption
-                                desc = desc.concat("Photo ");
+            if (!isDm) {
+                RealtimeDbHelper.getMessagesRef().child(groupId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                            String desc = "";
+                            if (isValidString(quotedChatData.getImgUrl())) {
+                                desc = desc.concat("\uD83D\uDCF7 ");
+                                if (!isValidString(quotedChatData.getMessage())) {
+                                    // add the word photo if there is no caption
+                                    desc = desc.concat("Photo ");
+                                }
                             }
+                            desc = desc.concat(quotedChatData.getMessage());
+                            linkDescTv.setText(desc);
+                            showName(linkTitleTv, quotedChatData.getAuthorUid());
                         }
-                        desc = desc.concat(quotedChatData.getMessage());
-                        linkDescTv.setText(desc);
-                        showName(linkTitleTv, quotedChatData.getAuthorUid());
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            } else {
+                RealtimeDbHelper.getDmMessagesRef().child(dmId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.getValue() != null) {
+                            final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                            String desc = "";
+                            if (isValidString(quotedChatData.getImgUrl())) {
+                                desc = desc.concat("\uD83D\uDCF7 ");
+                                if (!isValidString(quotedChatData.getMessage())) {
+                                    // add the word photo if there is no caption
+                                    desc = desc.concat("Photo ");
+                                }
+                            }
+                            desc = desc.concat(quotedChatData.getMessage());
+                            linkDescTv.setText(desc);
+                            showName(linkTitleTv, quotedChatData.getAuthorUid());
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            }
         }
     }
 

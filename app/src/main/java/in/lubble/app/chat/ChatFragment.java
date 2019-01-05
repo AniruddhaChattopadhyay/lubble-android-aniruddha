@@ -1183,6 +1183,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                        linkPicIv.setImageResource(R.drawable.ic_reply_black_24dp);
                         linkTitle.setText(profileInfo.getName());
                         String desc = "";
                         if (isValidString(quotedChatData.getImgUrl())) {
