@@ -182,7 +182,7 @@ public class MainActivity extends BaseActivity {
                 LubbleActivity.open(MainActivity.this);
             }
         });
-        showBottomNavBadge();
+        //showBottomNavBadge();
         fetchAndPersistAppFeatures();
         fetchAndPersistMplaceItems();
         initFirebaseRemoteConfig();
