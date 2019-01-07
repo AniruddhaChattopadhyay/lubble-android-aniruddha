@@ -305,7 +305,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 GlideApp.with(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
         calcUnreadCount();
-
+        if (messagesReference != null) {
+            msgChildListener = msgListener(messagesReference);
+            initMsgListenerToKnowWhenSyncComplete();
+        } else {
+            chatProgressBar.setVisibility(View.GONE);
+        }
         foundFirstUnreadMsg = false;
         chatRecyclerView.setOnFlingListener(new RecyclerView.OnFlingListener() {
             @Override
@@ -415,12 +420,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     @Override
     public void onResume() {
         super.onResume();
-        if (messagesReference != null) {
-            msgChildListener = msgListener(messagesReference);
-            initMsgListenerToKnowWhenSyncComplete();
-        } else {
-            chatProgressBar.setVisibility(View.GONE);
-        }
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         resetUnreadCount();
@@ -1232,9 +1231,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onPause();
         recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
-        if (msgChildListener != null) {
-            messagesReference.removeEventListener(msgChildListener);
-        }
         if (groupReference != null && groupInfoListener != null) {
             groupReference.removeEventListener(groupInfoListener);
         }
