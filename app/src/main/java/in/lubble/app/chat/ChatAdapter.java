@@ -573,6 +573,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     choiceTv.setTypeface(choiceTv.getTypeface(), Typeface.BOLD);
                     percentTv.setTypeface(percentTv.getTypeface(), Typeface.BOLD);
                     ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.trans_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+                } else {
+                    choiceTv.setTypeface(choiceTv.getTypeface(), Typeface.NORMAL);
+                    percentTv.setTypeface(percentTv.getTypeface(), Typeface.NORMAL);
+                    ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.medium_light_grey), android.graphics.PorterDuff.Mode.SRC_IN);
                 }
             } else {
                 // percent is ZERO
