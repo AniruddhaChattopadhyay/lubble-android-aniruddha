@@ -305,12 +305,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 GlideApp.with(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
         calcUnreadCount();
-        if (messagesReference != null) {
-            msgChildListener = msgListener(messagesReference);
-            initMsgListenerToKnowWhenSyncComplete();
-        } else {
-            chatProgressBar.setVisibility(View.GONE);
-        }
 
         foundFirstUnreadMsg = false;
         chatRecyclerView.setOnFlingListener(new RecyclerView.OnFlingListener() {
@@ -421,6 +415,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     @Override
     public void onResume() {
         super.onResume();
+        if (messagesReference != null) {
+            msgChildListener = msgListener(messagesReference);
+            initMsgListenerToKnowWhenSyncComplete();
+        } else {
+            chatProgressBar.setVisibility(View.GONE);
+        }
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         resetUnreadCount();
@@ -742,7 +742,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildAdded: ");
                 final ChatData chatData = dataSnapshot.getValue(ChatData.class);
-                if (chatData != null && isAdded()) {
+                if (chatData != null) {
                     sendBtnProgressBtn.setVisibility(View.GONE);
                     Log.d(TAG, "onChildAdded: " + dataSnapshot.getKey());
                     chatData.setId(dataSnapshot.getKey());
@@ -790,9 +790,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                if (isAdded()) {
-                    Crashlytics.logException(databaseError.toException());
-                }
+                Crashlytics.logException(databaseError.toException());
             }
         });
     }
@@ -1234,6 +1232,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onPause();
         recyclerViewState = chatRecyclerView.getLayoutManager().onSaveInstanceState();
         prevUrl = "";
+        if (msgChildListener != null) {
+            messagesReference.removeEventListener(msgChildListener);
+        }
         if (groupReference != null && groupInfoListener != null) {
             groupReference.removeEventListener(groupInfoListener);
         }

@@ -39,6 +39,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -464,6 +465,9 @@ public class MainActivity extends BaseActivity {
                     return true;
                 case R.id.navigation_explore:
                     switchFrag(ExploreFrag.newInstance());
+                    return true;
+                case R.id.navigation_events:
+                    switchFrag(EventsFrag.newInstance());
                     return true;
                 case R.id.navigation_mplace:
                     switchFrag(MarketplaceFrag.newInstance());
