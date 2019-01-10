@@ -65,6 +65,11 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
         attachmentData.setColor(R.color.mute_purple);
         attachmentData.setText("Group");
         list.add(attachmentData);
+        attachmentData = new AttachmentData();
+        attachmentData.setIcon(R.drawable.ic_event_black_24dp);
+        attachmentData.setColor(R.color.dk_green);
+        attachmentData.setText("Event");
+        list.add(attachmentData);
         return list;
     }
 

@@ -362,9 +362,22 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".chat.NewPollActiv" />
-        <activity android:name=".chat.GroupPickerActiv" />
-        <activity android:name=".chat.ShareActiv"></activity>
+        <activity
+            android:name=".chat.NewPollActiv"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".chat.GroupPickerActiv"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".events.EventPickerActiv"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name=".chat.ShareActiv"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" />
     </application>
 
 </manifest>

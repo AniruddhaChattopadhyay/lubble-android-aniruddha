@@ -34,6 +34,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
+import in.lubble.app.events.EventPickerActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.*;
@@ -68,6 +69,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
     private static final int REQUEST_CODE_GROUP_PICK = 917;
+    private static final int REQUEST_CODE_EVENT_PICK = 922;
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
     private static final String KEY_MSG_ID = "CHAT_MSG_ID";
     private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
@@ -144,7 +146,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private final static int PAGE_SIZE = 20;
     private int unreadCount = 0;
     private String attachedGroupId;
+    private String attachedEventId;
     private String attachedGroupPicUrl;
+    private String attachedEventPicUrl;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -915,6 +919,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     chatData.setLinkTitle(linkTitle.getText().toString());
                     chatData.setLinkDesc(linkDesc.getText().toString());
                     chatData.setLinkPicUrl(attachedGroupPicUrl);
+                } else if (isValidString(attachedEventId)) {
+                    chatData.setType(EVENT);
+                    chatData.setAttachedGroupId(attachedEventId);
+                    chatData.setLinkTitle(linkTitle.getText().toString());
+                    chatData.setLinkDesc(linkDesc.getText().toString());
+                    chatData.setLinkPicUrl(attachedEventPicUrl);
                 } else if (isValidString(replyMsgId)) {
                     chatData.setType(REPLY);
                     chatData.setReplyMsgId(replyMsgId);
@@ -1032,6 +1042,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 attachedGroupId = chosenGroupId;
                 fetchAndShowAttachedGroupInfo();
             }
+        } else if (requestCode == REQUEST_CODE_EVENT_PICK && resultCode == RESULT_OK) {
+            String chosenEventId = data.getStringExtra("event_id");
+            if (!TextUtils.isEmpty(chosenEventId)) {
+                attachedEventId = chosenEventId;
+                fetchAndShowAttachedEventInfo();
+            }
         }
     }
 
@@ -1061,7 +1077,37 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 }
             });
         } else {
+            linkMetaContainer.setVisibility(View.GONE);
+        }
+    }
 
+    private void fetchAndShowAttachedEventInfo() {
+        if (!TextUtils.isEmpty(attachedEventId)) {
+            RealtimeDbHelper.getEventsRef().child(attachedEventId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue() != null) {
+                        linkMetaContainer.setVisibility(View.VISIBLE);
+                        final EventData eventData = dataSnapshot.getValue(EventData.class);
+                        linkTitle.setText(eventData.getTitle());
+                        linkDesc.setText(eventData.getDesc());
+                        GlideApp.with(getContext())
+                                .load(eventData.getProfilePic())
+                                .circleCrop()
+                                .placeholder(R.drawable.ic_event_black_24dp)
+                                .error(R.drawable.ic_event_black_24dp)
+                                .into(linkPicIv);
+                        attachedEventPicUrl = eventData.getProfilePic();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        } else {
+            linkMetaContainer.setVisibility(View.GONE);
         }
     }
 
@@ -1079,6 +1125,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 break;
             case 3:
                 startActivityForResult(GroupPickerActiv.getIntent(getContext()), REQUEST_CODE_GROUP_PICK);
+                break;
+            case 4:
+                startActivityForResult(EventPickerActiv.getIntent(getContext()), REQUEST_CODE_EVENT_PICK);
                 break;
         }
     }
