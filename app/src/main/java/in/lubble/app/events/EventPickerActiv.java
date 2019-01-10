@@ -24,7 +24,6 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 import static in.lubble.app.utils.DateTimeUtils.*;
 
@@ -99,7 +98,6 @@ public class EventPickerActiv extends AppCompatActivity {
                 } else {
                     emptyEventsContainer.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.VISIBLE);
-                    Collections.reverse(eventDataList);
                     recyclerView.setAdapter(new EventPickerAdapter(eventDataList, GlideApp.with(EventPickerActiv.this)));
                 }
             }

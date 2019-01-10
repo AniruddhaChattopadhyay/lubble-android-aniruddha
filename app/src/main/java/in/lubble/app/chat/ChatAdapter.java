@@ -42,6 +42,7 @@ import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
@@ -234,6 +235,21 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             setBgColor(sentChatViewHolder.linkContainer, chatData);
 
+        } else if (chatData.getType().equalsIgnoreCase(EVENT) && isValidString(chatData.getAttachedGroupId())) {
+            sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            sentChatViewHolder.linkTitleTv.setText("Event: " + chatData.getLinkTitle());
+            sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            glide.load(chatData.getLinkPicUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_event)
+                    .error(R.drawable.ic_event)
+                    .into(sentChatViewHolder.linkPicIv);
+            sentChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+
+            setBgColor(sentChatViewHolder.linkContainer, chatData);
+
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv, chatData.getIsDm());
@@ -336,6 +352,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             });
                 }
             });
+        } else {
+            Drawable normalDrawable = context.getResources().getDrawable(R.drawable.rounded_rect_gray);
+            Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
+            DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(context, R.color.fb_color));
+            linkContainer.setBackground(wrapDrawable);
         }
     }
 
@@ -390,6 +411,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (chatData.getType().equalsIgnoreCase(GROUP) && isValidString(chatData.getAttachedGroupId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
+            recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            glide.load(chatData.getLinkPicUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_circle_group_24dp)
+                    .error(R.drawable.ic_circle_group_24dp)
+                    .into(recvdChatViewHolder.linkPicIv);
+            recvdChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+            setBgColor(recvdChatViewHolder.linkContainer, chatData);
+        } else if (chatData.getType().equalsIgnoreCase(EVENT) && isValidString(chatData.getAttachedGroupId())) {
+            recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
+            recvdChatViewHolder.linkTitleTv.setText("Event: " + chatData.getLinkTitle());
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
             recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
@@ -1214,6 +1248,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     ChatData chatData = chatDataList.get(getAdapterPosition());
                     if (GROUP.equalsIgnoreCase(chatData.getType())) {
                         ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
+                    } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
+                        EventInfoActivity.open(context, chatData.getAttachedGroupId());
                     } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
                         ChatData emptyReplyChatData = new ChatData();
                         emptyReplyChatData.setId(chatData.getReplyMsgId());
@@ -1388,6 +1424,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     ChatData chatData = chatDataList.get(getAdapterPosition());
                     if (GROUP.equalsIgnoreCase(chatData.getType())) {
                         ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
+                    } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
+                        EventInfoActivity.open(context, chatData.getAttachedGroupId());
                     } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
                         ChatData emptyReplyChatData = new ChatData();
                         emptyReplyChatData.setId(chatData.getReplyMsgId());

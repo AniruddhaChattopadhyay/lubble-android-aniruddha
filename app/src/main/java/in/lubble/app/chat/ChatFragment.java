@@ -971,6 +971,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 linkMetaContainer.setVisibility(View.GONE);
                 replyMsgId = null;
                 attachedGroupId = null;
+                attachedEventId = null;
                 if (linkMetaAsyncTask != null) {
                     linkMetaAsyncTask.cancel(true);
                 }
@@ -1003,6 +1004,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 linkMetaContainer.setVisibility(View.GONE);
                 replyMsgId = null;
                 attachedGroupId = null;
+                attachedEventId = null;
                 break;
         }
     }
@@ -1090,12 +1092,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         linkMetaContainer.setVisibility(View.VISIBLE);
                         final EventData eventData = dataSnapshot.getValue(EventData.class);
                         linkTitle.setText(eventData.getTitle());
-                        linkDesc.setText(eventData.getDesc());
+                        linkDesc.setText(DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), DateTimeUtils.APP_DATE_NO_YEAR) + ": " + eventData.getDesc());
                         GlideApp.with(getContext())
                                 .load(eventData.getProfilePic())
                                 .circleCrop()
-                                .placeholder(R.drawable.ic_event_black_24dp)
-                                .error(R.drawable.ic_event_black_24dp)
+                                .placeholder(R.drawable.ic_event)
+                                .error(R.drawable.ic_event)
                                 .into(linkPicIv);
                         attachedEventPicUrl = eventData.getProfilePic();
                     }
@@ -1175,7 +1177,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     prevUrl = extractedUrl;
                     linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
                     linkMetaAsyncTask.execute();
-                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId) && !isValidString(attachedGroupId)) {
+                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId) && !isValidString(attachedGroupId) && !isValidString(attachedEventId)) {
                     linkMetaContainer.setVisibility(View.GONE);
                     prevUrl = "";
                     linkTitle.setText("");

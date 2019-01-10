@@ -46,7 +46,7 @@ public class ChatData implements Serializable {
     private ArrayList<ChoiceData> choiceList;
     private String pollQues = "";
     private HashMap<String, Integer> pollReceipts = new HashMap<>();
-    private String attachedGroupId;
+    private String attachedGroupId; // or attached event ID
 
     @Override
     public boolean equals(Object obj) {
@@ -223,6 +223,7 @@ public class ChatData implements Serializable {
         this.pollReceipts = pollReceipts;
     }
 
+    // or attached event ID
     public String getAttachedGroupId() {
         return attachedGroupId;
     }
