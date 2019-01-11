@@ -291,7 +291,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
             shareGroupContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ShareActiv.open(ScrollingGroupInfoActivity.this, groupId);
+                    ShareActiv.open(ScrollingGroupInfoActivity.this, groupId, ShareActiv.ShareType.GROUP);
                 }
             });
         } else {

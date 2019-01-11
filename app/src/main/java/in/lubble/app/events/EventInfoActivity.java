@@ -36,6 +36,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.UserGroupData;
@@ -221,6 +222,13 @@ public class EventInfoActivity extends BaseActivity {
         } catch (Exception e) {
             Crashlytics.logException(e);
         }
+
+        shareContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShareActiv.open(EventInfoActivity.this, eventId, ShareActiv.ShareType.EVENT);
+            }
+        });
     }
 
     @Override

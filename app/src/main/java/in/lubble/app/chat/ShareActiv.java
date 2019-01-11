@@ -33,18 +33,25 @@ import static in.lubble.app.firebase.RealtimeDbHelper.*;
 
 public class ShareActiv extends AppCompatActivity {
 
+    public enum ShareType {
+        GROUP, EVENT
+    }
+
     private static final String TAG = "ShareActiv";
-    private static final String ARG_GROUP_ID = "ARG_GROUP_ID";
+    private static final String ARG_SHARE_ID = "ARG_SHARE_ID";
+    private static final String ARG_TYPE = "ARG_TYPE";
 
     private RecyclerView recyclerView;
     private Query query;
     private ValueEventListener valueEventListener;
     private ChatsAdapter chatsAdapter;
-    private String groupIdToShare;
+    private String shareId;
+    private ShareType shareType;
 
-    public static void open(Context context, String groupIdToShare) {
+    public static void open(Context context, String groupIdToShare, ShareType shareType) {
         final Intent intent = new Intent(context, ShareActiv.class);
-        intent.putExtra(ARG_GROUP_ID, groupIdToShare);
+        intent.putExtra(ARG_SHARE_ID, groupIdToShare);
+        intent.putExtra(ARG_TYPE, shareType);
         context.startActivity(intent);
     }
 
@@ -60,7 +67,8 @@ public class ShareActiv extends AppCompatActivity {
         DividerItemDecoration itemDecor = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(itemDecor);
 
-        groupIdToShare = getIntent().getStringExtra(ARG_GROUP_ID);
+        shareId = getIntent().getStringExtra(ARG_SHARE_ID);
+        shareType = (ShareType) getIntent().getSerializableExtra(ARG_TYPE);
 
         syncGroups();
         syncUserDmIds();
@@ -301,9 +309,12 @@ public class ShareActiv extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         final ChatData chatData = new ChatData();
-                        if (groupIdToShare != null) {
+                        if (shareType == ShareType.GROUP && shareId != null) {
                             chatData.setType(ChatData.GROUP);
-                            chatData.setAttachedGroupId(groupIdToShare);
+                            chatData.setAttachedGroupId(shareId);
+                        } else if (shareType == ShareType.EVENT && shareId != null) {
+                            chatData.setType(ChatData.EVENT);
+                            chatData.setAttachedGroupId(shareId);
                         }
                         final GroupData groupData = groupList.get(getAdapterPosition());
                         if (groupData.isDm()) {

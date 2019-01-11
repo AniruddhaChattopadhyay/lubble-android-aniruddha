@@ -76,7 +76,7 @@
             android:layout_below="@id/tv_event_name"
             android:layout_marginTop="24dp"
             android:orientation="horizontal"
-            android:weightSum="2">
+            android:weightSum="3">
 
             <TextView
                 android:id="@+id/tv_final_marked_status"
@@ -135,10 +135,9 @@
                 android:id="@+id/share_container"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical"
-                android:visibility="gone">
+                android:orientation="vertical">
 
                 <ImageView
                     android:layout_width="wrap_content"

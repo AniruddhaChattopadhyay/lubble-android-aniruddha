@@ -223,6 +223,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             case GROUP:
                 attachedGroupId = chatData.getAttachedGroupId();
                 fetchAndShowAttachedGroupInfo();
+            case EVENT:
+                attachedEventId = chatData.getAttachedGroupId();
+                fetchAndShowAttachedEventInfo();
                 break;
         }
         if (!TextUtils.isEmpty(chatData.getMessage())) {
