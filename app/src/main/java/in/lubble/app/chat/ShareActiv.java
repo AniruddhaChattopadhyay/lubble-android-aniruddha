@@ -27,11 +27,13 @@ import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 
 public class ShareActiv extends AppCompatActivity {
 
@@ -102,7 +104,10 @@ public class ShareActiv extends AppCompatActivity {
     private void handleSendImage(Intent intent) {
         Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
         if (imageUri != null) {
-            this.imgUri = imageUri;
+            // make a local copy of the img becoz our file upload service will lose auth for this URI
+            // since the service is not part of same context/process
+            File localImgFile = getFileFromInputStreamUri(this, imageUri);
+            this.imgUri = Uri.fromFile(localImgFile);
         }
     }
 
