@@ -73,6 +73,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
     private static final String KEY_MSG_ID = "CHAT_MSG_ID";
     private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
+    private static final String KEY_IMG_URI = "KEY_IMG_URI";
     private static final String KEY_DM_ID = "KEY_DM_ID";
     private static final String KEY_RECEIVER_ID = "KEY_RECEIVER_ID";
     private static final String KEY_RECEIVER_NAME = "KEY_RECEIVER_NAME";
@@ -149,28 +150,31 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedEventId;
     private String attachedGroupPicUrl;
     private String attachedEventPicUrl;
+    private Uri sharedImageUri;
 
     public ChatFragment() {
         // Required empty public constructor
     }
 
-    public static ChatFragment newInstanceForGroup(@NonNull String groupId, boolean isJoining, @Nullable String msgId, @Nullable ChatData chatData) {
+    public static ChatFragment newInstanceForGroup(@NonNull String groupId, boolean isJoining, @Nullable String msgId, @Nullable ChatData chatData, @Nullable Uri imgUri) {
         Bundle args = new Bundle();
         args.putString(KEY_GROUP_ID, groupId);
         args.putString(KEY_MSG_ID, msgId);
         args.putSerializable(KEY_CHAT_DATA, chatData);
         args.putBoolean(KEY_IS_JOINING, isJoining);
+        args.putParcelable(KEY_IMG_URI, imgUri);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
     }
 
-    public static ChatFragment newInstanceForDm(@NonNull String dmId, @Nullable String msgId, @Nullable String itemName, @Nullable ChatData chatData) {
+    public static ChatFragment newInstanceForDm(@NonNull String dmId, @Nullable String msgId, @Nullable String itemName, @Nullable ChatData chatData, @Nullable Uri imgUri) {
         Bundle args = new Bundle();
         args.putString(KEY_MSG_ID, msgId);
         args.putString(KEY_DM_ID, dmId);
         args.putString(KEY_ITEM_TITLE, itemName);
         args.putSerializable(KEY_CHAT_DATA, chatData);
+        args.putParcelable(KEY_IMG_URI, imgUri);
         ChatFragment fragment = new ChatFragment();
         fragment.setArguments(args);
         return fragment;
@@ -199,10 +203,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         receiverDpUrl = getArguments().getString(KEY_RECEIVER_DP_URL);
         itemTitle = getArguments().getString(KEY_ITEM_TITLE);
         isJoining = getArguments().getBoolean(KEY_IS_JOINING);
-        ChatData chatData = (ChatData) getArguments().getSerializable(KEY_CHAT_DATA);
-        if (chatData != null) {
-            populateChatData(chatData);
-        }
 
         if (groupId != null) {
             groupReference = getLubbleGroupsRef().child(groupId);
@@ -288,6 +288,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             newMessageEt.requestFocus();
         }
         init();
+        ChatData chatData = (ChatData) getArguments().getSerializable(KEY_CHAT_DATA);
+        if (getArguments().getParcelable(KEY_IMG_URI) != null) {
+            sharedImageUri = getArguments().getParcelable(KEY_IMG_URI);
+            if (TextUtils.isEmpty(dmId)) {
+                // not a DM
+                AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                sharedImageUri = null;
+            }
+        }
+        if (chatData != null) {
+            populateChatData(chatData);
+        }
+
         return view;
     }
 
@@ -545,6 +558,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     authorId = profileId;
                                     chatAdapter.setAuthorId(authorId);
                                     chatAdapter.setDmId(dmId);
+                                    if (sharedImageUri != null) {
+                                        String chatId = groupId;
+                                        if (!TextUtils.isEmpty(dmId)) {
+                                            chatId = dmId;
+                                        }
+                                        AttachImageActivity.open(getContext(), sharedImageUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                                        sharedImageUri = null;
+                                    }
                                 }
                             } else {
                                 // other person's profile ID, could be a seller or a user

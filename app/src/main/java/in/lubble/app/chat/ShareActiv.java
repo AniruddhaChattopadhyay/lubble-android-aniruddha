@@ -2,7 +2,9 @@ package in.lubble.app.chat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +49,8 @@ public class ShareActiv extends AppCompatActivity {
     private ChatsAdapter chatsAdapter;
     private String shareId;
     private ShareType shareType;
+    private final ChatData chatDataToSend = new ChatData();
+    private Uri imgUri;
 
     public static void open(Context context, String groupIdToShare, ShareType shareType) {
         final Intent intent = new Intent(context, ShareActiv.class);
@@ -67,13 +71,41 @@ public class ShareActiv extends AppCompatActivity {
         DividerItemDecoration itemDecor = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(itemDecor);
 
-        shareId = getIntent().getStringExtra(ARG_SHARE_ID);
-        shareType = (ShareType) getIntent().getSerializableExtra(ARG_TYPE);
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String type = intent.getType();
+
+        if (Intent.ACTION_SEND.equals(action) && type != null) {
+            if ("text/plain".equals(type)) {
+                handleSendText(intent);
+            } else if (type.startsWith("image/")) {
+                handleSendImage(intent);
+            }
+        } else {
+            // Handle other intents
+            shareId = getIntent().getStringExtra(ARG_SHARE_ID);
+            shareType = (ShareType) getIntent().getSerializableExtra(ARG_TYPE);
+        }
 
         syncGroups();
         syncUserDmIds();
         syncSellerDmIds();
     }
+
+    private void handleSendText(Intent intent) {
+        String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+        if (!TextUtils.isEmpty(sharedText)) {
+            chatDataToSend.setMessage(sharedText);
+        }
+    }
+
+    private void handleSendImage(Intent intent) {
+        Uri imageUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if (imageUri != null) {
+            this.imgUri = imageUri;
+        }
+    }
+
 
     private void syncGroups() {
         query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
@@ -308,19 +340,18 @@ public class ShareActiv extends AppCompatActivity {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        final ChatData chatData = new ChatData();
                         if (shareType == ShareType.GROUP && shareId != null) {
-                            chatData.setType(ChatData.GROUP);
-                            chatData.setAttachedGroupId(shareId);
+                            chatDataToSend.setType(ChatData.GROUP);
+                            chatDataToSend.setAttachedGroupId(shareId);
                         } else if (shareType == ShareType.EVENT && shareId != null) {
-                            chatData.setType(ChatData.EVENT);
-                            chatData.setAttachedGroupId(shareId);
+                            chatDataToSend.setType(ChatData.EVENT);
+                            chatDataToSend.setAttachedGroupId(shareId);
                         }
                         final GroupData groupData = groupList.get(getAdapterPosition());
                         if (groupData.isDm()) {
-                            ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatData);
+                            ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatDataToSend, imgUri);
                         } else {
-                            ChatActivity.openForGroup(ShareActiv.this, groupData.getId(), false, null, chatData);
+                            ChatActivity.openForGroup(ShareActiv.this, groupData.getId(), false, null, chatDataToSend, imgUri);
                         }
                         finish();
                     }

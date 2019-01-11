@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -41,6 +42,7 @@ public class ChatActivity extends BaseActivity {
     public static final String EXTRA_GROUP_ID = "chat_activ_group_id";
     public static final String EXTRA_MSG_ID = "chat_activ_msg_id";
     public static final String EXTRA_CHAT_DATA = "chat_activ_chat_data";
+    public static final String EXTRA_IMG_URI_DATA = "EXTRA_IMG_URI_DATA";
     // if we need to show joining progress dialog
     public static final String EXTRA_IS_JOINING = "chat_activ_is_joining";
     // for when DM exists
@@ -65,12 +67,13 @@ public class ChatActivity extends BaseActivity {
         context.startActivity(intent);
     }
 
-    public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId, ChatData chatData) {
+    public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId, ChatData chatData, @Nullable Uri imgUri) {
         final Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(EXTRA_GROUP_ID, groupId);
         intent.putExtra(EXTRA_IS_JOINING, isJoining);
         intent.putExtra(EXTRA_MSG_ID, msgId);
         intent.putExtra(EXTRA_CHAT_DATA, chatData);
+        intent.putExtra(EXTRA_IMG_URI_DATA, imgUri);
         context.startActivity(intent);
     }
 
@@ -82,12 +85,13 @@ public class ChatActivity extends BaseActivity {
         context.startActivity(intent);
     }
 
-    public static void openForDm(@NonNull Context context, @NonNull String dmId, @Nullable String msgId, @Nullable String itemTitle, ChatData chatData) {
+    public static void openForDm(@NonNull Context context, @NonNull String dmId, @Nullable String msgId, @Nullable String itemTitle, ChatData chatData, @Nullable Uri imgUri) {
         final Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(EXTRA_DM_ID, dmId);
         intent.putExtra(EXTRA_MSG_ID, msgId);
         intent.putExtra(EXTRA_ITEM_TITLE, itemTitle);
         intent.putExtra(EXTRA_CHAT_DATA, chatData);
+        intent.putExtra(EXTRA_IMG_URI_DATA, imgUri);
         context.startActivity(intent);
     }
 
@@ -131,12 +135,12 @@ public class ChatActivity extends BaseActivity {
         }
         if (!TextUtils.isEmpty(groupId)) {
             targetFrag = ChatFragment.newInstanceForGroup(
-                    groupId, isJoining, msgId, (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA)
+                    groupId, isJoining, msgId, (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
             );
         } else if (!TextUtils.isEmpty(dmId)) {
             targetFrag = ChatFragment.newInstanceForDm(
                     dmId, msgId,
-                    getIntent().getStringExtra(EXTRA_ITEM_TITLE), (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA)
+                    getIntent().getStringExtra(EXTRA_ITEM_TITLE), (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
             );
         } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
             targetFrag = ChatFragment.newInstanceForEmptyDm(
