@@ -79,6 +79,34 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <meta-data
+            android:name="CLEVERTAP_NOTIFICATION_ICON"
+            android:value="ic_lubble_notif" /> <!-- name of your file in the drawable directory without the file extension. -->
+
+        <activity
+            android:name="com.clevertap.android.sdk.InAppNotificationActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
+            android:configChanges="orientation|keyboardHidden" />
+
+        <meta-data
+            android:name="CLEVERTAP_BACKGROUND_SYNC"
+            android:value="1" />
+
+        <!--use CTBackgroundIntentService to target users below Android 21 (Lollipop)-->
+        <service
+            android:name="com.clevertap.android.sdk.CTBackgroundIntentService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.clevertap.BG_EVENT" />
+            </intent-filter>
+        </service>
+
+        <!--use CTBackgroundJobService to target users on and above Android 21 (Lollipop)-->
+        <service
+            android:name="com.clevertap.android.sdk.CTBackgroundJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:exported="false" />
+
         <activity
             android:name=".chat.ChatActivity"
             android:configChanges="orientation"

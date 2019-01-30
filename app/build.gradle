@@ -9,8 +9,8 @@ android {
         applicationId "in.lubble.app"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 109
-        versionName "1.5.0-1"
+        versionCode 110
+        versionName "1.5.1-1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -85,7 +85,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.10.1'
     // Retrofit & OkHttp
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation 'com.clevertap.android:clevertap-android-sdk:3.3.2'
+    implementation 'com.clevertap.android:clevertap-android-sdk:3.4.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.github.apl-devs:appintro:v4.2.3'
