@@ -82,7 +82,8 @@ public class ProfileFrag extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+        userId = FirebaseAuth.getInstance().getUid();
+        if (getArguments() != null && !TextUtils.isEmpty(getArguments().getString(ARG_USER_ID))) {
             userId = getArguments().getString(ARG_USER_ID);
         }
     }
@@ -203,53 +204,54 @@ public class ProfileFrag extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 profileData = dataSnapshot.getValue(ProfileData.class);
-                assert profileData != null;
-                userName.setText(profileData.getInfo().getName());
-                if (!TextUtils.isEmpty(profileData.getInfo().getBadge())) {
-                    badgeTv.setVisibility(View.VISIBLE);
-                    badgeTv.setText(profileData.getInfo().getBadge());
-                } else {
-                    badgeTv.setVisibility(View.GONE);
-                }
-                locality.setText(profileData.getLocality());
-                if (isValidString(profileData.getBio())) {
-                    userBio.setText(profileData.getBio());
-                } else if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                    userBio.setText(R.string.edit_profile_to_add_bio);
-                } else {
-                    userBio.setText(R.string.no_bio_text);
-                }
-                if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                    editProfileTV.setVisibility(View.VISIBLE);
-                    referralCard.setVisibility(View.VISIBLE);
-                    logoutTv.setVisibility(View.VISIBLE);
-                } else {
-                    editProfileTV.setVisibility(View.GONE);
-                    referralCard.setVisibility(View.GONE);
-                    logoutTv.setVisibility(View.GONE);
-                }
-                GlideApp.with(getContext())
-                        .load(profileData.getProfilePic())
-                        .error(R.drawable.ic_account_circle_black_no_padding)
-                        .placeholder(R.drawable.circle)
-                        .listener(new RequestListener<Drawable>() {
-                            @Override
-                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                progressBar.setVisibility(View.GONE);
-                                return false;
-                            }
+                if (profileData != null) {
+                    userName.setText(profileData.getInfo().getName());
+                    if (!TextUtils.isEmpty(profileData.getInfo().getBadge())) {
+                        badgeTv.setVisibility(View.VISIBLE);
+                        badgeTv.setText(profileData.getInfo().getBadge());
+                    } else {
+                        badgeTv.setVisibility(View.GONE);
+                    }
+                    locality.setText(profileData.getLocality());
+                    if (isValidString(profileData.getBio())) {
+                        userBio.setText(profileData.getBio());
+                    } else if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                        userBio.setText(R.string.edit_profile_to_add_bio);
+                    } else {
+                        userBio.setText(R.string.no_bio_text);
+                    }
+                    if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                        editProfileTV.setVisibility(View.VISIBLE);
+                        referralCard.setVisibility(View.VISIBLE);
+                        logoutTv.setVisibility(View.VISIBLE);
+                    } else {
+                        editProfileTV.setVisibility(View.GONE);
+                        referralCard.setVisibility(View.GONE);
+                        logoutTv.setVisibility(View.GONE);
+                    }
+                    GlideApp.with(getContext())
+                            .load(profileData.getProfilePic())
+                            .error(R.drawable.ic_account_circle_black_no_padding)
+                            .placeholder(R.drawable.circle)
+                            .listener(new RequestListener<Drawable>() {
+                                @Override
+                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                    progressBar.setVisibility(View.GONE);
+                                    return false;
+                                }
 
-                            @Override
-                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                progressBar.setVisibility(View.GONE);
-                                return false;
-                            }
-                        })
-                        .circleCrop()
-                        .into(profilePicIv);
-                GlideApp.with(getContext())
-                        .load(profileData.getCoverPic())
-                        .into(coverPicIv);
+                                @Override
+                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                    progressBar.setVisibility(View.GONE);
+                                    return false;
+                                }
+                            })
+                            .circleCrop()
+                            .into(profilePicIv);
+                    GlideApp.with(getContext())
+                            .load(profileData.getCoverPic())
+                            .into(coverPicIv);
+                }
             }
 
             @Override
