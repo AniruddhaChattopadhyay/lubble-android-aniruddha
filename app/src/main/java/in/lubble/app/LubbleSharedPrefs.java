@@ -127,8 +127,6 @@ public class LubbleSharedPrefs {
                     HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
                     if (map != null && !map.isEmpty()) {
                         setLubbleId((String) map.keySet().toArray()[0]);
-                    } else {
-                        Crashlytics.logException(new IllegalAccessException("User has NO lubble ID"));
                     }
                 }
 

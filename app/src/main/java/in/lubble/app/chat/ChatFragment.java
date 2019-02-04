@@ -513,7 +513,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     groupData = dataSnapshot.getValue(GroupData.class);
                     // fetchMembersProfile(groupData.getMembers()); to be used for tagging
-                    if (groupData != null) {
+                    if (groupData != null && getActivity() != null) {
                         if (!groupData.isJoined() && groupData.getIsPrivate()) {
                             chatRecyclerView.setVisibility(View.GONE);
                             pvtSystemMsg.setVisibility(View.VISIBLE);
@@ -1033,7 +1033,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
     }
 
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void showAttachmentBottomSheet() {
         AttachmentListDialogFrag.newInstance().show(getChildFragmentManager(), null);
     }
@@ -1322,21 +1322,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // NOTE: delegate the permission handling to generated method
         ChatFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
-    }
-
-    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void showRationaleForCamera(final PermissionRequest request) {
-        showStoragePermRationale(getContext(), request);
-    }
-
-    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void showDeniedForCamera() {
-        Toast.makeText(getContext(), getString(R.string.storage_perm_denied_text), Toast.LENGTH_SHORT).show();
-    }
-
-    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
-    void showNeverAskForCamera() {
-        Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
 
     @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
