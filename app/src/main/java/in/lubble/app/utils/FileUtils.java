@@ -209,7 +209,7 @@ public class FileUtils {
 
     @Nullable
     public static String getSavedImageForMsgId(Context context, String msgId) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && isExternalStorageReadable()) {
             File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                     + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + ".jpg");

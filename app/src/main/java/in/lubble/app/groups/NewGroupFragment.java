@@ -125,7 +125,7 @@ public class NewGroupFragment extends Fragment {
         return view;
     }
 
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void startPhotoPicker(int REQUEST_CODE) {
         try {
             File cameraPic = createImageFile(getContext());
@@ -219,17 +219,17 @@ public class NewGroupFragment extends Fragment {
         NewGroupFragmentPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showRationaleForCamera(final PermissionRequest request) {
         showStoragePermRationale(getContext(), request);
     }
 
-    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showDeniedForCamera() {
         Toast.makeText(getContext(), R.string.storage_perm_denied_text, Toast.LENGTH_SHORT).show();
     }
 
-    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showNeverAskForCamera() {
         Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
     }

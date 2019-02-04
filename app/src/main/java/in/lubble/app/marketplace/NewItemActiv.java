@@ -739,7 +739,7 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
 
     }
 
-    @NeedsPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void startPhotoPicker(int REQUEST_CODE) {
         try {
             File cameraPic = createImageFile(this);
@@ -758,17 +758,17 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
         NewItemActivPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    @OnShowRationale(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showRationaleForCamera(final PermissionRequest request) {
         showStoragePermRationale(this, request);
     }
 
-    @OnPermissionDenied(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showDeniedForCamera() {
         Toast.makeText(this, R.string.storage_perm_denied_text, Toast.LENGTH_SHORT).show();
     }
 
-    @OnNeverAskAgain(Manifest.permission.READ_EXTERNAL_STORAGE)
+    @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showNeverAskForCamera() {
         Toast.makeText(this, R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
