@@ -327,6 +327,7 @@ public class ShareActiv extends AppCompatActivity {
 
         void addGroupList(ArrayList<GroupData> groupDataList) {
             groupList.addAll(groupDataList);
+            notifyDataSetChanged();
         }
 
         class ViewHolder extends RecyclerView.ViewHolder {
