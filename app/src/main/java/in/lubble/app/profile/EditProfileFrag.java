@@ -45,7 +45,6 @@ public class EditProfileFrag extends Fragment {
     private static final int REQUEST_CODE_COVER_PIC = 560;
     private static final int REQUEST_CODE_DP = 211;
 
-    private ImageView coverPicIv;
     private ImageView profilePicIv;
     private TextView fullNameTv;
     private TextView lubbleTv;
@@ -78,7 +77,6 @@ public class EditProfileFrag extends Fragment {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
-        coverPicIv = rootView.findViewById(R.id.iv_cover);
         profilePicIv = rootView.findViewById(R.id.iv_profilePic);
         fullNameTv = rootView.findViewById(R.id.tv_name);
         lubbleTv = rootView.findViewById(R.id.tv_lubble);
@@ -86,7 +84,6 @@ public class EditProfileFrag extends Fragment {
         saveBtn = rootView.findViewById(R.id.btn_save_profile);
         progressBar = rootView.findViewById(R.id.progressBar_profile);
 
-        rootView.findViewById(R.id.linearLayout_cover_edit_container).setVisibility(View.VISIBLE);
         rootView.findViewById(R.id.iv_dp_edit_overlay).setVisibility(View.VISIBLE);
 
         Analytics.triggerScreenEvent(getContext(), this.getClass());
@@ -119,9 +116,6 @@ public class EditProfileFrag extends Fragment {
                             })
                             .circleCrop()
                             .into(profilePicIv);
-                    GlideApp.with(getContext())
-                            .load(fetchedProfileData.getCoverPic())
-                            .into(coverPicIv);
                 }
             }
 
@@ -131,13 +125,6 @@ public class EditProfileFrag extends Fragment {
             }
         });
 
-        coverPicIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditProfileFragPermissionsDispatcher
-                        .startPhotoPickerWithPermissionCheck(EditProfileFrag.this, REQUEST_CODE_COVER_PIC);
-            }
-        });
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -203,13 +190,6 @@ public class EditProfileFrag extends Fragment {
                         .circleCrop()
                         .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
                         .into(profilePicIv);
-            } else {
-                newCoverPicUri = Uri.fromFile(imageFile);
-                GlideApp.with(getContext())
-                        .load(imageFile)
-                        .centerCrop()
-                        .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
-                        .into(coverPicIv);
             }
 
         } else {

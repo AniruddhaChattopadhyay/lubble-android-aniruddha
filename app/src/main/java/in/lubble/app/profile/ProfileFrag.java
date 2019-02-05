@@ -11,12 +11,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,19 +30,19 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import in.lubble.app.BuildConfig;
-import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.R;
+import in.lubble.app.*;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
-import in.lubble.app.utils.FragUtils;
-import in.lubble.app.utils.FullScreenImageActivity;
-import in.lubble.app.utils.UserUtils;
+import in.lubble.app.utils.*;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+
+import java.util.ArrayList;
+import java.util.Collections;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
@@ -49,13 +55,13 @@ public class ProfileFrag extends Fragment {
 
     private View rootView;
     private String userId;
-    private ImageView coverPicIv;
     private ImageView profilePicIv;
     private TextView userName;
     private TextView badgeTv;
     private TextView locality;
     private TextView userBio;
     private TextView editProfileTV;
+    private RecyclerView userGroupsRv;
     private Button inviteBtn;
     private TextView logoutTv;
     private ProgressBar progressBar;
@@ -66,6 +72,7 @@ public class ProfileFrag extends Fragment {
     private ProfileData profileData;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
+    private GroupsAdapter groupsAdapter;
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -94,13 +101,13 @@ public class ProfileFrag extends Fragment {
         // Inflate the layout for this fragment
         rootView = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        coverPicIv = rootView.findViewById(R.id.iv_cover);
         profilePicIv = rootView.findViewById(R.id.iv_profilePic);
         userName = rootView.findViewById(R.id.tv_name);
         badgeTv = rootView.findViewById(R.id.tv_badge);
         locality = rootView.findViewById(R.id.tv_locality);
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
+        userGroupsRv = rootView.findViewById(R.id.rv_user_groups);
         referralCard = rootView.findViewById(R.id.card_referral);
         inviteBtn = rootView.findViewById(R.id.btn_invite);
         logoutTv = rootView.findViewById(R.id.tv_logout);
@@ -168,6 +175,10 @@ public class ProfileFrag extends Fragment {
             }
         });
 
+        groupsAdapter = new GroupsAdapter(GlideApp.with(requireContext()));
+        userGroupsRv.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
+        userGroupsRv.setAdapter(groupsAdapter);
+        syncGroups();
         return rootView;
     }
 
@@ -179,6 +190,28 @@ public class ProfileFrag extends Fragment {
         fetchDevMenu();
     }
 
+    private void syncGroups() {
+        RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final ArrayList<GroupData> groupDataList = new ArrayList<>();
+
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    final GroupData groupData = child.getValue(GroupData.class);
+                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())) {
+                        groupDataList.add(groupData);
+                    }
+                }
+                Collections.reverse(groupDataList);
+                groupsAdapter.addGroupList(groupDataList);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 
     final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
         @Override
@@ -199,6 +232,67 @@ public class ProfileFrag extends Fragment {
         }
     };
 
+    private class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder> {
+
+        private ArrayList<GroupData> groupList = new ArrayList<>();
+        private GlideRequests glideApp;
+
+        GroupsAdapter(GlideRequests glideApp) {
+            this.glideApp = glideApp;
+        }
+
+        @Override
+        public GroupsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new GroupsAdapter.ViewHolder(LayoutInflater.from(parent.getContext()), parent);
+        }
+
+        @Override
+        public void onBindViewHolder(GroupsAdapter.ViewHolder holder, int position) {
+            final GroupData groupData = groupList.get(position);
+            RequestOptions requestOptions = new RequestOptions();
+            requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0));
+            glideApp.load(groupData.getThumbnail())
+                    .placeholder(R.drawable.rounded_rect_gray)
+                    .error(R.drawable.rounded_rect_gray)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .apply(requestOptions)
+                    .into(holder.groupDpIv);
+            holder.groupNameTv.setText(groupData.getTitle());
+        }
+
+        @Override
+        public int getItemCount() {
+            return groupList.size();
+        }
+
+        void addGroupList(ArrayList<GroupData> groupDataList) {
+            groupList.addAll(groupDataList);
+            notifyDataSetChanged();
+        }
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+
+            final ImageView groupDpIv;
+            final TextView groupNameTv;
+            final TextView groupMemberTv;
+
+            ViewHolder(LayoutInflater inflater, ViewGroup parent) {
+                super(inflater.inflate(R.layout.item_user_group, parent, false));
+                groupDpIv = itemView.findViewById(R.id.iv_group_pic);
+                groupNameTv = itemView.findViewById(R.id.tv_group_title);
+                groupMemberTv = itemView.findViewById(R.id.tv_member_hint);
+                itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final GroupData groupData = groupList.get(getAdapterPosition());
+                        ChatActivity.openForGroup(getContext(), groupData.getId(), false, null);
+                    }
+                });
+            }
+        }
+
+    }
+
     private void fetchProfileFeed() {
         valueEventListener = new ValueEventListener() {
             @Override
@@ -212,7 +306,12 @@ public class ProfileFrag extends Fragment {
                     } else {
                         badgeTv.setVisibility(View.GONE);
                     }
-                    locality.setText(profileData.getLocality());
+                    if (!TextUtils.isEmpty(profileData.getLocality())) {
+                        locality.setText(profileData.getLocality());
+                        locality.setVisibility(View.VISIBLE);
+                    } else {
+                        locality.setVisibility(View.GONE);
+                    }
                     if (isValidString(profileData.getBio())) {
                         userBio.setText(profileData.getBio());
                     } else if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
@@ -248,9 +347,6 @@ public class ProfileFrag extends Fragment {
                             })
                             .circleCrop()
                             .into(profilePicIv);
-                    GlideApp.with(getContext())
-                            .load(profileData.getCoverPic())
-                            .into(coverPicIv);
                 }
             }
 

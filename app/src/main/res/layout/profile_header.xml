@@ -6,52 +6,15 @@
     android:layout_height="wrap_content"
     tools:showIn="@layout/fragment_profile">
 
-    <ImageView
-        android:id="@+id/iv_cover"
-        android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:background="@color/light_gray"
-        android:scaleType="centerCrop" />
-
-    <LinearLayout
-        android:id="@+id/linearLayout_cover_edit_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/iv_cover"
-        android:layout_alignParentRight="true"
-        android:alpha="0.5"
-        android:background="@color/white"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <ImageView
-            android:id="@+id/iv_cover_edit_overlay"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="4dp"
-            app:srcCompat="@drawable/ic_edit_black_24dp" />
-
-        <TextView
-            android:id="@+id/tv_edit_cover"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EDIT"
-            android:textStyle="bold" />
-
-    </LinearLayout>
 
     <!--transition name is different because we need circular reveal transition animation-->
     <ImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/iv_profilePic"
         android:layout_width="184dp"
         android:layout_height="184dp"
+        android:layout_marginTop="8dp"
         android:transitionName="nahi_chaiye"
-        android:layout_below="@+id/iv_cover"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="-92dp"
         app:srcCompat="@drawable/circle" />
 
     <ProgressBar
