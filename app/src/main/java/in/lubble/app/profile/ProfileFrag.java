@@ -37,9 +37,17 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.referrals.LeaderboardPersonData;
+import in.lubble.app.referrals.ReferralHistoryData;
+import in.lubble.app.referrals.ReferralLeaderboardData;
 import in.lubble.app.utils.*;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,6 +69,9 @@ public class ProfileFrag extends Fragment {
     private TextView locality;
     private TextView userBio;
     private TextView editProfileTV;
+    private TextView rankTv;
+    private TextView invitedTv;
+    private TextView pointsTv;
     private RecyclerView userGroupsRv;
     private Button inviteBtn;
     private TextView logoutTv;
@@ -107,6 +118,9 @@ public class ProfileFrag extends Fragment {
         locality = rootView.findViewById(R.id.tv_locality);
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
+        rankTv = rootView.findViewById(R.id.tv_rank);
+        invitedTv = rootView.findViewById(R.id.tv_invited);
+        pointsTv = rootView.findViewById(R.id.tv_points);
         userGroupsRv = rootView.findViewById(R.id.rv_user_groups);
         referralCard = rootView.findViewById(R.id.card_referral);
         inviteBtn = rootView.findViewById(R.id.btn_invite);
@@ -179,6 +193,7 @@ public class ProfileFrag extends Fragment {
         userGroupsRv.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
         userGroupsRv.setAdapter(groupsAdapter);
         syncGroups();
+        fetchStats();
         return rootView;
     }
 
@@ -356,6 +371,55 @@ public class ProfileFrag extends Fragment {
             }
         };
         userRef.addValueEventListener(valueEventListener);
+    }
+
+    private void fetchStats() {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchReferralLeaderboard().enqueue(new Callback<ReferralLeaderboardData>() {
+            @Override
+            public void onResponse(Call<ReferralLeaderboardData> call, Response<ReferralLeaderboardData> response) {
+                final ReferralLeaderboardData referralLeaderboardData = response.body();
+                if (response.isSuccessful() && referralLeaderboardData != null && isAdded() && isVisible()) {
+                    final LeaderboardPersonData currentUserStats = referralLeaderboardData.getCurrentUser();
+                    rankTv.setText(String.valueOf(currentUserStats.getCurrentUserRank()));
+                    pointsTv.setText(String.valueOf(currentUserStats.getPoints()));
+                } else if (isAdded() && isVisible()) {
+                    Crashlytics.log("referral leaderboard bad response");
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReferralLeaderboardData> call, Throwable t) {
+                if (isAdded() && isVisible()) {
+                    Log.e(TAG, "onFailure: ");
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        endpoints.fetchReferralHistory().enqueue(new Callback<ReferralHistoryData>() {
+            @Override
+            public void onResponse(Call<ReferralHistoryData> call, Response<ReferralHistoryData> response) {
+                progressBar.setVisibility(View.GONE);
+                final ReferralHistoryData referralHistoryData = response.body();
+                if (response.isSuccessful() && referralHistoryData != null && isAdded() && isVisible()) {
+                    invitedTv.setText(String.valueOf(referralHistoryData.getReferralPersonData().size() - 1));
+                } else if (isAdded() && isVisible()) {
+                    Crashlytics.log("referral history bad response");
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ReferralHistoryData> call, Throwable t) {
+                if (isAdded() && isVisible()) {
+                    Log.e(TAG, "onFailure: ");
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void fetchDevMenu() {

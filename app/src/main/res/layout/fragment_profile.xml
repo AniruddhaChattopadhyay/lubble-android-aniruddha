@@ -84,11 +84,98 @@
                 android:visibility="gone"
                 tools:visibility="visible" />
 
+            <View
+                android:id="@+id/view_hr"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/tv_editProfile"
+                android:layout_marginTop="8dp"
+                android:background="@color/light_gray" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/container_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/view_hr"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/tv_rank"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=".."
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_rank_hint"
+                    app:layout_constraintStart_toStartOf="@+id/tv_rank_hint"
+                    app:layout_constraintTop_toTopOf="@+id/tv_invited" />
+
+                <TextView
+                    android:id="@+id/tv_rank_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:text="Rank"
+                    app:layout_constraintEnd_toStartOf="@+id/tv_invited_hint"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_rank" />
+
+                <TextView
+                    android:id="@+id/tv_invited"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=".."
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_invited_hint"
+                    app:layout_constraintStart_toStartOf="@+id/tv_invited_hint"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_invited_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Invited"
+                    app:layout_constraintEnd_toStartOf="@+id/tv_points_hint"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/tv_rank_hint"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_invited" />
+
+                <TextView
+                    android:id="@+id/tv_points"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="..."
+                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_points_hint"
+                    app:layout_constraintStart_toStartOf="@+id/tv_points_hint"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tv_points_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="24dp"
+                    android:text="Points"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHorizontal_bias="0.5"
+                    app:layout_constraintStart_toEndOf="@+id/tv_invited_hint"
+                    app:layout_constraintTop_toBottomOf="@+id/tv_points" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/container_stats"
+                android:background="@color/light_gray" />
+
             <TextView
                 android:id="@+id/tv_groups_hint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_editProfile"
+                android:layout_below="@id/container_stats"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="16dp"
                 android:text="Groups"
@@ -97,14 +184,14 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_user_groups"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_groups_hint"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="16dp"
-                tools:listitem="@layout/item_user_group"
-                android:layout_marginTop="8dp" />
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_user_group" />
 
         </RelativeLayout>
 
