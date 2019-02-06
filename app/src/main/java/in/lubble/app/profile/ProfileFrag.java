@@ -66,7 +66,7 @@ public class ProfileFrag extends Fragment {
     private ImageView profilePicIv;
     private TextView userName;
     private TextView badgeTv;
-    private TextView locality;
+    private TextView lubbleTv;
     private TextView userBio;
     private TextView editProfileTV;
     private TextView rankTv;
@@ -84,6 +84,13 @@ public class ProfileFrag extends Fragment {
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
     private GroupsAdapter groupsAdapter;
+
+    ImageView genderIv;
+    TextView genderTv;
+    ImageView businessIv;
+    TextView businessTv;
+    ImageView educationIv;
+    TextView educationTv;
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -115,12 +122,18 @@ public class ProfileFrag extends Fragment {
         profilePicIv = rootView.findViewById(R.id.iv_profilePic);
         userName = rootView.findViewById(R.id.tv_name);
         badgeTv = rootView.findViewById(R.id.tv_badge);
-        locality = rootView.findViewById(R.id.tv_locality);
+        lubbleTv = rootView.findViewById(R.id.tv_lubble);
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
         rankTv = rootView.findViewById(R.id.tv_rank);
         invitedTv = rootView.findViewById(R.id.tv_invited);
         pointsTv = rootView.findViewById(R.id.tv_points);
+        genderIv = rootView.findViewById(R.id.iv_gender);
+        genderTv = rootView.findViewById(R.id.tv_gender);
+        businessIv = rootView.findViewById(R.id.iv_business);
+        businessTv = rootView.findViewById(R.id.tv_business);
+        educationIv = rootView.findViewById(R.id.iv_education);
+        educationTv = rootView.findViewById(R.id.tv_education);
         userGroupsRv = rootView.findViewById(R.id.rv_user_groups);
         referralCard = rootView.findViewById(R.id.card_referral);
         inviteBtn = rootView.findViewById(R.id.btn_invite);
@@ -321,12 +334,17 @@ public class ProfileFrag extends Fragment {
                     } else {
                         badgeTv.setVisibility(View.GONE);
                     }
-                    if (!TextUtils.isEmpty(profileData.getLocality())) {
-                        locality.setText(profileData.getLocality());
-                        locality.setVisibility(View.VISIBLE);
-                    } else {
-                        locality.setVisibility(View.GONE);
-                    }
+                    RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            lubbleTv.setText(dataSnapshot.child("title").getValue(String.class));
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                     if (isValidString(profileData.getBio())) {
                         userBio.setText(profileData.getBio());
                     } else if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
@@ -334,6 +352,7 @@ public class ProfileFrag extends Fragment {
                     } else {
                         userBio.setText(R.string.no_bio_text);
                     }
+                    populateProfileDetails();
                     if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                         editProfileTV.setVisibility(View.VISIBLE);
                         referralCard.setVisibility(View.VISIBLE);
@@ -371,6 +390,44 @@ public class ProfileFrag extends Fragment {
             }
         };
         userRef.addValueEventListener(valueEventListener);
+    }
+
+    private void populateProfileDetails() {
+        if (!TextUtils.isEmpty(profileData.getGenderText())) {
+            genderTv.setText(profileData.getGenderText());
+            if (profileData.getIsAgePublic()) {
+                genderTv.append(", " + profileData.getAge());
+            }
+            genderIv.setVisibility(View.VISIBLE);
+            genderTv.setVisibility(View.VISIBLE);
+        } else {
+            genderIv.setVisibility(View.GONE);
+            genderTv.setVisibility(View.GONE);
+        }
+
+        String companyText = profileData.getJobTitle();
+        if (!TextUtils.isEmpty(profileData.getCompany())) {
+            if (!TextUtils.isEmpty(profileData.getJobTitle())) {
+                companyText += " @ ";
+            }
+            companyText += profileData.getCompany();
+        }
+        if (!TextUtils.isEmpty(companyText)) {
+            businessTv.setText(companyText);
+            businessIv.setVisibility(View.VISIBLE);
+            businessTv.setVisibility(View.VISIBLE);
+        } else {
+            businessIv.setVisibility(View.GONE);
+            businessTv.setVisibility(View.GONE);
+        }
+        if (!TextUtils.isEmpty(profileData.getSchool())) {
+            educationTv.setText(profileData.getSchool());
+            educationIv.setVisibility(View.VISIBLE);
+            educationTv.setVisibility(View.VISIBLE);
+        } else {
+            educationIv.setVisibility(View.GONE);
+            educationTv.setVisibility(View.GONE);
+        }
     }
 
     private void fetchStats() {

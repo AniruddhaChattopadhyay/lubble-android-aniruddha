@@ -22,6 +22,7 @@ public class DateTimeUtils {
     public static final String APP_DATE_YEAR = "MMM dd, yyyy";
     public static final String APP_DATE_NO_YEAR = "MMM dd";
     public static final String APP_NORMAL_DATE_YEAR = "dd MMM, yyyy";
+    public static final String OFFICIAL_DATE_YEAR = "dd/MM/yyyy";
     public static final String EVENT_DATE_TIME = "dd MMM, h:mm a";
     public static final String SHORT_MONTH = "MMM";
     public static final String DATE = "dd";
@@ -128,6 +129,21 @@ public class DateTimeUtils {
         } else {
             return getDateFromLong(time) + ", " + getTimeFromLong(time);
         }
+    }
+
+    public static int getAge(Calendar dob) {
+        Calendar today = Calendar.getInstance();
+
+        int age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR);
+
+        if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+            age--;
+        }
+
+        Integer ageInt = new Integer(age);
+        String ageS = ageInt.toString();
+
+        return age;
     }
 
 }

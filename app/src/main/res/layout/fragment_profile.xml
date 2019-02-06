@@ -50,19 +50,19 @@
                 tools:visibility="visible" />
 
             <TextView
-                android:id="@+id/tv_locality"
+                android:id="@+id/tv_lubble"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/tv_badge"
                 android:layout_centerHorizontal="true"
                 android:textStyle="bold"
-                tools:text="C - Block" />
+                tools:text="Koramangala" />
 
             <TextView
                 android:id="@+id/tv_bio"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/tv_locality"
+                android:layout_below="@id/tv_lubble"
                 android:layout_centerHorizontal="true"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
@@ -71,7 +71,7 @@
                 android:gravity="center"
                 tools:text="Edit Profile to add a bio" />
 
-            <TextView
+            <Button
                 android:id="@+id/tv_editProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -79,8 +79,7 @@
                 android:layout_centerHorizontal="true"
                 android:padding="8dp"
                 android:text="@string/edit_profile"
-                android:textColor="@color/link_blue"
-                android:textStyle="bold"
+                android:theme="@style/AccentButton"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
@@ -171,16 +170,91 @@
                 android:layout_below="@id/container_stats"
                 android:background="@color/light_gray" />
 
-            <TextView
-                android:id="@+id/tv_groups_hint"
+            <ImageView
+                android:id="@+id/iv_gender"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/container_stats"
                 android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:tint="@color/gray"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_account_circle_black_24dp"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tv_gender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/iv_gender"
+                android:layout_alignBottom="@id/iv_gender"
+                android:layout_marginLeft="4dp"
+                android:layout_toRightOf="@id/iv_gender"
+                android:gravity="center"
+                android:text="Male"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/iv_business"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_below="@id/iv_gender"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="4dp"
+                android:tint="@color/gray"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_business_black_24dp"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tv_business"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/iv_business"
+                android:layout_alignBottom="@id/iv_business"
+                android:layout_marginLeft="4dp"
+                android:layout_toRightOf="@id/iv_business"
+                android:gravity="center"
+                android:text="Czar @ Atlantis"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <ImageView
+                android:id="@+id/iv_education"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_below="@id/iv_business"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="4dp"
+                android:tint="@color/gray"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_school_black_24dp"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tv_education"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/iv_education"
+                android:layout_alignBottom="@id/iv_education"
+                android:layout_marginLeft="4dp"
+                android:layout_toRightOf="@id/iv_education"
+                android:gravity="center"
+                android:text="Underwater School of Business (USB)"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/tv_groups_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/iv_education"
+                android:layout_marginLeft="8dp"
                 android:layout_marginTop="16dp"
                 android:text="Groups"
-                android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                android:textColor="@color/dark_gray" />
+                android:textColor="@color/dark_gray"
+                android:textSize="20sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_user_groups"

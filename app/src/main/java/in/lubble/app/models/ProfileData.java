@@ -1,5 +1,9 @@
 package in.lubble.app.models;
 
+import in.lubble.app.utils.DateTimeUtils;
+
+import java.util.Calendar;
+
 /**
  * Created by ishaangarg on 01/11/17.
  */
@@ -12,9 +16,15 @@ public class ProfileData {
     private String coverPic;
     private String locality;
     private String bio;
+    private int gender = -1; //0 male / 1 female / 2 other
+    private String jobTitle;
+    private String company;
+    private String school;
     private String token;
     private String referredBy;
+    private long birthdate = 0L;
     private boolean isOwner;
+    private boolean isAgePublic;
 
     public String getId() {
         return id;
@@ -86,5 +96,72 @@ public class ProfileData {
 
     public void setIsOwner(boolean owner) {
         isOwner = owner;
+    }
+
+    public String getJobTitle() {
+        return jobTitle;
+    }
+
+    public void setJobTitle(String jobTitle) {
+        this.jobTitle = jobTitle;
+    }
+
+    public String getCompany() {
+        return company;
+    }
+
+    public void setCompany(String company) {
+        this.company = company;
+    }
+
+    public String getSchool() {
+        return school;
+    }
+
+    public void setSchool(String school) {
+        this.school = school;
+    }
+
+    public int getGender() {
+        return gender;
+    }
+
+    public String getGenderText() {
+        switch (gender) {
+            case 0:
+                return "Male";
+            case 1:
+                return "Female";
+            case 2:
+                return "Other";
+            default:
+                return "";
+        }
+    }
+
+    public void setGender(int gender) {
+        this.gender = gender;
+    }
+
+    public long getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(long birthdate) {
+        this.birthdate = birthdate;
+    }
+
+    public int getAge() {
+        Calendar dob = Calendar.getInstance();
+        dob.setTimeInMillis(birthdate);
+        return DateTimeUtils.getAge(dob);
+    }
+
+    public boolean getIsAgePublic() {
+        return isAgePublic;
+    }
+
+    public void setIsAgePublic(boolean agePublic) {
+        isAgePublic = agePublic;
     }
 }
