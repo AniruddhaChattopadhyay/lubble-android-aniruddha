@@ -24,7 +24,7 @@ public class ProfileData {
     private String referredBy;
     private long birthdate = 0L;
     private boolean isOwner;
-    private boolean isAgePublic;
+    private boolean isAgePublic = true;
 
     public String getId() {
         return id;
