@@ -14,6 +14,7 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,6 +41,7 @@ import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.referrals.LeaderboardPersonData;
+import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.referrals.ReferralHistoryData;
 import in.lubble.app.referrals.ReferralLeaderboardData;
 import in.lubble.app.utils.*;
@@ -84,6 +86,7 @@ public class ProfileFrag extends Fragment {
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
     private GroupsAdapter groupsAdapter;
+    private ConstraintLayout statsContainer;
 
     ImageView genderIv;
     TextView genderTv;
@@ -137,6 +140,7 @@ public class ProfileFrag extends Fragment {
         userGroupsRv = rootView.findViewById(R.id.rv_user_groups);
         referralCard = rootView.findViewById(R.id.card_referral);
         inviteBtn = rootView.findViewById(R.id.btn_invite);
+        statsContainer = rootView.findViewById(R.id.container_stats);
         logoutTv = rootView.findViewById(R.id.tv_logout);
         progressBar = rootView.findViewById(R.id.progressBar_profile);
         TextView versionTv = rootView.findViewById(R.id.tv_version_name);
@@ -207,6 +211,14 @@ public class ProfileFrag extends Fragment {
         userGroupsRv.setAdapter(groupsAdapter);
         syncGroups();
         fetchStats();
+
+        statsContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ReferralActivity.open(requireContext());
+            }
+        });
+
         return rootView;
     }
 
