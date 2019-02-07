@@ -40,10 +40,7 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.referrals.LeaderboardPersonData;
 import in.lubble.app.referrals.ReferralActivity;
-import in.lubble.app.referrals.ReferralHistoryData;
-import in.lubble.app.referrals.ReferralLeaderboardData;
 import in.lubble.app.utils.*;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -444,14 +441,14 @@ public class ProfileFrag extends Fragment {
 
     private void fetchStats() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchReferralLeaderboard().enqueue(new Callback<ReferralLeaderboardData>() {
+        endpoints.fetchUserProfile(userId).enqueue(new Callback<UserProfileData>() {
             @Override
-            public void onResponse(Call<ReferralLeaderboardData> call, Response<ReferralLeaderboardData> response) {
-                final ReferralLeaderboardData referralLeaderboardData = response.body();
-                if (response.isSuccessful() && referralLeaderboardData != null && isAdded() && isVisible()) {
-                    final LeaderboardPersonData currentUserStats = referralLeaderboardData.getCurrentUser();
-                    rankTv.setText(String.valueOf(currentUserStats.getCurrentUserRank()));
-                    pointsTv.setText(String.valueOf(currentUserStats.getPoints()));
+            public void onResponse(Call<UserProfileData> call, Response<UserProfileData> response) {
+                final UserProfileData userProfileData = response.body();
+                if (response.isSuccessful() && userProfileData != null && isAdded() && isVisible()) {
+                    rankTv.setText(String.valueOf(userProfileData.getRank()));
+                    pointsTv.setText(String.valueOf(userProfileData.getPoints()));
+                    invitedTv.setText(String.valueOf(userProfileData.getReferrals()));
                 } else if (isAdded() && isVisible()) {
                     Crashlytics.log("referral leaderboard bad response");
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
@@ -459,32 +456,9 @@ public class ProfileFrag extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<ReferralLeaderboardData> call, Throwable t) {
+            public void onFailure(Call<UserProfileData> call, Throwable t) {
                 if (isAdded() && isVisible()) {
                     Log.e(TAG, "onFailure: ");
-                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        endpoints.fetchReferralHistory().enqueue(new Callback<ReferralHistoryData>() {
-            @Override
-            public void onResponse(Call<ReferralHistoryData> call, Response<ReferralHistoryData> response) {
-                progressBar.setVisibility(View.GONE);
-                final ReferralHistoryData referralHistoryData = response.body();
-                if (response.isSuccessful() && referralHistoryData != null && isAdded() && isVisible()) {
-                    invitedTv.setText(String.valueOf(referralHistoryData.getReferralPersonData().size() - 1));
-                } else if (isAdded() && isVisible()) {
-                    Crashlytics.log("referral history bad response");
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ReferralHistoryData> call, Throwable t) {
-                if (isAdded() && isVisible()) {
-                    Log.e(TAG, "onFailure: ");
-                    progressBar.setVisibility(View.GONE);
                     Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
                 }
             }

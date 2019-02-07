@@ -10,6 +10,7 @@ import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
+import in.lubble.app.profile.UserProfileData;
 import in.lubble.app.referrals.ReferralHistoryData;
 import in.lubble.app.referrals.ReferralLeaderboardData;
 import in.lubble.app.utils.YoutubeData;
@@ -95,6 +96,9 @@ public interface Endpoints {
 
     @GET("/explore/{lubble_id}/")
     Call<ArrayList<ExploreGroupData>> fetchExploreGroups(@Path("lubble_id") String lubbleId);
+
+    @GET("/profile/{user_id}/")
+    Call<UserProfileData> fetchUserProfile(@Path("user_id") String userId);
 
     @GET
     public Call<YoutubeData> getYoutubeData(@Url String url);

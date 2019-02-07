@@ -47,7 +47,7 @@
                 android:textColor="@color/colorAccent"
                 android:visibility="gone"
                 tools:text="RWA"
-                tools:visibility="visible" />
+                tools:visibility="gone" />
 
             <TextView
                 android:id="@+id/tv_lubble"
