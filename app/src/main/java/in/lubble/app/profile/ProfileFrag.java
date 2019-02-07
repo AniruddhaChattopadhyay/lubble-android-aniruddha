@@ -235,7 +235,7 @@ public class ProfileFrag extends Fragment {
 
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     final GroupData groupData = child.getValue(GroupData.class);
-                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())) {
+                    if (groupData.getMembers().containsKey(userId)) {
                         groupDataList.add(groupData);
                     }
                 }
