@@ -19,6 +19,7 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 
+import java.util.HashMap;
 import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
@@ -31,6 +32,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     private final OnListFragmentInteractionListener mListener;
     private final GlideRequests glide;
     private final boolean isOnboarding;
+    private HashMap<Integer, Boolean> selectedMap = new HashMap<>();
 
     public ExploreGroupAdapter(List<ExploreGroupData> items, OnListFragmentInteractionListener listener, GlideRequests glide, boolean isOnboarding) {
         mValues = items;
@@ -39,7 +41,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         this.isOnboarding = isOnboarding;
     }
 
-    public void updateList(List<ExploreGroupData> items){
+    public void updateList(List<ExploreGroupData> items) {
         this.mValues = items;
         notifyDataSetChanged();
     }
@@ -68,6 +70,15 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         if (isOnboarding) {
             holder.joinTv.setText("SELECT");
             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
+            if (selectedMap.containsKey(position)) {
+                holder.selectedContainer.setVisibility(View.VISIBLE);
+                holder.joinTv.setText("REMOVE");
+                holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
+            } else {
+                holder.selectedContainer.setVisibility(View.GONE);
+                holder.joinTv.setText("SELECT");
+                holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
+            }
         } else {
             holder.joinTv.setText("JOIN");
             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
@@ -123,11 +134,13 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                             UiUtils.animateFadeShow(holder.mView.getContext(), holder.selectedContainer);
                             holder.joinTv.setText("REMOVE");
                             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
+                            selectedMap.put(holder.getAdapterPosition(), true);
                         } else {
                             mListener.onListFragmentInteraction(holder.groupItem, false);
                             UiUtils.animateFadeHide(holder.mView.getContext(), holder.selectedContainer);
                             holder.joinTv.setText("SELECT");
                             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
+                            selectedMap.remove(holder.getAdapterPosition());
                         }
                     } else {
                         // for explore bottom tab
