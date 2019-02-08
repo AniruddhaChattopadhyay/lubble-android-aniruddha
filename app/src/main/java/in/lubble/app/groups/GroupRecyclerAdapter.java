@@ -25,9 +25,6 @@ import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final int TYPE_GROUP = 74;
-    private static final int TYPE_SEPARATOR = 58;
-
     private final List<GroupData> groupDataList;
     // <GroupID, UserGroupData>
     private final HashMap<String, UserGroupData> userGroupDataMap;
@@ -41,94 +38,75 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     @Override
-    public int getItemViewType(int position) {
-        if (!isValidString(groupDataList.get(position).getTitle())) {
-            return TYPE_SEPARATOR;
-        } else {
-            return TYPE_GROUP;
-        }
-    }
-
-    @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        if (viewType == TYPE_SEPARATOR) {
-            return new PublicGroupHeaderViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_public_group_header, parent, false));
-        } else {
-            return new GroupViewHolder(LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.fragment_group_list, parent, false));
-        }
+        return new GroupViewHolder(LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.fragment_group_list, parent, false));
     }
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof GroupViewHolder) {
-            final GroupViewHolder groupViewHolder = (GroupViewHolder) holder;
-            final GroupData groupData = groupDataList.get(position);
-            groupViewHolder.groupData = groupData;
+        final GroupViewHolder groupViewHolder = (GroupViewHolder) holder;
+        final GroupData groupData = groupDataList.get(position);
+        groupViewHolder.groupData = groupData;
 
-            GlideApp.with(groupViewHolder.mView)
-                    .load(groupData.getThumbnail())
-                    .placeholder(R.drawable.ic_circle_group_24dp)
-                    .error(R.drawable.ic_circle_group_24dp)
-                    .circleCrop()
-                    .into(groupViewHolder.iconIv);
+        GlideApp.with(groupViewHolder.mView)
+                .load(groupData.getThumbnail())
+                .placeholder(R.drawable.ic_circle_group_24dp)
+                .error(R.drawable.ic_circle_group_24dp)
+                .circleCrop()
+                .into(groupViewHolder.iconIv);
 
-            groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
+        groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
 
-            groupViewHolder.titleTv.setText(groupData.getTitle());
-            if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
-                groupViewHolder.subtitleTv.setText(R.string.invite_pending);
-                groupViewHolder.inviteIcon.setVisibility(View.VISIBLE);
-            } else if (isValidString(groupData.getLastMessage())) {
-                groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
-                groupViewHolder.inviteIcon.setVisibility(View.GONE);
-            } else {
-                groupViewHolder.subtitleTv.setText(groupData.getDescription());
-                groupViewHolder.inviteIcon.setVisibility(View.GONE);
-            }
+        groupViewHolder.titleTv.setText(groupData.getTitle());
+        if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
+            groupViewHolder.subtitleTv.setText(R.string.invite_pending);
+            groupViewHolder.inviteIcon.setVisibility(View.VISIBLE);
+        } else if (isValidString(groupData.getLastMessage())) {
+            groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
+            groupViewHolder.inviteIcon.setVisibility(View.GONE);
+        } else {
+            groupViewHolder.subtitleTv.setText(groupData.getDescription());
+            groupViewHolder.inviteIcon.setVisibility(View.GONE);
+        }
 
-            groupViewHolder.mView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (null != mListener) {
-                        // Notify the active callbacks interface (the activity, if the
-                        // fragment is attached to one) that an item has been selected.
-                        final boolean isDm = groupData.getMembers().size() == 0;
-                        if (isDm) {
-                            mListener.onDmClick(groupViewHolder.groupData.getId(), groupData.getTitle(), groupData.getThumbnail());
-                        } else {
-                            mListener.onListFragmentInteraction(groupViewHolder.groupData.getId(), false);
-                        }
+        groupViewHolder.mView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != mListener) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    final boolean isDm = groupData.getMembers().size() == 0;
+                    if (isDm) {
+                        mListener.onDmClick(groupViewHolder.groupData.getId(), groupData.getTitle(), groupData.getThumbnail());
+                    } else {
+                        mListener.onListFragmentInteraction(groupViewHolder.groupData.getId(), false);
                     }
                 }
-            });
-
-            final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
-            if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
-                groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
-                groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
-            } else {
-                groupViewHolder.unreadCountTv.setVisibility(View.GONE);
             }
-            handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
+        });
 
-            if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
-                groupViewHolder.joinBtn.setVisibility(View.VISIBLE);
-            } else {
-                groupViewHolder.joinBtn.setVisibility(View.GONE);
-            }
-
-            if (posToFlash == position) {
-                UiUtils.animateColor(groupViewHolder.itemView, ContextCompat.getColor(groupViewHolder.mView.getContext(),
-                        R.color.trans_colorAccent), Color.TRANSPARENT);
-                posToFlash = -1;
-            } else {
-                groupViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
-            }
-
+        final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
+        if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
+            groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
+            groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
         } else {
-            //todo
+            groupViewHolder.unreadCountTv.setVisibility(View.GONE);
+        }
+        handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
+
+        if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
+            groupViewHolder.joinBtn.setVisibility(View.VISIBLE);
+        } else {
+            groupViewHolder.joinBtn.setVisibility(View.GONE);
+        }
+
+        if (posToFlash == position) {
+            UiUtils.animateColor(groupViewHolder.itemView, ContextCompat.getColor(groupViewHolder.mView.getContext(),
+                    R.color.trans_colorAccent), Color.TRANSPARENT);
+            posToFlash = -1;
+        } else {
+            groupViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
         }
     }
 

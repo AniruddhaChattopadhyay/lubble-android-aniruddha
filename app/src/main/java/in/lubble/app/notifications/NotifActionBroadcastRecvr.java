@@ -64,6 +64,9 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
                         });
                     }
                 }
+                // reset user's group unread counter
+                RealtimeDbHelper.getUserGroupsRef().child(groupId).child("unreadCount").setValue(0);
+
                 deleteUnreadMsgsForGroupId(groupId, context);
                 NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_MARKED_READ, groupId, context);
             }

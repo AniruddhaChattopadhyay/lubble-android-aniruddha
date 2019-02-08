@@ -128,6 +128,17 @@ public class NotifUtils {
                     .setDeleteIntent(deletePendingIntent)
                     .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
+            if (!TextUtils.isEmpty(map.getValue().getConversationTitle())) {
+                // not a DM, add actions
+                Intent markReadIntent = new Intent(context, NotifActionBroadcastRecvr.class);
+                markReadIntent.setAction(ACTION_MARK_AS_READ);
+                markReadIntent.putExtra("markread.groupId", groupId);
+                PendingIntent markReadPendingIntent =
+                        PendingIntent.getBroadcast(context, getNotifId(groupId), markReadIntent, 0);
+
+                builder.addAction(0, "Mark As Read", markReadPendingIntent);
+            }
+
             if (StringUtils.isValidString(groupDpUrl)) {
                 GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().into(new SimpleTarget<Bitmap>() {
                     @Override
@@ -229,17 +240,6 @@ public class NotifUtils {
                 .setGroupSummary(true)
                 .setDeleteIntent(deletePendingIntent)
                 .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
-
-        if (!"dm".equalsIgnoreCase(lastNotifData.getNotifType())) {
-            // not a DM, add actions
-            Intent markReadIntent = new Intent(context, NotifActionBroadcastRecvr.class);
-            markReadIntent.setAction(ACTION_MARK_AS_READ);
-            markReadIntent.putExtra("markread.groupId", lastNotifData.getGroupId());
-            PendingIntent markReadPendingIntent =
-                    PendingIntent.getBroadcast(context, getNotifId(lastNotifData.getGroupId()), markReadIntent, 0);
-
-            builder.addAction(0, "Mark As Read", markReadPendingIntent);
-        }
 
         NotificationCompat.InboxStyle inbox = new NotificationCompat.InboxStyle();
         for (NotifData notifData : notifDataList) {
