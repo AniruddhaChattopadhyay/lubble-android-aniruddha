@@ -1107,6 +1107,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
+        private FrameLayout rootLayout;
         private TextView authorNameTv;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
@@ -1141,6 +1142,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
+            rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
             authorNameTv = itemView.findViewById(R.id.tv_author);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
@@ -1181,7 +1183,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
             linkContainer.setOnClickListener(this);
-            itemView.setOnLongClickListener(this);
+            linkContainer.setOnLongClickListener(this);
+            pollContainer.setOnLongClickListener(this);
+            messageTv.setOnLongClickListener(this);
+            rootLayout.setOnLongClickListener(this);
             chatIv.setOnLongClickListener(this);
 
         }
@@ -1302,6 +1307,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
+        private FrameLayout rootLayout;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
         private ImageView linkPicIv;
@@ -1332,6 +1338,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         SentChatViewHolder(final View itemView) {
             super(itemView);
+            rootLayout = itemView.findViewById(R.id.root_layout_chat_sent);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkPicIv = itemView.findViewById(R.id.iv_link_pic);
@@ -1359,12 +1366,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
 
             linkContainer.setOnClickListener(this);
+            linkContainer.setOnLongClickListener(this);
             lubbContainer.setOnClickListener(this);
             lubbHeadsContainer.setOnClickListener(this);
             lubbPopOutContainer.setOnClickListener(this);
+            pollContainer.setOnLongClickListener(this);
+            messageTv.setOnLongClickListener(this);
             chatIv.setOnClickListener(null);
             chatIv.setOnLongClickListener(this);
-            itemView.setOnLongClickListener(this);
+            rootLayout.setOnLongClickListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {

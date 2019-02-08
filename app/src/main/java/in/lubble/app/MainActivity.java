@@ -159,8 +159,6 @@ public class MainActivity extends BaseActivity {
 
         handleExploreActivity();
 
-        ExploreActiv.open(this, false);
-
     }
 
     private void initEverything() {
