@@ -14,6 +14,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.RemoteInput;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -35,7 +36,7 @@ import java.util.*;
 
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_MARK_AS_READ;
+import static in.lubble.app.notifications.NotifActionBroadcastRecvr.*;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 
 /**
@@ -126,17 +127,13 @@ public class NotifUtils {
                     .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                     .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
                     .setDeleteIntent(deletePendingIntent)
+                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                     .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
 
             if (!TextUtils.isEmpty(map.getValue().getConversationTitle())) {
                 // not a DM, add actions
-                Intent markReadIntent = new Intent(context, NotifActionBroadcastRecvr.class);
-                markReadIntent.setAction(ACTION_MARK_AS_READ);
-                markReadIntent.putExtra("markread.groupId", groupId);
-                PendingIntent markReadPendingIntent =
-                        PendingIntent.getBroadcast(context, getNotifId(groupId), markReadIntent, 0);
-
-                builder.addAction(0, "Mark As Read", markReadPendingIntent);
+                addActionReply(context, groupId, builder);
+                addActionMarkAsRead(context, groupId, builder);
             }
 
             if (StringUtils.isValidString(groupDpUrl)) {
@@ -156,6 +153,41 @@ public class NotifUtils {
                 notificationManager.notify(SUMMARY_ID, summary);
             }
         }
+    }
+
+    private static void addActionReply(Context context, String groupId, NotificationCompat.Builder builder) {
+        RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
+                .setLabel("Reply")
+                .build();
+
+        Intent replyIntent = new Intent(context, NotifActionBroadcastRecvr.class);
+        replyIntent.setAction(ACTION_REPLY);
+        replyIntent.putExtra("reply.groupId", groupId);
+
+        PendingIntent replyPendingIntent =
+                PendingIntent.getBroadcast(context,
+                        getNotifId(groupId),
+                        replyIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Create the reply action and add the remote input.
+        NotificationCompat.Action action =
+                new NotificationCompat.Action.Builder(0,
+                        "Reply", replyPendingIntent)
+                        .addRemoteInput(remoteInput)
+                        .build();
+
+        builder.addAction(action);
+    }
+
+    private static void addActionMarkAsRead(Context context, String groupId, NotificationCompat.Builder builder) {
+        Intent markReadIntent = new Intent(context, NotifActionBroadcastRecvr.class);
+        markReadIntent.setAction(ACTION_MARK_AS_READ);
+        markReadIntent.putExtra("markread.groupId", groupId);
+        PendingIntent markReadPendingIntent =
+                PendingIntent.getBroadcast(context, getNotifId(groupId), markReadIntent, 0);
+
+        builder.addAction(0, "Mark As Read", markReadPendingIntent);
     }
 
     @Nullable
