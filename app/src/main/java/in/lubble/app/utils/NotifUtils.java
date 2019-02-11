@@ -275,7 +275,7 @@ public class NotifUtils {
 
         NotificationCompat.InboxStyle inbox = new NotificationCompat.InboxStyle();
         for (NotifData notifData : notifDataList) {
-            inbox.addLine(notifData.getMessageBody());
+            inbox.addLine(notifData.getAuthorName() + ": " + notifData.getMessageBody());
         }
         builder.setContentText(lastNotifData.getMessageBody());
 
