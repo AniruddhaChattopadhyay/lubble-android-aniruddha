@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +20,9 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.utils.ChatUtils;
 import permissions.dispatcher.*;
 
 import java.io.File;
@@ -27,8 +30,7 @@ import java.io.IOException;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.UserUtils.getLubbleId;
 
@@ -41,6 +43,7 @@ public class NewGroupFragment extends Fragment {
     private ImageView groupIv;
     private EditText groupName;
     private EditText groupDesc;
+    private EditText groupQues;
     private Spinner spinner;
     private String currentPhotoPath;
     private DatabaseReference userGroupRef;
@@ -75,6 +78,7 @@ public class NewGroupFragment extends Fragment {
         groupIv = view.findViewById(R.id.iv_new_group);
         groupName = view.findViewById(R.id.et_group_title);
         groupDesc = view.findViewById(R.id.et_group_desc);
+        groupQues = view.findViewById(R.id.et_group_question);
         spinner = view.findViewById(R.id.spinner_privacy);
         Button createBtn = view.findViewById(R.id.container_create_group);
 
@@ -82,21 +86,43 @@ public class NewGroupFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                progressDialog = new ProgressDialog(getContext());
-                progressDialog.setTitle(getString(R.string.creating_new_group));
-                progressDialog.setMessage(getString(R.string.all_please_wait));
-                progressDialog.setCancelable(false);
-                progressDialog.show();
+                if (isdataValid()) {
+                    progressDialog = new ProgressDialog(getContext());
+                    progressDialog.setTitle(getString(R.string.creating_new_group));
+                    progressDialog.setMessage(getString(R.string.all_please_wait));
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
 
-                final GroupData groupData = new GroupData();
-                groupData.setTitle(groupName.getText().toString().trim());
-                groupData.setDescription(groupDesc.getText().toString());
-                groupData.setIsPrivate(isPvt);
+                    final GroupData groupData = new GroupData();
+                    groupData.setTitle(groupName.getText().toString().trim());
+                    groupData.setDescription(groupDesc.getText().toString());
+                    groupData.setQuestion(groupQues.getText().toString());
+                    groupData.setIsPrivate(isPvt);
 
-                Log.d(TAG, "onClick: ");
-                DatabaseReference pushRef = createJoinRef.push();
-                pushRef.setValue(groupData);
-                confirmGroupDone(pushRef.getKey());
+                    Log.d(TAG, "onClick: ");
+                    DatabaseReference pushRef = createJoinRef.push();
+                    pushRef.setValue(groupData);
+                    confirmGroupDone(pushRef.getKey());
+                }
+            }
+
+            private boolean isdataValid() {
+                if (TextUtils.isEmpty(groupName.getText().toString())) {
+                    groupName.setError("Uh-oh. A girl has no name, but a group must have one");
+                    return false;
+                }
+                if (TextUtils.isEmpty(groupDesc.getText().toString())) {
+                    groupDesc.setError("Uh-oh! Group must have a description. A purpose in life.");
+                    return false;
+                }
+                if (TextUtils.isEmpty(groupQues.getText().toString())) {
+                    groupQues.setError("Whoa! A joining question is required, to create a tighter community");
+                    return false;
+                }
+                groupName.setError(null);
+                groupDesc.setError(null);
+                groupQues.setError(null);
+                return true;
             }
         });
 
@@ -171,6 +197,12 @@ public class NewGroupFragment extends Fragment {
                             .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + getLubbleId() + "/groups/" + pushId)
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
+                // add the joining question as group's first message
+                final ChatData chatData = ChatUtils.createGroupChatdata(groupQues.getText().toString());
+                final DatabaseReference chatPushRef = getMessagesRef().child(pushId).push();
+                chatPushRef.setValue(chatData);
+                // make this first chat msg's ID as group's question ID which joinees will reply to
+                getLubbleGroupsRef().child(pushId).child("questionChatId").setValue(chatPushRef.getKey());
 
                 progressDialog.dismiss();
                 final Intent intent = new Intent(getContext(), ChatActivity.class);

@@ -18,6 +18,8 @@ public class GroupData {
     private String thumbnail;
     private String title;
     private String description;
+    private String question;
+    private String questionChatId;
     private boolean isPrivate;
     private HashMap<String, Object> members = new HashMap<>();
     private String lastMessage;
@@ -152,4 +154,20 @@ public class GroupData {
         return getMembers().size() == 0;
     }
 
+    @Nullable
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public String getQuestionChatId() {
+        return questionChatId;
+    }
+
+    public void setQuestionChatId(String questionChatId) {
+        this.questionChatId = questionChatId;
+    }
 }

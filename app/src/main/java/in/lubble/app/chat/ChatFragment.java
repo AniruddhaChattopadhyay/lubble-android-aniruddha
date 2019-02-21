@@ -70,6 +70,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final int REQUEST_CODE_IMG = 789;
     private static final int REQUEST_CODE_GROUP_PICK = 917;
     private static final int REQUEST_CODE_EVENT_PICK = 922;
+    private static final int REQUEST_CODE_QUES = 198;
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
     private static final String KEY_MSG_ID = "CHAT_MSG_ID";
     private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
@@ -1009,9 +1010,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
                 break;
             case R.id.btn_join:
-                getCreateOrJoinGroupRef().child(groupId).setValue(true);
-                isJoining = true;
-                showJoiningDialog();
+                if (!TextUtils.isEmpty(groupData.getQuestion())) {
+                    startActivityForResult(GroupQuestionActiv.getIntent(requireContext(), groupId), REQUEST_CODE_QUES);
+                    getActivity().overridePendingTransition(R.anim.slide_from_bottom, R.anim.none);
+                } else {
+                    getCreateOrJoinGroupRef().child(groupId).setValue(true);
+                    isJoining = true;
+                    showJoiningDialog();
+                }
                 break;
             case R.id.tv_decline:
                 RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -1074,6 +1080,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 attachedEventId = chosenEventId;
                 fetchAndShowAttachedEventInfo();
             }
+        } else if (requestCode == REQUEST_CODE_QUES && resultCode == RESULT_OK) {
+            getCreateOrJoinGroupRef().child(groupId).setValue(true);
+            isJoining = true;
+            showJoiningDialog();
+            syncGroupInfo();
         }
     }
 
