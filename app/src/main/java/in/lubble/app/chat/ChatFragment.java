@@ -87,7 +87,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private RelativeLayout joinContainer;
     private TextView joinDescTv;
     private Button joinBtn;
-    private TextView declineTv;
+    private ImageView declineIv;
     private RelativeLayout composeContainer;
     private Group linkMetaContainer;
     private RecyclerView chatRecyclerView;
@@ -243,7 +243,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         joinContainer = view.findViewById(R.id.relativeLayout_join_container);
         joinDescTv = view.findViewById(R.id.tv_join_desc);
         joinBtn = view.findViewById(R.id.btn_join);
-        declineTv = view.findViewById(R.id.tv_decline);
+        declineIv = view.findViewById(R.id.iv_decline_cross);
         chatRecyclerView = view.findViewById(R.id.rv_chat);
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.iv_send_btn);
@@ -269,7 +269,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
         joinBtn.setOnClickListener(this);
-        declineTv.setOnClickListener(this);
+        declineIv.setOnClickListener(this);
         linkCancel.setOnClickListener(this);
 
         if (!TextUtils.isEmpty(itemTitle)) {
@@ -680,7 +680,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         String inviter = (String) invitedBy.keySet().toArray()[0];
                         if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
                             joinDescTv.setText(getString(R.string.ready_to_join));
-                            declineTv.setVisibility(View.GONE);
+                            declineIv.setVisibility(View.GONE);
                         } else {
                             RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
@@ -688,7 +688,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     if (isAdded()) {
                                         final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                                         joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
-                                        declineTv.setVisibility(View.VISIBLE);
+                                        declineIv.setVisibility(View.VISIBLE);
                                     }
                                 }
 
@@ -702,7 +702,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         joinContainer.setVisibility(View.VISIBLE);
                     } else {
                         joinDescTv.setText(R.string.join_group_to_chat);
-                        declineTv.setVisibility(View.GONE);
+                        declineIv.setVisibility(View.GONE);
                         composeContainer.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
                     }
@@ -1024,7 +1024,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     showJoiningDialog();
                 }
                 break;
-            case R.id.tv_decline:
+            case R.id.iv_decline_cross:
                 RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
