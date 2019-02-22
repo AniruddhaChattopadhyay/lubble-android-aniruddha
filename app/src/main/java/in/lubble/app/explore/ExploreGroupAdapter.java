@@ -3,16 +3,16 @@ package in.lubble.app.explore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
@@ -22,8 +22,6 @@ import in.lubble.app.utils.UiUtils;
 import java.util.HashMap;
 import java.util.List;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 
 public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapter.ViewHolder> {
@@ -80,7 +78,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                 holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
             }
         } else {
-            holder.joinTv.setText("JOIN");
+            holder.joinTv.setText("VIEW");
             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
         }
 
@@ -89,29 +87,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                 @Override
                 public void onClick(View v) {
                     if (!isOnboarding) {
-                        String groupId = exploreGroupData.getFirebaseGroupId();
-                        holder.joinTv.setVisibility(View.GONE);
-                        holder.joinProgressbar.setVisibility(View.VISIBLE);
-                        getCreateOrJoinGroupRef().child(groupId).setValue(true);
-                        holder.mView.setOnClickListener(null);
-
-                        getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                holder.joinTv.setVisibility(View.VISIBLE);
-                                holder.joinProgressbar.setVisibility(View.GONE);
-                                holder.joinTv.setText("Member");
-                                holder.joinTv.setOnClickListener(null);
-                                initCardClickListener(holder, exploreGroupData);
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                holder.joinProgressbar.setVisibility(View.GONE);
-                                Toast.makeText(holder.mView.getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                                initCardClickListener(holder, exploreGroupData);
-                            }
-                        });
+                        ChatActivity.openForGroup(holder.mView.getContext(), exploreGroupData.getFirebaseGroupId(), false, null);
                     }
                 }
             });
