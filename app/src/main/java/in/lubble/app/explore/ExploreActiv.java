@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import androidx.core.content.ContextCompat;
+import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 
 import static in.lubble.app.analytics.AnalyticsEvents.EXPLORE_CONTINUE_CLICKED;
 import static in.lubble.app.analytics.AnalyticsEvents.EXPLORE_DIALOG_SHOWN;
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 
 public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
@@ -55,7 +55,8 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
                 joinBtn.setEnabled(false);
                 Analytics.triggerEvent(EXPLORE_CONTINUE_CLICKED, ExploreActiv.this);
                 for (String groupId : selectedGroupIdMap.keySet()) {
-                    getCreateOrJoinGroupRef().child(groupId).setValue(true);
+                    RealtimeDbHelper.getUserLubbleRef(LubbleSharedPrefs.getInstance().getSupportUid()).child("groups").child(groupId)
+                            .child("invitees").child(FirebaseAuth.getInstance().getUid()).setValue(Boolean.TRUE);
                 }
                 finish();
                 overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);

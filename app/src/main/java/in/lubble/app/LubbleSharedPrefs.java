@@ -2,6 +2,7 @@ package in.lubble.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import androidx.annotation.Nullable;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -38,6 +39,7 @@ public class LubbleSharedPrefs {
     private final String IS_EXPLORE_SHOWN = "IS_EXPLORE_SHOWN";
     private final String CENTER_LATI = "CENTER_LATI";
     private final String CENTER_LONGI = "CENTER_LONGI";
+    private final String SUPPORT_UID = "SUPPORT_UID";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -261,6 +263,15 @@ public class LubbleSharedPrefs {
 
     double getDouble(final SharedPreferences prefs, final String key, final double defaultValue) {
         return Double.longBitsToDouble(prefs.getLong(key, Double.doubleToLongBits(defaultValue)));
+    }
+
+    @Nullable
+    public String getSupportUid() {
+        return preferences.getString(SUPPORT_UID, null);
+    }
+
+    public boolean setSupportUid(String supportUid) {
+        return preferences.edit().putString(SUPPORT_UID, supportUid).commit();
     }
 
 }

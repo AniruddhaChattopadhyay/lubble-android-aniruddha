@@ -67,6 +67,7 @@
     <string name="joining_group">Joining group</string>
     <string name="pvt_group_msgs_hidden">Messages are hidden in private groups until you join</string>
     <string name="invited_by">Invited by %s</string>
+    <string name="ready_to_join">Ready to join</string>
     <string name="join_group_to_chat">Join group to send messages</string>
     <string name="lubble_group_warning_title">Welcome to %s Group</string>
     <string name="lubble_group_warning_subtitle">All your neighbors in %s are a member of this group  Messages you send here are visible to everyone.</string>

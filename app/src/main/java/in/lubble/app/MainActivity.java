@@ -159,6 +159,7 @@ public class MainActivity extends BaseActivity {
 
         handleExploreActivity();
 
+        ExploreActiv.open(this, false);
     }
 
     private void initEverything() {
@@ -438,6 +439,7 @@ public class MainActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 toolbarTitle.setText(dataSnapshot.child("title").getValue(String.class));
                 LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
+                LubbleSharedPrefs.getInstance().setSupportUid(dataSnapshot.child("supportUid").getValue(String.class));
             }
 
             @Override

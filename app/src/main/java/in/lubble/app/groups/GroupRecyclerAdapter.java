@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
@@ -60,7 +61,12 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         groupViewHolder.titleTv.setText(groupData.getTitle());
         if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
-            groupViewHolder.subtitleTv.setText(R.string.invite_pending);
+            String inviter = (String) groupData.getInvitedBy().toArray()[0];
+            if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+                groupViewHolder.subtitleTv.setText(R.string.ready_to_join);
+            } else {
+                groupViewHolder.subtitleTv.setText(R.string.invite_pending);
+            }
             groupViewHolder.inviteIcon.setVisibility(View.VISIBLE);
         } else if (isValidString(groupData.getLastMessage())) {
             groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
