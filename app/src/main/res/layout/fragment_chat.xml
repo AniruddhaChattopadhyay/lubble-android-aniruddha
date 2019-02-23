@@ -169,7 +169,6 @@
                 app:srcCompat="@drawable/ic_close_black_24dp"
                 android:layout_width="wrap_content"
                 android:paddingLeft="4dp"
-                android:paddingRight="4dp"
                 android:layout_height="match_parent" />
 
             <Button
@@ -186,7 +185,9 @@
                 android:id="@+id/tv_join_desc"
                 android:layout_width="wrap_content"
                 android:layout_toRightOf="@id/iv_decline_cross"
+                android:layout_alignWithParentIfMissing="true"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@id/btn_join"
                 android:textColor="@color/white"
