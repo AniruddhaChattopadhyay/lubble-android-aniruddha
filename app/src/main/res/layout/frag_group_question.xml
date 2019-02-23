@@ -5,21 +5,38 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context="in.lubble.app.chat.GroupQuestionActiv">
+    tools:context="in.lubble.app.chat.GroupQuesBottomSheetDialogFrag">
+
+    <!--Empty view to make the sheet full screen-->
+    <View
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        app:srcCompat="@drawable/rounded_rect_gray"
+        android:layout_width="56dp"
+        android:tint="@color/black"
+        android:layout_marginTop="8dp"
+        android:layout_centerHorizontal="true"
+        android:layout_height="8dp" />
 
     <TextView
+        android:id="@+id/tv_answer_this"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_margin="8dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginLeft="8dp"
         android:layout_toLeftOf="@id/iv_cross"
         android:text="Answer this to join"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <LinearLayout
+        android:id="@+id/container_ques"
         android:layout_width="match_parent"
+        android:layout_below="@id/tv_answer_this"
         android:layout_height="wrap_content"
-        android:layout_marginTop="42dp"
         android:layout_marginRight="64dp"
         android:orientation="horizontal"
         android:padding="8dp">
@@ -55,11 +72,12 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tv_answer_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/et_answer"
+        android:layout_below="@id/container_ques"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="2dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="This will be your first message on this group" />
 
@@ -67,15 +85,15 @@
         android:id="@+id/et_answer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:layout_below="@id/tv_answer_hint"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="4dp"
         android:layout_marginRight="16dp"
-        android:layout_marginBottom="8dp"
         android:background="@drawable/chat_bubble_border"
         android:gravity="top|left"
         android:hint="Answer Publicly"
         android:maxLines="5"
-        android:padding="12dp"
+        android:padding="11dp"
         android:scrollbars="vertical" />
 
     <ImageView
@@ -83,9 +101,8 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
+        android:layout_alignBottom="@id/et_answer"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
         android:background="@drawable/blue_circle"
         android:padding="12dp"
         app:srcCompat="@drawable/ic_send_white_24dp" />
