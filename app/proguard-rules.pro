@@ -44,3 +44,5 @@
 -dontwarn com.android.installreferrer.api.**
 # For CleverTap SDK
 -dontwarn com.clevertap.android.sdk.**
+# please KEEP ALL THE NAMES
+-keepnames class ** { *; }

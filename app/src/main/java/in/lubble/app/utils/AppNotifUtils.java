@@ -199,6 +199,7 @@ public class AppNotifUtils {
             return stackBuilder;
         } else if (appNotifData.getType().equalsIgnoreCase("deep_link")) {
             Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.putExtra(TRACK_NOTIF_ID, appNotifData.getNotifKey());
             intent.setData(Uri.parse(appNotifData.getDeepLink()));
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
             stackBuilder.addNextIntentWithParentStack(intent);
