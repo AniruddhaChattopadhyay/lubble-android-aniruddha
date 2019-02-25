@@ -1,12 +1,12 @@
 package in.lubble.app;
 
+import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
 import androidx.core.provider.FontRequest;
 import androidx.emoji.text.EmojiCompat;
 import androidx.emoji.text.FontRequestEmojiCompatConfig;
-import androidx.multidex.MultiDexApplication;
 import com.clevertap.android.sdk.ActivityLifecycleCallback;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -27,7 +27,7 @@ import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
  * Created by ishaan on 20/1/18.
  */
 
-public class LubbleApp extends MultiDexApplication {
+public class LubbleApp extends Application {
 
     private static LubbleApp appContext;
 

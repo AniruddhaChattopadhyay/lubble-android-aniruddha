@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
+import com.heapanalytics.android.Heap;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.utils.StringUtils;
 
@@ -63,10 +64,17 @@ public class Analytics {
 
     private static void setUser(Context context) {
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
-        String riderId = FirebaseAuth.getInstance().getUid();
-        firebaseAnalytics.setUserId(riderId);
-        firebaseAnalytics.setUserProperty("uid", riderId);
+        String userId = FirebaseAuth.getInstance().getUid();
+        firebaseAnalytics.setUserId(userId);
+        firebaseAnalytics.setUserProperty("uid", userId);
         firebaseAnalytics.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+        firebaseAnalytics.setUserProperty("name", LubbleSharedPrefs.getInstance().getFullName());
+        Heap.identify(userId.toLowerCase());
+        Map<String, String> props = new HashMap<>();
+        props.put("uid", userId);
+        props.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+        props.put("name", LubbleSharedPrefs.getInstance().getFullName());
+        Heap.addUserProperties(props);
     }
 
     private static void unSetUser(Context context) {
@@ -74,6 +82,7 @@ public class Analytics {
         firebaseAnalytics.setUserId(null);
         firebaseAnalytics.setUserProperty("uid", null);
         firebaseAnalytics.setUserProperty("lubble_id", null);
+        Heap.resetIdentity();
     }
 
     public static void triggerLogoutEvent(Context context) {
