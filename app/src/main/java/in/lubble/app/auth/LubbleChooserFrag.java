@@ -101,6 +101,8 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
         mapView.onResume(); // needed to get the map to display immediately
         mapView.getMapAsync(this);
 
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
+
         lubbleNameTv.setText(chosenLubbleData.getLubbleName());
         joinbtn.setText("Join " + chosenLubbleData.getLubbleName());
 
