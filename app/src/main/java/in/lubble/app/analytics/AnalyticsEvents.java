@@ -24,10 +24,10 @@ public class AnalyticsEvents {
     public static final String HELP_BTN_CLICKED = "HELP_BTN_CLICKED";
     public static final String HELP_PHONE_CLICKED = "HELP_PHONE_CLICKED";
 
-    public static final String NOTIF_SHOWN = "NOTIF_SHOWN";
+    public static final String NOTIF_RECVD = "NOTIF_RECVD";
     public static final String NOTIF_ABORTED = "NOTIF_ABORTED";
     public static final String NOTIF_MUTED = "NOTIF_MUTED";
-    public static final String NOTIF_CREATED = "NOTIF_CREATED";
+    public static final String NOTIF_DIGEST_CREATED = "NOTIF_DIGEST_CREATED";
     public static final String NOTIF_DISPLAYED = "NOTIF_DISPLAYED";
     public static final String NOTIF_SUMMARY_DISPLAYED = "NOTIF_DISPLAYED";
     public static final String NOTIF_OPENED = "NOTIF_OPENED";

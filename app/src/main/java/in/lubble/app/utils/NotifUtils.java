@@ -28,6 +28,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
@@ -85,6 +86,7 @@ public class NotifUtils {
     }
 
     private static void sendAllNotifs(final Context context, final ArrayList<NotifData> notifDataList) {
+        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DIGEST_CREATED, notifDataList.get(0).getGroupId(), context);
 
         final NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

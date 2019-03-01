@@ -52,7 +52,7 @@ public class FcmService extends FirebaseMessagingService {
             final Map<String, String> dataMap = remoteMessage.getData();
             Log.d(TAG, "Message data payload: " + dataMap);
 
-            NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SHOWN, dataMap, this);
+            NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_RECVD, dataMap, this);
 
             Bundle extras = new Bundle();
             for (Map.Entry<String, String> entry : remoteMessage.getData().entrySet()) {
