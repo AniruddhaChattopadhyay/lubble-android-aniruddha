@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -68,7 +70,7 @@ public class NotifUtils {
         ArrayList<NotifData> msgList = getAllMsgs();
         sortListByTime(msgList);
         Log.d(TAG, "read notif count: " + msgList.size());
-        sendAllNotifs(context, msgList);
+        //sendAllNotifs(context, msgList);
 
     }
 
@@ -98,7 +100,7 @@ public class NotifUtils {
             final String groupDpUrl = getGroupDp(notifDataList, groupId);
 
             Intent intent = new Intent(context, ChatActivity.class);
-            String channel = Constants.NEW_CHAT_NOTIF_CHANNEL;
+            String channel;
             if (TextUtils.isEmpty(map.getValue().getConversationTitle())) {
                 // it is a DM notif
                 intent.putExtra(EXTRA_DM_ID, groupId);
@@ -137,13 +139,18 @@ public class NotifUtils {
             }
 
             if (StringUtils.isValidString(groupDpUrl)) {
-                GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().into(new SimpleTarget<Bitmap>() {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        builder.setLargeIcon(resource);
-                        notificationManager.notify(notifId, builder.build());
-                        Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
-                        notificationManager.notify(SUMMARY_ID, summary);
+                    public void run() {
+                        GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                builder.setLargeIcon(resource);
+                                notificationManager.notify(notifId, builder.build());
+                                Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
+                                notificationManager.notify(SUMMARY_ID, summary);
+                            }
+                        });
                     }
                 });
             } else {
