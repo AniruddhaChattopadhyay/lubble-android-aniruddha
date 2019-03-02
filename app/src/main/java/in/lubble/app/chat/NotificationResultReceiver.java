@@ -58,7 +58,6 @@ public class NotificationResultReceiver extends BroadcastReceiver {
         }
         updateUnreadCounter(notifData, false);
         pullNewMsgs(notifData);
-        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_CREATED, dataMap, context);
         //sendDeliveryReceipt(notifData);
     }
 
@@ -74,7 +73,6 @@ public class NotificationResultReceiver extends BroadcastReceiver {
         }
         updateUnreadCounter(notifData, true);
         pullNewDmMsgs(notifData);
-        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_CREATED, dataMap, context);
         //sendDeliveryReceipt(notifData);
     }
 

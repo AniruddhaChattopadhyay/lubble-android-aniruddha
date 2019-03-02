@@ -52,7 +52,7 @@ public class FcmService extends FirebaseMessagingService {
             final Map<String, String> dataMap = remoteMessage.getData();
             Log.d(TAG, "Message data payload: " + dataMap);
 
-            NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SHOWN, dataMap, this);
+            NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_RECVD, dataMap, this);
 
             Bundle extras = new Bundle();
             for (Map.Entry<String, String> entry : remoteMessage.getData().entrySet()) {
@@ -96,6 +96,9 @@ public class FcmService extends FirebaseMessagingService {
                     broadcast.setAction(NEW_CHAT_ACTION);
                     broadcast.setPackage(BuildConfig.APPLICATION_ID);
                     sendOrderedBroadcast(broadcast, null, null, null, Activity.RESULT_OK, null, null);
+                } else if (StringUtils.isValidString(type) && "notif_digest".equalsIgnoreCase(type)) {
+                    // show all chat notifs now
+                    NotifUtils.showAllPendingChatNotifs(this);
                 } else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
                     // mplace image uploaded, send broadcast
                     sendMarketplaceImgBroadcast(dataMap);
