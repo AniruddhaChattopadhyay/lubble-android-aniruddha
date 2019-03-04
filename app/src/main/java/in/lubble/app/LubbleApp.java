@@ -18,6 +18,7 @@ import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
+import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
 import io.fabric.sdk.android.Fabric;
 
@@ -54,6 +55,7 @@ public class LubbleApp extends Application {
         UnreadChatsSharedPrefs.initializeInstance(getApplicationContext());
         MutedChatsSharedPrefs.initializeInstance(getApplicationContext());
         KeyMappingSharedPrefs.initializeInstance(getApplicationContext());
+        AnswerSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
 

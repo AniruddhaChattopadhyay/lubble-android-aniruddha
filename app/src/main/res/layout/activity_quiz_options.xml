@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/rootview_quiz"
+    android:background="@drawable/gradient_blue_clue"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <Button
+            android:id="@+id/btn_quiz_next"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Next"
+            android:theme="@style/WhiteButton" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout_questions"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_above="@id/btn_quiz_next"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            app:tabBackground="@drawable/tab_selector_light"
+            app:tabGravity="center"
+            app:tabIndicatorHeight="0dp" />
+
+        <in.lubble.app.widget.NonSwipeableViewPager
+            android:id="@+id/viewpager_quiz_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:layout_above="@id/tab_layout_questions"
+            android:orientation="vertical" />
+
+    </RelativeLayout>
+</LinearLayout>

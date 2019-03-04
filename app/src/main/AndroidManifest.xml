@@ -19,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".quiz.QuizResultActiv"></activity>
+        <activity android:name=".quiz.QuizOptionsActiv"></activity>
+        <activity android:name=".quiz.QuizResultActiv" />
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"

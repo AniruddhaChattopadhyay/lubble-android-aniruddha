@@ -5,23 +5,25 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.R;
-import in.lubble.app.quiz.dummy.DummyContent;
-import in.lubble.app.quiz.dummy.DummyContent.DummyItem;
 
 public class OptionFrag extends Fragment {
 
     private OnListFragmentInteractionListener mListener;
+    private QuestionData questionData;
+    private TextView quesTv;
 
     public OptionFrag() {
     }
 
-    public static OptionFrag newInstance(int columnCount) {
+    public static OptionFrag newInstance(QuestionData questionData) {
         OptionFrag fragment = new OptionFrag();
         Bundle args = new Bundle();
+        args.putSerializable("ques", questionData);
         fragment.setArguments(args);
         return fragment;
     }
@@ -31,6 +33,7 @@ public class OptionFrag extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
+            questionData = (QuestionData) getArguments().getSerializable("ques");
         }
     }
 
@@ -40,12 +43,14 @@ public class OptionFrag extends Fragment {
         View view = inflater.inflate(R.layout.frag_option_list, container, false);
 
         // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = view.findViewById(R.id.rv_quiz_options);
-            recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.setAdapter(new OptionAdapter(DummyContent.ITEMS, mListener));
-        }
+        Context context = view.getContext();
+        quesTv = view.findViewById(R.id.tv_quiz_title);
+        RecyclerView recyclerView = view.findViewById(R.id.rv_quiz_options);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
+        recyclerView.setAdapter(new OptionAdapter(questionData.getId(), questionData.getOptions(), mListener));
+
+        quesTv.setText(questionData.getQuestion());
+
         return view;
     }
 
@@ -68,6 +73,6 @@ public class OptionFrag extends Fragment {
     }
 
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(int quesId, OptionData optionData);
     }
 }
