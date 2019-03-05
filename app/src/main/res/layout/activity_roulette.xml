@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="in.lubble.app.quiz.roulette.RouletteActiv">
+
+    <github.hellocsl.cursorwheel.CursorWheelLayout
+        android:id="@+id/test_circle_menu_right"
+        android:layout_width="306dip"
+        android:layout_height="306dip"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center_vertical|right|bottom"
+        android:layout_marginRight="-153dp"
+        android:layout_marginBottom="-153dp"
+        app:wheelBackgroundColor="@color/colorAccent"
+        app:wheelCursorColor="@color/gold"
+        app:wheelPaddingRadio="0"
+        app:wheelCenterRadio="0.1"
+        app:wheelCursorHeight="20dp"
+        app:wheelGuideLineColor="#B5CBE8FF"
+        app:wheelGuideLineWidth="1dp"
+        app:wheelFlingValue="460"
+        app:wheelItemRotateMode="outward"
+        app:wheelSelectedAngle="0">
+
+    </github.hellocsl.cursorwheel.CursorWheelLayout>
+
+</RelativeLayout>

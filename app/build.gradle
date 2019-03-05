@@ -89,6 +89,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     implementation 'com.google.android.gms:play-services-places:16.0.0'
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
+    implementation 'github.hellocsl:CursorWheelLayout:1.1.0'
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'org.jsoup:jsoup:1.10.1'
     // Retrofit & OkHttp

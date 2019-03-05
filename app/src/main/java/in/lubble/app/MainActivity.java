@@ -49,7 +49,7 @@ import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.quiz.QuizOptionsActiv;
+import in.lubble.app.quiz.roulette.RouletteActiv;
 import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
@@ -310,8 +310,8 @@ public class MainActivity extends BaseActivity {
         super.onResume();
         handlePresence();
         setDp();
-
-        QuizOptionsActiv.open(this);
+        RouletteActiv.open(this);
+        //QuizOptionsActiv.open(this);
 
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
