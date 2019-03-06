@@ -6,6 +6,9 @@ public class PlaceData {
     private Long budget;
     private Long cuisine;
     private String name;
+    private String pic;
+    private String type;
+    private double distance;
     private float rating;
 
     public Long getAmbience() {
@@ -47,4 +50,33 @@ public class PlaceData {
     public void setRating(float rating) {
         this.rating = rating;
     }
+
+    public String getPic() {
+        return pic;
+    }
+
+    public void setPic(String pic) {
+        this.pic = pic;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    public String getDistanceString() {
+        return String.valueOf(Math.round(this.distance)) + "m";
+    }
+
 }

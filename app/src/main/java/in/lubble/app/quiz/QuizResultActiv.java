@@ -9,8 +9,10 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.location.Location;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import in.lubble.app.Constants;
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -45,6 +48,8 @@ public class QuizResultActiv extends AppCompatActivity {
     private TextView ambienceNameTv;
     private TextView cuisineEmojiTv;
     private TextView ambienceEmojiTv;
+    private ImageView placePicIv;
+    private TextView placeCaptionTv;
     private TextView placeNameTv;
 
     public static void open(Context context) {
@@ -61,7 +66,9 @@ public class QuizResultActiv extends AppCompatActivity {
         ambienceNameTv = findViewById(R.id.tv_ambience_name);
         cuisineEmojiTv = findViewById(R.id.tv_cuisine_emoji);
         ambienceEmojiTv = findViewById(R.id.tv_ambience_emoji);
+        placePicIv = findViewById(R.id.iv_place_pic);
         placeNameTv = findViewById(R.id.tv_name);
+        placeCaptionTv = findViewById(R.id.tv_caption);
 
         progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
 
@@ -121,6 +128,16 @@ public class QuizResultActiv extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         final PlaceData placeData = response.body();
                         placeNameTv.setText(placeData.getName());
+                        GlideApp.with(QuizResultActiv.this).load(placeData.getPic()).into(placePicIv);
+
+                        String caption = "";
+                        if (!TextUtils.isEmpty(placeData.getType())) {
+                            caption += placeData.getType() + " · ";
+                        }
+                        if (placeData.getDistance() != 0 && placeData.getDistance() < 10 * 3) {
+                            caption += " · " + placeData.getDistanceString();
+                        }
+                        placeCaptionTv.setText(caption);
 
                     } else if (!isFinishing()) {
                         progressBar.setVisibility(View.GONE);
