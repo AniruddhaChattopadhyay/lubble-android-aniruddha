@@ -16,7 +16,7 @@
     <ImageView
         app:srcCompat="@drawable/rounded_rect_gray"
         android:layout_width="56dp"
-        android:tint="@color/black"
+        android:tint="@color/gray"
         android:layout_marginTop="8dp"
         android:layout_centerHorizontal="true"
         android:layout_height="8dp" />

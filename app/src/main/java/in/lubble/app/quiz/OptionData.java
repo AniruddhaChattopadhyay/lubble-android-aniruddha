@@ -1,7 +1,10 @@
 package in.lubble.app.quiz;
 
-public class OptionData {
+import java.io.Serializable;
 
+public class OptionData implements Serializable {
+
+    private static final long serialVersionUID = -4462586081643912942L;
     private int id;
     private String value;
 

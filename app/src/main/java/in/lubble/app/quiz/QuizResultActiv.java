@@ -12,13 +12,13 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import in.lubble.app.Constants;
@@ -26,6 +26,8 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,6 +39,7 @@ import retrofit2.Response;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
+import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.ALL;
 
 @RuntimePermissions
 public class QuizResultActiv extends AppCompatActivity {
@@ -51,6 +54,7 @@ public class QuizResultActiv extends AppCompatActivity {
     private ImageView placePicIv;
     private TextView placeCaptionTv;
     private TextView placeNameTv;
+    private LinearLayout retryContainer;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, QuizResultActiv.class));
@@ -69,10 +73,18 @@ public class QuizResultActiv extends AppCompatActivity {
         placePicIv = findViewById(R.id.iv_place_pic);
         placeNameTv = findViewById(R.id.tv_name);
         placeCaptionTv = findViewById(R.id.tv_caption);
+        retryContainer = findViewById(R.id.container_retry);
 
         progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
 
         fetchLastKnownLocationWithPermissionCheck(this);
+
+        retryContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openPlayAgainDialog();
+            }
+        });
     }
 
     @SuppressLint("MissingPermission")
@@ -107,6 +119,10 @@ public class QuizResultActiv extends AppCompatActivity {
         ambienceAnswerName = ambienceAnswerName.substring(0, ambienceAnswerName.lastIndexOf(" "));
         ambienceNameTv.setText(ambienceAnswerName.trim().replaceAll(" ", "\n"));
 
+        final CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(this);
+        circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
+        circularProgressDrawable.start();
+
         final int budgetAnswerId = prefs.getPreferences().getInt("2", 0);
         prefs.clearAll();
 
@@ -128,7 +144,14 @@ public class QuizResultActiv extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         final PlaceData placeData = response.body();
                         placeNameTv.setText(placeData.getName());
-                        GlideApp.with(QuizResultActiv.this).load(placeData.getPic()).into(placePicIv);
+
+                        RequestOptions requestOptions = new RequestOptions();
+                        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, ALL));
+                        GlideApp.with(QuizResultActiv.this)
+                                .load(placeData.getPic())
+                                .placeholder(circularProgressDrawable)
+                                .apply(requestOptions)
+                                .into(placePicIv);
 
                         String caption = "";
                         if (!TextUtils.isEmpty(placeData.getType())) {
@@ -164,6 +187,11 @@ public class QuizResultActiv extends AppCompatActivity {
         dummyLoc.setLatitude(Constants.SVR_LATI);
         dummyLoc.setLongitude(Constants.SVR_LONGI);
         fetchResult(dummyLoc);
+    }
+
+    private void openPlayAgainDialog() {
+        final RetryQuizBottomSheet retryQuizBottomSheet = RetryQuizBottomSheet.newInstance();
+        retryQuizBottomSheet.show(getSupportFragmentManager(), null);
     }
 
     @Override
