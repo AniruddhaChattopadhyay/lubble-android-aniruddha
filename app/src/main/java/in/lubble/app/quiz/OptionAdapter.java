@@ -35,7 +35,7 @@ public class OptionAdapter extends RecyclerView.Adapter<OptionAdapter.ViewHolder
     public void onBindViewHolder(final ViewHolder holder, final int position) {
         final OptionData optionData = optionDataList.get(position);
         holder.mItem = optionData;
-        holder.optionTv.setText(optionData.getName());
+        holder.optionTv.setText(optionData.getValue());
 
         if (SELECTED_ROW == position) {
             holder.mView.setBackgroundColor(ContextCompat.getColor(holder.mView.getContext(), R.color.light_green));

@@ -191,5 +191,7 @@
         <item quantity="one">%d vote</item>
         <item quantity="other">%d votes</item>
     </plurals>
+    <string name="quiz_loc_perm_denied_text">Please grant permission to locate a place closest to you</string>
+    <string name="quiz_loc_perm_never_text">To enable permissions again, go to phone settings &amp; enable location for Lubble</string>
 
 </resources>

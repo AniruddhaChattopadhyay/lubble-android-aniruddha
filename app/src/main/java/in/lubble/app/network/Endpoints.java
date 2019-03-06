@@ -11,6 +11,8 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.profile.UserProfileData;
+import in.lubble.app.quiz.PlaceData;
+import in.lubble.app.quiz.QuestionData;
 import in.lubble.app.referrals.ReferralHistoryData;
 import in.lubble.app.referrals.ReferralLeaderboardData;
 import in.lubble.app.utils.YoutubeData;
@@ -102,4 +104,10 @@ public interface Endpoints {
 
     @GET
     public Call<YoutubeData> getYoutubeData(@Url String url);
+
+    @GET("/quiz/")
+    public Call<ArrayList<QuestionData>> getQuizQuestions();
+
+    @POST("/quiz/")
+    public Call<PlaceData> getQuizResult(@Body RequestBody params);
 }

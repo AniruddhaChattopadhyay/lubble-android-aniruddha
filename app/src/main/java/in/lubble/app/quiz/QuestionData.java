@@ -7,16 +7,16 @@ public class QuestionData implements Serializable {
 
     private static final long serialVersionUID = -7855131020149483128L;
 
-    private int id;
-    private String question;
+    private int quesId;
+    private String quesName;
     private ArrayList<OptionData> options;
 
-    public String getQuestion() {
-        return question;
+    public String getQuesName() {
+        return quesName;
     }
 
-    public void setQuestion(String question) {
-        this.question = question;
+    public void setQuesName(String quesName) {
+        this.quesName = quesName;
     }
 
     public ArrayList<OptionData> getOptions() {
@@ -27,11 +27,11 @@ public class QuestionData implements Serializable {
         this.options = options;
     }
 
-    public int getId() {
-        return id;
+    public int getQuesId() {
+        return quesId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setQuesId(int quesId) {
+        this.quesId = quesId;
     }
 }

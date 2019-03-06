@@ -47,9 +47,9 @@ public class OptionFrag extends Fragment {
         quesTv = view.findViewById(R.id.tv_quiz_title);
         RecyclerView recyclerView = view.findViewById(R.id.rv_quiz_options);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.setAdapter(new OptionAdapter(questionData.getId(), questionData.getOptions(), mListener));
+        recyclerView.setAdapter(new OptionAdapter(questionData.getQuesId(), questionData.getOptions(), mListener));
 
-        quesTv.setText(questionData.getQuestion());
+        quesTv.setText(questionData.getQuesName());
 
         return view;
     }
