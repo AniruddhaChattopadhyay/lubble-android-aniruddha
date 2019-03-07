@@ -25,6 +25,7 @@ public class ProfileData {
     private long birthdate = 0L;
     private boolean isOwner;
     private boolean isAgePublic = true;
+    private long coins;
 
     public String getId() {
         return id;
@@ -163,5 +164,13 @@ public class ProfileData {
 
     public void setIsAgePublic(boolean agePublic) {
         isAgePublic = agePublic;
+    }
+
+    public long getCoins() {
+        return coins;
+    }
+
+    public void setCoins(long coins) {
+        this.coins = coins;
     }
 }

@@ -15,12 +15,12 @@ import android.view.View;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -42,9 +42,10 @@ import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.ALL;
 
 @RuntimePermissions
-public class QuizResultActiv extends AppCompatActivity {
+public class QuizResultActiv extends BaseActivity implements RetryQuizBottomSheet.OnQuizRetryListener {
 
     private static final String TAG = "QuizResultActiv";
+    private static final int REQUEST_CODE_RETRY = 605;
 
     private ProgressBar progressBar;
     private TextView cuisineNameTv;
@@ -52,6 +53,7 @@ public class QuizResultActiv extends AppCompatActivity {
     private TextView cuisineEmojiTv;
     private TextView ambienceEmojiTv;
     private ImageView placePicIv;
+    private ImageView closeIv;
     private TextView placeCaptionTv;
     private TextView placeNameTv;
     private LinearLayout retryContainer;
@@ -74,6 +76,7 @@ public class QuizResultActiv extends AppCompatActivity {
         placeNameTv = findViewById(R.id.tv_name);
         placeCaptionTv = findViewById(R.id.tv_caption);
         retryContainer = findViewById(R.id.container_retry);
+        closeIv = findViewById(R.id.iv_quiz_close);
 
         progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
 
@@ -83,6 +86,13 @@ public class QuizResultActiv extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 openPlayAgainDialog();
+            }
+        });
+
+        closeIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
             }
         });
     }
@@ -192,6 +202,14 @@ public class QuizResultActiv extends AppCompatActivity {
     private void openPlayAgainDialog() {
         final RetryQuizBottomSheet retryQuizBottomSheet = RetryQuizBottomSheet.newInstance();
         retryQuizBottomSheet.show(getSupportFragmentManager(), null);
+    }
+
+    @Override
+    public void onSheetInteraction(int id) {
+        if (id == RESULT_OK) {
+            QuizOptionsActiv.open(this);
+            finish();
+        }
     }
 
     @Override
