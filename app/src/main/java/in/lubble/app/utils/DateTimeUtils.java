@@ -27,6 +27,7 @@ public class DateTimeUtils {
     public static final String SHORT_MONTH = "MMM";
     public static final String DATE = "dd";
     public static final long FAMILY_FUN_NIGHT_END_TIME = 1529753400000L;
+    public static final String COUNTDOWN_TIME = "hh:mm:ss";
 
     public static String currTimestampInString() {
         Calendar c = Calendar.getInstance();

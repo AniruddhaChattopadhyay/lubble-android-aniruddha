@@ -142,4 +142,8 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("sellers").child(uid).child("info");
     }
 
+    public static DatabaseReference getQuizRefForThisUser(String quizName) {
+        return FirebaseDatabase.getInstance().getReference("quiz").child(quizName).child(FirebaseAuth.getInstance().getUid());
+    }
+
 }

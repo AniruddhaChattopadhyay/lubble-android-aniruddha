@@ -42,11 +42,12 @@
             app:srcCompat="@drawable/ic_access_time_black_24dp" />
 
         <TextView
+            android:id="@+id/tv_quiz_countdown"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
-            android:text="Wait for 3:45:11"
-            android:textColor="@color/black" />
+            android:textColor="@color/black"
+            tools:text="Free Play in 3:45:11" />
 
     </LinearLayout>
 
@@ -87,6 +88,7 @@
         android:padding="4dp"
         android:text="How to earn more coins?"
         android:textColor="@color/link_blue"
+        android:textSize="16sp"
         android:visibility="gone"
         tools:visibility="visible" />
 

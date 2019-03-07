@@ -24,6 +24,7 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.RoundedCornersTransformation;
@@ -172,6 +173,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
                         }
                         placeCaptionTv.setText(caption);
 
+                        RealtimeDbHelper.getQuizRefForThisUser("whereTonight").child("lastPlayedTime").setValue(System.currentTimeMillis());
                     } else if (!isFinishing()) {
                         progressBar.setVisibility(View.GONE);
                         Toast.makeText(QuizResultActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
