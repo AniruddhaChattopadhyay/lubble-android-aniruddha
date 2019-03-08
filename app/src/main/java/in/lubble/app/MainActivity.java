@@ -46,10 +46,9 @@ import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
-import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.quiz.QuizOptionsActiv;
+import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
@@ -311,15 +310,13 @@ public class MainActivity extends BaseActivity {
         handlePresence();
         setDp();
 
-        QuizOptionsActiv.open(this);
-
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
                 case "services":
                     bottomNavigation.setSelectedItemId(R.id.navigation_services);
                     break;
-                case "marketplace":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_mplace);
+                case "fun":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_fun);
                     break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
@@ -479,8 +476,8 @@ public class MainActivity extends BaseActivity {
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
                     return true;
-                case R.id.navigation_mplace:
-                    switchFrag(MarketplaceFrag.newInstance());
+                case R.id.navigation_fun:
+                    switchFrag(GamesFrag.newInstance());
                     return true;
                 case R.id.navigation_services:
                     switchFrag(ServicesFrag.newInstance());

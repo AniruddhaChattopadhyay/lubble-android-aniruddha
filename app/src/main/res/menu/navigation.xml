@@ -17,8 +17,8 @@
         android:title="Events" />
 
     <item
-        android:id="@+id/navigation_mplace"
-        android:icon="@drawable/ic_shopping_cart_black_24dp"
+        android:id="@+id/navigation_fun"
+        android:icon="@drawable/ic_stars_black_24dp"
         android:title="Market" />
 
     <item
