@@ -161,7 +161,7 @@
         android:layout_below="@id/cardview_2"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="2dp"
-        android:text="Found the perfect place for you"
+        android:text="Found the perfect match for you"
         android:textColor="@color/white"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/container_place_result"
@@ -189,6 +189,35 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/green_circle"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:rotation="-10"
+            app:layout_constraintLeft_toLeftOf="@id/iv_place_pic"
+            app:layout_constraintTop_toTopOf="@id/iv_place_pic">
+
+            <TextView
+                android:id="@+id/tv_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="4.3" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="zomato"
+                android:textColor="@color/white"
+                android:textSize="10sp" />
+
+        </LinearLayout>
 
         <Space
             android:id="@+id/space"

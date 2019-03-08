@@ -17,25 +17,13 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true" />
 
-        <Button
-            android:id="@+id/btn_quiz_next"
-            android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="Next"
-            android:theme="@style/WhiteButton" />
-
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout_questions"
             android:layout_width="match_parent"
             android:layout_height="8dp"
-            android:layout_above="@id/btn_quiz_next"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
+            android:layout_alignParentBottom="true"
             app:tabBackground="@drawable/tab_selector_light"
             app:tabGravity="center"
             app:tabIndicatorHeight="0dp" />

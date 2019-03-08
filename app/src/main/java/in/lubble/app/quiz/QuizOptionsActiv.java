@@ -1,5 +1,6 @@
 package in.lubble.app.quiz;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +9,6 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,13 +31,9 @@ public class QuizOptionsActiv extends AppCompatActivity implements OptionFrag.On
     private static final String TAG = "QuizOptionsActiv";
 
     private NonSwipeableViewPager optionsCardViewPager;
-    private Button nextBtn;
     private TabLayout tabLayout;
     private ArrayList<QuestionData> quesDataList;
-    private int answeredQuesId;
     private ProgressBar progressBar;
-    private int answerId = -1;
-    private String answerName;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, QuizOptionsActiv.class));
@@ -51,33 +47,9 @@ public class QuizOptionsActiv extends AppCompatActivity implements OptionFrag.On
 
         optionsCardViewPager = findViewById(R.id.viewpager_quiz_options);
         progressBar = findViewById(R.id.progressbar_quiz);
-        nextBtn = findViewById(R.id.btn_quiz_next);
         tabLayout = findViewById(R.id.tab_layout_questions);
 
         progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
-        disableTabLayoutClicks(tabLayout);
-
-        nextBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (answerId != -1) {
-                    persistAnswer();
-                    answerId = -1;
-                } else {
-                    Toast.makeText(QuizOptionsActiv.this, "Choose one", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                final int nextPos = optionsCardViewPager.getCurrentItem() + 1;
-                if (nextPos < optionsCardViewPager.getAdapter().getCount()) {
-                    optionsCardViewPager.setCurrentItem(nextPos);
-                } else {
-                    QuizResultActiv.open(QuizOptionsActiv.this);
-                    finish();
-                }
-            }
-        });
-
         fetchQuesList();
     }
 
@@ -91,6 +63,7 @@ public class QuizOptionsActiv extends AppCompatActivity implements OptionFrag.On
                     quesDataList = response.body();
                     optionsCardViewPager.setAdapter(new QuizOptionsPagerAdapter(getSupportFragmentManager(), quesDataList));
                     tabLayout.setupWithViewPager(optionsCardViewPager, false);
+                    disableTabLayoutClicks(tabLayout);
                 } else if (!isFinishing()) {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(QuizOptionsActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
@@ -109,21 +82,27 @@ public class QuizOptionsActiv extends AppCompatActivity implements OptionFrag.On
         });
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void onListFragmentInteraction(int answeredQuesId, OptionData optionData) {
-        for (QuestionData questionData : quesDataList) {
-            if (questionData.getQuesId() == answeredQuesId) {
-                this.answeredQuesId = answeredQuesId;
-                this.answerId = optionData.getId();
-                this.answerName = optionData.getValue();
-            }
+        int answerId = optionData.getId();
+        String answerName = optionData.getValue();
+        if (answerId != -1) {
+            final SharedPreferences preferences = AnswerSharedPrefs.getInstance().getPreferences();
+            preferences.edit().putInt(String.valueOf(answeredQuesId), answerId).commit();
+            preferences.edit().putString(String.valueOf(answeredQuesId) + "_name", answerName).commit();
+        } else {
+            Toast.makeText(QuizOptionsActiv.this, "Choose one", Toast.LENGTH_SHORT).show();
+            return;
         }
-    }
 
-    private void persistAnswer() {
-        final SharedPreferences preferences = AnswerSharedPrefs.getInstance().getPreferences();
-        preferences.edit().putInt(String.valueOf(answeredQuesId), answerId).commit();
-        preferences.edit().putString(String.valueOf(answeredQuesId) + "_name", answerName).commit();
+        final int nextPos = optionsCardViewPager.getCurrentItem() + 1;
+        if (nextPos < optionsCardViewPager.getAdapter().getCount()) {
+            optionsCardViewPager.setCurrentItem(nextPos);
+        } else {
+            QuizResultActiv.open(QuizOptionsActiv.this);
+            finish();
+        }
     }
 
 }

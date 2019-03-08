@@ -60,6 +60,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
     private TextView ambienceNameTv;
     private TextView cuisineEmojiTv;
     private TextView ambienceEmojiTv;
+    private TextView ratingTv;
     private ImageView placePicIv;
     private ImageView closeIv;
     private TextView placeCaptionTv;
@@ -84,6 +85,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         cuisineEmojiTv = findViewById(R.id.tv_cuisine_emoji);
         ambienceEmojiTv = findViewById(R.id.tv_ambience_emoji);
         placePicIv = findViewById(R.id.iv_place_pic);
+        ratingTv = findViewById(R.id.tv_rating);
         placeNameTv = findViewById(R.id.tv_name);
         placeCaptionTv = findViewById(R.id.tv_caption);
         retryContainer = findViewById(R.id.container_retry);
@@ -205,6 +207,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
                         progressBar.setVisibility(View.GONE);
                         final PlaceData placeData = response.body();
                         placeNameTv.setText(placeData.getName());
+                        ratingTv.setText(String.valueOf(placeData.getRating()));
 
                         RequestOptions requestOptions = new RequestOptions();
                         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, ALL));
