@@ -30,6 +30,7 @@
         android:id="@+id/container_wait"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:foreground="?attr/selectableItemBackground"
         android:layout_marginTop="16dp"
         android:background="@drawable/rect_rounded_teal"
         android:gravity="center"

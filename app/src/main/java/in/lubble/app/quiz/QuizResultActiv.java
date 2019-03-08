@@ -2,12 +2,15 @@ package in.lubble.app.quiz;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,18 +18,19 @@ import android.view.View;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import in.lubble.app.BaseActivity;
-import in.lubble.app.Constants;
-import in.lubble.app.GlideApp;
+import in.lubble.app.*;
+import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
@@ -37,8 +41,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.io.File;
+
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
+import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.shareScreenshotWithPermissionCheck;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.ALL;
 
@@ -58,6 +65,9 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
     private TextView placeCaptionTv;
     private TextView placeNameTv;
     private LinearLayout retryContainer;
+    private LinearLayout shareContainer;
+    private ProgressBar shareProgressBar;
+    private LinearLayout shareItemsContainer;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, QuizResultActiv.class));
@@ -77,6 +87,9 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         placeNameTv = findViewById(R.id.tv_name);
         placeCaptionTv = findViewById(R.id.tv_caption);
         retryContainer = findViewById(R.id.container_retry);
+        shareContainer = findViewById(R.id.container_quiz_share);
+        shareProgressBar = findViewById(R.id.progressbar_quiz_share);
+        shareItemsContainer = findViewById(R.id.container_share_items);
         closeIv = findViewById(R.id.iv_quiz_close);
 
         progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
@@ -90,12 +103,49 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
             }
         });
 
+        shareContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareScreenshotWithPermissionCheck(QuizResultActiv.this);
+            }
+        });
+
         closeIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
+    }
+
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public void shareScreenshot() {
+        View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
+        final Bitmap screenShot = getScreenShot(rootView);
+        final String path = FileUtils.saveImageInGallery(screenShot, "quiz_screenie_" + System.currentTimeMillis(), QuizResultActiv.this);
+        Uri uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(path));
+        Intent intent = new Intent();
+        intent.setAction(Intent.ACTION_SEND);
+        intent.setType("image/*");
+
+        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "");
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, "");
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        try {
+            startActivity(Intent.createChooser(intent, "Share Screenshot"));
+            shareProgressBar.setVisibility(View.VISIBLE);
+            shareItemsContainer.setVisibility(View.GONE);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "No App Available", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static Bitmap getScreenShot(View view) {
+        View screenView = view.getRootView();
+        screenView.setDrawingCacheEnabled(true);
+        Bitmap bitmap = Bitmap.createBitmap(screenView.getDrawingCache());
+        screenView.setDrawingCacheEnabled(false);
+        return bitmap;
     }
 
     @SuppressLint("MissingPermission")
@@ -166,7 +216,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
 
                         String caption = "";
                         if (!TextUtils.isEmpty(placeData.getType())) {
-                            caption += placeData.getType() + " · ";
+                            caption += placeData.getType();
                         }
                         if (placeData.getDistance() != 0 && placeData.getDistance() < 10 * 3) {
                             caption += " · " + placeData.getDistanceString();
@@ -212,6 +262,13 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
             QuizOptionsActiv.open(this);
             finish();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        shareProgressBar.setVisibility(View.GONE);
+        shareItemsContainer.setVisibility(View.VISIBLE);
     }
 
     @Override
