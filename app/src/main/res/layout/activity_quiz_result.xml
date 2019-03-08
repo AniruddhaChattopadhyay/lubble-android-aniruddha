@@ -70,7 +70,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_you_chose"
         android:layout_marginStart="8dp"
-        android:rotation="-10"
         app:cardCornerRadius="8dp"
         app:cardElevation="8dp"
         app:layout_constraintBottom_toBottomOf="@id/cardview_2"
@@ -116,7 +115,6 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:rotation="10"
         app:cardBackgroundColor="@color/very_light_gray"
         app:cardCornerRadius="8dp"
         app:layout_constraintBottom_toTopOf="@+id/container_place_result"
@@ -173,14 +171,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/container_retry"
-        app:layout_constraintTop_toBottomOf="@+id/cardView"
-        tools:layout_editor_absoluteX="8dp">
+        app:layout_constraintTop_toBottomOf="@+id/cardView">
 
         <ImageView
             android:id="@+id/iv_place_pic"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginLeft="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginRight="8dp"
             android:background="@drawable/rect_rounded_white"
             android:padding="4dp"
@@ -190,16 +188,27 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
+        <Space
+            android:id="@+id/space_place_pic"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            app:layout_constraintBottom_toTopOf="@id/iv_place_pic"
+            app:layout_constraintRight_toLeftOf="@id/iv_place_pic" />
+
         <LinearLayout
+            android:id="@+id/container_rating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/green_circle"
+            android:elevation="8dp"
             android:gravity="center"
             android:orientation="vertical"
             android:padding="8dp"
             android:rotation="-10"
-            app:layout_constraintLeft_toLeftOf="@id/iv_place_pic"
-            app:layout_constraintTop_toTopOf="@id/iv_place_pic">
+            app:layout_constraintLeft_toLeftOf="@id/space_place_pic"
+            app:layout_constraintTop_toTopOf="@id/space_place_pic">
 
             <TextView
                 android:id="@+id/tv_rating"
@@ -270,7 +279,10 @@
         android:foreground="?attr/selectableItemBackground"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="8dp"
+        android:paddingLeft="16dp"
+        android:paddingTop="8dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="8dp"
         app:layout_constraintBottom_toTopOf="@id/lubble_logo"
         app:layout_constraintLeft_toLeftOf="parent">
 
@@ -318,6 +330,7 @@
             android:id="@+id/container_share_items"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:orientation="horizontal">
 
             <ImageView
@@ -365,8 +378,8 @@
         android:id="@+id/lubble_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:alpha="0.7"
+        android:gravity="center"
         android:paddingTop="4dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -385,5 +398,14 @@
             android:textSize="18sp" />
 
     </LinearLayout>
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="lubble_logo,container_quiz_share,container_retry,container_place_result,tv_here,tv_you_chose,cardView,cardview_2"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

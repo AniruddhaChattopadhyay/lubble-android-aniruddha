@@ -15,9 +15,14 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
+import android.view.animation.ScaleAnimation;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.Group;
 import androidx.core.content.FileProvider;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -56,6 +61,9 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
     private static final int REQUEST_CODE_RETRY = 605;
 
     private ProgressBar progressBar;
+    private Group group;
+    private CardView cardView1;
+    private CardView cardView2;
     private TextView cuisineNameTv;
     private TextView ambienceNameTv;
     private TextView cuisineEmojiTv;
@@ -67,6 +75,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
     private TextView placeNameTv;
     private LinearLayout retryContainer;
     private LinearLayout shareContainer;
+    private LinearLayout ratingContainer;
     private ProgressBar shareProgressBar;
     private LinearLayout shareItemsContainer;
 
@@ -80,6 +89,9 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         setContentView(R.layout.activity_quiz_result);
 
         progressBar = findViewById(R.id.progressbar_quiz_result);
+        group = findViewById(R.id.group);
+        cardView1 = findViewById(R.id.cardView);
+        cardView2 = findViewById(R.id.cardview_2);
         cuisineNameTv = findViewById(R.id.tv_cuisine_name);
         ambienceNameTv = findViewById(R.id.tv_ambience_name);
         cuisineEmojiTv = findViewById(R.id.tv_cuisine_emoji);
@@ -92,6 +104,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         shareContainer = findViewById(R.id.container_quiz_share);
         shareProgressBar = findViewById(R.id.progressbar_quiz_share);
         shareItemsContainer = findViewById(R.id.container_share_items);
+        ratingContainer = findViewById(R.id.container_rating);
         closeIv = findViewById(R.id.iv_quiz_close);
 
         progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
@@ -225,6 +238,9 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
                             caption += " · " + placeData.getDistanceString();
                         }
                         placeCaptionTv.setText(caption);
+                        group.setVisibility(View.VISIBLE);
+
+                        animateCards();
 
                         RealtimeDbHelper.getQuizRefForThisUser("whereTonight").child("lastPlayedTime").setValue(System.currentTimeMillis());
                     } else if (!isFinishing()) {
@@ -245,6 +261,24 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private void animateCards() {
+        RotateAnimation rotate = new RotateAnimation(0, -10, Animation.RELATIVE_TO_SELF,
+                0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        RotateAnimation rotate2 = new RotateAnimation(0, 10, Animation.RELATIVE_TO_SELF,
+                0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        rotate.setDuration(500);
+        rotate.setFillAfter(true);
+        rotate2.setDuration(500);
+        rotate2.setFillAfter(true);
+        cardView1.startAnimation(rotate);
+        cardView2.startAnimation(rotate2);
+
+        final ScaleAnimation scaleAnimation = new ScaleAnimation(0, 1, 0, 1, 0.5f, 0.5f);
+        scaleAnimation.setDuration(500);
+        scaleAnimation.setFillAfter(true);
+        ratingContainer.startAnimation(scaleAnimation);
     }
 
     private void fetchResultWithoutLocation() {
