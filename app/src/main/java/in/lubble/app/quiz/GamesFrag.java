@@ -6,6 +6,8 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -13,18 +15,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.*;
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ProfileData;
-import in.lubble.app.profile.ProfileFrag;
+import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.utils.RoundedCornersTransformation;
 
 import java.util.concurrent.TimeUnit;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getQuizRefForThisUser;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class GamesFrag extends Fragment {
 
@@ -36,6 +40,10 @@ public class GamesFrag extends Fragment {
     private TextView earnCoinsTv;
     private LinearLayout playContainer;
     private boolean isFreePlayEnabled;
+    private RelativeLayout whereTonightContainer;
+    private ValueEventListener timeListener;
+    private ValueEventListener coinsListener;
+    private long currentCoins = 0;
 
     public GamesFrag() {
         // Required empty public constructor
@@ -61,40 +69,52 @@ public class GamesFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_games, container, false);
 
-        final RelativeLayout whereTonightContainer = view.findViewById(R.id.container_wheretonight);
+        whereTonightContainer = view.findViewById(R.id.container_wheretonight);
         currentCoinsTv = view.findViewById(R.id.tv_total_coins);
         countdownTv = view.findViewById(R.id.tv_quiz_play_countdown);
         playContainer = view.findViewById(R.id.container_quiz_play);
         quizPlayCoinIv = view.findViewById(R.id.iv_quiz_play_coin);
         quizPlayCostTv = view.findViewById(R.id.tv_quiz_play_cost);
+        ImageView whereTonightPicIv = view.findViewById(R.id.iv_wheretonight_pic);
         earnCoinsTv = view.findViewById(R.id.tv_earn_more);
         final LinearLayout currentCoinsContainer = view.findViewById(R.id.container_current_coins);
 
         quizPlayCostTv.setText(String.valueOf(RETRY_COST));
 
-        syncCurrentCoins();
-        syncTime();
-
-        whereTonightContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                QuizOptionsActiv.open(requireContext());
-            }
-        });
-
         currentCoinsContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ProfileFrag.newInstance(FirebaseAuth.getInstance().getUid());
+                ProfileActivity.open(requireContext(), FirebaseAuth.getInstance().getUid());
             }
         });
+
+        earnCoinsTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProfileActivity.open(requireContext(), FirebaseAuth.getInstance().getUid());
+            }
+        });
+
+        GlideApp.with(requireContext())
+                .load(R.drawable.ic_having_fun_iais)
+                .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                .into(whereTonightPicIv);
 
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        whereTonightContainer.setAlpha(1f);
+        syncTime();
+    }
 
     private void syncTime() {
-        getQuizRefForThisUser("whereTonight").child("lastPlayedTime").addListenerForSingleValueEvent(new ValueEventListener() {
+        if (timeListener != null) {
+            getQuizRefForThisUser("whereTonight").child("lastPlayedTime").removeEventListener(timeListener);
+        }
+        timeListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
@@ -103,6 +123,9 @@ public class GamesFrag extends Fragment {
                     new CountDownTimer(millisInFuture - System.currentTimeMillis(), 1000) {
 
                         public void onTick(long millisUntilFinished) {
+                            if (isFreePlayEnabled) {
+                                isFreePlayEnabled = false;
+                            }
                             String hms = String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millisUntilFinished),
                                     TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished) % TimeUnit.HOURS.toMinutes(1),
                                     TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % TimeUnit.MINUTES.toSeconds(1));
@@ -111,6 +134,12 @@ public class GamesFrag extends Fragment {
                             countdownTv.setVisibility(View.VISIBLE);
                             quizPlayCoinIv.setVisibility(View.VISIBLE);
                             quizPlayCostTv.setVisibility(View.VISIBLE);
+                            whereTonightContainer.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    startQuiz();
+                                }
+                            });
                         }
 
                         public void onFinish() {
@@ -120,34 +149,42 @@ public class GamesFrag extends Fragment {
                 } else {
                     enableFreePlay();
                 }
+                syncCurrentCoins();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
-        });
-    }
-
-    private void enableFreePlay() {
-        countdownTv.setVisibility(View.GONE);
-        isFreePlayEnabled = true;
-        quizPlayCoinIv.setVisibility(View.GONE);
-        quizPlayCostTv.setVisibility(View.GONE);
+        };
+        getQuizRefForThisUser("whereTonight").child("lastPlayedTime").addValueEventListener(timeListener);
     }
 
     private void syncCurrentCoins() {
-        getThisUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
+        if (coinsListener != null) {
+            getThisUserRef().removeEventListener(coinsListener);
+        }
+        coinsListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                currentCoinsTv.setText(String.valueOf(profileData.getCoins()));
-                if (profileData.getCoins() >= RETRY_COST) {
-                    playContainer.setAlpha(1f);
-                    earnCoinsTv.setVisibility(View.GONE);
-                } else {
-                    playContainer.setAlpha(0.5f);
-                    earnCoinsTv.setVisibility(View.VISIBLE);
+                currentCoins = profileData.getCoins();
+                currentCoinsTv.setText(String.valueOf(currentCoins));
+                if (!isFreePlayEnabled) {
+                    if (profileData.getCoins() >= RETRY_COST) {
+                        playContainer.setAlpha(1f);
+                        earnCoinsTv.setVisibility(View.GONE);
+                        whereTonightContainer.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startQuiz();
+                            }
+                        });
+                    } else {
+                        playContainer.setAlpha(0.5f);
+                        earnCoinsTv.setVisibility(View.VISIBLE);
+                        whereTonightContainer.setOnClickListener(null);
+                    }
                 }
             }
 
@@ -155,7 +192,72 @@ public class GamesFrag extends Fragment {
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
+        };
+        getThisUserRef().addValueEventListener(coinsListener);
+    }
+
+    private void enableFreePlay() {
+        countdownTv.setVisibility(View.GONE);
+        isFreePlayEnabled = true;
+        quizPlayCoinIv.setVisibility(View.GONE);
+        quizPlayCostTv.setVisibility(View.GONE);
+        whereTonightContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startQuiz();
+            }
         });
     }
 
+    private void startQuiz() {
+        if (isFreePlayEnabled) {
+            QuizOptionsActiv.open(requireContext());
+        } else if (currentCoins >= RETRY_COST) {
+
+            whereTonightContainer.setAlpha(0.5f);
+            whereTonightContainer.setOnClickListener(null);
+            Analytics.triggerEvent(AnalyticsEvents.QUIZ_USE_COINS, requireContext());
+            getThisUserRef().runTransaction(new Transaction.Handler() {
+                @Override
+                public Transaction.Result doTransaction(MutableData mutableData) {
+                    ProfileData profileData = mutableData.getValue(ProfileData.class);
+                    if (profileData == null) {
+                        return Transaction.success(mutableData);
+                    }
+
+                    if (profileData.getCoins() >= RETRY_COST) {
+                        // go ahead & play quiz
+                        profileData.setCoins(profileData.getCoins() - RETRY_COST);
+                        // Set value and report transaction success
+                        mutableData.setValue(profileData);
+                        return Transaction.success(mutableData);
+                    } else {
+                        return Transaction.abort();
+                    }
+                }
+
+                @Override
+                public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
+                    // Transaction completed
+                    if (committed && isAdded()) {
+                        QuizOptionsActiv.open(requireContext());
+                    } else if (isAdded()) {
+                        isFreePlayEnabled = false;
+                        syncTime();
+                    }
+                }
+            });
+        } else {
+            Animation shake = AnimationUtils.loadAnimation(requireContext(), R.anim.shake);
+            earnCoinsTv.startAnimation(shake);
+            return;
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getQuizRefForThisUser("whereTonight").child("lastPlayedTime").removeEventListener(timeListener);
+        getThisUserRef().removeEventListener(coinsListener);
+    }
 }

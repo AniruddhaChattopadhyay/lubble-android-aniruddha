@@ -63,6 +63,7 @@ public class AnalyticsEvents {
     public static final String WRITE_PERM_GRANTED = "WRITE_PERM_GRANTED";
     public static final String FAILED_SEARCH = "FAILED_SEARCH";
 
+    public static final String QUIZ_USE_COINS = "QUIZ_USE_COINS";
     public static final String QUIZ_RETRY_WAIT = "QUIZ_RETRY_WAIT";
     public static final String QUIZ_FREE_RETRY = "QUIZ_FREE_RETRY";
     public static final String QUIZ_RETRY_USE_COINS = "QUIZ_RETRY_USE_COINS";

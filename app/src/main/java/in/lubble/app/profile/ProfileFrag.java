@@ -315,7 +315,7 @@ public class ProfileFrag extends Fragment {
 
             ViewHolder(LayoutInflater inflater, ViewGroup parent) {
                 super(inflater.inflate(R.layout.item_user_group, parent, false));
-                groupDpIv = itemView.findViewById(R.id.iv_group_pic);
+                groupDpIv = itemView.findViewById(R.id.iv_wheretonight_pic);
                 groupNameTv = itemView.findViewById(R.id.tv_group_title);
                 groupMemberTv = itemView.findViewById(R.id.tv_member_hint);
                 itemView.setOnClickListener(new View.OnClickListener() {

@@ -251,7 +251,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         public GroupViewHolder(View view) {
             super(view);
             mView = view;
-            iconIv = view.findViewById(R.id.iv_group_pic);
+            iconIv = view.findViewById(R.id.iv_wheretonight_pic);
             lockIv = view.findViewById(R.id.iv_lock_icon);
             titleTv = view.findViewById(R.id.tv_title);
             subtitleTv = view.findViewById(R.id.tv_subtitle);
