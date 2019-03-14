@@ -17,6 +17,8 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -99,6 +101,14 @@ public class GamesFrag extends Fragment {
                 .load(R.drawable.ic_having_fun_iais)
                 .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                 .into(whereTonightPicIv);
+
+
+        if (!LubbleSharedPrefs.getInstance().getIsQuizOpened()) {
+            LubbleSharedPrefs.getInstance().setIsQuizOpened(true);
+            if (getActivity() != null) {
+                ((MainActivity) getActivity()).removeQuizBadge();
+            }
+        }
 
         return view;
     }

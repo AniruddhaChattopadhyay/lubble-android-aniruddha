@@ -17,11 +17,20 @@
             android:background="@drawable/gradient_blue_clue"
             android:padding="8dp">
 
+            <ImageView
+                android:id="@+id/iv_coin"
+                app:srcCompat="@drawable/ic_coin"
+                android:layout_centerVertical="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
             <LinearLayout
+                android:layout_toRightOf="@id/iv_coin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="16dp"
+                android:gravity="left|start"
+                android:layout_marginLeft="4dp"
                 android:orientation="vertical">
 
                 <TextView
@@ -31,14 +40,14 @@
                     android:textAppearance="@style/TextAppearance.AppCompat.Title"
                     android:textColor="@color/white"
                     android:textSize="30sp"
-                    tools:text="1504" />
+                    tools:text="15" />
 
                 <TextView
                     android:id="@+id/tv_total_points_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
-                    tools:text="Total Points" />
+                    tools:text="Total Coins" />
 
             </LinearLayout>
 
@@ -107,7 +116,7 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:gravity="center"
-                android:text="Invite your contacts\nto earn points &amp; win prizes!"
+                android:text="Invite your contacts\n&amp; earn coins!"
                 android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
             <TextView
@@ -118,7 +127,7 @@
                 android:layout_marginRight="8dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:text="Even if they are not your neighbour, they can still join the queue &amp; you'll earn points!" />
+                android:text="Even if they are not your neighbour, they can still join the queue &amp; you'll earn coins!" />
 
             <include layout="@layout/layout_social_invite" />
 

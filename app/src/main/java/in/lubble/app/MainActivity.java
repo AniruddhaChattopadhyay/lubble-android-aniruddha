@@ -184,9 +184,24 @@ public class MainActivity extends BaseActivity {
             }
         });
         //showBottomNavBadge();
+        showQuizBadge();
         fetchAndPersistAppFeatures();
         fetchAndPersistMplaceItems();
         initFirebaseRemoteConfig();
+    }
+
+    private void showQuizBadge() {
+        if (!LubbleSharedPrefs.getInstance().getIsQuizOpened()) {
+            BottomNavigationMenuView bottomNavigationMenuView =
+                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+            View v = bottomNavigationMenuView.getChildAt(3);
+            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+
+            View badge = LayoutInflater.from(this)
+                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+
+            itemView.addView(badge);
+        }
     }
 
     @Override
@@ -512,6 +527,15 @@ public class MainActivity extends BaseActivity {
     }
 
     public void removeServicesBadge() {
+        BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+        View v = bottomNavigationMenuView.getChildAt(3);
+        BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        if (itemView != null && itemView.getChildAt(2) != null) {
+            itemView.removeViewAt(2);
+        }
+    }
+
+    public void removeQuizBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
         View v = bottomNavigationMenuView.getChildAt(3);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
