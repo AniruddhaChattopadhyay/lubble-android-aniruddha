@@ -104,6 +104,9 @@ public class GamesFrag extends Fragment {
 
 
         if (!LubbleSharedPrefs.getInstance().getIsQuizOpened()) {
+            Animation shake = AnimationUtils.loadAnimation(requireContext(), R.anim.shake);
+            shake.setStartOffset(2000);
+            playContainer.startAnimation(shake);
             LubbleSharedPrefs.getInstance().setIsQuizOpened(true);
             if (getActivity() != null) {
                 ((MainActivity) getActivity()).removeQuizBadge();
