@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="8dp"
-            android:background="@color/super_light_gray"
+            android:background="@color/white"
             android:src="@drawable/referral_info" />
 
         <TextView
@@ -96,24 +96,6 @@
                     app:srcCompat="@drawable/ic_cup"/>
 
             </RelativeLayout>
-
-            <TextView
-                android:id="@+id/tv_empty"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
-                android:text="Be the first! Invite someone fast!"
-                android:visibility="gone"
-                tools:visibility="visible"/>
-
-            <ProgressBar
-                android:id="@+id/progressbar_leaderboard"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
-                android:visibility="gone"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_leaderboard"
