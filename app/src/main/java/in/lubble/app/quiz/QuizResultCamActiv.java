@@ -254,7 +254,7 @@ public class QuizResultCamActiv extends BaseActivity implements RetryQuizBottomS
                         if (!TextUtils.isEmpty(placeData.getType())) {
                             caption += placeData.getType();
                         }
-                        if (placeData.getDistance() != 0 && placeData.getDistance() < 1000 * 3) {
+                        if (placeData.getDistance() != 0 && placeData.getDistance() < 1000 * 10) {
                             caption += " · " + placeData.getDistanceString();
                         }
                         placeCaptionTv.setText(caption);

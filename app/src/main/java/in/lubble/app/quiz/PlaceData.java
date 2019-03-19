@@ -76,7 +76,11 @@ public class PlaceData {
     }
 
     public String getDistanceString() {
-        return String.valueOf(Math.round(this.distance)) + "m";
+        if (this.distance < 1000) {
+            return String.valueOf(Math.round(this.distance)) + "m";
+        } else {
+            return String.format("%.1fkm", (float) (this.distance / 1000));
+        }
     }
 
 }
