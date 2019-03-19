@@ -70,7 +70,7 @@ public class ProfileFrag extends Fragment {
     private TextView editProfileTV;
     private TextView rankTv;
     private TextView invitedTv;
-    private TextView pointsTv;
+    private TextView coinsTv;
     private RecyclerView userGroupsRv;
     private Button inviteBtn;
     private TextView logoutTv;
@@ -127,7 +127,7 @@ public class ProfileFrag extends Fragment {
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
         rankTv = rootView.findViewById(R.id.tv_rank);
         invitedTv = rootView.findViewById(R.id.tv_invited);
-        pointsTv = rootView.findViewById(R.id.tv_points);
+        coinsTv = rootView.findViewById(R.id.tv_points);
         genderIv = rootView.findViewById(R.id.iv_gender);
         genderTv = rootView.findViewById(R.id.tv_gender);
         businessIv = rootView.findViewById(R.id.iv_business);
@@ -315,7 +315,7 @@ public class ProfileFrag extends Fragment {
 
             ViewHolder(LayoutInflater inflater, ViewGroup parent) {
                 super(inflater.inflate(R.layout.item_user_group, parent, false));
-                groupDpIv = itemView.findViewById(R.id.iv_group_pic);
+                groupDpIv = itemView.findViewById(R.id.iv_wheretonight_pic);
                 groupNameTv = itemView.findViewById(R.id.tv_group_title);
                 groupMemberTv = itemView.findViewById(R.id.tv_member_hint);
                 itemView.setOnClickListener(new View.OnClickListener() {
@@ -447,7 +447,6 @@ public class ProfileFrag extends Fragment {
                 final UserProfileData userProfileData = response.body();
                 if (response.isSuccessful() && userProfileData != null && isAdded() && isVisible()) {
                     rankTv.setText(String.valueOf(userProfileData.getRank()));
-                    pointsTv.setText(String.valueOf(userProfileData.getPoints()));
                     invitedTv.setText(String.valueOf(userProfileData.getReferrals()));
                 } else if (isAdded() && isVisible()) {
                     Crashlytics.log("referral leaderboard bad response");
@@ -461,6 +460,19 @@ public class ProfileFrag extends Fragment {
                     Log.e(TAG, "onFailure: ");
                     Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        getUserRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                coinsTv.setText(String.valueOf(profileData.getCoins()));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
             }
         });
     }

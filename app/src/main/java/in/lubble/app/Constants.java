@@ -30,7 +30,7 @@ public class Constants {
      * FIREBASE REMOTE CONFIG KEYS
      */
     public static final String REFER_MSG = "REFER_MSG";
-
+    public static final String QUIZ_RESULT_UI = "quiz_result_ui";
 
     public static final double SVR_LATI = 28.696660;
     public static final double SVR_LONGI = 77.124772;

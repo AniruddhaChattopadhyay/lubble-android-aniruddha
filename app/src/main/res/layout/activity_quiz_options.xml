@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootview_quiz"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_blue_clue"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/progressbar_quiz"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout_questions"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_alignParentBottom="true"
+            app:tabBackground="@drawable/tab_selector_light"
+            app:tabGravity="center"
+            app:tabIndicatorHeight="0dp" />
+
+        <in.lubble.app.widget.NonSwipeableViewPager
+            android:id="@+id/viewpager_quiz_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/tab_layout_questions"
+            android:layout_marginTop="12dp"
+            android:orientation="vertical" />
+
+    </RelativeLayout>
+</LinearLayout>

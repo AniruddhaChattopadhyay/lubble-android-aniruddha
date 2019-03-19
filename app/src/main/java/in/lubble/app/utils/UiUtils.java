@@ -11,17 +11,20 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.palette.graphics.Palette;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.tabs.TabLayout;
 import in.lubble.app.R;
 
 import java.io.File;
@@ -123,6 +126,15 @@ public class UiUtils {
         return bottomSheetDialog;
     }
 
+    public static void animateRotate(Context context, View view, int degree) {
+        if (context != null && view.getVisibility() == View.VISIBLE) {
+            Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_down_hide);
+            slideUp.setDuration(500);
+            view.startAnimation(slideUp);
+            view.setVisibility(View.GONE);
+        }
+
+    }
     public static void animateSlideDownHide(Context context, View view) {
         if (context != null && view.getVisibility() == View.VISIBLE) {
             Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_down_hide);
@@ -214,5 +226,17 @@ public class UiUtils {
             return hslColor[0] >= 10.0F && hslColor[0] <= 37.0F && hslColor[1] <= 0.82F;
         }
     };
+
+    public static void disableTabLayoutClicks(TabLayout tabLayout) {
+        LinearLayout tabStrip = ((LinearLayout) tabLayout.getChildAt(0));
+        for (int i = 0; i < tabStrip.getChildCount(); i++) {
+            tabStrip.getChildAt(i).setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+        }
+    }
 
 }

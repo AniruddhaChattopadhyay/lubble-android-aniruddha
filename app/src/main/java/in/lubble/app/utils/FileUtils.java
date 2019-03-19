@@ -169,7 +169,7 @@ public class FileUtils {
         alertDialog.show();
     }
 
-    public static void saveImageInGallery(Bitmap image, String msgId, Context context) {
+    public static String saveImageInGallery(Bitmap image, String msgId, Context context) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && isExternalStorageWritable()) {
             String savedImagePath = null;
@@ -189,14 +189,15 @@ public class FileUtils {
                     OutputStream fOut = new FileOutputStream(imageFile);
                     image.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
                     fOut.close();
+                    // Add the image to the system gallery
+                    galleryAddPic(context, savedImagePath);
+                    return savedImagePath;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                // Add the image to the system gallery
-                galleryAddPic(context, savedImagePath);
             }
         }
+        return null;
     }
 
     private static void galleryAddPic(Context context, String imagePath) {

@@ -36,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.heapanalytics.android.Heap;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
@@ -45,9 +46,9 @@ import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
-import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
@@ -56,7 +57,9 @@ import io.branch.referral.BranchError;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -182,9 +185,24 @@ public class MainActivity extends BaseActivity {
             }
         });
         //showBottomNavBadge();
+        showQuizBadge();
         fetchAndPersistAppFeatures();
         fetchAndPersistMplaceItems();
         initFirebaseRemoteConfig();
+    }
+
+    private void showQuizBadge() {
+        if (!LubbleSharedPrefs.getInstance().getIsQuizOpened()) {
+            BottomNavigationMenuView bottomNavigationMenuView =
+                    (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+            View v = bottomNavigationMenuView.getChildAt(3);
+            BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+
+            View badge = LayoutInflater.from(this)
+                    .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
+
+            itemView.addView(badge);
+        }
     }
 
     @Override
@@ -256,6 +274,7 @@ public class MainActivity extends BaseActivity {
         firebaseRemoteConfig.setConfigSettings(configSettings);
         HashMap<String, Object> map = new HashMap<>();
         map.put(REFER_MSG, getString(R.string.refer_msg));
+        map.put(QUIZ_RESULT_UI, "normal");
         firebaseRemoteConfig.setDefaults(map);
     }
 
@@ -310,11 +329,14 @@ public class MainActivity extends BaseActivity {
 
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
+                case "events":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
+                    break;
                 case "services":
                     bottomNavigation.setSelectedItemId(R.id.navigation_services);
                     break;
-                case "marketplace":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_mplace);
+                case "games":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_fun);
                     break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
@@ -421,8 +443,13 @@ public class MainActivity extends BaseActivity {
 
     private void logUser(FirebaseUser currentUser) {
         Crashlytics.setUserIdentifier(currentUser.getUid());
-        Crashlytics.setUserEmail(currentUser.getEmail());
         Crashlytics.setUserName(currentUser.getDisplayName());
+        Heap.identify(currentUser.getUid().toLowerCase());
+        Map<String, String> props = new HashMap<>();
+        props.put("uid", currentUser.getUid());
+        props.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+        props.put("name", currentUser.getDisplayName() == null ? "" : currentUser.getDisplayName());
+        Heap.addUserProperties(props);
     }
 
     private void syncFcmToken() {
@@ -469,8 +496,8 @@ public class MainActivity extends BaseActivity {
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
                     return true;
-                case R.id.navigation_mplace:
-                    switchFrag(MarketplaceFrag.newInstance());
+                case R.id.navigation_fun:
+                    switchFrag(GamesFrag.newInstance());
                     return true;
                 case R.id.navigation_services:
                     switchFrag(ServicesFrag.newInstance());
@@ -505,6 +532,15 @@ public class MainActivity extends BaseActivity {
     }
 
     public void removeServicesBadge() {
+        BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+        View v = bottomNavigationMenuView.getChildAt(3);
+        BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+        if (itemView != null && itemView.getChildAt(2) != null) {
+            itemView.removeViewAt(2);
+        }
+    }
+
+    public void removeQuizBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
         View v = bottomNavigationMenuView.getChildAt(3);
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;

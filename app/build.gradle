@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 // make sure this line comes *after* you apply the Android plugin
 apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'io.fabric'
+apply plugin: 'com.heapanalytics.android'
 
 android {
     compileSdkVersion 28
@@ -15,9 +16,15 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
+        debug {
+            // Add this line to a build type to enable Heap event capture.
+            ext.heap = ["enabled": true]
+            // ...
+        }
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ext.heap = ["enabled": true]
         }
     }
     flavorDimensions("type")
@@ -59,7 +66,7 @@ dependencies {
     implementation('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
         transitive = true;
     }
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.1.0-alpha03'
     implementation 'com.google.android.material:material:1.0.0'
     // FirebaseUI for Firebase Realtime Database
     implementation 'com.firebaseui:firebase-ui-database:4.1.0'
@@ -90,6 +97,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.github.apl-devs:appintro:v4.2.3'
+    implementation "com.heapanalytics.android:heap-android-client:${heapVersion}"
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
     implementation 'com.cepheuen.elegant-number-button:lib:1.0.3'

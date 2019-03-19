@@ -11,7 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,16 +29,17 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.network.Endpoints;
-import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.utils.mapUtils.MathUtil;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
@@ -43,13 +47,11 @@ public class ReferralsFragment extends Fragment {
 
     private static final String TAG = "ReferralsFragment";
 
-    private ProgressBar leaderboardProgressBar;
     private ImageView referralHeaderIv;
     private LinearLayout fbContainer;
     private LinearLayout whatsappContainer;
     private LinearLayout moreContainer;
     private Button bottomInviteBtn;
-    private TextView emptyTv;
     private ReferralLeaderboardAdapter adapter;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
@@ -74,13 +76,11 @@ public class ReferralsFragment extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_referrals, container, false);
 
-        leaderboardProgressBar = view.findViewById(R.id.progressbar_leaderboard);
         referralHeaderIv = view.findViewById(R.id.iv_refer_header);
         fbContainer = view.findViewById(R.id.container_fb);
         whatsappContainer = view.findViewById(R.id.container_whatsapp);
         moreContainer = view.findViewById(R.id.container_more);
         bottomInviteBtn = view.findViewById(R.id.btn_bottom_invite);
-        emptyTv = view.findViewById(R.id.tv_empty);
         RecyclerView rv = view.findViewById(R.id.rv_leaderboard);
         rv.setNestedScrollingEnabled(false);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -103,8 +103,8 @@ public class ReferralsFragment extends Fragment {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 GlideApp.with(getContext())
                         .load(dataSnapshot.getValue(String.class))
-                        .placeholder(R.drawable.referral_info_common)
-                        .error(R.drawable.referral_info_common)
+                        .placeholder(R.drawable.referral_info)
+                        .error(R.drawable.referral_info)
                         .into(referralHeaderIv);
             }
 
@@ -203,43 +203,78 @@ public class ReferralsFragment extends Fragment {
     }
 
     private void fetchReferralLeaderboard() {
-        leaderboardProgressBar.setVisibility(View.VISIBLE);
-        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchReferralLeaderboard().enqueue(new Callback<ReferralLeaderboardData>() {
-            @Override
-            public void onResponse(Call<ReferralLeaderboardData> call, Response<ReferralLeaderboardData> response) {
-                leaderboardProgressBar.setVisibility(View.GONE);
-                final ReferralLeaderboardData referralLeaderboardData = response.body();
-                if (response.isSuccessful() && referralLeaderboardData != null && isAdded() && isVisible()) {
-                    if (referralLeaderboardData.getLeaderboardData() == null || referralLeaderboardData.getLeaderboardData().isEmpty()) {
-                        emptyTv.setVisibility(View.VISIBLE);
-                    } else {
-                        emptyTv.setVisibility(View.GONE);
-                        for (LeaderboardPersonData referralPersonData : referralLeaderboardData.getLeaderboardData()) {
-                            if (referralPersonData.getUid().equals(FirebaseAuth.getInstance().getUid())) {
-                                adapter.addPerson(referralLeaderboardData.getCurrentUser());
-                            } else {
-                                adapter.addPerson(referralPersonData);
-                            }
-                        }
+        fetchAllLubbleUsers();
+    }
 
-                        if (referralLeaderboardData.getCurrentUser().getCurrentUserRank() > 10) {
-                            adapter.addPerson(referralLeaderboardData.getCurrentUser());
-                        }
-                    }
-                } else if (isAdded() && isVisible()) {
-                    Crashlytics.log("referral leaderboard bad response");
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+    private ArrayList<ProfileData> profileDataList = new ArrayList<>();
+
+    private void fetchAllLubbleUsers() {
+        RealtimeDbHelper.getLubbleMembersRef().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // get list of all lubble users
+                for (DataSnapshot child : dataSnapshot.getChildren()) {
+                    fetchLubbleMembersProfile(child.getKey());
                 }
             }
 
             @Override
-            public void onFailure(Call<ReferralLeaderboardData> call, Throwable t) {
-                if (isAdded() && isVisible()) {
-                    Log.e(TAG, "onFailure: ");
-                    leaderboardProgressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void fetchLubbleMembersProfile(String uid) {
+        getUserRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                if (profileData != null) {
+                    profileData.setId(dataSnapshot.getKey());
+                    profileDataList.add(profileData);
+
+                    // sort by coins desc
+                    Collections.sort(profileDataList, new Comparator<ProfileData>() {
+                        @Override
+                        public int compare(ProfileData o1, ProfileData o2) {
+                            // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending=
+                            return MathUtil.compareDesc(o1.getCoins(), o2.getCoins());
+                        }
+                    });
+                    adapter.clear();
+                    boolean isCurrUserInTop10 = false;
+                    for (ProfileData data : profileDataList) {
+                        addPersonToAdapter(data, 0);
+                        if (data.getId().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                            isCurrUserInTop10 = true;
+                        }
+                    }
+                    if (!isCurrUserInTop10) {
+                        final ProfileData dummyProfileData = new ProfileData();
+                        dummyProfileData.setId(FirebaseAuth.getInstance().getUid());
+                        final int index = profileDataList.indexOf(dummyProfileData);
+                        if (index != -1) {
+                            final ProfileData currUserProfileData = profileDataList.get(index);
+                            addPersonToAdapter(currUserProfileData, index + 1);
+                        }
+                    }
                 }
+            }
+
+            private void addPersonToAdapter(ProfileData profileData1, int rank) {
+                final LeaderboardPersonData leaderboardPersonData = new LeaderboardPersonData();
+                leaderboardPersonData.setUid(profileData1.getId());
+                leaderboardPersonData.setName(profileData1.getInfo().getName());
+                leaderboardPersonData.setPoints((int) profileData1.getCoins());
+                leaderboardPersonData.setThumbnail(profileData1.getInfo().getThumbnail());
+                leaderboardPersonData.setCurrentUserRank(rank);
+                adapter.addPerson(leaderboardPersonData);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
             }
         });
     }

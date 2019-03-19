@@ -7,18 +7,24 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
+import in.lubble.app.models.ProfileInfo;
 
 import java.util.ArrayList;
 import java.util.MissingFormatArgumentException;
 
 import static android.widget.RelativeLayout.ALIGN_BOTTOM;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.POLL;
 
 public class NewPollActiv extends AppCompatActivity {
@@ -38,6 +44,7 @@ public class NewPollActiv extends AppCompatActivity {
     private TextView pollExpiryTv;
     private int choiceCount = 2;
     private int expiryDayCount = 1;
+    private ImageView pollDpIv;
     private String groupId;
 
     public static void open(Context context, String grouId) {
@@ -59,7 +66,7 @@ public class NewPollActiv extends AppCompatActivity {
 
         ImageView closeIv = findViewById(R.id.iv_poll_close);
         LinearLayout sendPollContainer = findViewById(R.id.container_send_poll);
-        ImageView pollDpIv = findViewById(R.id.iv_poll_dp);
+        pollDpIv = findViewById(R.id.iv_poll_dp);
         askQuesEt = findViewById(R.id.et_ask_question);
 
         pollChoiceRelLayout = findViewById(R.id.container_poll_choices);
@@ -99,9 +106,6 @@ public class NewPollActiv extends AppCompatActivity {
             }
         });
 
-        GlideApp.with(this).load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
-                .placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(pollDpIv);
-
         sendPollContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,7 +126,31 @@ public class NewPollActiv extends AppCompatActivity {
                 }
             }
         });
+        setDp();
+    }
 
+    private void setDp() {
+        getUserInfoRef(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                try {
+                    GlideApp.with(NewPollActiv.this)
+                            .load(profileInfo == null ? "" : profileInfo.getThumbnail())
+                            .circleCrop()
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .error(R.drawable.ic_account_circle_black_no_padding)
+                            .into(pollDpIv);
+                } catch (IllegalArgumentException e) {
+                    Crashlytics.logException(e);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private ArrayList<ChoiceData> getChoices() {

@@ -6,8 +6,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!-- Recommended so that CleverTap knows when to attempt a network call -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- Recommended so that CleverTap knows when to attempt a network call -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -20,6 +19,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
+        <activity
+            android:name=".quiz.QuizOptionsActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".quiz.QuizResultActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".quiz.QuizResultCamActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"
@@ -43,17 +54,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
-        </activity>
-
-        <!-- Branch init -->
+        </activity> <!-- Branch init -->
         <meta-data
             android:name="io.branch.sdk.BranchKey"
             android:value="key_live_niB5GEB5sh3CprlT2Bx3EimiDFeN6RN4" />
         <meta-data
             android:name="io.branch.sdk.BranchKey.test"
-            android:value="key_test_hpqXJAxWDk3CexmNZyIBSepcAuoH9P4h" />
-
-        <!-- Branch testing (TestMode "true" to simulate fresh installs on dev environment) -->
+            android:value="key_test_hpqXJAxWDk3CexmNZyIBSepcAuoH9P4h" /> <!-- Branch testing (TestMode "true" to simulate fresh installs on dev environment) -->
         <meta-data
             android:name="io.branch.sdk.TestMode"
             android:value="false" />
@@ -82,7 +89,6 @@
         <meta-data
             android:name="CLEVERTAP_NOTIFICATION_ICON"
             android:value="ic_lubble_notif" /> <!-- name of your file in the drawable directory without the file extension. -->
-
         <activity
             android:name="com.clevertap.android.sdk.InAppNotificationActivity"
             android:configChanges="orientation|keyboardHidden"
@@ -90,18 +96,14 @@
 
         <meta-data
             android:name="CLEVERTAP_BACKGROUND_SYNC"
-            android:value="1" />
-
-        <!-- use CTBackgroundIntentService to target users below Android 21 (Lollipop) -->
+            android:value="1" /> <!-- use CTBackgroundIntentService to target users below Android 21 (Lollipop) -->
         <service
             android:name="com.clevertap.android.sdk.CTBackgroundIntentService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.clevertap.BG_EVENT" />
             </intent-filter>
-        </service>
-
-        <!-- use CTBackgroundJobService to target users on and above Android 21 (Lollipop) -->
+        </service> <!-- use CTBackgroundJobService to target users on and above Android 21 (Lollipop) -->
         <service
             android:name="com.clevertap.android.sdk.CTBackgroundJobService"
             android:exported="false"
@@ -320,13 +322,10 @@
                     android:host="*"
                     android:scheme="lubble" />
             </intent-filter>
-        </activity>
-        <!-- This is for removing Firebase conflict for verification of app links -->
+        </activity> <!-- This is for removing Firebase conflict for verification of app links -->
         <activity
             android:name="com.firebase.ui.auth.ui.provider.GitHubLoginActivity"
-            tools:node="remove" />
-
-        <!-- Branch install referrer tracking -->
+            tools:node="remove" /> <!-- Branch install referrer tracking -->
         <receiver
             android:name="io.branch.referral.InstallListener"
             android:exported="true">
@@ -426,7 +425,6 @@
             android:name=".notifications.NotifActionBroadcastRecvr"
             android:enabled="true"
             android:exported="true" />
-
     </application>
 
 </manifest>

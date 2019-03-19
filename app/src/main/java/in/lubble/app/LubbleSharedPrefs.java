@@ -40,6 +40,7 @@ public class LubbleSharedPrefs {
     private final String CENTER_LATI = "CENTER_LATI";
     private final String CENTER_LONGI = "CENTER_LONGI";
     private final String SUPPORT_UID = "SUPPORT_UID";
+    private final String IS_QUIZ_OPENED = "IS_QUIZ_OPENED";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -237,6 +238,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsExploreShown(boolean isShown) {
         return preferences.edit().putBoolean(IS_EXPLORE_SHOWN, isShown).commit();
+    }
+
+    public boolean getIsQuizOpened() {
+        return preferences.getBoolean(IS_QUIZ_OPENED, false);
+    }
+
+    public boolean setIsQuizOpened(boolean isShown) {
+        return preferences.edit().putBoolean(IS_QUIZ_OPENED, isShown).commit();
     }
 
 

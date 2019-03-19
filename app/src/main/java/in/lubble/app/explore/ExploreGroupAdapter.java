@@ -144,7 +144,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         public ViewHolder(View view) {
             super(view);
             mView = view;
-            imageView = view.findViewById(R.id.iv_group_pic);
+            imageView = view.findViewById(R.id.iv_wheretonight_pic);
             selectedContainer = view.findViewById(R.id.container_selected);
             titleTv = view.findViewById(R.id.tv_group_title);
             joinTv = view.findViewById(R.id.tv_join);

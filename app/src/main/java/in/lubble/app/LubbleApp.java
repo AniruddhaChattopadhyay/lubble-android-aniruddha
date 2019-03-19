@@ -12,11 +12,13 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
+import com.heapanalytics.android.Heap;
 import in.lubble.app.database.DbSingleton;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
+import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
 import io.fabric.sdk.android.Fabric;
 
@@ -53,6 +55,7 @@ public class LubbleApp extends Application {
         UnreadChatsSharedPrefs.initializeInstance(getApplicationContext());
         MutedChatsSharedPrefs.initializeInstance(getApplicationContext());
         KeyMappingSharedPrefs.initializeInstance(getApplicationContext());
+        AnswerSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
 
@@ -67,6 +70,7 @@ public class LubbleApp extends Application {
         EmojiCompat.Config config = new FontRequestEmojiCompatConfig(this, fontRequest);
         EmojiCompat.init(config);
 
+        Heap.init(getApplicationContext(), "1020439463");
     }
 
     public static LubbleApp getAppContext() {

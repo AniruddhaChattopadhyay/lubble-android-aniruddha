@@ -1,0 +1,169 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tv_quizzes_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quizzes"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+        android:textSize="30sp" />
+
+
+    <LinearLayout
+        android:id="@+id/container_current_coins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/tv_quizzes_title"
+        android:layout_alignBottom="@id/tv_quizzes_title"
+        android:layout_alignParentRight="true"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingRight="8dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:srcCompat="@drawable/ic_coin" />
+
+        <TextView
+            android:id="@+id/tv_total_coins"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:text="---"
+            android:textColor="@color/dark_gold"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:tint="@color/dark_gray"
+            app:srcCompat="@drawable/ic_add_circle_black_24dp" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/container_wheretonight"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_quizzes_title"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:animateLayoutChanges="true"
+        android:background="@drawable/rect_rounded_border"
+        android:paddingBottom="8dp">
+
+        <ImageView
+            android:id="@+id/iv_wheretonight_pic"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@drawable/half_rounded_rectangle_blue_clue_top"
+            android:padding="20dp"
+            app:srcCompat="@drawable/ic_having_fun_iais" />
+
+        <androidx.emoji.widget.EmojiTextView
+            android:id="@+id/tv_group_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/iv_wheretonight_pic"
+            android:layout_margin="8dp"
+            android:ellipsize="end"
+            android:maxLines="3"
+            android:text="Where Tonight?"
+            android:textColor="@color/darker_gray"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_quiz_play_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/container_quiz_play"
+            android:layout_alignBottom="@id/container_quiz_play"
+            android:layout_marginLeft="8dp"
+            android:gravity="center"
+            android:visibility="gone"
+            tools:text="Free Play in 2:45:00" />
+
+        <LinearLayout
+            android:id="@+id/container_quiz_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_group_title"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="8dp"
+            android:background="@drawable/rect_rounded_blue"
+            android:elevation="4dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/tv_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PLAY NOW"
+                android:textColor="@color/white"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/iv_quiz_play_coin"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginLeft="8dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_coin" />
+
+            <TextView
+                android:id="@+id/tv_quiz_play_cost"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:text="40"
+                android:textColor="@color/gold"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_earn_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/container_quiz_play"
+            android:layout_alignLeft="@id/container_quiz_play"
+            android:layout_alignRight="@id/container_quiz_play"
+            android:gravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="Earn More"
+            android:textColor="@color/link_blue"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/container_wheretonight"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:text="More fun quizzes &amp; games will be added soon!" />
+
+</RelativeLayout>

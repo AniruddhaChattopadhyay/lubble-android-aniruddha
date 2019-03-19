@@ -20,7 +20,7 @@ import static java.lang.Math.*;
 /**
  * Utility functions that are used my both PolyUtil and SphericalUtil.
  */
-class MathUtil {
+public class MathUtil {
     /**
      * The earth's radius, in meters.
      * Mean radius as defined by IUGG.
@@ -112,4 +112,13 @@ class MathUtil {
     static double havDistance(double lat1, double lat2, double dLng) {
         return hav(lat1 - lat2) + hav(dLng) * cos(lat1) * cos(lat2);
     }
+
+    public static int compare(long x, long y) {
+        return (x < y) ? -1 : ((x == y) ? 0 : 1);
+    }
+
+    public static int compareDesc(long x, long y) {
+        return (x < y) ? 1 : ((x == y) ? 0 : -1);
+    }
+
 }

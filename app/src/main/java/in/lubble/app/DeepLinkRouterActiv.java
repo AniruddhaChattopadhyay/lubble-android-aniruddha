@@ -15,6 +15,8 @@ import in.lubble.app.services.ServiceCategoryDetailActiv;
 
 import java.util.List;
 
+import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
+
 public class DeepLinkRouterActiv extends BaseActivity {
 
     @Override
@@ -72,6 +74,21 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 break;
             case "chats":
                 startActivity(new Intent(this, MainActivity.class));
+                break;
+            case "games":
+                final Intent intent = new Intent(this, MainActivity.class);
+                intent.putExtra(EXTRA_TAB_NAME, "games");
+                startActivity(intent);
+                break;
+            case "services":
+                final Intent serviceIntent = new Intent(this, MainActivity.class);
+                serviceIntent.putExtra(EXTRA_TAB_NAME, "services");
+                startActivity(serviceIntent);
+                break;
+            case "events":
+                final Intent eventsIntent = new Intent(this, MainActivity.class);
+                eventsIntent.putExtra(EXTRA_TAB_NAME, "events");
+                startActivity(eventsIntent);
                 break;
             default:
                 startActivity(new Intent(this, MainActivity.class));

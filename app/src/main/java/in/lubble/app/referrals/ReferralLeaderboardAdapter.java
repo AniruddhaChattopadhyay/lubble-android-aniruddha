@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.utils.StringUtils;
@@ -20,9 +21,6 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
 
     private static final String TAG = "ReferralLeaderboardAdapter";
 
-    private static final int TYPE_NORMAL = 898;
-    private static final int TYPE_CURR_USER = 154;
-
     private final List<LeaderboardPersonData> referralList;
     private final GlideRequests glide;
     private final Context context;
@@ -31,15 +29,6 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
         referralList = new ArrayList<>();
         this.glide = glide;
         this.context = context;
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if (referralList.get(position).getCurrentUserRank() > 0) {
-            return TYPE_CURR_USER;
-        } else {
-            return TYPE_NORMAL;
-        }
     }
 
     @NonNull
@@ -64,9 +53,11 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
                 .error(R.drawable.ic_account_circle_black_no_padding)
                 .into(normalViewHolder.iconIv);
 
-        if (referralPersonData.getCurrentUserRank() > 0) {
+        if (referralPersonData.getUid().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
             normalViewHolder.view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
-            normalViewHolder.rankTv.setText(String.valueOf(referralPersonData.getCurrentUserRank()));
+            if (referralPersonData.getCurrentUserRank() > 0) {
+                normalViewHolder.rankTv.setText(String.valueOf(referralPersonData.getCurrentUserRank()));
+            }
             normalViewHolder.rankTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             normalViewHolder.nameTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             normalViewHolder.pointsTv.setTextColor(ContextCompat.getColor(context, R.color.white));

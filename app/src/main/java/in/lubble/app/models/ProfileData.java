@@ -1,5 +1,6 @@
 package in.lubble.app.models;
 
+import androidx.annotation.Nullable;
 import in.lubble.app.utils.DateTimeUtils;
 
 import java.util.Calendar;
@@ -10,7 +11,7 @@ import java.util.Calendar;
 
 public class ProfileData {
 
-    private String id;
+    private String id = "";
     private ProfileInfo info;
     private String profilePic;
     private String coverPic;
@@ -25,6 +26,19 @@ public class ProfileData {
     private long birthdate = 0L;
     private boolean isOwner;
     private boolean isAgePublic = true;
+    private long coins;
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (obj instanceof ProfileData) {
+            ProfileData objectToCompare = (ProfileData) obj;
+            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
+                return true;
+            }
+            return false;
+        }
+        return super.equals(obj);
+    }
 
     public String getId() {
         return id;
@@ -163,5 +177,13 @@ public class ProfileData {
 
     public void setIsAgePublic(boolean agePublic) {
         isAgePublic = agePublic;
+    }
+
+    public long getCoins() {
+        return coins;
+    }
+
+    public void setCoins(long coins) {
+        this.coins = coins;
     }
 }
