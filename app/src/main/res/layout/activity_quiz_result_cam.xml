@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_purple"
+    android:padding="8dp"
+    tools:context="in.lubble.app.quiz.QuizResultActiv">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/container_quiz_main"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/iv_camera"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ProgressBar
+            android:id="@+id/progressbar_quiz_result"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_here" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="Quiz: Where Tonight?"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_you_chose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="You have chosen"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@id/cardview_2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintVertical_chainStyle="spread" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_you_chose"
+            android:layout_marginStart="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/cardview_2"
+            app:layout_constraintEnd_toStartOf="@+id/cardview_2"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <androidx.emoji.widget.EmojiTextView
+                    android:id="@+id/tv_cuisine_emoji"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:rotation="-10"
+                    android:text="🍎"
+                    android:textColor="@color/black"
+                    android:textSize="30sp" />
+
+                <TextView
+                    android:id="@+id/tv_cuisine_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minLines="2"
+                    android:textColor="@color/black"
+                    tools:text="Drinks\n" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardview_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_you_chose"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:cardBackgroundColor="@color/very_light_gray"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/container_place_result"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/cardView"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_ambience_emoji"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:rotation="10"
+                    android:textColor="@color/black"
+                    android:textSize="30sp"
+                    tools:text="🎵" />
+
+                <TextView
+                    android:id="@+id/tv_ambience_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:minLines="2"
+                    android:textColor="@color/black"
+                    tools:text="Soft\nMusic" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.emoji.widget.EmojiTextView
+            android:id="@+id/tv_here"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/cardview_2"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="2dp"
+            android:text="This is perfect for you"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/container_place_result"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/container_place_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cardView">
+
+            <ImageView
+                android:id="@+id/iv_place_pic"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginRight="8dp"
+                android:background="@drawable/rect_rounded_white"
+                android:padding="4dp"
+                android:scaleType="centerCrop"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+            <Space
+                android:id="@+id/space_place_pic"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginRight="4dp"
+                android:layout_marginBottom="4dp"
+                app:layout_constraintBottom_toTopOf="@id/iv_place_pic"
+                app:layout_constraintRight_toLeftOf="@id/iv_place_pic" />
+
+            <LinearLayout
+                android:id="@+id/container_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/green_circle"
+                android:elevation="8dp"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:rotation="-10"
+                app:layout_constraintLeft_toLeftOf="@id/space_place_pic"
+                app:layout_constraintTop_toTopOf="@id/space_place_pic">
+
+                <TextView
+                    android:id="@+id/tv_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    tools:text="4.3" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="zomato"
+                    android:textColor="@color/white"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
+
+            <Space
+                android:id="@+id/space"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginBottom="32dp"
+                app:layout_constraintBottom_toBottomOf="@id/iv_place_pic"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/rect_rounded_white"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingLeft="16dp"
+                android:paddingTop="8dp"
+                android:paddingRight="16dp"
+                android:paddingBottom="8dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/space">
+
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                    android:textColor="@color/black"
+                    tools:text="Boozy Griffins" />
+
+                <TextView
+                    android:id="@+id/tv_caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="Lounge · 450m" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/lubble_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:alpha="0.7"
+        android:gravity="center"
+        android:paddingTop="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_lubble_notif" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lubble"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_quiz_retry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/circle"
+        android:foreground="?attr/selectableItemBackground"
+        android:padding="8dp"
+        android:tint="@color/black"
+        app:backgroundTint="@color/light_teal"
+        app:layout_constraintBottom_toBottomOf="@id/iv_camera"
+        app:layout_constraintHorizontal_bias="0.8"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/iv_camera"
+        app:layout_constraintTop_toTopOf="@id/iv_camera"
+        app:srcCompat="@drawable/ic_refresh_black_24dp" />
+
+    <ImageView
+        android:id="@+id/iv_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/circle_white"
+        android:foreground="?attr/selectableItemBackground"
+        android:padding="16dp"
+        android:tint="@color/colorAccent"
+        app:layout_constraintBottom_toTopOf="@id/lubble_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_camera_alt_white_24dp" />
+
+    <ImageView
+        android:id="@+id/iv_quiz_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/circle"
+        android:foreground="?attr/selectableItemBackground"
+        android:padding="8dp"
+        android:tint="@color/white"
+        app:backgroundTint="@color/trans_lt_gray"
+        app:layout_constraintBottom_toBottomOf="@id/iv_camera"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintLeft_toRightOf="@id/iv_camera"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/iv_camera"
+        app:srcCompat="@drawable/ic_close_black_24dp" />
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:alpha="0.3"
+        android:rotation="90"
+        android:tint="@color/white"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_l_shape" />
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:alpha="0.3"
+        android:rotation="180"
+        android:tint="@color/white"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_l_shape" />
+
+    <Space
+        android:id="@+id/space_camera"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toBottomOf="@id/iv_camera"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:alpha="0.3"
+        android:tint="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/iv_camera"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:srcCompat="@drawable/ic_l_shape" />
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:alpha="0.3"
+        android:rotation="270"
+        android:tint="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/iv_camera"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@drawable/ic_l_shape" />
+
+    <View
+        android:id="@+id/view_flash"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/trans_white"
+        android:elevation="8dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/iv_camera" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

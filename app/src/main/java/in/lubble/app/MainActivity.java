@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -273,6 +274,7 @@ public class MainActivity extends BaseActivity {
         firebaseRemoteConfig.setConfigSettings(configSettings);
         HashMap<String, Object> map = new HashMap<>();
         map.put(REFER_MSG, getString(R.string.refer_msg));
+        map.put(QUIZ_RESULT_UI, "normal");
         firebaseRemoteConfig.setDefaults(map);
     }
 

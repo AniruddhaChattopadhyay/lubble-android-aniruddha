@@ -42,10 +42,12 @@ public class GamesFrag extends Fragment {
     private TextView earnCoinsTv;
     private LinearLayout playContainer;
     private boolean isFreePlayEnabled;
+    private boolean isClicked;
     private RelativeLayout whereTonightContainer;
     private ValueEventListener timeListener;
     private ValueEventListener coinsListener;
     private long currentCoins = 0;
+    private CountDownTimer countDownTimer;
 
     public GamesFrag() {
         // Required empty public constructor
@@ -56,13 +58,6 @@ public class GamesFrag extends Fragment {
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-        }
     }
 
     @Override
@@ -119,6 +114,7 @@ public class GamesFrag extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        isClicked = false;
         whereTonightContainer.setAlpha(1f);
         syncTime();
     }
@@ -133,7 +129,10 @@ public class GamesFrag extends Fragment {
                 if (dataSnapshot.getValue() != null) {
                     Long lastPlayedTime = dataSnapshot.getValue(Long.class);
                     final long millisInFuture = lastPlayedTime + 3 * DateUtils.HOUR_IN_MILLIS;
-                    new CountDownTimer(millisInFuture - System.currentTimeMillis(), 1000) {
+                    if (countDownTimer != null) {
+                        countDownTimer.cancel();
+                    }
+                    countDownTimer = new CountDownTimer(millisInFuture - System.currentTimeMillis(), 1000) {
 
                         public void onTick(long millisUntilFinished) {
                             if (isFreePlayEnabled) {
@@ -158,7 +157,8 @@ public class GamesFrag extends Fragment {
                         public void onFinish() {
                             enableFreePlay();
                         }
-                    }.start();
+                    };
+                    countDownTimer.start();
                 } else {
                     enableFreePlay();
                 }
@@ -223,10 +223,13 @@ public class GamesFrag extends Fragment {
     }
 
     private void startQuiz() {
+        if (isClicked) {
+            return;
+        }
         if (isFreePlayEnabled) {
             QuizOptionsActiv.open(requireContext());
         } else if (currentCoins >= RETRY_COST) {
-
+            isClicked = true;
             whereTonightContainer.setAlpha(0.5f);
             whereTonightContainer.setOnClickListener(null);
             Analytics.triggerEvent(AnalyticsEvents.QUIZ_USE_COINS, requireContext());

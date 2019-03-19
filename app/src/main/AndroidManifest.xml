@@ -19,8 +19,18 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".quiz.QuizOptionsActiv"></activity>
-        <activity android:name=".quiz.QuizResultActiv" />
+        <activity
+            android:name=".quiz.QuizOptionsActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".quiz.QuizResultActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".quiz.QuizResultCamActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"

@@ -189,13 +189,12 @@ public class FileUtils {
                     OutputStream fOut = new FileOutputStream(imageFile);
                     image.compress(Bitmap.CompressFormat.JPEG, 100, fOut);
                     fOut.close();
+                    // Add the image to the system gallery
+                    galleryAddPic(context, savedImagePath);
                     return savedImagePath;
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                // Add the image to the system gallery
-                galleryAddPic(context, savedImagePath);
             }
         }
         return null;

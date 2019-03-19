@@ -2,7 +2,6 @@ package in.lubble.app.quiz;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,13 +15,15 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.Group;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
@@ -36,6 +37,7 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.FileUtils;
+import in.lubble.app.utils.ReverseInterpolator;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
@@ -49,19 +51,19 @@ import retrofit2.Response;
 import java.io.File;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
-import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.shareScreenshotWithPermissionCheck;
+import static in.lubble.app.quiz.QuizResultCamActivPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
+import static in.lubble.app.quiz.QuizResultCamActivPermissionsDispatcher.shareScreenshotWithPermissionCheck;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.ALL;
 
 @RuntimePermissions
-public class QuizResultActiv extends BaseActivity implements RetryQuizBottomSheet.OnQuizRetryListener {
+public class QuizResultCamActiv extends BaseActivity implements RetryQuizBottomSheet.OnQuizRetryListener {
 
-    private static final String TAG = "QuizResultActiv";
-    private static final int REQUEST_CODE_RETRY = 605;
+    private static final String TAG = "QuizResultCamActiv";
 
     private ProgressBar progressBar;
-    private Group group;
+    private ConstraintLayout mainContentContainer;
+    private ConstraintLayout placeContentContainer;
     private CardView cardView1;
     private CardView cardView2;
     private TextView cuisineNameTv;
@@ -71,25 +73,27 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
     private TextView ratingTv;
     private ImageView placePicIv;
     private ImageView closeIv;
+    private View flashView;
     private TextView placeCaptionTv;
     private TextView placeNameTv;
-    private LinearLayout retryContainer;
-    private LinearLayout shareContainer;
+    private ImageView retryIv;
+    private ImageView cameraIv;
     private LinearLayout ratingContainer;
-    private ProgressBar shareProgressBar;
-    private LinearLayout shareItemsContainer;
+    //private ProgressBar shareProgressBar;
+    //private LinearLayout shareItemsContainer;
 
     public static void open(Context context) {
-        context.startActivity(new Intent(context, QuizResultActiv.class));
+        context.startActivity(new Intent(context, QuizResultCamActiv.class));
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_quiz_result);
+        setContentView(R.layout.activity_quiz_result_cam);
 
         progressBar = findViewById(R.id.progressbar_quiz_result);
-        group = findViewById(R.id.group);
+        mainContentContainer = findViewById(R.id.container_quiz_main);
+        placeContentContainer = findViewById(R.id.container_place_result);
         cardView1 = findViewById(R.id.cardView);
         cardView2 = findViewById(R.id.cardview_2);
         cuisineNameTv = findViewById(R.id.tv_cuisine_name);
@@ -100,28 +104,23 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         ratingTv = findViewById(R.id.tv_rating);
         placeNameTv = findViewById(R.id.tv_name);
         placeCaptionTv = findViewById(R.id.tv_caption);
-        retryContainer = findViewById(R.id.container_retry);
-        shareContainer = findViewById(R.id.container_quiz_share);
-        shareProgressBar = findViewById(R.id.progressbar_quiz_share);
-        shareItemsContainer = findViewById(R.id.container_share_items);
+        retryIv = findViewById(R.id.iv_quiz_retry);
+        cameraIv = findViewById(R.id.iv_camera);
+        //shareProgressBar = findViewById(R.id.progressbar_quiz_share);
+        //shareItemsContainer = findViewById(R.id.container_share_items);
         ratingContainer = findViewById(R.id.container_rating);
         closeIv = findViewById(R.id.iv_quiz_close);
+        flashView = findViewById(R.id.view_flash);
+        mainContentContainer.setDrawingCacheEnabled(true);
 
         progressBar.getIndeterminateDrawable().setColorFilter(Color.WHITE, PorterDuff.Mode.MULTIPLY);
 
         fetchLastKnownLocationWithPermissionCheck(this);
 
-        retryContainer.setOnClickListener(new View.OnClickListener() {
+        retryIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openPlayAgainDialog();
-            }
-        });
-
-        shareContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                shareScreenshotWithPermissionCheck(QuizResultActiv.this);
             }
         });
 
@@ -135,32 +134,53 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void shareScreenshot() {
-        View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
-        final Bitmap screenShot = getScreenShot(rootView);
-        final String path = FileUtils.saveImageInGallery(screenShot, "quiz_screenie_" + System.currentTimeMillis(), QuizResultActiv.this);
-        Uri uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(path));
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_SEND);
-        intent.setType("image/*");
-
-        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, "");
-        intent.putExtra(android.content.Intent.EXTRA_TEXT, "");
-        intent.putExtra(Intent.EXTRA_STREAM, uri);
-        try {
-            startActivity(Intent.createChooser(intent, "Share Screenshot"));
-            shareProgressBar.setVisibility(View.VISIBLE);
-            shareItemsContainer.setVisibility(View.GONE);
-        } catch (ActivityNotFoundException e) {
-            Toast.makeText(this, "No App Available", Toast.LENGTH_SHORT).show();
-        }
+        animateFlash();
     }
 
-    public static Bitmap getScreenShot(View view) {
-        View screenView = view.getRootView();
-        screenView.setDrawingCacheEnabled(true);
-        Bitmap bitmap = Bitmap.createBitmap(screenView.getDrawingCache());
-        screenView.setDrawingCacheEnabled(false);
-        return bitmap;
+    private void animateFlash() {
+        Animation animFadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in_scale);
+        animFadeIn.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                Animation animFadeOut = AnimationUtils.loadAnimation(QuizResultCamActiv.this, R.anim.fade_in_scale);
+                animFadeOut.setInterpolator(new ReverseInterpolator());
+                animFadeOut.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mainContentContainer.setBackground(ContextCompat.getDrawable(QuizResultCamActiv.this, R.drawable.gradient_purple));
+                        final Bitmap screenShot = mainContentContainer.getDrawingCache();
+                        final String path = FileUtils.saveImageInGallery(screenShot, "quiz_screenie_" + System.currentTimeMillis(), QuizResultCamActiv.this);
+                        Uri uri = FileProvider.getUriForFile(QuizResultCamActiv.this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(path));
+
+                        final QuizSharePicDialogFrag quizSharePicDialogFrag = QuizSharePicDialogFrag.newInstance(uri);
+                        quizSharePicDialogFrag.show(getSupportFragmentManager(), null);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                flashView.startAnimation(animFadeOut);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        flashView.startAnimation(animFadeIn);
+        flashView.setVisibility(View.VISIBLE);
     }
 
     @SuppressLint("MissingPermission")
@@ -224,7 +244,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
 
                         RequestOptions requestOptions = new RequestOptions();
                         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, ALL));
-                        GlideApp.with(QuizResultActiv.this)
+                        GlideApp.with(QuizResultCamActiv.this)
                                 .load(placeData.getPic())
                                 .placeholder(circularProgressDrawable)
                                 .apply(requestOptions)
@@ -238,14 +258,21 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
                             caption += " · " + placeData.getDistanceString();
                         }
                         placeCaptionTv.setText(caption);
-                        group.setVisibility(View.VISIBLE);
+                        placeContentContainer.setVisibility(View.VISIBLE);
+
+                        cameraIv.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                shareScreenshotWithPermissionCheck(QuizResultCamActiv.this);
+                            }
+                        });
 
                         animateCards();
 
                         RealtimeDbHelper.getQuizRefForThisUser("whereTonight").child("lastPlayedTime").setValue(System.currentTimeMillis());
                     } else if (!isFinishing()) {
                         progressBar.setVisibility(View.GONE);
-                        Toast.makeText(QuizResultActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(QuizResultCamActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -253,7 +280,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
                 public void onFailure(Call<PlaceData> call, Throwable t) {
                     Log.e(TAG, "onFailure: ");
                     if (!isFinishing()) {
-                        Toast.makeText(QuizResultActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(QuizResultCamActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
                         progressBar.setVisibility(View.GONE);
                     }
                 }
@@ -304,15 +331,15 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
     @Override
     protected void onResume() {
         super.onResume();
-        shareProgressBar.setVisibility(View.GONE);
-        shareItemsContainer.setVisibility(View.VISIBLE);
+        //shareProgressBar.setVisibility(View.GONE);
+        //shareItemsContainer.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // NOTE: delegate the permission handling to generated method
-        QuizResultActivPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+        QuizResultCamActivPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
     @OnShowRationale(Manifest.permission.ACCESS_FINE_LOCATION)

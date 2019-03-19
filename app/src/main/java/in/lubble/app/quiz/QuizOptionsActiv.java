@@ -13,6 +13,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import in.lubble.app.Constants;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.network.Endpoints;
@@ -100,7 +102,12 @@ public class QuizOptionsActiv extends AppCompatActivity implements OptionFrag.On
         if (nextPos < optionsCardViewPager.getAdapter().getCount()) {
             optionsCardViewPager.setCurrentItem(nextPos);
         } else {
-            QuizResultActiv.open(QuizOptionsActiv.this);
+            final String remoteConfigResult = FirebaseRemoteConfig.getInstance().getString(Constants.QUIZ_RESULT_UI);
+            if (remoteConfigResult.equalsIgnoreCase("NORMAL")) {
+                QuizResultActiv.open(QuizOptionsActiv.this);
+            } else if (remoteConfigResult.equalsIgnoreCase("CAM")) {
+                QuizResultCamActiv.open(QuizOptionsActiv.this);
+            }
             finish();
         }
     }

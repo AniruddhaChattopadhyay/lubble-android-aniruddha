@@ -20,7 +20,9 @@
     <color name="darker_gray">#484848</color>
     <color name="dark_gray">#7e7e7e</color>
     <color name="gray">#b1b1b1</color>
+    <color name="trans_black">#9C000000</color>
     <color name="trans_gray">#a3353535</color>
+    <color name="trans_lt_gray">#A3969696</color>
     <color name="medium_light_grey">#CCCCCC</color>
     <color name="light_gray">#d6d6d6</color>
     <color name="very_light_gray">#ededed</color>
