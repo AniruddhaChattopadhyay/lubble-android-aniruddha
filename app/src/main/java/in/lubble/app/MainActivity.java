@@ -36,7 +36,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-import com.heapanalytics.android.Heap;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
@@ -58,7 +57,6 @@ import io.branch.referral.BranchError;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import static in.lubble.app.Constants.*;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
@@ -458,12 +456,6 @@ public class MainActivity extends BaseActivity {
     private void logUser(FirebaseUser currentUser) {
         Crashlytics.setUserIdentifier(currentUser.getUid());
         Crashlytics.setUserName(currentUser.getDisplayName());
-        Heap.identify(currentUser.getUid().toLowerCase());
-        Map<String, String> props = new HashMap<>();
-        props.put("uid", currentUser.getUid());
-        props.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
-        props.put("name", currentUser.getDisplayName() == null ? "" : currentUser.getDisplayName());
-        Heap.addUserProperties(props);
     }
 
     private void syncFcmToken() {
