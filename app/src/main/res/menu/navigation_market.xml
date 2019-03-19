@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_chats"
+        android:icon="@drawable/ic_group_black_24dp"
+        android:title="Chats" />
+
+    <item
+        android:id="@+id/navigation_explore"
+        android:icon="@drawable/ic_search_gray_24dp"
+        android:title="Explore" />
+
+    <item
+        android:id="@+id/navigation_events"
+        android:icon="@drawable/ic_event_black_24dp"
+        android:title="Events" />
+
+    <item
+        android:id="@+id/navigation_market"
+        android:icon="@drawable/ic_shopping_cart_black_24dp"
+        android:title="Market" />
+
+    <item
+        android:id="@+id/navigation_services"
+        android:icon="@drawable/ic_services_black"
+        android:title="Services" />
+
+</menu>

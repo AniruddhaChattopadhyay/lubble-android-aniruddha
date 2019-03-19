@@ -46,6 +46,7 @@ import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.lubble_info.LubbleActivity;
+import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.quiz.GamesFrag;
@@ -59,8 +60,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static in.lubble.app.Constants.QUIZ_RESULT_UI;
-import static in.lubble.app.Constants.REFER_MSG;
+import static in.lubble.app.Constants.*;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -174,6 +174,11 @@ public class MainActivity extends BaseActivity {
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
+        if (!FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_QUIZ_SHOWN)) {
+            bottomNavigation.getMenu().clear();
+            bottomNavigation.inflateMenu(R.menu.navigation_market);
+        }
+
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
         updateDefaultGroupId();
@@ -274,6 +279,7 @@ public class MainActivity extends BaseActivity {
         firebaseRemoteConfig.setConfigSettings(configSettings);
         HashMap<String, Object> map = new HashMap<>();
         map.put(REFER_MSG, getString(R.string.refer_msg));
+        map.put(IS_QUIZ_SHOWN, true);
         map.put(QUIZ_RESULT_UI, "normal");
         firebaseRemoteConfig.setDefaults(map);
     }
@@ -364,6 +370,14 @@ public class MainActivity extends BaseActivity {
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     firebaseRemoteConfig.activateFetched();
+                    if (!firebaseRemoteConfig.getBoolean(Constants.IS_QUIZ_SHOWN)) {
+                        bottomNavigation.getMenu().clear();
+                        bottomNavigation.inflateMenu(R.menu.navigation_market);
+                    } else if (bottomNavigation.getMenu().findItem(R.id.navigation_fun) == null) {
+                        // change only if new menu wasnt present before
+                        bottomNavigation.getMenu().clear();
+                        bottomNavigation.inflateMenu(R.menu.navigation);
+                    }
                 }
             }
         });
@@ -498,6 +512,9 @@ public class MainActivity extends BaseActivity {
                     return true;
                 case R.id.navigation_fun:
                     switchFrag(GamesFrag.newInstance());
+                    return true;
+                case R.id.navigation_market:
+                    switchFrag(MarketplaceFrag.newInstance());
                     return true;
                 case R.id.navigation_services:
                     switchFrag(ServicesFrag.newInstance());
