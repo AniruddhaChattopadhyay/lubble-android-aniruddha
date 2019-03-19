@@ -329,10 +329,13 @@ public class MainActivity extends BaseActivity {
 
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
+                case "events":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
+                    break;
                 case "services":
                     bottomNavigation.setSelectedItemId(R.id.navigation_services);
                     break;
-                case "fun":
+                case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
                     break;
             }
