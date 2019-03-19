@@ -63,9 +63,13 @@ public class AnalyticsEvents {
     public static final String WRITE_PERM_GRANTED = "WRITE_PERM_GRANTED";
     public static final String FAILED_SEARCH = "FAILED_SEARCH";
 
-    public static final String QUIZ_USE_COINS = "QUIZ_USE_COINS";
-    public static final String QUIZ_RETRY_WAIT = "QUIZ_RETRY_WAIT";
-    public static final String QUIZ_FREE_RETRY = "QUIZ_FREE_RETRY";
-    public static final String QUIZ_RETRY_USE_COINS = "QUIZ_RETRY_USE_COINS";
+    public static final String QUIZ_PLAY = "QUIZ_PLAY";
+    public static final String QUIZ_EARN_COINS = "QUIZ_EARN_COINS";
+    public static final String QUIZ_RESULT = "QUIZ_RESULT";
+    public static final String QUIZ_RETRY_CLICKED = "QUIZ_RETRY_CLICKED";
+    public static final String QUIZ_RETRY_DONE = "QUIZ_RETRY_DONE";
+    public static final String QUIZ_CAMERA_CLICKED = "QUIZ_SHARE_CLICKED";
+    public static final String QUIZ_SHARE_CLICKED = "QUIZ_SHARE_CLICKED";
+    public static final String QUIZ_PIC_SAVE_CLICKED = "QUIZ_PIC_SAVE_CLICKED";
 
 }

@@ -52,6 +52,8 @@ public class RetryQuizBottomSheet extends BottomSheetDialogFragment {
         View view = View.inflate(getContext(), R.layout.frag_retry_quiz, null);
         dialog.setContentView(view);
 
+        Analytics.triggerScreenEvent(requireContext(), this.getClass());
+
         currentCoinsTv = view.findViewById(R.id.tv_current_coins);
         waitContainer = view.findViewById(R.id.container_wait);
         useCoinsContainer = view.findViewById(R.id.container_use_coins);
@@ -67,7 +69,9 @@ public class RetryQuizBottomSheet extends BottomSheetDialogFragment {
             public void onClick(View v) {
                 useCoinsContainer.setAlpha(0.5f);
                 useCoinsContainer.setOnClickListener(null);
-                Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_USE_COINS, requireContext());
+                final Bundle bundle = new Bundle();
+                bundle.putString("type", "paid");
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_DONE, bundle, requireContext());
                 getThisUserRef().runTransaction(new Transaction.Handler() {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {
@@ -106,11 +110,15 @@ public class RetryQuizBottomSheet extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 if (isFreePlayEnabled) {
-                    Analytics.triggerEvent(AnalyticsEvents.QUIZ_FREE_RETRY, requireContext());
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("type", "free");
+                    Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_DONE, bundle, requireContext());
                     listener.onSheetInteraction(RESULT_OK);
                     dismiss();
                 } else {
-                    Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_WAIT, requireContext());
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("type", "wait");
+                    Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_DONE, bundle, requireContext());
                     listener.onSheetInteraction(RESULT_CANCELED);
                     dismiss();
                 }
@@ -121,6 +129,7 @@ public class RetryQuizBottomSheet extends BottomSheetDialogFragment {
         earnCoinsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, requireContext());
                 ProfileActivity.open(requireContext(), FirebaseAuth.getInstance().getUid());
                 dismiss();
             }

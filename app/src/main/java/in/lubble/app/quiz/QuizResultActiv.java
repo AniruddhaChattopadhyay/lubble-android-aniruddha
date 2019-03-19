@@ -29,9 +29,12 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import in.lubble.app.*;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
+import in.lubble.app.Constants;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -88,6 +91,8 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz_result);
 
+        Analytics.triggerScreenEvent(this, this.getClass());
+
         progressBar = findViewById(R.id.progressbar_quiz_result);
         group = findViewById(R.id.group);
         cardView1 = findViewById(R.id.cardView);
@@ -121,6 +126,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         shareContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_SHARE_CLICKED, QuizResultActiv.this);
                 shareScreenshotWithPermissionCheck(QuizResultActiv.this);
             }
         });
@@ -289,6 +295,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
     }
 
     private void openPlayAgainDialog() {
+        Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_CLICKED, this);
         final RetryQuizBottomSheet retryQuizBottomSheet = RetryQuizBottomSheet.newInstance();
         retryQuizBottomSheet.show(getSupportFragmentManager(), null);
     }

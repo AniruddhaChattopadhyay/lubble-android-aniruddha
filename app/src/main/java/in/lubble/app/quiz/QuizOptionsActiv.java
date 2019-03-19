@@ -17,6 +17,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import in.lubble.app.Constants;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.widget.NonSwipeableViewPager;
@@ -102,6 +103,7 @@ public class QuizOptionsActiv extends AppCompatActivity implements OptionFrag.On
         if (nextPos < optionsCardViewPager.getAdapter().getCount()) {
             optionsCardViewPager.setCurrentItem(nextPos);
         } else {
+            Analytics.triggerEvent(AnalyticsEvents.QUIZ_RESULT, this);
             final String remoteConfigResult = FirebaseRemoteConfig.getInstance().getString(Constants.QUIZ_RESULT_UI);
             if (remoteConfigResult.equalsIgnoreCase("NORMAL")) {
                 QuizResultActiv.open(QuizOptionsActiv.this);

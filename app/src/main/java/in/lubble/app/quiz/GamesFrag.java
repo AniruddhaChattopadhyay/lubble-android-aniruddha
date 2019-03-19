@@ -76,6 +76,8 @@ public class GamesFrag extends Fragment {
         earnCoinsTv = view.findViewById(R.id.tv_earn_more);
         final LinearLayout currentCoinsContainer = view.findViewById(R.id.container_current_coins);
 
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
+
         quizPlayCostTv.setText(String.valueOf(RETRY_COST));
 
         currentCoinsContainer.setOnClickListener(new View.OnClickListener() {
@@ -88,6 +90,7 @@ public class GamesFrag extends Fragment {
         earnCoinsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, requireContext());
                 ProfileActivity.open(requireContext(), FirebaseAuth.getInstance().getUid());
             }
         });
@@ -227,12 +230,17 @@ public class GamesFrag extends Fragment {
             return;
         }
         if (isFreePlayEnabled) {
+            final Bundle bundle = new Bundle();
+            bundle.putString("type", "free");
+            Analytics.triggerEvent(AnalyticsEvents.QUIZ_PLAY, bundle, requireContext());
             QuizOptionsActiv.open(requireContext());
         } else if (currentCoins >= RETRY_COST) {
             isClicked = true;
             whereTonightContainer.setAlpha(0.5f);
             whereTonightContainer.setOnClickListener(null);
-            Analytics.triggerEvent(AnalyticsEvents.QUIZ_USE_COINS, requireContext());
+            final Bundle bundle = new Bundle();
+            bundle.putString("type", "paid");
+            Analytics.triggerEvent(AnalyticsEvents.QUIZ_PLAY, bundle, requireContext());
             getThisUserRef().runTransaction(new Transaction.Handler() {
                 @Override
                 public Transaction.Result doTransaction(MutableData mutableData) {

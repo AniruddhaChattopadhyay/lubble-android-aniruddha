@@ -24,6 +24,8 @@ import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.request.RequestOptions;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 
@@ -93,6 +95,7 @@ public class QuizSharePicDialogFrag extends DialogFragment {
             @Override
             public void onClick(View v) {
 
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_SHARE_CLICKED, requireContext());
                 shareTv.setVisibility(View.INVISIBLE);
                 shareProgressbar.setVisibility(View.VISIBLE);
 
@@ -114,6 +117,7 @@ public class QuizSharePicDialogFrag extends DialogFragment {
         saveTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_PIC_SAVE_CLICKED, requireContext());
                 final Intent intent = new Intent(Intent.ACTION_VIEW)
                         .setDataAndType(picUri,
                                 "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
