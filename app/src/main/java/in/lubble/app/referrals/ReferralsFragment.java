@@ -230,7 +230,7 @@ public class ReferralsFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null) {
+                if (profileData != null && profileData.getInfo() != null && profileDataList.size() < 10) {
                     profileData.setId(dataSnapshot.getKey());
                     profileDataList.add(profileData);
 
