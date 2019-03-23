@@ -25,6 +25,8 @@ import in.lubble.app.models.ProfileData;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getQuizRefForThisUser;
@@ -249,10 +251,10 @@ public class GamesFrag extends Fragment {
                     }
 
                     if (profileData.getCoins() >= RETRY_COST) {
-                        // go ahead & play quiz
-                        profileData.setCoins(profileData.getCoins() - RETRY_COST);
                         // Set value and report transaction success
-                        mutableData.setValue(profileData);
+                        Map<String, Object> childUpdates = new HashMap<>();
+                        childUpdates.put("coins", profileData.getCoins() - RETRY_COST);
+                        getThisUserRef().updateChildren(childUpdates);
                         return Transaction.success(mutableData);
                     } else {
                         return Transaction.abort();

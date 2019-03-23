@@ -17,6 +17,8 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.referrals.ReferralActivity;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -80,10 +82,10 @@ public class RetryQuizBottomSheet extends BottomSheetDialogFragment {
                         }
 
                         if (profileData.getCoins() >= RETRY_COST) {
-                            // go ahead & play quiz again
-                            profileData.setCoins(profileData.getCoins() - RETRY_COST);
                             // Set value and report transaction success
-                            mutableData.setValue(profileData);
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put("coins", profileData.getCoins() - RETRY_COST);
+                            getThisUserRef().updateChildren(childUpdates);
                             return Transaction.success(mutableData);
                         } else {
                             return Transaction.abort();

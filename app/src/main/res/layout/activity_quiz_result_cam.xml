@@ -268,30 +268,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
-        android:id="@+id/lubble_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:alpha="0.7"
-        android:gravity="center"
-        android:paddingTop="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent">
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_lubble_notif" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lubble"
-            android:textColor="@color/white"
-            android:textSize="18sp" />
-
-    </LinearLayout>
-
     <ImageView
         android:id="@+id/iv_quiz_retry"
         android:layout_width="wrap_content"
@@ -312,11 +288,12 @@
         android:id="@+id/iv_camera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
         android:background="@drawable/circle_white"
         android:foreground="?attr/selectableItemBackground"
         android:padding="16dp"
         android:tint="@color/colorAccent"
-        app:layout_constraintBottom_toTopOf="@id/lubble_logo"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
