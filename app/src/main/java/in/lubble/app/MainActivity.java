@@ -188,14 +188,13 @@ public class MainActivity extends BaseActivity {
             }
         });
         //showBottomNavBadge();
-        showQuizBadge();
         fetchAndPersistAppFeatures();
         fetchAndPersistMplaceItems();
         initFirebaseRemoteConfig();
     }
 
     private void showQuizBadge() {
-        if (!LubbleSharedPrefs.getInstance().getIsQuizOpened()) {
+        if (!LubbleSharedPrefs.getInstance().getIsQuizOpened() && FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_QUIZ_SHOWN)) {
             BottomNavigationMenuView bottomNavigationMenuView =
                     (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
             View v = bottomNavigationMenuView.getChildAt(3);
@@ -376,6 +375,7 @@ public class MainActivity extends BaseActivity {
                         bottomNavigation.getMenu().clear();
                         bottomNavigation.inflateMenu(R.menu.navigation);
                     }
+                    showQuizBadge();
                 }
             }
         });
