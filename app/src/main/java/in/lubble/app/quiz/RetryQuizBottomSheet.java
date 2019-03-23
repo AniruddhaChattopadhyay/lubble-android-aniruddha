@@ -10,13 +10,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ProfileData;
-import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.referrals.ReferralActivity;
 
 import java.util.concurrent.TimeUnit;
 
@@ -130,7 +129,7 @@ public class RetryQuizBottomSheet extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, requireContext());
-                ProfileActivity.open(requireContext(), FirebaseAuth.getInstance().getUid());
+                ReferralActivity.open(requireContext());
                 dismiss();
             }
         });

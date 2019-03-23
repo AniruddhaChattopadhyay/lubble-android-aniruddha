@@ -14,7 +14,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -23,7 +22,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ProfileData;
-import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
 import java.util.concurrent.TimeUnit;
@@ -83,7 +82,7 @@ public class GamesFrag extends Fragment {
         currentCoinsContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ProfileActivity.open(requireContext(), FirebaseAuth.getInstance().getUid());
+                ReferralActivity.open(requireContext());
             }
         });
 
@@ -91,7 +90,7 @@ public class GamesFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, requireContext());
-                ProfileActivity.open(requireContext(), FirebaseAuth.getInstance().getUid());
+                ReferralActivity.open(requireContext());
             }
         });
 
