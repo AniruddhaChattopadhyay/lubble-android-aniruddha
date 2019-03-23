@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -30,13 +29,9 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
-import in.lubble.app.utils.mapUtils.MathUtil;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
@@ -206,12 +201,11 @@ public class ReferralsFragment extends Fragment {
         fetchAllLubbleUsers();
     }
 
-    private ArrayList<ProfileData> profileDataList = new ArrayList<>();
-
     private void fetchAllLubbleUsers() {
-        RealtimeDbHelper.getLubbleMembersRef().addValueEventListener(new ValueEventListener() {
+        RealtimeDbHelper.getLubbleMembersRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                adapter.clear();
                 // get list of all lubble users
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     fetchLubbleMembersProfile(child.getKey());
@@ -230,35 +224,9 @@ public class ReferralsFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null && profileData.getInfo() != null && profileDataList.size() < 10) {
+                if (profileData != null && profileData.getInfo() != null) {
                     profileData.setId(dataSnapshot.getKey());
-                    profileDataList.add(profileData);
-
-                    // sort by coins desc
-                    Collections.sort(profileDataList, new Comparator<ProfileData>() {
-                        @Override
-                        public int compare(ProfileData o1, ProfileData o2) {
-                            // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending=
-                            return MathUtil.compareDesc(o1.getCoins(), o2.getCoins());
-                        }
-                    });
-                    adapter.clear();
-                    boolean isCurrUserInTop10 = false;
-                    for (ProfileData data : profileDataList) {
-                        addPersonToAdapter(data, 0);
-                        if (data.getId().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                            isCurrUserInTop10 = true;
-                        }
-                    }
-                    if (!isCurrUserInTop10) {
-                        final ProfileData dummyProfileData = new ProfileData();
-                        dummyProfileData.setId(FirebaseAuth.getInstance().getUid());
-                        final int index = profileDataList.indexOf(dummyProfileData);
-                        if (index != -1) {
-                            final ProfileData currUserProfileData = profileDataList.get(index);
-                            addPersonToAdapter(currUserProfileData, index + 1);
-                        }
-                    }
+                    addPersonToAdapter(profileData, 0);
                 }
             }
 

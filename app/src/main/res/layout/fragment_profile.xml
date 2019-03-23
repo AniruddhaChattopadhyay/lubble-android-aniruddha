@@ -101,28 +101,6 @@
                 android:layout_marginBottom="8dp">
 
                 <TextView
-                    android:id="@+id/tv_rank"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=".."
-                    android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                    app:layout_constraintEnd_toEndOf="@+id/tv_rank_hint"
-                    app:layout_constraintStart_toStartOf="@+id/tv_rank_hint"
-                    app:layout_constraintTop_toTopOf="@+id/tv_invited" />
-
-                <TextView
-                    android:id="@+id/tv_rank_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:text="Rank"
-                    app:layout_constraintEnd_toStartOf="@+id/tv_invited_hint"
-                    app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintHorizontal_chainStyle="packed"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_rank" />
-
-                <TextView
                     android:id="@+id/tv_invited"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -139,7 +117,8 @@
                     android:text="Invited"
                     app:layout_constraintEnd_toStartOf="@+id/tv_points_hint"
                     app:layout_constraintHorizontal_bias="0.5"
-                    app:layout_constraintStart_toEndOf="@+id/tv_rank_hint"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/tv_invited" />
 
                 <TextView
@@ -157,9 +136,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
-                    android:text="Coins"
                     android:drawablePadding="2dp"
                     android:gravity="center"
+                    android:text="Coins"
                     app:drawableStartCompat="@drawable/ic_coin"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"

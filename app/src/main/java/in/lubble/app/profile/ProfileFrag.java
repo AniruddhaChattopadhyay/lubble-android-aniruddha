@@ -68,7 +68,6 @@ public class ProfileFrag extends Fragment {
     private TextView lubbleTv;
     private TextView userBio;
     private TextView editProfileTV;
-    private TextView rankTv;
     private TextView invitedTv;
     private TextView coinsTv;
     private RecyclerView userGroupsRv;
@@ -125,7 +124,6 @@ public class ProfileFrag extends Fragment {
         lubbleTv = rootView.findViewById(R.id.tv_lubble);
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
-        rankTv = rootView.findViewById(R.id.tv_rank);
         invitedTv = rootView.findViewById(R.id.tv_invited);
         coinsTv = rootView.findViewById(R.id.tv_points);
         genderIv = rootView.findViewById(R.id.iv_gender);
@@ -446,7 +444,6 @@ public class ProfileFrag extends Fragment {
             public void onResponse(Call<UserProfileData> call, Response<UserProfileData> response) {
                 final UserProfileData userProfileData = response.body();
                 if (response.isSuccessful() && userProfileData != null && isAdded() && isVisible()) {
-                    rankTv.setText(String.valueOf(userProfileData.getRank()));
                     invitedTv.setText(String.valueOf(userProfileData.getReferrals()));
                 } else if (isAdded() && isVisible()) {
                     Crashlytics.log("referral leaderboard bad response");

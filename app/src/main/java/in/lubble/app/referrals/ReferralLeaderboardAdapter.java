@@ -13,8 +13,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.mapUtils.MathUtil;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -71,11 +74,19 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public int getItemCount() {
-        return referralList.size();
+        return referralList.size() > 10 ? 10 : referralList.size();
     }
 
     public void addPerson(LeaderboardPersonData person) {
         referralList.add(person);
+        // sort by coins desc
+        Collections.sort(referralList, new Comparator<LeaderboardPersonData>() {
+            @Override
+            public int compare(LeaderboardPersonData o1, LeaderboardPersonData o2) {
+                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending=
+                return MathUtil.compareDesc(o1.getPoints(), o2.getPoints());
+            }
+        });
         notifyDataSetChanged();
     }
 
