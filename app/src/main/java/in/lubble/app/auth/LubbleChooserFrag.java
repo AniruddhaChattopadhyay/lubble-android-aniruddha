@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -147,48 +148,53 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
 
                 final String referrerUid = LubbleSharedPrefs.getInstance().getReferrerUid();
 
-                getUserRef(referrerUid).runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-                        ProfileData profileData = mutableData.getValue(ProfileData.class);
-                        if (profileData == null) {
-                            return Transaction.success(mutableData);
-                        }
-                        profileData.setCoins(profileData.getCoins() + 100);
-                        // Set value and report transaction success
-                        mutableData.setValue(profileData);
-                        return Transaction.success(mutableData);
-                    }
-
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
-                        // Transaction completed
-                        if (committed && isAdded()) {
-                            user.updateProfile(profileUpdates)
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                Log.d(TAG, "User profile updated.");
-                                                completeSignup();
-                                            } else {
-                                                Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "join click, referred uid: " + referrerUid);
+                user.updateProfile(profileUpdates)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Log.d(TAG, "User profile updated.");
+                                    if (!TextUtils.isEmpty(referrerUid)) {
+                                        getUserRef(referrerUid).runTransaction(new Transaction.Handler() {
+                                            @Override
+                                            public Transaction.Result doTransaction(MutableData mutableData) {
+                                                Log.d(TAG, "doTransaction: ");
+                                                ProfileData profileData = mutableData.getValue(ProfileData.class);
+                                                if (profileData == null) {
+                                                    return Transaction.success(mutableData);
+                                                }
+                                                // Set value and report transaction success
+                                                mutableData.child("coins").setValue(profileData.getCoins() + 100);
+                                                return Transaction.success(mutableData);
                                             }
-                                        }
-                                    });
-                        } else if (isAdded()) {
-                            Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
+
+                                            @Override
+                                            public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
+                                                if (!committed) {
+                                                    Crashlytics.log("Failed to increment coins for referrer uid: " + referrerUid);
+                                                    Crashlytics.logException(databaseError.toException());
+                                                }
+                                            }
+                                        });
+                                    }
+                                    completeSignup();
+                                } else {
+                                    progressDialog.dismiss();
+                                    Log.e(TAG, "User profile update FAIL e: " + task.getException());
+                                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                    Crashlytics.logException(task.getException());
+                                }
+                            }
+                        });
             }
         });
-
         return view;
     }
 
     private void completeSignup() {
 
+        Log.d(TAG, "completeSignup: ");
         final JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("lubble", chosenLubbleData.getId());
@@ -200,6 +206,7 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful() && isAdded() && isVisible()) {
+                        Log.d(TAG, "onResponse: ");
                         progressDialog.dismiss();
                         Analytics.triggerSignUpEvent(getContext());
                         startActivity(MainActivity.createIntent(getContext(), ((IdpResponse) idpResponse)));
