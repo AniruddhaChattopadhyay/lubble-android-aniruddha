@@ -282,7 +282,11 @@ public class GamesFrag extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        getQuizRefForThisUser("whereTonight").child("lastPlayedTime").removeEventListener(timeListener);
-        getThisUserRef().removeEventListener(coinsListener);
+        if (timeListener != null) {
+            getQuizRefForThisUser("whereTonight").child("lastPlayedTime").removeEventListener(timeListener);
+        }
+        if (coinsListener != null) {
+            getThisUserRef().removeEventListener(coinsListener);
+        }
     }
 }
