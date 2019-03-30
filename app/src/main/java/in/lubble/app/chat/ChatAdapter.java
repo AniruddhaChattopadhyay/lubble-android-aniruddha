@@ -1,6 +1,7 @@
 package in.lubble.app.chat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -1305,7 +1306,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
 
         private FrameLayout rootLayout;
         private EmojiTextView messageTv;
@@ -1336,6 +1337,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView badgeTextTv;
         private TextView senderTv;
 
+        @SuppressLint("ClickableViewAccessibility")
         SentChatViewHolder(final View itemView) {
             super(itemView);
             rootLayout = itemView.findViewById(R.id.root_layout_chat_sent);
@@ -1365,16 +1367,96 @@ public class ChatAdapter extends RecyclerView.Adapter {
             senderTv = itemView.findViewById(R.id.tv_sender_name);
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
 
-            linkContainer.setOnClickListener(this);
-            linkContainer.setOnLongClickListener(this);
-            lubbContainer.setOnClickListener(this);
-            lubbHeadsContainer.setOnClickListener(this);
-            lubbPopOutContainer.setOnClickListener(this);
-            pollContainer.setOnLongClickListener(this);
-            messageTv.setOnLongClickListener(this);
-            chatIv.setOnClickListener(null);
-            chatIv.setOnLongClickListener(this);
-            rootLayout.setOnLongClickListener(this);
+            linkContainer.setOnTouchListener(this);
+            lubbContainer.setOnTouchListener(this);
+            lubbHeadsContainer.setOnTouchListener(this);
+            lubbPopOutContainer.setOnTouchListener(this);
+            pollContainer.setOnTouchListener(this);
+            messageTv.setOnTouchListener(this);
+            chatIv.setOnTouchListener(this);
+            rootLayout.setOnTouchListener(this);
+        }
+
+        View touchedView;
+        private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                Toast.makeText(activity, "d tap", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                switch (touchedView.getId()) {
+                    case R.id.linearLayout_lubb_container:
+                        toggleLubb(getAdapterPosition());
+                        Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, touchedView.getContext());
+                        break;
+                    case R.id.linear_layout_lubb_pop:
+                        toggleLubb(getAdapterPosition());
+                        break;
+                    case R.id.link_meta_container:
+                        ChatData chatData = chatDataList.get(getAdapterPosition());
+                        if (GROUP.equalsIgnoreCase(chatData.getType())) {
+                            ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
+                        } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
+                            EventInfoActivity.open(context, chatData.getAttachedGroupId());
+                        } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                            ChatData emptyReplyChatData = new ChatData();
+                            emptyReplyChatData.setId(chatData.getReplyMsgId());
+                            int pos = chatDataList.indexOf(emptyReplyChatData);
+                            if (pos != -1) {
+                                recyclerView.scrollToPosition(pos);
+                                posToFlash = pos;
+                                notifyItemChanged(pos);
+                            }
+                        } else if (LINK.equalsIgnoreCase(chatData.getType())) {
+                            final URLSpan[] urls = messageTv.getUrls();
+                            final String url = urls[0].getURL();
+                            if (isValidString(url)) {
+                                Intent i = new Intent(Intent.ACTION_VIEW);
+                                i.setData(Uri.parse(url));
+                                context.startActivity(i);
+                            }
+                        }
+                        break;
+                    case R.id.linear_layout_lubb_heads:
+                        chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
+                        break;
+                }
+                if (actionMode != null) {
+                    actionMode.finish();
+                }
+                return super.onSingleTapConfirmed(e);
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (getAdapterPosition() != highlightedPos) {
+                    actionMode = ((AppCompatActivity) touchedView.getContext()).startSupportActionMode(actionModeCallbacks);
+                    lubbPopOutContainer.setVisibility(View.VISIBLE);
+                    toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(authorId));
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                    if (highlightedPos != -1) {
+                        // another item was highlighted, remove its highlight
+                        notifyItemChanged(highlightedPos);
+                    }
+                    highlightedPos = getAdapterPosition();
+                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+                } else {
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
+                }
+                super.onLongPress(e);
+            }
+        });
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            touchedView = v;
+            gestureDetector.onTouchEvent(event);
+            return true;
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -1419,71 +1501,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
             }
         };
-
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.linearLayout_lubb_container:
-                    toggleLubb(getAdapterPosition());
-                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
-                    break;
-                case R.id.linear_layout_lubb_pop:
-                    toggleLubb(getAdapterPosition());
-                    break;
-                case R.id.link_meta_container:
-                    ChatData chatData = chatDataList.get(getAdapterPosition());
-                    if (GROUP.equalsIgnoreCase(chatData.getType())) {
-                        ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
-                    } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
-                        EventInfoActivity.open(context, chatData.getAttachedGroupId());
-                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
-                        ChatData emptyReplyChatData = new ChatData();
-                        emptyReplyChatData.setId(chatData.getReplyMsgId());
-                        int pos = chatDataList.indexOf(emptyReplyChatData);
-                        if (pos != -1) {
-                            recyclerView.scrollToPosition(pos);
-                            posToFlash = pos;
-                            notifyItemChanged(pos);
-                        }
-                    } else if (LINK.equalsIgnoreCase(chatData.getType())) {
-                        final URLSpan[] urls = messageTv.getUrls();
-                        final String url = urls[0].getURL();
-                        if (isValidString(url)) {
-                            Intent i = new Intent(Intent.ACTION_VIEW);
-                            i.setData(Uri.parse(url));
-                            context.startActivity(i);
-                        }
-                    }
-                    break;
-                case R.id.linear_layout_lubb_heads:
-                    chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
-                    break;
-            }
-            if (actionMode != null) {
-                actionMode.finish();
-            }
-        }
-
-        @Override
-        public boolean onLongClick(View v) {
-            if (getAdapterPosition() != highlightedPos) {
-                actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
-                lubbPopOutContainer.setVisibility(View.VISIBLE);
-                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(authorId));
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-                if (highlightedPos != -1) {
-                    // another item was highlighted, remove its highlight
-                    notifyItemChanged(highlightedPos);
-                }
-                highlightedPos = getAdapterPosition();
-                selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            } else {
-                if (actionMode != null) {
-                    actionMode.finish();
-                }
-            }
-            return true;
-        }
     }
 
     private void toggleLubbPopOutContainer(ImageView lubbIv, TextView lubbTv, boolean isLubbed) {
