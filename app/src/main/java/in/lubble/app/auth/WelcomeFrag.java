@@ -90,6 +90,10 @@ public class WelcomeFrag extends Fragment {
     }
 
     private void startAuthActivity() {
+
+        AuthUI.IdpConfig facebookIdp = new AuthUI.IdpConfig.FacebookBuilder()
+                .build();
+
         List<String> whitelistedCountries = new ArrayList<String>();
         whitelistedCountries.add("in");
         List<AuthUI.IdpConfig> selectedProviders = new ArrayList<>();
@@ -98,6 +102,7 @@ public class WelcomeFrag extends Fragment {
                         .setDefaultCountryIso("in")
                         .setWhitelistedCountries(whitelistedCountries)
                         .build());
+        selectedProviders.add(facebookIdp);
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                 .setLogo(R.drawable.ic_android_black_24dp)
                 .setAvailableProviders(selectedProviders)

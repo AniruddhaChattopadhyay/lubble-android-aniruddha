@@ -244,7 +244,7 @@ public class LocationActivity extends BaseActivity {
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
-        if (LocationUtils.isMockLocationsON(this)) {
+        if (!BuildConfig.DEBUG && LocationUtils.isMockLocationsON(this)) {
             showMockLocationDialog();
             return;
         }

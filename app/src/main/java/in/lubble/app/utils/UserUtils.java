@@ -11,8 +11,6 @@ import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.FirebaseUserMetadata;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -20,20 +18,12 @@ import in.lubble.app.auth.LoginActivity;
 import io.branch.referral.Branch;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.utils.StringUtils.isValidString;
 
 /**
  * Created by ishaangarg on 12/11/17.
  */
 
 public class UserUtils {
-
-    public static boolean isNewUser(FirebaseUser currentUser) {
-        FirebaseUserMetadata metadata = currentUser.getMetadata();
-        return (metadata != null && (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()))
-                || !isValidString(currentUser.getDisplayName()
-        );
-    }
 
     public static void logout(@NonNull final FragmentActivity activity) {
         final ProgressDialog progressDialog = new ProgressDialog(activity);
