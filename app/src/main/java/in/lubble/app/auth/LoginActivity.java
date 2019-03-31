@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import com.crashlytics.android.Crashlytics;
+import com.firebase.ui.auth.AuthMethodPickerLayout;
+import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -30,12 +34,16 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.utils.FragUtils.*;
+import static in.lubble.app.utils.FragUtils.addFrag;
 
 public class LoginActivity extends BaseActivity {
 
@@ -53,14 +61,69 @@ public class LoginActivity extends BaseActivity {
 
         rootLayout = findViewById(R.id.root_layout);
         firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        Analytics.triggerScreenEvent(this, this.getClass());
 
+        LubbleSharedPrefs.getInstance().setIsLogoutPending(false);
+        startAuthActivity();
         if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
             startActivity(new Intent(this, IntroActivity.class));
         }
+    }
 
-        replaceFrag(getSupportFragmentManager(), WelcomeFrag.newInstance(getIntent()), R.id.frame_fragContainer);
-        LubbleSharedPrefs.getInstance().setIsLogoutPending(false);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        trackReferral();
+    }
+
+    private void startAuthActivity() {
+
+        AuthUI.IdpConfig facebookIdp = new AuthUI.IdpConfig.FacebookBuilder()
+                .build();
+
+        List<String> whitelistedCountries = new ArrayList<String>();
+        whitelistedCountries.add("in");
+        List<AuthUI.IdpConfig> selectedProviders = new ArrayList<>();
+        selectedProviders
+                .add(new AuthUI.IdpConfig.PhoneBuilder()
+                        .setDefaultCountryIso("in")
+                        .setWhitelistedCountries(whitelistedCountries)
+                        .build());
+        selectedProviders.add(facebookIdp);
+
+        AuthMethodPickerLayout customLayout = new AuthMethodPickerLayout
+                .Builder(R.layout.custom_login_layout)
+                .setFacebookButtonId(R.id.btn_sign_in_fb)
+                .setPhoneButtonId(R.id.tv_sign_in_phone)
+                .setTosAndPrivacyPolicyId(R.id.tv_tos)
+                .build();
+
+        Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
+                .setLogo(R.drawable.ic_android_black_24dp)
+                .setAvailableProviders(selectedProviders)
+                .setAuthMethodPickerLayout(customLayout)
+                .setTheme(R.style.AppTheme)
+                .setTosAndPrivacyPolicyUrls("https://lubble.in/policies/terms", "https://lubble.in/policies/privacy")
+                .setIsSmartLockEnabled(false, false)
+                .build();
+        startActivityForResult(intent, RC_SIGN_IN);
+    }
+
+    private void trackReferral() {
+        Branch.getInstance().initSession(new Branch.BranchReferralInitListener() {
+            @Override
+            public void onInitFinished(JSONObject referringParams, BranchError error) {
+                if (error == null) {
+                    Log.i("BRANCH SDK", referringParams.toString());
+                    final String referrerUid = referringParams.optString("referrer_uid");
+                    if (!TextUtils.isEmpty(referrerUid)) {
+                        LubbleSharedPrefs.getInstance().setReferrerUid(referrerUid);
+                    }
+                } else {
+                    Log.e("BRANCH SDK", error.getMessage());
+                }
+            }
+        }, getIntent().getData(), this);
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -115,12 +178,13 @@ public class LoginActivity extends BaseActivity {
                 // Sign in failed
                 if (response == null) {
                     // User pressed back button
-                    showSnackbar(R.string.sign_in_cancelled);
+                    finish();
                     return;
                 }
 
                 if (response.getError() != null && response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     showSnackbar(R.string.no_internet_connection);
+                    startAuthActivity();
                     return;
                 }
 
@@ -136,7 +200,7 @@ public class LoginActivity extends BaseActivity {
                 /*UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
                 addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);*/
             } else {
-                replaceStack(this, WelcomeFrag.newInstance(getIntent()), R.id.frame_fragContainer);
+                startAuthActivity();
             }
         }
     }

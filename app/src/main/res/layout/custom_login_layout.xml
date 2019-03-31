@@ -136,7 +136,7 @@
         android:layout_above="@id/tv_tos"
         android:layout_centerHorizontal="true"
         android:padding="8dp"
-        android:text="sign in with phone number"
+        android:text="Sign in with phone number"
         android:textColor="@color/link_blue" />
 
     <TextView
