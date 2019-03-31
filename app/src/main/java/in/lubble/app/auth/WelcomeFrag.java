@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -103,9 +104,18 @@ public class WelcomeFrag extends Fragment {
                         .setWhitelistedCountries(whitelistedCountries)
                         .build());
         selectedProviders.add(facebookIdp);
+
+        AuthMethodPickerLayout customLayout = new AuthMethodPickerLayout
+                .Builder(R.layout.custom_login_layout)
+                .setFacebookButtonId(R.id.btn_sign_in_fb)
+                .setPhoneButtonId(R.id.tv_sign_in_phone)
+                .setTosAndPrivacyPolicyId(R.id.tv_tos)
+                .build();
+
         Intent intent = AuthUI.getInstance().createSignInIntentBuilder()
                 .setLogo(R.drawable.ic_android_black_24dp)
                 .setAvailableProviders(selectedProviders)
+                .setAuthMethodPickerLayout(customLayout)
                 .setTheme(R.style.AppTheme)
                 .setTosAndPrivacyPolicyUrls("https://lubble.in/policies/terms", "https://lubble.in/policies/privacy")
                 .setIsSmartLockEnabled(false, false)
