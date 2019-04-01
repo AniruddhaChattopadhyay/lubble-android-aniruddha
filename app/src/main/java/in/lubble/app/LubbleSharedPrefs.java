@@ -4,13 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import androidx.annotation.Nullable;
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
-import in.lubble.app.firebase.RealtimeDbHelper;
-
-import java.util.HashMap;
+import in.lubble.app.utils.UserUtils;
 
 /**
  * Created by ishaan on 17/2/18.
@@ -90,55 +84,25 @@ public class LubbleSharedPrefs {
         return preferences.edit().putString(REFERRER_UID, uid).commit();
     }
 
+    @Nullable
     public String getLubbleId() {
-        /*if (!TextUtils.isEmpty(preferences.getString(LUBBLE_ID, ""))) {
-            return preferences.getString(LUBBLE_ID, "");
-        } else if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            // user is signed in but has no lubble ID
-            // start Main Activity to fetch & update lubble ID
-            try {
-                final Intent intent = new Intent(LubbleApp.getAppContext(), MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                LubbleApp.getAppContext().startActivity(intent);
-            } catch (Exception e) {
-                return "";
-            }
-            return "";
-        } else {
-            // user is logged out, Lubble ID does not exist at this time
-            return "";
-        }*/
-        final String lubbleId = preferences.getString(LUBBLE_ID, "");
-        if (lubbleId == null || lubbleId.isEmpty()) {
-            fetchAndUpdateLubbleId();
-            return "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "DEV" : "saraswati_vihar";
-        } else {
-            return lubbleId;
+        return preferences.getString(LUBBLE_ID, "");
+    }
+
+    public String requireLubbleId() {
+        if (preferences.getString(LUBBLE_ID, null) == null) {
+            UserUtils.logout(LubbleApp.getAppContext());
+
+            final IllegalArgumentException illegalArgumentException = new IllegalArgumentException("Tried to access Lubble ID but was not found in Shared Prefs");
+            Crashlytics.logException(illegalArgumentException);
+            throw illegalArgumentException;
         }
+        return preferences.getString(LUBBLE_ID, "");
     }
 
     public boolean setLubbleId(String lubbleId) {
 
         return preferences.edit().putString(LUBBLE_ID, lubbleId).commit();
-    }
-
-    private void fetchAndUpdateLubbleId() {
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            RealtimeDbHelper.getThisUserRef().child("lubbles").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                    if (map != null && !map.isEmpty()) {
-                        setLubbleId((String) map.keySet().toArray()[0]);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
-                }
-            });
-        }
     }
 
     public String getDefaultGroupId() {

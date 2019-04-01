@@ -58,6 +58,39 @@ public class UserUtils {
         }
     }
 
+    public static void logout(@NonNull final Context context) {
+        final ProgressDialog progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage(context.getString(R.string.logging_out));
+        progressDialog.show();
+        try {
+            getThisUserRef().child("token").setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if (task.isSuccessful()) {
+                        AuthUI.getInstance()
+                                .signOut(context)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        progressDialog.dismiss();
+                                        // user is now signed out
+                                        LubbleSharedPrefs.getInstance().clearAll();
+                                        Branch.getInstance().logout();
+                                        Intent intent = new Intent(context, LoginActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        context.startActivity(intent);
+                                    }
+                                });
+                    } else {
+                        Toast.makeText(context, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            Crashlytics.logException(e);
+        }
+    }
+
     public static void setProfilePic(@NonNull Context context,
                                      @NonNull ImageView imageView,
                                      @NonNull String profileUrl) {
@@ -65,10 +98,6 @@ public class UserUtils {
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .circleCrop()
                 .into(imageView);
-    }
-
-    public static String getLubbleId() {
-        return LubbleSharedPrefs.getInstance().getLubbleId();
     }
 
 }

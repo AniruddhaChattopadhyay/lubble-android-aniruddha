@@ -61,6 +61,7 @@ public class LoginActivity extends BaseActivity {
         Analytics.triggerScreenEvent(this, this.getClass());
 
         LubbleSharedPrefs.getInstance().setIsLogoutPending(false);
+        LubbleSharedPrefs.getInstance().setLubbleId("");
         startAuthActivity();
         if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
             startActivity(new Intent(this, IntroActivity.class));

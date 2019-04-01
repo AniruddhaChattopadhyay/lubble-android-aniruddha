@@ -87,7 +87,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private void fetchExploreGroups() {
         progressbar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchExploreGroups(LubbleSharedPrefs.getInstance().getLubbleId()).enqueue(new Callback<ArrayList<ExploreGroupData>>() {
+        endpoints.fetchExploreGroups(LubbleSharedPrefs.getInstance().requireLubbleId()).enqueue(new Callback<ArrayList<ExploreGroupData>>() {
             @Override
             public void onResponse(Call<ArrayList<ExploreGroupData>> call, Response<ArrayList<ExploreGroupData>> response) {
                 final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();

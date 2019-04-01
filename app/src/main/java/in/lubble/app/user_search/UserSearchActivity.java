@@ -6,10 +6,10 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import androidx.appcompat.widget.Toolbar;
 import in.lubble.app.BaseActivity;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 
 import static in.lubble.app.utils.FragUtils.replaceFrag;
-import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 public class UserSearchActivity extends BaseActivity {
 
@@ -32,7 +32,7 @@ public class UserSearchActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         final String groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
-        replaceFrag(getSupportFragmentManager(), UserSearchFrag.newInstance(getLubbleId(), groupId), R.id.frame_fragContainer);
+        replaceFrag(getSupportFragmentManager(), UserSearchFrag.newInstance(LubbleSharedPrefs.getInstance().requireLubbleId(), groupId), R.id.frame_fragContainer);
 
     }
 

@@ -39,7 +39,6 @@ import java.util.Map;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
-import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 public class ScrollingGroupInfoActivity extends BaseActivity {
 
@@ -273,7 +272,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
                 this,
                 groupData.getProfilePic(),
                 groupIv,
-                "lubbles/" + getLubbleId() + "/groups/" + groupId,
+                "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + groupId,
                 R.drawable.ic_circle_group_24dp);
     }
 

@@ -13,7 +13,6 @@ import in.lubble.app.*;
 import in.lubble.app.utils.TouchImageView;
 
 import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
-import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 public class AttachImageActivity extends BaseActivity {
 
@@ -60,7 +59,7 @@ public class AttachImageActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 final boolean isDm = getIntent().getBooleanExtra(EXTRA_IS_DM, false);
-                String uploadPath = "lubbles/" + getLubbleId() + "/groups/" + chatId;
+                String uploadPath = "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + chatId;
                 if (isDm) {
                     uploadPath = "dms/" + chatId;
                 }
