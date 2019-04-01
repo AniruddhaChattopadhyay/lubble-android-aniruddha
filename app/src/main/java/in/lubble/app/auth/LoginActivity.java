@@ -18,10 +18,7 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FacebookAuthProvider;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.auth.*;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -81,6 +78,9 @@ public class LoginActivity extends BaseActivity {
         AuthUI.IdpConfig facebookIdp = new AuthUI.IdpConfig.FacebookBuilder()
                 .build();
 
+        AuthUI.IdpConfig googleIdp = new AuthUI.IdpConfig.GoogleBuilder()
+                .build();
+
         List<String> whitelistedCountries = new ArrayList<String>();
         whitelistedCountries.add("in");
         List<AuthUI.IdpConfig> selectedProviders = new ArrayList<>();
@@ -90,10 +90,12 @@ public class LoginActivity extends BaseActivity {
                         .setWhitelistedCountries(whitelistedCountries)
                         .build());
         selectedProviders.add(facebookIdp);
+        selectedProviders.add(googleIdp);
 
         AuthMethodPickerLayout customLayout = new AuthMethodPickerLayout
                 .Builder(R.layout.custom_login_layout)
                 .setFacebookButtonId(R.id.btn_sign_in_fb)
+                .setGoogleButtonId(R.id.btn_sign_in_google)
                 .setPhoneButtonId(R.id.tv_sign_in_phone)
                 .setTosAndPrivacyPolicyId(R.id.tv_tos)
                 .build();
@@ -137,7 +139,9 @@ public class LoginActivity extends BaseActivity {
                 if (response.isNewUser()) {
                     // start registration flow
                     if (currentUser.getProviders().get(0).equals(FacebookAuthProvider.PROVIDER_ID)) {
-                        registerFacebookUser(response, currentUser);
+                        registerSocialUser(response, currentUser, "?type=large");
+                    } else if (currentUser.getProviders().get(0).equals(GoogleAuthProvider.PROVIDER_ID)) {
+                        registerSocialUser(response, currentUser, "?sz=300");
                     } else if (currentUser.getProviders().get(0).equals(PhoneAuthProvider.PROVIDER_ID)) {
                         NameFrag nameFrag = NameFrag.newInstance(response);
                         addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
@@ -205,7 +209,7 @@ public class LoginActivity extends BaseActivity {
         }
     }
 
-    private void registerFacebookUser(final IdpResponse response, FirebaseUser currentUser) {
+    private void registerSocialUser(final IdpResponse response, FirebaseUser currentUser, String bigPicString) {
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(getString(R.string.all_please_wait));
@@ -221,7 +225,7 @@ public class LoginActivity extends BaseActivity {
         profileInfo.setName(currentUser.getDisplayName());
         if (currentUser.getPhotoUrl() != null) {
             profileInfo.setThumbnail(currentUser.getPhotoUrl().toString());
-            profileData.setProfilePic(currentUser.getPhotoUrl().toString().concat("?type=large"));
+            profileData.setProfilePic(currentUser.getPhotoUrl().toString().concat(bigPicString));
         }
         profileData.setInfo(profileInfo);
         profileData.setToken(FirebaseInstanceId.getInstance().getToken());
