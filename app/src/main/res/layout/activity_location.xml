@@ -10,18 +10,41 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
+        android:layout_marginRight="16dp"
+        android:animateLayoutChanges="true"
         android:gravity="center"
         android:orientation="vertical"
         android:visibility="gone"
-        tools:visibility="gone">
+        tools:visibility="visible">
 
         <TextView
+            android:id="@+id/tv_logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:padding="8dp"
+            android:text="LOGOUT"
+            android:textColor="@color/link_blue" />
+
+        <TextView
+            android:id="@+id/tv_hi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/tv_logout"
+            android:maxLines="1"
+            android:text="Hi"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+            android:textColor="@color/dk_colorAccent"
+            android:textSize="24sp" />
+
+        <androidx.emoji.widget.EmojiTextView
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="We are not open in your\nneighbourhood yet"
+            android:layout_below="@id/tv_hi"
+            android:text="We are not open in your\nneighbourhood yet 😢"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             android:textColor="@color/dk_colorAccent"
             android:textSize="24sp" />
@@ -31,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_title"
-            android:text="If you're not at home, please try again from your society.\n\nTo get useful local help &amp; connections, Lubble is waiting for more neighbours in your area to join.\n\nWe'll notify you when we open in your area."
+            android:text="If you're not at home, please try again from your society.\n\nTo get useful local help &amp; connections, Lubble is waiting for more neighbours in your area to join."
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle" />
 
         <ImageView
@@ -42,6 +65,14 @@
             android:layout_below="@id/tv_desc"
             app:srcCompat="@drawable/ic_society" />
 
+        <ProgressBar
+            android:id="@+id/progressbar_phone_reg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:paddingBottom="32dp" />
+
         <LinearLayout
             android:id="@+id/container_action"
             android:layout_width="match_parent"
@@ -49,7 +80,8 @@
             android:layout_alignParentBottom="true"
             android:background="@drawable/half_rounded_rectangle_blue_top"
             android:orientation="vertical"
-            android:padding="8dp">
+            android:padding="8dp"
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/tv_action"
@@ -68,6 +100,74 @@
                 android:layout_alignParentBottom="true"
                 android:text="Invite Friends"
                 android:theme="@style/WhiteButton" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/container_register_phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/half_rounded_rectangle_blue_top"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/tv_register_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:text="Join the Waitlist. We'll let you know when Lubble comes to your locality!"
+                android:textColor="@color/white"
+                android:textSize="16sp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="8dp">
+
+                <TextView
+                    android:id="@+id/tv_prefix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignTop="@id/et_register_phone"
+                    android:layout_alignBottom="@id/et_register_phone"
+                    android:layout_alignParentLeft="true"
+                    android:gravity="center"
+                    android:text="+91"
+                    android:textColor="@color/white"
+                    android:textSize="16sp" />
+
+                <EditText
+                    android:id="@+id/et_register_phone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:layout_toLeftOf="@id/btn_register_phone"
+                    android:layout_toRightOf="@id/tv_prefix"
+                    android:digits="0123456789"
+                    android:hint="Phone Number"
+                    android:inputType="phone"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white"
+                    android:textCursorDrawable="@null"
+                    app:backgroundTint="@color/white" />
+
+                <Button
+                    android:id="@+id/btn_register_phone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:text="Notify Me"
+                    android:theme="@style/WhiteButton" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 
@@ -101,6 +201,7 @@
         android:layout_margin="8dp"
         android:gravity="center"
         android:text="We need your location to connect you with people nearby."
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+        tools:visibility="gone" />
 
 </RelativeLayout>

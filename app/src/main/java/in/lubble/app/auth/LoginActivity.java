@@ -62,9 +62,15 @@ public class LoginActivity extends BaseActivity {
 
         LubbleSharedPrefs.getInstance().setIsLogoutPending(false);
         LubbleSharedPrefs.getInstance().setLubbleId("");
-        startAuthActivity();
-        if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
-            startActivity(new Intent(this, IntroActivity.class));
+        if (firebaseAuth.getCurrentUser() != null) {
+            final Intent intent = new Intent(LoginActivity.this, LocationActivity.class);
+            //intent.putExtra("idpResponse", response);
+            startActivityForResult(intent, REQUEST_LOCATION);
+        } else {
+            startAuthActivity();
+            if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
+                startActivity(new Intent(this, IntroActivity.class));
+            }
         }
     }
 
@@ -166,7 +172,9 @@ public class LoginActivity extends BaseActivity {
                                 startActivity(MainActivity.createIntent(LoginActivity.this, response));
                                 finish();
                             } else {
-                                Crashlytics.logException(new IllegalAccessException("User has NO lubble ID"));
+                                final Intent intent = new Intent(LoginActivity.this, LocationActivity.class);
+                                intent.putExtra("idpResponse", response);
+                                startActivityForResult(intent, REQUEST_LOCATION);
                             }
                         }
 
@@ -197,16 +205,18 @@ public class LoginActivity extends BaseActivity {
             }
         } else if (requestCode == REQUEST_LOCATION) {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                LubbleChooserFrag userNameFrag = LubbleChooserFrag.newInstance(
+                LubbleChooserFrag lubbleChooserFrag = LubbleChooserFrag.newInstance(
                         data.getParcelableExtra("idpResponse"),
                         (ArrayList<LocationsData>) data.getSerializableExtra("lubbleDataList")
                 );
-                addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);
+                addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, lubbleChooserFrag);
                 /*UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
                 addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);*/
             } else {
-                startAuthActivity();
+                finish();
             }
+        } else {
+            finish();
         }
     }
 
@@ -217,8 +227,6 @@ public class LoginActivity extends BaseActivity {
         progressDialog.setMessage(getString(R.string.all_updating));
         progressDialog.setCancelable(false);
         progressDialog.show();
-
-        LubbleSharedPrefs.getInstance().setFullName(currentUser.getDisplayName());
 
         final ProfileData profileData = new ProfileData();
         final ProfileInfo profileInfo = new ProfileInfo();

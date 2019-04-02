@@ -19,6 +19,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.iid.FirebaseInstanceId;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -86,17 +87,23 @@ public class NameFrag extends Fragment {
         continueBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!TextUtils.isEmpty(fullNameTil.getEditText().getText())) {
+                final String fullNameStr = fullNameTil.getEditText().getText().toString();
+                if (!TextUtils.isEmpty(fullNameStr)) {
                     progressDialog.show();
-                    LubbleSharedPrefs.getInstance().setFullName(fullNameTil.getEditText().getText().toString().trim());
                     if (!TextUtils.isEmpty(referralCodeTil.getEditText().getText().toString())) {
                         LubbleSharedPrefs.getInstance().setReferralCode(referralCodeTil.getEditText().getText().toString().trim());
                     }
 
+                    final UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                            .setDisplayName(fullNameStr)
+                            .build();
+
+                    FirebaseAuth.getInstance().getCurrentUser().updateProfile(profileUpdates);
+
                     final ProfileData profileData = new ProfileData();
                     final ProfileInfo profileInfo = new ProfileInfo();
                     profileInfo.setId(FirebaseAuth.getInstance().getUid());
-                    profileInfo.setName(LubbleSharedPrefs.getInstance().getFullName());
+                    profileInfo.setName(fullNameStr);
                     profileData.setInfo(profileInfo);
                     profileData.setToken(FirebaseInstanceId.getInstance().getToken());
                     profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());

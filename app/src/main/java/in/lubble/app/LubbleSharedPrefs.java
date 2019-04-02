@@ -28,7 +28,6 @@ public class LubbleSharedPrefs {
     private final String IS_SERVICES_OPENED = "IS_SERVICES_OPENED";
     private final String SELLER_ID = "SELLER_ID";
     private final String IS_VIEW_COUNT_ENABLED = "IS_VIEW_COUNT_ENABLED";
-    private final String FULL_NAME = "FULL_NAME";
     private final String REFERRAL_CODE = "REFERRAL_CODE";
     private final String IS_EXPLORE_SHOWN = "IS_EXPLORE_SHOWN";
     private final String CENTER_LATI = "CENTER_LATI";
@@ -111,14 +110,6 @@ public class LubbleSharedPrefs {
 
     public boolean setDefaultGroupId(String defaultGroupId) {
         return preferences.edit().putString(DEFAULT_GROUP_ID, defaultGroupId).commit();
-    }
-
-    public String getFullName() {
-        return preferences.getString(FULL_NAME, "");
-    }
-
-    public boolean setFullName(String fullName) {
-        return preferences.edit().putString(FULL_NAME, fullName).commit();
     }
 
     public String getReferralCode() {

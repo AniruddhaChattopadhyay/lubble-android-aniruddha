@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.utils.StringUtils;
 
@@ -67,7 +68,10 @@ public class Analytics {
         firebaseAnalytics.setUserId(userId);
         firebaseAnalytics.setUserProperty("uid", userId);
         firebaseAnalytics.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
-        firebaseAnalytics.setUserProperty("name", LubbleSharedPrefs.getInstance().getFullName());
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            firebaseAnalytics.setUserProperty("name", currentUser.getDisplayName());
+        }
     }
 
     private static void unSetUser(Context context) {

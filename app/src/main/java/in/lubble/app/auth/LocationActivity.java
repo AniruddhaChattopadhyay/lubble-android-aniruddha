@@ -17,6 +17,8 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -28,6 +30,11 @@ import com.google.android.gms.location.*;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
@@ -37,6 +44,8 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.LocationUtils;
+import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import okhttp3.RequestBody;
@@ -50,6 +59,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
@@ -65,7 +75,14 @@ public class LocationActivity extends BaseActivity {
     private ImageView pulseIv;
     private ImageView locIv;
     private TextView locHintTv;
+    private TextView logoutTv;
+    private TextView hiNameTv;
     private Button shareBtn;
+    private EditText phoneEt;
+    private Button phoneBtn;
+    private ProgressBar phoneProgressBar;
+    private LinearLayout shareContainer;
+    private LinearLayout phoneContainer;
     private Parcelable idpResponse;
     private Location currLocation;
     private int retryCount = 0;
@@ -81,7 +98,14 @@ public class LocationActivity extends BaseActivity {
         pulseIv = findViewById(R.id.iv_pulse);
         locIv = findViewById(R.id.iv_loc);
         locHintTv = findViewById(R.id.tv_loc_hint);
+        shareContainer = findViewById(R.id.container_action);
+        phoneContainer = findViewById(R.id.container_register_phone);
         shareBtn = findViewById(R.id.btn_action);
+        phoneEt = findViewById(R.id.et_register_phone);
+        phoneBtn = findViewById(R.id.btn_register_phone);
+        logoutTv = findViewById(R.id.tv_logout);
+        hiNameTv = findViewById(R.id.tv_hi);
+        phoneProgressBar = findViewById(R.id.progressbar_phone_reg);
 
         idpResponse = getIntent().getParcelableExtra("idpResponse");
 
@@ -97,6 +121,57 @@ public class LocationActivity extends BaseActivity {
 
         sharingProgressDialog = new ProgressDialog(this);
         generateBranchUrl(this, linkCreateListener);
+
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        hiNameTv.setText("Hi " + StringUtils.getTitleCase(currentUser.getDisplayName().split(" ")[0]));
+
+        if (!TextUtils.isEmpty(currentUser.getPhoneNumber())) {
+            shareContainer.setVisibility(View.VISIBLE);
+            phoneContainer.setVisibility(View.GONE);
+            phoneProgressBar.setVisibility(View.GONE);
+        } else {
+            getThisUserRef().child("phone").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.getValue(String.class) == null) {
+                        shareContainer.setVisibility(View.GONE);
+                        phoneContainer.setVisibility(View.VISIBLE);
+                        phoneProgressBar.setVisibility(View.GONE);
+                    } else {
+                        shareContainer.setVisibility(View.VISIBLE);
+                        phoneContainer.setVisibility(View.GONE);
+                        phoneProgressBar.setVisibility(View.GONE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+
+        phoneBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!TextUtils.isEmpty(phoneEt.getText()) && phoneEt.getText().toString().length() == 10) {
+                    getThisUserRef().child("phone").setValue(phoneEt.getText().toString());
+                    shareContainer.setVisibility(View.VISIBLE);
+                    phoneContainer.setVisibility(View.GONE);
+                } else {
+                    Toast.makeText(LocationActivity.this, "Please enter correct Phone Number, no country code", Toast.LENGTH_SHORT).show();
+                    Animation shake = AnimationUtils.loadAnimation(LocationActivity.this, R.anim.shake);
+                    phoneEt.startAnimation(shake);
+                }
+            }
+        });
+
+        logoutTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UserUtils.logout(LocationActivity.this);
+            }
+        });
     }
 
     private void onInviteClicked() {
@@ -327,7 +402,7 @@ public class LocationActivity extends BaseActivity {
                 params.put("referral", referralObject);
             }
             final JSONObject userInfoObject = new JSONObject();
-            userInfoObject.put("name", LubbleSharedPrefs.getInstance().getFullName());
+            userInfoObject.put("name", FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
             params.put("user_info", userInfoObject);
         } catch (JSONException e) {
             e.printStackTrace();
