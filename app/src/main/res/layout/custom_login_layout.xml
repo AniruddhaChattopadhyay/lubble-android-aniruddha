@@ -139,19 +139,41 @@
         android:id="@+id/btn_sign_in_google"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/tv_sign_in_phone"
+        android:layout_above="@id/tv_sign_in_email"
         android:layout_alignLeft="@id/btn_sign_in_fb"
         android:layout_alignRight="@id/btn_sign_in_fb"
+        android:layout_marginBottom="8dp"
         app:buttonSize="wide" />
+
+    <TextView
+        android:id="@+id/tv_sign_in_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tv_tos"
+        android:layout_toLeftOf="@id/tv_sep"
+        android:padding="8dp"
+        android:text="Sign in with email"
+        android:textColor="@color/link_blue" />
+
+    <TextView
+        android:id="@+id/tv_sep"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/tv_tos"
+        android:layout_centerHorizontal="true"
+        android:alpha="0.6"
+        android:paddingBottom="8dp"
+        android:text=" | "
+        android:textColor="@color/white" />
 
     <TextView
         android:id="@+id/tv_sign_in_phone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@id/tv_tos"
-        android:layout_centerHorizontal="true"
+        android:layout_toRightOf="@id/tv_sep"
         android:padding="8dp"
-        android:text="Sign in with phone number"
+        android:text="Sign in with Phone"
         android:textColor="@color/link_blue" />
 
     <TextView
@@ -160,6 +182,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginBottom="16dp"
         android:gravity="center"

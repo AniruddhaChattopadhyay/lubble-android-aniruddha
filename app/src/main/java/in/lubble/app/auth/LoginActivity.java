@@ -23,9 +23,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
-import in.lubble.app.BaseActivity;
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.MainActivity;
+import in.lubble.app.*;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -76,11 +74,20 @@ public class LoginActivity extends BaseActivity {
 
     private void startAuthActivity() {
 
+        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
+                .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
+                .setHandleCodeInApp(true)
+                .setUrl("https://google.com") // This URL needs to be whitelisted
+                .build();
+
         AuthUI.IdpConfig facebookIdp = new AuthUI.IdpConfig.FacebookBuilder()
                 .build();
 
         AuthUI.IdpConfig googleIdp = new AuthUI.IdpConfig.GoogleBuilder()
                 .build();
+
+        final AuthUI.IdpConfig emailIdp = new AuthUI.IdpConfig.EmailBuilder()
+                .setActionCodeSettings(actionCodeSettings).build();
 
         List<String> whitelistedCountries = new ArrayList<String>();
         whitelistedCountries.add("in");
@@ -92,9 +99,11 @@ public class LoginActivity extends BaseActivity {
                         .build());
         selectedProviders.add(facebookIdp);
         selectedProviders.add(googleIdp);
+        selectedProviders.add(emailIdp);
 
         AuthMethodPickerLayout customLayout = new AuthMethodPickerLayout
                 .Builder(R.layout.custom_login_layout)
+                .setEmailButtonId(R.id.tv_sign_in_email)
                 .setFacebookButtonId(R.id.btn_sign_in_fb)
                 .setGoogleButtonId(R.id.btn_sign_in_google)
                 .setPhoneButtonId(R.id.tv_sign_in_phone)
@@ -146,6 +155,8 @@ public class LoginActivity extends BaseActivity {
                     } else if (currentUser.getProviders().get(0).equals(PhoneAuthProvider.PROVIDER_ID)) {
                         NameFrag nameFrag = NameFrag.newInstance(response);
                         addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
+                    } else if (currentUser.getProviders().get(0).equals(EmailAuthProvider.PROVIDER_ID)) {
+                        registerSocialUser(response, currentUser, "");
                     }
                 } else {
                     // start signin flow: fetch lubble ID
