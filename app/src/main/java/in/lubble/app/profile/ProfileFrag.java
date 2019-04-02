@@ -31,7 +31,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import in.lubble.app.*;
+import in.lubble.app.BuildConfig;
+import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
+import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
@@ -222,7 +225,6 @@ public class ProfileFrag extends Fragment {
         super.onStart();
         userRef = getUserRef(userId);
         fetchProfileFeed();
-        fetchDevMenu();
     }
 
     private void syncGroups() {
@@ -372,7 +374,6 @@ public class ProfileFrag extends Fragment {
                     GlideApp.with(getContext())
                             .load(profileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
-                            .placeholder(R.drawable.circle)
                             .listener(new RequestListener<Drawable>() {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -469,55 +470,6 @@ public class ProfileFrag extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void fetchDevMenu() {
-        RealtimeDbHelper.getDevRef().child(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (isAdded() && isVisible()) {
-                    if (dataSnapshot.getValue() != null && dataSnapshot.getValue(Boolean.class)) {
-                        toggleDevMenu(true);
-                    } else {
-                        toggleDevMenu(false);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void toggleDevMenu(boolean isDev) {
-        Spinner envoSpinner = rootView.findViewById(R.id.spinner_envo);
-        envoSpinner.setVisibility(isDev ? View.VISIBLE : View.GONE);
-        String[] envos = new String[3];
-        envos[0] = "Select Environment...";
-        envos[1] = "DEV";
-        envos[2] = "STAGING";
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_list_item_1, envos);
-
-        envoSpinner.setAdapter(adapter);
-        envoSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 1) {
-                    LubbleSharedPrefs.getInstance().setLubbleId("DEV");
-                    UserUtils.logout(getActivity());
-                } else if (position == 2) {
-                    LubbleSharedPrefs.getInstance().setLubbleId("STAGING");
-                    UserUtils.logout(getActivity());
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });

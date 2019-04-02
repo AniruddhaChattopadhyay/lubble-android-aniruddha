@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.database.*;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.chat.ChatActivity;
@@ -32,7 +33,6 @@ import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.utils.FileUtils.*;
-import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 @RuntimePermissions
 public class NewGroupFragment extends Fragment {
@@ -194,7 +194,7 @@ public class NewGroupFragment extends Fragment {
                     getContext().startService(new Intent(getContext(), UploadFileService.class)
                             .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
                             .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
-                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + getLubbleId() + "/groups/" + pushId)
+                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + pushId)
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
                 // add the joining question as group's first message

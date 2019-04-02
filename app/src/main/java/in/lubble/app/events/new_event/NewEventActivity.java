@@ -46,7 +46,6 @@ import static in.lubble.app.utils.DateTimeUtils.APP_NORMAL_DATE_YEAR;
 import static in.lubble.app.utils.DateTimeUtils.APP_SHORT_TIME;
 import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.StringUtils.isValidString;
-import static in.lubble.app.utils.UserUtils.getLubbleId;
 
 @RuntimePermissions
 public class NewEventActivity extends BaseActivity {
@@ -194,7 +193,7 @@ public class NewEventActivity extends BaseActivity {
                         startService(new Intent(NewEventActivity.this, UploadFileService.class)
                                 .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
                                 .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
-                                .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + getLubbleId() + "/events/" + pushRef.getKey())
+                                .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/events/" + pushRef.getKey())
                                 .setAction(UploadFileService.ACTION_UPLOAD));
                     }
 

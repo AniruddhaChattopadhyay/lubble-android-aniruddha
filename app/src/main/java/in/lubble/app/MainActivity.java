@@ -115,7 +115,7 @@ public class MainActivity extends BaseActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null || !StringUtils.isValidString(currentUser.getDisplayName())) {
+        if (currentUser == null || !StringUtils.isValidString(LubbleSharedPrefs.getInstance().getLubbleId())) {
             // user is not signed in, start login flow
             startActivity(new Intent(this, LoginActivity.class));
             finish();

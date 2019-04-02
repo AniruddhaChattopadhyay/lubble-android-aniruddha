@@ -306,23 +306,11 @@
 
         </androidx.cardview.widget.CardView>
 
-        <Spinner
-            android:id="@+id/spinner_envo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/card_referral"
-            android:layout_marginLeft="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginRight="8dp"
-            android:background="@drawable/rectangle_border"
-            android:visibility="gone"
-            tools:visibility="visible" />
-
         <RelativeLayout
             android:id="@+id/feedback_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/spinner_envo"
+            android:layout_below="@id/card_referral"
             android:layout_margin="8dp"
             android:background="@drawable/rectangle_border">
 

@@ -5,8 +5,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import in.lubble.app.LubbleSharedPrefs;
 
-import static in.lubble.app.utils.UserUtils.getLubbleId;
-
 /**
  * Created by ishaan on 30/1/18.
  */
@@ -34,19 +32,19 @@ public class RealtimeDbHelper {
 
     public static DatabaseReference getUserLubbleRef() {
         return FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
-                + "/lubbles/" + getLubbleId());
+                + "/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId());
     }
 
     public static DatabaseReference getUserLubbleRef(String uid) {
-        return FirebaseDatabase.getInstance().getReference("users/" + uid + "/lubbles/" + getLubbleId());
+        return FirebaseDatabase.getInstance().getReference("users/" + uid + "/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId());
     }
 
     public static String getUserGroupPath() {
-        return "users/" + FirebaseAuth.getInstance().getUid() + "/lubbles/" + getLubbleId() + "/groups";
+        return "users/" + FirebaseAuth.getInstance().getUid() + "/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups";
     }
 
     public static String getLubbleGroupPath() {
-        return "lubbles/" + getLubbleId() + "/groups";
+        return "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups";
     }
 
     public static DatabaseReference getUserGroupsRef() {
@@ -54,36 +52,36 @@ public class RealtimeDbHelper {
     }
 
     public static DatabaseReference getLubbleRef() {
-        return FirebaseDatabase.getInstance().getReference("lubbles/" + getLubbleId());
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId());
     }
 
     public static DatabaseReference getLubbleMembersRef() {
-        return FirebaseDatabase.getInstance().getReference("lubbles/" + getLubbleId() + "/members");
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/members");
     }
 
     public static DatabaseReference getLubbleDomesticRef() {
-        return FirebaseDatabase.getInstance().getReference("lubbles/" + getLubbleId() + "/domesticDirectory");
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/domesticDirectory");
     }
 
     public static DatabaseReference getLubbleGroupsRef() {
-        return FirebaseDatabase.getInstance().getReference("lubbles/" + getLubbleId() + "/groups");
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups");
     }
 
     public static DatabaseReference getLubbleBlocksRef() {
-        return FirebaseDatabase.getInstance().getReference("lubbles/" + getLubbleId() + "/blocks");
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/blocks");
     }
 
     public static DatabaseReference getCreateOrJoinGroupRef() {
-        return FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + getLubbleId()
+        return FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()
                 + "/users/" + FirebaseAuth.getInstance().getUid());
     }
 
     public static DatabaseReference getMessagesRef() {
-        return FirebaseDatabase.getInstance().getReference("messages/lubbles/" + getLubbleId() + "/groups");
+        return FirebaseDatabase.getInstance().getReference("messages/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups");
     }
 
     public static DatabaseReference getAnnouncementsRef() {
-        return FirebaseDatabase.getInstance().getReference("messages/lubbles/" + getLubbleId() + "/announcements");
+        return FirebaseDatabase.getInstance().getReference("messages/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/announcements");
     }
 
     public static DatabaseReference getConnectedInfoRef() {
