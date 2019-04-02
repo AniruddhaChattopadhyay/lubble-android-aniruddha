@@ -28,11 +28,14 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.events.EventPickerActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -53,6 +56,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
 import static in.lubble.app.utils.FileUtils.*;
@@ -992,6 +996,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                 } else if (!TextUtils.isEmpty(groupId)) {
                     messagesReference.push().setValue(chatData);
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("group_id", groupId);
+                    Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
                 } else if (!TextUtils.isEmpty(dmId)) {
                     messagesReference.push().setValue(chatData);
                 }
@@ -1015,7 +1022,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
                 break;
             case R.id.btn_join:
-                if (!TextUtils.isEmpty(groupData.getQuestion())) {
+                if (!TextUtils.isEmpty(groupData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)) {
 
                     final GroupQuesBottomSheetDialogFrag groupQuesBottomSheetDialogFrag = GroupQuesBottomSheetDialogFrag.newInstance(groupId);
                     groupQuesBottomSheetDialogFrag.setTargetFragment(this, REQUEST_CODE_QUES);

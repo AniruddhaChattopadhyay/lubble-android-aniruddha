@@ -18,12 +18,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.utils.ChatUtils;
-import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.UiUtils;
 
 import static android.app.Activity.RESULT_OK;
@@ -114,6 +114,9 @@ public class GroupQuesBottomSheetDialogFrag extends BottomSheetDialogFragment {
             }
         }, 1000);
         answerEt.requestFocus();
+        final Bundle bundle = new Bundle();
+        bundle.putString("group_id", groupId);
+        Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_SHOWN, bundle, getContext());
     }
 
     private void sendAnswer() {
@@ -126,7 +129,9 @@ public class GroupQuesBottomSheetDialogFrag extends BottomSheetDialogFragment {
         RealtimeDbHelper.getUserGroupsRef().child(groupId).child("unreadCount").setValue(0);
 
         deleteUnreadMsgsForGroupId(groupId, requireContext());
-        NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_REPLIED, groupId, requireContext());
+        final Bundle bundle = new Bundle();
+        bundle.putString("group_id", groupId);
+        Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_ANSWERED, bundle, getContext());
     }
 
 }

@@ -72,4 +72,8 @@ public class AnalyticsEvents {
     public static final String QUIZ_SHARE_CLICKED = "QUIZ_SHARE_CLICKED";
     public static final String QUIZ_PIC_SAVE_CLICKED = "QUIZ_PIC_SAVE_CLICKED";
 
+    public static final String SEND_GROUP_CHAT = "SEND_GROUP_CHAT";
+    public static final String GROUP_QUES_SHOWN = "GROUP_QUES_SHOWN";
+    public static final String GROUP_QUES_ANSWERED = "GROUP_QUES_ANSWERED";
+
 }

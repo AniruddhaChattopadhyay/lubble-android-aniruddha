@@ -278,6 +278,7 @@ public class MainActivity extends BaseActivity {
         map.put(REFER_MSG, getString(R.string.refer_msg));
         map.put(IS_QUIZ_SHOWN, true);
         map.put(QUIZ_RESULT_UI, "normal");
+        map.put(GROUP_QUES_ENABLED, true);
         firebaseRemoteConfig.setDefaults(map);
     }
 
