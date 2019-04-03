@@ -106,6 +106,8 @@ public class LocationActivity extends BaseActivity {
         hiNameTv = findViewById(R.id.tv_hi_name);
         phoneProgressBar = findViewById(R.id.progressbar_phone_reg);
 
+        Analytics.triggerScreenEvent(this, this.getClass());
+
         shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
