@@ -197,8 +197,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <!-- ... -->
-    <string name="facebook_application_id" translatable="false">435995540485180</string>
+    <string name="facebook_application_id" translatable="false">2413591255319136</string>
     <!-- Facebook Application ID, prefixed by 'fb'. Enables Chrome Custom tabs. -->
-    <string name="facebook_login_protocol_scheme" translatable="false">fb435995540485180</string>
+    <string name="facebook_login_protocol_scheme" translatable="false">fb2413591255319136</string>
 
 </resources>
