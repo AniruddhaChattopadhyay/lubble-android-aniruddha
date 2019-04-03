@@ -15,7 +15,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import com.bumptech.glide.signature.ObjectKey;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
@@ -111,7 +110,7 @@ public class ProfilePicFrag extends Fragment {
 
     private void startMain() {
         Analytics.triggerSignUpEvent(getContext());
-        startActivity(MainActivity.createIntent(getContext(), ((IdpResponse) idpResponse)));
+        startActivity(MainActivity.createIntent(getContext(), true));
         getActivity().finishAffinity();
     }
 

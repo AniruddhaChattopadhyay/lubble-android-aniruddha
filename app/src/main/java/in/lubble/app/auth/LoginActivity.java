@@ -39,6 +39,7 @@ import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.utils.FragUtils.addFrag;
+import static in.lubble.app.utils.UserUtils.isNewUser;
 
 public class LoginActivity extends BaseActivity {
 
@@ -61,9 +62,7 @@ public class LoginActivity extends BaseActivity {
         LubbleSharedPrefs.getInstance().setIsLogoutPending(false);
         LubbleSharedPrefs.getInstance().setLubbleId("");
         if (firebaseAuth.getCurrentUser() != null) {
-            final Intent intent = new Intent(LoginActivity.this, LocationActivity.class);
-            //intent.putExtra("idpResponse", response);
-            startActivityForResult(intent, REQUEST_LOCATION);
+            startSignInFlow(isNewUser(firebaseAuth.getCurrentUser()));
         } else {
             startAuthActivity();
             if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
@@ -159,45 +158,15 @@ public class LoginActivity extends BaseActivity {
                     } else if (currentUser.getProviders().get(0).equals(GoogleAuthProvider.PROVIDER_ID)) {
                         registerSocialUser(response, currentUser, "?sz=300");
                     } else if (currentUser.getProviders().get(0).equals(PhoneAuthProvider.PROVIDER_ID)) {
-                        NameFrag nameFrag = NameFrag.newInstance(response);
+                        NameFrag nameFrag = NameFrag.newInstance();
                         addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
                     } else if (currentUser.getProviders().get(0).equals(EmailAuthProvider.PROVIDER_ID)) {
                         registerSocialUser(response, currentUser, "");
                     }
                 } else {
                     // start signin flow: fetch lubble ID
-                    final ProgressDialog progressDialog = new ProgressDialog(this);
-                    progressDialog.setTitle(getString(R.string.signing_in));
-                    progressDialog.setMessage(getString(R.string.all_please_wait));
-                    progressDialog.setCancelable(false);
-                    progressDialog.show();
-                    RealtimeDbHelper.getThisUserRef().child("lubbles").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                            progressDialog.dismiss();
-                            if (map != null && !map.isEmpty()) {
-                                // fetch & set lubble ID before login
-                                LubbleSharedPrefs.getInstance().setLubbleId((String) map.keySet().toArray()[0]);
-                                Analytics.triggerLoginEvent(LoginActivity.this);
-                                startActivity(MainActivity.createIntent(LoginActivity.this, response));
-                                finish();
-                            } else {
-                                final Intent intent = new Intent(LoginActivity.this, LocationActivity.class);
-                                intent.putExtra("idpResponse", response);
-                                startActivityForResult(intent, REQUEST_LOCATION);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            progressDialog.dismiss();
-                            Toast.makeText(LoginActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                            Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
-                        }
-                    });
+                    startSignInFlow(response.isNewUser());
                 }
-                return;
             } else {
                 // Sign in failed
                 if (response == null) {
@@ -207,19 +176,16 @@ public class LoginActivity extends BaseActivity {
                 }
 
                 if (response.getError() != null && response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
-                    showSnackbar(R.string.no_internet_connection);
+                    Toast.makeText(this, R.string.check_internet, Toast.LENGTH_SHORT).show();
                     startAuthActivity();
                     return;
                 }
-
-                showSnackbar(R.string.unknown_error);
+                Toast.makeText(this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                startAuthActivity();
             }
         } else if (requestCode == REQUEST_LOCATION) {
             if (resultCode == Activity.RESULT_OK && data != null) {
-                LubbleChooserFrag lubbleChooserFrag = LubbleChooserFrag.newInstance(
-                        data.getParcelableExtra("idpResponse"),
-                        (ArrayList<LocationsData>) data.getSerializableExtra("lubbleDataList")
-                );
+                LubbleChooserFrag lubbleChooserFrag = LubbleChooserFrag.newInstance((ArrayList<LocationsData>) data.getSerializableExtra("lubbleDataList"));
                 addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, lubbleChooserFrag);
                 /*UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
                 addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);*/
@@ -229,6 +195,43 @@ public class LoginActivity extends BaseActivity {
         } else {
             finish();
         }
+    }
+
+    private void startSignInFlow(final boolean isNewUser) {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle(getString(R.string.signing_in));
+        progressDialog.setMessage(getString(R.string.all_please_wait));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        RealtimeDbHelper.getThisUserRef().child("lubbles").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
+                progressDialog.dismiss();
+                if (map != null && !map.isEmpty()) {
+                    // fetch & set lubble ID before login
+                    LubbleSharedPrefs.getInstance().setLubbleId((String) map.keySet().toArray()[0]);
+                    Analytics.triggerLoginEvent(LoginActivity.this);
+                    startActivity(MainActivity.createIntent(LoginActivity.this, isNewUser));
+                    finish();
+                } else {
+                    if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getDisplayName())) {
+                        final Intent intent = new Intent(LoginActivity.this, LocationActivity.class);
+                        startActivityForResult(intent, REQUEST_LOCATION);
+                    } else {
+                        NameFrag nameFrag = NameFrag.newInstance();
+                        addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                progressDialog.dismiss();
+                Toast.makeText(LoginActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
+            }
+        });
     }
 
     private void registerSocialUser(final IdpResponse response, FirebaseUser currentUser, String bigPicString) {

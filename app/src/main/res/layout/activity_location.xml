@@ -28,7 +28,7 @@
             android:textColor="@color/link_blue" />
 
         <TextView
-            android:id="@+id/tv_hi"
+            android:id="@+id/tv_hi_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
@@ -43,7 +43,7 @@
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tv_hi"
+            android:layout_below="@id/tv_hi_name"
             android:text="We are not open in your\nneighbourhood yet 😢"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             android:textColor="@color/dk_colorAccent"

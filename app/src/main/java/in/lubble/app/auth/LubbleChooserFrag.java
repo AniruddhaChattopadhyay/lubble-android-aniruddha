@@ -3,7 +3,6 @@ package in.lubble.app.auth;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import com.crashlytics.android.Crashlytics;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -52,12 +50,10 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "LubbleChooserFrag";
 
-    private static final String ARG_IDP_RESPONSE = "ARG_IDP_RESPONSE";
     private static final String ARG_LOCATION_DATA = "ARG_LOCATION_DATA";
 
     static final int REQUEST_CODE_CHOOSE = 665;
 
-    private Parcelable idpResponse;
     private ArrayList<LocationsData> locationsDataList;
     private LocationsData chosenLubbleData;
     private TextView lubbleNameTv;
@@ -69,10 +65,9 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
         // Required empty public constructor
     }
 
-    public static LubbleChooserFrag newInstance(Parcelable idpResponse, ArrayList<LocationsData> locationsDataList) {
+    public static LubbleChooserFrag newInstance(ArrayList<LocationsData> locationsDataList) {
         LubbleChooserFrag fragment = new LubbleChooserFrag();
         Bundle args = new Bundle();
-        args.putParcelable(ARG_IDP_RESPONSE, idpResponse);
         args.putSerializable(ARG_LOCATION_DATA, locationsDataList);
         fragment.setArguments(args);
         return fragment;
@@ -82,7 +77,6 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            idpResponse = getArguments().getParcelable(ARG_IDP_RESPONSE);
             this.locationsDataList = (ArrayList<LocationsData>) getArguments().getSerializable(ARG_LOCATION_DATA);
             chosenLubbleData = locationsDataList.get(0);
         }
@@ -188,7 +182,7 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
                         Log.d(TAG, "onResponse: ");
                         progressDialog.dismiss();
                         Analytics.triggerSignUpEvent(getContext());
-                        startActivity(MainActivity.createIntent(getContext(), ((IdpResponse) idpResponse)));
+                        startActivity(MainActivity.createIntent(getContext(), true));
                         getActivity().finishAffinity();
                     } else if (isAdded() && isVisible()) {
                         Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();

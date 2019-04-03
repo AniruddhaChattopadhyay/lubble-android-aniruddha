@@ -11,6 +11,8 @@ import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.FirebaseUserMetadata;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -24,6 +26,14 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
  */
 
 public class UserUtils {
+
+    public static boolean isNewUser(FirebaseUser currentUser) {
+        FirebaseUserMetadata metadata = currentUser.getMetadata();
+        return (metadata != null &&
+                (metadata.getCreationTimestamp() <= metadata.getLastSignInTimestamp() + 100
+                        || metadata.getCreationTimestamp() >= metadata.getLastSignInTimestamp() - 100)
+        );
+    }
 
     public static void logout(@NonNull final FragmentActivity activity) {
         final ProgressDialog progressDialog = new ProgressDialog(activity);

@@ -13,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -45,6 +44,7 @@ import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.LocationUtils;
 import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -83,7 +83,6 @@ public class LocationActivity extends BaseActivity {
     private ProgressBar phoneProgressBar;
     private LinearLayout shareContainer;
     private LinearLayout phoneContainer;
-    private Parcelable idpResponse;
     private Location currLocation;
     private int retryCount = 0;
     private String sharingUrl;
@@ -104,10 +103,8 @@ public class LocationActivity extends BaseActivity {
         phoneEt = findViewById(R.id.et_register_phone);
         phoneBtn = findViewById(R.id.btn_register_phone);
         logoutTv = findViewById(R.id.tv_logout);
-        hiNameTv = findViewById(R.id.tv_hi);
+        hiNameTv = findViewById(R.id.tv_hi_name);
         phoneProgressBar = findViewById(R.id.progressbar_phone_reg);
-
-        idpResponse = getIntent().getParcelableExtra("idpResponse");
 
         shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,6 +155,7 @@ public class LocationActivity extends BaseActivity {
                     getThisUserRef().child("phone").setValue(phoneEt.getText().toString());
                     shareContainer.setVisibility(View.VISIBLE);
                     phoneContainer.setVisibility(View.GONE);
+                    UiUtils.hideKeyboard(LocationActivity.this);
                 } else {
                     Toast.makeText(LocationActivity.this, "Please enter correct Phone Number, no country code", Toast.LENGTH_SHORT).show();
                     Animation shake = AnimationUtils.loadAnimation(LocationActivity.this, R.anim.shake);
@@ -438,7 +436,6 @@ public class LocationActivity extends BaseActivity {
 
     private void locationCheckSuccess(ArrayList<LocationsData> locationsData) {
         Intent intent = new Intent();
-        intent.putExtra("idpResponse", idpResponse);
         intent.putExtra("lubbleDataList", locationsData);
         setResult(RESULT_OK, intent);
         finish();

@@ -21,7 +21,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.crashlytics.android.Crashlytics;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
@@ -50,7 +49,6 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.services.ServicesFrag;
-import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -69,7 +67,7 @@ import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 public class MainActivity extends BaseActivity {
 
     private static final String TAG = "MainActivity";
-    private static final String EXTRA_IDP_RESPONSE = "extra_idp_response";
+    private static final String IS_NEW_USER_IN_THIS_LUBBLE = "IS_NEW_USER_IN_THIS_LUBBLE";
 
     public static final String EXTRA_TAB_NAME = "extra_tab_name";
 
@@ -83,13 +81,11 @@ public class MainActivity extends BaseActivity {
     private ValueEventListener dpEventListener;
     private BottomNavigationView bottomNavigation;
     private boolean isActive;
-    private boolean isNewUser;
+    private boolean isNewUserInThisLubble;
 
-    public static Intent createIntent(Context context, IdpResponse idpResponse) {
+    public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
-        if (idpResponse != null) {
-            startIntent.putExtra(EXTRA_IDP_RESPONSE, idpResponse);
-        }
+        startIntent.putExtra(IS_NEW_USER_IN_THIS_LUBBLE, isNewUserInThisLubble);
         return startIntent;
     }
 
@@ -115,7 +111,7 @@ public class MainActivity extends BaseActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
-        if (currentUser == null || !StringUtils.isValidString(LubbleSharedPrefs.getInstance().getLubbleId())) {
+        if (currentUser == null || TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
             // user is not signed in, start login flow
             startActivity(new Intent(this, LoginActivity.class));
             finish();
@@ -132,7 +128,8 @@ public class MainActivity extends BaseActivity {
                 .circleCrop()
                 .into(profileIcon);
 
-        isNewUser = getIntent().hasExtra(EXTRA_IDP_RESPONSE) && ((IdpResponse) getIntent().getParcelableExtra(EXTRA_IDP_RESPONSE)).isNewUser();
+        //used to determine whether to show explore dialog or not
+        isNewUserInThisLubble = getIntent().hasExtra(IS_NEW_USER_IN_THIS_LUBBLE) && getIntent().getBooleanExtra(IS_NEW_USER_IN_THIS_LUBBLE, false);
 
         if (!TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
             initEverything();
@@ -231,7 +228,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void handleExploreActivity() {
-        if (isNewUser) {
+        if (isNewUserInThisLubble) {
             // new signup
             ExploreActiv.open(this, true);
         } else {
@@ -287,7 +284,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void showBottomNavBadge() {
-        if (!isNewUser) {
+        if (!isNewUserInThisLubble) {
             if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
                 BottomNavigationMenuView bottomNavigationMenuView =
                         (BottomNavigationMenuView) bottomNavigation.getChildAt(0);

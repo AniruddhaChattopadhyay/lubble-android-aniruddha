@@ -3,8 +3,6 @@ package in.lubble.app.auth;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +12,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import com.crashlytics.android.Crashlytics;
-import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;
@@ -43,10 +42,9 @@ public class NameFrag extends Fragment {
         // Required empty public constructor
     }
 
-    public static NameFrag newInstance(IdpResponse response) {
+    public static NameFrag newInstance() {
         NameFrag fragment = new NameFrag();
         Bundle args = new Bundle();
-        args.putParcelable("idpResponse", response);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,8 +68,6 @@ public class NameFrag extends Fragment {
         continueBtn = rootView.findViewById(R.id.btn_continue);
 
         Analytics.triggerScreenEvent(getContext(), this.getClass());
-
-        final Parcelable idpResponse = getArguments().getParcelable("idpResponse");
 
         if (TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getReferrerUid())) {
             referralCodeTil.setVisibility(View.VISIBLE);
@@ -98,54 +94,51 @@ public class NameFrag extends Fragment {
                             .setDisplayName(fullNameStr)
                             .build();
 
-                    FirebaseAuth.getInstance().getCurrentUser().updateProfile(profileUpdates);
-
-                    final ProfileData profileData = new ProfileData();
-                    final ProfileInfo profileInfo = new ProfileInfo();
-                    profileInfo.setId(FirebaseAuth.getInstance().getUid());
-                    profileInfo.setName(fullNameStr);
-                    profileData.setInfo(profileInfo);
-                    profileData.setToken(FirebaseInstanceId.getInstance().getToken());
-                    profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
-
-                    getThisUserRef().setValue(profileData)
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    if (isAdded() && isVisible()) {
-                                        progressDialog.dismiss();
-                                        final Intent intent = new Intent(getContext(), LocationActivity.class);
-                                        intent.putExtra("idpResponse", idpResponse);
-                                        getActivity().startActivityForResult(intent, REQUEST_LOCATION);
-                                    }
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    // Write failed
-                                    if (isAdded() && isVisible()) {
-                                        progressDialog.dismiss();
-                                        Crashlytics.log("OMG Failed to write profile info inside NameFrag");
-                                        Crashlytics.logException(e);
-                                        if (isAdded() && isVisible()) {
-                                            Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                }
-                            });
-
-                    new Handler().postDelayed(new Runnable() {
+                    FirebaseAuth.getInstance().getCurrentUser().updateProfile(profileUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
-                        public void run() {
-                            if (isAdded() && isVisible() && getContext() != null) {
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                final ProfileData profileData = new ProfileData();
+                                final ProfileInfo profileInfo = new ProfileInfo();
+                                profileInfo.setId(FirebaseAuth.getInstance().getUid());
+                                profileInfo.setName(fullNameStr);
+                                profileData.setInfo(profileInfo);
+                                profileData.setToken(FirebaseInstanceId.getInstance().getToken());
+                                profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
+
+                                getThisUserRef().setValue(profileData)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                if (isAdded() && isVisible()) {
+                                                    progressDialog.dismiss();
+                                                    final Intent intent = new Intent(getContext(), LocationActivity.class);
+                                                    getActivity().startActivityForResult(intent, REQUEST_LOCATION);
+                                                }
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                // Write failed
+                                                if (isAdded() && isVisible()) {
+                                                    progressDialog.dismiss();
+                                                    Crashlytics.log("OMG Failed to write profile info inside NameFrag");
+                                                    Crashlytics.logException(e);
+                                                    if (isAdded() && isVisible()) {
+                                                        Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            }
+                                        });
+                            } else {
                                 if (progressDialog != null) {
                                     progressDialog.dismiss();
                                 }
-                                Toast.makeText(requireContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                             }
                         }
-                    }, 7000);
+                    });
                 }
             }
         });
