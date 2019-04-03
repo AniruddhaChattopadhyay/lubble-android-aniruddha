@@ -39,6 +39,7 @@ import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.utils.FragUtils.addFrag;
+import static in.lubble.app.utils.FragUtils.replaceStack;
 import static in.lubble.app.utils.UserUtils.isNewUser;
 
 public class LoginActivity extends BaseActivity {
@@ -186,7 +187,7 @@ public class LoginActivity extends BaseActivity {
         } else if (requestCode == REQUEST_LOCATION) {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 LubbleChooserFrag lubbleChooserFrag = LubbleChooserFrag.newInstance((ArrayList<LocationsData>) data.getSerializableExtra("lubbleDataList"));
-                addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, lubbleChooserFrag);
+                replaceStack(LoginActivity.this, lubbleChooserFrag, R.id.frame_fragContainer);
                 /*UserNameFrag userNameFrag = UserNameFrag.newInstance(data.getParcelableExtra("idpResponse"));
                 addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, userNameFrag);*/
             } else {

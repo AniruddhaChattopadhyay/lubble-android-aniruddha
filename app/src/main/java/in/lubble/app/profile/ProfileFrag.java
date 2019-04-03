@@ -374,6 +374,9 @@ public class ProfileFrag extends Fragment {
                     GlideApp.with(getContext())
                             .load(profileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
+                            .apply(new RequestOptions()
+                                    .placeholder(R.color.light_gray)
+                                    .dontAnimate().skipMemoryCache(true))
                             .listener(new RequestListener<Drawable>() {
                                 @Override
                                 public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
