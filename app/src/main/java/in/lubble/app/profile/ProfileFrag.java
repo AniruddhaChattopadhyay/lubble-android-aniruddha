@@ -375,7 +375,7 @@ public class ProfileFrag extends Fragment {
                             .load(profileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .apply(new RequestOptions()
-                                    .placeholder(R.color.light_gray)
+                                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
                                     .dontAnimate().skipMemoryCache(true))
                             .listener(new RequestListener<Drawable>() {
                                 @Override
