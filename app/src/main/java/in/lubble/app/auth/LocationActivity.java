@@ -157,6 +157,7 @@ public class LocationActivity extends BaseActivity {
                     getThisUserRef().child("phone").setValue(phoneEt.getText().toString());
                     shareContainer.setVisibility(View.VISIBLE);
                     phoneContainer.setVisibility(View.GONE);
+                    Analytics.triggerEvent(AnalyticsEvents.LOC_FAIL_PHONE_SUBMIT, LocationActivity.this);
                     UiUtils.hideKeyboard(LocationActivity.this);
                 } else {
                     Toast.makeText(LocationActivity.this, "Please enter correct Phone Number, no country code", Toast.LENGTH_SHORT).show();

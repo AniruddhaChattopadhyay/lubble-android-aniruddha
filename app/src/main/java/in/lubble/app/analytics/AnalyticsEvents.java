@@ -75,5 +75,6 @@ public class AnalyticsEvents {
     public static final String SEND_GROUP_CHAT = "SEND_GROUP_CHAT";
     public static final String GROUP_QUES_SHOWN = "GROUP_QUES_SHOWN";
     public static final String GROUP_QUES_ANSWERED = "GROUP_QUES_ANSWERED";
+    public static final String LOC_FAIL_PHONE_SUBMIT = "LOC_FAIL_PHONE_SUBMIT";
 
 }
