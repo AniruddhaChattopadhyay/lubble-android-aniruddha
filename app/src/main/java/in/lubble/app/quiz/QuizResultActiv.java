@@ -53,7 +53,6 @@ import java.io.File;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
 import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.shareScreenshotWithPermissionCheck;
-import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.ALL;
 
 @RuntimePermissions
@@ -323,8 +322,6 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
 
     @OnShowRationale(Manifest.permission.ACCESS_FINE_LOCATION)
     void showRationaleForExtStorage(final PermissionRequest request) {
-
-        showStoragePermRationale(this, request);
 
         final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
         alertDialog.setMessage(getString(R.string.loc_perm_rationale));
