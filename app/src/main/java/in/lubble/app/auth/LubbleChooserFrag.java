@@ -39,6 +39,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.MEDIA_TYPE;
@@ -132,7 +134,6 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
                 getUserLubbleRef().setValue("true");
                 getThisUserRef().child("coins").setValue(100);
 
-
                 final String referrerUid = LubbleSharedPrefs.getInstance().getReferrerUid();
 
                 Log.d(TAG, "join click, referred uid: " + referrerUid);
@@ -146,7 +147,9 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
                                 return Transaction.success(mutableData);
                             }
                             // Set value and report transaction success
-                            mutableData.child("coins").setValue(profileData.getCoins() + 100);
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put("coins", profileData.getCoins() + 100);
+                            getUserRef(referrerUid).updateChildren(childUpdates);
                             return Transaction.success(mutableData);
                         }
 
