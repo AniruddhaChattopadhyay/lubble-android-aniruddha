@@ -226,7 +226,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/bottom_container"
         android:layout_below="@id/progressbar_pagination"
-        android:layout_marginBottom="0dp">
+        android:layout_marginBottom="0dp"
+        android:clipToPadding="true">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_chat"
@@ -235,6 +236,8 @@
             android:layout_above="@id/bottom_container"
             android:layout_below="@id/progressbar_pagination"
             android:layout_marginBottom="4dp"
+            android:clipToPadding="false"
+            android:paddingBottom="48dp"
             android:visibility="invisible"
             tools:listitem="@layout/item_recvd_chat"
             tools:visibility="visible" />

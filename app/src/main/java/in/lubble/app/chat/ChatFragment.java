@@ -338,7 +338,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     public void onAnimationStart(Animator animation) {
                         introPromptContainer.setVisibility(View.VISIBLE);
                         bunnyHandsIv.setVisibility(View.GONE);
-                        chatAdapter.toggleFooter();
+                        chatRecyclerView.setPadding(0, 0, 0, 0);
                     }
 
                     @Override
@@ -771,7 +771,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 @Override
                 public void onAnimationStart(Animation animation) {
                     introPromptContainer.setVisibility(View.VISIBLE);
-                    chatAdapter.toggleFooter();
+                    chatRecyclerView.setPadding(0, 0, 0, dpToPx(48));
                 }
 
                 @Override
@@ -1009,6 +1009,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         switch (view.getId()) {
             case R.id.iv_send_btn:
 
+                if (introPromptContainer.getVisibility() == View.VISIBLE) {
+                    hideIntroPrompt();
+                    Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_ANSWERED, getContext());
+                }
+
                 final ChatData chatData = new ChatData();
                 chatData.setAuthorUid(authorId);
                 chatData.setAuthorIsSeller(isCurrUserSeller);
@@ -1081,10 +1086,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 attachedEventId = null;
                 if (linkMetaAsyncTask != null) {
                     linkMetaAsyncTask.cancel(true);
-                }
-                if (introPromptContainer.getVisibility() == View.VISIBLE) {
-                    hideIntroPrompt();
-                    Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_ANSWERED, getContext());
                 }
                 break;
             case R.id.iv_attach:
