@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -156,6 +157,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedGroupPicUrl;
     private String attachedEventPicUrl;
     private Uri sharedImageUri;
+    private ConstraintLayout introPromptContainer;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -262,6 +264,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         sendBtnProgressBtn = view.findViewById(R.id.progress_bar_send);
         chatProgressBar = view.findViewById(R.id.progressbar_chat);
         paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
+        introPromptContainer = view.findViewById(R.id.container_intro_prompt);
 
         groupMembersMap = new HashMap<>();
 
