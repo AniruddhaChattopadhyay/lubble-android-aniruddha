@@ -78,6 +78,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private static final int TYPE_SENT = 1;
     private static final int TYPE_SYSTEM = 2;
     private static final int TYPE_UNREAD = 3;
+    private static final int TYPE_FOOTER = 4;
 
     private Activity activity;
     private Context context;
@@ -115,10 +116,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
         this.dmId = dmId;
     }
 
+    public void toggleFooter() {
+        final int lastIndex = chatDataList.size() - 1;
+        if (chatDataList.get(lastIndex).getType().equalsIgnoreCase(FOOTER)) {
+            chatDataList.remove(chatDataList.size() - 1);
+            notifyItemRemoved(lastIndex);
+        } else {
+            final ChatData dateChatData = new ChatData();
+            dateChatData.setType(FOOTER);
+            addChatData(dateChatData);
+        }
+    }
+
     @Override
     public int getItemViewType(int position) {
         final ChatData chatData = chatDataList.get(position);
-        if (isValidString(chatData.getType()) && chatData.getType().equalsIgnoreCase(SYSTEM)) {
+        if (chatData.getType().equalsIgnoreCase(FOOTER)) {
+            return TYPE_FOOTER;
+        } else if (isValidString(chatData.getType()) && chatData.getType().equalsIgnoreCase(SYSTEM)) {
             return TYPE_SYSTEM;
         } else if (isValidString(chatData.getType()) && chatData.getType().equalsIgnoreCase(UNREAD)) {
             return TYPE_UNREAD;
@@ -140,6 +155,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 return new SystemChatViewHolder(LayoutInflater.from(context).inflate(R.layout.item_system, parent, false));
             case TYPE_UNREAD:
                 return new UnreadChatViewHolder(LayoutInflater.from(context).inflate(R.layout.item_unread, parent, false));
+            case TYPE_FOOTER:
+                return new FooterViewHolder(LayoutInflater.from(context).inflate(R.layout.item_footer, parent, false));
             default:
                 return new RecvdChatViewHolder(LayoutInflater.from(context).inflate(R.layout.item_recvd_chat, parent, false));
         }
@@ -152,6 +169,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else if (holder instanceof SystemChatViewHolder) {
             bindSystemViewHolder(holder, position);
         } else if (holder instanceof UnreadChatViewHolder) {
+            // no data to bind to any view
+        } else if (holder instanceof FooterViewHolder) {
             // no data to bind to any view
         } else {
             bindRecvdChatViewHolder(holder, position);
@@ -1511,6 +1530,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class UnreadChatViewHolder extends RecyclerView.ViewHolder {
 
         UnreadChatViewHolder(View itemView) {
+            super(itemView);
+        }
+    }
+
+    public class FooterViewHolder extends RecyclerView.ViewHolder {
+
+        FooterViewHolder(View itemView) {
             super(itemView);
         }
     }

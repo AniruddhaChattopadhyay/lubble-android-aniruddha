@@ -23,6 +23,7 @@ public class ChatData implements Serializable {
     public static final String POLL = "POLL";
     public static final String GROUP = "GROUP";
     public static final String EVENT = "EVENT";
+    public static final String FOOTER = "FOOTER";
 
     private String id;
     private String authorUid;

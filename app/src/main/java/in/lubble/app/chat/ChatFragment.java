@@ -329,6 +329,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             public void onAnimationStart(Animator animation) {
                                 introPromptContainer.setVisibility(View.VISIBLE);
                                 bunnyHandsIv.setVisibility(View.GONE);
+                                chatAdapter.toggleFooter();
                             }
 
                             @Override
@@ -767,6 +768,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 @Override
                 public void onAnimationStart(Animation animation) {
                     introPromptContainer.setVisibility(View.VISIBLE);
+                    chatAdapter.toggleFooter();
                 }
 
                 @Override
