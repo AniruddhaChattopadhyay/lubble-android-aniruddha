@@ -318,31 +318,34 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         introPromptCloseIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getUserGroupsRef().child(groupId).child("isIntroPromptDismissed").setValue(true);
-                introPromptContainer.animate()
-                        .translationY(view.getHeight())
-                        .setInterpolator(new FastOutSlowInInterpolator())
-                        .setDuration(200)
-                        .setListener(new AnimatorListenerAdapter() {
-
-                            @Override
-                            public void onAnimationStart(Animator animation) {
-                                introPromptContainer.setVisibility(View.VISIBLE);
-                                bunnyHandsIv.setVisibility(View.GONE);
-                                chatAdapter.toggleFooter();
-                            }
-
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                introPromptContainer.setVisibility(View.GONE);
-                            }
-                        });
-
+                hideIntroPrompt();
                 Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_DISMISSED, getContext());
             }
         });
 
         return view;
+    }
+
+    private void hideIntroPrompt() {
+        getUserGroupsRef().child(groupId).child("isIntroPromptDismissed").setValue(true);
+        introPromptContainer.animate()
+                .translationY(introPromptContainer.getHeight())
+                .setInterpolator(new FastOutSlowInInterpolator())
+                .setDuration(200)
+                .setListener(new AnimatorListenerAdapter() {
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        introPromptContainer.setVisibility(View.VISIBLE);
+                        bunnyHandsIv.setVisibility(View.GONE);
+                        chatAdapter.toggleFooter();
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        introPromptContainer.setVisibility(View.GONE);
+                    }
+                });
     }
 
     private void showJoiningDialog() {
@@ -1078,6 +1081,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 attachedEventId = null;
                 if (linkMetaAsyncTask != null) {
                     linkMetaAsyncTask.cancel(true);
+                }
+                if (introPromptContainer.getVisibility() == View.VISIBLE) {
+                    hideIntroPrompt();
+                    Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_ANSWERED, getContext());
                 }
                 break;
             case R.id.iv_attach:
