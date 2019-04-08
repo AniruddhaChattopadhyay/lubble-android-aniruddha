@@ -19,7 +19,6 @@ public class GroupData {
     private String title;
     private String description;
     private String question;
-    private String questionChatId;
     private boolean isPrivate;
     private HashMap<String, Object> members = new HashMap<>();
     private String lastMessage;
@@ -163,11 +162,4 @@ public class GroupData {
         this.question = question;
     }
 
-    public String getQuestionChatId() {
-        return questionChatId;
-    }
-
-    public void setQuestionChatId(String questionChatId) {
-        this.questionChatId = questionChatId;
-    }
 }

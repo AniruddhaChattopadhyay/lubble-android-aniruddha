@@ -1,6 +1,8 @@
 package in.lubble.app.chat;
 
 import android.Manifest;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +15,8 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
@@ -22,6 +26,7 @@ import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
@@ -29,7 +34,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
@@ -57,7 +61,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
 import static in.lubble.app.utils.FileUtils.*;
@@ -75,7 +78,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final int REQUEST_CODE_IMG = 789;
     private static final int REQUEST_CODE_GROUP_PICK = 917;
     private static final int REQUEST_CODE_EVENT_PICK = 922;
-    private static final int REQUEST_CODE_QUES = 198;
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
     private static final String KEY_MSG_ID = "CHAT_MSG_ID";
     private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
@@ -158,6 +160,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedEventPicUrl;
     private Uri sharedImageUri;
     private ConstraintLayout introPromptContainer;
+    private ImageView introPromptCloseIv;
+    private ImageView bunnyHandsIv;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -265,6 +269,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         chatProgressBar = view.findViewById(R.id.progressbar_chat);
         paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
         introPromptContainer = view.findViewById(R.id.container_intro_prompt);
+        introPromptCloseIv = view.findViewById(R.id.iv_intro_prompt_close);
+        bunnyHandsIv = view.findViewById(R.id.iv_bunny_hands);
 
         groupMembersMap = new HashMap<>();
 
@@ -308,6 +314,32 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (chatData != null) {
             populateChatData(chatData);
         }
+
+        introPromptCloseIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getUserGroupsRef().child(groupId).child("isIntroPromptDismissed").setValue(true);
+                introPromptContainer.animate()
+                        .translationY(view.getHeight())
+                        .setInterpolator(new FastOutSlowInInterpolator())
+                        .setDuration(200)
+                        .setListener(new AnimatorListenerAdapter() {
+
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                                introPromptContainer.setVisibility(View.VISIBLE);
+                                bunnyHandsIv.setVisibility(View.GONE);
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                introPromptContainer.setVisibility(View.GONE);
+                            }
+                        });
+
+                Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_DISMISSED, getContext());
+            }
+        });
 
         return view;
     }
@@ -680,6 +712,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         joiningProgressDialog.dismiss();
                         isJoining = false;
                     }
+                    final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                    showIntroPrompt(userGroupData);
                 } else {
                     final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                     if (userGroupData != null && userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
@@ -721,6 +755,34 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             }
         });
+    }
+
+    private void showIntroPrompt(UserGroupData userGroupData) {
+        if (groupData != null && !TextUtils.isEmpty(groupData.getQuestion()) && !userGroupData.getIsIntroPromptDismissed()) {
+            final TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, dpToPx(48), 0);
+            translateAnimation.setDuration(200);
+            translateAnimation.setInterpolator(new FastOutSlowInInterpolator());
+            translateAnimation.setAnimationListener(new Animation.AnimationListener() {
+
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    introPromptContainer.setVisibility(View.VISIBLE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+
+            });
+            introPromptContainer.startAnimation(translateAnimation);
+            bunnyHandsIv.setVisibility(View.VISIBLE);
+            final TextView msgTv = introPromptContainer.findViewById(R.id.tv_intro_prompt);
+            msgTv.setText(groupData.getQuestion());
+        }
     }
 
     private void showPublicGroupWarning() {
@@ -1025,16 +1087,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
                 break;
             case R.id.btn_join:
-                if (!TextUtils.isEmpty(groupData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)) {
-
-                    final GroupQuesBottomSheetDialogFrag groupQuesBottomSheetDialogFrag = GroupQuesBottomSheetDialogFrag.newInstance(groupId);
-                    groupQuesBottomSheetDialogFrag.setTargetFragment(this, REQUEST_CODE_QUES);
-                    groupQuesBottomSheetDialogFrag.show(getFragmentManager(), null);
-                } else {
-                    getCreateOrJoinGroupRef().child(groupId).setValue(true);
-                    isJoining = true;
-                    showJoiningDialog();
-                }
+                getCreateOrJoinGroupRef().child(groupId).setValue(true);
+                isJoining = true;
+                showJoiningDialog();
                 break;
             case R.id.iv_decline_cross:
                 RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -1097,11 +1152,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 attachedEventId = chosenEventId;
                 fetchAndShowAttachedEventInfo();
             }
-        } else if (requestCode == REQUEST_CODE_QUES && resultCode == RESULT_OK) {
-            getCreateOrJoinGroupRef().child(groupId).setValue(true);
-            isJoining = true;
-            showJoiningDialog();
-            syncGroupInfo();
         }
     }
 

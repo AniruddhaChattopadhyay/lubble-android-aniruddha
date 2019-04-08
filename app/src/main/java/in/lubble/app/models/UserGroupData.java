@@ -13,6 +13,7 @@ public class UserGroupData {
     private HashMap<String, Boolean> invitedBy;
     private HashMap<String, Boolean> invitees;
     private long invitedTimeStamp;
+    private boolean isIntroPromptDismissed;
 
     public long getUnreadCount() {
         return unreadCount;
@@ -52,5 +53,13 @@ public class UserGroupData {
 
     public void setInvitedTimeStamp(long invitedTimeStamp) {
         this.invitedTimeStamp = invitedTimeStamp;
+    }
+
+    public boolean getIsIntroPromptDismissed() {
+        return isIntroPromptDismissed;
+    }
+
+    public void setIsIntroPromptDismissed(boolean introPromptDismissed) {
+        isIntroPromptDismissed = introPromptDismissed;
     }
 }

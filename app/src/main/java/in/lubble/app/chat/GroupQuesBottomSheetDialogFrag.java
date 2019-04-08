@@ -79,7 +79,6 @@ public class GroupQuesBottomSheetDialogFrag extends BottomSheetDialogFragment {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         final GroupData groupData = dataSnapshot.getValue(GroupData.class);
                         questionTv.setText(groupData.getQuestion());
-                        replyMsgId = groupData.getQuestionChatId();
                         GlideApp.with(GroupQuesBottomSheetDialogFrag.this)
                                 .load(groupData.getProfilePic())
                                 .placeholder(R.drawable.circle)

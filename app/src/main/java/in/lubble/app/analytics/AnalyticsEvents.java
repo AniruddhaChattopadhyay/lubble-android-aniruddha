@@ -77,4 +77,6 @@ public class AnalyticsEvents {
     public static final String GROUP_QUES_ANSWERED = "GROUP_QUES_ANSWERED";
     public static final String LOC_FAIL_PHONE_SUBMIT = "LOC_FAIL_PHONE_SUBMIT";
 
+    public static final String GROUP_QUES_DISMISSED = "GROUP_QUES_DISMISSED";
+
 }

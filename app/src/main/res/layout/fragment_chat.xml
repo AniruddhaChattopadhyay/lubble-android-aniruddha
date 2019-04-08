@@ -247,7 +247,9 @@
             android:layout_gravity="bottom"
             android:layout_marginBottom="-4dp"
             android:elevation="8dp"
-            app:layout_behavior="in.lubble.app.chat.IntroPromptBehaviour">
+            android:visibility="gone"
+            app:layout_behavior="in.lubble.app.chat.IntroPromptBehaviour"
+            tools:visibility="visible">
 
             <ImageView
                 android:id="@+id/iv_bunny"
@@ -287,7 +289,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:alpha="0.3"
+                    android:alpha="0.5"
                     android:paddingRight="4dp"
                     android:tint="@color/white"
                     app:srcCompat="@drawable/ic_close_black_24dp" />
@@ -305,6 +307,8 @@
         android:layout_above="@id/bottom_container"
         android:layout_marginBottom="-4dp"
         android:elevation="9dp"
-        app:srcCompat="@drawable/ic_rabbit_hands" />
+        android:visibility="gone"
+        app:srcCompat="@drawable/ic_rabbit_hands"
+        tools:visibility="visible" />
 
 </RelativeLayout>
