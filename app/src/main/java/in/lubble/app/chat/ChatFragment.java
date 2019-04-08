@@ -787,6 +787,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             bunnyHandsIv.setVisibility(View.VISIBLE);
             final TextView msgTv = introPromptContainer.findViewById(R.id.tv_intro_prompt);
             msgTv.setText(groupData.getQuestion());
+            Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_SHOWN, getContext());
         }
     }
 
