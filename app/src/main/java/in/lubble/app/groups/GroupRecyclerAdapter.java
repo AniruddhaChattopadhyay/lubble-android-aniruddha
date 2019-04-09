@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -96,8 +97,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
             groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
             groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
+            groupViewHolder.pinIv.setVisibility(View.GONE);
         } else {
             groupViewHolder.unreadCountTv.setVisibility(View.GONE);
+            if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+                groupViewHolder.pinIv.setVisibility(View.VISIBLE);
+            } else {
+                groupViewHolder.pinIv.setVisibility(View.GONE);
+            }
         }
         handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
 
@@ -185,6 +192,12 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 if (lhs.getId() == null || rhs.getId() == null) {
                     return 0;
                 }
+                if (lhs.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+                    return -1;
+                }
+                if (rhs.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+                    return 1;
+                }
                 long lhsTs = 0;
                 long rhsTs = 0;
                 if (!lhs.isJoined()) {
@@ -246,6 +259,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final TextView timestampTv;
         final Button joinBtn;
         final ImageView inviteIcon;
+        final ImageView pinIv;
         GroupData groupData;
 
         public GroupViewHolder(View view) {
@@ -259,6 +273,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
             joinBtn = view.findViewById(R.id.btn_join_group);
             inviteIcon = view.findViewById(R.id.ic_invite);
+            pinIv = view.findViewById(R.id.iv_pin);
             joinBtn.setOnClickListener(this);
         }
 
