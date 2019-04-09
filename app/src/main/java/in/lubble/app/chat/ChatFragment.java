@@ -552,6 +552,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     // For populating the toolbar with DP and Title
     private void syncGroupInfo() {
         if (!TextUtils.isEmpty(groupId)) {
+            if (groupReference != null && groupInfoListener != null) {
+                groupReference.removeEventListener(groupInfoListener);
+            }
             groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -704,7 +707,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (!isJoining) {
             bottomContainer.setVisibility(View.VISIBLE);
         }
-
+        if (bottomBarListener != null) {
+            RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
+        }
         bottomBarListener = RealtimeDbHelper.getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
