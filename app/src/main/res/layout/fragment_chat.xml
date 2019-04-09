@@ -129,6 +129,7 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="8dp"
                     android:layout_marginLeft="8dp"
+                    android:cursorVisible="true"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
                     android:layout_toLeftOf="@id/iv_attach"

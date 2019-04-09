@@ -51,6 +51,7 @@ import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.DateTimeUtils;
+import in.lubble.app.utils.StringUtils;
 import permissions.dispatcher.*;
 
 import java.io.File;
@@ -63,6 +64,7 @@ import java.util.Map;
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
+import static in.lubble.app.utils.ChatHelper.getRandomGroupGreeting;
 import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
@@ -793,6 +795,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             final TextView msgTv = introPromptContainer.findViewById(R.id.tv_intro_prompt);
             msgTv.setText(groupData.getQuestion());
             Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_SHOWN, getContext());
+
+            if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+                newMessageEt.setText(getRandomGroupGreeting() +
+                        " I'm " + StringUtils.getTitleCase(FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0])
+                        + "!\nI'm from ");
+                newMessageEt.setSelection(newMessageEt.getText().length());
+                newMessageEt.requestFocus();
+            }
         }
     }
 
