@@ -99,11 +99,17 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
             groupViewHolder.pinIv.setVisibility(View.GONE);
         } else {
-            groupViewHolder.unreadCountTv.setVisibility(View.GONE);
-            if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
-                groupViewHolder.pinIv.setVisibility(View.VISIBLE);
-            } else {
+            if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened() && groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+                groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
+                groupViewHolder.unreadCountTv.setText("1");
                 groupViewHolder.pinIv.setVisibility(View.GONE);
+            } else {
+                groupViewHolder.unreadCountTv.setVisibility(View.GONE);
+                if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+                    groupViewHolder.pinIv.setVisibility(View.VISIBLE);
+                } else {
+                    groupViewHolder.pinIv.setVisibility(View.GONE);
+                }
             }
         }
         handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);

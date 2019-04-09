@@ -21,7 +21,6 @@ public class LubbleSharedPrefs {
     private final String LUBBLE_ID = "LUBBLE_ID";
     private final String DEFAULT_GROUP_ID = "DEFAULT_GROUP_ID";
     private final String IS_DEFAULT_GROUP_INFO_SHOWN = "IS_DEFAULT_GROUP_INFO_SHOWN";
-    private final String IS_PUBLIC_GROUP_INFO_SHOWN = "IS_PUBLIC_GROUP_INFO_SHOWN";
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
     private final String IS_GROUP_INFO_OPENED = "IS_GROUP_INFO_OPENED";
     private final String IS_MPLACE_OPENED = "IS_MPLACE_OPENED";
@@ -34,6 +33,7 @@ public class LubbleSharedPrefs {
     private final String CENTER_LONGI = "CENTER_LONGI";
     private final String SUPPORT_UID = "SUPPORT_UID";
     private final String IS_QUIZ_OPENED = "IS_QUIZ_OPENED";
+    private final String IS_DEFAULT_GRP_OPENED = "IS_DEFAULT_GRP_OPENED";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -129,15 +129,6 @@ public class LubbleSharedPrefs {
         return preferences.edit().putBoolean(IS_DEFAULT_GROUP_INFO_SHOWN, isShown).commit();
     }
 
-    public boolean getIsPublicGroupInfoShown() {
-        return preferences.getBoolean(IS_PUBLIC_GROUP_INFO_SHOWN, false);
-    }
-
-    public boolean setIsPublicGroupInfoShown(boolean isShown) {
-
-        return preferences.edit().putBoolean(IS_PUBLIC_GROUP_INFO_SHOWN, isShown).commit();
-    }
-
     public boolean getIsLogoutPending() {
         return preferences.getBoolean(IS_LOGOUT_PENDING, false);
     }
@@ -201,6 +192,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsQuizOpened(boolean isShown) {
         return preferences.edit().putBoolean(IS_QUIZ_OPENED, isShown).commit();
+    }
+
+    public boolean getIsDefaultGroupOpened() {
+        return preferences.getBoolean(IS_DEFAULT_GRP_OPENED, true);
+    }
+
+    public boolean setIsDefaultGroupOpened(boolean isOpened) {
+        return preferences.edit().putBoolean(IS_DEFAULT_GRP_OPENED, isOpened).commit();
     }
 
 

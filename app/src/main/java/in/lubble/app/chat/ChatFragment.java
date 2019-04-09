@@ -809,6 +809,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 @Override
                                 public void onClick(View v) {
                                     LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
+                                    LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
                                 }
                             });
                 }
@@ -819,17 +820,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 }
             });
 
-        } else if (groupData != null && !LubbleSharedPrefs.getInstance().getIsPublicGroupInfoShown()
-                && !groupData.getIsPrivate() && !groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
-            showBottomSheetAlert(getContext(), getLayoutInflater(),
-                    getString(R.string.public_group_warning_title),
-                    getString(R.string.public_group_warning_subtitle),
-                    R.drawable.ic_public_black_24dp, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            LubbleSharedPrefs.getInstance().setIsPublicGroupInfoShown(true);
-                        }
-                    });
         }
     }
 

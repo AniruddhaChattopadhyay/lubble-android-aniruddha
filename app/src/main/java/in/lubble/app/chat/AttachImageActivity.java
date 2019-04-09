@@ -10,6 +10,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import androidx.appcompat.widget.Toolbar;
 import in.lubble.app.*;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.utils.TouchImageView;
 
 import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
@@ -75,6 +77,9 @@ public class AttachImageActivity extends BaseActivity {
                         .putExtra(UploadFileService.EXTRA_AUTHOR_ID, getIntent().getStringExtra(EXTRA_AUTHOR_ID))
                         .putExtra(UploadFileService.EXTRA_IS_AUTHOR_SELLER, getIntent().getBooleanExtra(EXTRA_IS_AUTHOR_SELLER, false))
                         .setAction(UploadFileService.ACTION_UPLOAD));
+                final Bundle bundle = new Bundle();
+                bundle.putString("group_id", chatId);
+                Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, AttachImageActivity.this);
                 finish();
             }
         });
