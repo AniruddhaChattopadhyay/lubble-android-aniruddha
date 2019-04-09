@@ -44,14 +44,14 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_group_desc"
         android:layout_marginTop="9dp"
-        android:hint="Joining Question" />
+        android:hint="Introduction Helper" />
 
     <TextView
         android:id="@+id/tv_group_ques_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/et_group_question"
-        android:text="Anyone joining the group will have to answer this question" />
+        android:text="Help new joinees introduce themselves in the group\nEx. Welcome to Painting group! Show us your work!" />
 
     <Spinner
         android:id="@+id/spinner_privacy"

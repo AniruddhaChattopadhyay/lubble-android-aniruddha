@@ -96,7 +96,7 @@ public class NewGroupFragment extends Fragment {
                     final GroupData groupData = new GroupData();
                     groupData.setTitle(groupName.getText().toString().trim());
                     groupData.setDescription(groupDesc.getText().toString());
-                    groupData.setQuestion(groupQues.getText().toString());
+                    groupData.setIntro(groupQues.getText().toString());
                     groupData.setIsPrivate(isPvt);
 
                     Log.d(TAG, "onClick: ");

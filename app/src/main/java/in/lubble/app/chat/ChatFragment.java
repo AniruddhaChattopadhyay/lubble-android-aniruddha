@@ -769,7 +769,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     private void showIntroPrompt(UserGroupData userGroupData) {
-        if (groupData != null && !TextUtils.isEmpty(groupData.getQuestion()) && !userGroupData.getIsIntroPromptDismissed()) {
+        if (groupData != null && !TextUtils.isEmpty(groupData.getIntro()) && !userGroupData.getIsIntroPromptDismissed()) {
             final TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, dpToPx(48), 0);
             translateAnimation.setDuration(200);
             translateAnimation.setInterpolator(new FastOutSlowInInterpolator());
@@ -793,7 +793,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             introPromptContainer.startAnimation(translateAnimation);
             bunnyHandsIv.setVisibility(View.VISIBLE);
             final TextView msgTv = introPromptContainer.findViewById(R.id.tv_intro_prompt);
-            msgTv.setText(groupData.getQuestion());
+            msgTv.setText(groupData.getIntro());
             Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_SHOWN, getContext());
 
             if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
