@@ -10,7 +10,7 @@
         android:id="@+id/scrollview_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/iv_info_hint"
+        android:layout_above="@id/btn_submit"
         android:layout_marginBottom="8dp">
 
         <RelativeLayout
@@ -28,8 +28,8 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/iv_event_image"
                 android:layout_alignTop="@id/tv_change_pic"
+                android:layout_alignBottom="@id/iv_event_image"
                 android:layout_toLeftOf="@id/tv_change_pic"
                 android:background="@color/white"
                 android:paddingLeft="4dp"
@@ -39,8 +39,8 @@
                 android:id="@+id/tv_change_pic"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/iv_event_image"
                 android:layout_alignRight="@id/iv_event_image"
+                android:layout_alignBottom="@id/iv_event_image"
                 android:background="@color/white"
                 android:padding="4dp"
                 android:text="CHANGE PICTURE" />
@@ -236,8 +236,8 @@
                     android:id="@+id/tv_link_group_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignLeft="@id/tv_link_group"
                     android:layout_below="@id/tv_link_group"
+                    android:layout_alignLeft="@id/tv_link_group"
                     android:text="People can discuss &amp; share event pics in the group"
                     android:textSize="12sp" />
 
@@ -245,8 +245,8 @@
                     android:id="@+id/radioGroup_group_link"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignLeft="@id/tv_link_group"
-                    android:layout_below="@id/tv_link_group_hint">
+                    android:layout_below="@id/tv_link_group_hint"
+                    android:layout_alignLeft="@id/tv_link_group">
 
                     <RadioButton
                         android:id="@+id/radiobtn_new_group"
@@ -291,8 +291,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/map"
                     android:layout_alignTop="@id/map"
+                    android:layout_alignBottom="@id/map"
                     android:background="@color/trans_gray"
                     android:gravity="center"
                     android:text="Update location on map"
@@ -336,25 +336,5 @@
         android:layout_alignParentBottom="true"
         android:text="Submit"
         android:theme="@style/AccentButton" />
-
-    <TextView
-        android:id="@+id/tv_broadcast_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/btn_submit"
-        android:layout_centerHorizontal="true"
-        android:text="Creating an event will notify &amp; invite all residents"
-        android:textColor="@color/colorAccent"
-        android:textStyle="bold" />
-
-    <ImageView
-        android:id="@+id/iv_info_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/tv_broadcast_hint"
-        android:layout_alignTop="@id/tv_broadcast_hint"
-        android:layout_toLeftOf="@id/tv_broadcast_hint"
-        android:tint="@color/colorAccent"
-        app:srcCompat="@drawable/ic_info_black_24dp" />
 
 </RelativeLayout>
