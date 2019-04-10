@@ -359,12 +359,13 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textStyle="bold"/>
 
-        <TextView
+        <androidx.emoji.widget.EmojiTextView
             android:id="@+id/tv_desc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_desc_hint"
             android:layout_marginTop="8dp"
+            android:autoLink="web"
             tools:text="@tools:sample/lorem/random"/>
 
     </RelativeLayout>

@@ -18,6 +18,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiTextView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -84,7 +85,7 @@ public class EventInfoActivity extends BaseActivity {
     private ImageView ticketIv;
     private TextView ticketCountTv;
     private LinearLayout luckyDrawHint;
-    private TextView descTv;
+    private EmojiTextView descTv;
     private ProgressDialog progressDialog;
     private boolean isLinkedGroupJoined;
     private DatabaseReference checkGroupJoinedRef;
