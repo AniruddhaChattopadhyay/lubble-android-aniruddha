@@ -21,9 +21,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadFileService;
 import in.lubble.app.chat.ChatActivity;
-import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
-import in.lubble.app.utils.ChatUtils;
 import permissions.dispatcher.*;
 
 import java.io.File;
@@ -31,7 +29,8 @@ import java.io.IOException;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.FileUtils.*;
 
 @RuntimePermissions
@@ -197,12 +196,6 @@ public class NewGroupFragment extends Fragment {
                             .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + pushId)
                             .setAction(UploadFileService.ACTION_UPLOAD));
                 }
-                // add the joining question as group's first message
-                final ChatData chatData = ChatUtils.createGroupChatdata(groupQues.getText().toString());
-                final DatabaseReference chatPushRef = getMessagesRef().child(pushId).push();
-                chatPushRef.setValue(chatData);
-                // make this first chat msg's ID as group's question ID which joinees will reply to
-                getLubbleGroupsRef().child(pushId).child("questionChatId").setValue(chatPushRef.getKey());
 
                 progressDialog.dismiss();
                 final Intent intent = new Intent(getContext(), ChatActivity.class);
