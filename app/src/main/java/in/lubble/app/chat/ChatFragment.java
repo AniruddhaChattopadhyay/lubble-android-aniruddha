@@ -778,7 +778,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 @Override
                 public void onAnimationStart(Animation animation) {
                     introPromptContainer.setVisibility(View.VISIBLE);
-                    chatRecyclerView.setPadding(0, 0, 0, dpToPx(48));
+                    chatRecyclerView.setPadding(0, 0, 0, dpToPx(52));
+                    if (((LinearLayoutManager) chatRecyclerView.getLayoutManager()).findLastVisibleItemPosition()
+                            == chatRecyclerView.getAdapter().getItemCount() - 1) {
+                        chatRecyclerView.scrollBy(0, dpToPx(52));
+                    }
                 }
 
                 @Override
