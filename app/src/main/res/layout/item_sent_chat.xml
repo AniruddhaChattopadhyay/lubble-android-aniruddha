@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_layout_chat_sent"
@@ -8,10 +8,13 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
+        android:id="@+id/container_chat"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
         android:layout_gravity="right"
-        android:layout_marginLeft="56dp"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/tv_date"
         android:gravity="right">
 
         <RelativeLayout
@@ -33,16 +36,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginBottom="4dp"
                     android:layout_marginLeft="4dp"
+                    android:layout_marginBottom="4dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <androidx.emoji.widget.EmojiTextView
                         android:id="@+id/tv_sender_name"
                         android:layout_width="wrap_content"
-                        android:alpha="0.8"
                         android:layout_height="wrap_content"
+                        android:alpha="0.8"
                         android:textColor="@color/white"
                         tools:text="@tools:sample/full_names" />
 
@@ -139,112 +142,81 @@
 
                 </RelativeLayout>
 
-                <in.lubble.app.utils.MsgFlexBoxLayout
-                    android:id="@+id/msgFlexBox_text"
+                <RelativeLayout
+                    android:id="@+id/msg_content_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:viewPartMain="@+id/msg_content_container"
-                    app:viewPartSlave="@+id/msg_status_container">
+                    android:orientation="vertical">
 
-                    <RelativeLayout
-                        android:id="@+id/msg_content_container"
-                        android:layout_width="wrap_content"
+                    <include
+                        layout="@layout/layout_poll"
+                        android:visibility="gone" />
+
+                    <FrameLayout
+                        android:id="@+id/img_container"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:minWidth="240dp"
+                        android:visibility="gone"
+                        tools:visibility="gone">
 
-                        <include
-                            android:visibility="gone"
-                            layout="@layout/layout_poll" />
+                        <ProgressBar
+                            android:id="@+id/progressbar_img"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center" />
 
-                        <FrameLayout
-                            android:id="@+id/img_container"
+                        <ImageView
+                            android:id="@+id/iv_chat_img"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="240dp"
+                            android:layout_marginBottom="4dp"
                             android:minWidth="240dp"
-                            android:visibility="gone"
-                            tools:visibility="gone">
+                            android:scaleType="centerCrop"
+                            android:transitionName="fullscreen_image"
+                            tools:src="@tools:sample/backgrounds/scenic" />
 
-                            <ProgressBar
-                                android:id="@+id/progressbar_img"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center" />
+                    </FrameLayout>
 
-                            <ImageView
-                                android:id="@+id/iv_chat_img"
-                                android:layout_width="match_parent"
-                                android:layout_height="240dp"
-                                android:layout_marginBottom="4dp"
-                                android:minWidth="240dp"
-                                android:scaleType="centerCrop"
-                                android:transitionName="fullscreen_image"
-                                tools:src="@tools:sample/backgrounds/scenic" />
-
-                        </FrameLayout>
-
-                        <androidx.emoji.widget.EmojiTextView
-                            android:id="@+id/tv_message"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/img_container"
-                            android:autoLink="web"
-                            android:textColor="@color/white"
-                            android:textSize="16sp"
-                            tools:text="Psu ghiufhgud !" />
-
-                    </RelativeLayout>
-
-                    <LinearLayout
-                        android:id="@+id/msg_status_container"
+                    <androidx.emoji.widget.EmojiTextView
+                        android:id="@+id/tv_message"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:gravity="right"
-                        android:minWidth="60dp">
+                        android:layout_below="@id/img_container"
+                        android:autoLink="web"
+                        android:textColor="@color/white"
+                        android:textSize="16sp"
+                        tools:text="Psu ghiufhgud !" />
 
-                        <TextView
-                            android:id="@+id/tv_date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_gravity="right|bottom"
-                            android:layout_marginRight="4dp"
-                            android:gravity="right"
-                            android:textColor="@color/white"
-                            android:maxLines="1"
-                            android:textSize="12sp"
-                            tools:text="14:23pm" />
+                </RelativeLayout>
 
-                        <!--<include
-                            android:id="@+id/msg_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:layout_marginRight="5dp"
-                            android:minWidth="40dp"
-                            android:visibility="gone" />-->
+                <LinearLayout
+                    android:id="@+id/msg_status_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:gravity="right"
+                    android:minWidth="60dp">
 
-                    </LinearLayout>
-
-                </in.lubble.app.utils.MsgFlexBoxLayout>
+                </LinearLayout>
 
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/container_lubb"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="-12dp"
                 android:layout_height="wrap_content"
+                android:layout_marginRight="-12dp"
                 android:gravity="top|right"
                 android:paddingBottom="16dp">
 
                 <TextView
                     android:id="@+id/tv_lubb_count"
-                    android:minWidth="16dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingTop="2dp"
                     android:gravity="right"
+                    android:minWidth="16dp"
+                    android:paddingTop="2dp"
                     android:text="1"
                     android:textSize="12sp" />
 
@@ -261,4 +233,20 @@
         </RelativeLayout>
     </LinearLayout>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/container_chat"
+        android:layout_alignParentLeft="true"
+        android:layout_gravity="right|bottom"
+        android:layout_marginLeft="4dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="invisible"
+        android:gravity="right"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        tools:text="14:23pm" />
+
+</RelativeLayout>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_layout_chat_recvd"
@@ -10,9 +10,11 @@
     android:longClickable="true">
 
     <LinearLayout
+        android:id="@+id/container_chat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="56dp"
+        android:layout_alignParentLeft="true"
+        android:layout_toLeftOf="@id/tv_date"
         android:clipToPadding="false"
         android:orientation="horizontal">
 
@@ -158,107 +160,67 @@
 
                 </RelativeLayout>
 
-                <in.lubble.app.utils.MsgFlexBoxLayout
-                    android:id="@+id/msgFlexBox_text"
+                <LinearLayout
+                    android:id="@+id/msg_content_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:viewPartMain="@+id/msg_content_container"
-                    app:viewPartSlave="@+id/msg_status_container">
+                    android:orientation="vertical">
 
-                    <LinearLayout
-                        android:id="@+id/msg_content_container"
+                    <include
+                        layout="@layout/layout_poll"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:minWidth="240dp"
+                        android:visibility="gone" />
 
-                        <include
-                            layout="@layout/layout_poll"
+                    <FrameLayout
+                        android:id="@+id/img_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="240dp"
+                        android:layout_marginBottom="8dp"
+                        android:minWidth="240dp"
+                        android:visibility="gone"
+                        tools:visibility="gone">
+
+                        <ProgressBar
+                            android:id="@+id/progressbar_img"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minWidth="240dp"
-                            android:visibility="gone" />
+                            android:layout_gravity="center" />
 
-                        <FrameLayout
-                            android:id="@+id/img_container"
+                        <ImageView
+                            android:id="@+id/iv_chat_img"
                             android:layout_width="wrap_content"
                             android:layout_height="240dp"
-                            android:layout_marginBottom="8dp"
+                            android:layout_marginTop="4dp"
+                            android:layout_marginBottom="4dp"
                             android:minWidth="240dp"
+                            android:scaleType="centerCrop"
+                            android:transitionName="fullscreen_image"
+                            tools:src="@tools:sample/backgrounds/scenic" />
+
+                        <ImageView
+                            android:id="@+id/iv_download"
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:layout_gravity="center"
+                            android:background="@drawable/circle_white_trans"
+                            android:padding="8dp"
                             android:visibility="gone"
-                            tools:visibility="gone">
+                            app:srcCompat="@drawable/ic_file_download_black_24dp" />
 
-                            <ProgressBar
-                                android:id="@+id/progressbar_img"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center" />
+                    </FrameLayout>
 
-                            <ImageView
-                                android:id="@+id/iv_chat_img"
-                                android:layout_width="wrap_content"
-                                android:layout_height="240dp"
-                                android:layout_marginTop="4dp"
-                                android:layout_marginBottom="4dp"
-                                android:minWidth="240dp"
-                                android:scaleType="centerCrop"
-                                android:transitionName="fullscreen_image"
-                                tools:src="@tools:sample/backgrounds/scenic" />
-
-                            <ImageView
-                                android:id="@+id/iv_download"
-                                android:layout_width="64dp"
-                                android:layout_height="64dp"
-                                android:layout_gravity="center"
-                                android:background="@drawable/circle_white_trans"
-                                android:padding="8dp"
-                                android:visibility="gone"
-                                app:srcCompat="@drawable/ic_file_download_black_24dp" />
-
-                        </FrameLayout>
-
-                        <androidx.emoji.widget.EmojiTextView
-                            android:id="@+id/tv_message"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:autoLink="web"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"
-                            tools:text="Pikachu! I choose youu!" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/msg_status_container"
+                    <androidx.emoji.widget.EmojiTextView
+                        android:id="@+id/tv_message"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="4dp"
-                        android:gravity="right"
-                        android:minWidth="60dp">
+                        android:autoLink="web"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        tools:text="Pikachu! I choose youu!" />
 
-                        <TextView
-                            android:id="@+id/tv_date"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentRight="true"
-                            android:layout_gravity="right|bottom"
-                            android:layout_marginRight="4dp"
-                            android:gravity="right"
-                            android:maxLines="1"
-                            android:textSize="12sp"
-                            tools:text="14:23pm" />
-
-                        <!--<include
-                            android:id="@+id/msg_status"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom"
-                            android:layout_marginRight="5dp"
-                            android:minWidth="40dp"
-                            android:visibility="gone" />-->
-
-                    </LinearLayout>
-
-                </in.lubble.app.utils.MsgFlexBoxLayout>
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -280,9 +242,9 @@
 
                 <TextView
                     android:id="@+id/tv_lubb_count"
-                    android:minWidth="16dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:minWidth="16dp"
                     android:paddingTop="2dp"
                     android:text=""
                     android:textSize="12sp" />
@@ -293,4 +255,21 @@
 
     </LinearLayout>
 
-</FrameLayout>
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/container_chat"
+        android:layout_alignParentRight="true"
+        android:layout_gravity="right|bottom"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="8dp"
+        android:gravity="right"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:textSize="12sp"
+        android:visibility="invisible"
+        tools:text="14:23pm"
+        tools:visibility="visible" />
+
+</RelativeLayout>

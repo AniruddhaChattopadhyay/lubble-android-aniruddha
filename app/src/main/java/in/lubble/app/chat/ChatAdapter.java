@@ -194,8 +194,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+            sentChatViewHolder.dateTv.setVisibility(View.VISIBLE);
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            sentChatViewHolder.dateTv.setVisibility(View.INVISIBLE);
         }
 
         if (isValidString(chatData.getMessage())) {
@@ -355,8 +357,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+            recvdChatViewHolder.dateTv.setVisibility(View.VISIBLE);
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            recvdChatViewHolder.dateTv.setVisibility(View.INVISIBLE);
 
         }
 
@@ -1112,7 +1116,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-        private FrameLayout rootLayout;
+        private RelativeLayout rootLayout;
         private TextView authorNameTv;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
@@ -1123,7 +1127,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar progressBar;
         private ImageView chatIv;
         private TextView dateTv;
-        private MsgFlexBoxLayout textContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
         private ImageView dpIv;
@@ -1155,7 +1158,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);
-            textContainer = itemView.findViewById(R.id.msgFlexBox_text);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
             dpIv = itemView.findViewById(R.id.iv_dp);
@@ -1218,6 +1220,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
+                dateTv.setVisibility(View.INVISIBLE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -1269,6 +1272,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         public boolean onLongClick(View v) {
             if (getAdapterPosition() != highlightedPos) {
                 actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                dateTv.setVisibility(View.VISIBLE);
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                 if (highlightedPos != -1) {
                     // another item was highlighted, remove its highlight
@@ -1287,7 +1291,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
-        private FrameLayout rootLayout;
+        private RelativeLayout rootLayout;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
         private ImageView linkPicIv;
@@ -1297,7 +1301,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar progressBar;
         private ImageView chatIv;
         private TextView dateTv;
-        private MsgFlexBoxLayout textContainer;
         private ImageView lubbIcon;
         private TextView lubbCount;
         @Nullable
@@ -1324,7 +1327,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);
-            textContainer = itemView.findViewById(R.id.msgFlexBox_text);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
             lubbContainer = itemView.findViewById(R.id.container_lubb);
@@ -1383,7 +1385,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
-                //lubbPopOutContainer.setVisibility(View.GONE);
+                dateTv.setVisibility(View.INVISIBLE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -1433,6 +1435,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         public boolean onLongClick(View v) {
             if (getAdapterPosition() != highlightedPos) {
                 actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
+                dateTv.setVisibility(View.VISIBLE);
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                 if (highlightedPos != -1) {
                     // another item was highlighted, remove its highlight
