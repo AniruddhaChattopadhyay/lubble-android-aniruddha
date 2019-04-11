@@ -7,10 +7,11 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.util.Log;
@@ -36,7 +37,6 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
@@ -46,6 +46,7 @@ import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
+import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -193,13 +194,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
-            sentChatViewHolder.lubbPopOutContainer.setVisibility(View.VISIBLE);
-            toggleLubbPopOutContainer(sentChatViewHolder.lubbIv,
-                    sentChatViewHolder.lubbHintTv,
-                    chatData.getLubbReceipts().containsKey(authorId));
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
-            sentChatViewHolder.lubbPopOutContainer.setVisibility(View.GONE);
         }
 
         if (isValidString(chatData.getMessage())) {
@@ -208,7 +204,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
         }
-        sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
+        if (chatData.getLubbCount() == 0) {
+            sentChatViewHolder.lubbCount.setText("");
+        } else {
+            sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
+        }
         if (chatData.getLubbReceipts().containsKey(authorId)) {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
             if (position == chatDataList.size() - 1) {
@@ -216,7 +216,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
             }
         } else {
-            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
         }
 
         sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
@@ -293,32 +293,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null);
 
-        sentChatViewHolder.lubbHeadsContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
-        sentChatViewHolder.lubbContainer.setVisibility(chatData.getLubbCount() > 0 ? View.VISIBLE : View.GONE);
-
-        int i = 0;
-        sentChatViewHolder.lubbHeadsContainer.removeAllViews();
-        for (String uid : chatData.getLubbReceipts().keySet()) {
-            if (i++ < 4) {
-                // show a max of 4 heads
-                // todo sort?
-                if (profileInfoMap.containsKey(uid)) {
-                    final ImageView lubbHeadIv = new ImageView(context);
-                    RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(dpToPx(16), dpToPx(16));
-                    lubbHeadIv.setLayoutParams(lp);
-                    glide.load(profileInfoMap.get(uid).getThumbnail())
-                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                            .circleCrop()
-                            .into(lubbHeadIv);
-                    sentChatViewHolder.lubbHeadsContainer.addView(lubbHeadIv);
-                } else {
-                    updateProfileInfoMap(getUserInfoRef(uid), uid, sentChatViewHolder.getAdapterPosition());
-                }
-            } else {
-                break;
-            }
-        }
-
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
@@ -381,13 +355,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
-            recvdChatViewHolder.lubbPopOutContainer.setVisibility(View.VISIBLE);
-            toggleLubbPopOutContainer(recvdChatViewHolder.lubbIv,
-                    recvdChatViewHolder.lubbHintTv,
-                    chatData.getLubbReceipts().containsKey(authorId));
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
-            recvdChatViewHolder.lubbPopOutContainer.setVisibility(View.GONE);
 
         }
 
@@ -398,7 +367,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }
         recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
-        recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
+        if (chatData.getLubbCount() == 0) {
+            recvdChatViewHolder.lubbCount.setText("");
+        } else {
+            recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
+        }
         if (chatData.getLubbReceipts().containsKey(authorId)) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
             if (position == chatDataList.size() - 1) {
@@ -406,7 +379,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
             }
         } else {
-            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
         }
         if (chatData.getType().equalsIgnoreCase(GROUP) && isValidString(chatData.getAttachedGroupId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
@@ -482,7 +455,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
-        showLubbHintIfLastMsg(position, chatData, recvdChatViewHolder);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
@@ -734,7 +706,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void handleLubbs(RecvdChatViewHolder recvdChatViewHolder, ChatData chatData, boolean toAnimate) {
 
-        if (chatData.getLubbCount() > 0) {
+        /*if (chatData.getLubbCount() > 0) {
             if (toAnimate) {
                 UiUtils.animateSlideDownShow(context, recvdChatViewHolder.lubbContainer);
             } else {
@@ -768,31 +740,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             } else {
                 break;
             }
-        }
-    }
-
-    private void showLubbHintIfLastMsg(int position, final ChatData chatData, final RecvdChatViewHolder recvdChatViewHolder) {
-        if (position == chatDataList.size() - 1) {
-            UiUtils.animateSlideDownShow(context, recvdChatViewHolder.lubbLastHintContainer);
-            //recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.VISIBLE);
-            recvdChatViewHolder.lubbContainer.setVisibility(View.GONE);
-            shownLubbHintForLastMsg = true;
-            if (chatData.getLubbCount() > 0) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (chatFragment != null && chatFragment.isAdded() && chatFragment.isVisible()) {
-                            //recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
-                            UiUtils.animateSlideDownHide(context, recvdChatViewHolder.lubbLastHintContainer);
-                            handleLubbs(recvdChatViewHolder, chatData, true);
-                        }
-                    }
-                }, 2000);
-            }
-        } else {
-            recvdChatViewHolder.lubbLastHintContainer.setVisibility(View.GONE);
-            handleLubbs(recvdChatViewHolder, chatData, false);
-        }
+        }*/
     }
 
     private void updateProfileInfoMap(DatabaseReference userInfoRef, final String uid, final int pos) {
@@ -1061,6 +1009,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void toggleLubb(int pos) {
         final ChatData chatData = chatDataList.get(pos);
+        // add or remove like to chat msg
         DatabaseReference lubbRef;
         if (chatData.getIsDm()) {
             lubbRef = getDmMessagesRef().child(dmId).child(chatData.getId());
@@ -1092,9 +1041,65 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
 
             @Override
-            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+            public void onComplete(DatabaseError databaseError, boolean isCommitted, DataSnapshot dataSnapshot) {
                 // Transaction completed
-                Log.d(TAG, "postTransaction:onComplete:" + databaseError);
+                Log.d(TAG, "postLikeTransaction:onComplete:" + databaseError);
+                if (isCommitted) {
+                    // add or remove like to user profile
+                    // this logic is inverse of the one for post likes
+                    // here, the chatData has been successfully liked and contains liker uid
+                    ChatData updatedChatData = dataSnapshot.getValue(ChatData.class);
+                    if (updatedChatData != null) {
+                        if (updatedChatData.getLubbReceipts().containsKey(authorId)) {
+                            addLikeToAuthorProfile(updatedChatData);
+                        } else {
+                            removeLikeFromAuthorProfile(updatedChatData);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private void addLikeToAuthorProfile(final ChatData chatData) {
+        getUserRef(chatData.getAuthorUid()).runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                ProfileData profileData = mutableData.getValue(ProfileData.class);
+                if (profileData == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                // Set value and report transaction success
+                mutableData.child("likes").setValue(profileData.getLikes() + 1);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
+    }
+
+    private void removeLikeFromAuthorProfile(final ChatData chatData) {
+        getUserRef(chatData.getAuthorUid()).runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                ProfileData profileData = mutableData.getValue(ProfileData.class);
+                if (profileData == null) {
+                    return Transaction.success(mutableData);
+                }
+                // Set value and report transaction success
+                mutableData.child("likes").setValue(profileData.getLikes() - 1);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
             }
         });
     }
@@ -1119,14 +1124,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView chatIv;
         private TextView dateTv;
         private MsgFlexBoxLayout textContainer;
-        private LinearLayout lubbContainer;
-        private LinearLayout lubbLastHintContainer;
-        private TextView lubbAnyHintTv;
         private ImageView lubbIcon;
         private TextView lubbCount;
-        private LinearLayout lubbHeadsContainer;
         private ImageView dpIv;
-        private LinearLayout lubbPopOutContainer;
         @Nullable
         private ActionMode actionMode;
         private ImageView lubbIv;
@@ -1138,6 +1138,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView youtubeTitleTv;
         private ImageView downloadIv;
         private LinearLayout pollContainer;
+        private LinearLayout lubbContainer;
         private TextView badgeTextTv;
 
         public RecvdChatViewHolder(final View itemView) {
@@ -1150,20 +1151,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);
+            lubbContainer = itemView.findViewById(R.id.container_lubb);
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);
             textContainer = itemView.findViewById(R.id.msgFlexBox_text);
-            lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
-            lubbLastHintContainer = itemView.findViewById(R.id.linearLayout_lubb_hint_container);
-            lubbAnyHintTv = itemView.findViewById(R.id.tv_any_lubb_hint);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
-            lubbHeadsContainer = itemView.findViewById(R.id.linear_layout_lubb_heads);
             dpIv = itemView.findViewById(R.id.iv_dp);
-            lubbPopOutContainer = itemView.findViewById(R.id.linear_layout_lubb_pop);
-            lubbIv = itemView.findViewById(R.id.iv_lubb_icon);
-            lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
             youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
             youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
             youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
@@ -1174,11 +1169,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
 
-            lubbAnyHintTv.setSelected(true);
-            lubbAnyHintTv.setHorizontallyScrolling(true);
-
-            lubbPopOutContainer.setOnClickListener(this);
-            lubbHeadsContainer.setOnClickListener(this);
             dpIv.setOnClickListener(this);
             lubbContainer.setOnClickListener(this);
             chatIv.setOnClickListener(null);
@@ -1188,7 +1178,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             messageTv.setOnLongClickListener(this);
             rootLayout.setOnLongClickListener(this);
             chatIv.setOnLongClickListener(this);
-
+            lubbContainer.setOnLongClickListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -1228,7 +1218,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
-                //lubbPopOutContainer.setVisibility(View.GONE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -1242,11 +1231,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 case R.id.iv_dp:
                     ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
                     break;
-                case R.id.linear_layout_lubb_pop:
-                    toggleLubb(getAdapterPosition());
-                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
-                    break;
-                case R.id.linearLayout_lubb_container:
+                case R.id.container_lubb:
                     toggleLubb(getAdapterPosition());
                     break;
                 case R.id.link_meta_container:
@@ -1274,9 +1259,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
                     }
                     break;
-                case R.id.linear_layout_lubb_heads:
-                    chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), false);
-                    break;
             }
             if (actionMode != null) {
                 actionMode.finish();
@@ -1287,8 +1269,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         public boolean onLongClick(View v) {
             if (getAdapterPosition() != highlightedPos) {
                 actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
-                lubbPopOutContainer.setVisibility(View.VISIBLE);
-                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(authorId));
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                 if (highlightedPos != -1) {
                     // another item was highlighted, remove its highlight
@@ -1318,21 +1298,17 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView chatIv;
         private TextView dateTv;
         private MsgFlexBoxLayout textContainer;
-        private LinearLayout lubbContainer;
         private ImageView lubbIcon;
-        private LinearLayout lubbHeadsContainer;
-        private LinearLayout lubbPopOutContainer;
         private TextView lubbCount;
         @Nullable
         private ActionMode actionMode;
-        private ImageView lubbIv;
-        private TextView lubbHintTv;
         private ImageView youtubeThumbnailView;
         private ProgressBar youtubeProgressBar;
         private ImageView youtubePlayIv;
         private RelativeLayout youtubeContainer;
         private TextView youtubeTitleTv;
         private LinearLayout pollContainer;
+        private LinearLayout lubbContainer;
         private TextView badgeTextTv;
         private TextView senderTv;
 
@@ -1349,13 +1325,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);
             textContainer = itemView.findViewById(R.id.msgFlexBox_text);
-            lubbContainer = itemView.findViewById(R.id.linearLayout_lubb_container);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
             lubbCount = itemView.findViewById(R.id.tv_lubb_count);
-            lubbHeadsContainer = itemView.findViewById(R.id.linear_layout_lubb_heads);
-            lubbPopOutContainer = itemView.findViewById(R.id.linear_layout_lubb_pop);
-            lubbIv = itemView.findViewById(R.id.iv_lubb_icon);
-            lubbHintTv = itemView.findViewById(R.id.tv_lubb_hint);
+            lubbContainer = itemView.findViewById(R.id.container_lubb);
             youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
             youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
             youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
@@ -1368,13 +1340,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkContainer.setOnClickListener(this);
             linkContainer.setOnLongClickListener(this);
             lubbContainer.setOnClickListener(this);
-            lubbHeadsContainer.setOnClickListener(this);
-            lubbPopOutContainer.setOnClickListener(this);
             pollContainer.setOnLongClickListener(this);
             messageTv.setOnLongClickListener(this);
             chatIv.setOnClickListener(null);
             chatIv.setOnLongClickListener(this);
             rootLayout.setOnLongClickListener(this);
+            lubbContainer.setOnLongClickListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -1423,12 +1394,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         @Override
         public void onClick(View v) {
             switch (v.getId()) {
-                case R.id.linearLayout_lubb_container:
+                case R.id.container_lubb:
                     toggleLubb(getAdapterPosition());
                     Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
-                    break;
-                case R.id.linear_layout_lubb_pop:
-                    toggleLubb(getAdapterPosition());
                     break;
                 case R.id.link_meta_container:
                     ChatData chatData = chatDataList.get(getAdapterPosition());
@@ -1455,9 +1423,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
                     }
                     break;
-                case R.id.linear_layout_lubb_heads:
-                    chatFragment.openChatInfo(chatDataList.get(getAdapterPosition()).getId(), true);
-                    break;
             }
             if (actionMode != null) {
                 actionMode.finish();
@@ -1468,8 +1433,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         public boolean onLongClick(View v) {
             if (getAdapterPosition() != highlightedPos) {
                 actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
-                lubbPopOutContainer.setVisibility(View.VISIBLE);
-                toggleLubbPopOutContainer(lubbIv, lubbHintTv, chatDataList.get(getAdapterPosition()).getLubbReceipts().containsKey(authorId));
                 itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                 if (highlightedPos != -1) {
                     // another item was highlighted, remove its highlight
@@ -1483,18 +1446,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
             }
             return true;
-        }
-    }
-
-    private void toggleLubbPopOutContainer(ImageView lubbIv, TextView lubbTv, boolean isLubbed) {
-        if (isLubbed) {
-            lubbIv.setImageResource(R.drawable.ic_favorite_24dp);
-            lubbIv.setColorFilter(null);
-            lubbTv.setText(R.string.liked);
-        } else {
-            lubbIv.setImageResource(R.drawable.ic_favorite_border_24dp);
-            lubbIv.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(context, R.color.bright_red), PorterDuff.Mode.SRC_IN));
-            lubbTv.setText(R.string.like);
         }
     }
 

@@ -27,6 +27,7 @@ public class ProfileData {
     private boolean isOwner;
     private boolean isAgePublic = true;
     private long coins;
+    private long likes = 0L;
 
     @Override
     public boolean equals(@Nullable Object obj) {
@@ -185,5 +186,13 @@ public class ProfileData {
 
     public void setCoins(long coins) {
         this.coins = coins;
+    }
+
+    public long getLikes() {
+        return likes;
+    }
+
+    public void setLikes(long likes) {
+        this.likes = likes;
     }
 }

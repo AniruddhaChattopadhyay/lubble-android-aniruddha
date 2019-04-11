@@ -1,34 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:background="#fff">
 
-    <androidx.cardview.widget.CardView
+    <TextView
+        android:id="@+id/tv_system_msg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="8dp"
-        app:cardBackgroundColor="@color/mute_yellow_light"
-        app:cardCornerRadius="8dp">
-
-        <TextView
-            android:id="@+id/tv_system_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:textColor="@color/white"
-            android:layout_margin="8dp"
-            android:gravity="center"
-            tools:maxLines="4"
-            tools:text="@tools:sample/lorem" />
-
-    </androidx.cardview.widget.CardView>
+        android:layout_centerInParent="true"
+        android:layout_gravity="center"
+        android:layout_margin="8dp"
+        android:gravity="center"
+        tools:maxLines="4"
+        tools:text="@tools:sample/lorem" />
 
 </RelativeLayout>

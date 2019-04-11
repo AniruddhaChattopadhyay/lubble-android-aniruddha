@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/root_layout_chat_recvd"
-    android:longClickable="true"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:descendantFocusability="blocksDescendants"
+    android:id="@+id/root_layout_chat_recvd"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:longClickable="true">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="64dp"
+        android:layout_marginRight="56dp"
+        android:clipToPadding="false"
         android:orientation="horizontal">
 
         <ImageView
@@ -27,14 +28,16 @@
             android:id="@+id/frame_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_toRightOf="@id/iv_dp"
-            android:orientation="vertical">
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:id="@+id/ll_box"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:background="@drawable/chat_bubble_border"
                 android:orientation="vertical"
                 android:paddingLeft="8dp"
@@ -46,13 +49,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginRight="8dp"
                     android:gravity="center_vertical">
 
                     <androidx.emoji.widget.EmojiTextView
                         android:id="@+id/tv_author"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        tools:text="@tools:sample/full_names" />
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        tools:text="sagdyuasgdyuagduyasgduyasgduyg" />
 
                     <include layout="@layout/container_msg_badge" />
 
@@ -61,7 +68,8 @@
                 <RelativeLayout
                     android:id="@+id/relativelayout_youtube"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
 
                     <ProgressBar
                         android:id="@+id/progressbar_youtube"
@@ -111,7 +119,7 @@
                     android:orientation="vertical"
                     android:padding="8dp"
                     android:visibility="gone"
-                    tools:visibility="visible">
+                    tools:visibility="gone">
 
 
                     <ImageView
@@ -167,7 +175,8 @@
                             layout="@layout/layout_poll"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:minWidth="240dp" />
+                            android:minWidth="240dp"
+                            android:visibility="gone" />
 
                         <FrameLayout
                             android:id="@+id/img_container"
@@ -214,7 +223,7 @@
                             android:autoLink="web"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            tools:text="Pikachu! I choose you!" />
+                            tools:text="Pikachu! I choose youu!" />
 
                     </LinearLayout>
 
@@ -253,106 +262,34 @@
 
             </LinearLayout>
 
-
             <LinearLayout
-                android:id="@+id/linearLayout_lubb_container"
-                android:layout_width="wrap_content"
+                android:id="@+id/container_lubb"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/frame_msg"
-                android:layout_alignRight="@id/frame_msg"
-                android:layout_marginTop="4dp"
-                android:gravity="left|center_vertical"
-                android:orientation="horizontal">
+                android:layout_marginLeft="-14dp"
+                android:gravity="top|left"
+                android:paddingBottom="16dp">
 
                 <ImageView
                     android:id="@+id/iv_lubb"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    app:srcCompat="@drawable/ic_favorite_border_24dp" />
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="@drawable/circle_white"
+                    android:padding="2dp"
+                    app:srcCompat="@drawable/ic_favorite_border_light" />
 
                 <TextView
                     android:id="@+id/tv_lubb_count"
+                    android:minWidth="16dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="2dp"
-                    tools:text="3" />
-
-                <LinearLayout
-                    android:id="@+id/linear_layout_lubb_heads"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="4dp"
-                    android:orientation="horizontal"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/linearLayout_lubb_hint_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="left|center_vertical"
-                android:orientation="horizontal"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/iv_lubb_hint"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    app:srcCompat="@drawable/ic_favorite_border_24dp" />
-
-                <TextView
-                    android:id="@+id/tv_any_lubb_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="2dp"
-                    android:ellipsize="marquee"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:freezesText="true"
-                    android:marqueeRepeatLimit="1"
-                    android:orientation="horizontal"
-                    android:singleLine="true"
-                    android:text="@string/like_any_msg_hint"
+                    android:paddingTop="2dp"
+                    android:text=""
                     android:textSize="12sp" />
 
             </LinearLayout>
 
         </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linear_layout_lubb_pop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right|center_vertical"
-        android:layout_marginRight="18dp"
-        android:background="@drawable/like_pill_button_white"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <ImageView
-            android:id="@+id/iv_lubb_icon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center"
-            android:tint="@color/bright_red"
-            app:srcCompat="@drawable/ic_favorite_border_24dp" />
-
-        <TextView
-            android:id="@+id/tv_lubb_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/like"
-            android:textColor="@color/black" />
 
     </LinearLayout>
 

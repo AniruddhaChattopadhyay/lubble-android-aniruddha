@@ -11,20 +11,21 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="right"
-        android:layout_marginLeft="64dp"
+        android:layout_marginLeft="56dp"
         android:gravity="right">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
-                android:background="@drawable/sent_chat_bubble_border"
+                android:layout_toRightOf="@id/container_lubb"
+                android:background="@drawable/chat_bubble_blue"
                 android:orientation="vertical"
                 android:padding="8dp">
 
@@ -33,13 +34,16 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginBottom="4dp"
+                    android:layout_marginLeft="4dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <androidx.emoji.widget.EmojiTextView
                         android:id="@+id/tv_sender_name"
                         android:layout_width="wrap_content"
+                        android:alpha="0.8"
                         android:layout_height="wrap_content"
+                        android:textColor="@color/white"
                         tools:text="@tools:sample/full_names" />
 
                     <include layout="@layout/container_msg_badge" />
@@ -148,7 +152,9 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
-                        <include layout="@layout/layout_poll" />
+                        <include
+                            android:visibility="gone"
+                            layout="@layout/layout_poll" />
 
                         <FrameLayout
                             android:id="@+id/img_container"
@@ -182,9 +188,9 @@
                             android:layout_height="wrap_content"
                             android:layout_below="@id/img_container"
                             android:autoLink="web"
-                            android:textColor="@color/black"
+                            android:textColor="@color/white"
                             android:textSize="16sp"
-                            tools:text="P!" />
+                            tools:text="Psu ghiufhgud !" />
 
                     </RelativeLayout>
 
@@ -204,6 +210,7 @@
                             android:layout_gravity="right|bottom"
                             android:layout_marginRight="4dp"
                             android:gravity="right"
+                            android:textColor="@color/white"
                             android:maxLines="1"
                             android:textSize="12sp"
                             tools:text="14:23pm" />
@@ -224,71 +231,34 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/linearLayout_lubb_container"
+                android:id="@+id/container_lubb"
                 android:layout_width="wrap_content"
+                android:layout_marginRight="-12dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginTop="4dp"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <ImageView
-                    android:id="@+id/iv_lubb"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    app:srcCompat="@drawable/ic_favorite_border_24dp" />
+                android:gravity="top|right"
+                android:paddingBottom="16dp">
 
                 <TextView
                     android:id="@+id/tv_lubb_count"
+                    android:minWidth="16dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="2dp"
-                    tools:text="3" />
+                    android:paddingTop="2dp"
+                    android:gravity="right"
+                    android:text="1"
+                    android:textSize="12sp" />
 
-                <LinearLayout
-                    android:id="@+id/linear_layout_lubb_heads"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="4dp"
-                    android:orientation="horizontal"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
+                <ImageView
+                    android:id="@+id/iv_lubb"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:background="@drawable/circle_white"
+                    android:padding="2dp"
+                    app:srcCompat="@drawable/ic_favorite_border_light" />
 
             </LinearLayout>
 
-        </LinearLayout>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linear_layout_lubb_pop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left|center_vertical"
-        android:layout_marginLeft="18dp"
-        android:background="@drawable/like_pill_button_white"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <ImageView
-            android:id="@+id/iv_lubb_icon"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_gravity="center"
-            android:tint="@color/bright_red"
-            app:srcCompat="@drawable/ic_favorite_border_24dp" />
-
-        <TextView
-            android:id="@+id/tv_lubb_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/like"
-            android:textColor="@color/black" />
-
+        </RelativeLayout>
     </LinearLayout>
 
 </FrameLayout>
