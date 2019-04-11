@@ -115,44 +115,36 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Invited"
-                    app:layout_constraintEnd_toStartOf="@+id/tv_points_hint"
+                    app:layout_constraintBottom_toBottomOf="@id/tv_likes_hint"
+                    app:layout_constraintEnd_toStartOf="@+id/tv_likes_hint"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintHorizontal_chainStyle="packed"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/tv_invited" />
 
                 <TextView
-                    android:id="@+id/tv_points"
+                    android:id="@+id/tv_likes"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="..."
                     android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                    app:layout_constraintEnd_toEndOf="@+id/tv_points_hint"
-                    app:layout_constraintStart_toStartOf="@+id/tv_points_hint"
+                    app:layout_constraintEnd_toEndOf="@+id/tv_likes_hint"
+                    app:layout_constraintStart_toStartOf="@+id/tv_likes_hint"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/tv_points_hint"
+                    android:id="@+id/tv_likes_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:drawablePadding="2dp"
                     android:gravity="center"
-                    android:text="Coins"
-                    app:drawableStartCompat="@drawable/ic_coin"
+                    android:text="Likes"
+                    app:drawableStartCompat="@drawable/ic_favorite_24dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.5"
                     app:layout_constraintStart_toEndOf="@+id/tv_invited_hint"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_points" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:text="Learn More >"
-                    android:textSize="12sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tv_invited_hint" />
+                    app:layout_constraintTop_toBottomOf="@+id/tv_likes" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -289,7 +281,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Share Lubble app with your friends and family"
+                    android:text="Get 100 coins for inviting each neighbour or flatmate to Lubble"
                     android:textColor="@color/white" />
 
                 <Button
@@ -299,7 +291,7 @@
                     android:layout_marginTop="8dp"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:text="Invite Friends"
+                    android:text="Invite Now"
                     android:theme="@style/WhiteButton" />
 
             </LinearLayout>

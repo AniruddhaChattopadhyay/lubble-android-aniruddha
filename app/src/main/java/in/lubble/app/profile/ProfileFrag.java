@@ -72,6 +72,8 @@ public class ProfileFrag extends Fragment {
     private TextView userBio;
     private TextView editProfileTV;
     private TextView invitedTv;
+    private TextView likesTv;
+    private LinearLayout coinsContainer;
     private TextView coinsTv;
     private RecyclerView userGroupsRv;
     private Button inviteBtn;
@@ -128,7 +130,7 @@ public class ProfileFrag extends Fragment {
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
         invitedTv = rootView.findViewById(R.id.tv_invited);
-        coinsTv = rootView.findViewById(R.id.tv_points);
+        likesTv = rootView.findViewById(R.id.tv_likes);
         genderIv = rootView.findViewById(R.id.iv_gender);
         genderTv = rootView.findViewById(R.id.tv_gender);
         businessIv = rootView.findViewById(R.id.iv_business);
@@ -138,6 +140,8 @@ public class ProfileFrag extends Fragment {
         userGroupsRv = rootView.findViewById(R.id.rv_user_groups);
         referralCard = rootView.findViewById(R.id.card_referral);
         inviteBtn = rootView.findViewById(R.id.btn_invite);
+        coinsContainer = rootView.findViewById(R.id.container_current_coins);
+        coinsTv = rootView.findViewById(R.id.tv_total_coins);
         statsContainer = rootView.findViewById(R.id.container_stats);
         logoutTv = rootView.findViewById(R.id.tv_logout);
         progressBar = rootView.findViewById(R.id.progressBar_profile);
@@ -146,7 +150,9 @@ public class ProfileFrag extends Fragment {
 
         sharingProgressDialog = new ProgressDialog(getContext());
         generateBranchUrl(getContext(), linkCreateListener);
-
+        if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+            coinsContainer.setVisibility(View.VISIBLE);
+        }
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -210,7 +216,7 @@ public class ProfileFrag extends Fragment {
         syncGroups();
         fetchStats();
 
-        statsContainer.setOnClickListener(new View.OnClickListener() {
+        coinsContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ReferralActivity.open(requireContext());
@@ -371,6 +377,8 @@ public class ProfileFrag extends Fragment {
                         referralCard.setVisibility(View.GONE);
                         logoutTv.setVisibility(View.GONE);
                     }
+                    likesTv.setText(String.valueOf(profileData.getLikes()));
+                    coinsTv.setText(String.valueOf(profileData.getCoins()));
                     GlideApp.with(getContext())
                             .load(profileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
@@ -461,19 +469,6 @@ public class ProfileFrag extends Fragment {
                     Log.e(TAG, "onFailure: ");
                     Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
-
-        getUserRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                coinsTv.setText(String.valueOf(profileData.getCoins()));
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
     }

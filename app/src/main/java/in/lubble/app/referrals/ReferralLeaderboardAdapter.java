@@ -108,7 +108,7 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
             rankTv = view.findViewById(R.id.tv_rank);
             iconIv = view.findViewById(R.id.iv_icon);
             nameTv = view.findViewById(R.id.tv_name);
-            pointsTv = view.findViewById(R.id.tv_points);
+            pointsTv = view.findViewById(R.id.tv_likes);
         }
 
     }
@@ -126,7 +126,7 @@ public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerVie
             rankTv = view.findViewById(R.id.tv_rank);
             iconIv = view.findViewById(R.id.iv_icon);
             nameTv = view.findViewById(R.id.tv_name);
-            pointsTv = view.findViewById(R.id.tv_points);
+            pointsTv = view.findViewById(R.id.tv_likes);
         }
 
     }

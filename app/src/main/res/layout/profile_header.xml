@@ -12,25 +12,17 @@
         android:id="@+id/iv_profilePic"
         android:layout_width="184dp"
         android:layout_height="184dp"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
         android:transitionName="nahi_chaiye"
-        android:layout_centerHorizontal="true"
         app:srcCompat="@drawable/circle" />
-
-    <ProgressBar
-        android:id="@+id/progressBar_profile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/iv_profilePic"
-        android:layout_alignTop="@id/iv_profilePic"
-        android:layout_centerHorizontal="true" />
 
     <ImageView
         android:id="@+id/iv_dp_edit_overlay"
         android:layout_width="184dp"
         android:layout_height="184dp"
-        android:layout_alignBottom="@id/iv_profilePic"
         android:layout_alignTop="@id/iv_profilePic"
+        android:layout_alignBottom="@id/iv_profilePic"
         android:layout_centerHorizontal="true"
         android:alpha="0.5"
         android:background="@drawable/circle"
@@ -40,5 +32,53 @@
         android:visibility="gone"
         app:srcCompat="@drawable/ic_edit_black_24dp"
         tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/container_current_coins"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/pill_button"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:paddingRight="8dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            app:srcCompat="@drawable/ic_coin" />
+
+        <TextView
+            android:id="@+id/tv_total_coins"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:text="---"
+            android:textColor="@color/gold"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:alpha="0.7"
+            android:gravity="center"
+            android:tint="@color/white"
+            app:srcCompat="@drawable/ic_add_circle_black_24dp" />
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/iv_profilePic"
+        android:layout_alignBottom="@id/iv_profilePic"
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
