@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -172,6 +173,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (!TextUtils.isEmpty(profileInfo.getBadge())) {
                     sentChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
                     sentChatViewHolder.badgeTextTv.setText(profileInfo.getBadge());
+                    sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.trans_white));
                 } else {
                     sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
                 }
@@ -206,6 +208,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
         }
+        sentChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.white));
         if (chatData.getLubbCount() == 0) {
             sentChatViewHolder.lubbCount.setText("");
         } else {
@@ -255,7 +258,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             addReplyData(chatData.getReplyMsgId(), sentChatViewHolder.linkTitleTv, sentChatViewHolder.linkDescTv, chatData.getIsDm());
-            final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.rounded_rect_gray);
+            final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.rect_rounded_trans_white);
             DrawableCompat.setTintList(drawable, null);
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
             sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.black));
@@ -286,7 +289,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .error(R.drawable.ic_public_black_24dp)
                     .into(sentChatViewHolder.linkPicIv);
             sentChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
-            final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.rounded_rect_gray);
+            final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.rect_rounded_trans_white);
             DrawableCompat.setTintList(drawable, null);
             sentChatViewHolder.linkContainer.setBackground(drawable);
         } else {
@@ -326,6 +329,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                     Drawable normalDrawable = context.getResources().getDrawable(R.drawable.rounded_rect_gray);
                                     Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
                                     DrawableCompat.setTint(wrapDrawable, p.getDarkVibrantColor(ContextCompat.getColor(context, R.color.fb_color)));
+                                    DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
                                     linkContainer.setBackground(wrapDrawable);
                                 }
                             });
@@ -335,6 +339,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             Drawable normalDrawable = context.getResources().getDrawable(R.drawable.rounded_rect_gray);
             Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
             DrawableCompat.setTint(wrapDrawable, ContextCompat.getColor(context, R.color.fb_color));
+            DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
             linkContainer.setBackground(wrapDrawable);
         }
     }
@@ -373,6 +378,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }
+        recvdChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
         recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
         if (chatData.getLubbCount() == 0) {
             recvdChatViewHolder.lubbCount.setText("");
@@ -907,6 +913,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (!TextUtils.isEmpty(profileInfo.getBadge())) {
                 recvdChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
                 recvdChatViewHolder.badgeTextTv.setText(profileInfo.getBadge());
+                recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.default_text_color));
             } else {
                 recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
             }
@@ -1168,7 +1175,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView downloadIv;
         private LinearLayout pollContainer;
         private LinearLayout lubbContainer;
-        private TextView badgeTextTv;
+        private EmojiTextView badgeTextTv;
 
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
@@ -1338,7 +1345,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView youtubeTitleTv;
         private LinearLayout pollContainer;
         private LinearLayout lubbContainer;
-        private TextView badgeTextTv;
+        private EmojiTextView badgeTextTv;
         private TextView senderTv;
 
         SentChatViewHolder(final View itemView) {
