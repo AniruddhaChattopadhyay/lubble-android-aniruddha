@@ -17,6 +17,7 @@
         tools:text="Poll: What is the answer to life, the universe &amp; everything?" />
 
     <TextView
+        android:id="@+id/tv_anon_poll_hint"
         android:layout_width="wrap_content"
         android:textSize="12sp"
         android:textColor="@color/colorAccent"

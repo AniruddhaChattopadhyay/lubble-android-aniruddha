@@ -300,7 +300,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
             sentChatViewHolder.pollContainer.setVisibility(View.VISIBLE);
-            ((TextView) sentChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques)).setText(chatData.getPollQues());
+            final TextView pollQuesTv = sentChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques);
+            ((TextView) sentChatViewHolder.pollContainer.findViewById(R.id.tv_anon_poll_hint)).setTextColor(ContextCompat.getColor(context, R.color.trans_white));
+            pollQuesTv.setText(chatData.getPollQues());
+            pollQuesTv.setTextColor(ContextCompat.getColor(context, R.color.white));
 
             showPollResults(sentChatViewHolder, chatData);
 
@@ -464,7 +467,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
             recvdChatViewHolder.pollContainer.setVisibility(View.VISIBLE);
-            ((TextView) recvdChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques)).setText(chatData.getPollQues());
+            final TextView pollQuesTv = recvdChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques);
+            ((TextView) recvdChatViewHolder.pollContainer.findViewById(R.id.tv_anon_poll_hint)).setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+            pollQuesTv.setText(chatData.getPollQues());
+            pollQuesTv.setTextColor(ContextCompat.getColor(context, R.color.black));
 
             if (chatData.getPollReceipts().containsKey(FirebaseAuth.getInstance().getUid())) {
                 // this user has voted. Show results UI
@@ -486,7 +492,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             pollContainer = ((SentChatViewHolder) baseViewHolder).pollContainer;
         }
         pollContainer.findViewById(R.id.container_poll_results).setVisibility(View.GONE);
-        setPollCount(chatData, pollContainer);
+        setPollCount(chatData, pollContainer, ContextCompat.getColor(context, R.color.white));
         final LinearLayout buttonsContainer = pollContainer.findViewById(R.id.container_poll_btns);
         buttonsContainer.setVisibility(View.VISIBLE);
         if (buttonsContainer.getChildCount() > 0) {
@@ -551,10 +557,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final LinearLayout pollContainer;
         if (baseViewHolder instanceof RecvdChatViewHolder) {
             pollContainer = ((RecvdChatViewHolder) baseViewHolder).pollContainer;
+            setPollCount(chatData, pollContainer, ContextCompat.getColor(context, R.color.black));
         } else {
             pollContainer = ((SentChatViewHolder) baseViewHolder).pollContainer;
+            setPollCount(chatData, pollContainer, ContextCompat.getColor(context, R.color.white));
         }
-        setPollCount(chatData, pollContainer);
         final LinearLayout resultsView = pollContainer.findViewById(R.id.container_poll_results);
         resultsView.setVisibility(View.VISIBLE);
         pollContainer.findViewById(R.id.container_poll_btns).setVisibility(View.GONE);
@@ -573,8 +580,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             int percent = chatData.getPollReceipts().size() == 0 ? 0 : (int) ((((double) choiceData.getCount() / (double) chatData.getPollReceipts().size())) * 100);
             final TextView percentTv = choiceContainer.findViewById(R.id.tv_choice_percent);
             percentTv.setText(percent + "%");
+            final View choiceBackground = choiceContainer.findViewById(R.id.iv_choice_background);
             if (percent > 0) {
-                final View choiceBackground = choiceContainer.findViewById(R.id.iv_choice_background);
                 final LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) choiceBackground.getLayoutParams();
                 layoutParams.weight = percent;
                 choiceBackground.setLayoutParams(layoutParams);
@@ -582,24 +589,42 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     // tint the choice voted by user to differentiate it from rest of the choices
                     choiceTv.setTypeface(choiceTv.getTypeface(), Typeface.BOLD);
                     percentTv.setTypeface(percentTv.getTypeface(), Typeface.BOLD);
-                    ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.trans_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+                    if (baseViewHolder instanceof RecvdChatViewHolder) {
+                        ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.trans_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+                    } else {
+                        ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.white), android.graphics.PorterDuff.Mode.SRC_IN);
+                    }
                 } else {
                     choiceTv.setTypeface(choiceTv.getTypeface(), Typeface.NORMAL);
                     percentTv.setTypeface(percentTv.getTypeface(), Typeface.NORMAL);
-                    ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.medium_light_grey), android.graphics.PorterDuff.Mode.SRC_IN);
+                    if (baseViewHolder instanceof RecvdChatViewHolder) {
+                        ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.medium_light_grey), android.graphics.PorterDuff.Mode.SRC_IN);
+                    } else {
+                        ((ImageView) choiceBackground).setColorFilter(ContextCompat.getColor(context, R.color.very_trans_white), android.graphics.PorterDuff.Mode.SRC_IN);
+                    }
                 }
             } else {
                 // percent is ZERO
-                choiceTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_rect_trans_border));
+                if (baseViewHolder instanceof RecvdChatViewHolder) {
+                    choiceTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_rect_trans_border));
+                } else {
+                    choiceTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_rect_white_border));
+                }
                 choiceContainer.findViewById(R.id.iv_choice_background).setVisibility(View.GONE);
             }
-
+            if (baseViewHolder instanceof RecvdChatViewHolder) {
+                choiceTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+                percentTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+            } else {
+                choiceTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+                percentTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            }
 
             resultsView.addView(choiceContainer);
         }
     }
 
-    private void setPollCount(ChatData chatData, LinearLayout pollContainer) {
+    private void setPollCount(ChatData chatData, LinearLayout pollContainer, int color) {
         final TextView voteCountTv = pollContainer.findViewById(R.id.tv_poll_vote_count);
         final int voteCount = chatData.getPollReceipts().size();
         String voteCountStr = "No votes";
@@ -607,6 +632,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             voteCountStr = context.getResources().getQuantityString(R.plurals.vote_count, voteCount, voteCount);
         }
         voteCountTv.setText(voteCountStr);
+        voteCountTv.setTextColor(color);
     }
 
     private void handleYoutube(RecyclerView.ViewHolder baseViewHolder, final String message, final int position) {

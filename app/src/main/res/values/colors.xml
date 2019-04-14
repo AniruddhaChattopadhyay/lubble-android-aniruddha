@@ -14,6 +14,7 @@
     <color name="white">#FFFFFF</color>
     <color name="dark_gold">#e1b000</color>
     <color name="gold">#FFCA0A</color>
+    <color name="very_trans_white">#45FFFFFF</color>
     <color name="trans_white">#96ffffff</color>
     <color name="circle_trans_white">#caffffff</color>
     <color name="default_text_color">#808080</color>
