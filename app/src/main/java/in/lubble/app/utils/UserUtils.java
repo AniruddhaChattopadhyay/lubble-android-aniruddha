@@ -48,14 +48,16 @@ public class UserUtils {
                                 .signOut(activity)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     public void onComplete(@NonNull Task<Void> task) {
-                                        progressDialog.dismiss();
-                                        // user is now signed out
-                                        LubbleSharedPrefs.getInstance().clearAll();
-                                        Branch.getInstance().logout();
-                                        Intent intent = new Intent(activity, LoginActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                                        activity.startActivity(intent);
-                                        activity.finishAffinity();
+                                        if (!activity.isFinishing() && !activity.isDestroyed()) {
+                                            progressDialog.dismiss();
+                                            // user is now signed out
+                                            LubbleSharedPrefs.getInstance().clearAll();
+                                            Branch.getInstance().logout();
+                                            Intent intent = new Intent(activity, LoginActivity.class);
+                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                            activity.startActivity(intent);
+                                            activity.finishAffinity();
+                                        }
                                     }
                                 });
                     } else {
