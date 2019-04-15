@@ -15,7 +15,6 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
-import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
@@ -769,44 +768,36 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     private void showIntroPrompt(UserGroupData userGroupData) {
-        if (groupData != null && !TextUtils.isEmpty(groupData.getIntro()) && !userGroupData.getIsIntroPromptDismissed()) {
-            final TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, dpToPx(48), 0);
-            translateAnimation.setDuration(200);
-            translateAnimation.setInterpolator(new FastOutSlowInInterpolator());
-            translateAnimation.setAnimationListener(new Animation.AnimationListener() {
+        try {
+            if (groupData != null && !TextUtils.isEmpty(groupData.getIntro()) && !userGroupData.getIsIntroPromptDismissed()) {
+                final TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, dpToPx(48), 0);
+                translateAnimation.setDuration(200);
+                translateAnimation.setInterpolator(new FastOutSlowInInterpolator());
+                introPromptContainer.startAnimation(translateAnimation);
+                bunnyHandsIv.setVisibility(View.VISIBLE);
 
-                @Override
-                public void onAnimationStart(Animation animation) {
-                    introPromptContainer.setVisibility(View.VISIBLE);
-                    chatRecyclerView.setPadding(0, 0, 0, dpToPx(52));
-                    if (((LinearLayoutManager) chatRecyclerView.getLayoutManager()).findLastVisibleItemPosition()
-                            == chatRecyclerView.getAdapter().getItemCount() - 1) {
-                        chatRecyclerView.scrollBy(0, dpToPx(52));
-                    }
+                introPromptContainer.setVisibility(View.VISIBLE);
+                chatRecyclerView.setPadding(0, 0, 0, dpToPx(52));
+                if (((LinearLayoutManager) chatRecyclerView.getLayoutManager()).findLastVisibleItemPosition()
+                        == chatRecyclerView.getAdapter().getItemCount() - 1) {
+                    chatRecyclerView.scrollBy(0, dpToPx(52));
                 }
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
+                final TextView msgTv = introPromptContainer.findViewById(R.id.tv_intro_prompt);
+                msgTv.setText(groupData.getIntro());
+                Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_SHOWN, getContext());
+
+                if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+                    newMessageEt.setText(getRandomGroupGreeting() +
+                            " I'm " + StringUtils.getTitleCase(FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0])
+                            + "!\nI'm interested in ");
+                    newMessageEt.setSelection(newMessageEt.getText().length());
+                    newMessageEt.requestFocus();
                 }
-
-                @Override
-                public void onAnimationRepeat(Animation animation) {
-                }
-
-            });
-            introPromptContainer.startAnimation(translateAnimation);
-            bunnyHandsIv.setVisibility(View.VISIBLE);
-            final TextView msgTv = introPromptContainer.findViewById(R.id.tv_intro_prompt);
-            msgTv.setText(groupData.getIntro());
-            Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_SHOWN, getContext());
-
-            if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
-                newMessageEt.setText(getRandomGroupGreeting() +
-                        " I'm " + StringUtils.getTitleCase(FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0])
-                        + "!\nI'm from ");
-                newMessageEt.setSelection(newMessageEt.getText().length());
-                newMessageEt.requestFocus();
             }
+        } catch (Exception e) {
+            Crashlytics.log("exception showing intro prompt");
+            Crashlytics.logException(e);
         }
     }
 
