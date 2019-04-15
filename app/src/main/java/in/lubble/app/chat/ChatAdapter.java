@@ -173,7 +173,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (!TextUtils.isEmpty(profileInfo.getBadge())) {
                     sentChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
                     sentChatViewHolder.badgeTextTv.setText(profileInfo.getBadge());
-                    sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.trans_white));
+                    sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+                    sentChatViewHolder.badgeTextTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rect_rounded_trans_white));
                 } else {
                     sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
                 }
@@ -914,6 +915,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 recvdChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
                 recvdChatViewHolder.badgeTextTv.setText(profileInfo.getBadge());
                 recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.default_text_color));
+                recvdChatViewHolder.badgeTextTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rect_rounded_border_sharper));
             } else {
                 recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
             }
