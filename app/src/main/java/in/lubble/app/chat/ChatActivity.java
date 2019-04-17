@@ -259,7 +259,7 @@ public class ChatActivity extends BaseActivity {
             if (position == 0) {
                 return getTargetChatFrag(msgId, isJoining);
             } else {
-                return ChatMoreFragment.newInstance("", "");
+                return ChatMoreFragment.newInstance("The Book Club", "");
             }
         }
 

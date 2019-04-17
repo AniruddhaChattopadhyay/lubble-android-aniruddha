@@ -112,8 +112,8 @@ public interface Endpoints {
     @POST("quiz/")
     public Call<PlaceData> getQuizResult(@Body RequestBody params);
 
-    @GET("appbhSWmy7ZS6UeTy/Table%201?view=Grid%20view")
-    public Call<AirtableData> fetchMore();
+    @GET
+    public Call<AirtableData> fetchMore(@Url String url);
 
     @GET
     public Call<AirtableCollectionData> fetchEntries(@Url String url);
