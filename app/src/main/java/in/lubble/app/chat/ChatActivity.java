@@ -15,7 +15,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -119,6 +124,10 @@ public class ChatActivity extends BaseActivity {
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         setTitle("");
 
+        ViewPager viewPager = findViewById(R.id.viewpager_chat);
+        TabLayout tabLayout = findViewById(R.id.tablayout_chat);
+        tabLayout.setupWithViewPager(viewPager);
+
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
         groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
@@ -133,25 +142,10 @@ public class ChatActivity extends BaseActivity {
         } else {
             toolbarInviteHint.setVisibility(View.GONE);
         }
-        if (!TextUtils.isEmpty(groupId)) {
-            targetFrag = ChatFragment.newInstanceForGroup(
-                    groupId, isJoining, msgId, (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
-            );
-        } else if (!TextUtils.isEmpty(dmId)) {
-            targetFrag = ChatFragment.newInstanceForDm(
-                    dmId, msgId,
-                    getIntent().getStringExtra(EXTRA_ITEM_TITLE), (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
-            );
-        } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
-            targetFrag = ChatFragment.newInstanceForEmptyDm(
-                    getIntent().getStringExtra(EXTRA_RECEIVER_ID),
-                    getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
-                    getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL),
-                    getIntent().getStringExtra(EXTRA_ITEM_TITLE)
-            );
-        } else {
-            throw new RuntimeException("Invalid Args, see the valid factory methods by searching for this error string");
-        }
+
+        ChatViewPagerAdapter adapter = new ChatViewPagerAdapter(getSupportFragmentManager(), msgId, isJoining);
+        viewPager.setAdapter(adapter);
+        targetFrag = getTargetChatFrag(msgId, isJoining);
 
         replaceFrag(getSupportFragmentManager(), targetFrag, R.id.frame_fragContainer);
         toolbar.setOnClickListener(new View.OnClickListener() {
@@ -179,6 +173,28 @@ public class ChatActivity extends BaseActivity {
             }
         } catch (Exception e) {
             Crashlytics.logException(e);
+        }
+    }
+
+    private ChatFragment getTargetChatFrag(String msgId, boolean isJoining) {
+        if (!TextUtils.isEmpty(groupId)) {
+            return ChatFragment.newInstanceForGroup(
+                    groupId, isJoining, msgId, (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
+            );
+        } else if (!TextUtils.isEmpty(dmId)) {
+            return ChatFragment.newInstanceForDm(
+                    dmId, msgId,
+                    getIntent().getStringExtra(EXTRA_ITEM_TITLE), (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
+            );
+        } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
+            return ChatFragment.newInstanceForEmptyDm(
+                    getIntent().getStringExtra(EXTRA_RECEIVER_ID),
+                    getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
+                    getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL),
+                    getIntent().getStringExtra(EXTRA_ITEM_TITLE)
+            );
+        } else {
+            throw new RuntimeException("Invalid Args, see the valid factory methods by searching for this error string");
         }
     }
 
@@ -224,6 +240,38 @@ public class ChatActivity extends BaseActivity {
         filter.setPriority(1);
         registerReceiver(notificationReceiver, filter);
 
+    }
+
+    public class ChatViewPagerAdapter extends FragmentPagerAdapter {
+
+        private String title[] = {"Chats", "Info"};
+        private String msgId;
+        private boolean isJoining;
+
+        public ChatViewPagerAdapter(FragmentManager manager, String msgId, boolean isJoining) {
+            super(manager);
+            this.msgId = msgId;
+            this.isJoining = isJoining;
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            if (position == 0) {
+                return getTargetChatFrag(msgId, isJoining);
+            } else {
+                return ChatMoreFragment.newInstance("", "");
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return title.length;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return title[position];
+        }
     }
 
     public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate) {

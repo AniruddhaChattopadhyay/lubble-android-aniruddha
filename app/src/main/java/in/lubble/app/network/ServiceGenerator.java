@@ -12,19 +12,28 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ServiceGenerator {
 
     private static final String BASE_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://devapi.lubble.in/" : "https://api.lubble.in/";
+    private static final String AIRTABLE_API_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://api.airtable.com/v0/" : "https://api.lubble.in/";
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create());
 
+    private static Retrofit.Builder airtableBuilder =
+            new Retrofit.Builder()
+                    .baseUrl(AIRTABLE_API_URL)
+                    .addConverterFactory(GsonConverterFactory.create());
+
     private static Retrofit retrofit = builder.build();
+    private static Retrofit airtableRetrofit = airtableBuilder.build();
 
     private static HttpLoggingInterceptor logging =
             new HttpLoggingInterceptor()
                     .setLevel(HttpLoggingInterceptor.Level.BODY);
 
     private static OkHttpClient.Builder httpClient =
+            new OkHttpClient.Builder();
+    private static OkHttpClient.Builder airtableHttpClient =
             new OkHttpClient.Builder();
 
     public static <S> S createService(Class<S> serviceClass) {
@@ -54,5 +63,24 @@ public class ServiceGenerator {
         return retrofit.create(serviceClass);
     }
 
+    public static <S> S createAirtableService(Class<S> serviceClass) {
+
+        AirtableAuthInterceptor interceptor =
+                new AirtableAuthInterceptor();
+
+        if (!airtableHttpClient.interceptors().contains(interceptor)) {
+            airtableHttpClient.addInterceptor(interceptor);
+
+            airtableBuilder.client(airtableHttpClient.build());
+            airtableRetrofit = airtableBuilder.build();
+        }
+
+        if (!airtableHttpClient.interceptors().contains(logging)) {
+            airtableHttpClient.addInterceptor(logging);
+            airtableBuilder.client(airtableHttpClient.build());
+            airtableRetrofit = airtableBuilder.build();
+        }
+        return airtableRetrofit.create(serviceClass);
+    }
 
 }

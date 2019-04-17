@@ -45,4 +45,6 @@ public class Constants {
 
     public static final String NEW_CHAT_ACTION = "in.lubble.app.NEW_MSG_INTENT";
 
+    public static final String AIRTABLE_CHAABI = "keynD8giLhbC5OtN5";
+
 }

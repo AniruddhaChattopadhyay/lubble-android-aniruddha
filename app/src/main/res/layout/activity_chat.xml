@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,12 +14,37 @@
         android:id="@+id/frame_fragContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/icon_toolbar" />
+        android:layout_below="@id/tablayout_chat" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tablayout_chat"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/icon_toolbar"
+        android:background="@color/white">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chats" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Info" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewpager_chat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/tablayout_chat" />
 
     <include
         layout="@layout/layout_shadow"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:layout_below="@id/icon_toolbar" />
+        android:layout_below="@id/tablayout_chat" />
 
 </RelativeLayout>

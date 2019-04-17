@@ -5,7 +5,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import in.lubble.app.chat.ChatMoreFragment;
+import in.lubble.app.utils.FragUtils;
 
 public class DebugActivity extends BaseActivity {
 
@@ -15,6 +18,9 @@ public class DebugActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debug);
+
+        FrameLayout frameContent = findViewById(R.id.content_frame);
+        FragUtils.replaceFrag(getSupportFragmentManager(), ChatMoreFragment.newInstance("", ""), frameContent.getId());
 
     }
 

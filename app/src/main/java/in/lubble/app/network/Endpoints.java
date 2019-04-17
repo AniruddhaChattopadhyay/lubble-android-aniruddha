@@ -1,6 +1,7 @@
 package in.lubble.app.network;
 
 import in.lubble.app.auth.LocationsData;
+import in.lubble.app.chat.AirtableCollectionData;
 import in.lubble.app.explore.ExploreGroupData;
 import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.marketplace.RatingData;
@@ -78,36 +79,42 @@ public interface Endpoints {
     @GET("marketplace/allitems/")
     Call<ArrayList<Item>> fetchAllItems();
 
-    @GET("/marketplace/servicecategories/")
+    @GET("marketplace/servicecategories/")
     Call<ArrayList<Category>> fetchServiceCategories();
 
-    @GET("/referral/history/")
+    @GET("referral/history/")
     Call<ReferralHistoryData> fetchReferralHistory();
 
-    @GET("/referral/leaderboard/")
+    @GET("referral/leaderboard/")
     Call<ReferralLeaderboardData> fetchReferralLeaderboard();
 
-    @POST("/signup/")
+    @POST("signup/")
     Call<ArrayList<LocationsData>> uploadSignUp(@Body RequestBody params);
 
-    @POST("/signup_complete/")
+    @POST("signup_complete/")
     Call<Void> uploadSignUpComplete(@Body RequestBody params);
 
-    @GET("/home/")
+    @GET("home/")
     Call<ArrayList<SliderData>> fetchHomeData();
 
-    @GET("/explore/{lubble_id}/")
+    @GET("explore/{lubble_id}/")
     Call<ArrayList<ExploreGroupData>> fetchExploreGroups(@Path("lubble_id") String lubbleId);
 
-    @GET("/profile/{user_id}/")
+    @GET("profile/{user_id}/")
     Call<UserProfileData> fetchUserProfile(@Path("user_id") String userId);
 
     @GET
     public Call<YoutubeData> getYoutubeData(@Url String url);
 
-    @GET("/quiz/")
+    @GET("quiz/")
     public Call<ArrayList<QuestionData>> getQuizQuestions();
 
-    @POST("/quiz/")
+    @POST("quiz/")
     public Call<PlaceData> getQuizResult(@Body RequestBody params);
+
+    @GET("appbhSWmy7ZS6UeTy/Table%201?view=Grid%20view")
+    public Call<AirtableData> fetchMore();
+
+    @GET
+    public Call<AirtableCollectionData> fetchEntries(@Url String url);
 }
