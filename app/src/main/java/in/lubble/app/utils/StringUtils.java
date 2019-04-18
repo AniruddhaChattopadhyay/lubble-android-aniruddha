@@ -24,6 +24,10 @@ public class StringUtils {
         return textInputLayout.getEditText().getText().toString();
     }
 
+    public static boolean isValidMobile(String phone) {
+        return android.util.Patterns.PHONE.matcher(phone).matches();
+    }
+
     public static String getTitleCase(String str) {
 
         if (str == null) {

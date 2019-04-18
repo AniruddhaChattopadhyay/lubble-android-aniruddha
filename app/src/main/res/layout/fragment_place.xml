@@ -2,9 +2,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white"
-    tools:context="in.lubble.app.places.PlaceFrag">
+    android:layout_height="wrap_content"
+    android:layout_marginTop="16dp"
+    android:layout_marginBottom="16dp"
+    android:background="@color/white">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,7 +15,9 @@
             android:id="@+id/tv_pre_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="8dp"
             android:maxLines="2"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             android:textColor="@color/black"
@@ -30,151 +33,163 @@
             tools:src="@tools:sample/backgrounds/scenic" />
 
         <TextView
-            android:id="@+id/tv_post_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/iv_place_hero"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginRight="16dp"
-            android:maxLines="2"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-            android:textColor="@color/black"
-            android:textSize="24sp"
-            tools:text="Atta Galatta" />
-
-        <ImageView
-            android:id="@+id/iv_map"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignTop="@id/tv_post_title"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="8dp"
-            app:srcCompat="@drawable/ic_map" />
-
-        <TextView
-            android:id="@+id/tv_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_post_title"
-            android:layout_alignLeft="@id/tv_post_title"
-            android:layout_marginTop="4dp"
-            android:gravity="center"
-            android:textSize="18sp"
-            app:drawableLeftCompat="@drawable/ic_location_on_black_24dp"
-            app:drawableTint="@color/gray"
-            tools:text="5th Block" />
-
-        <TextView
-            android:id="@+id/tv_rating"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_location"
-            android:layout_alignLeft="@id/tv_post_title"
-            android:layout_marginLeft="4dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="8dp"
-            android:gravity="center"
-            android:textColor="@color/orange"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:drawableRightCompat="@drawable/ic_star_black_24dp"
-            app:drawableTint="@color/orange"
-            tools:text="4.4" />
-
-        <TextView
-            android:id="@+id/tv_rating_provider"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/tv_rating"
-            android:layout_alignBottom="@id/tv_rating"
-            android:layout_marginLeft="4dp"
-            android:layout_toRightOf="@id/tv_rating"
-            android:gravity="center"
-            tools:text="Google" />
-
-        <TextView
-            android:id="@+id/tv_price_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_rating"
-            android:layout_alignLeft="@id/tv_post_title"
-            android:layout_marginTop="16dp"
-            android:drawablePadding="8dp"
-            android:text="Price for two: "
-            android:textColor="@color/darker_gray"
-            android:textStyle="bold"
-            app:drawableLeftCompat="@drawable/ic_circle_rupee_16" />
-
-        <TextView
-            android:id="@+id/tv_price"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/tv_price_hint"
-            android:layout_alignBottom="@id/tv_price_hint"
-            android:layout_toRightOf="@id/tv_price_hint"
-            android:gravity="center"
-            android:textColor="@color/black"
-            tools:text="INR 2500" />
-
-        <TextView
-            android:id="@+id/tv_timing_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_price_hint"
-            android:layout_alignLeft="@id/tv_post_title"
-            android:layout_marginTop="8dp"
-            android:drawablePadding="8dp"
-            android:gravity="center"
-            android:text="Timings : "
-            android:textColor="@color/darker_gray"
-            android:textStyle="bold"
-            app:drawableLeftCompat="@drawable/ic_clock" />
-
-        <TextView
-            android:id="@+id/tv_timing"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignTop="@id/tv_timing_hint"
-            android:layout_alignBottom="@id/tv_timing_hint"
-            android:layout_toRightOf="@id/tv_timing_hint"
-            android:gravity="center"
-            android:textColor="@color/black"
-            tools:text="8am - 8pm" />
-
-        <TextView
-            android:id="@+id/tv_special"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_timing_hint"
-            android:layout_alignLeft="@id/tv_post_title"
-            android:layout_marginTop="8dp"
-            android:drawablePadding="8dp"
-            android:gravity="center"
-            android:text="Special Remark"
-            android:textColor="@color/black"
-            app:drawableLeftCompat="@drawable/ic_stars_gray_16dp" />
-
-        <Button
-            android:id="@+id/btn_cta"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/tv_special"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginRight="16dp"
-            android:theme="@style/AccentButton"
-            tools:text="CALL NOW" />
-
-        <TextView
             android:id="@+id/tv_desc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/btn_cta"
+            android:layout_below="@id/iv_place_hero"
             android:layout_margin="16dp"
             android:autoLink="web"
+            android:lineSpacingExtra="8dp"
             android:textColor="@color/black"
+            android:textSize="16sp"
             tools:text="@tools:sample/lorem/random" />
+
+        <RelativeLayout
+            android:id="@+id/container_place_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_desc">
+
+            <TextView
+                android:id="@+id/tv_post_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="16dp"
+                android:maxLines="2"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                tools:text="Atta Galatta" />
+
+            <ImageView
+                android:id="@+id/iv_map"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignTop="@id/tv_post_title"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="8dp"
+                app:srcCompat="@drawable/ic_map" />
+
+            <TextView
+                android:id="@+id/tv_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_post_title"
+                android:layout_alignLeft="@id/tv_post_title"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:textSize="18sp"
+                app:drawableLeftCompat="@drawable/ic_location_on_black_24dp"
+                app:drawableTint="@color/gray"
+                tools:text="5th Block" />
+
+            <TextView
+                android:id="@+id/tv_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_location"
+                android:layout_alignLeft="@id/tv_post_title"
+                android:layout_marginLeft="4dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:textColor="@color/orange"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:drawableRightCompat="@drawable/ic_star_black_24dp"
+                app:drawableTint="@color/orange"
+                tools:text="4.4" />
+
+            <TextView
+                android:id="@+id/tv_rating_provider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/tv_rating"
+                android:layout_alignBottom="@id/tv_rating"
+                android:layout_marginLeft="4dp"
+                android:layout_toRightOf="@id/tv_rating"
+                android:gravity="center"
+                tools:text="Google" />
+
+            <TextView
+                android:id="@+id/tv_price_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_rating"
+                android:layout_alignLeft="@id/tv_post_title"
+                android:layout_marginTop="16dp"
+                android:drawablePadding="8dp"
+                android:text="Price for two: "
+                android:textColor="@color/darker_gray"
+                android:textStyle="bold"
+                app:drawableLeftCompat="@drawable/ic_circle_rupee_16" />
+
+            <TextView
+                android:id="@+id/tv_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/tv_price_hint"
+                android:layout_alignBottom="@id/tv_price_hint"
+                android:layout_toRightOf="@id/tv_price_hint"
+                android:gravity="center"
+                android:textColor="@color/black"
+                tools:text="INR 2500" />
+
+            <TextView
+                android:id="@+id/tv_timing_hint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_price_hint"
+                android:layout_alignLeft="@id/tv_post_title"
+                android:layout_marginTop="8dp"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:text="Timings : "
+                android:textColor="@color/darker_gray"
+                android:textStyle="bold"
+                app:drawableLeftCompat="@drawable/ic_clock" />
+
+            <TextView
+                android:id="@+id/tv_timing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/tv_timing_hint"
+                android:layout_alignBottom="@id/tv_timing_hint"
+                android:layout_toRightOf="@id/tv_timing_hint"
+                android:gravity="center"
+                android:textColor="@color/black"
+                tools:text="8am - 8pm" />
+
+            <TextView
+                android:id="@+id/tv_special"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_timing_hint"
+                android:layout_alignLeft="@id/tv_post_title"
+                android:layout_marginTop="8dp"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:text="Special Remark"
+                android:textColor="@color/black"
+                app:drawableLeftCompat="@drawable/ic_stars_gray_16dp" />
+
+            <Button
+                android:id="@+id/btn_cta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_special"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginRight="16dp"
+                android:background="@drawable/pill_button_blue_clue"
+                android:elevation="4dp"
+                android:textColor="@color/white"
+                android:theme="@style/AccentButton"
+                tools:text="CALL NOW" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

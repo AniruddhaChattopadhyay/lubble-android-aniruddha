@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.chat.collections.AirtableCollectionData;
+import in.lubble.app.chat.collections.CollectionsAdapter;
 import in.lubble.app.network.AirtableData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;

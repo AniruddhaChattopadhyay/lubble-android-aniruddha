@@ -1,7 +1,8 @@
 package in.lubble.app.network;
 
 import in.lubble.app.auth.LocationsData;
-import in.lubble.app.chat.AirtableCollectionData;
+import in.lubble.app.chat.collections.AirtableCollectionData;
+import in.lubble.app.chat.collections.AirtablePlacesData;
 import in.lubble.app.explore.ExploreGroupData;
 import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.marketplace.RatingData;
@@ -117,4 +118,7 @@ public interface Endpoints {
 
     @GET
     public Call<AirtableCollectionData> fetchEntries(@Url String url);
+
+    @GET
+    public Call<AirtablePlacesData> fetchPlaces(@Url String url);
 }

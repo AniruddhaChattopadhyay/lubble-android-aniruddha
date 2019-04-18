@@ -1,4 +1,4 @@
-package in.lubble.app.chat;
+package in.lubble.app.chat.collections;
 
 import com.google.gson.annotations.SerializedName;
 
