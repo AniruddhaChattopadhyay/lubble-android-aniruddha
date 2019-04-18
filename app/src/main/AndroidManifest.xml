@@ -19,7 +19,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".chat.collections.CollectionActivity"></activity>
+        <activity
+            android:name=".chat.collections.CollectionActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".quiz.QuizOptionsActiv"
             android:configChanges="orientation"
