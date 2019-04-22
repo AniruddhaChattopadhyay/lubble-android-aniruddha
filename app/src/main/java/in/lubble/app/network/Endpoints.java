@@ -1,6 +1,7 @@
 package in.lubble.app.network;
 
 import in.lubble.app.auth.LocationsData;
+import in.lubble.app.chat.books.pojos.BooksData;
 import in.lubble.app.chat.collections.AirtableCollectionData;
 import in.lubble.app.chat.collections.AirtablePlacesData;
 import in.lubble.app.explore.ExploreGroupData;
@@ -121,4 +122,7 @@ public interface Endpoints {
 
     @GET
     public Call<AirtablePlacesData> fetchPlaces(@Url String url);
+
+    @GET
+    public Call<BooksData> searchBooks(@Url String url);
 }

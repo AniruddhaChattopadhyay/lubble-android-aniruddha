@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/iv_serp_book"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/tv_give_this"
+        tools:src="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/tv_book_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/iv_serp_book"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+        tools:text="Lord of the Rings: The return of the King III" />
+
+    <TextView
+        android:id="@+id/tv_book_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_book_title"
+        android:layout_alignLeft="@id/tv_book_title"
+        android:ellipsize="end"
+        android:maxLines="1"
+        tools:text="JRR Tolkein" />
+
+    <TextView
+        android:id="@+id/tv_give_this"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_book_author"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_toRightOf="@id/iv_serp_book"
+        android:background="@drawable/pill_button_blue_white"
+        app:drawableTint="@color/white"
+        android:gravity="center"
+        android:paddingLeft="24dp"
+        android:paddingTop="8dp"
+        android:paddingRight="24dp"
+        android:paddingBottom="8dp"
+        android:text="Give out this book"
+        android:textColor="@color/white"
+        app:drawableRightCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
+
+</RelativeLayout>

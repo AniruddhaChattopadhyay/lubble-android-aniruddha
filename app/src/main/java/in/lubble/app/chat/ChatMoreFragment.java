@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,11 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.chat.books.BookFragment;
 import in.lubble.app.chat.collections.AirtableCollectionData;
 import in.lubble.app.chat.collections.CollectionsAdapter;
 import in.lubble.app.network.AirtableData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.FragUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,6 +40,7 @@ public class ChatMoreFragment extends Fragment {
     private TextView collectionTitleTv;
     private RecyclerView collectionsRecyclerView;
     private ProgressBar progressBar;
+    private FrameLayout frameLayout;
 
     public ChatMoreFragment() {
         // Required empty public constructor
@@ -69,10 +73,14 @@ public class ChatMoreFragment extends Fragment {
         collectionTitleTv = view.findViewById(R.id.tv_collection_title);
         progressBar = view.findViewById(R.id.progressbar_chat_more);
         collectionsRecyclerView = view.findViewById(R.id.rv_1);
+        frameLayout = view.findViewById(R.id.framelayout_container);
 
         collectionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
 
         fetchMore();
+
+        FragUtils.addFrag(getChildFragmentManager(), frameLayout.getId(), BookFragment.newInstance());
+
         return view;
     }
 

@@ -19,6 +19,23 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
+        <service
+            android:name=".FetchAddressIntentService"
+            android:exported="false" />
+
+        <activity
+            android:name=".chat.books.AddressChooserActiv"
+            android:configChanges="orientation"
+            android:label="@string/title_activity_address_chooser"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".chat.books.BookCheckoutActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".chat.books.BookSearchActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".chat.collections.CollectionActivity"
             android:configChanges="orientation"

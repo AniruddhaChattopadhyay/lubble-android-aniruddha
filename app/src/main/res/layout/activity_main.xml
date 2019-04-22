@@ -28,7 +28,7 @@
         app:menu="@menu/navigation" />
 
     <FrameLayout
-        android:id="@+id/content"
+        android:id="@+id/tv_book_author"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/navigation"

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context="in.lubble.app.chat.books.BookCheckoutActiv">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/container_book_get"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:padding="8dp">
+
+        <ImageView
+            android:id="@+id/iv_selected_book"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignBottom="@id/tv_give_this"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/tv_book_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@id/iv_selected_book"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            tools:text="Lord of the Rings: The return of the King III" />
+
+        <TextView
+            android:id="@+id/tv_book_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_book_title"
+            android:layout_alignLeft="@id/tv_book_title"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="JRR Tolkein" />
+
+        <TextView
+            android:id="@+id/tv_remove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/iv_selected_book"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/pill_green"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:paddingTop="4dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="4dp"
+            android:text="+ You Get"
+            android:textColor="@color/white" />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:id="@+id/container_add_book"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/container_book_get"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:background="@drawable/pill_button_blue_white"
+        android:gravity="center"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:text="Choose a Book to give"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            app:drawableLeftCompat="@drawable/ic_library_add_white_24dp"
+            app:drawableTint="@color/white" />
+
+    </LinearLayout>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/container_book_give"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/container_book_get"
+        android:layout_marginLeft="16dp"
+        android:background="@color/white"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/iv_give_selected_book"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignBottom="@id/tv_give_this"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/tv_give_book_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_toRightOf="@id/iv_give_selected_book"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            tools:text="Lord of the Rings: The return of the King III" />
+
+        <TextView
+            android:id="@+id/tv_give_book_author"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_give_book_title"
+            android:layout_alignLeft="@id/tv_give_book_title"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="JRR Tolkein" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/iv_give_selected_book"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/pill_red"
+            android:gravity="center"
+            android:paddingLeft="8dp"
+            android:paddingTop="4dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="4dp"
+            android:text="- You Give"
+            android:textColor="@color/white" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignBottom="@id/container_book_get"
+        android:layout_marginBottom="-24dp"
+        android:background="@drawable/circle_white"
+        app:srcCompat="@drawable/ic_swap_vertical_circle_black_24dp" />
+
+    <TextView
+        android:id="@+id/tv_hint_addr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btn_place_order"
+        android:layout_alignTop="@id/btn_address"
+        android:layout_alignBottom="@id/btn_address"
+        android:layout_alignParentLeft="true"
+        android:gravity="center_vertical|left"
+        android:text="We'll pickup &amp; deliver\nat the same time"
+        android:textColor="@color/black"
+        app:drawableLeftCompat="@drawable/ic_location_on_black_24dp" />
+
+    <Button
+        android:id="@+id/btn_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/btn_place_order"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="4dp"
+        android:layout_toRightOf="@id/tv_hint_addr"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="Choose Address"
+        android:theme="@style/GreenButton" />
+
+    <Button
+        android:id="@+id/btn_place_order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Place Order"
+        android:theme="@style/AccentButton" />
+
+</RelativeLayout>

@@ -516,7 +516,7 @@ public class MainActivity extends BaseActivity {
 
     private void switchFrag(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().replace(R.id.content, fragment).commitAllowingStateLoss();
+        fm.beginTransaction().replace(R.id.tv_book_author, fragment).commitAllowingStateLoss();
     }
 
     @Override
