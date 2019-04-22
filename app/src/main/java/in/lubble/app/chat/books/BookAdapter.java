@@ -3,22 +3,28 @@ package in.lubble.app.chat.books;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.chat.books.BookFragment.OnListFragmentInteractionListener;
-import in.lubble.app.chat.books.dummy.DummyContent.DummyItem;
+import in.lubble.app.chat.books.airtable_pojo.AirtableBooksFields;
+import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
 
 import java.util.List;
 
 public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder> {
 
-    private final List<DummyItem> mValues;
+    private final List<AirtableBooksRecord> bookRecordsList;
     private final OnListFragmentInteractionListener mListener;
+    private GlideRequests glide;
 
-    public BookAdapter(List<DummyItem> items, OnListFragmentInteractionListener listener) {
-        mValues = items;
+    public BookAdapter(List<AirtableBooksRecord> items, GlideRequests glide, OnListFragmentInteractionListener listener) {
+        bookRecordsList = items;
         mListener = listener;
+        this.glide = glide;
     }
 
     @Override
@@ -30,9 +36,11 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
 
     @Override
     public void onBindViewHolder(final BookViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.titleTv.setText(mValues.get(position).id);
-        holder.authorTv.setText(mValues.get(position).content);
+        final AirtableBooksFields airtableBook = bookRecordsList.get(position).getFields();
+        holder.mItem = airtableBook;
+        holder.titleTv.setText(airtableBook.getTitle());
+        holder.authorTv.setText(airtableBook.getAuthor());
+        glide.load(airtableBook.getPhoto()).diskCacheStrategy(DiskCacheStrategy.NONE).into(holder.picIv);
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,7 +48,7 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
+                    //todo mListener.onListFragmentInteraction(holder.mItem);
                 }
                 BookCheckoutActiv.open(v.getContext());
             }
@@ -49,18 +57,20 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return bookRecordsList.size();
     }
 
     public class BookViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView titleTv;
-        public final TextView authorTv;
-        public DummyItem mItem;
+        final View mView;
+        final ImageView picIv;
+        final TextView titleTv;
+        final TextView authorTv;
+        AirtableBooksFields mItem;
 
-        public BookViewHolder(View view) {
+        BookViewHolder(View view) {
             super(view);
             mView = view;
+            picIv = view.findViewById(R.id.iv_book_cover);
             titleTv = view.findViewById(R.id.tv_book_title);
             authorTv = view.findViewById(R.id.tv_book_author);
         }

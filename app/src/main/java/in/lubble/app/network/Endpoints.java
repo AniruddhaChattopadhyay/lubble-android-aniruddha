@@ -1,6 +1,7 @@
 package in.lubble.app.network;
 
 import in.lubble.app.auth.LocationsData;
+import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
 import in.lubble.app.chat.books.pojos.BooksData;
 import in.lubble.app.chat.collections.AirtableCollectionData;
 import in.lubble.app.chat.collections.AirtablePlacesData;
@@ -125,4 +126,10 @@ public interface Endpoints {
 
     @GET
     public Call<BooksData> searchBooks(@Url String url);
+
+    @GET
+    public Call<AirtableBooksData> fetchBooks(@Url String url);
+
+    @POST
+    public Call<AirtableBooksData> uploadNewBook(@Url String url, @Body RequestBody params);
 }

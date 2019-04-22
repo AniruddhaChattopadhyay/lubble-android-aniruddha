@@ -16,12 +16,39 @@
         android:textSize="24sp" />
 
     <LinearLayout
+        android:id="@+id/container_book_stats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_book_exchangee_hint"
+        android:layout_alignTop="@id/container_add_book"
+        android:layout_alignBottom="@id/container_add_book"
+        android:layout_marginLeft="16dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_book_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--"
+            android:textColor="@color/black"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Your Books" />
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/container_add_book"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_book_exchangee_hint"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
+        android:layout_toRightOf="@id/container_book_stats"
         android:background="@drawable/pill_button_blue_white"
         android:gravity="center"
         android:padding="12dp">
@@ -30,70 +57,81 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawablePadding="8dp"
-            app:drawableTint="@color/white"
             android:gravity="center_vertical"
             android:text="Add Your Books"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textStyle="bold"
-            app:drawableLeftCompat="@drawable/ic_library_add_white_24dp" />
+            app:drawableLeftCompat="@drawable/ic_library_add_white_24dp"
+            app:drawableTint="@color/white" />
 
     </LinearLayout>
 
-    <RelativeLayout
-        android:id="@+id/container_book_stats"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/container_add_book"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="16dp"
-        android:orientation="horizontal"
-        android:padding="8dp">
-
-        <TextView
-            android:id="@+id/tv_book_stats_hint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="8dp"
-            android:text="Your Books"
-            android:textColor="@color/black" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="8dp"
-            android:layout_toRightOf="@id/tv_book_stats_hint"
-            android:text="0 books" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
-
-    </RelativeLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_books"
+    <LinearLayout
+        android:id="@+id/container_book_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/container_book_stats"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ProgressBar
+            android:id="@+id/progressbar_books"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/iv_no_book"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_undraw_book_lover" />
+
+        <TextView
+            android:id="@+id/tv_no_book"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
+            android:gravity="center"
+            android:text="Evanesco!\nNo books are available,\nadd your books to get started!"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_books"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/container_book_stats"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="16dp"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            tools:listitem="@layout/item_book" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_hint_psa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/container_book_list"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginRight="16dp"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:spanCount="2"
-        tools:listitem="@layout/item_book" />
+        android:gravity="center"
+        android:text="Add more books to get more books in exchange &amp; help grow this public library!"
+        android:textColor="@color/black" />
 
     <LinearLayout
         android:id="@+id/container_add_book_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/rv_books"
+        android:layout_below="@id/tv_hint_psa"
         android:layout_marginLeft="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginRight="16dp"
@@ -105,13 +143,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawablePadding="8dp"
-            app:drawableTint="@color/white"
             android:gravity="center_vertical"
             android:text="Add Your Books"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textStyle="bold"
-            app:drawableLeftCompat="@drawable/ic_library_add_white_24dp" />
+            app:drawableLeftCompat="@drawable/ic_library_add_white_24dp"
+            app:drawableTint="@color/white" />
 
     </LinearLayout>
 

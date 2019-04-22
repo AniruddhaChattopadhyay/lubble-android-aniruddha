@@ -12,19 +12,29 @@ import android.widget.*;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
 import in.lubble.app.chat.books.pojos.BookItem;
 import in.lubble.app.chat.books.pojos.BooksData;
+import in.lubble.app.chat.books.pojos.IndustryIdentifier;
+import in.lubble.app.chat.books.pojos.VolumeInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.UiUtils;
+import okhttp3.RequestBody;
+import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.util.HashMap;
+
+import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.chat.books.BookFragment.BOOK_STATUS_AVAILABLE;
 
 public class BookSearchActiv extends BaseActivity implements BookSelectedListener {
 
@@ -34,10 +44,11 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
     private ImageView searchIv;
     private TextView addedBooksTv;
     private RelativeLayout proceedContainer;
+    private RelativeLayout uploadingBookContainer;
     private RelativeLayout addMoreContainer;
     private RecyclerView searchResultsRv;
     private ProgressBar progressBar;
-    private HashMap<String, BookItem> selectedBooksMap = new HashMap<>();
+    private int booksAdded = 0;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, BookSearchActiv.class));
@@ -55,6 +66,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
         addMoreContainer = findViewById(R.id.container_add_more);
         addedBooksTv = findViewById(R.id.tv_added_books);
         searchResultsRv = findViewById(R.id.rv_book_search_results);
+        uploadingBookContainer = findViewById(R.id.container_uploading_book);
         searchResultsRv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         searchResultsRv.setLayoutManager(new LinearLayoutManager(this));
 
@@ -91,7 +103,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
 
         String searchString = searchEt.getText().toString();
         searchString = searchString.replace(" ", "+");
-        String url = "https://www.googleapis.com/books/v1/volumes?q=" + searchString + "+intitle&printType=books";
+        String url = "https://www.googleapis.com/books/v1/volumes?q=intitle:" + searchString + "&printType=books";
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.searchBooks(url).enqueue(new Callback<BooksData>() {
@@ -123,8 +135,8 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
 
     @Override
     public void onBookSelected(BookItem bookItem) {
-        selectedBooksMap.put(bookItem.getId(), bookItem);
-        updateProceedVisibility();
+        uploadBook(bookItem);
+        addMoreContainer.setVisibility(View.VISIBLE);
         searchEt.setText("");
         searchResultsRv.setAdapter(null);
         searchEt.postDelayed(new Runnable() {
@@ -139,11 +151,72 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
         searchEt.requestFocus();
     }
 
+    private void uploadBook(BookItem bookItem) {
+        uploadingBookContainer.setVisibility(View.VISIBLE);
+        proceedContainer.setVisibility(View.GONE);
+
+        HashMap<String, Object> params = new HashMap<>();
+        final VolumeInfo volumeInfo = bookItem.getVolumeInfo();
+        String isbn = "";
+
+        for (IndustryIdentifier industryIdentifier : volumeInfo.getIndustryIdentifiers()) {
+            if (industryIdentifier.getType().equalsIgnoreCase("ISBN_13")) {
+                isbn = industryIdentifier.getIdentifier();
+                break;
+            }
+        }
+
+        HashMap<String, Object> fieldParams = new HashMap<>();
+        fieldParams.put("id", bookItem.getId());
+        fieldParams.put("Title", volumeInfo.getTitle());
+        fieldParams.put("Author", volumeInfo.getAuthors().get(0));
+        fieldParams.put("Photo", volumeInfo.getImageLinks().getThumbnail());
+        fieldParams.put("Owner", FirebaseAuth.getInstance().getUid());
+        fieldParams.put("Lubble", LubbleSharedPrefs.getInstance().requireLubbleId());
+        fieldParams.put("Status", BOOK_STATUS_AVAILABLE);
+        fieldParams.put("isbn", isbn);
+        params.put("fields", fieldParams);
+        RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
+
+        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Books";
+
+        final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
+        endpoints.uploadNewBook(url, body).enqueue(new Callback<AirtableBooksData>() {
+            @Override
+            public void onResponse(Call<AirtableBooksData> call, Response<AirtableBooksData> response) {
+                final AirtableBooksData airtableData = response.body();
+                if (response.isSuccessful() && airtableData != null && !isFinishing()) {
+                    booksAdded++;
+                    uploadingBookContainer.setVisibility(View.GONE);
+                    updateProceedVisibility();
+
+                } else {
+                    if (!isFinishing()) {
+                        uploadingBookContainer.setVisibility(View.GONE);
+                        updateProceedVisibility();
+                        Toast.makeText(BookSearchActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AirtableBooksData> call, Throwable t) {
+                if (!isFinishing()) {
+                    Toast.makeText(BookSearchActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ");
+                    uploadingBookContainer.setVisibility(View.GONE);
+                    updateProceedVisibility();
+                }
+            }
+        });
+    }
+
     private void updateProceedVisibility() {
-        if (selectedBooksMap.size() > 0) {
+        if (booksAdded > 0) {
+            uploadingBookContainer.setVisibility(View.GONE);
             proceedContainer.setVisibility(View.VISIBLE);
             addMoreContainer.setVisibility(View.VISIBLE);
-            final String bookCountStr = getResources().getQuantityString(R.plurals.book_count, selectedBooksMap.size(), selectedBooksMap.size());
+            final String bookCountStr = getResources().getQuantityString(R.plurals.book_count, booksAdded, booksAdded);
             addedBooksTv.setText("Added " + bookCountStr);
         } else {
             proceedContainer.setVisibility(View.GONE);
