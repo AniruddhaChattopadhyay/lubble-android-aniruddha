@@ -202,11 +202,13 @@
                 android:background="@color/super_light_gray" />
 
             <RelativeLayout
+                android:id="@+id/container_billing"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/view_div_bill"
                 android:layout_margin="16dp"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/tv_bill_details"
@@ -398,6 +400,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginRight="8dp"
                 android:layout_toRightOf="@id/tv_hint_addr"
+                android:alpha="0.3"
                 android:gravity="center"
                 android:padding="16dp"
                 android:text="Choose Address"
@@ -530,12 +533,14 @@
                 android:gravity="center"
                 android:text="use 100 Coins"
                 android:textColor="@color/black"
+                android:visibility="gone"
                 app:drawableLeftCompat="@drawable/ic_coin" />
 
             <Button
                 android:id="@+id/btn_place_order"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:alpha="0.3"
                 android:text="Place Order"
                 android:theme="@style/AccentButton" />
 

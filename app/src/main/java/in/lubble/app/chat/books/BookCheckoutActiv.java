@@ -70,6 +70,7 @@ public class BookCheckoutActiv extends BaseActivity {
     private RelativeLayout bookGiveContainer;
     private RelativeLayout addAddressContainer;
     private RelativeLayout timeAddressContainer;
+    private RelativeLayout billingContainer;
     private Button addressBtn;
     private Button placeOrderBtn;
     private AirtableBooksRecord airtableBooksRecord;
@@ -107,6 +108,7 @@ public class BookCheckoutActiv extends BaseActivity {
         giveBookChangeTv = findViewById(R.id.tv_give_change);
         addAddressContainer = findViewById(R.id.container_add_address);
         timeAddressContainer = findViewById(R.id.container_time_address);
+        billingContainer = findViewById(R.id.container_billing);
         deliveryFeeTv = findViewById(R.id.tv_delivery_fee);
         balanceCoinsTv = findViewById(R.id.tv_balance_coins);
         toPayTv = findViewById(R.id.tv_to_pay);
@@ -212,6 +214,7 @@ public class BookCheckoutActiv extends BaseActivity {
 
     private void setCtaToPlaceOrder(final ProfileData profileData) {
         placeOrderBtn.setText("Place Order");
+        placeOrderBtn.setAlpha(1f);
         placeOrderBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -329,6 +332,7 @@ public class BookCheckoutActiv extends BaseActivity {
 
     private void setCtaToGetPhone() {
         useCoinsTv.setVisibility(View.VISIBLE);
+        placeOrderBtn.setAlpha(1f);
         placeOrderBtn.setText("Update Contact Number");
         placeOrderBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -357,6 +361,9 @@ public class BookCheckoutActiv extends BaseActivity {
             giveBookTitleTv.setText(bookFields.getTitle());
             giveBookAuthorTv.setText(bookFields.getAuthor());
             givenBookId = airtableBooksRecord.getId();
+
+            billingContainer.setVisibility(View.VISIBLE);
+            addressBtn.setAlpha(1f);
         }
     }
 

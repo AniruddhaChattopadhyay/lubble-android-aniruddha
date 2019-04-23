@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.os.ResultReceiver;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -193,19 +194,19 @@ public class AddressChooserActiv extends FragmentActivity implements OnMapReadyC
     }
 
     private boolean isValidAddress() {
-        if (!locationTil.getEditText().getText().toString().isEmpty()) {
+        if (TextUtils.isEmpty(locationTil.getEditText().getText().toString())) {
             locationTil.setError("Please set Location on Map");
             return false;
         } else {
             locationTil.setError(null);
         }
-        if (!houseNumberTil.getEditText().getText().toString().isEmpty()) {
+        if (TextUtils.isEmpty(houseNumberTil.getEditText().getText().toString())) {
             houseNumberTil.setError("Please enter house no.");
             return false;
         } else {
             houseNumberTil.setError(null);
         }
-        if (!landmarkTil.getEditText().getText().toString().isEmpty()) {
+        if (TextUtils.isEmpty(landmarkTil.getEditText().getText().toString())) {
             landmarkTil.setError("Please enter landmark");
             return false;
         } else {
