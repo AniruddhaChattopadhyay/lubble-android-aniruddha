@@ -48,7 +48,6 @@ public abstract class BaseTaskService extends Service {
         if (totalUnits > 0) {
             percentComplete = (int) (100 * completedUnits / totalUnits);
         }
-        //todo change icon
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, SENDING_MEDIA_NOTIF_CHANNEL)
                 .setSmallIcon(R.drawable.ic_upload)
                 .setContentTitle(getString(R.string.app_name))
@@ -73,7 +72,6 @@ public abstract class BaseTaskService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* requestCode */, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        //todo change icons
         int icon = success ? R.drawable.ic_upload : R.drawable.ic_upload;
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, SENDING_MEDIA_NOTIF_CHANNEL)
