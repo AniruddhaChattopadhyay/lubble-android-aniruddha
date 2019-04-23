@@ -7,13 +7,24 @@
     android:background="@color/white"
     tools:context="in.lubble.app.chat.books.BookCheckoutActiv">
 
+    <include
+        android:id="@+id/text_toolbar"
+        layout="@layout/text_toolbar_no_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/container_book_get"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:layout_below="@id/text_toolbar"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/rect_rounded_border"
+        android:backgroundTint="#F7FFF7"
+        android:backgroundTintMode="multiply"
         android:padding="8dp">
 
         <ImageView
@@ -69,6 +80,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/container_book_get"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="4dp"
         android:layout_marginRight="16dp"
         android:background="@drawable/pill_button_blue_white"
         android:gravity="center"
@@ -95,8 +107,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/container_book_get"
-        android:layout_marginLeft="16dp"
-        android:background="@color/white"
+        android:layout_marginLeft="24dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="8dp"
+        android:background="@drawable/rect_rounded_border"
+        android:backgroundTint="#FFF8F8"
+        android:backgroundTintMode="multiply"
         android:padding="8dp"
         android:visibility="gone">
 
@@ -128,6 +144,15 @@
             android:ellipsize="end"
             android:maxLines="1"
             tools:text="JRR Tolkein" />
+
+        <TextView
+            android:id="@+id/tv_give_change"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_give_book_author"
+            android:layout_alignLeft="@id/tv_give_book_author"
+            android:text="CHANGE"
+            android:textColor="@color/link_blue" />
 
         <TextView
             android:layout_width="wrap_content"

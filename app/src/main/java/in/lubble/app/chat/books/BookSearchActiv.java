@@ -1,5 +1,6 @@
 package in.lubble.app.chat.books;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -18,6 +19,8 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
+import in.lubble.app.chat.books.airtable_pojo.AirtableBooksFields;
+import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.chat.books.pojos.BookItem;
 import in.lubble.app.chat.books.pojos.BooksData;
 import in.lubble.app.chat.books.pojos.IndustryIdentifier;
@@ -35,6 +38,8 @@ import java.util.HashMap;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.chat.books.BookFragment.BOOK_STATUS_AVAILABLE;
+import static in.lubble.app.chat.books.MyBooksActivity.ARG_SELECT_BOOK;
+import static in.lubble.app.chat.books.MyBooksActivity.SELECTED_BOOK_RECORD;
 
 public class BookSearchActiv extends BaseActivity implements BookSelectedListener {
 
@@ -49,6 +54,8 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
     private RecyclerView searchResultsRv;
     private ProgressBar progressBar;
     private int booksAdded = 0;
+    private boolean toSelectBook;
+    private BookItem lastBookItemUploaded;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, BookSearchActiv.class));
@@ -69,6 +76,8 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
         uploadingBookContainer = findViewById(R.id.container_uploading_book);
         searchResultsRv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         searchResultsRv.setLayoutManager(new LinearLayoutManager(this));
+
+        toSelectBook = getIntent().getBooleanExtra(ARG_SELECT_BOOK, false);
 
         searchEt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -91,7 +100,36 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
         proceedContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                if (toSelectBook) {
+                    if (booksAdded == 1) {
+                        final Intent intent = new Intent();
+
+                        final AirtableBooksRecord airtableBooksRecord = new AirtableBooksRecord();
+                        airtableBooksRecord.setId(lastBookItemUploaded.getId());
+                        final VolumeInfo volumeInfo = lastBookItemUploaded.getVolumeInfo();
+                        final AirtableBooksFields fields = new AirtableBooksFields();
+                        fields.setTitle(volumeInfo.getTitle());
+                        fields.setAuthor(volumeInfo.getAuthors().get(0));
+                        fields.setIsbn(getIsbn(volumeInfo));
+                        fields.setLubble(LubbleSharedPrefs.getInstance().requireLubbleId());
+                        fields.setOwner(FirebaseAuth.getInstance().getUid());
+                        fields.setStatus(BookFragment.BOOK_STATUS_AVAILABLE);
+                        fields.setPhoto(volumeInfo.getImageLinks().getThumbnail());
+                        airtableBooksRecord.setFields(fields);
+
+                        intent.putExtra(SELECTED_BOOK_RECORD, airtableBooksRecord);
+                        setResult(Activity.RESULT_OK, intent);
+                        finish();
+                    } else {
+                        final Intent intent = new Intent(BookSearchActiv.this, MyBooksActivity.class);
+                        intent.putExtra(ARG_SELECT_BOOK, true);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+                        startActivity(intent);
+                        finish();
+                    }
+                } else {
+                    finish();
+                }
             }
         });
     }
@@ -110,7 +148,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
             @Override
             public void onResponse(Call<BooksData> call, Response<BooksData> response) {
                 final BooksData booksData = response.body();
-                if (response.isSuccessful() && booksData != null && !isFinishing()) {
+                if (response.isSuccessful() && booksData != null && booksData.getTotalItems() > 0 && !isFinishing()) {
                     progressBar.setVisibility(View.GONE);
                     searchResultsRv.setAdapter(new BookSearchResultAdapter(booksData.getItems(),
                             GlideApp.with(BookSearchActiv.this), BookSearchActiv.this));
@@ -157,15 +195,8 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
 
         HashMap<String, Object> params = new HashMap<>();
         final VolumeInfo volumeInfo = bookItem.getVolumeInfo();
-        String isbn = "";
-
-        for (IndustryIdentifier industryIdentifier : volumeInfo.getIndustryIdentifiers()) {
-            if (industryIdentifier.getType().equalsIgnoreCase("ISBN_13")) {
-                isbn = industryIdentifier.getIdentifier();
-                break;
-            }
-        }
-
+        String isbn = getIsbn(volumeInfo);
+        lastBookItemUploaded = bookItem;
         HashMap<String, Object> fieldParams = new HashMap<>();
         fieldParams.put("id", bookItem.getId());
         fieldParams.put("Title", volumeInfo.getTitle());
@@ -209,6 +240,15 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
                 }
             }
         });
+    }
+
+    private String getIsbn(VolumeInfo volumeInfo) {
+        for (IndustryIdentifier industryIdentifier : volumeInfo.getIndustryIdentifiers()) {
+            if (industryIdentifier.getType().equalsIgnoreCase("ISBN_13")) {
+                return industryIdentifier.getIdentifier();
+            }
+        }
+        return "";
     }
 
     private void updateProceedVisibility() {

@@ -1,14 +1,15 @@
 package in.lubble.app.chat.books.airtable_pojo;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class AirtableBooksFields {
+import java.io.Serializable;
 
+public class AirtableBooksFields implements Serializable {
+
+    private static final long serialVersionUID = -11006212659862214L;
     @SerializedName("ListTime")
     private String listTime;
     @SerializedName("Title")
-    @Expose
     private String title;
     @SerializedName("Author")
     private String author;
@@ -18,8 +19,6 @@ public class AirtableBooksFields {
     private String lubble;
     @SerializedName("Status")
     private String status;
-    @SerializedName("id")
-    private String id;
     @SerializedName("isbn")
     private String isbn;
     @SerializedName("Photo")
@@ -71,14 +70,6 @@ public class AirtableBooksFields {
 
     public void setStatus(String status) {
         this.status = status;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getIsbn() {

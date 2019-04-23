@@ -2,8 +2,11 @@ package in.lubble.app.chat.books.airtable_pojo;
 
 import com.google.gson.annotations.SerializedName;
 
-public class AirtableBooksRecord {
+import java.io.Serializable;
 
+public class AirtableBooksRecord implements Serializable {
+
+    private static final long serialVersionUID = 472854447872549804L;
     @SerializedName("id")
     private String id;
     @SerializedName("fields")

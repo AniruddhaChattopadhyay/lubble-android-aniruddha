@@ -18,7 +18,6 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
-import in.lubble.app.chat.books.dummy.DummyContent.DummyItem;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
@@ -34,7 +33,6 @@ public class BookFragment extends Fragment {
     public static final String BOOK_STATUS_AVAILABLE = "AVAILABLE";
     public static final String BOOK_STATUS_BORROWED = "BORROWED";
 
-    private static final int mColumnCount = 2;
     private OnListFragmentInteractionListener mListener;
     private RecyclerView booksRecyclerView;
     private LinearLayout addBookContainer;
@@ -43,6 +41,7 @@ public class BookFragment extends Fragment {
     private TextView noBookTv;
     private TextView bookCountTv;
     private ProgressBar progressBar;
+    private int myBooks = -1;
 
     public BookFragment() {
     }
@@ -89,12 +88,26 @@ public class BookFragment extends Fragment {
                 addBooks();
             }
         });
+
+        mListener = new OnListFragmentInteractionListener() {
+            @Override
+            public void onListFragmentInteraction(AirtableBooksRecord airtableBooksRecord) {
+                BookCheckoutActiv.open(requireContext(), airtableBooksRecord, myBooks);
+            }
+        };
+
         fetchBooks();
 
         DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), GridLayoutManager.VERTICAL);
         booksRecyclerView.addItemDecoration(itemDecor);
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchBooks();
     }
 
     private void fetchBooks() {
@@ -143,7 +156,7 @@ public class BookFragment extends Fragment {
     }
 
     private void calcMyBooks(List<AirtableBooksRecord> records) {
-        int myBooks = 0;
+        myBooks = 0;
         for (AirtableBooksRecord booksRecord : records) {
             if (booksRecord.getFields().getOwner().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                 myBooks++;
@@ -173,18 +186,7 @@ public class BookFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(AirtableBooksRecord airtableBooksRecord);
     }
 }
