@@ -1,6 +1,7 @@
 package in.lubble.app.chat.books;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -10,15 +11,21 @@ import android.support.v4.os.ResultReceiver;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import in.lubble.app.FetchAddressIntentService;
 import in.lubble.app.R;
+import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.ProfileAddress;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
 
@@ -34,7 +41,7 @@ public class AddressChooserActiv extends FragmentActivity implements OnMapReadyC
     private GoogleMap mMap;
     private TextInputLayout locationTil;
     private ImageView mapMarkerIv;
-    private TextInputLayout flatNumberTil;
+    private TextInputLayout houseNumberTil;
     private TextInputLayout landmarkTil;
     private Button addrDoneBtn;
     private AddressResultReceiver resultReceiver;
@@ -49,7 +56,7 @@ public class AddressChooserActiv extends FragmentActivity implements OnMapReadyC
         setContentView(R.layout.activ_address_chooser);
 
         locationTil = findViewById(R.id.til_location);
-        flatNumberTil = findViewById(R.id.til_flat_number);
+        houseNumberTil = findViewById(R.id.til_flat_number);
         landmarkTil = findViewById(R.id.til_landmark);
         addrDoneBtn = findViewById(R.id.btn_addr_done);
 
@@ -64,7 +71,33 @@ public class AddressChooserActiv extends FragmentActivity implements OnMapReadyC
             @Override
             public void onClick(View v) {
                 if (isValidAddress()) {
-                    /// TODO: 22-04-2019
+                    LatLng centerOfMap = mMap.getCameraPosition().target;
+                    final ProfileAddress profileAddress = new ProfileAddress();
+                    profileAddress.setLocation(locationTil.getEditText().toString());
+                    profileAddress.setHouseNumber(houseNumberTil.getEditText().toString());
+                    profileAddress.setLandmark(landmarkTil.getEditText().toString());
+                    profileAddress.setLatitude(centerOfMap.latitude);
+                    profileAddress.setLongitude(centerOfMap.longitude);
+
+                    final ProgressDialog progressDialog = new ProgressDialog(AddressChooserActiv.this);
+                    progressDialog.setTitle("Adding Address");
+                    progressDialog.setMessage(getString(R.string.all_please_wait));
+                    progressDialog.setCancelable(false);
+                    progressDialog.show();
+
+                    RealtimeDbHelper.getThisUserRef().child("profileAddress").setValue(profileAddress)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        progressDialog.dismiss();
+                                        finish();
+                                    } else {
+                                        progressDialog.dismiss();
+                                        Toast.makeText(AddressChooserActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
                 }
             }
         });
@@ -166,11 +199,11 @@ public class AddressChooserActiv extends FragmentActivity implements OnMapReadyC
         } else {
             locationTil.setError(null);
         }
-        if (!flatNumberTil.getEditText().getText().toString().isEmpty()) {
-            flatNumberTil.setError("Please enter house no.");
+        if (!houseNumberTil.getEditText().getText().toString().isEmpty()) {
+            houseNumberTil.setError("Please enter house no.");
             return false;
         } else {
-            flatNumberTil.setError(null);
+            houseNumberTil.setError(null);
         }
         if (!landmarkTil.getEditText().getText().toString().isEmpty()) {
             landmarkTil.setError("Please enter landmark");

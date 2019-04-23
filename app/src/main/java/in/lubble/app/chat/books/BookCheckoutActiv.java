@@ -4,19 +4,30 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksFields;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
+import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.referrals.ReferralActivity;
 
+import static in.lubble.app.Constants.DELIVERY_FEE;
 import static in.lubble.app.chat.books.MyBooksActivity.ARG_SELECT_BOOK;
 import static in.lubble.app.chat.books.MyBooksActivity.SELECTED_BOOK_RECORD;
 
@@ -35,11 +46,21 @@ public class BookCheckoutActiv extends BaseActivity {
     private TextView bookAuthorTv;
     private TextView giveBookAuthorTv;
     private TextView giveBookChangeTv;
+    private TextView addressTv;
+    private TextView deliveryFeeTv;
+    private TextView balanceCoinsTv;
+    private TextView toPayTv;
+    private TextView phoneTv;
+    private TextView useCoinsTv;
     private LinearLayout addBookContainer;
     private RelativeLayout bookGiveContainer;
+    private RelativeLayout addAddressContainer;
+    private RelativeLayout timeAddressContainer;
     private Button addressBtn;
+    private Button placeOrderBtn;
     private AirtableBooksRecord airtableBooksRecord;
     private int myBookCount = -1;
+    private ValueEventListener addressValueListener;
 
     public static void open(Context context, AirtableBooksRecord airtableBooksRecord, int myBooks) {
         final Intent intent = new Intent(context, BookCheckoutActiv.class);
@@ -67,7 +88,16 @@ public class BookCheckoutActiv extends BaseActivity {
         giveBookTitleTv = findViewById(R.id.tv_give_book_title);
         giveBookAuthorTv = findViewById(R.id.tv_give_book_author);
         giveBookChangeTv = findViewById(R.id.tv_give_change);
+        addAddressContainer = findViewById(R.id.container_add_address);
+        timeAddressContainer = findViewById(R.id.container_time_address);
+        deliveryFeeTv = findViewById(R.id.tv_delivery_fee);
+        balanceCoinsTv = findViewById(R.id.tv_balance_coins);
+        toPayTv = findViewById(R.id.tv_to_pay);
+        addressTv = findViewById(R.id.tv_addr);
+        phoneTv = findViewById(R.id.tv_phone);
         addressBtn = findViewById(R.id.btn_address);
+        useCoinsTv = findViewById(R.id.tv_use_coins);
+        placeOrderBtn = findViewById(R.id.btn_place_order);
 
         if (!getIntent().hasExtra(ARG_BOOK_DATA)) {
             Log.e(TAG, "onCreate: ARG_BOOK_DATA missing");
@@ -115,6 +145,77 @@ public class BookCheckoutActiv extends BaseActivity {
             }
         });
 
+        final long deliveryFeeCoins = FirebaseRemoteConfig.getInstance().getLong(DELIVERY_FEE);
+        deliveryFeeTv.setText(deliveryFeeCoins + " Coins");
+        toPayTv.setText(deliveryFeeCoins + " Coins");
+        toPayTv.setText(deliveryFeeCoins + " Coins");
+        useCoinsTv.setText("use " + deliveryFeeCoins + " Coins");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        addressValueListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                if (profileData != null) {
+                    if (profileData.getProfileAddress() != null) {
+                        addAddressContainer.setVisibility(View.GONE);
+                        timeAddressContainer.setVisibility(View.VISIBLE);
+                        addressTv.setText(profileData.getProfileAddress().getHouseNumber() + " " + profileData.getProfileAddress().getLocation());
+                        balanceCoinsTv.setText(profileData.getCoins() + " Coins");
+
+                        if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
+                            phoneTv.setText(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
+                            setCtaToPlaceOrder();
+                        } else if (!TextUtils.isEmpty(profileData.getPhone())) {
+                            phoneTv.setText("+91 " + profileData.getPhone());
+                            setCtaToPlaceOrder();
+                        } else {
+                            phoneTv.setText("");
+                            setCtaToGetPhone();
+                        }
+                    } else {
+                        addAddressContainer.setVisibility(View.VISIBLE);
+                        timeAddressContainer.setVisibility(View.GONE);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        RealtimeDbHelper.getThisUserRef().addValueEventListener(addressValueListener);
+    }
+
+    private void setCtaToPlaceOrder() {
+        placeOrderBtn.setText("Place Order");
+        placeOrderBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+    }
+
+    private void setCtaToGetPhone() {
+        useCoinsTv.setVisibility(View.VISIBLE);
+        placeOrderBtn.setText("Update Contact Number");
+        placeOrderBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final PhoneBottomSheet phoneBottomSheet = PhoneBottomSheet.newInstance();
+                phoneBottomSheet.show(getSupportFragmentManager(), null);
+            }
+        });
+    }
+
+    public void earnMore(View view) {
+        ReferralActivity.open(this);
     }
 
     @Override
@@ -144,5 +245,11 @@ public class BookCheckoutActiv extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
-
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (addressValueListener != null) {
+            RealtimeDbHelper.getThisUserRef().removeEventListener(addressValueListener);
+        }
+    }
 }

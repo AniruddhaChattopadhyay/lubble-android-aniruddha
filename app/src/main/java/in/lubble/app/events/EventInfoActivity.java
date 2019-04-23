@@ -128,7 +128,7 @@ public class EventInfoActivity extends BaseActivity {
         shareContainer = findViewById(R.id.share_container);
         statsIcon = findViewById(R.id.iv_stats);
         statsTv = findViewById(R.id.tv_stats);
-        timeTv = findViewById(R.id.tv_time);
+        timeTv = findViewById(R.id.tv_phone);
         addressTv = findViewById(R.id.tv_address);
         linkedGroupTv = findViewById(R.id.tv_linked_group);
         linkedGroupOpenIcon = findViewById(R.id.iv_open_group);

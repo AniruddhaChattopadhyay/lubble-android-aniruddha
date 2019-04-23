@@ -21,6 +21,7 @@ public class ProfileData {
     private String jobTitle;
     private String company;
     private String school;
+    private String phone;
     private String token;
     private String referredBy;
     private long birthdate = 0L;
@@ -28,6 +29,7 @@ public class ProfileData {
     private boolean isAgePublic = true;
     private long coins;
     private long likes = 0L;
+    private ProfileAddress profileAddress;
 
     @Override
     public boolean equals(@Nullable Object obj) {
@@ -194,5 +196,21 @@ public class ProfileData {
 
     public void setLikes(long likes) {
         this.likes = likes;
+    }
+
+    public ProfileAddress getProfileAddress() {
+        return profileAddress;
+    }
+
+    public void setProfileAddress(ProfileAddress profileAddress) {
+        this.profileAddress = profileAddress;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

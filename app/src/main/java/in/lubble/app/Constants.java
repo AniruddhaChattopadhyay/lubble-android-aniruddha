@@ -33,6 +33,7 @@ public class Constants {
     public static final String IS_QUIZ_SHOWN = "IS_QUIZ_SHOWN";
     public static final String QUIZ_RESULT_UI = "quiz_result_ui";
     public static final String GROUP_QUES_ENABLED = "GROUP_QUES_ENABLED";
+    public static final String DELIVERY_FEE = "DELIVERY_FEE";
 
     public static final double SVR_LATI = 28.696660;
     public static final double SVR_LONGI = 77.124772;

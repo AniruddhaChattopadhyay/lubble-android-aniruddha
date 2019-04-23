@@ -66,7 +66,7 @@ public class AnnouncementsAdapter extends RecyclerView.Adapter<AnnouncementsAdap
         public AnnouncementViewHolder(View view) {
             super(view);
             mView = view;
-            timeTv = view.findViewById(R.id.tv_time);
+            timeTv = view.findViewById(R.id.tv_phone);
             titleTv = view.findViewById(R.id.tv_title);
             messageTv = view.findViewById(R.id.tv_message);
         }

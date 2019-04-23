@@ -237,12 +237,12 @@
             android:id="@+id/iv_time"
             android:layout_width="16dp"
             android:layout_height="16dp"
-            android:layout_alignBottom="@id/tv_time"
-            android:layout_alignTop="@id/tv_time"
+            android:layout_alignBottom="@id/tv_phone"
+            android:layout_alignTop="@id/tv_phone"
             app:srcCompat="@drawable/ic_access_time_black_24dp"/>
 
         <TextView
-            android:id="@+id/tv_time"
+            android:id="@+id/tv_phone"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_stats"
@@ -283,7 +283,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_below="@id/tv_time"
+            android:layout_below="@id/tv_phone"
             android:layout_marginTop="8dp"
             android:gravity="center"
             android:orientation="vertical"
