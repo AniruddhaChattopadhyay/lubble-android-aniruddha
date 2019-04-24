@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,6 +50,7 @@ public class CollectionPlacesAdapter extends RecyclerView.Adapter<CollectionPlac
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(holder.collectionIv);
         holder.descTv.setText(HtmlCompat.fromHtml(placesData.getDesc(), HtmlCompat.FROM_HTML_MODE_LEGACY));
+        holder.descTv.setMovementMethod(LinkMovementMethod.getInstance());
         holder.ctaBtn.setText(placesData.getCTAText());
         holder.postTitleTv.setText(placesData.getName());
         if (placesData.getPrice() > 0) {

@@ -3,6 +3,7 @@ package in.lubble.app.chat.collections;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -67,6 +68,7 @@ public class CollectionActivity extends AppCompatActivity {
         setTitle(collectionsData.getTitle());
         titleTv.setText(collectionsData.getTitle());
         descTV.setText(HtmlCompat.fromHtml(collectionsData.getDescription(), HtmlCompat.FROM_HTML_MODE_LEGACY));
+        descTV.setMovementMethod(LinkMovementMethod.getInstance());
         GlideApp.with(this).load(collectionsData.getImageUrl())
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(imageIv);

@@ -38,7 +38,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/iv_place_hero"
             android:layout_margin="16dp"
-            android:autoLink="web"
             android:lineSpacingExtra="8dp"
             android:textColor="@color/black"
             android:textSize="16sp"
