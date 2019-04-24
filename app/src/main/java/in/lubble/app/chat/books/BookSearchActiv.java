@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -47,6 +48,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
     private EditText searchEt;
     private ImageView searchIv;
     private TextView addedBooksTv;
+    private TextView termsTv;
     private RelativeLayout proceedContainer;
     private RelativeLayout uploadingBookContainer;
     private RelativeLayout addMoreContainer;
@@ -67,6 +69,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
 
         searchEt = findViewById(R.id.et_search);
         searchIv = findViewById(R.id.iv_search_btn);
+        termsTv = findViewById(R.id.tv_terms);
         progressBar = findViewById(R.id.progressbar_book_search);
         proceedContainer = findViewById(R.id.container_proceed);
         addMoreContainer = findViewById(R.id.container_add_more);
@@ -130,9 +133,12 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
                 }
             }
         });
+
+        termsTv.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void performSearch() {
+        termsTv.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
         addMoreContainer.setVisibility(View.GONE);
         UiUtils.hideKeyboard(BookSearchActiv.this);

@@ -51,7 +51,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="8dp"
-        android:text="Add Your Books"
+        android:text="Add More Books"
         android:theme="@style/AccentButton" />
 
 </LinearLayout>

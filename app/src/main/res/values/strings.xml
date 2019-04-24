@@ -208,4 +208,10 @@
         <item quantity="other">%d books</item>
     </plurals>
     <string name="title_activity_address_chooser">Choose Address</string>
+
+    <string name="bookterms">By adding books, you agree to these\n
+<a href="https://lubble.in/policies/terms">Terms</a> and
+<a href="https://lubble.in/policies/privacy">Privacy Policy</a>
+</string>
+
 </resources>

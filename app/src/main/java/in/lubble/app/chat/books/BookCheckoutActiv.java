@@ -13,6 +13,7 @@ import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -61,6 +62,7 @@ public class BookCheckoutActiv extends BaseActivity {
     private TextView bookAuthorTv;
     private TextView giveBookAuthorTv;
     private TextView giveBookChangeTv;
+    private TextView myBalanceHintTv;
     private TextView addressTv;
     private TextView deliveryFeeTv;
     private TextView balanceCoinsTv;
@@ -108,6 +110,7 @@ public class BookCheckoutActiv extends BaseActivity {
         giveBookTitleTv = findViewById(R.id.tv_give_book_title);
         giveBookAuthorTv = findViewById(R.id.tv_give_book_author);
         giveBookChangeTv = findViewById(R.id.tv_give_change);
+        myBalanceHintTv = findViewById(R.id.tv_my_balance_hint);
         addAddressContainer = findViewById(R.id.container_add_address);
         timeAddressContainer = findViewById(R.id.container_time_address);
         billingContainer = findViewById(R.id.container_billing);
@@ -197,7 +200,9 @@ public class BookCheckoutActiv extends BaseActivity {
                         addressTv.setText(profileData.getProfileAddress().getHouseNumber() + ", " + profileData.getProfileAddress().getLocation());
                         balanceCoinsTv.setText(profileData.getCoins() + " Coins");
 
-                        if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
+                        if (profileData.getCoins() < DELIVERY_FEE) {
+                            setCtaToEarnCoins();
+                        } else if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
                             phoneTv.setText(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
                             setCtaToPlaceOrder(profileData);
                         } else if (!TextUtils.isEmpty(profileData.getPhone())) {
@@ -220,6 +225,14 @@ public class BookCheckoutActiv extends BaseActivity {
             }
         };
         RealtimeDbHelper.getThisUserRef().addValueEventListener(addressValueListener);
+    }
+
+    private void setCtaToEarnCoins() {
+        placeOrderBtn.setText("Not enough coins");
+        placeOrderBtn.setAlpha(0.3f);
+        placeOrderBtn.setEnabled(false);
+        myBalanceHintTv.setTextColor(ContextCompat.getColor(this, R.color.red));
+        balanceCoinsTv.setTextColor(ContextCompat.getColor(this, R.color.orange));
     }
 
     private void setCtaToGetPhone() {

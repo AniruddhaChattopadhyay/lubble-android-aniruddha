@@ -188,6 +188,7 @@
             <ImageView
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:rotation="90"
                 android:layout_alignBottom="@id/container_book_get"
                 android:layout_marginBottom="-24dp"
                 android:background="@drawable/circle_white"
@@ -318,7 +319,7 @@
                     android:background="@color/very_light_gray" />
 
                 <TextView
-                    android:id="@+id/tv_my_balance"
+                    android:id="@+id/tv_my_balance_hint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/tv_to_pay_hint"
@@ -331,9 +332,9 @@
                     android:id="@+id/tv_balance_coins"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignBottom="@id/tv_my_balance"
+                    android:layout_alignBottom="@id/tv_my_balance_hint"
                     android:layout_marginLeft="8dp"
-                    android:layout_toRightOf="@id/tv_my_balance"
+                    android:layout_toRightOf="@id/tv_my_balance_hint"
                     android:drawablePadding="4dp"
                     android:text="100"
                     android:textColor="@color/dark_gold"
@@ -344,7 +345,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_my_balance"
+                    android:layout_below="@id/tv_my_balance_hint"
                     android:layout_marginTop="4dp"
                     android:background="@drawable/rect_rounded_border_blue"
                     android:onClick="earnMore"
