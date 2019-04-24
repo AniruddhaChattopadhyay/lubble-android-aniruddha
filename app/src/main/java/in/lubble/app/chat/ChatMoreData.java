@@ -6,9 +6,9 @@ import java.util.List;
 
 public class ChatMoreData {
 
-    @SerializedName("Group Name")
+    @SerializedName("GroupID")
     private String groupName;
-    @SerializedName("Collection Title")
+    @SerializedName("CollectionTitle")
     private String collectionTitle;
     @SerializedName("Collections")
     private List<String> collectionList = null;

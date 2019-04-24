@@ -5,10 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -31,14 +28,15 @@ import java.util.List;
 public class ChatMoreFragment extends Fragment {
     private static final String TAG = "ChatMoreFragment";
 
-    private static final String ARG_GROUP_NAME = "ChatMoreFragment.ARG_GROUP_NAME";
+    private static final String ARG_GROUP_ID = "ChatMoreFragment.ARG_GROUP_ID";
     private static final String ARG_PARAM2 = "param2";
 
-    private String groupName;
+    private String groupId;
     private String mParam2;
 
     private TextView collectionTitleTv;
     private RecyclerView collectionsRecyclerView;
+    private LinearLayout noCollectionsContainer;
     private ProgressBar progressBar;
     private FrameLayout frameLayout;
 
@@ -46,10 +44,10 @@ public class ChatMoreFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static ChatMoreFragment newInstance(String groupName, String param2) {
+    public static ChatMoreFragment newInstance(String groupId, String param2) {
         ChatMoreFragment fragment = new ChatMoreFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_GROUP_NAME, groupName);
+        args.putString(ARG_GROUP_ID, groupId);
         args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
@@ -59,7 +57,7 @@ public class ChatMoreFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            groupName = getArguments().getString(ARG_GROUP_NAME);
+            groupId = getArguments().getString(ARG_GROUP_ID);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
@@ -72,6 +70,7 @@ public class ChatMoreFragment extends Fragment {
 
         collectionTitleTv = view.findViewById(R.id.tv_collection_title);
         progressBar = view.findViewById(R.id.progressbar_chat_more);
+        noCollectionsContainer = view.findViewById(R.id.container_no_collections);
         collectionsRecyclerView = view.findViewById(R.id.rv_1);
         frameLayout = view.findViewById(R.id.framelayout_container);
 
@@ -86,9 +85,9 @@ public class ChatMoreFragment extends Fragment {
 
 
     private void fetchMore() {
-        String formula = "Lubble=\'" + LubbleSharedPrefs.getInstance().getLubbleId() + "\', Group Name=\'" + groupName + "\'";
+        String formula = "Lubble=\'" + LubbleSharedPrefs.getInstance().getLubbleId() + "\', GroupID=\'" + groupId + "\'";
 
-        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Group%20Mapping?view=Grid%20view&filterByFormula=\"AND(" + formula + ")\"";
+        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/GroupMapping?view=Grid%20view&filterByFormula=AND(" + formula + ")";
 
         final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
         endpoints.fetchMore(url).enqueue(new Callback<AirtableData>() {
@@ -96,11 +95,15 @@ public class ChatMoreFragment extends Fragment {
             public void onResponse(Call<AirtableData> call, Response<AirtableData> response) {
                 final AirtableData airtableData = response.body();
                 if (response.isSuccessful() && airtableData != null && isAdded() && isVisible()) {
-                    //exploreGroupAdapter.updateList(exploreGroupDataList);
-                    final ChatMoreData chatMoreData = airtableData.getRecords().get(0).getChatMoreData();
-                    collectionTitleTv.setText(chatMoreData.getCollectionTitle());
-                    final List<String> entries1List = chatMoreData.getCollectionList();
-                    fetchEntries(entries1List);
+                    if (airtableData.getRecords().size() > 0) {
+                        noCollectionsContainer.setVisibility(View.GONE);
+                        final ChatMoreData chatMoreData = airtableData.getRecords().get(0).getChatMoreData();
+                        collectionTitleTv.setText(chatMoreData.getCollectionTitle());
+                        final List<String> entries1List = chatMoreData.getCollectionList();
+                        fetchEntries(entries1List);
+                    } else {
+                        noCollectionsContainer.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     if (isAdded() && isVisible()) {
                         Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();

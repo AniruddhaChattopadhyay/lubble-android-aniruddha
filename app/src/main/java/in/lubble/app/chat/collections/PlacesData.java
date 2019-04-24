@@ -9,7 +9,7 @@ public class PlacesData implements Serializable {
 
     private static final long serialVersionUID = -3921587497121130689L;
 
-    @SerializedName("Rating Provider")
+    @SerializedName("RatingProvider")
     private String ratingProvider;
     @SerializedName("Desc")
     private String desc;
@@ -27,9 +27,9 @@ public class PlacesData implements Serializable {
     private String image;
     @SerializedName("Timing")
     private String timing;
-    @SerializedName("CTA_text")
+    @SerializedName("CtaText")
     private String cTAText;
-    @SerializedName("CTA_link")
+    @SerializedName("CtaLink")
     private String cTALink;
     @SerializedName("Latitude")
     private Double latitude;

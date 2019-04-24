@@ -73,7 +73,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
             groupViewHolder.inviteIcon.setVisibility(View.GONE);
         } else {
-            groupViewHolder.subtitleTv.setText(groupData.getDescription());
+            groupViewHolder.subtitleTv.setText("...");
             groupViewHolder.inviteIcon.setVisibility(View.GONE);
         }
 

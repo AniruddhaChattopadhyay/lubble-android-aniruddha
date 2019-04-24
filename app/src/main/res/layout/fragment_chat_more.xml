@@ -27,9 +27,32 @@
             android:layout_marginTop="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginBottom="4dp"
-            android:text="Collections"
+            tools:text="Collections"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/container_no_collections"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="300dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/ic_undraw_not_found" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="No collections yet.\nWe're constantly adding new content,\nplease check back later :)" />
+
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_1"

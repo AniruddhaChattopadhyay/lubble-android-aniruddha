@@ -244,7 +244,7 @@ public class ChatActivity extends BaseActivity {
 
     public class ChatViewPagerAdapter extends FragmentPagerAdapter {
 
-        private String title[] = {"Chats", "Info"};
+        private String title[] = {"Chats", "Collections"};
         private String msgId;
         private boolean isJoining;
 
@@ -259,7 +259,7 @@ public class ChatActivity extends BaseActivity {
             if (position == 0) {
                 return getTargetChatFrag(msgId, isJoining);
             } else {
-                return ChatMoreFragment.newInstance("The Book Club", "");
+                return ChatMoreFragment.newInstance(groupId, "");
             }
         }
 
