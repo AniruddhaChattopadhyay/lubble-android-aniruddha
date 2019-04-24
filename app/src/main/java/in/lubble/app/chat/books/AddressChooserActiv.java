@@ -3,6 +3,7 @@ package in.lubble.app.chat.books;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -11,9 +12,9 @@ import android.support.v4.os.ResultReceiver;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.LatLng;
@@ -27,8 +28,7 @@ import in.lubble.app.FetchAddressIntentService;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileAddress;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.RuntimePermissions;
+import permissions.dispatcher.*;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static in.lubble.app.FetchAddressIntentService.*;
@@ -41,7 +41,6 @@ public class AddressChooserActiv extends BaseActivity implements OnMapReadyCallb
 
     private GoogleMap mMap;
     private TextInputLayout locationTil;
-    private ImageView mapMarkerIv;
     private TextInputLayout houseNumberTil;
     private TextInputLayout landmarkTil;
     private Button addrDoneBtn;
@@ -213,6 +212,44 @@ public class AddressChooserActiv extends BaseActivity implements OnMapReadyCallb
             landmarkTil.setError(null);
         }
         return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        AddressChooserActivPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(ACCESS_FINE_LOCATION)
+    void showRationaleForExtStorage(final PermissionRequest request) {
+
+        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setMessage(getString(R.string.loc_perm_rationale));
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_ok), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                request.proceed();
+            }
+        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.all_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                request.cancel();
+            }
+        });
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+    }
+
+    @OnPermissionDenied(ACCESS_FINE_LOCATION)
+    void showDeniedForAddrLoc() {
+        Toast.makeText(this, "Please adjust the map manually", Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(ACCESS_FINE_LOCATION)
+    void showNeverAskForAddrLoc() {
+        Toast.makeText(this, R.string.quiz_loc_perm_never_text, Toast.LENGTH_LONG).show();
     }
 
 }

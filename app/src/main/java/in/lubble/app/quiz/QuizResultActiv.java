@@ -324,7 +324,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
     void showRationaleForExtStorage(final PermissionRequest request) {
 
         final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setMessage(getString(R.string.loc_perm_rationale));
+        alertDialog.setMessage(getString(R.string.loc_perm_rationale_quiz));
         alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_ok), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
