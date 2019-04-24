@@ -44,6 +44,7 @@ import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.chat.books.MyBooksActivity.ARG_SELECT_BOOK;
 import static in.lubble.app.chat.books.MyBooksActivity.SELECTED_BOOK_RECORD;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.utils.UserUtils.getUserPhone;
 
 public class BookCheckoutActiv extends BaseActivity {
 
@@ -65,6 +66,7 @@ public class BookCheckoutActiv extends BaseActivity {
     private TextView balanceCoinsTv;
     private TextView toPayTv;
     private TextView phoneTv;
+    private TextView addressChangeTv;
     private TextView useCoinsTv;
     private LinearLayout addBookContainer;
     private RelativeLayout bookGiveContainer;
@@ -115,6 +117,7 @@ public class BookCheckoutActiv extends BaseActivity {
         addressTv = findViewById(R.id.tv_addr);
         phoneTv = findViewById(R.id.tv_phone);
         addressBtn = findViewById(R.id.btn_address);
+        addressChangeTv = findViewById(R.id.tv_addr_change);
         useCoinsTv = findViewById(R.id.tv_use_coins);
         placeOrderBtn = findViewById(R.id.btn_place_order);
 
@@ -165,6 +168,13 @@ public class BookCheckoutActiv extends BaseActivity {
             }
         });
 
+        addressChangeTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AddressChooserActiv.open(BookCheckoutActiv.this);
+            }
+        });
+
         DELIVERY_FEE = FirebaseRemoteConfig.getInstance().getLong(Constants.DELIVERY_FEE);
         deliveryFeeTv.setText(DELIVERY_FEE + " Coins");
         toPayTv.setText(DELIVERY_FEE + " Coins");
@@ -184,7 +194,7 @@ public class BookCheckoutActiv extends BaseActivity {
                     if (profileData.getProfileAddress() != null) {
                         addAddressContainer.setVisibility(View.GONE);
                         timeAddressContainer.setVisibility(View.VISIBLE);
-                        addressTv.setText(profileData.getProfileAddress().getHouseNumber() + " " + profileData.getProfileAddress().getLocation());
+                        addressTv.setText(profileData.getProfileAddress().getHouseNumber() + ", " + profileData.getProfileAddress().getLocation());
                         balanceCoinsTv.setText(profileData.getCoins() + " Coins");
 
                         if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
@@ -212,25 +222,53 @@ public class BookCheckoutActiv extends BaseActivity {
         RealtimeDbHelper.getThisUserRef().addValueEventListener(addressValueListener);
     }
 
-    private void setCtaToPlaceOrder(final ProfileData profileData) {
-        placeOrderBtn.setText("Place Order");
-        placeOrderBtn.setAlpha(1f);
-        placeOrderBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!TextUtils.isEmpty(profileData.getPhone()) && profileData.getProfileAddress() != null && !TextUtils.isEmpty(profileData.getProfileAddress().getHouseNumber())
-                        && takenBookId != null && givenBookId != null) {
-                    try {
-                        uploadNewOrder(profileData);
-                    } catch (JSONException e) {
-                        Crashlytics.logException(e);
-                        e.printStackTrace();
-                    }
-                } else {
-                    Toast.makeText(BookCheckoutActiv.this, "Please enter all info", Toast.LENGTH_SHORT).show();
+    private void setCtaToGetPhone() {
+        if (givenBookId != null) {
+            placeOrderBtn.setAlpha(1f);
+            placeOrderBtn.setText("Update Contact Number");
+            placeOrderBtn.setEnabled(true);
+            placeOrderBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final PhoneBottomSheet phoneBottomSheet = PhoneBottomSheet.newInstance();
+                    phoneBottomSheet.show(getSupportFragmentManager(), null);
                 }
-            }
-        });
+            });
+        } else {
+            placeOrderBtn.setAlpha(0.3f);
+            placeOrderBtn.setText("Update Contact Number");
+            placeOrderBtn.setEnabled(false);
+        }
+    }
+
+    private void setCtaToPlaceOrder(final ProfileData profileData) {
+        if (givenBookId != null && profileData.getProfileAddress() != null && getUserPhone(profileData) != null) {
+            useCoinsTv.setVisibility(View.VISIBLE);
+            placeOrderBtn.setText("Place Order");
+            placeOrderBtn.setAlpha(1f);
+            placeOrderBtn.setEnabled(true);
+            placeOrderBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (profileData.getProfileAddress() != null && !TextUtils.isEmpty(profileData.getProfileAddress().getHouseNumber())
+                            && takenBookId != null && givenBookId != null) {
+                        try {
+                            uploadNewOrder(profileData);
+                        } catch (JSONException e) {
+                            Crashlytics.logException(e);
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Toast.makeText(BookCheckoutActiv.this, "Please enter all info", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } else {
+            useCoinsTv.setVisibility(View.GONE);
+            placeOrderBtn.setText("Place Order");
+            placeOrderBtn.setAlpha(0.3f);
+            placeOrderBtn.setEnabled(false);
+        }
     }
 
     private void uploadNewOrder(ProfileData profileData) throws JSONException {
@@ -326,19 +364,6 @@ public class BookCheckoutActiv extends BaseActivity {
                     progressDialog.dismiss();
                     Toast.makeText(BookCheckoutActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
-            }
-        });
-    }
-
-    private void setCtaToGetPhone() {
-        useCoinsTv.setVisibility(View.VISIBLE);
-        placeOrderBtn.setAlpha(1f);
-        placeOrderBtn.setText("Update Contact Number");
-        placeOrderBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final PhoneBottomSheet phoneBottomSheet = PhoneBottomSheet.newInstance();
-                phoneBottomSheet.show(getSupportFragmentManager(), null);
             }
         });
     }

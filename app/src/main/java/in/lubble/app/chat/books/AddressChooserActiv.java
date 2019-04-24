@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.LatLng;
@@ -23,6 +22,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.FetchAddressIntentService;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -35,7 +35,7 @@ import static in.lubble.app.FetchAddressIntentService.*;
 import static in.lubble.app.chat.books.AddressChooserActivPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
 
 @RuntimePermissions
-public class AddressChooserActiv extends FragmentActivity implements OnMapReadyCallback {
+public class AddressChooserActiv extends BaseActivity implements OnMapReadyCallback {
 
     private static final String TAG = "AddressChooserActiv";
 
@@ -74,9 +74,9 @@ public class AddressChooserActiv extends FragmentActivity implements OnMapReadyC
                 if (isValidAddress()) {
                     LatLng centerOfMap = mMap.getCameraPosition().target;
                     final ProfileAddress profileAddress = new ProfileAddress();
-                    profileAddress.setLocation(locationTil.getEditText().toString());
-                    profileAddress.setHouseNumber(houseNumberTil.getEditText().toString());
-                    profileAddress.setLandmark(landmarkTil.getEditText().toString());
+                    profileAddress.setLocation(locationTil.getEditText().getText().toString());
+                    profileAddress.setHouseNumber(houseNumberTil.getEditText().getText().toString());
+                    profileAddress.setLandmark(landmarkTil.getEditText().getText().toString());
                     profileAddress.setLatitude(centerOfMap.latitude);
                     profileAddress.setLongitude(centerOfMap.longitude);
 

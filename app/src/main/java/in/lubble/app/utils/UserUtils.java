@@ -3,20 +3,24 @@ package in.lubble.app.utils;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.models.ProfileData;
 import io.branch.referral.Branch;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -110,6 +114,15 @@ public class UserUtils {
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .circleCrop()
                 .into(imageView);
+    }
+
+    @Nullable
+    public static String getUserPhone(ProfileData profileData) {
+        if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
+            return FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber();
+        } else {
+            return profileData.getPhone();
+        }
     }
 
 }

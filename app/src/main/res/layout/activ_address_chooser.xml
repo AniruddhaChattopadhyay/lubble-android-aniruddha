@@ -1,12 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     android:orientation="vertical">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
@@ -18,16 +18,22 @@
             android:layout_height="match_parent"
             tools:context="in.lubble.app.chat.books.AddressChooserActiv" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:drawableTint="@color/bright_red"
-            android:textSize="20sp"
-            app:drawableTopCompat="@drawable/ic_location_on_black_24dp"
-            android:text="" />
+        <View
+            android:id="@+id/view_target"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_centerInParent="true" />
 
-    </FrameLayout>
+        <ImageView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_above="@id/view_target"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:tint="@color/red"
+            app:srcCompat="@drawable/ic_location_on_black_24dp" />
+
+    </RelativeLayout>
 
     <TextView
         android:layout_width="wrap_content"
@@ -43,11 +49,13 @@
         android:id="@+id/til_location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Location">
+        android:hint="Location"
+        android:maxLines="2">
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:maxLines="2" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
