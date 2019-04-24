@@ -11,7 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:visibility="visible">
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <RelativeLayout
             android:id="@+id/compose_container"
@@ -129,11 +130,11 @@
                     android:layout_centerVertical="true"
                     android:layout_marginStart="8dp"
                     android:layout_marginLeft="8dp"
-                    android:cursorVisible="true"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
                     android:layout_toLeftOf="@id/iv_attach"
                     android:background="@android:color/transparent"
+                    android:cursorVisible="true"
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:gravity="top|left"
@@ -222,96 +223,15 @@
         android:visibility="gone"
         tools:visibility="visible" />
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_chat"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_above="@id/bottom_container"
         android:layout_below="@id/progressbar_pagination"
-        android:layout_marginBottom="0dp"
-        android:clipToPadding="true">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_chat"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/bottom_container"
-            android:layout_below="@id/progressbar_pagination"
-            android:layout_marginBottom="4dp"
-            android:clipToPadding="false"
-            android:visibility="invisible"
-            tools:listitem="@layout/item_recvd_chat"
-            tools:visibility="visible" />
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/container_intro_prompt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="-4dp"
-            android:elevation="8dp"
-            android:visibility="gone"
-            app:layout_behavior="in.lubble.app.chat.IntroPromptBehaviour"
-            tools:visibility="visible">
-
-            <ImageView
-                android:id="@+id/iv_bunny"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:srcCompat="@drawable/ic_rabbit" />
-
-            <RelativeLayout
-                android:id="@+id/container_prompt_msg"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="32dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/chat_bubble_blue"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintLeft_toRightOf="@id/iv_bunny"
-                app:layout_constraintRight_toRightOf="parent">
-
-                <androidx.emoji.widget.EmojiTextView
-                    android:id="@+id/tv_intro_prompt"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:layout_toLeftOf="@id/iv_intro_prompt_close"
-                    android:gravity="left|top"
-                    android:padding="8dp"
-                    android:text="What's your current favorite song?\nReply below 👇"
-                    android:textColor="@color/white" />
-
-                <ImageView
-                    android:id="@+id/iv_intro_prompt_close"
-                    android:layout_width="24dp"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:alpha="0.5"
-                    android:paddingRight="4dp"
-                    android:tint="@color/white"
-                    app:srcCompat="@drawable/ic_close_black_24dp" />
-
-            </RelativeLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
-
-    <ImageView
-        android:id="@+id/iv_bunny_hands"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_above="@id/bottom_container"
-        android:layout_marginBottom="-4dp"
-        android:elevation="9dp"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_rabbit_hands"
+        android:layout_marginBottom="4dp"
+        android:visibility="invisible"
+        tools:listitem="@layout/item_recvd_chat"
         tools:visibility="visible" />
 
 </RelativeLayout>

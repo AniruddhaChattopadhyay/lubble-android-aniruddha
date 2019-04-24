@@ -1,8 +1,6 @@
 package in.lubble.app.chat;
 
 import android.Manifest;
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -15,17 +13,14 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
-import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
@@ -50,7 +45,6 @@ import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.DateTimeUtils;
-import in.lubble.app.utils.StringUtils;
 import permissions.dispatcher.*;
 
 import java.io.File;
@@ -63,7 +57,6 @@ import java.util.Map;
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
-import static in.lubble.app.utils.ChatHelper.getRandomGroupGreeting;
 import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
@@ -160,9 +153,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedGroupPicUrl;
     private String attachedEventPicUrl;
     private Uri sharedImageUri;
-    private ConstraintLayout introPromptContainer;
-    private ImageView introPromptCloseIv;
-    private ImageView bunnyHandsIv;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -269,9 +259,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         sendBtnProgressBtn = view.findViewById(R.id.progress_bar_send);
         chatProgressBar = view.findViewById(R.id.progressbar_chat);
         paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
-        introPromptContainer = view.findViewById(R.id.container_intro_prompt);
-        introPromptCloseIv = view.findViewById(R.id.iv_intro_prompt_close);
-        bunnyHandsIv = view.findViewById(R.id.iv_bunny_hands);
 
         groupMembersMap = new HashMap<>();
 
@@ -316,37 +303,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             populateChatData(chatData);
         }
 
-        introPromptCloseIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideIntroPrompt();
-                Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_DISMISSED, getContext());
-            }
-        });
-
         return view;
-    }
-
-    private void hideIntroPrompt() {
-        getUserGroupsRef().child(groupId).child("isIntroPromptDismissed").setValue(true);
-        introPromptContainer.animate()
-                .translationY(introPromptContainer.getHeight())
-                .setInterpolator(new FastOutSlowInInterpolator())
-                .setDuration(200)
-                .setListener(new AnimatorListenerAdapter() {
-
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        introPromptContainer.setVisibility(View.VISIBLE);
-                        bunnyHandsIv.setVisibility(View.GONE);
-                        chatRecyclerView.setPadding(0, 0, 0, 0);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        introPromptContainer.setVisibility(View.GONE);
-                    }
-                });
     }
 
     private void showJoiningDialog() {
@@ -358,7 +315,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void init() {
         endAtTimestamp = 0L;
-        syncGroupInfo();
+        //syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         chatRecyclerView.setLayoutManager(layoutManager);
         chatAdapter = new ChatAdapter(
@@ -488,6 +445,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         resetUnreadCount();
+        syncGroupInfo();
     }
 
     private void calcUnreadCount() {
@@ -571,8 +529,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             pvtSystemMsg.setVisibility(View.GONE);
                         }
                         ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
-                        resetUnreadCount();
                         showBottomBar(groupData);
+                        resetUnreadCount();
                         showPublicGroupWarning();
                     } else {
                         Crashlytics.logException(new NullPointerException("groupdata is null for group id: " + groupId));
@@ -705,7 +663,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     private void showBottomBar(final GroupData groupData) {
-        if (!isJoining) {
+        if (!isJoining && groupData.isJoined()) {
             bottomContainer.setVisibility(View.VISIBLE);
         }
         if (bottomBarListener != null) {
@@ -714,16 +672,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         bottomBarListener = RealtimeDbHelper.getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                bottomContainer.setVisibility(View.VISIBLE);
                 if (groupData.isJoined()) {
                     composeContainer.setVisibility(View.VISIBLE);
                     joinContainer.setVisibility(View.GONE);
                     if (joiningProgressDialog != null && isJoining) {
-                        bottomContainer.setVisibility(View.VISIBLE);
                         joiningProgressDialog.dismiss();
                         isJoining = false;
                     }
-                    final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
-                    showIntroPrompt(userGroupData);
                 } else {
                     final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                     if (userGroupData != null && userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
@@ -765,40 +721,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             }
         });
-    }
-
-    private void showIntroPrompt(UserGroupData userGroupData) {
-        try {
-            if (groupData != null && !TextUtils.isEmpty(groupData.getIntro()) && !userGroupData.getIsIntroPromptDismissed()) {
-                final TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, dpToPx(48), 0);
-                translateAnimation.setDuration(200);
-                translateAnimation.setInterpolator(new FastOutSlowInInterpolator());
-                introPromptContainer.startAnimation(translateAnimation);
-                bunnyHandsIv.setVisibility(View.VISIBLE);
-
-                introPromptContainer.setVisibility(View.VISIBLE);
-                chatRecyclerView.setPadding(0, 0, 0, dpToPx(52));
-                if (((LinearLayoutManager) chatRecyclerView.getLayoutManager()).findLastVisibleItemPosition()
-                        == chatRecyclerView.getAdapter().getItemCount() - 1) {
-                    chatRecyclerView.scrollBy(0, dpToPx(52));
-                }
-
-                final TextView msgTv = introPromptContainer.findViewById(R.id.tv_intro_prompt);
-                msgTv.setText(groupData.getIntro());
-                Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_SHOWN, getContext());
-
-                if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
-                    newMessageEt.setText(getRandomGroupGreeting() +
-                            " I'm " + StringUtils.getTitleCase(FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0])
-                            + "!\nI'm interested in ");
-                    newMessageEt.setSelection(newMessageEt.getText().length());
-                    newMessageEt.requestFocus();
-                }
-            }
-        } catch (Exception e) {
-            Crashlytics.log("exception showing intro prompt");
-            Crashlytics.logException(e);
-        }
     }
 
     private void showPublicGroupWarning() {
@@ -1009,12 +931,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_send_btn:
-
-                if (introPromptContainer.getVisibility() == View.VISIBLE) {
-                    hideIntroPrompt();
-                    Analytics.triggerEvent(AnalyticsEvents.GROUP_QUES_ANSWERED, getContext());
-                }
-
                 final ChatData chatData = new ChatData();
                 chatData.setAuthorUid(authorId);
                 chatData.setAuthorIsSeller(isCurrUserSeller);
