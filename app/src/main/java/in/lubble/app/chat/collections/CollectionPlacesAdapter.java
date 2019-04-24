@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import in.lubble.app.GlideRequests;
@@ -47,7 +48,7 @@ public class CollectionPlacesAdapter extends RecyclerView.Adapter<CollectionPlac
         glide.load(placesData.getImage())
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(holder.collectionIv);
-        holder.descTv.setText(placesData.getDesc());
+        holder.descTv.setText(HtmlCompat.fromHtml(placesData.getDesc(), HtmlCompat.FROM_HTML_MODE_LEGACY));
         holder.ctaBtn.setText(placesData.getCTAText());
         holder.postTitleTv.setText(placesData.getName());
         if (placesData.getPrice() > 0) {

@@ -88,7 +88,7 @@ public class ChatMoreFragment extends Fragment {
     private void fetchMore() {
         String formula = "Lubble=\'" + LubbleSharedPrefs.getInstance().getLubbleId() + "\', Group Name=\'" + groupName + "\'";
 
-        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Table%201?view=Grid%20view&filterByFormula=\"AND(" + formula + ")\"";
+        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Group%20Mapping?view=Grid%20view&filterByFormula=\"AND(" + formula + ")\"";
 
         final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
         endpoints.fetchMore(url).enqueue(new Callback<AirtableData>() {

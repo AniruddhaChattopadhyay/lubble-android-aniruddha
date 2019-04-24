@@ -19,8 +19,6 @@ public class PlacesData implements Serializable {
     private String name;
     @SerializedName("Price")
     private int price = 0;
-    @SerializedName("Table 1")
-    private String table1;
     @SerializedName("Locality")
     private String locality;
     @SerializedName("Rating")
@@ -78,14 +76,6 @@ public class PlacesData implements Serializable {
 
     public void setPrice(int price) {
         this.price = price;
-    }
-
-    public String getTable1() {
-        return table1;
-    }
-
-    public void setTable1(String table1) {
-        this.table1 = table1;
     }
 
     public String getLocality() {

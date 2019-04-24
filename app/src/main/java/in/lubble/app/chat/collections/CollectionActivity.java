@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -65,7 +66,7 @@ public class CollectionActivity extends AppCompatActivity {
 
         setTitle(collectionsData.getTitle());
         titleTv.setText(collectionsData.getTitle());
-        descTV.setText(collectionsData.getDescription());
+        descTV.setText(HtmlCompat.fromHtml(collectionsData.getDescription(), HtmlCompat.FROM_HTML_MODE_LEGACY));
         GlideApp.with(this).load(collectionsData.getImageUrl())
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(imageIv);
