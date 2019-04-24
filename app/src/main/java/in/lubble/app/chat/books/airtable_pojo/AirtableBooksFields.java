@@ -3,6 +3,7 @@ package in.lubble.app.chat.books.airtable_pojo;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class AirtableBooksFields implements Serializable {
 
@@ -15,10 +16,10 @@ public class AirtableBooksFields implements Serializable {
     private String author;
     @SerializedName("Owner")
     private String owner;
+    @SerializedName("Borrower")
+    private List<String> borrowerList;
     @SerializedName("Lubble")
     private String lubble;
-    @SerializedName("Status")
-    private String status;
     @SerializedName("isbn")
     private String isbn;
     @SerializedName("Photo")
@@ -64,14 +65,6 @@ public class AirtableBooksFields implements Serializable {
         this.lubble = lubble;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getIsbn() {
         return isbn;
     }
@@ -88,5 +81,11 @@ public class AirtableBooksFields implements Serializable {
         this.photo = photo;
     }
 
+    public List<String> getBorrower() {
+        return borrowerList;
+    }
 
+    public void setBorrower(List<String> borrowerList) {
+        this.borrowerList = borrowerList;
+    }
 }

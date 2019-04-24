@@ -10,7 +10,7 @@
 
     <ImageView
         android:id="@+id/iv_book_cover"
-        android:layout_width="100dp"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/tv_give_this"
         tools:src="@tools:sample/avatars" />
@@ -48,10 +48,10 @@
         android:gravity="center"
         android:paddingLeft="16dp"
         android:paddingTop="4dp"
-        android:textColor="@color/dark_green"
         android:paddingRight="16dp"
         android:paddingBottom="4dp"
         android:text="Get this book for FREE"
+        android:textColor="@color/dark_green"
         app:drawableRightCompat="@drawable/ic_keyboard_arrow_right_black_24dp"
         app:drawableTint="@color/dark_green" />
 

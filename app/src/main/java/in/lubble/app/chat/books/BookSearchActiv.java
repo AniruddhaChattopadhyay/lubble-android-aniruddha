@@ -37,7 +37,6 @@ import retrofit2.Response;
 import java.util.HashMap;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.chat.books.BookFragment.BOOK_STATUS_AVAILABLE;
 import static in.lubble.app.chat.books.MyBooksActivity.ARG_SELECT_BOOK;
 import static in.lubble.app.chat.books.MyBooksActivity.SELECTED_BOOK_RECORD;
 
@@ -113,7 +112,6 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
                         fields.setIsbn(getIsbn(volumeInfo));
                         fields.setLubble(LubbleSharedPrefs.getInstance().requireLubbleId());
                         fields.setOwner(FirebaseAuth.getInstance().getUid());
-                        fields.setStatus(BookFragment.BOOK_STATUS_AVAILABLE);
                         fields.setPhoto(volumeInfo.getImageLinks().getThumbnail());
                         airtableBooksRecord.setFields(fields);
 
@@ -204,7 +202,6 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
         fieldParams.put("Photo", volumeInfo.getImageLinks().getThumbnail());
         fieldParams.put("Owner", FirebaseAuth.getInstance().getUid());
         fieldParams.put("Lubble", LubbleSharedPrefs.getInstance().requireLubbleId());
-        fieldParams.put("Status", BOOK_STATUS_AVAILABLE);
         fieldParams.put("isbn", isbn);
         params.put("fields", fieldParams);
         RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());

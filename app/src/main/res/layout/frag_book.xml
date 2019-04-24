@@ -19,8 +19,6 @@
         android:id="@+id/container_book_stats"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_book_exchangee_hint"
-        android:layout_alignTop="@id/container_add_book"
         android:layout_alignBottom="@id/container_add_book"
         android:layout_marginLeft="16dp"
         android:gravity="center"
@@ -31,13 +29,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="--"
-            android:textColor="@color/black"
-            android:textSize="18sp" />
+            android:textColor="@color/black" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Your Books" />
+            android:background="@drawable/rect_rounded_border_blue"
+            android:gravity="center"
+            android:paddingLeft="4dp"
+            android:paddingTop="2dp"
+            android:paddingRight="4dp"
+            android:paddingBottom="2dp"
+            android:text="My Books"
+            android:textColor="@color/colorAccent"
+            android:textSize="12sp" />
 
     </LinearLayout>
 
@@ -51,14 +56,14 @@
         android:layout_toRightOf="@id/container_book_stats"
         android:background="@drawable/pill_button_blue_white"
         android:gravity="center"
-        android:padding="12dp">
+        android:padding="8dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawablePadding="8dp"
             android:gravity="center_vertical"
-            android:text="Add Your Books"
+            android:text="Add MY Books"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textStyle="bold"
