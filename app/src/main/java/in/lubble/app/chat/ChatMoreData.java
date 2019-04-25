@@ -7,7 +7,7 @@ import java.util.List;
 public class ChatMoreData {
 
     @SerializedName("GroupID")
-    private String groupName;
+    private List<String> groupId;
     @SerializedName("CollectionTitle")
     private String collectionTitle;
     @SerializedName("Collections")
@@ -16,13 +16,15 @@ public class ChatMoreData {
     private String lubble;
     @SerializedName("Name")
     private String name;
+    @SerializedName("IsBooksGroup")
+    private boolean isBooksGroup;
 
-    public String getGroupName() {
-        return groupName;
+    public List<String> getGroupId() {
+        return groupId;
     }
 
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
+    public void setGroupId(List<String> groupId) {
+        this.groupId = groupId;
     }
 
     public List<String> getCollectionList() {
@@ -57,5 +59,11 @@ public class ChatMoreData {
         this.name = name;
     }
 
+    public boolean getIsBooksGroup() {
+        return isBooksGroup;
+    }
 
+    public void setIsBooksGroup(boolean booksGroup) {
+        isBooksGroup = booksGroup;
+    }
 }

@@ -78,8 +78,6 @@ public class ChatMoreFragment extends Fragment {
 
         fetchMore();
 
-        FragUtils.addFrag(getChildFragmentManager(), frameLayout.getId(), BookFragment.newInstance());
-
         return view;
     }
 
@@ -99,6 +97,9 @@ public class ChatMoreFragment extends Fragment {
                         noCollectionsContainer.setVisibility(View.GONE);
                         final ChatMoreData chatMoreData = airtableData.getRecords().get(0).getChatMoreData();
                         collectionTitleTv.setText(chatMoreData.getCollectionTitle());
+                        if (chatMoreData.getIsBooksGroup()) {
+                            FragUtils.addFrag(getChildFragmentManager(), frameLayout.getId(), BookFragment.newInstance());
+                        }
                         final List<String> entries1List = chatMoreData.getCollectionList();
                         fetchEntries(entries1List);
                     } else {
