@@ -103,10 +103,12 @@ public class ChatMoreFragment extends Fragment {
                         fetchEntries(entries1List);
                     } else {
                         noCollectionsContainer.setVisibility(View.VISIBLE);
+                        progressBar.setVisibility(View.GONE);
                     }
                 } else {
                     if (isAdded() && isVisible()) {
                         Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
                     }
                 }
             }
@@ -115,6 +117,7 @@ public class ChatMoreFragment extends Fragment {
             public void onFailure(Call<AirtableData> call, Throwable t) {
                 if (isAdded() && isVisible()) {
                     Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
                     Log.e(TAG, "onFailure: ");
                 }
             }

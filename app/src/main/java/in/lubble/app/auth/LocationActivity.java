@@ -6,6 +6,7 @@ import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -13,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -35,7 +37,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.BaseActivity;
-import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -320,7 +321,7 @@ public class LocationActivity extends BaseActivity {
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
-        if (!BuildConfig.DEBUG && LocationUtils.isMockLocationsON(this)) {
+        if (LocationUtils.isMockLocationsON(this)) {
             showMockLocationDialog();
             return;
         }
@@ -348,7 +349,13 @@ public class LocationActivity extends BaseActivity {
         alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Open Settings", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                ComponentName componentName = intent.resolveActivity(getPackageManager());
+                if (componentName == null) {
+                    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+                } else {
+                    startActivity(intent);
+                }
             }
         });
         alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.all_retry), new DialogInterface.OnClickListener() {
@@ -361,14 +368,20 @@ public class LocationActivity extends BaseActivity {
         alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                ComponentName componentName = intent.resolveActivity(getPackageManager());
+                if (componentName == null) {
+                    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+                } else {
+                    startActivity(intent);
+                }
             }
         });
     }
 
     private void validateUserLocation(final Location location) {
 
-        if (!BuildConfig.DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && location.isFromMockProvider()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && location.isFromMockProvider()) {
             showMockLocationDialog();
             return;
         }
