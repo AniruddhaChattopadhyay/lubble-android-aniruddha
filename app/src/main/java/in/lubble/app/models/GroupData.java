@@ -18,7 +18,6 @@ public class GroupData {
     private String thumbnail;
     private String title;
     private String description;
-    private String intro;
     private boolean isPrivate;
     private HashMap<String, Object> members = new HashMap<>();
     private String lastMessage;
@@ -152,12 +151,5 @@ public class GroupData {
         // Yeah. Weird.
         return getMembers().size() == 0;
     }
-    @Nullable
-    public String getIntro() {
-        return intro;
-    }
 
-    public void setIntro(String intro) {
-        this.intro = intro;
-    }
 }

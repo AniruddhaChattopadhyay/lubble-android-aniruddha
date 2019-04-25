@@ -42,7 +42,6 @@ public class NewGroupFragment extends Fragment {
     private ImageView groupIv;
     private EditText groupName;
     private EditText groupDesc;
-    private EditText groupQues;
     private Spinner spinner;
     private String currentPhotoPath;
     private DatabaseReference userGroupRef;
@@ -77,7 +76,6 @@ public class NewGroupFragment extends Fragment {
         groupIv = view.findViewById(R.id.iv_new_group);
         groupName = view.findViewById(R.id.et_group_title);
         groupDesc = view.findViewById(R.id.et_group_desc);
-        groupQues = view.findViewById(R.id.et_group_question);
         spinner = view.findViewById(R.id.spinner_privacy);
         Button createBtn = view.findViewById(R.id.container_create_group);
 
@@ -95,7 +93,6 @@ public class NewGroupFragment extends Fragment {
                     final GroupData groupData = new GroupData();
                     groupData.setTitle(groupName.getText().toString().trim());
                     groupData.setDescription(groupDesc.getText().toString());
-                    groupData.setIntro(groupQues.getText().toString());
                     groupData.setIsPrivate(isPvt);
 
                     Log.d(TAG, "onClick: ");
@@ -114,13 +111,8 @@ public class NewGroupFragment extends Fragment {
                     groupDesc.setError("Uh-oh! Group must have a description. A purpose in life.");
                     return false;
                 }
-                if (TextUtils.isEmpty(groupQues.getText().toString())) {
-                    groupQues.setError("Whoa! A joining question is required, to create a tighter community");
-                    return false;
-                }
                 groupName.setError(null);
                 groupDesc.setError(null);
-                groupQues.setError(null);
                 return true;
             }
         });

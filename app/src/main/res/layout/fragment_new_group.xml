@@ -38,26 +38,11 @@
         android:layout_marginTop="9dp"
         android:hint="Group Description" />
 
-    <EditText
-        android:id="@+id/et_group_question"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/et_group_desc"
-        android:layout_marginTop="9dp"
-        android:hint="Introduction Helper" />
-
-    <TextView
-        android:id="@+id/tv_group_ques_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/et_group_question"
-        android:text="Help new joinees introduce themselves in the group\nEx. Welcome to Painting group! Show us your work!" />
-
     <Spinner
         android:id="@+id/spinner_privacy"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_group_ques_hint"
+        android:layout_below="@id/et_group_desc"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:layout_marginRight="8dp" />

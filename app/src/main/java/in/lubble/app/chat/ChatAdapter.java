@@ -40,6 +40,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -92,8 +93,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private String groupId;
     private int highlightedPos = -1;
     private int posToFlash = -1;
-    private boolean shownLubbHintForLastMsg;
-    private static HashMap<String, ProfileInfo> profileInfoMap = new HashMap<>();
+    private HashMap<String, ProfileData> profileDataMap = new HashMap<>();
     private String authorId = FirebaseAuth.getInstance().getUid();
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
@@ -166,22 +166,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         final String authorUid = chatData.getAuthorUid();
         if (!chatData.getIsDm())
-            if (profileInfoMap.containsKey(authorUid)) {
-                final ProfileInfo profileInfo = profileInfoMap.get(authorUid);
+            if (profileDataMap.containsKey(authorUid)) {
+                final ProfileData profileData = profileDataMap.get(authorUid);
+                final ProfileInfo profileInfo = profileData.getInfo();
                 sentChatViewHolder.senderTv.setVisibility(View.VISIBLE);
                 sentChatViewHolder.senderTv.setText(profileInfo.getName());
-                if (!TextUtils.isEmpty(profileInfo.getBadge())) {
+                if (!TextUtils.isEmpty(profileInfo.getBadge()) || !TextUtils.isEmpty(profileData.getGroupFlair())) {
+                    String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                     sentChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
-                    sentChatViewHolder.badgeTextTv.setText(profileInfo.getBadge());
-                    sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
-                    sentChatViewHolder.badgeTextTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rect_rounded_trans_white));
+                    sentChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
+                    sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.white));
                 } else {
                     sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
                 }
             } else {
                 sentChatViewHolder.senderTv.setVisibility(View.GONE);
                 sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
-                updateProfileInfoMap(RealtimeDbHelper.getUserInfoRef(authorUid), authorUid, position);
+                updateProfileInfoMap(getUserRef(authorUid), authorUid, position);
             }
         else {
             sentChatViewHolder.senderTv.setVisibility(View.GONE);
@@ -780,17 +781,30 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }*/
     }
 
-    private void updateProfileInfoMap(DatabaseReference userInfoRef, final String uid, final int pos) {
+    private void updateProfileInfoMap(DatabaseReference userRef, final String uid, final int pos) {
         // single as its very difficult otherwise to keep track of all listeners for every user
         // plus we don't really need realtime updation of user DP and/or name in chat
-        userInfoRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                if (profileInfo != null) {
-                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                    profileInfoMap.put(profileInfo.getId(), profileInfo);
-                    notifyItemChanged(pos);
+                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                if (profileData != null) {
+                    profileData.setId(dataSnapshot.getKey());
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
+                            final String flair = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(groupId).child("flair").getValue(String.class);
+                            profileData.setGroupFlair(flair);
+                            break;
+                        }
+                    }
+
+                    profileData.setId(dataSnapshot.getKey());
+                    final ProfileInfo profileInfo = profileData.getInfo();
+                    if (profileInfo != null) {
+                        profileInfo.setId(dataSnapshot.getKey());
+                        profileDataMap.put(profileData.getId(), profileData);
+                        notifyItemChanged(pos);
+                    }
                 } else {
                     updateProfileInfoMap(getSellerInfoRef(uid), uid, pos);
                 }
@@ -900,27 +914,28 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
-        if (profileInfoMap.containsKey(chatData.getAuthorUid())) {
+        if (profileDataMap.containsKey(chatData.getAuthorUid())) {
             recvdChatViewHolder.authorNameTv.setVisibility(View.VISIBLE);
             recvdChatViewHolder.dpIv.setVisibility(View.VISIBLE);
-            final ProfileInfo profileInfo = profileInfoMap.get(chatData.getAuthorUid());
+            final ProfileData profileData = profileDataMap.get(chatData.getAuthorUid());
+            final ProfileInfo profileInfo = profileData.getInfo();
             glide.load(profileInfo.getThumbnail())
                     .circleCrop()
                     .placeholder(R.drawable.ic_account_circle_black_no_padding)
                     .error(R.drawable.ic_account_circle_black_no_padding)
                     .into(recvdChatViewHolder.dpIv);
-            recvdChatViewHolder.authorNameTv.setText(profileInfo.getName());
+            recvdChatViewHolder.authorNameTv.setText(profileInfo.getName().split(" ")[0]);
             recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
-            if (!TextUtils.isEmpty(profileInfo.getBadge())) {
+            if (!TextUtils.isEmpty(profileInfo.getBadge()) || !TextUtils.isEmpty(profileData.getGroupFlair())) {
+                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                 recvdChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
-                recvdChatViewHolder.badgeTextTv.setText(profileInfo.getBadge());
-                recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.default_text_color));
-                recvdChatViewHolder.badgeTextTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rect_rounded_border_sharper));
+                recvdChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
+                recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
             } else {
                 recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
             }
         } else {
-            updateProfileInfoMap(getUserInfoRef(chatData.getAuthorUid()), chatData.getAuthorUid(), recvdChatViewHolder.getAdapterPosition());
+            updateProfileInfoMap(getUserRef(chatData.getAuthorUid()), chatData.getAuthorUid(), recvdChatViewHolder.getAdapterPosition());
         }
     }
 

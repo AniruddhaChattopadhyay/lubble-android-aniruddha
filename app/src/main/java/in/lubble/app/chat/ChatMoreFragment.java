@@ -9,6 +9,7 @@ import android.widget.*;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.textfield.TextInputLayout;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -25,6 +26,8 @@ import retrofit2.Response;
 
 import java.util.List;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+
 public class ChatMoreFragment extends Fragment {
     private static final String TAG = "ChatMoreFragment";
 
@@ -34,6 +37,8 @@ public class ChatMoreFragment extends Fragment {
     private String groupId;
     private String mParam2;
 
+    private TextInputLayout flairTil;
+    private Button updateFlairBtn;
     private TextView collectionTitleTv;
     private RecyclerView collectionsRecyclerView;
     private LinearLayout noCollectionsContainer;
@@ -68,6 +73,8 @@ public class ChatMoreFragment extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_chat_more, container, false);
 
+        flairTil = view.findViewById(R.id.til_flair);
+        updateFlairBtn = view.findViewById(R.id.btn_update_flair);
         collectionTitleTv = view.findViewById(R.id.tv_collection_title);
         progressBar = view.findViewById(R.id.progressbar_chat_more);
         noCollectionsContainer = view.findViewById(R.id.container_no_collections);
@@ -77,6 +84,14 @@ public class ChatMoreFragment extends Fragment {
         collectionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
 
         fetchMore();
+
+        updateFlairBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //todo add isJoined check
+                getUserGroupsRef().child(groupId).child("flair").setValue(flairTil.getEditText().getText().toString());
+            }
+        });
 
         return view;
     }

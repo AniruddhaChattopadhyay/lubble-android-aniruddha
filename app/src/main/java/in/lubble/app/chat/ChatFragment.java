@@ -518,8 +518,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     groupData = dataSnapshot.getValue(GroupData.class);
-                    // fetchMembersProfile(groupData.getMembers()); to be used for tagging
                     if (groupData != null && getActivity() != null) {
+                        //fetchMembersProfile(groupData.getMembers()); //can be used for tagging too
                         if (!groupData.isJoined() && groupData.getIsPrivate()) {
                             chatRecyclerView.setVisibility(View.GONE);
                             pvtSystemMsg.setVisibility(View.VISIBLE);

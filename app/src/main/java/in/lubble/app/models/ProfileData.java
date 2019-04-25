@@ -1,6 +1,7 @@
 package in.lubble.app.models;
 
 import androidx.annotation.Nullable;
+import com.google.firebase.database.Exclude;
 import in.lubble.app.utils.DateTimeUtils;
 
 import java.util.Calendar;
@@ -30,6 +31,8 @@ public class ProfileData {
     private long coins;
     private long likes = 0L;
     private ProfileAddress profileAddress;
+    @Exclude
+    private String groupFlair;
 
     @Override
     public boolean equals(@Nullable Object obj) {
@@ -213,4 +216,16 @@ public class ProfileData {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
+    @Exclude
+    @Nullable
+    public String getGroupFlair() {
+        return groupFlair;
+    }
+
+    @Exclude
+    public void setGroupFlair(String groupFlair) {
+        this.groupFlair = groupFlair;
+    }
+
 }

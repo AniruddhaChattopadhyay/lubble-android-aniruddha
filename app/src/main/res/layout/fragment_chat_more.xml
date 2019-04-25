@@ -19,6 +19,36 @@
             android:layout_gravity="center"
             android:layout_marginTop="16dp" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_flair"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/btn_update_flair"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="update"
+                android:theme="@style/AccentButton" />
+
+        </LinearLayout>
+
         <TextView
             android:id="@+id/tv_collection_title"
             android:layout_width="wrap_content"
@@ -27,9 +57,9 @@
             android:layout_marginTop="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginBottom="4dp"
-            tools:text="Collections"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            tools:text="Collections" />
 
         <LinearLayout
             android:id="@+id/container_no_collections"

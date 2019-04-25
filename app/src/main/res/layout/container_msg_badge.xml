@@ -5,16 +5,11 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginLeft="4dp"
-    android:background="@drawable/rect_rounded_border_sharper"
     android:gravity="center_vertical"
-    android:paddingLeft="4dp"
-    android:paddingTop="2dp"
-    android:paddingRight="4dp"
-    android:paddingBottom="2dp"
-    android:textSize="10sp"
     android:visibility="gone"
     tools:showIn="@layout/item_recvd_chat"
-    tools:text="RWA"
+    tools:text="\u26ABadmin"
+    android:textColor="@color/colorAccent"
     tools:visibility="visible">
 
 </androidx.emoji.widget.EmojiTextView>
