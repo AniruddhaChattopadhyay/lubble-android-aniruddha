@@ -213,6 +213,11 @@
     <string name="bookterms">By adding books, you agree to these\n
 <a href="https://lubble.in/policies/terms">Terms</a> and
 <a href="https://lubble.in/policies/privacy">Privacy Policy</a>
-</string>
+    </string>
+
+    <plurals name="group_count">
+        <item quantity="one">%d group</item>
+        <item quantity="other">%d groups</item>
+    </plurals>
 
 </resources>

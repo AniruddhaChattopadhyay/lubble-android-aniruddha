@@ -53,6 +53,7 @@ public class NewEventActivity extends BaseActivity {
     private static final String TAG = "NewEventActivity";
     private static final int PLACE_PICKER_REQUEST = 828;
     private static final int REQUEST_CODE_EVENT_PIC = 626;
+    private static final int REQUEST_CODE_RELATED_GROUPS = 627;
 
     private String currentPhotoPath;
     private Uri picUri = null;
@@ -72,6 +73,7 @@ public class NewEventActivity extends BaseActivity {
     private RadioButton newGroupRadioBtn;
     private CompoundButton oldGroupRadioBtn;
     private TextView notAdminHintTv;
+    private TextView relatedGroupsTv;
     private Spinner adminGroupsSpinner;
     private EventGroupSpinnerAdapter spinnerAdapter;
     private Calendar myCalendar;
@@ -79,6 +81,7 @@ public class NewEventActivity extends BaseActivity {
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private Button submitBtn;
     private Place place;
+    private ArrayList<String> relatedGroupIdList = new ArrayList<>();
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, NewEventActivity.class));
@@ -103,6 +106,7 @@ public class NewEventActivity extends BaseActivity {
         newGroupRadioBtn = findViewById(R.id.radiobtn_new_group);
         oldGroupRadioBtn = findViewById(R.id.radiobtn_old_group);
         notAdminHintTv = findViewById(R.id.tv_not_admin_hint);
+        relatedGroupsTv = findViewById(R.id.tv_related_groups);
         adminGroupsSpinner = findViewById(R.id.spinner_admin_groups);
         submitBtn = findViewById(R.id.btn_submit);
 
@@ -153,6 +157,7 @@ public class NewEventActivity extends BaseActivity {
                 eventData.setTitle(titleTil.getEditText().getText().toString().trim());
                 eventData.setDesc(descTil.getEditText().getText().toString().trim());
                 eventData.setOrganizer(organizerTil.getEditText().getText().toString().trim());
+                eventData.setRelatedGroups(relatedGroupIdList);
 
                 final String dateStr = dateTil.getEditText().getText().toString();
                 final String startTimeStr = startTimeTil.getEditText().getText().toString();
@@ -213,6 +218,13 @@ public class NewEventActivity extends BaseActivity {
             public void onClick(View v) {
                 NewEventActivityPermissionsDispatcher
                         .startPhotoPickerWithPermissionCheck(NewEventActivity.this, REQUEST_CODE_EVENT_PIC);
+            }
+        });
+
+        relatedGroupsTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(GroupMultiSelectActiv.getIntent(NewEventActivity.this), REQUEST_CODE_RELATED_GROUPS);
             }
         });
 
@@ -497,6 +509,15 @@ public class NewEventActivity extends BaseActivity {
                     .load(imageFile)
                     .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
                     .into(headerImage);
+        } else if (requestCode == REQUEST_CODE_RELATED_GROUPS && resultCode == RESULT_OK && data.hasExtra("selected_list")) {
+            relatedGroupIdList = (ArrayList<String>) data.getSerializableExtra("selected_list");
+            if (!relatedGroupIdList.isEmpty()) {
+                relatedGroupsTv.setText(String.format("Add event to %s", getResources().getQuantityString(R.plurals.group_count, relatedGroupIdList.size(), relatedGroupIdList.size())));
+                relatedGroupsTv.setTextColor(ContextCompat.getColor(this, R.color.black));
+            } else {
+                relatedGroupsTv.setText("Select All Related Groups");
+                relatedGroupsTv.setTextColor(ContextCompat.getColor(this, R.color.link_blue));
+            }
         }
     }
 

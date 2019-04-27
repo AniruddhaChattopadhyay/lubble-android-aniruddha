@@ -278,12 +278,38 @@
 
                 </RadioGroup>
 
+                <TextView
+                    android:id="@+id/tv_related_groups"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/radioGroup_group_link"
+                    android:drawableRight="@drawable/ic_edit_black_24dp"
+                    android:drawablePadding="12dp"
+                    android:drawableTint="@color/darker_gray"
+                    android:gravity="center_vertical"
+                    android:paddingTop="8dp"
+                    android:paddingRight="8dp"
+                    android:text="Select All Related Groups"
+                    android:textColor="@color/link_blue"
+                    android:textSize="16sp"
+                    app:drawableLeftCompat="@drawable/ic_swap_vertical_circle_black_24dp" />
+
+                <TextView
+                    android:id="@+id/tv_related_groups_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_related_groups"
+                    android:layout_alignLeft="@id/tv_organizer_hint"
+                    android:paddingBottom="8dp"
+                    android:text="The event will be shown in these related groups"
+                    android:textSize="12sp" />
+
                 <fragment
                     android:id="@+id/map"
                     android:name="com.google.android.gms.maps.SupportMapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
-                    android:layout_below="@id/radioGroup_group_link"
+                    android:layout_below="@id/tv_related_groups_hint"
                     android:layout_marginTop="8dp"
                     app:liteMode="true"
                     tools:context="com.example.mapwithmarker.MapsMarkerActivity" />

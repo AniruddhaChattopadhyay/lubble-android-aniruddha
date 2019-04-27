@@ -2,7 +2,9 @@ package in.lubble.app.models;
 
 import com.google.firebase.database.Exclude;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by ishaan on 20/5/18.
@@ -27,6 +29,7 @@ public class EventData {
     private double longi;
     private String address;
     private String gid;
+    private List<String> relatedGroups = new ArrayList<>();
 
     @Override
     public boolean equals(Object obj) {
@@ -136,4 +139,11 @@ public class EventData {
         this.id = id;
     }
 
+    public List<String> getRelatedGroups() {
+        return relatedGroups;
+    }
+
+    public void setRelatedGroups(List<String> relatedGroups) {
+        this.relatedGroups = relatedGroups;
+    }
 }
