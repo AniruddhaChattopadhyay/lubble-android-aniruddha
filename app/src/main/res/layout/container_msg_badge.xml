@@ -5,11 +5,13 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_marginLeft="4dp"
+    android:ellipsize="end"
     android:gravity="center_vertical"
+    android:maxLines="1"
+    android:textColor="@color/colorAccent"
     android:visibility="gone"
     tools:showIn="@layout/item_recvd_chat"
     tools:text="\u26ABadmin"
-    android:textColor="@color/colorAccent"
     tools:visibility="visible">
 
 </androidx.emoji.widget.EmojiTextView>

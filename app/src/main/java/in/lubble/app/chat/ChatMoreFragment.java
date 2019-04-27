@@ -6,26 +6,34 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.books.BookFragment;
 import in.lubble.app.chat.collections.AirtableCollectionData;
 import in.lubble.app.chat.collections.CollectionsAdapter;
+import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.AirtableData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.FragUtils;
+import in.lubble.app.utils.UiUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.util.List;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 
 public class ChatMoreFragment extends Fragment {
@@ -37,13 +45,15 @@ public class ChatMoreFragment extends Fragment {
     private String groupId;
     private String mParam2;
 
-    private TextInputLayout flairTil;
-    private Button updateFlairBtn;
+    private EditText flairEt;
+    private TextView updateFlairTv;
+    private ProgressBar flairProgressbar;
     private TextView collectionTitleTv;
     private RecyclerView collectionsRecyclerView;
     private LinearLayout noCollectionsContainer;
     private ProgressBar progressBar;
     private FrameLayout frameLayout;
+    private ValueEventListener flairListener;
 
     public ChatMoreFragment() {
         // Required empty public constructor
@@ -73,8 +83,9 @@ public class ChatMoreFragment extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_chat_more, container, false);
 
-        flairTil = view.findViewById(R.id.til_flair);
-        updateFlairBtn = view.findViewById(R.id.btn_update_flair);
+        flairEt = view.findViewById(R.id.et_flair);
+        updateFlairTv = view.findViewById(R.id.tv_update_flair);
+        flairProgressbar = view.findViewById(R.id.progressbar_flair);
         collectionTitleTv = view.findViewById(R.id.tv_collection_title);
         progressBar = view.findViewById(R.id.progressbar_chat_more);
         noCollectionsContainer = view.findViewById(R.id.container_no_collections);
@@ -85,17 +96,83 @@ public class ChatMoreFragment extends Fragment {
 
         fetchMore();
 
-        updateFlairBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //todo add isJoined check
-                getUserGroupsRef().child(groupId).child("flair").setValue(flairTil.getEditText().getText().toString());
-            }
-        });
-
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        syncFlair();
+    }
+
+    private void syncFlair() {
+        flairEt.setEnabled(false);
+        flairListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                if (profileData != null) {
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
+                            final DataSnapshot userGroupsSnapshot = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups");
+
+                            if (userGroupsSnapshot.hasChild(groupId) && (boolean) userGroupsSnapshot.child(groupId).child("joined").getValue()) {
+                                //is joined
+                                flairEt.setEnabled(true);
+                                final String flair = userGroupsSnapshot.child(groupId).child("flair").getValue(String.class);
+                                profileData.setGroupFlair(flair);
+                                flairEt.setText(flair);
+                                flairEt.setCursorVisible(true);
+                                flairEt.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        flairEt.setCursorVisible(true);
+                                    }
+                                });
+
+                                updateFlairTv.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        flairProgressbar.setVisibility(View.VISIBLE);
+                                        updateFlairTv.setText("");
+                                        flairEt.setCursorVisible(false);
+                                        getUserGroupsRef().child(groupId).child("flair").setValue(flairEt.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                flairProgressbar.setVisibility(View.GONE);
+                                                updateFlairTv.setText("UPDATE");
+                                                if (!task.isSuccessful()) {
+                                                    Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    Toast.makeText(requireContext(), "Updated!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                        UiUtils.hideKeyboard(requireContext());
+                                    }
+                                });
+                            } else {
+                                flairEt.setEnabled(false);
+                                updateFlairTv.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Toast.makeText(requireContext(), "Please join the group first", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        getThisUserRef().addValueEventListener(flairListener);
+    }
 
     private void fetchMore() {
         String formula = "Lubble=\'" + LubbleSharedPrefs.getInstance().getLubbleId() + "\', GroupID=\'" + groupId + "\'";
@@ -177,5 +254,11 @@ public class ChatMoreFragment extends Fragment {
         });
     }
 
-
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (flairListener != null) {
+            getThisUserRef().removeEventListener(flairListener);
+        }
+    }
 }

@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     android:background="@color/white"
     android:orientation="vertical"
     tools:context="in.lubble.app.chat.ChatMoreFragment">
@@ -12,14 +13,23 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <ProgressBar
-            android:id="@+id/progressbar_chat_more"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp" />
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="8dp"
+            android:text="My Group Status"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
 
-        <LinearLayout
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:text="Shown next to your name in this group only."
+            android:textSize="12sp" />
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -28,26 +38,50 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/til_flair"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <Button
-                android:id="@+id/btn_update_flair"
+            <EditText
+                android:id="@+id/et_flair"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="update"
-                android:theme="@style/AccentButton" />
+                android:layout_alignParentLeft="true"
+                android:layout_marginTop="4dp"
+                android:layout_toLeftOf="@id/tv_update_flair"
+                android:background="@drawable/half_rounded_rect_lt_gray_left"
+                android:enabled="false"
+                android:hint="My Status"
+                android:maxLength="40"
+                android:maxLines="1"
+                android:padding="8dp"
+                android:textColor="@color/colorAccent"
+                android:textSize="14sp" />
 
-        </LinearLayout>
+            <TextView
+                android:id="@+id/tv_update_flair"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/et_flair"
+                android:layout_alignBottom="@id/et_flair"
+                android:layout_alignParentRight="true"
+                android:background="@drawable/half_rounded_rectangle_blue_right"
+                android:gravity="center"
+                android:padding="5dp"
+                android:text="Update"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+
+            <ProgressBar
+                android:id="@+id/progressbar_flair"
+                style="?android:attr/android:progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/tv_update_flair"
+                android:layout_alignTop="@id/tv_update_flair"
+                android:layout_alignRight="@id/tv_update_flair"
+                android:layout_alignBottom="@id/tv_update_flair"
+                android:theme="@style/AppTheme.WhiteAccent"
+                android:visibility="gone" />
+
+        </RelativeLayout>
 
         <TextView
             android:id="@+id/tv_collection_title"
@@ -60,6 +94,13 @@
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             android:textSize="20sp"
             tools:text="Collections" />
+
+        <ProgressBar
+            android:id="@+id/progressbar_chat_more"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp" />
 
         <LinearLayout
             android:id="@+id/container_no_collections"
