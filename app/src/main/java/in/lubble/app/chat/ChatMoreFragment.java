@@ -21,6 +21,7 @@ import in.lubble.app.R;
 import in.lubble.app.chat.books.BookFragment;
 import in.lubble.app.chat.collections.AirtableCollectionData;
 import in.lubble.app.chat.collections.CollectionsAdapter;
+import in.lubble.app.models.EventData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.AirtableData;
 import in.lubble.app.network.Endpoints;
@@ -31,10 +32,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
 
 public class ChatMoreFragment extends Fragment {
     private static final String TAG = "ChatMoreFragment";
@@ -50,10 +52,14 @@ public class ChatMoreFragment extends Fragment {
     private ProgressBar flairProgressbar;
     private TextView collectionTitleTv;
     private RecyclerView collectionsRecyclerView;
+    private RecyclerView eventsRecyclerView;
     private LinearLayout noCollectionsContainer;
+    private LinearLayout noEventsContainer;
     private ProgressBar progressBar;
+    private ProgressBar eventProgressBar;
     private FrameLayout frameLayout;
     private ValueEventListener flairListener;
+    private ValueEventListener eventsListener;
 
     public ChatMoreFragment() {
         // Required empty public constructor
@@ -88,11 +94,15 @@ public class ChatMoreFragment extends Fragment {
         flairProgressbar = view.findViewById(R.id.progressbar_flair);
         collectionTitleTv = view.findViewById(R.id.tv_collection_title);
         progressBar = view.findViewById(R.id.progressbar_chat_more);
+        eventProgressBar = view.findViewById(R.id.progressbar_events);
         noCollectionsContainer = view.findViewById(R.id.container_no_collections);
+        noEventsContainer = view.findViewById(R.id.container_no_events);
         collectionsRecyclerView = view.findViewById(R.id.rv_1);
+        eventsRecyclerView = view.findViewById(R.id.rv_events);
         frameLayout = view.findViewById(R.id.framelayout_container);
 
         collectionsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
+        eventsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
 
         fetchMore();
 
@@ -103,6 +113,46 @@ public class ChatMoreFragment extends Fragment {
     public void onResume() {
         super.onResume();
         syncFlair();
+        syncEvents();
+    }
+
+    private void syncEvents() {
+        eventProgressBar.setVisibility(View.VISIBLE);
+        eventsListener = getEventsRef().orderByChild("startTimestamp").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (eventProgressBar != null) {
+                    eventProgressBar.setVisibility(View.GONE);
+                }
+                eventsRecyclerView.setVisibility(View.VISIBLE);
+                noEventsContainer.setVisibility(View.GONE);
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    final ArrayList<EventData> eventDataList = new ArrayList<>();
+                    for (DataSnapshot dataSnapshotChild : dataSnapshot.getChildren()) {
+                        final EventData eventData = dataSnapshotChild.getValue(EventData.class);
+                        if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp() && eventData.getRelatedGroups().contains(groupId)) {
+                            eventData.setId(dataSnapshot.getKey());
+                            eventDataList.add(eventData);
+                        }
+                    }
+                    Collections.reverse(eventDataList);
+                    eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
+
+                } else {
+                    // no events
+                    if (eventProgressBar != null) {
+                        eventProgressBar.setVisibility(View.GONE);
+                    }
+                    eventsRecyclerView.setVisibility(View.GONE);
+                    noEventsContainer.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void syncFlair() {
