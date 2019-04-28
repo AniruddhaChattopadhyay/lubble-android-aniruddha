@@ -272,11 +272,17 @@ public class ChatMoreFragment extends Fragment {
     private void fetchEntries(List<String> entries1List) {
         progressBar.setVisibility(View.VISIBLE);
         String filterByFormula = "";
+        boolean first = true;
         for (String recordId : entries1List) {
-            filterByFormula = filterByFormula.concat("RECORD_ID()=\'" + recordId + "\',");
+            if (first) {
+                filterByFormula = filterByFormula.concat("RECORD_ID()=\'" + recordId + "\'");
+                first = false;
+            } else {
+                filterByFormula = filterByFormula.concat(",RECORD_ID()=\'" + recordId + "\'");
+            }
         }
 
-        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Collections?filterByFormula=\"OR(" + filterByFormula + ")\"&view=Grid%20view";
+        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Collections?filterByFormula=OR(" + filterByFormula + ")&view=Grid%20view";
 
         final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
         endpoints.fetchEntries(url).enqueue(new Callback<AirtableCollectionData>() {
