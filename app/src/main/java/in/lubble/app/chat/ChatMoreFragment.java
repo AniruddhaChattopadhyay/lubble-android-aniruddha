@@ -129,7 +129,7 @@ public class ChatMoreFragment extends Fragment {
                     final ArrayList<EventData> eventDataList = new ArrayList<>();
                     for (DataSnapshot dataSnapshotChild : dataSnapshot.getChildren()) {
                         final EventData eventData = dataSnapshotChild.getValue(EventData.class);
-                        if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp() && eventData.getRelatedGroups().contains(groupId)) {
+                        if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp() && eventData.getRelatedGroupsList().contains(groupId)) {
                             eventData.setId(dataSnapshotChild.getKey());
                             eventDataList.add(eventData);
                         }

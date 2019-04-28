@@ -157,7 +157,11 @@ public class NewEventActivity extends BaseActivity {
                 eventData.setTitle(titleTil.getEditText().getText().toString().trim());
                 eventData.setDesc(descTil.getEditText().getText().toString().trim());
                 eventData.setOrganizer(organizerTil.getEditText().getText().toString().trim());
-                eventData.setRelatedGroups(relatedGroupIdList);
+                StringBuilder relatedGroupsStr = new StringBuilder();
+                for (String groudId : relatedGroupIdList) {
+                    relatedGroupsStr.append(groudId + ",");
+                }
+                eventData.setRelatedGroups(relatedGroupsStr.toString());
 
                 final String dateStr = dateTil.getEditText().getText().toString();
                 final String startTimeStr = startTimeTil.getEditText().getText().toString();
