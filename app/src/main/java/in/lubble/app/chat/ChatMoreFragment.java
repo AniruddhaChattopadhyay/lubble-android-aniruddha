@@ -33,7 +33,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
@@ -131,13 +130,16 @@ public class ChatMoreFragment extends Fragment {
                     for (DataSnapshot dataSnapshotChild : dataSnapshot.getChildren()) {
                         final EventData eventData = dataSnapshotChild.getValue(EventData.class);
                         if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp() && eventData.getRelatedGroups().contains(groupId)) {
-                            eventData.setId(dataSnapshot.getKey());
+                            eventData.setId(dataSnapshotChild.getKey());
                             eventDataList.add(eventData);
                         }
                     }
-                    Collections.reverse(eventDataList);
-                    eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
-
+                    if (eventDataList.size() > 0) {
+                        eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
+                    } else {
+                        eventsRecyclerView.setVisibility(View.GONE);
+                        noEventsContainer.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     // no events
                     if (eventProgressBar != null) {
@@ -309,6 +311,9 @@ public class ChatMoreFragment extends Fragment {
         super.onPause();
         if (flairListener != null) {
             getThisUserRef().removeEventListener(flairListener);
+        }
+        if (eventsListener != null) {
+            getEventsRef().orderByChild("startTimestamp").removeEventListener(eventsListener);
         }
     }
 }
