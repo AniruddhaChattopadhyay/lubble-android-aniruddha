@@ -42,7 +42,7 @@ import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
-public class ChatActivity extends BaseActivity {
+public class ChatActivity extends BaseActivity implements ChatMoreFragment.FlairUpdateListener {
 
     public static final String EXTRA_GROUP_ID = "chat_activ_group_id";
     public static final String EXTRA_MSG_ID = "chat_activ_msg_id";
@@ -62,6 +62,7 @@ public class ChatActivity extends BaseActivity {
     private TextView toolbarTv;
     private ChatFragment targetFrag = null;
     private String groupId;
+    private ViewPager viewPager;
     private String dmId;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
@@ -124,7 +125,7 @@ public class ChatActivity extends BaseActivity {
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         setTitle("");
 
-        ViewPager viewPager = findViewById(R.id.viewpager_chat);
+        viewPager = findViewById(R.id.viewpager_chat);
         TabLayout tabLayout = findViewById(R.id.tablayout_chat);
         tabLayout.setupWithViewPager(viewPager);
 
@@ -319,6 +320,17 @@ public class ChatActivity extends BaseActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onFlairUpdated() {
+        ChatFragment frag = (ChatFragment)
+                getSupportFragmentManager().findFragmentByTag(makeFragmentName(viewPager.getId(), 0));
+        frag.updateThisUserFlair();
+    }
+
+    private static String makeFragmentName(int viewPagerId, int index) {
+        return "android:switcher:" + viewPagerId + ":" + index;
     }
 
 }

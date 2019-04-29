@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,6 +60,7 @@ public class ChatMoreFragment extends Fragment {
     private FrameLayout frameLayout;
     private ValueEventListener flairListener;
     private ValueEventListener eventsListener;
+    private FlairUpdateListener flairUpdateListener;
 
     public ChatMoreFragment() {
         // Required empty public constructor
@@ -168,7 +170,7 @@ public class ChatMoreFragment extends Fragment {
                         if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
                             final DataSnapshot userGroupsSnapshot = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups");
 
-                            if (userGroupsSnapshot.hasChild(groupId) && (boolean) userGroupsSnapshot.child(groupId).child("joined").getValue()) {
+                            if (userGroupsSnapshot.hasChild(groupId) && userGroupsSnapshot.child(groupId).hasChild("joined") && (boolean) userGroupsSnapshot.child(groupId).child("joined").getValue()) {
                                 //is joined
                                 flairEt.setEnabled(true);
                                 final String flair = userGroupsSnapshot.child(groupId).child("flair").getValue(String.class);
@@ -201,6 +203,7 @@ public class ChatMoreFragment extends Fragment {
                                             }
                                         });
                                         UiUtils.hideKeyboard(requireContext());
+                                        flairUpdateListener.onFlairUpdated();
                                     }
                                 });
                             } else {
@@ -313,6 +316,21 @@ public class ChatMoreFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            flairUpdateListener = (FlairUpdateListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement TextClicked");
+        }
+    }
+
+    interface FlairUpdateListener {
+        void onFlairUpdated();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         if (flairListener != null) {
@@ -321,5 +339,11 @@ public class ChatMoreFragment extends Fragment {
         if (eventsListener != null) {
             getEventsRef().orderByChild("startTimestamp").removeEventListener(eventsListener);
         }
+    }
+
+    @Override
+    public void onDetach() {
+        flairUpdateListener = null;
+        super.onDetach();
     }
 }

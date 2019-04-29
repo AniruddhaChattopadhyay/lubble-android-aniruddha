@@ -1042,6 +1042,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    void updateFlair(ProfileData thisUserProfileData) {
+        profileDataMap.put(thisUserProfileData.getId(), thisUserProfileData);
+        notifyDataSetChanged();
+    }
+
     public ChatData getChatMsgAt(int pos) {
         return chatDataList.get(pos);
     }

@@ -153,6 +153,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedGroupPicUrl;
     private String attachedEventPicUrl;
     private Uri sharedImageUri;
+    private ValueEventListener thisUserValueListener;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -1288,6 +1289,35 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
     }
 
+    void updateThisUserFlair() {
+        thisUserValueListener = getThisUserRef().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                if (profileData != null) {
+                    profileData.setId(dataSnapshot.getKey());
+                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
+                            final String flair = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(groupId).child("flair").getValue(String.class);
+                            profileData.setGroupFlair(flair);
+                            break;
+                        }
+                    }
+                    final ProfileInfo profileInfo = profileData.getInfo();
+                    if (profileInfo != null) {
+                        profileInfo.setId(dataSnapshot.getKey());
+                        chatAdapter.updateFlair(profileData);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
     public void openGroupInfo() {
         if (groupData != null && (groupData.isJoined() || !groupData.getIsPrivate())) {
             ScrollingGroupInfoActivity.open(getContext(), groupId);
@@ -1319,6 +1349,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
         if (bottomBarListener != null) {
             RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
+        }
+        if (thisUserValueListener != null) {
+            getThisUserRef().removeEventListener(thisUserValueListener);
         }
     }
 
