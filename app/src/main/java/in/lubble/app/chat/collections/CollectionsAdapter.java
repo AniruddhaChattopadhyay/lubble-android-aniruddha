@@ -39,7 +39,7 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
         holder.nameTv.setText(collectionsData.getTitle());
         holder.captionTv.setText(collectionsData.getCaption());
         glide.load(collectionsData.getImageUrl())
-                .transform(new RoundedCornersTransformation(dpToPx(4), 0))
+                .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(holder.collectionIv);
 

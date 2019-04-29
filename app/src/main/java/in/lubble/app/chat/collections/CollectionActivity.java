@@ -11,12 +11,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
@@ -27,7 +28,7 @@ import retrofit2.Response;
 
 import java.util.List;
 
-public class CollectionActivity extends AppCompatActivity {
+public class CollectionActivity extends BaseActivity {
 
     private static final String TAG = "CollectionActivity";
 
@@ -69,8 +70,13 @@ public class CollectionActivity extends AppCompatActivity {
         titleTv.setText(collectionsData.getTitle());
         descTV.setText(HtmlCompat.fromHtml(collectionsData.getDescription(), HtmlCompat.FROM_HTML_MODE_LEGACY));
         descTV.setMovementMethod(LinkMovementMethod.getInstance());
+
+        final CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(this);
+        circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
+        circularProgressDrawable.start();
         GlideApp.with(this).load(collectionsData.getImageUrl())
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .placeholder(circularProgressDrawable)
                 .into(imageIv);
         fetchPlaces(collectionsData.getPlaceIdList());
 
