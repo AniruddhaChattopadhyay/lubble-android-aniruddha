@@ -17,6 +17,8 @@ public class PlacesData implements Serializable {
     private List<String> collections = null;
     @SerializedName("Name")
     private String name;
+    @SerializedName("PriceHint")
+    private String priceHint = "Price for two: ";
     @SerializedName("Price")
     private int price = 0;
     @SerializedName("Locality")
@@ -148,5 +150,13 @@ public class PlacesData implements Serializable {
 
     public void setSpecial(String special) {
         this.special = special;
+    }
+
+    public String getPriceHint() {
+        return priceHint;
+    }
+
+    public void setPriceHint(String priceHint) {
+        this.priceHint = priceHint;
     }
 }

@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
@@ -48,11 +47,7 @@ public class CollectionPlacesAdapter extends RecyclerView.Adapter<CollectionPlac
         holder.preTitleTv.setText(placesData.getName());
         holder.locationTv.setText(placesData.getLocality());
 
-        final CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(context);
-        circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
-        circularProgressDrawable.start();
         glide.load(placesData.getImage())
-                .placeholder(circularProgressDrawable)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .into(holder.collectionIv);
         holder.descTv.setText(HtmlCompat.fromHtml(placesData.getDesc(), HtmlCompat.FROM_HTML_MODE_LEGACY));
@@ -62,6 +57,7 @@ public class CollectionPlacesAdapter extends RecyclerView.Adapter<CollectionPlac
         if (placesData.getPrice() > 0) {
             holder.priceTv.setVisibility(View.VISIBLE);
             holder.priceHintTv.setVisibility(View.VISIBLE);
+            holder.priceHintTv.setText(placesData.getPriceHint());
             holder.priceTv.setText("₹" + placesData.getPrice());
         } else {
             holder.priceTv.setVisibility(View.GONE);
