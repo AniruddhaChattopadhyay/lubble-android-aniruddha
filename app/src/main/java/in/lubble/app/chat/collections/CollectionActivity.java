@@ -20,6 +20,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
@@ -65,6 +66,7 @@ public class CollectionActivity extends BaseActivity {
         placesRv.setNestedScrollingEnabled(false);
 
         collectionsData = (CollectionsData) getIntent().getSerializableExtra(PARAM_COLLECTION);
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         setTitle(collectionsData.getTitle());
         titleTv.setText(collectionsData.getTitle());

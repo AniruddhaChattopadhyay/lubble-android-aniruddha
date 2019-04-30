@@ -175,6 +175,28 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         } catch (Exception e) {
             Crashlytics.logException(e);
         }
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                final Bundle bundle = new Bundle();
+                bundle.putString("groupid", groupId);
+                if (tab.getPosition() == 0) {
+                    Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, ChatActivity.this);
+                } else if (tab.getPosition() == 1) {
+                    Analytics.triggerEvent(AnalyticsEvents.GROUP_MORE_FRAG, bundle, ChatActivity.this);
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 
     private ChatFragment getTargetChatFrag(String msgId, boolean isJoining) {

@@ -23,6 +23,8 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksFields;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -130,6 +132,8 @@ public class BookCheckoutActiv extends BaseActivity {
             return;
         }
 
+        Analytics.triggerScreenEvent(this, this.getClass());
+        Analytics.triggerEvent(AnalyticsEvents.BOOK_CHECKOUT_PAGE, this);
         airtableBooksRecord = (AirtableBooksRecord) getIntent().getSerializableExtra(ARG_BOOK_DATA);
         myBookCount = getIntent().getIntExtra(ARG_MY_BOOK_COUNT, -1);
 
@@ -143,6 +147,7 @@ public class BookCheckoutActiv extends BaseActivity {
         addBookContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.ADD_BOOK_CLICKED, BookCheckoutActiv.this);
                 if (myBookCount == 0) {
                     final Intent intent = new Intent(BookCheckoutActiv.this, BookSearchActiv.class);
                     intent.putExtra(ARG_SELECT_BOOK, true);
@@ -158,6 +163,7 @@ public class BookCheckoutActiv extends BaseActivity {
         giveBookChangeTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.BOOK_CHANGE, BookCheckoutActiv.this);
                 final Intent intent = new Intent(BookCheckoutActiv.this, MyBooksActivity.class);
                 intent.putExtra(ARG_SELECT_BOOK, true);
                 startActivityForResult(intent, REQUEST_MY_BOOK);
@@ -167,13 +173,16 @@ public class BookCheckoutActiv extends BaseActivity {
         addressBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.BOOK_ADDRESS_CLICKED, BookCheckoutActiv.this);
                 AddressChooserActiv.open(BookCheckoutActiv.this);
             }
         });
+        addressBtn.setEnabled(false);
 
         addressChangeTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.BOOK_ADDRESS_CLICKED, BookCheckoutActiv.this);
                 AddressChooserActiv.open(BookCheckoutActiv.this);
             }
         });
@@ -243,6 +252,7 @@ public class BookCheckoutActiv extends BaseActivity {
             placeOrderBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    Analytics.triggerEvent(AnalyticsEvents.BOOK_PHONE_CLICKED, BookCheckoutActiv.this);
                     final PhoneBottomSheet phoneBottomSheet = PhoneBottomSheet.newInstance();
                     phoneBottomSheet.show(getSupportFragmentManager(), null);
                 }
@@ -266,6 +276,7 @@ public class BookCheckoutActiv extends BaseActivity {
                     if (profileData.getProfileAddress() != null && !TextUtils.isEmpty(profileData.getProfileAddress().getHouseNumber())
                             && takenBookId != null && givenBookId != null) {
                         try {
+                            Analytics.triggerEvent(AnalyticsEvents.BOOK_PLACE_ORDER, BookCheckoutActiv.this);
                             uploadNewOrder(profileData);
                         } catch (JSONException e) {
                             Crashlytics.logException(e);
@@ -402,6 +413,8 @@ public class BookCheckoutActiv extends BaseActivity {
 
             billingContainer.setVisibility(View.VISIBLE);
             addressBtn.setAlpha(1f);
+            addressBtn.setEnabled(true);
+            Analytics.triggerEvent(AnalyticsEvents.MY_BOOK_SELECTED, this);
         }
     }
 

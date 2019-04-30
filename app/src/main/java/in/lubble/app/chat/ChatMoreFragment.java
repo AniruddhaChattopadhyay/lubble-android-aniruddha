@@ -19,6 +19,8 @@ import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.books.BookFragment;
 import in.lubble.app.chat.collections.AirtableCollectionData;
 import in.lubble.app.chat.collections.CollectionsAdapter;
@@ -198,6 +200,7 @@ public class ChatMoreFragment extends Fragment {
                                                 if (!task.isSuccessful()) {
                                                     Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                                 } else {
+                                                    Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, requireContext());
                                                     Toast.makeText(requireContext(), "Updated!", Toast.LENGTH_SHORT).show();
                                                 }
                                             }

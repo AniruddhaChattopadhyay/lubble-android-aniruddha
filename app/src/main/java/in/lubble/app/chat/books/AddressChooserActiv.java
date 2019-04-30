@@ -26,6 +26,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.FetchAddressIntentService;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileAddress;
 import permissions.dispatcher.*;
@@ -60,6 +61,7 @@ public class AddressChooserActiv extends BaseActivity implements OnMapReadyCallb
         landmarkTil = findViewById(R.id.til_landmark);
         addrDoneBtn = findViewById(R.id.btn_addr_done);
 
+        Analytics.triggerScreenEvent(this, this.getClass());
         resultReceiver = new AddressResultReceiver(new Handler());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.

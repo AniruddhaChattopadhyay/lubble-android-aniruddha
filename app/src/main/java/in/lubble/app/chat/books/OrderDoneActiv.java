@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.referrals.ReferralActivity;
@@ -38,6 +39,7 @@ public class OrderDoneActiv extends BaseActivity {
         coinsTv = findViewById(R.id.tv_coins);
         earnCoinsTv = findViewById(R.id.tv_earn);
         addBooksTv = findViewById(R.id.tv_add_books);
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         crossIv.setOnClickListener(new View.OnClickListener() {
             @Override

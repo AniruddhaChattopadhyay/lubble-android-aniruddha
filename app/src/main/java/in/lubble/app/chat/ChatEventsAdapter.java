@@ -17,6 +17,8 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.models.EventData;
 import in.lubble.app.utils.RoundedCornersTransformation;
@@ -115,6 +117,7 @@ public class ChatEventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         @Override
         public void onClick(View v) {
+            Analytics.triggerEvent(AnalyticsEvents.EVENT_OPEN_FROM_GROUP_MORE, context);
             EventInfoActivity.open(context, eventDataList.get(getAdapterPosition()).getId());
         }
     }

@@ -73,10 +73,26 @@ public class AnalyticsEvents {
     public static final String QUIZ_PIC_SAVE_CLICKED = "QUIZ_PIC_SAVE_CLICKED";
 
     public static final String SEND_GROUP_CHAT = "SEND_GROUP_CHAT";
-    public static final String GROUP_QUES_SHOWN = "GROUP_QUES_SHOWN";
-    public static final String GROUP_QUES_ANSWERED = "GROUP_QUES_ANSWERED";
     public static final String LOC_FAIL_PHONE_SUBMIT = "LOC_FAIL_PHONE_SUBMIT";
 
-    public static final String GROUP_QUES_DISMISSED = "GROUP_QUES_DISMISSED";
+    public static final String GROUP_CHAT_FRAG = "GROUP_CHAT_FRAG";
+    public static final String GROUP_MORE_FRAG = "GROUP_MORE_FRAG";
+
+    public static final String BOOK_CHECKOUT_PAGE = "BOOK_CHECKOUT_PAGE";
+    public static final String ADD_BOOK_CLICKED = "ADD_BOOK_CLICKED";
+    public static final String BOOK_SEARCHED = "BOOK_SEARCHED";
+    public static final String BOOK_UPLOADED = "BOOK_UPLOADED";
+    public static final String BOOK_PROCEEDED = "BOOK_PROCEEDED";
+    public static final String BOOK_CHANGE = "BOOK_CHANGE";
+    public static final String MY_BOOK_SELECTED = "MY_BOOK_SELECTED";
+    public static final String BOOK_ADDRESS_CLICKED = "BOOK_ADDRESS_CLICKED";
+    public static final String BOOK_PHONE_CLICKED = "BOOK_PHONE_CLICKED";
+    public static final String BOOK_PLACE_ORDER = "BOOK_PLACE_ORDER";
+
+    public static final String FLAIR_UPDATED = "FLAIR_UPDATED";
+    public static final String COLLECTION_PLACE_MAP_CLICK = "COLLECTION_PLACE_MAP_CLICK";
+    public static final String COLLECTION_PLACE_CTA_CLICK = "COLLECTION_PLACE_CTA_CLICK";
+
+    public static final String EVENT_OPEN_FROM_GROUP_MORE = "EVENT_OPEN_FROM_GROUP_MORE";
 
 }

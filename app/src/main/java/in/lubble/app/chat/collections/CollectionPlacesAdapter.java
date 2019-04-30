@@ -3,6 +3,7 @@ package in.lubble.app.chat.collections;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -16,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.utils.StringUtils;
 
 import java.util.Calendar;
@@ -93,15 +96,20 @@ public class CollectionPlacesAdapter extends RecyclerView.Adapter<CollectionPlac
         holder.ctaBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final Bundle bundle = new Bundle();
+                bundle.putString("placeName", placesData.getName());
                 if (StringUtils.isValidMobile(placesData.getCTALink())) {
+                    bundle.putString("action", "phone");
                     Intent intent = new Intent(Intent.ACTION_DIAL);
                     intent.setData(Uri.parse("tel:" + placesData.getCTALink()));
                     context.startActivity(intent);
                 } else {
+                    bundle.putString("action", "link");
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setData(Uri.parse(placesData.getCTALink()));
                     context.startActivity(intent);
                 }
+                Analytics.triggerEvent(AnalyticsEvents.COLLECTION_PLACE_CTA_CLICK, bundle, context);
             }
         });
 
@@ -110,6 +118,9 @@ public class CollectionPlacesAdapter extends RecyclerView.Adapter<CollectionPlac
             holder.mapIv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("placeName", placesData.getName());
+                    Analytics.triggerEvent(AnalyticsEvents.COLLECTION_PLACE_MAP_CLICK, bundle, context);
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:" + placesData.getLatitude() +
                             "," + placesData.getLongitude() + "?q=" + placesData.getLatitude() + "," + placesData.getLongitude() + "(" + placesData.getName() + ")"));
                     context.startActivity(intent);

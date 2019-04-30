@@ -19,6 +19,8 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksFields;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
@@ -78,6 +80,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
         uploadingBookContainer = findViewById(R.id.container_uploading_book);
         searchResultsRv.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         searchResultsRv.setLayoutManager(new LinearLayoutManager(this));
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         toSelectBook = getIntent().getBooleanExtra(ARG_SELECT_BOOK, false);
 
@@ -102,6 +105,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
         proceedContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.BOOK_PROCEEDED, BookSearchActiv.this);
                 if (toSelectBook) {
                     if (booksAdded == 1) {
                         final Intent intent = new Intent();
@@ -138,6 +142,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
     }
 
     private void performSearch() {
+        Analytics.triggerEvent(AnalyticsEvents.BOOK_SEARCHED, this);
         termsTv.setVisibility(View.GONE);
         progressBar.setVisibility(View.VISIBLE);
         addMoreContainer.setVisibility(View.GONE);
@@ -194,6 +199,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
     }
 
     private void uploadBook(BookItem bookItem) {
+        Analytics.triggerEvent(AnalyticsEvents.BOOK_UPLOADED, this);
         uploadingBookContainer.setVisibility(View.VISIBLE);
         proceedContainer.setVisibility(View.GONE);
 

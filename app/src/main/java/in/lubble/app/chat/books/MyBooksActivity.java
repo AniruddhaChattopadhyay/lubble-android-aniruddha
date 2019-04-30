@@ -14,6 +14,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.network.Endpoints;
@@ -52,6 +53,7 @@ public class MyBooksActivity extends BaseActivity {
         recyclerView = findViewById(R.id.rv_my_books);
         addBooksBtn = findViewById(R.id.btn_add_books);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         toSelectBook = getIntent().getBooleanExtra(ARG_SELECT_BOOK, false);
 
