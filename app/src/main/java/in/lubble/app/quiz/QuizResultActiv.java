@@ -56,7 +56,7 @@ import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.shareScree
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.ALL;
 
 @RuntimePermissions
-public class QuizResultActiv extends BaseActivity implements RetryQuizBottomSheet.OnQuizRetryListener {
+public class QuizResultActiv extends BaseActivity {
 
     private static final String TAG = "QuizResultActiv";
     private static final int REQUEST_CODE_RETRY = 605;
@@ -117,7 +117,7 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         retryContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openPlayAgainDialog();
+                playAgain();
             }
         });
 
@@ -292,18 +292,10 @@ public class QuizResultActiv extends BaseActivity implements RetryQuizBottomShee
         fetchResult(dummyLoc);
     }
 
-    private void openPlayAgainDialog() {
-        Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_CLICKED, this);
-        final RetryQuizBottomSheet retryQuizBottomSheet = RetryQuizBottomSheet.newInstance();
-        retryQuizBottomSheet.show(getSupportFragmentManager(), null);
-    }
-
-    @Override
-    public void onSheetInteraction(int id) {
-        if (id == RESULT_OK) {
-            QuizOptionsActiv.open(this);
-            finish();
-        }
+    private void playAgain() {
+        Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_DONE, this);
+        QuizOptionsActiv.open(this);
+        finish();
     }
 
     @Override

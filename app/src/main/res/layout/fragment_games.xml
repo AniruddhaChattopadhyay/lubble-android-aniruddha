@@ -118,25 +118,6 @@
                 android:textColor="@color/white"
                 android:textStyle="bold" />
 
-            <ImageView
-                android:id="@+id/iv_quiz_play_coin"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginLeft="8dp"
-                android:visibility="gone"
-                app:srcCompat="@drawable/ic_coin" />
-
-            <TextView
-                android:id="@+id/tv_quiz_play_cost"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:text="40"
-                android:textColor="@color/gold"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:visibility="gone" />
-
         </LinearLayout>
 
         <TextView

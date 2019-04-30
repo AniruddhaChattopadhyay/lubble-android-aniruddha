@@ -11,10 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -34,6 +31,7 @@ import io.branch.referral.BranchError;
 
 import java.util.List;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
@@ -43,6 +41,7 @@ public class ReferralsFragment extends Fragment {
     private static final String TAG = "ReferralsFragment";
 
     private ImageView referralHeaderIv;
+    private TextView myCoinsTv;
     private LinearLayout fbContainer;
     private LinearLayout whatsappContainer;
     private LinearLayout moreContainer;
@@ -51,6 +50,7 @@ public class ReferralsFragment extends Fragment {
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
     private ValueEventListener referralHdrImgListener;
+    private ValueEventListener thisUserListener;
 
     public ReferralsFragment() {
         // Required empty public constructor
@@ -77,6 +77,7 @@ public class ReferralsFragment extends Fragment {
         moreContainer = view.findViewById(R.id.container_more);
         bottomInviteBtn = view.findViewById(R.id.btn_bottom_invite);
         RecyclerView rv = view.findViewById(R.id.rv_leaderboard);
+        myCoinsTv = view.findViewById(R.id.tv_my_coins);
         rv.setNestedScrollingEnabled(false);
         rv.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ReferralLeaderboardAdapter(GlideApp.with(getContext()), getContext());
@@ -101,6 +102,21 @@ public class ReferralsFragment extends Fragment {
                         .placeholder(R.drawable.referral_info)
                         .error(R.drawable.referral_info)
                         .into(referralHeaderIv);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        thisUserListener = getThisUserRef().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                if (profileData != null) {
+                    myCoinsTv.setText(String.valueOf(profileData.getCoins()));
+                }
             }
 
             @Override
@@ -252,6 +268,9 @@ public class ReferralsFragment extends Fragment {
         super.onPause();
         if (referralHdrImgListener != null) {
             RealtimeDbHelper.getLubbleRef().child("referralHdrImg").removeEventListener(referralHdrImgListener);
+        }
+        if (thisUserListener != null) {
+            getThisUserRef().removeEventListener(thisUserListener);
         }
     }
 }

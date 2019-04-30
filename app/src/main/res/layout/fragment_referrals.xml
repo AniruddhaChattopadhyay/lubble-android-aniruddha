@@ -1,10 +1,10 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-                                            xmlns:app="http://schemas.android.com/apk/res-auto"
-                                            xmlns:tools="http://schemas.android.com/tools"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:background="@color/white"
-                                            tools:context="in.lubble.app.referrals.ReferralsFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context="in.lubble.app.referrals.ReferralsFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -26,11 +26,54 @@
             android:layout_below="@id/iv_refer_header"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="24dp"
-            android:text="Share your invite link with:"
+            android:text="Earn coins when a friend joins Lubble:"
             android:textColor="@color/colorAccent"
-            android:textStyle="bold"/>
+            android:textStyle="bold" />
 
-        <include layout="@layout/layout_social_invite"/>
+        <include layout="@layout/layout_social_invite" />
+
+        <View
+            android:id="@+id/view_divi"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_below="@id/container_social_apps"
+            android:layout_marginTop="8dp"
+            android:background="@color/super_light_gray" />
+
+        <TextView
+            android:id="@+id/tv_my_coins"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/view_divi"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/pill_button_blue_white"
+            android:drawablePadding="2dp"
+            android:paddingLeft="16dp"
+            android:paddingTop="8dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="8dp"
+            android:text=" ---"
+            android:textColor="@color/gold"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:drawableLeftCompat="@drawable/ic_coin" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_my_coins"
+            android:layout_centerHorizontal="true"
+            android:text="My Coins"
+            android:textColor="@color/black" />
+
+        <View
+            android:id="@+id/view_divi2"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_below="@id/tv_my_coins"
+            android:layout_marginTop="32dp"
+            android:background="@color/super_light_gray" />
 
         <RelativeLayout
             android:id="@+id/container_referral_copy"
@@ -46,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Your Referral Code: 9999xxx"/>
+                android:text="Your Referral Code: 9999xxx" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -55,7 +98,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="8dp"
                 android:text="Tap to copy"
-                android:textSize="12sp"/>
+                android:textSize="12sp" />
 
         </RelativeLayout>
 
@@ -65,12 +108,13 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/container_referral_copy"
             android:layout_marginLeft="16dp"
-            android:paddingBottom="8dp"
-            android:layout_marginRight="16dp"
             android:layout_marginTop="32dp"
+            android:layout_marginRight="16dp"
             android:background="@drawable/rect_rounded_border"
             android:gravity="center_horizontal"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingBottom="8dp"
+            android:visibility="gone">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -84,16 +128,16 @@
                     android:layout_centerVertical="true"
                     android:text="The Top 10"
                     android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                    android:textColor="@color/white"/>
+                    android:textColor="@color/white" />
 
                 <ImageView
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_alignParentRight="true"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginRight="8dp"
                     android:layout_marginTop="8dp"
-                    app:srcCompat="@drawable/ic_cup"/>
+                    android:layout_marginRight="8dp"
+                    android:layout_marginBottom="8dp"
+                    app:srcCompat="@drawable/ic_cup" />
 
             </RelativeLayout>
 
@@ -101,35 +145,38 @@
                 android:id="@+id/rv_leaderboard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="1dp"/>
+                android:layout_margin="1dp" />
 
         </LinearLayout>
 
         <TextView
-            android:text="Rise to the top of the Leaderboard by inviting friends!"
             android:layout_width="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:textSize="16sp"
-            android:textColor="@color/black"
+            android:layout_height="wrap_content"
             android:layout_alignTop="@id/btn_bottom_invite"
+            android:layout_marginLeft="16dp"
             android:layout_toLeftOf="@id/btn_bottom_invite"
-            android:layout_height="wrap_content" />
+            android:text="Rise to the top of the Leaderboard by inviting friends!"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_bottom_invite"
-            android:text="Invite Friends"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_below="@id/container_leaderboard"
             android:layout_alignParentRight="true"
-            android:theme="@style/AccentButton"
             android:layout_marginTop="16dp"
             android:layout_marginRight="16dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:text="Invite Friends"
+            android:theme="@style/AccentButton"
+            android:visibility="gone" />
 
         <View
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:layout_below="@id/btn_bottom_invite"/>
+            android:layout_below="@id/btn_bottom_invite"
+            android:visibility="gone" />
 
     </RelativeLayout>
 

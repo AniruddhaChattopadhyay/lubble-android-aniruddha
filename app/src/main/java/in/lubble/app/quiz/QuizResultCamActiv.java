@@ -58,7 +58,7 @@ import static in.lubble.app.quiz.QuizResultCamActivPermissionsDispatcher.shareSc
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.ALL;
 
 @RuntimePermissions
-public class QuizResultCamActiv extends BaseActivity implements RetryQuizBottomSheet.OnQuizRetryListener {
+public class QuizResultCamActiv extends BaseActivity {
 
     private static final String TAG = "QuizResultCamActiv";
 
@@ -318,17 +318,9 @@ public class QuizResultCamActiv extends BaseActivity implements RetryQuizBottomS
     }
 
     private void openPlayAgainDialog() {
-        Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_CLICKED, this);
-        final RetryQuizBottomSheet retryQuizBottomSheet = RetryQuizBottomSheet.newInstance();
-        retryQuizBottomSheet.show(getSupportFragmentManager(), null);
-    }
-
-    @Override
-    public void onSheetInteraction(int id) {
-        if (id == RESULT_OK) {
-            QuizOptionsActiv.open(this);
-            finish();
-        }
+        Analytics.triggerEvent(AnalyticsEvents.QUIZ_RETRY_DONE, this);
+        QuizOptionsActiv.open(this);
+        finish();
     }
 
     @Override
