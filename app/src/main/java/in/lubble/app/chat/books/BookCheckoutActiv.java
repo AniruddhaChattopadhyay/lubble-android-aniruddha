@@ -207,11 +207,11 @@ public class BookCheckoutActiv extends BaseActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
                 if (profileData != null) {
+                    balanceCoinsTv.setText(profileData.getCoins() + " Coins");
                     if (profileData.getProfileAddress() != null) {
                         addAddressContainer.setVisibility(View.GONE);
                         timeAddressContainer.setVisibility(View.VISIBLE);
                         addressTv.setText(profileData.getProfileAddress().getHouseNumber() + ", " + profileData.getProfileAddress().getLocation());
-                        balanceCoinsTv.setText(profileData.getCoins() + " Coins");
 
                         if (profileData.getCoins() < DELIVERY_FEE) {
                             setCtaToEarnCoins();
