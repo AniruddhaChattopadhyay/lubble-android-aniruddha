@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
@@ -16,6 +18,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -44,6 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.analytics.AnalyticsEvents.HELP_PHONE_CLICKED;
 import static in.lubble.app.chat.books.MyBooksActivity.ARG_SELECT_BOOK;
 import static in.lubble.app.chat.books.MyBooksActivity.SELECTED_BOOK_RECORD;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -211,6 +215,7 @@ public class BookCheckoutActiv extends BaseActivity {
 
                         if (profileData.getCoins() < DELIVERY_FEE) {
                             setCtaToEarnCoins();
+                            Analytics.triggerEvent(AnalyticsEvents.BOOK_LESS_COINS, BookCheckoutActiv.this);
                         } else if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
                             phoneTv.setText(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
                             setCtaToPlaceOrder(profileData);
@@ -393,6 +398,7 @@ public class BookCheckoutActiv extends BaseActivity {
     }
 
     public void earnMore(View view) {
+        Analytics.triggerEvent(AnalyticsEvents.BOOK_EARN_MORE, this);
         ReferralActivity.open(this);
     }
 
@@ -419,14 +425,54 @@ public class BookCheckoutActiv extends BaseActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.new_item_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.action_help:
+                openHelpBottomSheet();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openHelpBottomSheet() {
+
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = getLayoutInflater().inflate(R.layout.help_bottom_sheet, null);
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
+
+        final TextView phoneTv = sheetView.findViewById(R.id.tv_phone_number);
+
+        phoneTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Analytics.triggerEvent(HELP_PHONE_CLICKED, BookCheckoutActiv.this);
+
+                Intent sendIntent = new Intent("android.intent.action.MAIN");
+                sendIntent.setAction(Intent.ACTION_VIEW);
+                sendIntent.setPackage("com.whatsapp");
+                String url = "https://api.whatsapp.com/send?phone=" + "+917676622668" + "&text=" + "Hi please help me with book exchange";
+                sendIntent.setData(Uri.parse(url));
+                if (sendIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(sendIntent);
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:+916361686026"));
+                    startActivity(intent);
+                }
+            }
+        });
+
     }
 
     @Override

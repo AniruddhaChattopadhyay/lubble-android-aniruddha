@@ -95,5 +95,7 @@ public class AnalyticsEvents {
 
     public static final String EVENT_OPEN_FROM_GROUP_MORE = "EVENT_OPEN_FROM_GROUP_MORE";
     public static final String CHAT_PAGINATION = "CHAT_PAGINATION";
+    public static final String BOOK_EARN_MORE = "BOOK_EARN_MORE";
+    public static final String BOOK_LESS_COINS = "BOOK_LESS_COINS";
 
 }

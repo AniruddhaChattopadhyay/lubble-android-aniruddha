@@ -717,23 +717,24 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
         bottomSheetDialog.setContentView(sheetView);
         bottomSheetDialog.show();
 
-        final TextView gotItTv = sheetView.findViewById(R.id.tv_got_it);
         final TextView phoneTv = sheetView.findViewById(R.id.tv_phone_number);
 
         phoneTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Analytics.triggerEvent(HELP_PHONE_CLICKED, NewItemActiv.this);
-                Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:+916361686026"));
-                startActivity(intent);
-            }
-        });
-
-        gotItTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bottomSheetDialog.dismiss();
+                Intent sendIntent = new Intent("android.intent.action.MAIN");
+                sendIntent.setAction(Intent.ACTION_VIEW);
+                sendIntent.setPackage("com.whatsapp");
+                String url = "https://api.whatsapp.com/send?phone=" + "+917676622668" + "&text=" + "Hi please help me with products";
+                sendIntent.setData(Uri.parse(url));
+                if (sendIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(sendIntent);
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:+916361686026"));
+                    startActivity(intent);
+                }
             }
         });
 
