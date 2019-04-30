@@ -310,15 +310,15 @@ public class BookCheckoutActiv extends BaseActivity {
 
         HashMap<String, Object> params = new HashMap<>();
         HashMap<String, Object> fieldParams = new HashMap<>();
-        fieldParams.put("User ID", FirebaseAuth.getInstance().getUid());
+        fieldParams.put("UserID", FirebaseAuth.getInstance().getUid());
         final JSONArray givenArray = new JSONArray();
         givenArray.put(givenBookId);
-        fieldParams.put("Given Book ID", givenArray);
+        fieldParams.put("GivenBookID", givenArray);
         final JSONArray takenArray = new JSONArray();
         takenArray.put(takenBookId);
-        fieldParams.put("Taken Book ID", takenArray);
-        fieldParams.put("Coins Used", DELIVERY_FEE);
-        fieldParams.put("House Number", profileData.getProfileAddress().getHouseNumber());
+        fieldParams.put("TakenBookID", takenArray);
+        fieldParams.put("CoinsUsed", DELIVERY_FEE);
+        fieldParams.put("HouseNumber", profileData.getProfileAddress().getHouseNumber());
         fieldParams.put("Location", profileData.getProfileAddress().getLocation());
         fieldParams.put("Latitude", profileData.getProfileAddress().getLatitude());
         fieldParams.put("Longitude", profileData.getProfileAddress().getLongitude());
