@@ -423,12 +423,12 @@ public class EventInfoActivity extends BaseActivity {
                             maybeCount++;
                         }
                     }
-                    if (goingCount > 5) {
+                    if (goingCount > 0) {
                         statsIcon.setVisibility(View.VISIBLE);
                         statsTv.setVisibility(View.VISIBLE);
                         statsTv.setText(String.format(getString(R.string.event_going_count), goingCount));
                     }
-                    if (maybeCount > 3) {
+                    if (maybeCount > 0) {
                         statsIcon.setVisibility(View.VISIBLE);
                         statsTv.setVisibility(View.VISIBLE);
                         final CharSequence prefixText = statsTv.getText();
