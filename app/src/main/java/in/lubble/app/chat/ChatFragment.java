@@ -895,6 +895,27 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             }
         });
+        final Bundle bundle = new Bundle();
+        bundle.putString("groupid", groupId);
+        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, requireContext());
+    }
+
+    void updateMsgId(String msgId) {
+        getMessagesRef().child(groupId).child(msgId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (isAdded() && dataSnapshot.getValue(ChatData.class) != null) {
+                    final ChatData chatData = dataSnapshot.getValue(ChatData.class);
+                    chatData.setId(dataSnapshot.getKey());
+                    chatAdapter.updateChatData(chatData);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void checkAndInsertDate(ChatData chatData, @Nullable ChatData prevChatData, int posToInsert) {

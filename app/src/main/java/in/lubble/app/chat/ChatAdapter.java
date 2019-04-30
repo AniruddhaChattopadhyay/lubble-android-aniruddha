@@ -1108,6 +1108,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     // this logic is inverse of the one for post likes
                     // here, the chatData has been successfully liked and contains liker uid
                     ChatData updatedChatData = dataSnapshot.getValue(ChatData.class);
+                    updatedChatData.setId(dataSnapshot.getKey());
+                    chatFragment.updateMsgId(updatedChatData.getId());
                     if (updatedChatData != null) {
                         if (updatedChatData.getLubbReceipts().containsKey(authorId)) {
                             addLikeToAuthorProfile(updatedChatData);

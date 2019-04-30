@@ -94,5 +94,6 @@ public class AnalyticsEvents {
     public static final String COLLECTION_PLACE_CTA_CLICK = "COLLECTION_PLACE_CTA_CLICK";
 
     public static final String EVENT_OPEN_FROM_GROUP_MORE = "EVENT_OPEN_FROM_GROUP_MORE";
+    public static final String CHAT_PAGINATION = "CHAT_PAGINATION";
 
 }
