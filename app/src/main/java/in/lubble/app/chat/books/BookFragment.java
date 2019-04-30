@@ -149,12 +149,19 @@ public class BookFragment extends Fragment {
                             }
                         }
 
-                        booksRecyclerView.setAdapter(new BookAdapter(publicBooksList, GlideApp.with(requireContext()), mListener));
                         calcMyBooks(airtableData.getRecords());
+                        if (publicBooksList.size() > 0) {
+                            booksRecyclerView.setAdapter(new BookAdapter(publicBooksList, GlideApp.with(requireContext()), mListener));
+                        } else {
+                            booksRecyclerView.setVisibility(View.GONE);
+                            noBookIv.setVisibility(View.VISIBLE);
+                            noBookTv.setVisibility(View.VISIBLE);
+                        }
                     } else {
                         booksRecyclerView.setVisibility(View.GONE);
                         noBookIv.setVisibility(View.VISIBLE);
                         noBookTv.setVisibility(View.VISIBLE);
+                        bookCountTv.setText("0");
                     }
                 } else {
                     if (isAdded() && isVisible()) {

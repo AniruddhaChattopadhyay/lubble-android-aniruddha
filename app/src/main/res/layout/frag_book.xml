@@ -149,7 +149,7 @@
             android:layout_height="wrap_content"
             android:drawablePadding="8dp"
             android:gravity="center_vertical"
-            android:text="Add Your Books"
+            android:text="Add My Books"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textStyle="bold"
