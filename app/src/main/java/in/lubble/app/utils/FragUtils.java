@@ -17,7 +17,7 @@ public class FragUtils {
         fragmentManager
                 .beginTransaction()
                 .replace(viewId, targetFrag)
-                .commit();
+                .commitAllowingStateLoss();
     }
 
     public static void replaceStack(Context context, Fragment fragment, int viewId) {
@@ -28,7 +28,7 @@ public class FragUtils {
             }
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.replace(viewId, fragment);
-            transaction.commit();
+            transaction.commitAllowingStateLoss();
         }
     }
 
@@ -37,7 +37,7 @@ public class FragUtils {
                 .beginTransaction()
                 .replace(containerViewId, targetFrag)
                 .addToBackStack(null)
-                .commit();
+                .commitAllowingStateLoss();
     }
 
 }
