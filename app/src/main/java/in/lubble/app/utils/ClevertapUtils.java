@@ -22,7 +22,6 @@ public class ClevertapUtils {
             profileUpdate.put("Firebase ID", FirebaseAuth.getInstance().getUid());
             profileUpdate.put("Lubble Id", LubbleSharedPrefs.getInstance().getLubbleId());
             profileUpdate.put("Phone", currentUser.getPhoneNumber());
-            profileUpdate.put("Photo", currentUser.getPhotoUrl());
             profileUpdate.put("version name", BuildConfig.VERSION_NAME);
             profileUpdate.put("version code", BuildConfig.VERSION_CODE);
 

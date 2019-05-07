@@ -402,6 +402,12 @@ public class MainActivity extends BaseActivity {
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(profileIcon);
+
+                    if (profileInfo != null && !isFinishing()) {
+                        HashMap<String, Object> profileUpdate = new HashMap<>();
+                        profileUpdate.put("Photo", profileInfo.getThumbnail());
+                        CleverTapAPI.getDefaultInstance(MainActivity.this).pushProfile(profileUpdate);
+                    }
                 } catch (IllegalArgumentException e) {
                     Crashlytics.logException(e);
                 }
