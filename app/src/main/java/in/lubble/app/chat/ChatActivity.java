@@ -41,7 +41,6 @@ import java.util.MissingFormatArgumentException;
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.ClevertapUtils.setAppseeUser;
-import static in.lubble.app.utils.FragUtils.replaceFrag;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class ChatActivity extends BaseActivity implements ChatMoreFragment.FlairUpdateListener {
@@ -150,9 +149,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
         ChatViewPagerAdapter adapter = new ChatViewPagerAdapter(getSupportFragmentManager(), msgId, isJoining);
         viewPager.setAdapter(adapter);
-        targetFrag = getTargetChatFrag(msgId, isJoining);
 
-        replaceFrag(getSupportFragmentManager(), targetFrag, R.id.frame_fragContainer);
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -205,16 +202,16 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
     private ChatFragment getTargetChatFrag(String msgId, boolean isJoining) {
         if (!TextUtils.isEmpty(groupId)) {
-            return ChatFragment.newInstanceForGroup(
+            return targetFrag = ChatFragment.newInstanceForGroup(
                     groupId, isJoining, msgId, (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
             );
         } else if (!TextUtils.isEmpty(dmId)) {
-            return ChatFragment.newInstanceForDm(
+            return targetFrag = ChatFragment.newInstanceForDm(
                     dmId, msgId,
                     getIntent().getStringExtra(EXTRA_ITEM_TITLE), (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
             );
         } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
-            return ChatFragment.newInstanceForEmptyDm(
+            return targetFrag = ChatFragment.newInstanceForEmptyDm(
                     getIntent().getStringExtra(EXTRA_RECEIVER_ID),
                     getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
                     getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL),

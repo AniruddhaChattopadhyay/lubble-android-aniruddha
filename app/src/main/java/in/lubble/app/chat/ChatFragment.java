@@ -219,6 +219,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             throw new RuntimeException("khuch to params dega bhai?");
         }
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        if (getArguments().getParcelable(KEY_IMG_URI) != null) {
+            sharedImageUri = getArguments().getParcelable(KEY_IMG_URI);
+            if (TextUtils.isEmpty(dmId)) {
+                // not a DM
+                AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                sharedImageUri = null;
+            }
+        }
     }
 
     private void populateChatData(ChatData chatData) {
@@ -292,14 +300,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
         init();
         ChatData chatData = (ChatData) getArguments().getSerializable(KEY_CHAT_DATA);
-        if (getArguments().getParcelable(KEY_IMG_URI) != null) {
-            sharedImageUri = getArguments().getParcelable(KEY_IMG_URI);
-            if (TextUtils.isEmpty(dmId)) {
-                // not a DM
-                AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
-                sharedImageUri = null;
-            }
-        }
+
         if (chatData != null) {
             populateChatData(chatData);
         }
