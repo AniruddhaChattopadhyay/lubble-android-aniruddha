@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
+import com.appsee.Appsee;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.RemoteMessage;
@@ -39,6 +40,7 @@ import java.util.MissingFormatArgumentException;
 
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
+import static in.lubble.app.utils.ClevertapUtils.setAppseeUser;
 import static in.lubble.app.utils.FragUtils.replaceFrag;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
@@ -124,6 +126,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         TextView toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         setTitle("");
+        Appsee.start();
+        setAppseeUser();
 
         viewPager = findViewById(R.id.viewpager_chat);
         TabLayout tabLayout = findViewById(R.id.tablayout_chat);

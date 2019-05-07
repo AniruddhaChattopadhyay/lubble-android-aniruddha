@@ -467,6 +467,9 @@
             android:name=".notifications.NotifActionBroadcastRecvr"
             android:enabled="true"
             android:exported="true" />
+        <meta-data
+            android:name="com.appsee.ApiKey"
+            android:value="2d99c05c4f174ef7a04a08452a94e721" />
     </application>
 
 </manifest>
