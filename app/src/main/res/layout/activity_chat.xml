@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context="in.lubble.app.chat.ChatActivity">
 
@@ -21,19 +22,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/icon_toolbar"
-        android:background="@color/white">
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chats" />
-
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Collections" />
-
-    </com.google.android.material.tabs.TabLayout>
+        app:tabSelectedTextColor="@color/black"
+        android:background="@color/white" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewpager_chat"

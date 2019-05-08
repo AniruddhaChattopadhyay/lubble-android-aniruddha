@@ -249,6 +249,9 @@ public class ChatMoreFragment extends Fragment {
                         collectionTitleTv.setText(chatMoreData.getCollectionTitle());
                         if (chatMoreData.getIsBooksGroup()) {
                             FragUtils.addFrag(getChildFragmentManager(), frameLayout.getId(), BookFragment.newInstance());
+                            if (!LubbleSharedPrefs.getInstance().getIsBookExchangeOpened()) {
+                                ((ChatActivity) getActivity()).showNewBadge();
+                            }
                         }
                         final List<String> entries1List = chatMoreData.getCollectionList();
                         fetchEntries(entries1List);

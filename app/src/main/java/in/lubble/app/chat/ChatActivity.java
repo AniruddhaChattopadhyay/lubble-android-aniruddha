@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -64,6 +65,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private ChatFragment targetFrag = null;
     private String groupId;
     private ViewPager viewPager;
+    private TabLayout tabLayout;
     private String dmId;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
@@ -129,7 +131,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         setAppseeUser();
 
         viewPager = findViewById(R.id.viewpager_chat);
-        TabLayout tabLayout = findViewById(R.id.tablayout_chat);
+        tabLayout = findViewById(R.id.tablayout_chat);
         tabLayout.setupWithViewPager(viewPager);
 
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
@@ -185,12 +187,23 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, ChatActivity.this);
                 } else if (tab.getPosition() == 1) {
                     Analytics.triggerEvent(AnalyticsEvents.GROUP_MORE_FRAG, bundle, ChatActivity.this);
+                    final View customView = tab.getCustomView();
+                    if (customView != null) {
+                        ((TextView) customView.findViewById(android.R.id.text1)).setTextColor(ContextCompat.getColor(ChatActivity.this, R.color.black));
+                        customView.findViewById(R.id.badge).setVisibility(View.GONE);
+                        LubbleSharedPrefs.getInstance().setIsBookExchangeOpened(true);
+                    }
                 }
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-
+                if (tab.getPosition() == 1) {
+                    final View customView = tab.getCustomView();
+                    if (customView != null) {
+                        ((TextView) customView.findViewById(android.R.id.text1)).setTextColor(ContextCompat.getColor(ChatActivity.this, R.color.default_text_color));
+                    }
+                }
             }
 
             @Override
@@ -304,6 +317,14 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             GlideApp.with(this).load(thumbnailUrl).circleCrop().into(toolbarIcon);
         }
         toolbarLockIcon.setVisibility(isPrivate ? View.VISIBLE : View.GONE);
+    }
+
+    public void showNewBadge() {
+        tabLayout.getTabAt(1).setCustomView(R.layout.tab_with_badge);
+        final View customView = tabLayout.getTabAt(1).getCustomView();
+        if (customView != null) {
+            customView.findViewById(R.id.badge).setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
