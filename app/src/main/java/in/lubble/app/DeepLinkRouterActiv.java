@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
+import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.SellerDashActiv;
@@ -73,7 +74,20 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 startActivity(SellerDashActiv.getIntent(this, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT));
                 break;
             case "chats":
-                startActivity(new Intent(this, MainActivity.class));
+                final String groupId = uri.getQueryParameter("id");
+                if (groupId != null) {
+                    ChatActivity.openForGroup(this, groupId, false, null);
+                } else {
+                    startActivity(new Intent(this, MainActivity.class));
+                }
+                break;
+            case "chats.more":
+                final String id = uri.getQueryParameter("id");
+                if (id != null) {
+                    ChatActivity.openGroupMore(this, id);
+                } else {
+                    startActivity(new Intent(this, MainActivity.class));
+                }
                 break;
             case "games":
                 final Intent intent = new Intent(this, MainActivity.class);

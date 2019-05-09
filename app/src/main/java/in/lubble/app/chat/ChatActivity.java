@@ -50,6 +50,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_MSG_ID = "chat_activ_msg_id";
     public static final String EXTRA_CHAT_DATA = "chat_activ_chat_data";
     public static final String EXTRA_IMG_URI_DATA = "EXTRA_IMG_URI_DATA";
+    public static final String EXTRA_TAB_POS = "EXTRA_TAB_POS";
     // if we need to show joining progress dialog
     public static final String EXTRA_IS_JOINING = "chat_activ_is_joining";
     // for when DM exists
@@ -73,6 +74,13 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         intent.putExtra(EXTRA_GROUP_ID, groupId);
         intent.putExtra(EXTRA_IS_JOINING, isJoining);
         intent.putExtra(EXTRA_MSG_ID, msgId);
+        context.startActivity(intent);
+    }
+
+    public static void openGroupMore(@NonNull Context context, @NonNull String groupId) {
+        final Intent intent = new Intent(context, ChatActivity.class);
+        intent.putExtra(EXTRA_GROUP_ID, groupId);
+        intent.putExtra(EXTRA_TAB_POS, 1);
         context.startActivity(intent);
     }
 
@@ -137,6 +145,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
         groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
+        int tabPosition = getIntent().getIntExtra(EXTRA_TAB_POS, 0);
         final String msgId = getIntent().getStringExtra(EXTRA_MSG_ID);
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);
         dmId = getIntent().getStringExtra(EXTRA_DM_ID);
@@ -151,6 +160,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
         ChatViewPagerAdapter adapter = new ChatViewPagerAdapter(getSupportFragmentManager(), msgId, isJoining);
         viewPager.setAdapter(adapter);
+        viewPager.setCurrentItem(tabPosition, true);
 
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override

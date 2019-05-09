@@ -346,6 +346,7 @@ public class BookCheckoutActiv extends BaseActivity {
                     if (!isFinishing()) {
                         progressDialog.dismiss();
                         Toast.makeText(BookCheckoutActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        Crashlytics.logException(new Exception("Book Checkout airtable api Issue"));
                     }
                 }
             }
@@ -392,6 +393,7 @@ public class BookCheckoutActiv extends BaseActivity {
                 } else if (!isFinishing()) {
                     progressDialog.dismiss();
                     Toast.makeText(BookCheckoutActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    Crashlytics.logException(new Exception("Book Checkout coin deduction Issue"));
                 }
             }
         });
