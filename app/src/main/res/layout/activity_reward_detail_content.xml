@@ -14,7 +14,7 @@
         android:layout_alignParentRight="true"
         android:layout_toRightOf="@id/tv_brand_name"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
+        android:scaleType="fitStart"
         android:src="@drawable/reward_inside" />
 
     <ImageView

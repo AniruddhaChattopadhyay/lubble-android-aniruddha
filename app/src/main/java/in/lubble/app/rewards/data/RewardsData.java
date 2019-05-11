@@ -29,6 +29,8 @@ public class RewardsData implements Serializable {
     private String details;
     @SerializedName("Tnc")
     private String tnc;
+    @SerializedName("Color")
+    private String color;
 
     public Integer getId() {
         return id;
@@ -118,4 +120,11 @@ public class RewardsData implements Serializable {
         this.tnc = tnc;
     }
 
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
 }

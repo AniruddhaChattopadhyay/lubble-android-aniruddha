@@ -2,6 +2,7 @@ package in.lubble.app.rewards;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.view.View;
@@ -9,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.text.HtmlCompat;
 import androidx.core.widget.NestedScrollView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -26,7 +28,9 @@ public class RewardDetailActiv extends BaseActivity {
     private static final String TAG = "RewardDetailActiv";
     private static final String ARG_REWARD_DATA = "ARG_REWARD_DATA";
 
+    private CoordinatorLayout rootview;
     private RewardsData rewardsData;
+    private ImageView rewardIv;
     private ImageView logoIv;
     private TextView detailsTv;
     private TextView brandNameTv;
@@ -51,6 +55,8 @@ public class RewardDetailActiv extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reward_detail);
 
+        rootview = findViewById(R.id.rootview_reward_detail);
+        rewardIv = findViewById(R.id.iv_reward);
         logoIv = findViewById(R.id.iv_logo);
         brandNameTv = findViewById(R.id.tv_brand_name);
         titleTv = findViewById(R.id.tv_reward_title);
@@ -72,6 +78,8 @@ public class RewardDetailActiv extends BaseActivity {
             return;
         }
 
+        rootview.setBackgroundColor(Color.parseColor("#" + rewardsData.getColor()));
+        GlideApp.with(this).load(rewardsData.getDetailPhoto()).diskCacheStrategy(DiskCacheStrategy.NONE).into(rewardIv);
         GlideApp.with(this).load(rewardsData.getBrandLogo()).diskCacheStrategy(DiskCacheStrategy.NONE).into(logoIv);
         brandNameTv.setText(rewardsData.getBrand());
         detailBrandName.setText(rewardsData.getBrand());

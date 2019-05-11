@@ -5,6 +5,7 @@
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
     android:background="@color/teal"
+    android:id="@+id/rootview_reward_detail"
     tools:context="in.lubble.app.rewards.RewardDetailActiv">
 
     <com.google.android.material.appbar.AppBarLayout
