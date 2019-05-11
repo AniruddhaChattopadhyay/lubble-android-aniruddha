@@ -4,12 +4,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.core.text.HtmlCompat;
+import androidx.core.widget.NestedScrollView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -33,6 +37,8 @@ public class RewardDetailActiv extends BaseActivity {
     private TextView detailTitleTv;
     private TextView detailDescTv;
     private TextView tncTv;
+    private NestedScrollView bottomSheet;
+    private TextView showDetailsTv;
 
     public static void open(Context context, RewardsData rewardsData) {
         final Intent intent = new Intent(context, RewardDetailActiv.class);
@@ -55,6 +61,8 @@ public class RewardDetailActiv extends BaseActivity {
         detailDescTv = findViewById(R.id.tv_detail_desc);
         detailsTv = findViewById(R.id.tv_details);
         tncTv = findViewById(R.id.tv_tnc);
+        bottomSheet = findViewById(R.id.bottomsheet_reward);
+        showDetailsTv = findViewById(R.id.tv_show_details);
 
         rewardsData = (RewardsData) getIntent().getSerializableExtra(ARG_REWARD_DATA);
         if (rewardsData == null) {
@@ -78,6 +86,26 @@ public class RewardDetailActiv extends BaseActivity {
 
         tncTv.setText(HtmlCompat.fromHtml(rewardsData.getTnc(), HtmlCompat.FROM_HTML_MODE_LEGACY));
         tncTv.setMovementMethod(LinkMovementMethod.getInstance());
+
+        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+
+        bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    showDetailsTv.setText("Hide Details");
+                    showDetailsTv.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_keyboard_arrow_down_black_24dp, 0, 0);
+                } else {
+                    showDetailsTv.setText("Show Details");
+                    showDetailsTv.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_keyboard_arrow_up_black_24dp, 0, 0);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+            }
+        });
 
     }
 }
