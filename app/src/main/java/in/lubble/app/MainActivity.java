@@ -111,6 +111,9 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+        final Intent intent = new Intent(MainActivity.this, DebugActivity.class);
+        startActivity(intent);
+
         Appsee.start();
         setAppseeUser();
         firebaseAuth = FirebaseAuth.getInstance();

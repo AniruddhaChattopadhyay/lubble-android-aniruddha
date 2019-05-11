@@ -67,6 +67,7 @@ dependencies {
     implementation 'androidx.emoji:emoji:1.0.0'
     implementation 'androidx.core:core:1.0.1'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
+    implementation 'com.github.sharish:ShimmerRecyclerView:v1.3'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
     implementation 'com.appsee:appsee-android:2.6.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.0.1'

@@ -20,6 +20,7 @@ import in.lubble.app.quiz.PlaceData;
 import in.lubble.app.quiz.QuestionData;
 import in.lubble.app.referrals.ReferralHistoryData;
 import in.lubble.app.referrals.ReferralLeaderboardData;
+import in.lubble.app.rewards.data.RewardsAirtableData;
 import in.lubble.app.utils.YoutubeData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -124,6 +125,9 @@ public interface Endpoints {
 
     @GET
     public Call<AirtablePlacesData> fetchPlaces(@Url String url);
+
+    @GET
+    public Call<RewardsAirtableData> fetchRewards(@Url String url);
 
     @GET
     public Call<BooksData> searchBooks(@Url String url);
