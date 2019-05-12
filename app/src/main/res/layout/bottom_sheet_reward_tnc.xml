@@ -2,10 +2,10 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottomsheet_reward"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:behavior_peekHeight="70dp"
-    android:id="@+id/bottomsheet_reward"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <LinearLayout
@@ -24,8 +24,9 @@
             android:gravity="center"
             android:padding="16dp"
             android:text="Show Details"
-            android:textColor="@color/black"
-            app:backgroundTint="@color/very_trans_white" />
+            android:textColor="@color/white"
+            app:backgroundTint="@color/very_trans_white"
+            app:drawableTint="@color/white" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -110,12 +111,13 @@
                 tools:text="@tools:sample/lorem/random" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_get_this_detail"
                 android:layout_width="160dp"
                 android:layout_height="60dp"
-                app:cornerRadius="38dp"
                 android:layout_marginTop="40dp"
                 android:text="Get this"
-                android:theme="@style/MaterialButton" />
+                android:theme="@style/MaterialButton"
+                app:cornerRadius="38dp" />
 
         </LinearLayout>
 

@@ -24,6 +24,7 @@ import androidx.annotation.DrawableRes;
 import androidx.palette.graphics.Palette;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import in.lubble.app.R;
 
@@ -126,6 +127,30 @@ public class UiUtils {
         return bottomSheetDialog;
     }
 
+    public static BottomSheetDialog showBottomSheetAlertLight(Context context, LayoutInflater layoutInflater, String title, @DrawableRes int iconId, String btnText, final View.OnClickListener listener) {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        View sheetView = layoutInflater.inflate(R.layout.bottom_sheet_alert_light, null);
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
+
+        final MaterialButton gotItBtn = sheetView.findViewById(R.id.btn_got_it);
+        final ImageView iconIv = sheetView.findViewById(R.id.iv_bottom_sheet_icon);
+        final TextView titleTv = sheetView.findViewById(R.id.tv_bottom_sheet_title);
+
+        iconIv.setImageResource(iconId);
+        titleTv.setText(title);
+        gotItBtn.setText(btnText);
+
+        gotItBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetDialog.dismiss();
+                listener.onClick(v);
+            }
+        });
+        return bottomSheetDialog;
+    }
+
     public static void animateRotate(Context context, View view, int degree) {
         if (context != null && view.getVisibility() == View.VISIBLE) {
             Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_down_hide);
@@ -135,6 +160,7 @@ public class UiUtils {
         }
 
     }
+
     public static void animateSlideDownHide(Context context, View view) {
         if (context != null && view.getVisibility() == View.VISIBLE) {
             Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_down_hide);

@@ -16,12 +16,25 @@ import androidx.core.widget.NestedScrollView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.chat.books.OrderDoneActiv;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.rewards.data.RewardsData;
+import in.lubble.app.utils.UiUtils;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.MissingFormatArgumentException;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 
 public class RewardDetailActiv extends BaseActivity {
 
@@ -43,6 +56,8 @@ public class RewardDetailActiv extends BaseActivity {
     private TextView tncTv;
     private NestedScrollView bottomSheet;
     private TextView showDetailsTv;
+    private MaterialButton getThisBtn;
+    private MaterialButton detailGetThisBtn;
 
     public static void open(Context context, RewardsData rewardsData) {
         final Intent intent = new Intent(context, RewardDetailActiv.class);
@@ -69,6 +84,8 @@ public class RewardDetailActiv extends BaseActivity {
         tncTv = findViewById(R.id.tv_tnc);
         bottomSheet = findViewById(R.id.bottomsheet_reward);
         showDetailsTv = findViewById(R.id.tv_show_details);
+        getThisBtn = findViewById(R.id.btn_get_this);
+        detailGetThisBtn = findViewById(R.id.btn_get_this_detail);
 
         rewardsData = (RewardsData) getIntent().getSerializableExtra(ARG_REWARD_DATA);
         if (rewardsData == null) {
@@ -115,5 +132,71 @@ public class RewardDetailActiv extends BaseActivity {
             }
         });
 
+        getThisBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCoinsConfirmation();
+            }
+        });
+
+        detailGetThisBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showCoinsConfirmation();
+            }
+        });
+
     }
+
+    private void showCoinsConfirmation() {
+        UiUtils.showBottomSheetAlertLight(this, getLayoutInflater(), "Spend " + rewardsData.getCost() + " el coins?", R.drawable.ic_coin, "Confirm", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                claimReward();
+            }
+        });
+    }
+
+    private void claimReward() {
+        getThisUserRef().runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                ProfileData profileData = mutableData.getValue(ProfileData.class);
+                if (profileData == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                if (profileData.getCoins() >= rewardsData.getCost()) {
+                    // Set value and report transaction success
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    childUpdates.put("coins", profileData.getCoins() - rewardsData.getCost());
+                    getThisUserRef().updateChildren(childUpdates);
+                    return Transaction.success(mutableData);
+                } else {
+                    return Transaction.abort();
+                }
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
+                // Transaction completed
+                if (committed && !isFinishing()) {
+                    //todo progressDialog.dismiss();
+                    OrderDoneActiv.open(RewardDetailActiv.this);
+                    finish();
+                } else if (!isFinishing()) {
+                    //todo progressDialog.dismiss();
+                    UiUtils.showBottomSheetAlertLight(RewardDetailActiv.this, getLayoutInflater(), "Not enough coins", R.drawable.ic_error_outline_black_24dp, "Earn More",
+                            new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ReferralActivity.open(RewardDetailActiv.this);
+                                    finish();
+                                }
+                            });
+                }
+            }
+        });
+    }
+
 }

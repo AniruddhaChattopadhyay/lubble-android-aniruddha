@@ -29,6 +29,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RewardsFrag extends Fragment {
 
     private static final String TAG = "RewardsFrag";
@@ -94,7 +97,13 @@ public class RewardsFrag extends Fragment {
                             @Override
                             public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                                 shimmerRecyclerView.hideShimmerAdapter();
-                                shimmerRecyclerView.setAdapter(new RewardsAdapter(airtableData.getRecords(), GlideApp.with(requireContext())));
+                                final List<RewardsRecordData> activeRewardList = new ArrayList<>();
+                                for (RewardsRecordData reward : airtableData.getRecords()) {
+                                    if (!reward.getFields().isExpired()) {
+                                        activeRewardList.add(reward);
+                                    }
+                                }
+                                shimmerRecyclerView.setAdapter(new RewardsAdapter(activeRewardList, GlideApp.with(requireContext())));
                                 return false;
                             }
                         }).preload();

@@ -31,6 +31,8 @@ public class RewardsData implements Serializable {
     private String tnc;
     @SerializedName("Color")
     private String color;
+    @SerializedName("IsExpired")
+    private boolean isExpired;
 
     public Integer getId() {
         return id;
@@ -126,5 +128,13 @@ public class RewardsData implements Serializable {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public boolean isExpired() {
+        return isExpired;
+    }
+
+    public void setExpired(boolean expired) {
+        isExpired = expired;
     }
 }

@@ -90,6 +90,7 @@
         android:textColor="@color/black"
         android:theme="@style/MaterialButton"
         app:backgroundTint="@color/white"
-        app:cornerRadius="30dp" />
+        app:cornerRadius="30dp"
+        app:rippleColor="@color/gray" />
 
 </RelativeLayout>
