@@ -20,6 +20,7 @@ import in.lubble.app.quiz.PlaceData;
 import in.lubble.app.quiz.QuestionData;
 import in.lubble.app.referrals.ReferralHistoryData;
 import in.lubble.app.referrals.ReferralLeaderboardData;
+import in.lubble.app.rewards.data.RewardCodesAirtableData;
 import in.lubble.app.rewards.data.RewardsAirtableData;
 import in.lubble.app.utils.YoutubeData;
 import okhttp3.RequestBody;
@@ -127,9 +128,6 @@ public interface Endpoints {
     public Call<AirtablePlacesData> fetchPlaces(@Url String url);
 
     @GET
-    public Call<RewardsAirtableData> fetchRewards(@Url String url);
-
-    @GET
     public Call<BooksData> searchBooks(@Url String url);
 
     @GET
@@ -141,4 +139,13 @@ public interface Endpoints {
 
     @POST
     public Call<AirtableBooksRecord> uploadNewOrder(@Url String url, @Body RequestBody params);
+
+    @GET
+    public Call<RewardsAirtableData> fetchRewards(@Url String url);
+
+    @GET
+    public Call<RewardCodesAirtableData> fetchRewardCodes(@Url String url);
+
+    @PATCH
+    public Call<RewardsAirtableData> uploadRewardClaim(@Url String url, @Body RequestBody params);
 }

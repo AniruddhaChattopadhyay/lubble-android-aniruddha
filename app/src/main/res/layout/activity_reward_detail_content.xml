@@ -70,7 +70,7 @@
         android:id="@+id/tv_cost"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/btn_get_this"
+        android:layout_above="@id/container_cta"
         android:layout_marginLeft="16dp"
         android:drawablePadding="4dp"
         android:textColor="@color/white"
@@ -79,18 +79,52 @@
         app:drawableLeftCompat="@drawable/ic_coin"
         tools:text="100 el coins" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_get_this"
-        android:layout_width="160dp"
-        android:layout_height="52dp"
+    <FrameLayout
+        android:id="@+id/container_cta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="16dp"
-        android:layout_marginBottom="80dp"
-        android:text="Get this"
-        android:textColor="@color/black"
-        android:theme="@style/MaterialButton"
-        app:backgroundTint="@color/white"
-        app:cornerRadius="30dp"
-        app:rippleColor="@color/gray" />
+        android:layout_marginBottom="80dp">
+
+        <LinearLayout
+            android:id="@+id/container_reward_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_rect_white_border"
+            android:minWidth="160dp"
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_claimed_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reward Code"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tv_reward_code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                tools:text="JXE-LBL-500" />
+
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_get_this"
+            android:layout_width="160dp"
+            android:layout_height="52dp"
+            android:text="Get this"
+            android:textColor="@color/black"
+            android:theme="@style/MaterialButton"
+            app:backgroundTint="@color/white"
+            app:cornerRadius="30dp"
+            app:rippleColor="@color/gray" />
+
+    </FrameLayout>
 
 </RelativeLayout>

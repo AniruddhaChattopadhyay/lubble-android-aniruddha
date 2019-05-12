@@ -7,8 +7,8 @@ import java.io.Serializable;
 public class RewardsData implements Serializable {
 
     private static final long serialVersionUID = 1875545942123998076L;
-    @SerializedName("Id")
-    private Integer id;
+    @SerializedName("RecordId")
+    private String recordId;
     @SerializedName("LubbleId")
     private String lubbleId;
     @SerializedName("BrandLogo")
@@ -33,13 +33,15 @@ public class RewardsData implements Serializable {
     private String color;
     @SerializedName("IsExpired")
     private boolean isExpired;
+    @SerializedName("IsAvailable")
+    private int isAvailable;
 
-    public Integer getId() {
-        return id;
+    public String getRecordId() {
+        return recordId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setRecordId(String id) {
+        this.recordId = id;
     }
 
     public String getLubbleId() {
@@ -136,5 +138,17 @@ public class RewardsData implements Serializable {
 
     public void setExpired(boolean expired) {
         isExpired = expired;
+    }
+
+    public int getIsAvailable() {
+        return isAvailable;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable == 1;
+    }
+
+    public void setIsAvailable(int isAvailable) {
+        this.isAvailable = isAvailable;
     }
 }

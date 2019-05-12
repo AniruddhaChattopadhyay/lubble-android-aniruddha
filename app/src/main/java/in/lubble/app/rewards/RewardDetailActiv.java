@@ -1,12 +1,15 @@
 package in.lubble.app.rewards;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -17,6 +20,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.MutableData;
@@ -24,16 +28,26 @@ import com.google.firebase.database.Transaction;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
-import in.lubble.app.chat.books.OrderDoneActiv;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.referrals.ReferralActivity;
+import in.lubble.app.rewards.data.RewardCodesAirtableData;
+import in.lubble.app.rewards.data.RewardCodesData;
+import in.lubble.app.rewards.data.RewardsAirtableData;
 import in.lubble.app.rewards.data.RewardsData;
 import in.lubble.app.utils.UiUtils;
+import okhttp3.RequestBody;
+import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 
 public class RewardDetailActiv extends BaseActivity {
@@ -55,9 +69,13 @@ public class RewardDetailActiv extends BaseActivity {
     private TextView detailDescTv;
     private TextView tncTv;
     private NestedScrollView bottomSheet;
+    private BottomSheetBehavior bottomSheetBehavior;
     private TextView showDetailsTv;
     private MaterialButton getThisBtn;
     private MaterialButton detailGetThisBtn;
+    private LinearLayout rewardCodeContainer;
+    private TextView rewardCodeTv;
+    private ProgressDialog progressDialog;
 
     public static void open(Context context, RewardsData rewardsData) {
         final Intent intent = new Intent(context, RewardDetailActiv.class);
@@ -86,6 +104,8 @@ public class RewardDetailActiv extends BaseActivity {
         showDetailsTv = findViewById(R.id.tv_show_details);
         getThisBtn = findViewById(R.id.btn_get_this);
         detailGetThisBtn = findViewById(R.id.btn_get_this_detail);
+        rewardCodeContainer = findViewById(R.id.container_reward_code);
+        rewardCodeTv = findViewById(R.id.tv_reward_code);
 
         rewardsData = (RewardsData) getIntent().getSerializableExtra(ARG_REWARD_DATA);
         if (rewardsData == null) {
@@ -95,6 +115,7 @@ public class RewardDetailActiv extends BaseActivity {
             return;
         }
 
+        progressDialog = new ProgressDialog(this);
         rootview.setBackgroundColor(Color.parseColor("#" + rewardsData.getColor()));
         GlideApp.with(this).load(rewardsData.getDetailPhoto()).diskCacheStrategy(DiskCacheStrategy.NONE).into(rewardIv);
         GlideApp.with(this).load(rewardsData.getBrandLogo()).diskCacheStrategy(DiskCacheStrategy.NONE).into(logoIv);
@@ -112,7 +133,7 @@ public class RewardDetailActiv extends BaseActivity {
         tncTv.setText(HtmlCompat.fromHtml(rewardsData.getTnc(), HtmlCompat.FROM_HTML_MODE_LEGACY));
         tncTv.setMovementMethod(LinkMovementMethod.getInstance());
 
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -158,6 +179,12 @@ public class RewardDetailActiv extends BaseActivity {
     }
 
     private void claimReward() {
+
+        progressDialog.setTitle("Claiming Your Reward");
+        progressDialog.setMessage(getText(R.string.all_please_wait));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
         getThisUserRef().runTransaction(new Transaction.Handler() {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
@@ -181,11 +208,9 @@ public class RewardDetailActiv extends BaseActivity {
             public void onComplete(DatabaseError databaseError, boolean committed, DataSnapshot dataSnapshot) {
                 // Transaction completed
                 if (committed && !isFinishing()) {
-                    //todo progressDialog.dismiss();
-                    OrderDoneActiv.open(RewardDetailActiv.this);
-                    finish();
+                    fetchEmptyRewardCode();
                 } else if (!isFinishing()) {
-                    //todo progressDialog.dismiss();
+                    progressDialog.dismiss();
                     UiUtils.showBottomSheetAlertLight(RewardDetailActiv.this, getLayoutInflater(), "Not enough coins", R.drawable.ic_error_outline_black_24dp, "Earn More",
                             new View.OnClickListener() {
                                 @Override
@@ -194,6 +219,88 @@ public class RewardDetailActiv extends BaseActivity {
                                     finish();
                                 }
                             });
+                }
+            }
+        });
+    }
+
+    private void fetchEmptyRewardCode() {
+        String formula = "RewardId=\'" + rewardsData.getRecordId() + "\',Uid=\'\'";
+
+        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/RewardCodes?filterByFormula=AND(" + formula + ")&view=Grid%20view&maxRecords=1";
+
+        final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
+        endpoints.fetchRewardCodes(url).enqueue(new Callback<RewardCodesAirtableData>() {
+            @Override
+            public void onResponse(Call<RewardCodesAirtableData> call, Response<RewardCodesAirtableData> response) {
+                final RewardCodesAirtableData airtableData = response.body();
+                if (response.isSuccessful() && airtableData != null && !isFinishing()) {
+                    if (airtableData.getRecords().size() > 0) {
+                        uploadRewardClaim(airtableData.getRecords().get(0).getFields());
+                    } else {
+                        Crashlytics.logException(new IllegalStateException("trying to claim reward with no more codes left, reward id: " + rewardsData.getRecordId()));
+                        Toast.makeText(RewardDetailActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+
+                } else {
+                    if (!isFinishing()) {
+                        progressDialog.dismiss();
+                        Toast.makeText(RewardDetailActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RewardCodesAirtableData> call, Throwable t) {
+                if (!isFinishing()) {
+                    Toast.makeText(RewardDetailActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ");
+                    progressDialog.dismiss();
+                }
+            }
+        });
+    }
+
+    private void uploadRewardClaim(final RewardCodesData rewardCodesData) {
+
+        HashMap<String, Object> params = new HashMap<>();
+        HashMap<String, Object> fieldParams = new HashMap<>();
+        fieldParams.put("Uid", FirebaseAuth.getInstance().getUid());
+        params.put("fields", fieldParams);
+        RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
+
+        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/RewardCodes/" + rewardCodesData.getRewardRecordId();
+
+        final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
+        endpoints.uploadRewardClaim(url, body).enqueue(new Callback<RewardsAirtableData>() {
+            @Override
+            public void onResponse(Call<RewardsAirtableData> call, Response<RewardsAirtableData> response) {
+                final RewardsAirtableData airtableData = response.body();
+                if (response.isSuccessful() && airtableData != null && !isFinishing()) {
+                    progressDialog.dismiss();
+                    if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
+                        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                    }
+                    getThisBtn.setVisibility(View.GONE);
+                    detailGetThisBtn.setVisibility(View.GONE);
+                    rewardCodeContainer.setVisibility(View.VISIBLE);
+                    rewardCodeTv.setText(rewardCodesData.getRewardCode());
+
+                } else {
+                    if (!isFinishing()) {
+                        progressDialog.dismiss();
+                        Toast.makeText(RewardDetailActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RewardsAirtableData> call, Throwable t) {
+                if (!isFinishing()) {
+                    progressDialog.dismiss();
+                    Toast.makeText(RewardDetailActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ");
                 }
             }
         });

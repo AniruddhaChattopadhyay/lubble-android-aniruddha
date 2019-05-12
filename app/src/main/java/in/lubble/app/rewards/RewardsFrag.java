@@ -1,6 +1,5 @@
 package in.lubble.app.rewards;
 
-import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,7 +35,6 @@ public class RewardsFrag extends Fragment {
 
     private static final String TAG = "RewardsFrag";
 
-    private OnListFragmentInteractionListener mListener;
     private TextView noRewardsTv;
     private ShimmerRecyclerView shimmerRecyclerView;
 
@@ -99,7 +97,7 @@ public class RewardsFrag extends Fragment {
                                 shimmerRecyclerView.hideShimmerAdapter();
                                 final List<RewardsRecordData> activeRewardList = new ArrayList<>();
                                 for (RewardsRecordData reward : airtableData.getRecords()) {
-                                    if (!reward.getFields().isExpired()) {
+                                    if (!reward.getFields().isExpired() && reward.getFields().isAvailable()) {
                                         activeRewardList.add(reward);
                                     }
                                 }
@@ -130,33 +128,4 @@ public class RewardsFrag extends Fragment {
         });
     }
 
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onListFragmentInteraction(RewardsRecordData item);
-    }
 }
