@@ -17,6 +17,7 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -73,8 +74,9 @@ public class RewardsFrag extends Fragment {
     private void fetchRewards() {
         shimmerRecyclerView.showShimmerAdapter();
         noRewardsTv.setVisibility(View.GONE);
-        String formula = "LubbleId=\'" + LubbleSharedPrefs.getInstance().getLubbleId() + "\'";
-        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Rewards?filterByFormula=" + formula + "&view=Grid%20view";
+        shimmerRecyclerView.setVisibility(View.VISIBLE);
+        String formula = "LubbleId=\'" + LubbleSharedPrefs.getInstance().getLubbleId() + "\',FIND(\'" + FirebaseAuth.getInstance().getUid() + "\', ClaimedUids)=0";
+        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Rewards?filterByFormula=AND(" + formula + ")&view=Grid%20view";
 
         final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
         endpoints.fetchRewards(url).enqueue(new Callback<RewardsAirtableData>() {
@@ -107,6 +109,7 @@ public class RewardsFrag extends Fragment {
                         }).preload();
                     } else {
                         noRewardsTv.setVisibility(View.VISIBLE);
+                        shimmerRecyclerView.hideShimmerAdapter();
                     }
 
                 } else {
