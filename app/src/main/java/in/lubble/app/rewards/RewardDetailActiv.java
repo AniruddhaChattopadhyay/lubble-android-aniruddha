@@ -1,6 +1,8 @@
 package in.lubble.app.rewards;
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -9,7 +11,7 @@ import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
@@ -27,6 +29,7 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
@@ -54,9 +57,11 @@ public class RewardDetailActiv extends BaseActivity {
 
     private static final String TAG = "RewardDetailActiv";
     private static final String ARG_REWARD_DATA = "ARG_REWARD_DATA";
+    private static final String ARG_REWARD_CODE_DATA = "ARG_REWARD_CODE_DATA";
 
     private CoordinatorLayout rootview;
     private RewardsData rewardsData;
+    private RewardCodesData rewardCodesData;
     private ImageView rewardIv;
     private ImageView logoIv;
     private TextView detailsTv;
@@ -73,13 +78,19 @@ public class RewardDetailActiv extends BaseActivity {
     private TextView showDetailsTv;
     private MaterialButton getThisBtn;
     private MaterialButton detailGetThisBtn;
-    private LinearLayout rewardCodeContainer;
+    private RelativeLayout rewardCodeContainer;
     private TextView rewardCodeTv;
     private ProgressDialog progressDialog;
 
     public static void open(Context context, RewardsData rewardsData) {
         final Intent intent = new Intent(context, RewardDetailActiv.class);
         intent.putExtra(ARG_REWARD_DATA, rewardsData);
+        context.startActivity(intent);
+    }
+
+    public static void open(Context context, RewardCodesData rewardCodesData) {
+        final Intent intent = new Intent(context, RewardDetailActiv.class);
+        intent.putExtra(ARG_REWARD_CODE_DATA, rewardCodesData);
         context.startActivity(intent);
     }
 
@@ -108,7 +119,8 @@ public class RewardDetailActiv extends BaseActivity {
         rewardCodeTv = findViewById(R.id.tv_reward_code);
 
         rewardsData = (RewardsData) getIntent().getSerializableExtra(ARG_REWARD_DATA);
-        if (rewardsData == null) {
+        rewardCodesData = (RewardCodesData) getIntent().getSerializableExtra(ARG_REWARD_CODE_DATA);
+        if (rewardsData == null && rewardCodesData == null) {
             Toast.makeText(this, "No Data Found", Toast.LENGTH_SHORT).show();
             Crashlytics.logException(new MissingFormatArgumentException("no rewards data found"));
             finish();
@@ -116,23 +128,13 @@ public class RewardDetailActiv extends BaseActivity {
         }
 
         progressDialog = new ProgressDialog(this);
-        rootview.setBackgroundColor(Color.parseColor("#" + rewardsData.getColor()));
-        GlideApp.with(this).load(rewardsData.getDetailPhoto()).diskCacheStrategy(DiskCacheStrategy.NONE).into(rewardIv);
-        GlideApp.with(this).load(rewardsData.getBrandLogo()).diskCacheStrategy(DiskCacheStrategy.NONE).into(logoIv);
-        brandNameTv.setText(rewardsData.getBrand());
-        detailBrandName.setText(rewardsData.getBrand());
-        titleTv.setText(rewardsData.getTitle());
-        detailTitleTv.setText(rewardsData.getTitle());
-        descTv.setText(rewardsData.getDescription());
-        detailDescTv.setText(rewardsData.getDescription());
-        costTv.setText(rewardsData.getCost() + " el coins");
+        progressDialog.setCancelable(false);
 
-        detailsTv.setText(HtmlCompat.fromHtml(rewardsData.getDetails(), HtmlCompat.FROM_HTML_MODE_LEGACY));
-        detailsTv.setMovementMethod(LinkMovementMethod.getInstance());
-
-        tncTv.setText(HtmlCompat.fromHtml(rewardsData.getTnc(), HtmlCompat.FROM_HTML_MODE_LEGACY));
-        tncTv.setMovementMethod(LinkMovementMethod.getInstance());
-
+        if (rewardsData == null) {
+            fetchRewardsData();
+        } else {
+            initReward();
+        }
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
         bottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
@@ -166,7 +168,75 @@ public class RewardDetailActiv extends BaseActivity {
                 showCoinsConfirmation();
             }
         });
+    }
 
+    private void fetchRewardsData() {
+        progressDialog.setTitle("Fetching your reward");
+        progressDialog.setMessage(getText(R.string.all_please_wait));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        String formula = "RECORD_ID()=\'" + rewardCodesData.getRewardId().get(0) + "\'";
+        String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Rewards?filterByFormula=AND(" + formula + ")&view=Grid%20view";
+
+        final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
+        endpoints.fetchRewards(url).enqueue(new Callback<RewardsAirtableData>() {
+            @Override
+            public void onResponse(Call<RewardsAirtableData> call, Response<RewardsAirtableData> response) {
+                final RewardsAirtableData airtableData = response.body();
+                if (response.isSuccessful() && airtableData != null && !isFinishing()) {
+                    if (airtableData.getRecords().size() == 1) {
+                        progressDialog.dismiss();
+                        rewardsData = airtableData.getRecords().get(0).getFields();
+                        initReward();
+                    } else {
+                        progressDialog.dismiss();
+                        Toast.makeText(RewardDetailActiv.this, "Something went terribly wrong", Toast.LENGTH_SHORT).show();
+                        Crashlytics.logException(new IllegalStateException("More than 1 records for reward code: " + rewardCodesData.getRewardRecordId()));
+                        finish();
+                    }
+
+                } else {
+                    if (!isFinishing()) {
+                        progressDialog.dismiss();
+                        Toast.makeText(RewardDetailActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RewardsAirtableData> call, Throwable t) {
+                if (!isFinishing()) {
+                    progressDialog.dismiss();
+                    Toast.makeText(RewardDetailActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ");
+                    finish();
+                }
+            }
+        });
+    }
+
+    private void initReward() {
+        rootview.setBackgroundColor(Color.parseColor("#" + rewardsData.getColor()));
+        GlideApp.with(this).load(rewardsData.getDetailPhoto()).diskCacheStrategy(DiskCacheStrategy.NONE).into(rewardIv);
+        GlideApp.with(this).load(rewardsData.getBrandLogo()).diskCacheStrategy(DiskCacheStrategy.NONE).into(logoIv);
+        brandNameTv.setText(rewardsData.getBrand());
+        detailBrandName.setText(rewardsData.getBrand());
+        titleTv.setText(rewardsData.getTitle());
+        detailTitleTv.setText(rewardsData.getTitle());
+        descTv.setText(rewardsData.getDescription());
+        detailDescTv.setText(rewardsData.getDescription());
+        costTv.setText(rewardsData.getCost() + " el coins");
+
+        detailsTv.setText(HtmlCompat.fromHtml(rewardsData.getDetails(), HtmlCompat.FROM_HTML_MODE_LEGACY));
+        detailsTv.setMovementMethod(LinkMovementMethod.getInstance());
+
+        tncTv.setText(HtmlCompat.fromHtml(rewardsData.getTnc(), HtmlCompat.FROM_HTML_MODE_LEGACY));
+        tncTv.setMovementMethod(LinkMovementMethod.getInstance());
+
+        if (rewardCodesData != null) {
+            showRewardCode(rewardCodesData);
+        }
     }
 
     private void showCoinsConfirmation() {
@@ -282,10 +352,7 @@ public class RewardDetailActiv extends BaseActivity {
                     if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_COLLAPSED) {
                         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                     }
-                    getThisBtn.setVisibility(View.GONE);
-                    detailGetThisBtn.setVisibility(View.GONE);
-                    rewardCodeContainer.setVisibility(View.VISIBLE);
-                    rewardCodeTv.setText(rewardCodesData.getRewardCode());
+                    showRewardCode(rewardCodesData);
 
                 } else {
                     if (!isFinishing()) {
@@ -302,6 +369,24 @@ public class RewardDetailActiv extends BaseActivity {
                     Toast.makeText(RewardDetailActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onFailure: ");
                 }
+            }
+        });
+    }
+
+    private void showRewardCode(final RewardCodesData rewardCodesData) {
+        getThisBtn.setVisibility(View.GONE);
+        detailGetThisBtn.setVisibility(View.GONE);
+        rewardCodeContainer.setVisibility(View.VISIBLE);
+        rewardCodeTv.setText(rewardCodesData.getRewardCode());
+
+        rewardCodeContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                String message = rewardCodesData.getRewardCode();
+                ClipData clip = ClipData.newPlainText("lubble_reward_code", message);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(RewardDetailActiv.this, "COPIED!", Toast.LENGTH_SHORT).show();
             }
         });
     }

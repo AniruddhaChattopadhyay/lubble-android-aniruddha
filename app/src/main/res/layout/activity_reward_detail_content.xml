@@ -87,15 +87,13 @@
         android:layout_marginLeft="16dp"
         android:layout_marginBottom="80dp">
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/container_reward_code"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_rect_white_border"
-            android:minWidth="160dp"
             android:orientation="vertical"
-            android:padding="8dp"
-            android:visibility="gone">
+            android:padding="8dp">
 
             <TextView
                 android:id="@+id/tv_claimed_text"
@@ -109,10 +107,22 @@
                 android:id="@+id/tv_reward_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/tv_claimed_text"
                 android:textColor="@color/white"
+                android:textStyle="bold"
                 tools:text="JXE-LBL-500" />
 
-        </LinearLayout>
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/tv_reward_code"
+                android:layout_marginLeft="16dp"
+                android:layout_toRightOf="@id/tv_reward_code"
+                android:alpha="0.9"
+                android:tint="@color/white"
+                app:srcCompat="@drawable/ic_content_copy_black_24dp" />
+
+        </RelativeLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_get_this"
@@ -121,6 +131,7 @@
             android:text="Get this"
             android:textColor="@color/black"
             android:theme="@style/MaterialButton"
+            android:visibility="gone"
             app:backgroundTint="@color/white"
             app:cornerRadius="30dp"
             app:rippleColor="@color/gray" />

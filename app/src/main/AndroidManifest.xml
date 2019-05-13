@@ -19,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".rewards.RewardDetailActiv"></activity>
+        <activity android:name=".rewards.ClaimedRewardsActiv"></activity>
+        <activity android:name=".rewards.RewardDetailActiv" />
         <activity
             android:name=".chat.books.OrderDoneActiv"
             android:configChanges="orientation"

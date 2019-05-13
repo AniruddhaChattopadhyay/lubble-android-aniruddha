@@ -36,6 +36,7 @@ public class RewardsFrag extends Fragment {
 
     private static final String TAG = "RewardsFrag";
 
+    private TextView claimedRewardsTv;
     private TextView noRewardsTv;
     private ShimmerRecyclerView shimmerRecyclerView;
 
@@ -61,11 +62,19 @@ public class RewardsFrag extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frag_rewards, container, false);
 
+        claimedRewardsTv = view.findViewById(R.id.tv_claimed_rewards);
         noRewardsTv = view.findViewById(R.id.tv_no_rewards);
         shimmerRecyclerView = view.findViewById(R.id.rv_rewards);
         shimmerRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         fetchRewards();
+
+        claimedRewardsTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ClaimedRewardsActiv.open(requireContext());
+            }
+        });
 
         return view;
     }

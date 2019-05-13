@@ -1,11 +1,16 @@
 package in.lubble.app.rewards.data;
 
 import com.google.gson.annotations.SerializedName;
+import in.lubble.app.utils.DateTimeUtils;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class RewardCodesData {
+import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
 
+public class RewardCodesData implements Serializable {
+
+    private static final long serialVersionUID = 2639695733061755590L;
     @SerializedName("RewardCode")
     private String rewardCode;
     @SerializedName("RewardId")
@@ -43,6 +48,10 @@ public class RewardCodesData {
 
     public String getCreatedTime() {
         return createdTime;
+    }
+
+    public long getCreatedTimeInLong() {
+        return DateTimeUtils.convertStringDateTimeToLong(this.createdTime, SERVER_DATE_TIME, SERVER_DATE_TIME, false);
     }
 
     public void setCreatedTime(String createdTime) {
