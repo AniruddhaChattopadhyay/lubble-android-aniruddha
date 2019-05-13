@@ -844,7 +844,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 }
                 for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren()) {
                     final ChatData chatData = childDataSnapshot.getValue(ChatData.class);
-                    if (chatData != null) {
+                    if (chatData != null && chatData.getServerTimestampInLong() != null) {
                         Log.d(TAG, "onChildAdded: " + childDataSnapshot.getKey());
                         chatData.setId(childDataSnapshot.getKey());
                         sendReadReceipt(chatData);
