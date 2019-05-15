@@ -151,4 +151,14 @@
         <item name="android:colorControlNormal" tools:targetApi="lollipop">@color/colorAccent</item>
     </style>
 
+    <style name="BaseTextDark" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#FFFFFF</item>
+    </style>
+
+    <style name="LubbleTooltipStyle">
+        <item name="ttlm_cornerRadius">8dp</item>
+        <item name="ttlm_backgroundColor">@color/bright_red</item>
+        <item name="android:textAppearance">@style/BaseTextDark</item>
+    </style>
+
 </resources>

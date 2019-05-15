@@ -54,6 +54,8 @@ import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import it.sephiroth.android.library.xtooltip.ClosePolicy;
+import it.sephiroth.android.library.xtooltip.Tooltip;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -574,6 +576,21 @@ public class MainActivity extends BaseActivity {
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
         }
+    }
+
+    public void showRewardsTooltip() {
+        final Tooltip tooltip = new Tooltip.Builder(this)
+                .anchor(toolbarRewardsTv, 0, 0, false)
+                .text("NEW! Get cool rewards nearby")
+                .arrow(true)
+                .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
+                .closePolicy(new ClosePolicy.Builder().inside(true).consume(true).outside(true).build())
+                .showDuration(15000)
+                .overlay(true)
+                .create();
+
+        tooltip.show(toolbarRewardsTv, Tooltip.Gravity.BOTTOM, true);
+
     }
 
     @Override

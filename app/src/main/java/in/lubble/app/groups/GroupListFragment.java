@@ -456,6 +456,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     progressBar.setVisibility(View.GONE);
                 }
                 groupsRecyclerView.setVisibility(View.VISIBLE);
+                ((MainActivity) getActivity()).showRewardsTooltip();
             }
 
             @Override
