@@ -23,6 +23,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.rewards.data.RewardsAirtableData;
 import in.lubble.app.rewards.data.RewardsRecordData;
 import retrofit2.Call;
@@ -37,6 +38,7 @@ public class RewardsFrag extends Fragment {
     private static final String TAG = "RewardsFrag";
 
     private TextView claimedRewardsTv;
+    private TextView earnMoreTv;
     private TextView noRewardsTv;
     private ShimmerRecyclerView shimmerRecyclerView;
 
@@ -63,6 +65,7 @@ public class RewardsFrag extends Fragment {
         View view = inflater.inflate(R.layout.frag_rewards, container, false);
 
         claimedRewardsTv = view.findViewById(R.id.tv_claimed_rewards);
+        earnMoreTv = view.findViewById(R.id.tv_earn_more);
         noRewardsTv = view.findViewById(R.id.tv_no_rewards);
         shimmerRecyclerView = view.findViewById(R.id.rv_rewards);
         shimmerRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -73,6 +76,12 @@ public class RewardsFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 ClaimedRewardsActiv.open(requireContext());
+            }
+        });
+        earnMoreTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((ReferralActivity) getActivity()).openReferralFrag();
             }
         });
 

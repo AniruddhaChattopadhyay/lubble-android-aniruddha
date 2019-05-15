@@ -49,6 +49,7 @@ import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.quiz.GamesFrag;
+import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
@@ -78,6 +79,7 @@ public class MainActivity extends BaseActivity {
     private DatabaseReference connectedReference;
     private ValueEventListener presenceValueListener;
     private ImageView profileIcon;
+    private TextView toolbarRewardsTv;
     private TextView toolbarTitle;
     private View lubbleClickTarget;
     private ValueEventListener dpEventListener;
@@ -99,6 +101,7 @@ public class MainActivity extends BaseActivity {
         toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
         profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
+        toolbarRewardsTv = toolbar.findViewById(R.id.tv_toolbar_rewards);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setElevation(10);
         toolbarTitle = findViewById(R.id.lubble_toolbar_title);
@@ -110,9 +113,12 @@ public class MainActivity extends BaseActivity {
                 openProfile();
             }
         });
-
-        final Intent intent = new Intent(MainActivity.this, DebugActivity.class);
-        startActivity(intent);
+        toolbarRewardsTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ReferralActivity.open(MainActivity.this);
+            }
+        });
 
         Appsee.start();
         setAppseeUser();

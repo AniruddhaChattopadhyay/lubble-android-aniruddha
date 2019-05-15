@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,10 +19,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import in.lubble.app.GlideApp;
-import in.lubble.app.GlideRequests;
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.R;
+import in.lubble.app.*;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.*;
 
@@ -35,7 +31,7 @@ import java.util.HashMap;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 
-public class ShareActiv extends AppCompatActivity {
+public class ShareActiv extends BaseActivity {
 
     public enum ShareType {
         GROUP, EVENT

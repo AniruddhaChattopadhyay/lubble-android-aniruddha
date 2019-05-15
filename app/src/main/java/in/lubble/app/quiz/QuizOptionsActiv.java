@@ -11,9 +11,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.Constants;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -29,7 +29,7 @@ import java.util.ArrayList;
 
 import static in.lubble.app.utils.UiUtils.disableTabLayoutClicks;
 
-public class QuizOptionsActiv extends AppCompatActivity implements OptionFrag.OnListFragmentInteractionListener {
+public class QuizOptionsActiv extends BaseActivity implements OptionFrag.OnListFragmentInteractionListener {
 
     private static final String TAG = "QuizOptionsActiv";
 

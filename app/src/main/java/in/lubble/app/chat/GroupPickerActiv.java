@@ -10,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +18,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
@@ -28,7 +28,7 @@ import in.lubble.app.models.GroupData;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class GroupPickerActiv extends AppCompatActivity {
+public class GroupPickerActiv extends BaseActivity {
 
     private static final String TAG = "GroupPickerActiv";
 

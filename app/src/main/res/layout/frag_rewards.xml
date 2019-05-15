@@ -7,46 +7,32 @@
     android:background="@color/white">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/tv_my_coins"
-        android:layout_alignBottom="@id/tv_my_coins"
-        android:layout_marginLeft="16dp"
-        android:gravity="center"
-        android:text="Rewards"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
-
-    <TextView
-        android:id="@+id/tv_my_coins"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="16dp"
-        android:background="@drawable/pill_button_blue_white"
-        android:drawablePadding="2dp"
-        android:paddingLeft="16dp"
-        android:paddingTop="8dp"
-        android:paddingRight="16dp"
-        android:paddingBottom="8dp"
-        android:text="100"
-        android:textColor="@color/gold"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:drawableLeftCompat="@drawable/ic_coin" />
-
-    <TextView
         android:id="@+id/tv_claimed_rewards"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_my_coins"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/rect_rounded_border_blue"
+        android:padding="4dp"
+        android:text="Claimed Rewards"
+        android:textColor="@color/colorAccent" />
+
+    <TextView
+        android:id="@+id/tv_earn_more"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_marginTop="8dp"
         android:layout_marginRight="16dp"
-        android:textColor="@color/colorAccent"
-        android:background="@drawable/rect_rounded_border"
-        android:padding="4dp"
-        android:text="Claimed Rewards" />
+        android:background="@drawable/rect_rounded_border_blue"
+        android:gravity="center"
+        android:paddingLeft="8dp"
+        android:paddingTop="4dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="4dp"
+        android:text="Earn Coins"
+        android:textColor="@color/colorAccent" />
 
     <TextView
         android:id="@+id/tv_no_rewards"

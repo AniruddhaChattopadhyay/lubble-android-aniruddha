@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +15,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
@@ -27,7 +27,7 @@ import java.util.ArrayList;
 
 import static in.lubble.app.utils.DateTimeUtils.*;
 
-public class EventPickerActiv extends AppCompatActivity {
+public class EventPickerActiv extends BaseActivity {
 
     private static final String TAG = "EventPickerActiv";
 

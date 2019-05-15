@@ -43,8 +43,21 @@
             android:id="@+id/lubble_click_target"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginRight="48dp"
+            android:layout_toLeftOf="@id/tv_toolbar_rewards"
             android:layout_toRightOf="@id/iv_toolbar_profile" />
+
+        <TextView
+            android:id="@+id/tv_toolbar_rewards"
+            android:layout_width="wrap_content"
+            android:textSize="12sp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:textColor="@color/black"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            android:gravity="center"
+            android:text="Rewards"
+            app:drawableTopCompat="@drawable/ic_medal" />
 
     </RelativeLayout>
 
