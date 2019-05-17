@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,7 +19,9 @@ import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.UiUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -144,35 +145,28 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-    public void addGroup(GroupData groupData, UserGroupData userGroupData) {
+    public void addGroupToTop(GroupData groupData) {
         if (getChildIndex(groupData.getId()) == -1) {
-            groupDataList.add(groupData);
-            userGroupDataMap.put(groupData.getId(), userGroupData);
-            sortList();
-            notifyDataSetChanged();
+            groupDataList.add(0, groupData);
+            notifyItemInserted(0);
         } else {
-            updateGroup(groupData, userGroupData);
+            updateGroup(groupData);
         }
     }
 
-    public void addPublicGroup(GroupData groupData) {
-        if (getChildIndex(groupData.getId()) == -1) {
-            groupDataList.add(groupData);
-            notifyDataSetChanged();
-        } else {
-            updateGroup(groupData, null);
+    public void updateUserGroupData(String id, UserGroupData userGroupData) {
+        final int pos = getChildIndex(id);
+        userGroupDataMap.put(id, userGroupData);
+        if (pos != -1) {
+            notifyItemChanged(pos);
         }
     }
 
-    public void updateGroup(GroupData newGroupData, @Nullable UserGroupData userGroupData) {
+    public void updateGroup(GroupData newGroupData) {
         final int pos = getChildIndex(newGroupData.getId());
         if (pos != -1) {
             groupDataList.set(pos, newGroupData);
-            if (userGroupData != null) {
-                userGroupDataMap.put(newGroupData.getId(), userGroupData);
-            }
-            sortList();
-            notifyDataSetChanged();
+            notifyItemChanged(pos);
         }
     }
 
@@ -180,59 +174,23 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final int pos = getChildIndex(groupId);
         if (pos != -1) {
             groupDataList.remove(pos);
-            sortList();
-            notifyDataSetChanged();
+            notifyItemRemoved(pos);
+        }
+    }
+
+    public void updateGroupPos(GroupData groupData) {
+        final int oldIndex = getChildIndex(groupData.getId());
+        if (oldIndex != -1) {
+            groupDataList.remove(oldIndex);
+            int newIndex = 0;
+            groupDataList.add(newIndex, groupData);
+            notifyItemMoved(oldIndex, newIndex);
         }
     }
 
     public void flashPos(int pos) {
         posToFlash = pos;
         notifyItemChanged(pos);
-    }
-
-    private void sortList() {
-        Collections.sort(groupDataList, new Comparator<GroupData>() {
-            @Override
-            public int compare(GroupData lhs, GroupData rhs) {
-                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                if (lhs.getId() == null || rhs.getId() == null) {
-                    return 0;
-                }
-                if (lhs.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
-                    return -1;
-                }
-                if (rhs.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
-                    return 1;
-                }
-                long lhsTs = 0;
-                long rhsTs = 0;
-                if (!lhs.isJoined()) {
-                    final UserGroupData userGroupData = userGroupDataMap.get(lhs.getId());
-                    if (userGroupData != null) {
-                        lhsTs = userGroupData.getInvitedTimeStamp();
-                    }
-                } else {
-                    if (lhs.getJoinedTimestamp() > lhs.getLastMessageTimestamp()) {
-                        lhsTs = lhs.getJoinedTimestamp();
-                    } else {
-                        lhsTs = lhs.getLastMessageTimestamp();
-                    }
-                }
-                if (!rhs.isJoined()) {
-                    final UserGroupData userGroupData = userGroupDataMap.get(rhs.getId());
-                    if (userGroupData != null) {
-                        rhsTs = userGroupData.getInvitedTimeStamp();
-                    }
-                } else {
-                    if (rhs.getJoinedTimestamp() > rhs.getLastMessageTimestamp()) {
-                        rhsTs = rhs.getJoinedTimestamp();
-                    } else {
-                        rhsTs = rhs.getLastMessageTimestamp();
-                    }
-                }
-                return (lhsTs > rhsTs) ? -1 : 1;
-            }
-        });
     }
 
     private int getChildIndex(String groupIdToFind) {
