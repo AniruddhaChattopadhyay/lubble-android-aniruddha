@@ -164,7 +164,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             @Override
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
-                adapter.updateGroup(dataSnapshot.getValue(GroupData.class));
+                final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                if (groupData != null && groupData.isJoined()) {
+                    adapter.updateGroup(groupData);
+                }
             }
 
             @Override
@@ -175,7 +178,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             @Override
             public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String prevKey) {
-                adapter.updateGroupPos(dataSnapshot.getValue(GroupData.class));
+                final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                if (groupData != null && groupData.isJoined()) {
+                    adapter.updateGroupPos(groupData);
+                }
             }
 
             @Override
