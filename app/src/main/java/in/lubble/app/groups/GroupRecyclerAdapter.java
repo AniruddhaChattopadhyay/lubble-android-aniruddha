@@ -10,7 +10,6 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
-import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -28,6 +27,7 @@ import static in.lubble.app.utils.StringUtils.isValidString;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private int cursorPos = 0;
     private final List<GroupData> groupDataList;
     // <GroupID, UserGroupData>
     private final HashMap<String, UserGroupData> userGroupDataMap;
@@ -100,13 +100,13 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
             groupViewHolder.pinIv.setVisibility(View.GONE);
         } else {
-            if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened() && groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+            if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened() && groupData.getIsPinned()) {
                 groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
                 groupViewHolder.unreadCountTv.setText("1");
                 groupViewHolder.pinIv.setVisibility(View.GONE);
             } else {
                 groupViewHolder.unreadCountTv.setVisibility(View.GONE);
-                if (groupData.getId().equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+                if (groupData.getIsPinned()) {
                     groupViewHolder.pinIv.setVisibility(View.VISIBLE);
                 } else {
                     groupViewHolder.pinIv.setVisibility(View.GONE);
@@ -147,8 +147,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void addGroupToTop(GroupData groupData) {
         if (getChildIndex(groupData.getId()) == -1) {
-            groupDataList.add(0, groupData);
-            notifyItemInserted(0);
+            groupDataList.add(cursorPos, groupData);
+            notifyItemInserted(cursorPos);
+            cursorPos = groupData.getIsPinned() ? 1 : 0;
         } else {
             updateGroup(groupData);
         }
@@ -205,6 +206,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void clearGroups() {
         groupDataList.clear();
+        cursorPos = 0;
         notifyDataSetChanged();
     }
 

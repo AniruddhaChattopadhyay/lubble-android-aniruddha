@@ -25,6 +25,7 @@ public class GroupData {
     private String createdBy;
     @Exclude
     private Set<String> invitedBy;
+    private boolean isPinned;
 
     public GroupData() {
     }  // Needed for Firebase
@@ -152,4 +153,11 @@ public class GroupData {
         return getMembers().size() == 0;
     }
 
+    public boolean getIsPinned() {
+        return isPinned;
+    }
+
+    public void setIsPinned(boolean pinned) {
+        isPinned = pinned;
+    }
 }

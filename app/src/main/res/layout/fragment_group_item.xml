@@ -67,13 +67,15 @@
                 tools:listitem="@layout/fragment_group_list" />
 
             <LinearLayout
+                android:id="@+id/container_explore"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/rv_groups"
                 android:layout_marginBottom="40dp"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="8dp">
+                android:padding="8dp"
+                android:visibility="gone">
 
                 <ImageView
                     android:layout_width="match_parent"

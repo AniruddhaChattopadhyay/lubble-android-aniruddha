@@ -55,6 +55,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private GroupRecyclerAdapter adapter;
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private RecyclerView groupsRecyclerView;
+    private LinearLayout exploreContainer;
     private ProgressBar progressBar;
     private HashMap<String, Set<String>> groupInvitedByMap;
     private PagerContainer pagerContainer;
@@ -83,6 +84,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         NestedScrollView nestedScrollView = view.findViewById(R.id.container_scrollview);
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
+        exploreContainer = view.findViewById(R.id.container_explore);
         progressBar = view.findViewById(R.id.progressBar_groups);
         newGroupContainer = view.findViewById(R.id.container_create_group);
         pagerContainer = view.findViewById(R.id.pager_container);
@@ -143,7 +145,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     public void onResume() {
         super.onResume();
         adapter.clearGroups();
+        progressBar.setVisibility(View.VISIBLE);
         groupsRecyclerView.setVisibility(View.INVISIBLE);
+        exploreContainer.setVisibility(View.GONE);
         syncAllGroups();
     }
 
@@ -196,6 +200,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (isAdded()) {
                     syncUserGroup();
                     groupsRecyclerView.setVisibility(View.VISIBLE);
+                    exploreContainer.setVisibility(View.VISIBLE);
                     if (progressBar.getVisibility() == View.VISIBLE) {
                         progressBar.setVisibility(View.GONE);
                     }
