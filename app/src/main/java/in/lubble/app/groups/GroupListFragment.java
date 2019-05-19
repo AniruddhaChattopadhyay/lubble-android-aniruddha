@@ -22,6 +22,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -148,6 +149,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         progressBar.setVisibility(View.VISIBLE);
         groupsRecyclerView.setVisibility(View.INVISIBLE);
         exploreContainer.setVisibility(View.GONE);
+        totalUnreadCount = 0;
         syncAllGroups();
     }
 
@@ -259,7 +261,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         getUserGroupsRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (totalUnreadCount == 0 && isAdded()) {
+                if (totalUnreadCount == 0 && isAdded() && !LubbleSharedPrefs.getInstance().getIsRewardsOpened()) {
                     ((MainActivity) getActivity()).showRewardsTooltip();
                 }
             }

@@ -35,6 +35,7 @@ public class LubbleSharedPrefs {
     private final String IS_QUIZ_OPENED = "IS_QUIZ_OPENED";
     private final String IS_DEFAULT_GRP_OPENED = "IS_DEFAULT_GRP_OPENED";
     private final String IS_BOOK_EXCHANGE_OPENED = "IS_BOOK_EXCHANGE_OPENED";
+    private final String IS_REWARDS_OPENED = "IS_REWARDS_OPENED";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -209,6 +210,15 @@ public class LubbleSharedPrefs {
 
     public boolean setIsBookExchangeOpened(boolean isOpened) {
         return preferences.edit().putBoolean(IS_BOOK_EXCHANGE_OPENED, isOpened).commit();
+    }
+
+
+    public boolean getIsRewardsOpened() {
+        return preferences.getBoolean(IS_REWARDS_OPENED, false);
+    }
+
+    public boolean setIsRewardsOpened(boolean isOpened) {
+        return preferences.edit().putBoolean(IS_REWARDS_OPENED, isOpened).commit();
     }
 
 

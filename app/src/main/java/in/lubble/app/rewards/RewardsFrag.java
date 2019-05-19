@@ -85,6 +85,8 @@ public class RewardsFrag extends Fragment {
             }
         });
 
+        LubbleSharedPrefs.getInstance().setIsRewardsOpened(true);
+
         return view;
     }
 

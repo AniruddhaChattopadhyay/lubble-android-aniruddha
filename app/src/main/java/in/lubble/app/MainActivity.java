@@ -292,7 +292,13 @@ public class MainActivity extends BaseActivity {
         map.put(QUIZ_RESULT_UI, "normal");
         map.put(GROUP_QUES_ENABLED, true);
         map.put(DELIVERY_FEE, 100);
+        map.put(IS_REWARDS_SHOWN, false);
         firebaseRemoteConfig.setDefaults(map);
+        if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
+            toolbarRewardsTv.setVisibility(View.VISIBLE);
+        } else {
+            toolbarRewardsTv.setVisibility(View.GONE);
+        }
     }
 
     public void openExplore() {
@@ -388,6 +394,11 @@ public class MainActivity extends BaseActivity {
                         // change only if new menu wasnt present before
                         bottomNavigation.getMenu().clear();
                         bottomNavigation.inflateMenu(R.menu.navigation);
+                    }
+                    if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
+                        toolbarRewardsTv.setVisibility(View.VISIBLE);
+                    } else {
+                        toolbarRewardsTv.setVisibility(View.GONE);
                     }
                     showQuizBadge();
                 }
@@ -579,18 +590,20 @@ public class MainActivity extends BaseActivity {
     }
 
     public void showRewardsTooltip() {
-        final Tooltip tooltip = new Tooltip.Builder(this)
-                .anchor(toolbarRewardsTv, 0, 0, false)
-                .text("NEW! Get cool rewards nearby")
-                .arrow(true)
-                .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
-                .closePolicy(new ClosePolicy.Builder().inside(true).consume(true).outside(true).build())
-                .showDuration(15000)
-                .overlay(true)
-                .create();
+        if (toolbarRewardsTv.getVisibility() == View.VISIBLE && !LubbleSharedPrefs.getInstance().getIsRewardsOpened()) {
+            final Tooltip tooltip = new Tooltip.Builder(this)
+                    .anchor(toolbarRewardsTv, 0, 0, false)
+                    .text("NEW! Get cool rewards nearby")
+                    .arrow(true)
+                    .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
+                    .closePolicy(new ClosePolicy.Builder().inside(true).consume(false).outside(true).build())
+                    .showDuration(15000)
+                    .overlay(true)
+                    .styleId(R.style.ToolTipLayoutHoianStyle)
+                    .create();
 
-        tooltip.show(toolbarRewardsTv, Tooltip.Gravity.BOTTOM, true);
-
+            tooltip.show(toolbarRewardsTv, Tooltip.Gravity.BOTTOM, true);
+        }
     }
 
     @Override
