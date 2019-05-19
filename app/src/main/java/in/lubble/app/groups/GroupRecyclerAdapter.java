@@ -147,8 +147,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     public void addGroupToTop(GroupData groupData) {
         if (getChildIndex(groupData.getId()) == -1) {
-            groupDataList.add(cursorPos, groupData);
-            notifyItemInserted(cursorPos);
+            int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
+            groupDataList.add(newIndex, groupData);
+            notifyItemInserted(newIndex);
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
         } else {
             updateGroup(groupData);
@@ -183,8 +184,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final int oldIndex = getChildIndex(groupData.getId());
         if (oldIndex != -1) {
             groupDataList.remove(oldIndex);
-            groupDataList.add(cursorPos, groupData);
-            notifyItemMoved(oldIndex, cursorPos);
+            int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
+            groupDataList.add(newIndex, groupData);
+            notifyItemMoved(oldIndex, newIndex);
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
         }
     }
