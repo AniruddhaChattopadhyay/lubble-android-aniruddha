@@ -9,8 +9,8 @@ android {
         applicationId "in.lubble.app"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 146
-        versionName "1.6.4-3"
+        versionCode 147
+        versionName "1.6.4-4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }

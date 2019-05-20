@@ -169,6 +169,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (pos != -1) {
             groupDataList.set(pos, newGroupData);
             notifyItemChanged(pos);
+        } else {
+            addGroupToTop(newGroupData);
         }
     }
 

@@ -586,7 +586,7 @@ public class MainActivity extends BaseActivity {
     }
 
     public void showRewardsTooltip() {
-        if (toolbarRewardsTv.getVisibility() == View.VISIBLE && !LubbleSharedPrefs.getInstance().getIsRewardsOpened()) {
+        if (toolbarRewardsTv.getVisibility() == View.VISIBLE && !LubbleSharedPrefs.getInstance().getIsRewardsOpened() && LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened()) {
             final Tooltip tooltip = new Tooltip.Builder(this)
                     .anchor(toolbarRewardsTv, 0, 0, false)
                     .text("NEW! Get cool rewards nearby")
