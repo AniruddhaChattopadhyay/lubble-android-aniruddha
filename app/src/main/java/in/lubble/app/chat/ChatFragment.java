@@ -29,7 +29,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import com.google.gson.Gson;
-import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -533,7 +532,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
                         showBottomBar(groupData);
                         resetUnreadCount();
-                        showPublicGroupWarning();
+                        showPublicGroupWarning(groupData);
                     } else {
                         Crashlytics.logException(new NullPointerException("groupdata is null for group id: " + groupId));
                     }
@@ -725,8 +724,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
     }
 
-    private void showPublicGroupWarning() {
-        if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupId.equalsIgnoreCase(Constants.DEFAULT_GROUP)) {
+    private void showPublicGroupWarning(GroupData groupData) {
+        if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupData.getIsPinned()) {
             RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {

@@ -37,6 +37,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.BaseActivity;
+import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -381,7 +382,7 @@ public class LocationActivity extends BaseActivity {
 
     private void validateUserLocation(final Location location) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && location.isFromMockProvider()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && location.isFromMockProvider() && !BuildConfig.DEBUG) {
             showMockLocationDialog();
             return;
         }
