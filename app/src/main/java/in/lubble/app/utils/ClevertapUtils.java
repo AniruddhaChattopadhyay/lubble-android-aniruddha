@@ -1,7 +1,6 @@
 package in.lubble.app.utils;
 
 import android.content.Context;
-import com.appsee.Appsee;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,20 +26,6 @@ public class ClevertapUtils {
             profileUpdate.put("version code", BuildConfig.VERSION_CODE);
 
             CleverTapAPI.getDefaultInstance(context).pushProfile(profileUpdate);
-        }
-    }
-
-    public static void setAppseeUser() {
-        HashMap<String, Object> profileUpdate = new HashMap<>();
-        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            // user is logged in
-            Appsee.setUserId(currentUser.getUid());
-            profileUpdate.put("Name", currentUser.getDisplayName());
-            profileUpdate.put("Lubble Id", LubbleSharedPrefs.getInstance().getLubbleId());
-            profileUpdate.put("version name", BuildConfig.VERSION_NAME);
-            profileUpdate.put("version code", BuildConfig.VERSION_CODE);
-            Appsee.setUserProperties(profileUpdate);
         }
     }
 

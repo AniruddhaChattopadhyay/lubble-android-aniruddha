@@ -470,9 +470,6 @@
             android:enabled="true"
             android:exported="true" />
 
-        <meta-data
-            android:name="com.appsee.ApiKey"
-            android:value="d1ad6aea5ac24c6c87a23f1f9dc43a65" />
     </application>
 
 </manifest>

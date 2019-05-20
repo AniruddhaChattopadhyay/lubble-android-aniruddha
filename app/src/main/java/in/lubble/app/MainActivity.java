@@ -19,7 +19,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import com.appsee.Appsee;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -65,7 +64,6 @@ import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
-import static in.lubble.app.utils.ClevertapUtils.setAppseeUser;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
@@ -122,8 +120,6 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        Appsee.start();
-        setAppseeUser();
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null || TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
