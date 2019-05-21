@@ -236,6 +236,9 @@ public class RewardDetailActiv extends BaseActivity {
 
         if (rewardCodesData != null) {
             showRewardCode(rewardCodesData);
+        } else {
+            getThisBtn.setVisibility(View.VISIBLE);
+            rewardCodeContainer.setVisibility(View.GONE);
         }
     }
 

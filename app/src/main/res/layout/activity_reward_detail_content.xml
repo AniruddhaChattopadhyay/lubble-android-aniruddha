@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/teal"
     tools:context="in.lubble.app.rewards.RewardDetailActiv">
 
     <ImageView
@@ -92,6 +91,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/rounded_rect_white_border"
             android:orientation="vertical"
+            android:visibility="gone"
             android:padding="8dp">
 
             <TextView
@@ -130,7 +130,6 @@
             android:text="Get this"
             android:textColor="@color/black"
             android:theme="@style/MaterialButton"
-            android:visibility="gone"
             app:backgroundTint="@color/white"
             app:cornerRadius="30dp"
             app:rippleColor="@color/gray" />

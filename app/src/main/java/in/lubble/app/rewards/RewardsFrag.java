@@ -70,8 +70,6 @@ public class RewardsFrag extends Fragment {
         shimmerRecyclerView = view.findViewById(R.id.rv_rewards);
         shimmerRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        fetchRewards();
-
         claimedRewardsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,6 +88,11 @@ public class RewardsFrag extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchRewards();
+    }
 
     private void fetchRewards() {
         shimmerRecyclerView.showShimmerAdapter();
