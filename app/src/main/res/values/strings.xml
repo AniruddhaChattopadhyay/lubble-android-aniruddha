@@ -72,7 +72,7 @@
     <string name="ready_to_join">Ready to join</string>
     <string name="join_group_to_chat">Join group to send messages</string>
     <string name="lubble_group_warning_title">Welcome to %s Group</string>
-    <string name="lubble_group_warning_subtitle">All your neighbors in %s are a member of this group.\n\nsWe do not allow any spam/promotions in any group.</string>
+    <string name="lubble_group_warning_subtitle">All your neighbors in %s are a member of this group.\n\nWe do not allow any spam/promotions in any group.</string>
     <string name="public_group_warning_title">This is a public group!</string>
     <string name="public_group_warning_subtitle">Messages you send here are visible to everyone.</string>
     <string name="event_published">Event Published</string>
