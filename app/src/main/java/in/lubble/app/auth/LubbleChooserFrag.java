@@ -98,6 +98,7 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
         mapView.onCreate(savedInstanceState);
         mapView.onResume(); // needed to get the map to display immediately
         mapView.getMapAsync(this);
+        mapView.setOnClickListener(null);
 
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
@@ -227,7 +228,12 @@ public class LubbleChooserFrag extends Fragment implements OnMapReadyCallback {
         map.getUiSettings().setMapToolbarEnabled(false);
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(chosenLubbleData.getCenterLati(), chosenLubbleData.getCenterLongi())));
         map.setPadding(0, dpToPx(140), 0, dpToPx(40));
-        map.setOnMapClickListener(null);
+        map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+            }
+        });
+        map.getUiSettings().setScrollGesturesEnabled(false);
     }
 
 }

@@ -1,8 +1,10 @@
 package in.lubble.app.explore;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -57,8 +59,22 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
                 for (String groupId : selectedGroupIdMap.keySet()) {
                     getCreateOrJoinGroupRef().child(groupId).setValue(true);
                 }
-                finish();
-                overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
+                final ProgressDialog progressDialog = new ProgressDialog(ExploreActiv.this);
+                progressDialog.setTitle("Joining " + selectedGroupIdMap.size() + " groups");
+                progressDialog.setMessage("You're about to enter a lovely & helpful community, please be respectful & enjoy :)");
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isFinishing()) {
+                            progressDialog.dismiss();
+                            finish();
+                            overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
+                        }
+                    }
+                }, 4000);
             }
         });
 

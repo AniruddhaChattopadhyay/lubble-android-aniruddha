@@ -3,10 +3,7 @@ package in.lubble.app.explore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -106,11 +103,15 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                 if (null != mListener) {
                     if (isOnboarding) {
                         if (holder.selectedContainer.getVisibility() == View.GONE) {
-                            mListener.onListFragmentInteraction(holder.groupItem, true);
-                            UiUtils.animateFadeShow(holder.mView.getContext(), holder.selectedContainer);
-                            holder.joinTv.setText("REMOVE");
-                            holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
-                            selectedMap.put(holder.getAdapterPosition(), true);
+                            if (selectedMap.size() < 10) {
+                                mListener.onListFragmentInteraction(holder.groupItem, true);
+                                UiUtils.animateFadeShow(holder.mView.getContext(), holder.selectedContainer);
+                                holder.joinTv.setText("REMOVE");
+                                holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
+                                selectedMap.put(holder.getAdapterPosition(), true);
+                            } else {
+                                Toast.makeText(v.getContext(), "You can join more groups later", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             mListener.onListFragmentInteraction(holder.groupItem, false);
                             UiUtils.animateFadeHide(holder.mView.getContext(), holder.selectedContainer);
