@@ -70,7 +70,7 @@ public class GamesFrag extends Fragment {
         currentCoinsContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ReferralActivity.open(requireContext());
+                ReferralActivity.open(requireContext(), true);
             }
         });
 
@@ -78,7 +78,7 @@ public class GamesFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, requireContext());
-                ReferralActivity.open(requireContext());
+                ReferralActivity.open(requireContext(), true);
             }
         });
 

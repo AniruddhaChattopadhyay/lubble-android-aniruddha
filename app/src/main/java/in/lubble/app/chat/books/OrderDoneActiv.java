@@ -66,7 +66,7 @@ public class OrderDoneActiv extends BaseActivity {
         earnCoinsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ReferralActivity.open(OrderDoneActiv.this);
+                ReferralActivity.open(OrderDoneActiv.this, true);
                 finish();
             }
         });

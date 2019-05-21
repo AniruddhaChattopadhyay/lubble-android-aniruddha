@@ -22,11 +22,20 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 public class ReferralActivity extends BaseActivity {
     private static final String TAG = "ReferralActivity";
 
+    private static final String ARG_OPEN_REFERRALS = "ARG_OPEN_REFERRALS";
+
     private ValueEventListener thisUserListener;
     private TextView myCoinsTv;
 
+    public static void open(Context context, boolean openReferrals) {
+        final Intent intent = new Intent(context, ReferralActivity.class);
+        intent.putExtra(ARG_OPEN_REFERRALS, openReferrals);
+        context.startActivity(intent);
+    }
+
     public static void open(Context context) {
-        context.startActivity(new Intent(context, ReferralActivity.class));
+        final Intent intent = new Intent(context, ReferralActivity.class);
+        context.startActivity(intent);
     }
 
     @Override
@@ -39,12 +48,19 @@ public class ReferralActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Rewards");
 
+        boolean isOpenReferrals = getIntent().getBooleanExtra(ARG_OPEN_REFERRALS, false);
+
         // Set up the ViewPager with the sections adapter.
         myCoinsTv = findViewById(R.id.tv_my_coins);
         FrameLayout container = findViewById(R.id.container);
-        getSupportActionBar().setTitle("Invites");
 
-        FragUtils.replaceFrag(getSupportFragmentManager(), RewardsFrag.newInstance(), R.id.container);
+        if (isOpenReferrals) {
+            getSupportActionBar().setTitle("Referrals");
+            FragUtils.replaceFrag(getSupportFragmentManager(), ReferralsFragment.newInstance(), R.id.container);
+        } else {
+            getSupportActionBar().setTitle("Invites");
+            FragUtils.replaceFrag(getSupportFragmentManager(), RewardsFrag.newInstance(), R.id.container);
+        }
     }
 
     @Override

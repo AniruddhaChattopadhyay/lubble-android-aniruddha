@@ -288,7 +288,7 @@ public class RewardDetailActiv extends BaseActivity {
                             new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    ReferralActivity.open(RewardDetailActiv.this);
+                                    ReferralActivity.open(RewardDetailActiv.this, true);
                                     finish();
                                 }
                             });

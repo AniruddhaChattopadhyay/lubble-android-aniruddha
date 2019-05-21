@@ -401,7 +401,7 @@ public class BookCheckoutActiv extends BaseActivity {
 
     public void earnMore(View view) {
         Analytics.triggerEvent(AnalyticsEvents.BOOK_EARN_MORE, this);
-        ReferralActivity.open(this);
+        ReferralActivity.open(this, true);
     }
 
     @Override
