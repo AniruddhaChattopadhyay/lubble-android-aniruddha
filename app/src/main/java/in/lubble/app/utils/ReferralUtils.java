@@ -23,7 +23,7 @@ public class ReferralUtils {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
                 .setCanonicalIdentifier("lbl/referralCode/" + FirebaseAuth.getInstance().getUid())
                 .setTitle("Join your neighbours on Lubble")
-                .setContentDescription("Explore your neighbourhood, buy or sell items around you & so much more")
+                .setContentDescription("Connect with your neighbourhood, get advice, help & be a part of the local community")
                 .setContentImageUrl("https://i.imgur.com/JFsrCOs.png")
                 .setContentIndexingMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
                 .setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
