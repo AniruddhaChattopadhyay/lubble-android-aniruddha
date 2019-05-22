@@ -289,6 +289,7 @@ public class MainActivity extends BaseActivity {
         map.put(GROUP_QUES_ENABLED, true);
         map.put(DELIVERY_FEE, 100);
         map.put(IS_REWARDS_SHOWN, false);
+        map.put(REWARDS_EXPLAINER, "https://firebasestorage.googleapis.com/v0/b/lubble-in-default/o/chat_sliders%2Freward_explainer.png?alt=media&token=33f50ce7-c1b7-4d90-84d6-c0ff41f9e39f");
         firebaseRemoteConfig.setDefaults(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
             toolbarRewardsTv.setVisibility(View.VISIBLE);
@@ -599,6 +600,7 @@ public class MainActivity extends BaseActivity {
                     .create();
 
             tooltip.show(toolbarRewardsTv, Tooltip.Gravity.BOTTOM, true);
+            GlideApp.with(this).load(FirebaseRemoteConfig.getInstance().getString(REWARDS_EXPLAINER)).preload();
         }
     }
 
