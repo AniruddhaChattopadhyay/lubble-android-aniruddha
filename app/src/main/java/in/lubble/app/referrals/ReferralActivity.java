@@ -141,7 +141,7 @@ public class ReferralActivity extends BaseActivity {
                 Intent sendIntent = new Intent("android.intent.action.MAIN");
                 sendIntent.setAction(Intent.ACTION_VIEW);
                 sendIntent.setPackage("com.whatsapp");
-                String url = "https://api.whatsapp.com/send?phone=" + "+917676622668" + "&text=" + "Hi please help me with book exchange";
+                String url = "https://api.whatsapp.com/send?phone=" + "+917676622668" + "&text=" + "Hi please help me with rewards";
                 sendIntent.setData(Uri.parse(url));
                 if (sendIntent.resolveActivity(getPackageManager()) != null) {
                     startActivity(sendIntent);
