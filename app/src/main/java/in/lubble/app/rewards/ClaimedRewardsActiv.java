@@ -3,11 +3,14 @@ package in.lubble.app.rewards;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -18,10 +21,12 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.rewards.data.RewardCodesAirtableData;
@@ -33,6 +38,8 @@ import retrofit2.Response;
 
 import java.util.Collections;
 import java.util.Comparator;
+
+import static in.lubble.app.analytics.AnalyticsEvents.HELP_PHONE_CLICKED;
 
 public class ClaimedRewardsActiv extends BaseActivity {
 
@@ -130,14 +137,53 @@ public class ClaimedRewardsActiv extends BaseActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.new_item_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.action_help:
+                openHelpBottomSheet();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    private void openHelpBottomSheet() {
+
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = getLayoutInflater().inflate(R.layout.help_bottom_sheet, null);
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
+
+        final TextView phoneTv = sheetView.findViewById(R.id.tv_phone_number);
+
+        phoneTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Analytics.triggerEvent(HELP_PHONE_CLICKED, ClaimedRewardsActiv.this);
+
+                Intent sendIntent = new Intent("android.intent.action.MAIN");
+                sendIntent.setAction(Intent.ACTION_VIEW);
+                sendIntent.setPackage("com.whatsapp");
+                String url = "https://api.whatsapp.com/send?phone=" + "+917676622668" + "&text=" + "Hi please help me with book exchange";
+                sendIntent.setData(Uri.parse(url));
+                if (sendIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(sendIntent);
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:+916361686026"));
+                    startActivity(intent);
+                }
+            }
+        });
+
+    }
 }

@@ -58,6 +58,7 @@ import it.sephiroth.android.library.xtooltip.Tooltip;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
 import static in.lubble.app.Constants.*;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
@@ -379,7 +380,7 @@ public class MainActivity extends BaseActivity {
         }
 
         final FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        firebaseRemoteConfig.fetch().addOnCompleteListener(this, new OnCompleteListener<Void>() {
+        firebaseRemoteConfig.fetch(TimeUnit.HOURS.toSeconds(1)).addOnCompleteListener(this, new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
