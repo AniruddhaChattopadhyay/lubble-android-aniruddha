@@ -112,7 +112,11 @@ public class RewardsFrag extends Fragment {
                                 activeRewardList.add(reward);
                             }
                         }
-                        rewardsAdapter.setList(activeRewardList);
+                        if (!activeRewardList.isEmpty()) {
+                            rewardsAdapter.setList(activeRewardList);
+                        } else {
+                            noRewardsTv.setVisibility(View.VISIBLE);
+                        }
                     } else {
                         noRewardsTv.setVisibility(View.VISIBLE);
                         shimmerRecyclerView.hideShimmerAdapter();
