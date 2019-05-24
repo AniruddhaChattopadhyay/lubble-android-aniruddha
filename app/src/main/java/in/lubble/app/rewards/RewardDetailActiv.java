@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
@@ -80,7 +81,9 @@ public class RewardDetailActiv extends BaseActivity {
     private MaterialButton detailGetThisBtn;
     private RelativeLayout rewardCodeContainer;
     private TextView rewardCodeTv;
+    private TextView rewardClaimTv;
     private ProgressDialog progressDialog;
+    private ImageView rewardClaimIv;
 
     public static void open(Context context, RewardsData rewardsData) {
         final Intent intent = new Intent(context, RewardDetailActiv.class);
@@ -116,7 +119,9 @@ public class RewardDetailActiv extends BaseActivity {
         getThisBtn = findViewById(R.id.btn_get_this);
         detailGetThisBtn = findViewById(R.id.btn_get_this_detail);
         rewardCodeContainer = findViewById(R.id.container_reward_code);
+        rewardClaimTv = findViewById(R.id.tv_claimed_text);
         rewardCodeTv = findViewById(R.id.tv_reward_code);
+        rewardClaimIv = findViewById(R.id.iv_claimed_icon);
 
         rewardsData = (RewardsData) getIntent().getSerializableExtra(ARG_REWARD_DATA);
         rewardCodesData = (RewardCodesData) getIntent().getSerializableExtra(ARG_REWARD_CODE_DATA);
@@ -382,16 +387,30 @@ public class RewardDetailActiv extends BaseActivity {
         rewardCodeContainer.setVisibility(View.VISIBLE);
         rewardCodeTv.setText(rewardCodesData.getRewardCode());
 
-        rewardCodeContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                String message = rewardCodesData.getRewardCode();
-                ClipData clip = ClipData.newPlainText("lubble_reward_code", message);
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(RewardDetailActiv.this, "COPIED!", Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (rewardCodesData.getIsLink()) {
+            rewardClaimTv.setText("Reward Link");
+            rewardClaimIv.setImageResource(R.drawable.ic_open_in_new_black_24dp);
+            rewardCodeContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(rewardCodesData.getRewardCode()));
+                    startActivity(browserIntent);
+                }
+            });
+        } else {
+            rewardClaimTv.setText("Reward Code");
+            rewardClaimIv.setImageResource(R.drawable.ic_content_copy_black_24dp);
+            rewardCodeContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    String message = rewardCodesData.getRewardCode();
+                    ClipData clip = ClipData.newPlainText("lubble_reward_code", message);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(RewardDetailActiv.this, "COPIED!", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
 }

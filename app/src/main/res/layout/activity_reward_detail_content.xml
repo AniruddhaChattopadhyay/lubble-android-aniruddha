@@ -112,6 +112,7 @@
                 tools:text="JXE-LBL-500" />
 
             <ImageView
+                android:id="@+id/iv_claimed_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@id/tv_reward_code"

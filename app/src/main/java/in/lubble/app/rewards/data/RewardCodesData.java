@@ -21,6 +21,8 @@ public class RewardCodesData implements Serializable {
     private String createdTime;
     @SerializedName("RewardRecordId")
     private String rewardRecordId;
+    @SerializedName("IsLink")
+    private boolean isLink;
 
     public String getRewardCode() {
         return rewardCode;
@@ -64,5 +66,13 @@ public class RewardCodesData implements Serializable {
 
     public void setRewardRecordId(String rewardRecordId) {
         this.rewardRecordId = rewardRecordId;
+    }
+
+    public boolean getIsLink() {
+        return isLink;
+    }
+
+    public void setIsLink(boolean link) {
+        isLink = link;
     }
 }

@@ -81,14 +81,9 @@ public class RewardsFrag extends Fragment {
 
         rewardsAdapter = new RewardsAdapter(GlideApp.with(requireContext()));
         shimmerRecyclerView.setAdapter(rewardsAdapter);
+        fetchRewards();
 
         return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        fetchRewards();
     }
 
     private void fetchRewards() {
