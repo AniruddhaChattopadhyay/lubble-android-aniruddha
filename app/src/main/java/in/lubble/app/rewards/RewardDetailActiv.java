@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.text.HtmlCompat;
 import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -53,6 +54,7 @@ import java.util.MissingFormatArgumentException;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.rewards.RewardsFrag.REQ_REWARD_REFRESH;
 
 public class RewardDetailActiv extends BaseActivity {
 
@@ -85,10 +87,10 @@ public class RewardDetailActiv extends BaseActivity {
     private ProgressDialog progressDialog;
     private ImageView rewardClaimIv;
 
-    public static void open(Context context, RewardsData rewardsData) {
-        final Intent intent = new Intent(context, RewardDetailActiv.class);
+    public static void open(Fragment fragment, RewardsData rewardsData) {
+        final Intent intent = new Intent(fragment.getContext(), RewardDetailActiv.class);
         intent.putExtra(ARG_REWARD_DATA, rewardsData);
-        context.startActivity(intent);
+        fragment.startActivityForResult(intent, REQ_REWARD_REFRESH);
     }
 
     public static void open(Context context, RewardCodesData rewardCodesData) {
@@ -303,6 +305,7 @@ public class RewardDetailActiv extends BaseActivity {
     }
 
     private void fetchEmptyRewardCode() {
+        setResult(RESULT_OK);
         String formula = "RewardId=\'" + rewardsData.getRecordId() + "\',Uid=\'\'";
 
         String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/RewardCodes?filterByFormula=AND(" + formula + ")&view=Grid%20view&maxRecords=1";

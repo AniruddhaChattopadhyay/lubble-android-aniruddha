@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -35,9 +36,11 @@ public class RewardsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private List<RewardsRecordData> rewardsDataList = new ArrayList<>();
     private GlideRequests glide;
+    private Fragment fragment;
 
-    public RewardsAdapter(GlideRequests glide) {
+    public RewardsAdapter(GlideRequests glide, Fragment fragment) {
         this.glide = glide;
+        this.fragment = fragment;
         addExplainer();
     }
 
@@ -118,9 +121,16 @@ public class RewardsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         notifyDataSetChanged();
     }
 
+    void clearAll() {
+        rewardsDataList.clear();
+        addExplainer();
+        notifyDataSetChanged();
+    }
+
     class RewardViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View mView;
         final ImageView rewardIv;
+
         RewardsRecordData mItem;
 
         public RewardViewHolder(View view) {
@@ -129,11 +139,12 @@ public class RewardsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             rewardIv = view.findViewById(R.id.iv_reward);
             view.setOnClickListener(this);
         }
-
         @Override
         public void onClick(View v) {
-            RewardDetailActiv.open(v.getContext(), rewardsDataList.get(getAdapterPosition()).getFields());
+
+            RewardDetailActiv.open(fragment, rewardsDataList.get(getAdapterPosition()).getFields());
         }
+
     }
 
     class ExplainerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

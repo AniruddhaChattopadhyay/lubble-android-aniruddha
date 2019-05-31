@@ -1,5 +1,7 @@
 package in.lubble.app.rewards;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -7,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
@@ -29,6 +32,7 @@ import java.util.List;
 public class RewardsFrag extends Fragment {
 
     private static final String TAG = "RewardsFrag";
+    static final int REQ_REWARD_REFRESH = 576;
 
     private TextView claimedRewardsTv;
     private TextView earnMoreTv;
@@ -79,7 +83,7 @@ public class RewardsFrag extends Fragment {
 
         LubbleSharedPrefs.getInstance().setIsRewardsOpened(true);
 
-        rewardsAdapter = new RewardsAdapter(GlideApp.with(requireContext()));
+        rewardsAdapter = new RewardsAdapter(GlideApp.with(requireContext()), this);
         shimmerRecyclerView.setAdapter(rewardsAdapter);
         fetchRewards();
 
@@ -136,4 +140,12 @@ public class RewardsFrag extends Fragment {
         });
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_REWARD_REFRESH && resultCode == Activity.RESULT_OK) {
+            rewardsAdapter.clearAll();
+            fetchRewards();
+        }
+    }
 }
