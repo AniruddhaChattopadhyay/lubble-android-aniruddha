@@ -54,6 +54,7 @@ public class ReferralActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Rewards");
 
+        Analytics.triggerScreenEvent(this, this.getClass());
         boolean isOpenReferrals = getIntent().getBooleanExtra(ARG_OPEN_REFERRALS, false);
 
         // Set up the ViewPager with the sections adapter.

@@ -33,6 +33,7 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -161,6 +162,7 @@ public class RewardDetailActiv extends BaseActivity {
 
             }
         });
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         getThisBtn.setOnClickListener(new View.OnClickListener() {
             @Override

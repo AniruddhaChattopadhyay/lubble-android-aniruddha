@@ -61,6 +61,7 @@ public class ClaimedRewardsActiv extends BaseActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("My Claimed Rewards");
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         noRewardsContainer = findViewById(R.id.container_no_claimed_rewards);
         shimmerRecyclerView = findViewById(R.id.rv_claimed_rewards);
