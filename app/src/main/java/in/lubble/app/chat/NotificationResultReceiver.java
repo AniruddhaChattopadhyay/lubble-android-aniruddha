@@ -3,6 +3,7 @@ package in.lubble.app.chat;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.DataSnapshot;
@@ -17,6 +18,7 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
+import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.utils.NotifUtils;
 
 import java.util.Map;
@@ -26,6 +28,7 @@ import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class NotificationResultReceiver extends BroadcastReceiver {
     private static final String TAG = "NotificationResultRecei";
+    private final static int PAGE_SIZE = 10;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -106,8 +109,23 @@ public class NotificationResultReceiver extends BroadcastReceiver {
         });
     }
 
+    private int calcUnreadCount(String groupId) {
+        int unreadCount = 0;
+        final SharedPreferences chatSharedPrefs = UnreadChatsSharedPrefs.getInstance().getPreferences();
+        final Map<String, String> chatsMap = (Map<String, String>) chatSharedPrefs.getAll();
+        for (String json : chatsMap.values()) {
+            final NotifData notifData = new Gson().fromJson(json, NotifData.class);
+            if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                ++unreadCount;
+            }
+        }
+        return unreadCount;
+    }
+
     private void pullNewMsgs(NotifData notifData) {
-        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).keepSynced(true);
+        //what works: exactly the same query as in chatFrag
+        int unreadCount = calcUnreadCount(notifData.getGroupId());
+        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).orderByChild("serverTimestamp").limitToLast(PAGE_SIZE + unreadCount).keepSynced(true);
     }
 
     private void pullNewDmMsgs(NotifData notifData) {
