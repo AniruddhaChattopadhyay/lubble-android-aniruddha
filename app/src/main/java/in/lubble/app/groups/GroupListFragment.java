@@ -161,9 +161,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 if (groupData != null) {
-                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())) {
+                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && groupData.getId() != null) {
                         // joined group
                         adapter.addGroupToTop(groupData);
+                    } else if (!groupData.getIsPrivate() && groupData.getId() != null) {
+                        // non-joined public group
+                        adapter.addPublicGroupToTop(groupData);
                     }
                 }
             }
