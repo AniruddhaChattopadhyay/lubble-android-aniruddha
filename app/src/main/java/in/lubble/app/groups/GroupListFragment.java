@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -164,7 +165,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && groupData.getId() != null) {
                         // joined group
                         adapter.addGroupToTop(groupData);
-                    } else if (!groupData.getIsPrivate() && groupData.getId() != null) {
+                    } else if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())) {
                         // non-joined public group
                         adapter.addPublicGroupToTop(groupData);
                     }
@@ -205,7 +206,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (isAdded()) {
                     syncUserGroup();
                     groupsRecyclerView.setVisibility(View.VISIBLE);
-                    exploreContainer.setVisibility(View.VISIBLE);
+                    //exploreContainer.setVisibility(View.VISIBLE);
                     if (progressBar.getVisibility() == View.VISIBLE) {
                         progressBar.setVisibility(View.GONE);
                     }

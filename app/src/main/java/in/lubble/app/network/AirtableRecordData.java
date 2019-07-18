@@ -1,7 +1,7 @@
 package in.lubble.app.network;
 
 import com.google.gson.annotations.SerializedName;
-import in.lubble.app.chat.ChatMoreData;
+import in.lubble.app.models.ChatMoreData;
 
 public class AirtableRecordData {
 

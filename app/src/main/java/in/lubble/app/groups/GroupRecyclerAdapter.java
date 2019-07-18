@@ -4,8 +4,8 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -134,9 +134,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
 
             if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
-                groupViewHolder.joinBtn.setVisibility(View.VISIBLE);
+                groupViewHolder.viewGroupTv.setVisibility(View.VISIBLE);
             } else {
-                groupViewHolder.joinBtn.setVisibility(View.GONE);
+                groupViewHolder.viewGroupTv.setVisibility(View.GONE);
             }
 
             if (posToFlash == position) {
@@ -147,22 +147,28 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 groupViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
             }
         } else {
-            //nothing to process
+            // nothing to process
         }
     }
 
     private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
-        if (groupData.isJoined()) {
+        if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
+            // for pending group invite
+            timestampTv.setVisibility(View.GONE);
+        } else {
+            // joined or unjoined groups
             timestampTv.setVisibility(View.VISIBLE);
             if (groupData.getJoinedTimestamp() > groupData.getLastMessageTimestamp()) {
                 timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getJoinedTimestamp()));
             } else {
                 timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getLastMessageTimestamp()));
             }
-        } else if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
-            timestampTv.setVisibility(View.GONE);
-        } else {
-            timestampTv.setVisibility(View.GONE);
+            if (!groupData.isJoined()) {
+                // align time with "view" btn
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.setMargins(0, 0, dpToPx(8), dpToPx(4));
+                timestampTv.setLayoutParams(params);
+            }
         }
     }
 
@@ -257,7 +263,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         return groupDataList.size();
     }
 
-    class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class GroupViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final ImageView iconIv;
         final ImageView lockIv;
@@ -265,7 +271,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final EmojiTextView subtitleTv;
         final TextView unreadCountTv;
         final TextView timestampTv;
-        final Button joinBtn;
+        final TextView viewGroupTv;
         final ImageView inviteIcon;
         final ImageView pinIv;
         GroupData groupData;
@@ -279,21 +285,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             subtitleTv = view.findViewById(R.id.tv_subtitle);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
-            joinBtn = view.findViewById(R.id.btn_join_group);
+            viewGroupTv = view.findViewById(R.id.tv_view_group);
             inviteIcon = view.findViewById(R.id.ic_invite);
             pinIv = view.findViewById(R.id.iv_pin);
-            joinBtn.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.btn_join_group:
-                    getCreateOrJoinGroupRef().child(groupData.getId()).setValue(true);
-                    mListener.onListFragmentInteraction(groupData.getId(), true);
-                    break;
-            }
-        }
     }
 
     class PublicGroupHeaderViewHolder extends RecyclerView.ViewHolder {

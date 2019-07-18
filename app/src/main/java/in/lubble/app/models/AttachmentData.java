@@ -1,4 +1,4 @@
-package in.lubble.app.chat;
+package in.lubble.app.models;
 
 import androidx.annotation.ColorRes;
 import androidx.annotation.DrawableRes;

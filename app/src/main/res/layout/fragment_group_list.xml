@@ -79,15 +79,19 @@
             android:visibility="gone"
             app:srcCompat="@drawable/ic_pin" />
 
-        <Button
-            android:id="@+id/btn_join_group"
-            android:layout_width="64dp"
-            android:layout_height="32dp"
-            android:layout_gravity="center"
-            android:background="@drawable/pill_button"
-            android:text="JOIN"
+        <TextView
+            android:id="@+id/tv_view_group"
             android:textColor="@color/white"
-            android:visibility="gone" />
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:background="@drawable/pill_button"
+            android:text="VIEW"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
 
         <ImageView
             android:id="@+id/ic_invite"
