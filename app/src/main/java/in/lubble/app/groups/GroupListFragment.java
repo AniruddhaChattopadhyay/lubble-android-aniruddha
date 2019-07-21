@@ -165,8 +165,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && groupData.getId() != null) {
                         // joined group
                         adapter.addGroupToTop(groupData);
-                    } else if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())) {
-                        // non-joined public group
+                    } else if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
+                            && groupData.getMembers().size() > 0) {
+                        // non-joined public groups with non-zero members
                         adapter.addPublicGroupToTop(groupData);
                     }
                 }
