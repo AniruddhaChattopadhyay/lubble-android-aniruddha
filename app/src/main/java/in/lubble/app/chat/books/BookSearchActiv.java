@@ -21,7 +21,6 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksFields;
 import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.chat.books.pojos.BookItem;
@@ -221,13 +220,14 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
         String url = "https://api.airtable.com/v0/appbhSWmy7ZS6UeTy/Books";
 
         final Endpoints endpoints = ServiceGenerator.createAirtableService(Endpoints.class);
-        endpoints.uploadNewBook(url, body).enqueue(new Callback<AirtableBooksData>() {
+        endpoints.uploadNewBook(url, body).enqueue(new Callback<AirtableBooksRecord>() {
             @Override
-            public void onResponse(Call<AirtableBooksData> call, Response<AirtableBooksData> response) {
-                final AirtableBooksData airtableData = response.body();
-                if (response.isSuccessful() && airtableData != null && !isFinishing()) {
+            public void onResponse(Call<AirtableBooksRecord> call, Response<AirtableBooksRecord> response) {
+                final AirtableBooksRecord airtableBooksRecord = response.body();
+                if (response.isSuccessful() && airtableBooksRecord != null && !isFinishing()) {
                     booksAdded++;
                     uploadingBookContainer.setVisibility(View.GONE);
+                    lastBookItemUploaded.setId(airtableBooksRecord.getId());
                     updateProceedVisibility();
 
                 } else {
@@ -240,7 +240,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
             }
 
             @Override
-            public void onFailure(Call<AirtableBooksData> call, Throwable t) {
+            public void onFailure(Call<AirtableBooksRecord> call, Throwable t) {
                 if (!isFinishing()) {
                     Toast.makeText(BookSearchActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onFailure: ");

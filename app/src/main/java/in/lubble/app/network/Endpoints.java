@@ -133,9 +133,8 @@ public interface Endpoints {
     @GET
     public Call<AirtableBooksData> fetchBooks(@Url String url);
 
-    //todo fix the response POJO for both POST methods
     @POST
-    public Call<AirtableBooksData> uploadNewBook(@Url String url, @Body RequestBody params);
+    public Call<AirtableBooksRecord> uploadNewBook(@Url String url, @Body RequestBody params);
 
     @POST
     public Call<AirtableBooksRecord> uploadNewOrder(@Url String url, @Body RequestBody params);

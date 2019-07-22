@@ -346,7 +346,10 @@ public class BookCheckoutActiv extends BaseActivity {
                     if (!isFinishing()) {
                         progressDialog.dismiss();
                         Toast.makeText(BookCheckoutActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                        Crashlytics.logException(new Exception("Book Checkout airtable api Issue"));
+                        Crashlytics.logException(new Exception("Book Checkout airtable api Issue\nresponse code:" + response.code()
+                                + "\nisSuccessful: " + response.isSuccessful()
+                                + "\nerrorBody: " + response.errorBody()
+                                + "\nbody: " + response.body()));
                     }
                 }
             }
