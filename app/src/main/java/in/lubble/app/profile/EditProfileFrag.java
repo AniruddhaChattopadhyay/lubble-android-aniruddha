@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.segment.analytics.Traits;
 import com.tsongkha.spinnerdatepicker.DatePicker;
 import com.tsongkha.spinnerdatepicker.DatePickerDialog;
 import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder;
@@ -41,10 +42,12 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.models.ProfileData.getGenderText;
 import static in.lubble.app.utils.DateTimeUtils.OFFICIAL_DATE_YEAR;
 import static in.lubble.app.utils.FileUtils.*;
 
@@ -199,6 +202,15 @@ public class EditProfileFrag extends Fragment {
                 getThisUserRef().child("school").setValue(StringUtils.getStringFromTil(schoolTil));
                 getThisUserRef().child("birthdate").setValue(bdayEpochTime);
                 getThisUserRef().child("isAgePublic").setValue(ageSwitch.isChecked());
+
+                final Traits traits = new Traits();
+                traits.putGender(getGenderText(genderTabLayout.getSelectedTabPosition()));
+                traits.putDescription(StringUtils.getStringFromTil(bioTil));
+                traits.putTitle(StringUtils.getStringFromTil(jobTitleTil));
+                traits.putIndustry(StringUtils.getStringFromTil(companyTil));
+                traits.put("school", StringUtils.getStringFromTil(schoolTil));
+                traits.putBirthday(new Date(bdayEpochTime));
+                com.segment.analytics.Analytics.with(getContext()).identify(FirebaseAuth.getInstance().getUid(), traits, null);
                 getFragmentManager().popBackStack();
             }
         });
