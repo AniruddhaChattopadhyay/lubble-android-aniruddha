@@ -67,7 +67,7 @@ public class LubbleApp extends Application {
         }
         Analytics analytics = new Analytics.Builder(this, writeKey)
                 .trackApplicationLifecycleEvents() // Enable this to record certain application events automatically!
-                .recordScreenViews() // Enable this to record screen views automatically!
+                //.recordScreenViews() // Enable this to record screen views automatically!
                 .build();
 
         // Set the initialized instance as a globally accessible instance.
