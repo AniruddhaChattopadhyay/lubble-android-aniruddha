@@ -222,6 +222,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 sharedImageUri = null;
             }
         }
+        final Bundle bundle = new Bundle();
+        bundle.putString("groupid", groupId);
+        Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, requireContext());
     }
 
     private void populateChatData(ChatData chatData) {
@@ -893,7 +896,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
         final Bundle bundle = new Bundle();
         bundle.putString("groupid", groupId);
-        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, requireContext());
+        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, bundle, requireContext());
     }
 
     void updateMsgId(String msgId) {
