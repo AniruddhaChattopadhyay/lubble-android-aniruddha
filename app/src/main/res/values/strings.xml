@@ -223,6 +223,7 @@
 
     <string name="msg_spam_confirm_title">Mark as Spam?</string>
     <string name="msg_spam_confirm_msg">This will permanently delete the message! Are you sure you want to continue?</string>
-    <string name="msg_spam_confirm_positive">Delete Message</string>
+    <string name="msg_spam_confirm_del_msg">Delete Message</string>
+    <string name="msg_spam_confirm_reset_lastmsg">Delete Last Msg too</string>
 
 </resources>

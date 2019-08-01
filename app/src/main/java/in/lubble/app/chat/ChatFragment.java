@@ -1361,16 +1361,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     public void markSpam(final String selectedChatId, final String ogMsg) {
         if (selectedChatId != null) {
+            final CharSequence[] items = {"Delete last msg too", "Delete msg", "Cancel"};
             new AlertDialog.Builder(requireContext())
                     .setTitle(R.string.msg_spam_confirm_title)
                     .setMessage(R.string.msg_spam_confirm_msg)
-                    .setPositiveButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .setNegativeButton(R.string.msg_spam_confirm_positive, new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.msg_spam_confirm_reset_lastmsg, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Map<String, Object> childUpdates = new HashMap<>();
@@ -1378,8 +1373,30 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             childUpdates.put("message", "Marked as spam");
                             childUpdates.put("ogMessage", ogMsg);
                             messagesReference.child(selectedChatId).updateChildren(childUpdates);
-                            dialog.dismiss();
+
+                            Map<String, Object> groupUpdates = new HashMap<>();
+                            groupUpdates.put("lastMessage", "...");
+                            groupReference.updateChildren(groupUpdates);
                             Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.msg_spam_confirm_del_msg, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put("type", SYSTEM);
+                            childUpdates.put("message", "Marked as spam");
+                            childUpdates.put("ogMessage", ogMsg);
+                            messagesReference.child(selectedChatId).updateChildren(childUpdates);
+                            Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNeutralButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
                         }
                     })
                     .show();
