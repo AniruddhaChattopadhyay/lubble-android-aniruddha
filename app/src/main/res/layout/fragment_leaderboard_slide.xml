@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="120dp">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:background="@drawable/rounded_rectangle_blue_clue" />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:drawablePadding="4dp"
+        android:text="Most Liked"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:drawableLeftCompat="@drawable/ic_favorite_white_16dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="4dp"
+        android:background="@drawable/rounded_rect_black_trans"
+        android:paddingLeft="6dp"
+        android:paddingRight="6dp"
+        android:textSize="12sp"
+        android:gravity="center"
+        android:text="View All"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:drawableTint="@color/white" />
+
+    <LinearLayout
+        android:id="@+id/container_top3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_title"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:paddingBottom="8dp"
+        android:weightSum="3">
+
+        <RelativeLayout
+            android:id="@+id/container_second"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/iv_second"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/circle_white"
+                android:padding="2dp"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_second_hint"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_below="@id/iv_second"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="-12dp"
+                android:background="@drawable/green_circle"
+                android:elevation="4dp"
+                android:gravity="center"
+                android:text="2"
+                android:textColor="@color/black"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/light_teal"
+                tools:fontFamily="@font/molle_regular" />
+
+            <TextView
+                android:id="@+id/tv_name_second"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_second_hint"
+                android:layout_centerHorizontal="true"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="Captain America" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/container_first"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/iv_first"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/circle_white"
+                android:padding="2dp"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_first_hint"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_below="@id/iv_first"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="-12dp"
+                android:background="@drawable/circle_white"
+                android:elevation="4dp"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="@color/black"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/gold"
+                tools:fontFamily="@font/molle_regular" />
+
+            <TextView
+                android:id="@+id/tv_name_first"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_first_hint"
+                android:layout_centerHorizontal="true"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="Iron Man" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/container_third"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="2dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/iv_third"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/circle_white"
+                android:padding="2dp"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/tv_third_hint"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_below="@id/iv_third"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="-12dp"
+                android:background="@drawable/red_circle"
+                android:elevation="4dp"
+                android:gravity="center"
+                android:text="3"
+                android:textColor="@color/black"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/lt_pink"
+                tools:fontFamily="@font/molle_regular" />
+
+            <TextView
+                android:id="@+id/tv_name_third"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_third_hint"
+                android:layout_centerHorizontal="true"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="Thor Odinson" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -3,6 +3,7 @@ package in.lubble.app.marketplace;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+import in.lubble.app.leaderboard.LeaderboardSlideFrag;
 
 import java.util.ArrayList;
 
@@ -17,7 +18,11 @@ public class SliderViewPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        return SlidePageFrag.newInstance(sliderData.get(position));
+        if (position == sliderData.size()) {
+            return LeaderboardSlideFrag.newInstance();
+        } else {
+            return SlidePageFrag.newInstance(sliderData.get(position));
+        }
     }
 
     public void updateList(ArrayList<SliderData> questionData) {
@@ -28,6 +33,6 @@ public class SliderViewPagerAdapter extends FragmentStatePagerAdapter {
 
     @Override
     public int getCount() {
-        return sliderData.size();
+        return sliderData.size() + 1;
     }
 }

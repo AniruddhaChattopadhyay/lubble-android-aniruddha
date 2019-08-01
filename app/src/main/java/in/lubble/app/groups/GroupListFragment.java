@@ -316,7 +316,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private Runnable update = new Runnable() {
         public void run() {
-            if (currentPage == sliderDataList.size()) {
+            if (currentPage == sliderDataList.size() + 1) {
                 currentPage = 0;
             }
             viewPager.setCurrentItem(currentPage++, true);
