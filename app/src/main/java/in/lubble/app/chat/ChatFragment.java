@@ -3,6 +3,7 @@ package in.lubble.app.chat;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.Group;
@@ -48,6 +50,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
@@ -1353,6 +1356,35 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             }
         } else {
             Crashlytics.logException(new NullPointerException("chatId is null when trying to open msg info"));
+        }
+    }
+
+    public void markSpam(final String selectedChatId, final String ogMsg) {
+        if (selectedChatId != null) {
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.msg_spam_confirm_title)
+                    .setMessage(R.string.msg_spam_confirm_msg)
+                    .setPositiveButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.msg_spam_confirm_positive, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put("type", SYSTEM);
+                            childUpdates.put("message", "Marked as spam");
+                            childUpdates.put("ogMessage", ogMsg);
+                            messagesReference.child(selectedChatId).updateChildren(childUpdates);
+                            dialog.dismiss();
+                            Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
+                        }
+                    })
+                    .show();
+        } else {
+            Crashlytics.logException(new NullPointerException("chatId is null when trying to mark it spam"));
         }
     }
 
