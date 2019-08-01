@@ -19,9 +19,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".leaderboard.LeaderboardActivity"></activity>
-        <activity android:name=".rewards.ClaimedRewardsActiv" />
-        <activity android:name=".rewards.RewardDetailActiv" />
+        <activity
+            android:name=".leaderboard.LeaderboardActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            android:theme="@style/BlueAppTheme" />
+        <activity
+            android:name=".rewards.ClaimedRewardsActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".rewards.RewardDetailActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".chat.books.OrderDoneActiv"
             android:configChanges="orientation"

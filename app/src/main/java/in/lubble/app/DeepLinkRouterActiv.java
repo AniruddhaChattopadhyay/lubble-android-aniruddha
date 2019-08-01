@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.SellerDashActiv;
@@ -103,6 +104,9 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 final Intent eventsIntent = new Intent(this, MainActivity.class);
                 eventsIntent.putExtra(EXTRA_TAB_NAME, "events");
                 startActivity(eventsIntent);
+                break;
+            case "leaderboard":
+                LeaderboardActivity.open(this);
                 break;
             default:
                 startActivity(new Intent(this, MainActivity.class));

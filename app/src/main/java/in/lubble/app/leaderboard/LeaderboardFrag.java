@@ -20,6 +20,7 @@ import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.StringUtils;
@@ -35,6 +36,8 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
     private static final String TAG = "LeaderboardFrag";
 
     private TextView subtitleTv;
+    private TextView explainTv;
+    private ImageView logoIv;
 
     private RelativeLayout firstContainer;
     private ImageView firstIv;
@@ -73,11 +76,24 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
         View view = inflater.inflate(R.layout.frag_leaderboard, container, false);
 
         Context context = view.getContext();
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         RecyclerView recyclerView = view.findViewById(R.id.rv_leaderboard);
         recyclerView.setNestedScrollingEnabled(true);
         progressbar = view.findViewById(R.id.progressbar_leaderboard);
         subtitleTv = view.findViewById(R.id.tv_subtitle);
+        explainTv = view.findViewById(R.id.tv_explain);
+        logoIv = view.findViewById(R.id.iv_logo);
+
+        ImageView crossIv = view.findViewById(R.id.iv_cross);
+
+        crossIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().finish();
+                getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
+            }
+        });
 
         firstContainer = view.findViewById(R.id.container_first);
         firstIv = view.findViewById(R.id.iv_first);
@@ -125,6 +141,8 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
                 }
                 if (isAdded()) {
                     progressbar.setVisibility(View.GONE);
+                    explainTv.setVisibility(View.VISIBLE);
+                    logoIv.setVisibility(View.VISIBLE);
                     Collections.reverse(profileDataList);
                     setTop3(profileDataList.subList(0, 3));
                     adapter.addList(profileDataList.subList(3, 10));

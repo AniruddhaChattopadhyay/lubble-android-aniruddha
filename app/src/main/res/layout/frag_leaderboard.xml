@@ -4,12 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:name="in.lubble.app.leaderboard.LeaderboardFrag"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white">
+        android:layout_height="match_parent">
 
         <View
             android:layout_width="match_parent"
@@ -17,6 +17,16 @@
             android:layout_alignBottom="@id/container_top3"
             android:layout_alignParentTop="true"
             android:background="@drawable/gradient_blue_clue" />
+
+        <ImageView
+            android:id="@+id/iv_cross"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:alpha="0.6"
+            android:padding="8dp"
+            android:tint="@color/white"
+            app:srcCompat="@drawable/ic_close_black_24dp" />
 
         <TextView
             android:id="@+id/tv_title"
@@ -76,12 +86,12 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="-12dp"
                     android:background="@drawable/green_circle"
-                    app:backgroundTint="@color/light_teal"
                     android:elevation="4dp"
                     android:gravity="center"
                     android:text="2"
                     android:textColor="@color/black"
                     android:textStyle="bold"
+                    app:backgroundTint="@color/light_teal"
                     tools:fontFamily="@font/molle_regular" />
 
                 <TextView
@@ -135,12 +145,12 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="-12dp"
                     android:background="@drawable/circle_white"
-                    app:backgroundTint="@color/gold"
                     android:elevation="4dp"
                     android:gravity="center"
                     android:text="1"
                     android:textColor="@color/black"
                     android:textStyle="bold"
+                    app:backgroundTint="@color/gold"
                     tools:fontFamily="@font/molle_regular" />
 
                 <TextView
@@ -194,12 +204,12 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="-12dp"
                     android:background="@drawable/red_circle"
-                    app:backgroundTint="@color/lt_pink"
                     android:elevation="4dp"
                     android:gravity="center"
                     android:text="3"
                     android:textColor="@color/black"
                     android:textStyle="bold"
+                    app:backgroundTint="@color/lt_pink"
                     tools:fontFamily="@font/molle_regular" />
 
                 <TextView
@@ -250,6 +260,30 @@
             app:layoutManager="LinearLayoutManager"
             tools:context="in.lubble.app.leaderboard.LeaderboardFrag"
             tools:listitem="@layout/item_leaderboard_user" />
+
+        <TextView
+            android:id="@+id/tv_explain"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rv_leaderboard"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="8dp"
+            android:gravity="center"
+            android:text="Based on total number of likes\non all messages of a member"
+            android:textAlignment="center"
+            android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/iv_logo"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_explain"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp"
+            android:adjustViewBounds="true"
+            android:tint="@color/light_gray"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_lubble_logo_vector" />
 
     </RelativeLayout>
 
