@@ -9,18 +9,12 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
-import in.lubble.app.leaderboard.dummy.DummyContent.DummyItem;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
 public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.ViewHolder> {
 
     private final List<ProfileData> profileList;
@@ -70,16 +64,16 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
             holder.pointsTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
         }*/
 
-        /*holder.mView.setOnClickListener(new View.OnClickListener() {
+        holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (null != mListener) {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
+                    mListener.onListFragmentInteraction(profileList.get(holder.getAdapterPosition()).getId());
                 }
             }
-        });*/
+        });
     }
 
     public void addList(List<ProfileData> profileDataList) {

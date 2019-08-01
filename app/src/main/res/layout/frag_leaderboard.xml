@@ -1,236 +1,256 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:name="in.lubble.app.leaderboard.LeaderboardFrag"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/white">
+    android:layout_height="match_parent">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/container_top3"
-        android:background="@drawable/gradient_blue_clue" />
-
-    <TextView
-        android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:drawablePadding="4dp"
-        android:text="Most Liked"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:textColor="@color/white"
-        app:drawableLeftCompat="@drawable/ic_favorite_white_16dp" />
-
-    <TextView
-        android:id="@+id/tv_subtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_title"
-        android:layout_centerHorizontal="true"
-        android:text="in Koramangala"
-        android:textColor="@color/circle_trans_white"
-        android:textStyle="bold" />
-
-    <LinearLayout
-        android:id="@+id/container_top3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_subtitle"
-        android:layout_marginTop="8dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:paddingBottom="8dp"
-        android:weightSum="3">
-
-        <RelativeLayout
-            android:id="@+id/container_second"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <ImageView
-                android:id="@+id/iv_second"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_centerHorizontal="true"
-                android:background="@drawable/circle_white"
-                android:padding="2dp"
-                tools:src="@tools:sample/avatars" />
-
-            <TextView
-                android:id="@+id/tv_second_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/iv_second"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="-12dp"
-                android:background="@drawable/green_circle"
-                android:backgroundTint="@color/light_teal"
-                android:elevation="4dp"
-                android:gravity="center"
-                android:text="2"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                tools:fontFamily="@font/molle_regular" />
-
-            <TextView
-                android:id="@+id/tv_name_second"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_second_hint"
-                android:layout_centerHorizontal="true"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="1"
-                android:textColor="@color/white"
-                tools:text="Captain America" />
-
-            <TextView
-                android:id="@+id/tv_likes_second"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_name_second"
-                android:layout_centerHorizontal="true"
-                android:gravity="center"
-                android:textColor="@color/white"
-                app:drawableLeftCompat="@drawable/ic_favorite_white_16dp"
-                tools:text="123" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/container_first"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
-            android:layout_weight="1">
-
-            <ImageView
-                android:id="@+id/iv_first"
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:layout_centerHorizontal="true"
-                android:background="@drawable/circle_white"
-                android:padding="2dp"
-                tools:src="@tools:sample/avatars" />
-
-            <TextView
-                android:id="@+id/tv_first_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/iv_first"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="-12dp"
-                android:background="@drawable/circle_white"
-                android:backgroundTint="@color/gold"
-                android:elevation="4dp"
-                android:gravity="center"
-                android:text="1"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                tools:fontFamily="@font/molle_regular" />
-
-            <TextView
-                android:id="@+id/tv_name_first"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_first_hint"
-                android:layout_centerHorizontal="true"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="1"
-                android:textColor="@color/white"
-                tools:text="Iron Man" />
-
-            <TextView
-                android:id="@+id/tv_likes_first"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_name_first"
-                android:layout_centerHorizontal="true"
-                android:gravity="center"
-                android:textColor="@color/circle_trans_white"
-                app:drawableLeftCompat="@drawable/ic_favorite_white_16dp"
-                tools:text="123" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:id="@+id/container_third"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
-            android:layout_weight="1">
-
-            <ImageView
-                android:id="@+id/iv_third"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_centerHorizontal="true"
-                android:background="@drawable/circle_white"
-                android:padding="2dp"
-                tools:src="@tools:sample/avatars" />
-
-            <TextView
-                android:id="@+id/tv_third_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/iv_third"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="-12dp"
-                android:background="@drawable/red_circle"
-                android:backgroundTint="@color/lt_pink"
-                android:elevation="4dp"
-                android:gravity="center"
-                android:text="3"
-                android:textColor="@color/black"
-                android:textStyle="bold"
-                tools:fontFamily="@font/molle_regular" />
-
-            <TextView
-                android:id="@+id/tv_name_third"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_third_hint"
-                android:layout_centerHorizontal="true"
-                android:ellipsize="end"
-                android:gravity="center"
-                android:maxLines="1"
-                android:textColor="@color/white"
-                tools:text="Thor Odinson" />
-
-            <TextView
-                android:id="@+id/tv_likes_third"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/tv_name_third"
-                android:layout_centerHorizontal="true"
-                android:gravity="center"
-                android:textColor="@color/circle_trans_white"
-                app:drawableLeftCompat="@drawable/ic_favorite_white_16dp"
-                tools:text="123" />
-
-        </RelativeLayout>
-
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_leaderboard"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/container_top3"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="16dp"
-        app:layoutManager="LinearLayoutManager"
-        tools:context="in.lubble.app.leaderboard.LeaderboardFrag"
-        tools:listitem="@layout/item_leaderboard_user" />
+        android:background="@color/white">
 
-</RelativeLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/container_top3"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/gradient_blue_clue" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:drawablePadding="4dp"
+            android:text="Most Liked"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:textColor="@color/white"
+            app:drawableLeftCompat="@drawable/ic_favorite_white_16dp" />
+
+        <TextView
+            android:id="@+id/tv_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_title"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/circle_trans_white"
+            android:textStyle="bold"
+            tools:text="in Koramangala" />
+
+        <LinearLayout
+            android:id="@+id/container_top3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_subtitle"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingLeft="2dp"
+            android:paddingRight="2dp"
+            android:paddingBottom="8dp"
+            android:weightSum="3">
+
+            <RelativeLayout
+                android:id="@+id/container_second"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/iv_second"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/circle_white"
+                    android:padding="2dp"
+                    tools:src="@tools:sample/avatars" />
+
+                <TextView
+                    android:id="@+id/tv_second_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/iv_second"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="-12dp"
+                    android:background="@drawable/green_circle"
+                    android:backgroundTint="@color/light_teal"
+                    android:elevation="4dp"
+                    android:gravity="center"
+                    android:text="2"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    tools:fontFamily="@font/molle_regular" />
+
+                <TextView
+                    android:id="@+id/tv_name_second"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_second_hint"
+                    android:layout_centerHorizontal="true"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    tools:text="Captain America" />
+
+                <TextView
+                    android:id="@+id/tv_likes_second"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_name_second"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text="--"
+                    android:textColor="@color/white"
+                    app:drawableLeftCompat="@drawable/ic_favorite_white_16dp"
+                    tools:text="123" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/container_first"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/iv_first"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/circle_white"
+                    android:padding="2dp"
+                    tools:src="@tools:sample/avatars" />
+
+                <TextView
+                    android:id="@+id/tv_first_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/iv_first"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="-12dp"
+                    android:background="@drawable/circle_white"
+                    android:backgroundTint="@color/gold"
+                    android:elevation="4dp"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    tools:fontFamily="@font/molle_regular" />
+
+                <TextView
+                    android:id="@+id/tv_name_first"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_first_hint"
+                    android:layout_centerHorizontal="true"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    tools:text="Iron Man" />
+
+                <TextView
+                    android:id="@+id/tv_likes_first"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_name_first"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text="--"
+                    android:textColor="@color/circle_trans_white"
+                    app:drawableLeftCompat="@drawable/ic_favorite_white_16dp"
+                    tools:text="123" />
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/container_third"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/iv_third"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/circle_white"
+                    android:padding="2dp"
+                    tools:src="@tools:sample/avatars" />
+
+                <TextView
+                    android:id="@+id/tv_third_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/iv_third"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="-12dp"
+                    android:background="@drawable/red_circle"
+                    android:backgroundTint="@color/lt_pink"
+                    android:elevation="4dp"
+                    android:gravity="center"
+                    android:text="3"
+                    android:textColor="@color/black"
+                    android:textStyle="bold"
+                    tools:fontFamily="@font/molle_regular" />
+
+                <TextView
+                    android:id="@+id/tv_name_third"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_third_hint"
+                    android:layout_centerHorizontal="true"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textStyle="bold"
+                    tools:text="Thor Odinson" />
+
+                <TextView
+                    android:id="@+id/tv_likes_third"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/tv_name_third"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center"
+                    android:text="--"
+                    android:textColor="@color/circle_trans_white"
+                    app:drawableLeftCompat="@drawable/ic_favorite_white_16dp"
+                    tools:text="123" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressbar_leaderboard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/container_top3"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_leaderboard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/container_top3"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginRight="16dp"
+            app:layoutManager="LinearLayoutManager"
+            tools:context="in.lubble.app.leaderboard.LeaderboardFrag"
+            tools:listitem="@layout/item_leaderboard_user" />
+
+    </RelativeLayout>
+
+</androidx.core.widget.NestedScrollView>

@@ -19,7 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".rewards.ClaimedRewardsActiv"></activity>
+        <activity android:name=".leaderboard.LeaderboardActivity"></activity>
+        <activity android:name=".rewards.ClaimedRewardsActiv" />
         <activity android:name=".rewards.RewardDetailActiv" />
         <activity
             android:name=".chat.books.OrderDoneActiv"
@@ -469,7 +470,6 @@
             android:name=".notifications.NotifActionBroadcastRecvr"
             android:enabled="true"
             android:exported="true" />
-
     </application>
 
 </manifest>
