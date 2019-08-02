@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
@@ -21,12 +22,12 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-import in.lubble.app.*;
 import in.lubble.app.R;
+import in.lubble.app.*;
 import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
-import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.models.ProfileData;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.FullScreenImageActivity;
@@ -37,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class ScrollingGroupInfoActivity extends BaseActivity {
@@ -46,6 +46,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
 
     private String groupId;
     private ProgressBar dpProgressBar;
+    private ProgressBar groupMembersProgressBar;
     private ImageView groupIv;
     private TextView descTv;
     private ImageView privacyIcon;
@@ -76,6 +77,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
         groupId = getIntent().getStringExtra(EXTRA_GROUP_ID);
 
         dpProgressBar = findViewById(R.id.progressBar_groupInfo);
+        groupMembersProgressBar = findViewById(R.id.prgressbar_group_members);
         groupIv = findViewById(R.id.iv_group_image);
         descTv = findViewById(R.id.tv_group_desc);
         privacyIcon = findViewById(R.id.iv_privacy_icon);
@@ -228,12 +230,12 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
 
             List<Map.Entry> memberEntryList = new ArrayList<Map.Entry>(groupData.getMembers().entrySet());
             adapter.clear();
+            fetchAllGroupUsers();
             for (Map.Entry entry : memberEntryList) {
                 final HashMap map = (HashMap) entry.getValue();
                 if (map.get("admin") == Boolean.TRUE) {
                     adapter.addAdminId((String) entry.getKey());
                 }
-                fetchProfileInfo((String) entry.getKey());
             }
 
             toggleLeaveGroupVisibility(groupData);
@@ -249,22 +251,34 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
         }
     };
 
-    private void fetchProfileInfo(String uid) {
-        getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                if (profileInfo != null) {
-                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                    adapter.addProfile(profileInfo);
-                }
-            }
+    private void fetchAllGroupUsers() {
+        groupMembersProgressBar.setVisibility(View.VISIBLE);
+        FirebaseDatabase.getInstance().getReference("users").orderByChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()
+                + "/groups/" + groupId + "/joined").equalTo(true)
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (!isFinishing()) {
+                            adapter.clear();
+                            groupMembersProgressBar.setVisibility(View.GONE);
+                            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                if (!(child.getValue() instanceof Boolean)) {
+                                    final ProfileData profileData = child.getValue(ProfileData.class);
+                                    if (profileData != null && profileData.getInfo() != null && !profileData.getIsDeleted()) {
+                                        profileData.setId(child.getKey());
+                                        profileData.getInfo().setId(child.getKey());
+                                        adapter.addProfile(profileData.getInfo());
+                                    }
+                                }
+                            }
+                        }
+                    }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
+                    }
+                });
     }
 
     private void openDpInFullScreen(GroupData groupData) {

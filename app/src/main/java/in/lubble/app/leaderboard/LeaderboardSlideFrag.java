@@ -83,35 +83,38 @@ public class LeaderboardSlideFrag extends Fragment {
     }
 
     private void fetchAllLubbleUsers() {
-        FirebaseDatabase.getInstance().getReference("users").orderByChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                List<ProfileData> profileDataList = new ArrayList<>();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    final ProfileData profileData = child.getValue(ProfileData.class);
-                    if (profileData != null && profileData.getInfo() != null &&
-                            (profileData.getInfo().getBadge() == null || !profileData.getInfo().getBadge().equalsIgnoreCase("admin"))) {
-                        profileData.setId(child.getKey());
-                        profileDataList.add(profileData);
-                    }
-                }
-                Collections.sort(profileDataList, new Comparator<ProfileData>() {
+        FirebaseDatabase.getInstance().getReference("users").orderByChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()).startAt("")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public int compare(ProfileData o1, ProfileData o2) {
-                        // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                        return MathUtil.compareDesc(o1.getLikes(), o2.getLikes());
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        List<ProfileData> profileDataList = new ArrayList<>();
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            if (!(child.getValue() instanceof Boolean)) {
+                                final ProfileData profileData = child.getValue(ProfileData.class);
+                                if (profileData != null && profileData.getInfo() != null &&
+                                        (profileData.getInfo().getBadge() == null || !profileData.getInfo().getBadge().equalsIgnoreCase("admin"))) {
+                                    profileData.setId(child.getKey());
+                                    profileDataList.add(profileData);
+                                }
+                            }
+                        }
+                        Collections.sort(profileDataList, new Comparator<ProfileData>() {
+                            @Override
+                            public int compare(ProfileData o1, ProfileData o2) {
+                                // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                                return MathUtil.compareDesc(o1.getLikes(), o2.getLikes());
+                            }
+                        });
+                        if (isAdded()) {
+                            setTop3(profileDataList.subList(0, 3));
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
                     }
                 });
-                if (isAdded()) {
-                    setTop3(profileDataList.subList(0, 3));
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void setTop3(List<ProfileData> top3List) {

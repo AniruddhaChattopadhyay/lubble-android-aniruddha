@@ -28,6 +28,7 @@ public class ProfileData {
     private long birthdate = 0L;
     private boolean isOwner;
     private boolean isAgePublic = true;
+    private boolean isDeleted;
     private long coins;
     private long likes = 0L;
     private ProfileAddress profileAddress;
@@ -241,4 +242,11 @@ public class ProfileData {
         this.groupFlair = groupFlair;
     }
 
+    public boolean getIsDeleted() {
+        return isDeleted;
+    }
+
+    public void setIsDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
 }
