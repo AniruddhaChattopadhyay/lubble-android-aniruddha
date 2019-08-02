@@ -17,9 +17,11 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.mapUtils.MathUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class LeaderboardSlideFrag extends Fragment {
@@ -81,22 +83,26 @@ public class LeaderboardSlideFrag extends Fragment {
     }
 
     private void fetchAllLubbleUsers() {
-        FirebaseDatabase.getInstance().getReference("users").orderByChild("likes").addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference("users").orderByChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<ProfileData> profileDataList = new ArrayList<>();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    if (child.hasChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId())) {
-                        final ProfileData profileData = child.getValue(ProfileData.class);
-                        if (profileData != null && profileData.getInfo() != null &&
-                                (profileData.getInfo().getBadge() == null || !profileData.getInfo().getBadge().equalsIgnoreCase("admin"))) {
-                            profileData.setId(child.getKey());
-                            profileDataList.add(profileData);
-                        }
+                    final ProfileData profileData = child.getValue(ProfileData.class);
+                    if (profileData != null && profileData.getInfo() != null &&
+                            (profileData.getInfo().getBadge() == null || !profileData.getInfo().getBadge().equalsIgnoreCase("admin"))) {
+                        profileData.setId(child.getKey());
+                        profileDataList.add(profileData);
                     }
                 }
+                Collections.sort(profileDataList, new Comparator<ProfileData>() {
+                    @Override
+                    public int compare(ProfileData o1, ProfileData o2) {
+                        // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                        return MathUtil.compareDesc(o1.getLikes(), o2.getLikes());
+                    }
+                });
                 if (isAdded()) {
-                    Collections.reverse(profileDataList);
                     setTop3(profileDataList.subList(0, 3));
                 }
             }

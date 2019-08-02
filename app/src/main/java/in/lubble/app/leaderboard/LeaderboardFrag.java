@@ -24,9 +24,11 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.mapUtils.MathUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class LeaderboardFrag extends Fragment implements OnListFragmentInteractionListener {
@@ -124,26 +126,31 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
 
     private void fetchAllLubbleUsers() {
         progressbar.setVisibility(View.VISIBLE);
-        FirebaseDatabase.getInstance().getReference("users").orderByChild("likes").addListenerForSingleValueEvent(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference("users").orderByChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 adapter.clear();
                 List<ProfileData> profileDataList = new ArrayList<>();
+
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    if (child.hasChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId())) {
-                        final ProfileData profileData = child.getValue(ProfileData.class);
-                        if (profileData != null && profileData.getInfo() != null &&
-                                (profileData.getInfo().getBadge() == null || !profileData.getInfo().getBadge().equalsIgnoreCase("admin"))) {
-                            profileData.setId(child.getKey());
-                            profileDataList.add(profileData);
-                        }
+                    final ProfileData profileData = child.getValue(ProfileData.class);
+                    if (profileData != null && profileData.getInfo() != null &&
+                            (profileData.getInfo().getBadge() == null || !profileData.getInfo().getBadge().equalsIgnoreCase("admin"))) {
+                        profileData.setId(child.getKey());
+                        profileDataList.add(profileData);
                     }
                 }
+                Collections.sort(profileDataList, new Comparator<ProfileData>() {
+                    @Override
+                    public int compare(ProfileData o1, ProfileData o2) {
+                        // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                        return MathUtil.compareDesc(o1.getLikes(), o2.getLikes());
+                    }
+                });
                 if (isAdded()) {
                     progressbar.setVisibility(View.GONE);
                     explainTv.setVisibility(View.VISIBLE);
                     logoIv.setVisibility(View.VISIBLE);
-                    Collections.reverse(profileDataList);
                     setTop3(profileDataList.subList(0, 3));
                     adapter.addList(profileDataList.subList(3, 10));
                 }
