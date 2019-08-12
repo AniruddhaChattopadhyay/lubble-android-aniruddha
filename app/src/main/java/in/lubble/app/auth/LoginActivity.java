@@ -23,8 +23,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
-import in.lubble.app.*;
 import in.lubble.app.R;
+import in.lubble.app.*;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
@@ -66,9 +66,9 @@ public class LoginActivity extends BaseActivity {
             startSignInFlow(isNewUser(firebaseAuth.getCurrentUser()));
         } else {
             startAuthActivity();
-            if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
-                startActivity(new Intent(this, IntroActivity.class));
-            }
+            //if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
+            //    startActivity(new Intent(this, IntroActivity.class));
+            //}
         }
     }
 
@@ -170,6 +170,7 @@ public class LoginActivity extends BaseActivity {
                 }
             } else {
                 // Sign in failed
+                Crashlytics.logException(response.getError());
                 if (response == null) {
                     // User pressed back button
                     finish();
