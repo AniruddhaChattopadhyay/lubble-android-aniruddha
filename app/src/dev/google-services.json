@@ -8,12 +8,72 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:1026945729202:android:c7b2265e2f6d631b",
+        "android_client_info": {
+          "package_name": "com.lubble_react"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1026945729202-meki4u986i4324eblimkh11ohjpenkm1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfb07VH0-4-6d9l_mnh1aocrqLQSw_Fwk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1026945729202-meki4u986i4324eblimkh11ohjpenkm1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1026945729202-l2bnj7o1j4btidtl9jdc2s4h04oauuou.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.lubble-react"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:1026945729202:android:f434486a0da5b819",
         "android_client_info": {
           "package_name": "in.lubble.app.dev"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1026945729202-e0ub31c28kkvpufermqlnqlq61rbnun2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.lubble.app.dev",
+            "certificate_hash": "e8170d0ce11f7438e067570e10fcc6335a29761f"
+          }
+        },
+        {
+          "client_id": "1026945729202-50id64p554qn5j9fr2629fe0arroiv3i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.lubble.app.dev",
+            "certificate_hash": "745f7df6ee31429152b94b904aef82d466bfc1cf"
+          }
+        },
+        {
+          "client_id": "1026945729202-pbsn26mp3cbt6259frq18frelrv7dnnb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "in.lubble.app.dev",
+            "certificate_hash": "28d93d40b69e07efe24b5def32a41296485b2602"
+          }
+        },
         {
           "client_id": "1026945729202-1v4opj3rpp20td09op79nm8vpmm771o2.apps.googleusercontent.com",
           "client_type": 1,
@@ -29,24 +89,24 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAm-zSP2xikWnxfRbi6lftuueg_4Subbhs"
+          "current_key": "AIzaSyAfb07VH0-4-6d9l_mnh1aocrqLQSw_Fwk"
         }
       ],
       "services": {
-        "analytics_service": {
-          "status": 1
-        },
         "appinvite_service": {
-          "status": 2,
           "other_platform_oauth_client": [
             {
               "client_id": "1026945729202-meki4u986i4324eblimkh11ohjpenkm1.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1026945729202-l2bnj7o1j4btidtl9jdc2s4h04oauuou.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.lubble-react"
+              }
             }
           ]
-        },
-        "ads_service": {
-          "status": 2
         }
       }
     }
