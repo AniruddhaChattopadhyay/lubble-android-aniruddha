@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -161,9 +162,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 if (groupData != null) {
-                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())) {
+                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && groupData.getId() != null) {
                         // joined group
                         adapter.addGroupToTop(groupData);
+                    } else if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
+                            && groupData.getMembers().size() > 0) {
+                        // non-joined public groups with non-zero members
+                        adapter.addPublicGroupToTop(groupData);
                     }
                 }
             }
@@ -202,7 +207,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (isAdded()) {
                     syncUserGroup();
                     groupsRecyclerView.setVisibility(View.VISIBLE);
-                    exploreContainer.setVisibility(View.VISIBLE);
+                    //exploreContainer.setVisibility(View.VISIBLE);
                     if (progressBar.getVisibility() == View.VISIBLE) {
                         progressBar.setVisibility(View.GONE);
                     }
@@ -311,7 +316,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private Runnable update = new Runnable() {
         public void run() {
-            if (currentPage == sliderDataList.size()) {
+            if (currentPage == sliderDataList.size() + 1) {
                 currentPage = 0;
             }
             viewPager.setCurrentItem(currentPage++, true);

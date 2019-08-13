@@ -98,4 +98,6 @@ public class AnalyticsEvents {
     public static final String BOOK_EARN_MORE = "BOOK_EARN_MORE";
     public static final String BOOK_LESS_COINS = "BOOK_LESS_COINS";
 
+    public static final String MARKED_SPAM = "MARKED_SPAM";
+
 }

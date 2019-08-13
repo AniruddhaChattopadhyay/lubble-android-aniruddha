@@ -131,6 +131,7 @@
     <string name="msg_info">Message Info</string>
     <string name="liked_by">Liked By</string>
     <string name="action_info">Info</string>
+    <string name="action_spam">Spam</string>
     <string name="action_reply">Reply</string>
     <string name="action_copy">Copy</string>
     <string name="no_likes">No likes till now</string>
@@ -219,5 +220,10 @@
         <item quantity="one">%d group</item>
         <item quantity="other">%d groups</item>
     </plurals>
+
+    <string name="msg_spam_confirm_title">Mark as Spam?</string>
+    <string name="msg_spam_confirm_msg">This will permanently delete the message! Are you sure you want to continue?</string>
+    <string name="msg_spam_confirm_del_msg">Delete Message</string>
+    <string name="msg_spam_confirm_reset_lastmsg">Delete Last Msg too</string>
 
 </resources>

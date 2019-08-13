@@ -1244,6 +1244,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                if (authorId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+                    menu.findItem(R.id.action_spam).setVisible(true);
+                } else {
+                    menu.findItem(R.id.action_spam).setVisible(false);
+                }
                 return true;
             }
 
@@ -1255,6 +1260,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
+                    case R.id.action_spam:
+                        if (null != selectedChatId) {
+                            chatFragment.markSpam(selectedChatId, chatDataList.get(getAdapterPosition()).getMessage());
+                        }
+                        break;
                     case R.id.action_reply:
                         if (null != selectedChatId) {
                             chatFragment.addReplyFor(selectedChatId);

@@ -10,6 +10,7 @@
     <color name="black">#000000</color>
     <color name="bright_red">#df0505</color>
     <color name="pink">#a201ae</color>
+    <color name="lt_pink">#FF9CF7</color>
     <color name="red">#b41a1a</color>
     <color name="white">#FFFFFF</color>
     <color name="dark_gold">#e1b000</color>

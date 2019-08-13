@@ -10,23 +10,24 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.database.*;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
-import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.models.ProfileData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
@@ -134,51 +135,28 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     }
 
     private void fetchAllLubbleUsers() {
-        userAdapter.clear();
-        RealtimeDbHelper.getLubbleMembersRef().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                fetchLubbleMembersProfile(dataSnapshot.getKey());
-            }
+        FirebaseDatabase.getInstance().getReference("users").orderByChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()).startAt("")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        userAdapter.clear();
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            if (!(child.getValue() instanceof Boolean)) {
+                                final ProfileData profileData = child.getValue(ProfileData.class);
+                                if (profileData != null && profileData.getInfo() != null && !profileData.getIsDeleted()) {
+                                    profileData.setId(child.getKey());
+                                    profileData.getInfo().setId(profileData.getId());
+                                    userAdapter.addMemberProfile(profileData.getInfo());
+                                }
+                            }
+                        }
+                    }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void fetchLubbleMembersProfile(String uid) {
-        getUserInfoRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                if (profileInfo != null) {
-                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                    userAdapter.addMemberProfile(profileInfo);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+                    }
+                });
     }
 
     private void fetchGroupUsers() {

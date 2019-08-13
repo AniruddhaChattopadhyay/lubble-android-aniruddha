@@ -3,8 +3,8 @@ package in.lubble.app.chat;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -17,6 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.Group;
@@ -28,7 +29,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
-import com.google.gson.Gson;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -41,7 +41,6 @@ import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.*;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
-import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import permissions.dispatcher.*;
@@ -146,7 +145,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private boolean isLastPage;
     private long endAtTimestamp;
     private final static int PAGE_SIZE = 20;
-    private int unreadCount = 0;
+    //private int unreadCount = 0;
     private String attachedGroupId;
     private String attachedEventId;
     private String attachedGroupPicUrl;
@@ -226,6 +225,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 sharedImageUri = null;
             }
         }
+        final Bundle bundle = new Bundle();
+        bundle.putString("groupid", groupId);
+        Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, requireContext());
     }
 
     private void populateChatData(ChatData chatData) {
@@ -327,7 +329,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 this,
                 GlideApp.with(getContext()));
         chatRecyclerView.setAdapter(chatAdapter);
-        calcUnreadCount();
+        //calcUnreadCount();
         if (messagesReference != null) {
             msgChildListener = msgListener(messagesReference);
             initMsgListenerToKnowWhenSyncComplete();
@@ -385,8 +387,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 foundFirstUnreadMsg = true;
                                 final ChatData unreadChatData = new ChatData();
                                 unreadChatData.setType(UNREAD);
-                                chatAdapter.addChatData(pos, unreadChatData);
-                                chatRecyclerView.scrollToPosition(pos - 1);
+                                //chatAdapter.addChatData(pos, unreadChatData);
+                                //chatRecyclerView.scrollToPosition(pos - 1);
                             } else {
                                 // all msgs read, scroll to last msg
                                 chatRecyclerView.scrollToPosition(positionStart);
@@ -450,18 +452,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     private void calcUnreadCount() {
-        final SharedPreferences chatSharedPrefs = UnreadChatsSharedPrefs.getInstance().getPreferences();
-        final Map<String, String> chatsMap = (Map<String, String>) chatSharedPrefs.getAll();
-        for (String json : chatsMap.values()) {
-            final NotifData notifData = new Gson().fromJson(json, NotifData.class);
-            if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
-                ++unreadCount;
-            }
-        }
+        //final SharedPreferences chatSharedPrefs = UnreadChatsSharedPrefs.getInstance().getPreferences();
+        //final Map<String, String> chatsMap = (Map<String, String>) chatSharedPrefs.getAll();
+        //for (String json : chatsMap.values()) {
+        //    final NotifData notifData = new Gson().fromJson(json, NotifData.class);
+        //    if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+        //        ++unreadCount;
+        //    }
+        //}
     }
 
     private void initMsgListenerToKnowWhenSyncComplete() {
-        messagesReference.orderByChild("serverTimestamp").limitToLast(PAGE_SIZE + unreadCount).addValueEventListener(new ValueEventListener() {
+        messagesReference.orderByChild("serverTimestamp").limitToLast(PAGE_SIZE).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // this is only called after all chats have been synced
@@ -768,7 +770,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private ChildEventListener msgListener(@NonNull DatabaseReference messagesReference) {
         final ArrayList<ChatData> tempChatList = new ArrayList<>();
-        return messagesReference.orderByChild("serverTimestamp").limitToLast(PAGE_SIZE + unreadCount).addChildEventListener(new ChildEventListener() {
+        return messagesReference.orderByChild("serverTimestamp").limitToLast(PAGE_SIZE).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildAdded: ");
@@ -897,7 +899,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
         final Bundle bundle = new Bundle();
         bundle.putString("groupid", groupId);
-        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, requireContext());
+        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, bundle, requireContext());
     }
 
     void updateMsgId(String msgId) {
@@ -1354,6 +1356,52 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             }
         } else {
             Crashlytics.logException(new NullPointerException("chatId is null when trying to open msg info"));
+        }
+    }
+
+    public void markSpam(final String selectedChatId, final String ogMsg) {
+        if (selectedChatId != null) {
+            final CharSequence[] items = {"Delete last msg too", "Delete msg", "Cancel"};
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.msg_spam_confirm_title)
+                    .setMessage(R.string.msg_spam_confirm_msg)
+                    .setPositiveButton(R.string.msg_spam_confirm_reset_lastmsg, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put("type", SYSTEM);
+                            childUpdates.put("message", "Marked as spam");
+                            childUpdates.put("ogMessage", ogMsg);
+                            messagesReference.child(selectedChatId).updateChildren(childUpdates);
+
+                            Map<String, Object> groupUpdates = new HashMap<>();
+                            groupUpdates.put("lastMessage", "...");
+                            groupReference.updateChildren(groupUpdates);
+                            Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton(R.string.msg_spam_confirm_del_msg, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Map<String, Object> childUpdates = new HashMap<>();
+                            childUpdates.put("type", SYSTEM);
+                            childUpdates.put("message", "Marked as spam");
+                            childUpdates.put("ogMessage", ogMsg);
+                            messagesReference.child(selectedChatId).updateChildren(childUpdates);
+                            Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNeutralButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        } else {
+            Crashlytics.logException(new NullPointerException("chatId is null when trying to mark it spam"));
         }
     }
 

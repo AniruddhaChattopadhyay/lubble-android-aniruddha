@@ -66,9 +66,10 @@ public class LoginActivity extends BaseActivity {
             startSignInFlow(isNewUser(firebaseAuth.getCurrentUser()));
         } else {
             startAuthActivity();
-            if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
-                startActivity(new Intent(this, IntroActivity.class));
-            }
+            overridePendingTransition(0, 0);
+            //if (!LubbleSharedPrefs.getInstance().getIsAppIntroShown()) {
+            //    startActivity(new Intent(this, IntroActivity.class));
+            //}
         }
     }
 
@@ -179,6 +180,7 @@ public class LoginActivity extends BaseActivity {
                     finish();
                     return;
                 }
+                Crashlytics.logException(response.getError());
 
                 if (response.getError() != null && response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Toast.makeText(this, R.string.check_internet, Toast.LENGTH_SHORT).show();

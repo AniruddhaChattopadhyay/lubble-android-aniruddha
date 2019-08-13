@@ -7,16 +7,17 @@ import android.os.Bundle;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.utils.ClevertapUtils;
 import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.NotifUtils;
+
+import static in.lubble.app.analytics.Analytics.setAnalyticsUser;
 
 public class AppUpdateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
         NotifUtils.showAllPendingChatNotifs(context);
-        ClevertapUtils.setUser(context);
+        setAnalyticsUser(context);
         final Bundle bundle = new Bundle();
         bundle.putString("new_version_name", BuildConfig.VERSION_NAME);
         bundle.putInt("new_version_code", BuildConfig.VERSION_CODE);

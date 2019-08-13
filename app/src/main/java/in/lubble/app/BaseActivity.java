@@ -24,7 +24,6 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.utils.ClevertapUtils;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -66,7 +65,6 @@ public class BaseActivity extends AppCompatActivity {
             } catch (Throwable e) {
                 Crashlytics.logException(e);
             }
-            ClevertapUtils.setUser(this);
         }
     }
 

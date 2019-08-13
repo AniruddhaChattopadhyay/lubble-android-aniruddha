@@ -4,8 +4,8 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
@@ -22,11 +22,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private static final int TYPE_GROUP = 525;
+    private static final int TYPE_HEADER = 600;
+    private int publicCursorPos = 0;
     private int cursorPos = 0;
     private final List<GroupData> groupDataList;
     // <GroupID, UserGroupData>
@@ -41,107 +44,131 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     @Override
+    public int getItemViewType(int position) {
+        if (position == publicCursorPos) {
+            return TYPE_HEADER;
+        } else {
+            return TYPE_GROUP;
+        }
+    }
+
+    @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new GroupViewHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_group_list, parent, false));
+        if (viewType == TYPE_GROUP) {
+            return new GroupViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.fragment_group_list, parent, false));
+        } else {
+            return new PublicGroupHeaderViewHolder(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_group_public_header, parent, false));
+        }
     }
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        final GroupViewHolder groupViewHolder = (GroupViewHolder) holder;
-        final GroupData groupData = groupDataList.get(position);
-        groupViewHolder.groupData = groupData;
+        if (holder instanceof GroupViewHolder) {
+            final GroupViewHolder groupViewHolder = (GroupViewHolder) holder;
+            final GroupData groupData = groupDataList.get(position);
+            groupViewHolder.groupData = groupData;
 
-        GlideApp.with(groupViewHolder.mView)
-                .load(groupData.getThumbnail())
-                .placeholder(R.drawable.ic_circle_group_24dp)
-                .error(R.drawable.ic_circle_group_24dp)
-                .circleCrop()
-                .into(groupViewHolder.iconIv);
+            GlideApp.with(groupViewHolder.mView)
+                    .load(groupData.getThumbnail())
+                    .placeholder(R.drawable.ic_circle_group_24dp)
+                    .error(R.drawable.ic_circle_group_24dp)
+                    .circleCrop()
+                    .into(groupViewHolder.iconIv);
 
-        groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
+            groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
 
-        groupViewHolder.titleTv.setText(groupData.getTitle());
-        if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
-            String inviter = (String) groupData.getInvitedBy().toArray()[0];
-            if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
-                groupViewHolder.subtitleTv.setText(R.string.ready_to_join);
+            groupViewHolder.titleTv.setText(groupData.getTitle());
+            if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
+                String inviter = (String) groupData.getInvitedBy().toArray()[0];
+                if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+                    groupViewHolder.subtitleTv.setText(R.string.ready_to_join);
+                } else {
+                    groupViewHolder.subtitleTv.setText(R.string.invite_pending);
+                }
+                groupViewHolder.inviteIcon.setVisibility(View.VISIBLE);
+            } else if (isValidString(groupData.getLastMessage())) {
+                groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
+                groupViewHolder.inviteIcon.setVisibility(View.GONE);
             } else {
-                groupViewHolder.subtitleTv.setText(R.string.invite_pending);
+                groupViewHolder.subtitleTv.setText("...");
+                groupViewHolder.inviteIcon.setVisibility(View.GONE);
             }
-            groupViewHolder.inviteIcon.setVisibility(View.VISIBLE);
-        } else if (isValidString(groupData.getLastMessage())) {
-            groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
-            groupViewHolder.inviteIcon.setVisibility(View.GONE);
-        } else {
-            groupViewHolder.subtitleTv.setText("...");
-            groupViewHolder.inviteIcon.setVisibility(View.GONE);
-        }
 
-        groupViewHolder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    final boolean isDm = groupData.getMembers().size() == 0;
-                    if (isDm) {
-                        mListener.onDmClick(groupViewHolder.groupData.getId(), groupData.getTitle(), groupData.getThumbnail());
+            groupViewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (null != mListener) {
+                        // Notify the active callbacks interface (the activity, if the
+                        // fragment is attached to one) that an item has been selected.
+                        final boolean isDm = groupData.getMembers().size() == 0;
+                        if (isDm) {
+                            mListener.onDmClick(groupViewHolder.groupData.getId(), groupData.getTitle(), groupData.getThumbnail());
+                        } else {
+                            mListener.onListFragmentInteraction(groupViewHolder.groupData.getId(), false);
+                        }
+                    }
+                }
+            });
+
+            final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
+            if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
+                groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
+                groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
+                groupViewHolder.pinIv.setVisibility(View.GONE);
+            } else {
+                if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened() && groupData.getIsPinned()) {
+                    groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
+                    groupViewHolder.unreadCountTv.setText("1");
+                    groupViewHolder.pinIv.setVisibility(View.GONE);
+                } else {
+                    groupViewHolder.unreadCountTv.setVisibility(View.GONE);
+                    if (groupData.getIsPinned()) {
+                        groupViewHolder.pinIv.setVisibility(View.VISIBLE);
                     } else {
-                        mListener.onListFragmentInteraction(groupViewHolder.groupData.getId(), false);
+                        groupViewHolder.pinIv.setVisibility(View.GONE);
                     }
                 }
             }
-        });
+            handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
 
-        final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
-        if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
-            groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
-            groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
-            groupViewHolder.pinIv.setVisibility(View.GONE);
-        } else {
-            if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened() && groupData.getIsPinned()) {
-                groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
-                groupViewHolder.unreadCountTv.setText("1");
-                groupViewHolder.pinIv.setVisibility(View.GONE);
+            if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
+                groupViewHolder.viewGroupTv.setVisibility(View.VISIBLE);
             } else {
-                groupViewHolder.unreadCountTv.setVisibility(View.GONE);
-                if (groupData.getIsPinned()) {
-                    groupViewHolder.pinIv.setVisibility(View.VISIBLE);
-                } else {
-                    groupViewHolder.pinIv.setVisibility(View.GONE);
-                }
+                groupViewHolder.viewGroupTv.setVisibility(View.GONE);
             }
-        }
-        handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
 
-        if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
-            groupViewHolder.joinBtn.setVisibility(View.VISIBLE);
+            if (posToFlash == position) {
+                UiUtils.animateColor(groupViewHolder.itemView, ContextCompat.getColor(groupViewHolder.mView.getContext(),
+                        R.color.trans_colorAccent), Color.TRANSPARENT);
+                posToFlash = -1;
+            } else {
+                groupViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            }
         } else {
-            groupViewHolder.joinBtn.setVisibility(View.GONE);
-        }
-
-        if (posToFlash == position) {
-            UiUtils.animateColor(groupViewHolder.itemView, ContextCompat.getColor(groupViewHolder.mView.getContext(),
-                    R.color.trans_colorAccent), Color.TRANSPARENT);
-            posToFlash = -1;
-        } else {
-            groupViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            // nothing to process
         }
     }
 
     private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
-        if (groupData.isJoined()) {
+        if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
+            // for pending group invite
+            timestampTv.setVisibility(View.GONE);
+        } else {
+            // joined or unjoined groups
             timestampTv.setVisibility(View.VISIBLE);
             if (groupData.getJoinedTimestamp() > groupData.getLastMessageTimestamp()) {
                 timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getJoinedTimestamp()));
             } else {
                 timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getLastMessageTimestamp()));
             }
-        } else if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
-            timestampTv.setVisibility(View.GONE);
-        } else {
-            timestampTv.setVisibility(View.GONE);
+            if (!groupData.isJoined()) {
+                // align time with "view" btn
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                params.setMargins(0, 0, dpToPx(8), dpToPx(4));
+                timestampTv.setLayoutParams(params);
+            }
         }
     }
 
@@ -151,6 +178,21 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             groupDataList.add(newIndex, groupData);
             notifyItemInserted(newIndex);
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
+            publicCursorPos++;
+        } else {
+            updateGroup(groupData);
+        }
+    }
+
+    public void addPublicGroupToTop(GroupData groupData) {
+        if (getChildIndex(groupData.getId()) == -1) {
+            if (publicCursorPos + 1 < groupDataList.size()) {
+                groupDataList.add(publicCursorPos + 1, groupData);
+                notifyItemInserted(publicCursorPos + 1);
+            } else {
+                groupDataList.add(groupData);
+                notifyItemInserted(groupDataList.size() - 1);
+            }
         } else {
             updateGroup(groupData);
         }
@@ -201,7 +243,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     private int getChildIndex(String groupIdToFind) {
         for (int i = 0; i < groupDataList.size(); i++) {
             final GroupData groupData = groupDataList.get(i);
-            if (groupIdToFind.equalsIgnoreCase(groupData.getId())) {
+            if (groupData != null && groupIdToFind.equalsIgnoreCase(groupData.getId())) {
                 return i;
             }
         }
@@ -211,6 +253,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void clearGroups() {
         groupDataList.clear();
         cursorPos = 0;
+        publicCursorPos = 0;
+        groupDataList.add(0, null);
         notifyDataSetChanged();
     }
 
@@ -219,7 +263,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         return groupDataList.size();
     }
 
-    class GroupViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class GroupViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final ImageView iconIv;
         final ImageView lockIv;
@@ -227,7 +271,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final EmojiTextView subtitleTv;
         final TextView unreadCountTv;
         final TextView timestampTv;
-        final Button joinBtn;
+        final TextView viewGroupTv;
         final ImageView inviteIcon;
         final ImageView pinIv;
         GroupData groupData;
@@ -241,21 +285,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             subtitleTv = view.findViewById(R.id.tv_subtitle);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
-            joinBtn = view.findViewById(R.id.btn_join_group);
+            viewGroupTv = view.findViewById(R.id.tv_view_group);
             inviteIcon = view.findViewById(R.id.ic_invite);
             pinIv = view.findViewById(R.id.iv_pin);
-            joinBtn.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.btn_join_group:
-                    getCreateOrJoinGroupRef().child(groupData.getId()).setValue(true);
-                    mListener.onListFragmentInteraction(groupData.getId(), true);
-                    break;
-            }
-        }
     }
 
     class PublicGroupHeaderViewHolder extends RecyclerView.ViewHolder {

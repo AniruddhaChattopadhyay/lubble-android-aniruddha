@@ -24,6 +24,7 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.books.BookFragment;
 import in.lubble.app.chat.collections.AirtableCollectionData;
 import in.lubble.app.chat.collections.CollectionsAdapter;
+import in.lubble.app.models.ChatMoreData;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.AirtableData;

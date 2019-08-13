@@ -23,6 +23,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.segment.analytics.Traits;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.FetchAddressIntentService;
 import in.lubble.app.R;
@@ -80,6 +82,14 @@ public class AddressChooserActiv extends BaseActivity implements OnMapReadyCallb
                     profileAddress.setLandmark(landmarkTil.getEditText().getText().toString());
                     profileAddress.setLatitude(centerOfMap.latitude);
                     profileAddress.setLongitude(centerOfMap.longitude);
+
+                    final Traits.Address addressTrait = new Traits.Address();
+                    addressTrait.put("House Number", profileAddress.getHouseNumber());
+                    addressTrait.put("Location", profileAddress.getLocation());
+                    addressTrait.put("Landmark", profileAddress.getLandmark());
+                    addressTrait.put("Latitude", profileAddress.getLatitude());
+                    addressTrait.put("Longitude", profileAddress.getLongitude());
+                    com.segment.analytics.Analytics.with(AddressChooserActiv.this).identify(FirebaseAuth.getInstance().getUid(), new Traits().putAddress(addressTrait), null);
 
                     final ProgressDialog progressDialog = new ProgressDialog(AddressChooserActiv.this);
                     progressDialog.setTitle("Adding Address");

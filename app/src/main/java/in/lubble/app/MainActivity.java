@@ -32,6 +32,7 @@ import com.google.firebase.database.*;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
+import com.segment.analytics.Traits;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
@@ -430,9 +431,7 @@ public class MainActivity extends BaseActivity {
                             .into(profileIcon);
 
                     if (profileInfo != null && !isFinishing()) {
-                        HashMap<String, Object> profileUpdate = new HashMap<>();
-                        profileUpdate.put("Photo", profileInfo.getThumbnail());
-                        CleverTapAPI.getDefaultInstance(MainActivity.this).pushProfile(profileUpdate);
+                        com.segment.analytics.Analytics.with(MainActivity.this).identify(firebaseAuth.getUid(), new Traits().putAvatar(profileInfo.getThumbnail()), null);
                     }
                 } catch (IllegalArgumentException e) {
                     Crashlytics.logException(e);

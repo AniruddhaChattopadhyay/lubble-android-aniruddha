@@ -25,8 +25,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
                 android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
                 android:layout_toLeftOf="@id/tv_leave_group"
                 tools:text="@tools:sample/lorem" />
 
@@ -44,8 +44,8 @@
                 android:id="@+id/tv_privacy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/iv_privacy_icon"
                 android:layout_below="@id/tv_group_desc"
+                android:layout_alignBottom="@id/iv_privacy_icon"
                 android:layout_marginLeft="4dp"
                 android:layout_marginTop="4dp"
                 android:layout_toRightOf="@id/iv_privacy_icon"
@@ -93,8 +93,8 @@
                 android:id="@+id/switch_mute"
                 android:layout_width="wrap_content"
                 android:layout_height="32dp"
-                android:layout_alignParentRight="true"
                 android:layout_below="@id/view1"
+                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="8dp" />
 
@@ -111,8 +111,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             android:orientation="horizontal">
 
             <ImageView
@@ -139,8 +139,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             android:orientation="horizontal">
 
             <ImageView
@@ -159,6 +159,12 @@
                 android:textColor="@color/dk_colorAccent" />
 
         </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/prgressbar_group_members"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_group_members"

@@ -12,6 +12,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
+import com.segment.analytics.Analytics;
 import in.lubble.app.database.DbSingleton;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
@@ -57,6 +58,20 @@ public class LubbleApp extends Application {
         AnswerSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
+        // Create an analytics client with the given context and Segment write key.
+        String writeKey;
+        if (BuildConfig.DEBUG) {
+            writeKey = "1nx6Mc1yYGEJhFICwIvhabj0yKCKj8al";
+        } else {
+            writeKey = "czyerWm5cWfszKJvMA8qQJP8zFiyhDic";
+        }
+        Analytics analytics = new Analytics.Builder(this, writeKey)
+                .trackApplicationLifecycleEvents() // Enable this to record certain application events automatically!
+                //.recordScreenViews() // Enable this to record screen views automatically!
+                .build();
+
+        // Set the initialized instance as a globally accessible instance.
+        Analytics.setSingletonInstance(analytics);
 
         createNotifChannel();
         FirebaseAnalytics.getInstance(this);

@@ -26,6 +26,7 @@ import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class NotificationResultReceiver extends BroadcastReceiver {
     private static final String TAG = "NotificationResultRecei";
+    private final static int PAGE_SIZE = 20;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -107,7 +108,8 @@ public class NotificationResultReceiver extends BroadcastReceiver {
     }
 
     private void pullNewMsgs(NotifData notifData) {
-        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).keepSynced(true);
+        //what works: exactly the same query as in chatFrag
+        RealtimeDbHelper.getMessagesRef().child(notifData.getGroupId()).orderByChild("serverTimestamp").limitToLast(PAGE_SIZE).keepSynced(true);
     }
 
     private void pullNewDmMsgs(NotifData notifData) {

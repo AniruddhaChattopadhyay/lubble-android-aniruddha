@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <item
+        android:id="@+id/action_spam"
+        android:icon="@drawable/ic_warning_red_24dp"
+        android:title="@string/action_spam"
+        android:visible="false"
+        app:showAsAction="always"
+        tools:visible="true" />
+    <item
         android:id="@+id/action_info"
         android:icon="@drawable/ic_info_black_24dp"
         android:title="@string/action_info"
