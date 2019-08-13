@@ -222,6 +222,7 @@
             android:name=".user_search.UserSearchActivity"
             android:configChanges="orientation"
             android:label="Invite People"
+            android:windowSoftInputMode="stateHidden|adjustResize"
             android:screenOrientation="portrait" />
         <activity android:name=".utils.FullScreenImageActivity" />
         <activity

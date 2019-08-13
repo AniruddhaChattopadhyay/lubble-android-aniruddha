@@ -19,7 +19,14 @@
         android:id="@+id/et_user_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Search" />
+        android:layout_margin="8dp"
+        android:background="@drawable/rect_rounded_border"
+        android:drawablePadding="4dp"
+        android:hint="Search Lubble Members"
+        android:inputType="text"
+        android:padding="8dp"
+        app:drawableLeftCompat="@drawable/ic_search_gray_24dp"
+        app:drawableTint="@color/dark_gray" />
 
     <include
         layout="@layout/layout_social_invite"
@@ -27,12 +34,21 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_user_search" />
 
+    <View
+        android:id="@+id/view_div_social"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/container_social_apps"
+        android:layout_margin="8dp"
+        android:background="@color/light_gray" />
+
     <LinearLayout
         android:id="@+id/linearLayout_selected_members"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/container_social_apps"
+        android:layout_below="@id/view_div_social"
         android:background="@color/white"
+        tools:visibility="gone"
         android:elevation="4dp"
         android:orientation="horizontal">
 
@@ -50,12 +66,12 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_users"
-        android:name="in.lubble.app.user_search.UserSearchFrag"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/btn_send"
         android:layout_below="@id/linearLayout_selected_members"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="0dp"
         android:layout_marginRight="8dp"
         android:fadeScrollbars="false"
         app:layoutManager="LinearLayoutManager"

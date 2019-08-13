@@ -68,6 +68,9 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private LinearLayout moreContainer;
     private ProgressDialog sharingProgressDialog;
 
+    private LinearLayout socialAppsLinearLayout;
+    private View socialDivView;
+
     public UserSearchFrag() {
     }
 
@@ -99,6 +102,8 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         sendBtn = view.findViewById(R.id.btn_send);
         RecyclerView selectedUsersRecyclerView = view.findViewById(R.id.rv_selected_users);
         EditText searchEt = view.findViewById(R.id.et_user_search);
+        socialAppsLinearLayout = view.findViewById(R.id.container_social_apps);
+        socialDivView = view.findViewById(R.id.view_div_social);
         copyLinkContainer = view.findViewById(R.id.container_copy_link);
         fbContainer = view.findViewById(R.id.container_fb);
         whatsappContainer = view.findViewById(R.id.container_whatsapp);
@@ -311,12 +316,18 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     @Override
     public void onUserSelected(String uid) {
         selectedUserAdapter.addUser(uid);
+        socialAppsLinearLayout.setVisibility(View.GONE);
+        socialDivView.setVisibility(View.GONE);
     }
 
     @Override
     public void onUserDeSelected(String uid) {
         selectedUserAdapter.removeUser(uid);
         userAdapter.deselectUser(uid);
+        if (selectedUserAdapter.getItemCount() == 0) {
+            socialAppsLinearLayout.setVisibility(View.VISIBLE);
+            socialDivView.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
