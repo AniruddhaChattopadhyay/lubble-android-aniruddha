@@ -1,6 +1,9 @@
 package in.lubble.app.referrals;
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -20,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -45,6 +49,7 @@ public class ReferralHistoryFragment extends Fragment {
     private TextView totalPointsHintTv;
     private ProgressBar progressBar;
     private LinearLayout fbContainer;
+    private LinearLayout copyLinkContainer;
     private LinearLayout whatsappContainer;
     private LinearLayout moreContainer;
     private RecyclerView rv;
@@ -78,6 +83,7 @@ public class ReferralHistoryFragment extends Fragment {
         rv = view.findViewById(R.id.rv_referral_history);
         noReferralsTv = view.findViewById(R.id.tv_no_referrals);
         noHistoryContainer = view.findViewById(R.id.container_no_history);
+        copyLinkContainer = view.findViewById(R.id.container_copy_link);
         fbContainer = view.findViewById(R.id.container_fb);
         whatsappContainer = view.findViewById(R.id.container_whatsapp);
         moreContainer = view.findViewById(R.id.container_more);
@@ -154,6 +160,21 @@ public class ReferralHistoryFragment extends Fragment {
     };
 
     private void initClickHandlers() {
+        copyLinkContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
+                if (referralIntent != null) {
+                    ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("lubble_share_link", sharingUrl);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(requireContext(), "LINK COPIED", Toast.LENGTH_SHORT).show();
+                    Analytics.triggerEvent(AnalyticsEvents.REFERRAL_COPY_LINK, getContext());
+                } else {
+                    Toast.makeText(requireContext(), "RETRY", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         fbContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

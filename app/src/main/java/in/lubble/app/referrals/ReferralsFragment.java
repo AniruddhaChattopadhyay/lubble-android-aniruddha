@@ -1,6 +1,9 @@
 package in.lubble.app.referrals;
 
 import android.app.ProgressDialog;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -21,6 +24,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -42,6 +46,7 @@ public class ReferralsFragment extends Fragment {
 
     private ImageView referralHeaderIv;
     private TextView myCoinsTv;
+    private LinearLayout copyLinkContainer;
     private LinearLayout fbContainer;
     private LinearLayout whatsappContainer;
     private LinearLayout moreContainer;
@@ -72,6 +77,7 @@ public class ReferralsFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_referrals, container, false);
 
         referralHeaderIv = view.findViewById(R.id.iv_refer_header);
+        copyLinkContainer = view.findViewById(R.id.container_copy_link);
         fbContainer = view.findViewById(R.id.container_fb);
         whatsappContainer = view.findViewById(R.id.container_whatsapp);
         moreContainer = view.findViewById(R.id.container_more);
@@ -146,6 +152,21 @@ public class ReferralsFragment extends Fragment {
     };
 
     private void initClickHandlers() {
+        copyLinkContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
+                if (referralIntent != null) {
+                    ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("lubble_share_link", sharingUrl);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(requireContext(), "LINK COPIED", Toast.LENGTH_SHORT).show();
+                    Analytics.triggerEvent(AnalyticsEvents.REFERRAL_COPY_LINK, getContext());
+                } else {
+                    Toast.makeText(requireContext(), "RETRY", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         fbContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:background="@color/white"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:background="@color/white">
 
     <Button
         android:id="@+id/btn_send"
@@ -21,11 +21,17 @@
         android:layout_height="wrap_content"
         android:hint="Search" />
 
+    <include
+        layout="@layout/layout_social_invite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/et_user_search" />
+
     <LinearLayout
         android:id="@+id/linearLayout_selected_members"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/et_user_search"
+        android:layout_below="@id/container_social_apps"
         android:background="@color/white"
         android:elevation="4dp"
         android:orientation="horizontal">

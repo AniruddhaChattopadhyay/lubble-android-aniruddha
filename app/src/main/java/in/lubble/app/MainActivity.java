@@ -235,10 +235,13 @@ public class MainActivity extends BaseActivity {
         }, this.getIntent().getData(), this);
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
-        if (!LubbleSharedPrefs.getInstance().getInvitedGroupId().isEmpty()) {
-            final DatabaseReference inviteesRef = FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
-                    + "/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(LubbleSharedPrefs.getInstance().getInvitedGroupId()).child("invitees");
+        final LubbleSharedPrefs sharedPrefs = LubbleSharedPrefs.getInstance();
+        if (!sharedPrefs.getInvitedGroupId().isEmpty()) {
+            final DatabaseReference inviteesRef = FirebaseDatabase.getInstance().getReference("users/" + sharedPrefs.getReferrerUid()
+                    + "/lubbles/" + sharedPrefs.requireLubbleId()).child("groups").child(sharedPrefs.getInvitedGroupId()).child("invitees");
             inviteesRef.child(firebaseAuth.getUid()).setValue(Boolean.TRUE);
+            sharedPrefs.setInvitedGroupId("");
+            sharedPrefs.setReferrerUid("");
         }
     }
 
