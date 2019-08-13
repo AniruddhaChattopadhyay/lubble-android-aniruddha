@@ -18,7 +18,9 @@ public class LubbleSharedPrefs {
 
     private final String IS_APP_INTRO_SHOWN = "is_app_intro_shown";
     private final String REFERRER_UID = "referrer_uid";
+    private final String INVITED_GROUP_ID = "INVITED_GROUP_ID";
     private final String LUBBLE_ID = "LUBBLE_ID";
+    private final String LUBBLE_NAME = "LUBBLE_NAME";
     private final String DEFAULT_GROUP_ID = "DEFAULT_GROUP_ID";
     private final String IS_DEFAULT_GROUP_INFO_SHOWN = "IS_DEFAULT_GROUP_INFO_SHOWN";
     private final String IS_LOGOUT_PENDING = "IS_LOGOUT_PENDING";
@@ -86,6 +88,15 @@ public class LubbleSharedPrefs {
         return preferences.edit().putString(REFERRER_UID, uid).commit();
     }
 
+    public String getInvitedGroupId() {
+        return preferences.getString(INVITED_GROUP_ID, "");
+    }
+
+    public boolean setInvitedGroupId(String uid) {
+
+        return preferences.edit().putString(INVITED_GROUP_ID, uid).commit();
+    }
+
     @Nullable
     public String getLubbleId() {
         return preferences.getString(LUBBLE_ID, "");
@@ -113,6 +124,14 @@ public class LubbleSharedPrefs {
 
     public boolean setDefaultGroupId(String defaultGroupId) {
         return preferences.edit().putString(DEFAULT_GROUP_ID, defaultGroupId).commit();
+    }
+
+    public String getLubbleName() {
+        return preferences.getString(LUBBLE_NAME, "the hood");
+    }
+
+    public boolean setLubbleName(String lubbleName) {
+        return preferences.edit().putString(LUBBLE_NAME, lubbleName).commit();
     }
 
     public String getReferralCode() {

@@ -28,10 +28,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.*;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
@@ -237,6 +234,11 @@ public class MainActivity extends BaseActivity {
         }, this.getIntent().getData(), this);
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
+        if (!LubbleSharedPrefs.getInstance().getInvitedGroupId().isEmpty()) {
+            final DatabaseReference inviteesRef = FirebaseDatabase.getInstance().getReference("users/" + FirebaseAuth.getInstance().getUid()
+                    + "/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(LubbleSharedPrefs.getInstance().getInvitedGroupId()).child("invitees");
+            inviteesRef.child(firebaseAuth.getUid()).setValue(Boolean.TRUE);
+        }
     }
 
     private void handleExploreActivity() {
@@ -498,8 +500,10 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 toolbarTitle.setText(dataSnapshot.child("title").getValue(String.class));
-                LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
-                LubbleSharedPrefs.getInstance().setSupportUid(dataSnapshot.child("supportUid").getValue(String.class));
+                final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
+                prefs.setLubbleName(dataSnapshot.child("title").getValue(String.class));
+                prefs.setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
+                prefs.setSupportUid(dataSnapshot.child("supportUid").getValue(String.class));
             }
 
             @Override

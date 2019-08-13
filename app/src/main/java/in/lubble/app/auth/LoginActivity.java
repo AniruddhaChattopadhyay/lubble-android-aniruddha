@@ -23,8 +23,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
-import in.lubble.app.*;
 import in.lubble.app.R;
+import in.lubble.app.*;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
@@ -134,8 +134,12 @@ public class LoginActivity extends BaseActivity {
                 if (error == null) {
                     Log.i("BRANCH SDK", referringParams.toString());
                     final String referrerUid = referringParams.optString("referrer_uid");
+                    final String groupId = referringParams.optString("group_id");
                     if (!TextUtils.isEmpty(referrerUid)) {
                         LubbleSharedPrefs.getInstance().setReferrerUid(referrerUid);
+                    }
+                    if (!TextUtils.isEmpty(groupId)) {
+                        LubbleSharedPrefs.getInstance().setInvitedGroupId(groupId);
                     }
                 } else {
                     Log.e("BRANCH SDK", error.getMessage());

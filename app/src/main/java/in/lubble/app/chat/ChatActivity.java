@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -32,8 +34,11 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.models.GroupData;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.utils.StringUtils;
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
 
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
@@ -41,6 +46,7 @@ import java.util.MissingFormatArgumentException;
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
+import static in.lubble.app.utils.ReferralUtils.getReferralIntentForGroup;
 
 public class ChatActivity extends BaseActivity implements ChatMoreFragment.FlairUpdateListener {
 
@@ -61,6 +67,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private ImageView toolbarIcon;
     private ImageView toolbarLockIcon;
     private TextView toolbarTv;
+    private TextView inviteTv;
     private ChatFragment targetFrag = null;
     private String groupId;
     private ViewPager viewPager;
@@ -132,6 +139,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         toolbarLockIcon = toolbar.findViewById(R.id.iv_lock_icon);
         TextView toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
+        inviteTv = toolbar.findViewById(R.id.tv_add_friends);
         setTitle("");
 
         viewPager = findViewById(R.id.viewpager_chat);
@@ -217,7 +225,41 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
             }
         });
+
+        inviteTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final ProgressDialog progressDialog = new ProgressDialog(ChatActivity.this);
+                progressDialog.setTitle(R.string.all_please_wait);
+                final Intent referralIntent = getReferralIntentForGroup(ChatActivity.this, sharingUrl, progressDialog, groupData, linkCreateListener);
+                if (referralIntent != null) {
+                    startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
+                }
+            }
+        });
     }
+
+    private static final String TAG = "ChatActivity";
+    private String sharingUrl;
+    GroupData groupData;
+    final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
+        @Override
+        public void onLinkCreate(String url, BranchError error) {
+            if (url != null) {
+                Log.d(TAG, "got my Branch link to share: " + url);
+                sharingUrl = url;
+                //if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
+                //    sharingProgressDialog.dismiss();
+                //}
+            } else {
+                Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
+                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                if (!isFinishing()) {
+                    Toast.makeText(ChatActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
 
     private ChatFragment getTargetChatFrag(String msgId, boolean isJoining) {
         if (!TextUtils.isEmpty(groupId)) {
@@ -323,6 +365,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             GlideApp.with(this).load(thumbnailUrl).circleCrop().into(toolbarIcon);
         }
         toolbarLockIcon.setVisibility(isPrivate ? View.VISIBLE : View.GONE);
+
+        groupData = new GroupData();
+        groupData.setId(groupId);
+        groupData.setTitle(title);
+        groupData.setThumbnail(thumbnailUrl);
     }
 
     public void showNewBadge() {
