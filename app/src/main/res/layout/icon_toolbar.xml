@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="4dp"
-            android:layout_toLeftOf="@id/tv_add_friends"
+            android:layout_toLeftOf="@id/container_invite"
             android:layout_toRightOf="@id/container_dp"
             android:foregroundGravity="center_vertical"
             android:gravity="center_vertical"
@@ -75,24 +75,35 @@
                 android:marqueeRepeatLimit="1"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
-                android:text="Click here to view group info"
+                android:text="Click to view group info"
                 android:visibility="visible" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_add_friends"
+        <LinearLayout
+            android:id="@+id/container_invite"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:gravity="center"
-            android:paddingRight="8dp"
-            android:textSize="12sp"
-            android:text="Add Friends"
-            android:textColor="@color/black"
-            app:drawableTint="@color/black"
-            app:drawableTopCompat="@drawable/ic_person_add_24dp" />
+            android:gravity="bottom|center_horizontal"
+            android:orientation="vertical"
+            android:paddingLeft="8dp"
+            android:paddingRight="12dp">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_add_user_blue" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Invite"
+                android:textColor="@color/black"
+                android:textSize="12sp" />
+
+        </LinearLayout>
 
     </RelativeLayout>
 

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -63,7 +64,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private ImageView toolbarIcon;
     private ImageView toolbarLockIcon;
     private TextView toolbarTv;
-    private TextView inviteTv;
+    private LinearLayout inviteContainer;
     private ChatFragment targetFrag = null;
     private String groupId;
     private ViewPager viewPager;
@@ -135,7 +136,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         toolbarLockIcon = toolbar.findViewById(R.id.iv_lock_icon);
         TextView toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
-        inviteTv = toolbar.findViewById(R.id.tv_add_friends);
+        inviteContainer = toolbar.findViewById(R.id.container_invite);
         setTitle("");
 
         viewPager = findViewById(R.id.viewpager_chat);
@@ -222,7 +223,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             }
         });
 
-        inviteTv.setOnClickListener(new View.OnClickListener() {
+        inviteContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 UserSearchActivity.newInstance(ChatActivity.this, groupId);
