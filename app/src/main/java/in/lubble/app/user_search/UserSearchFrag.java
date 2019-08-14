@@ -33,6 +33,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
@@ -58,6 +59,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private String groupId;
     private String sharingUrl;
     private Button sendBtn;
+    private EditText searchEt;
     private RecyclerView usersRecyclerView;
     private UserAdapter userAdapter;
     private SelectedUserAdapter selectedUserAdapter;
@@ -68,8 +70,9 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private LinearLayout moreContainer;
     private ProgressDialog sharingProgressDialog;
 
-    private LinearLayout socialAppsLinearLayout;
-    private View socialDivView;
+    private LinearLayout sendGroupContainer;
+    private LinearLayout inviteLinksContainer;
+    private View selectedMembersDiv;
 
     public UserSearchFrag() {
     }
@@ -101,10 +104,11 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         usersRecyclerView = view.findViewById(R.id.rv_users);
         sendBtn = view.findViewById(R.id.btn_send);
         RecyclerView selectedUsersRecyclerView = view.findViewById(R.id.rv_selected_users);
-        EditText searchEt = view.findViewById(R.id.et_user_search);
-        socialAppsLinearLayout = view.findViewById(R.id.container_social_apps);
-        socialDivView = view.findViewById(R.id.view_div_social);
+        searchEt = view.findViewById(R.id.et_user_search);
+        inviteLinksContainer = view.findViewById(R.id.container_invite_links);
         copyLinkContainer = view.findViewById(R.id.container_copy_link);
+        selectedMembersDiv = view.findViewById(R.id.div_selected_members);
+        sendGroupContainer = view.findViewById(R.id.container_send);
         fbContainer = view.findViewById(R.id.container_fb);
         whatsappContainer = view.findViewById(R.id.container_whatsapp);
         moreContainer = view.findViewById(R.id.container_more);
@@ -144,12 +148,19 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
             }
         });
 
-        handleSearch(searchEt);
+        handleSearch();
+
+        sendGroupContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ShareActiv.open(requireContext(), groupId, ShareActiv.ShareType.GROUP);
+            }
+        });
 
         return view;
     }
 
-    private void handleSearch(EditText searchEt) {
+    private void handleSearch() {
         searchEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -165,6 +176,11 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
             public void afterTextChanged(Editable s) {
                 // filter your list from your input
                 userAdapter.getFilter().filter(s.toString());
+                if (s.length() != 0) {
+                    inviteLinksContainer.setVisibility(View.GONE);
+                } else if (selectedUserAdapter.getItemCount() == 0) {
+                    inviteLinksContainer.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
@@ -316,8 +332,10 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     @Override
     public void onUserSelected(String uid) {
         selectedUserAdapter.addUser(uid);
-        socialAppsLinearLayout.setVisibility(View.GONE);
-        socialDivView.setVisibility(View.GONE);
+        inviteLinksContainer.setVisibility(View.GONE);
+        selectedMembersDiv.setVisibility(View.VISIBLE);
+        sendBtn.setVisibility(View.VISIBLE);
+        searchEt.setText("");
     }
 
     @Override
@@ -325,8 +343,9 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         selectedUserAdapter.removeUser(uid);
         userAdapter.deselectUser(uid);
         if (selectedUserAdapter.getItemCount() == 0) {
-            socialAppsLinearLayout.setVisibility(View.VISIBLE);
-            socialDivView.setVisibility(View.VISIBLE);
+            inviteLinksContainer.setVisibility(View.VISIBLE);
+            selectedMembersDiv.setVisibility(View.GONE);
+            sendBtn.setVisibility(View.GONE);
         }
     }
 

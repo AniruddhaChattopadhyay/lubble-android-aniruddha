@@ -13,13 +13,15 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:text="Send Invitations"
+        android:visibility="gone"
         android:theme="@style/AccentButton" />
 
     <EditText
         android:id="@+id/et_user_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:background="@drawable/rect_rounded_border"
         android:drawablePadding="4dp"
         android:hint="Search Lubble Members"
@@ -28,29 +30,70 @@
         app:drawableLeftCompat="@drawable/ic_search_gray_24dp"
         app:drawableTint="@color/dark_gray" />
 
-    <include
-        layout="@layout/layout_social_invite"
-        android:layout_width="match_parent"
+    <LinearLayout
+        android:id="@+id/container_invite_links"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/et_user_search" />
+        android:layout_below="@id/et_user_search"
+        android:orientation="vertical">
 
-    <View
-        android:id="@+id/view_div_social"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/container_social_apps"
-        android:layout_margin="8dp"
-        android:background="@color/light_gray" />
+        <include
+            layout="@layout/layout_social_invite"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <View
+            android:id="@+id/view_div_social"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_margin="8dp"
+            android:background="@color/light_gray" />
+
+        <LinearLayout
+            android:id="@+id/container_send"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/view_div_social"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/blue_circle"
+                android:padding="8dp"
+                app:srcCompat="@drawable/ic_send_white_24dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="Share to another Lubble Group"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/view_div_attachment"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/container_send"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:background="@color/light_gray" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout_selected_members"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/view_div_social"
+        android:layout_below="@id/container_invite_links"
         android:background="@color/white"
-        tools:visibility="gone"
-        android:elevation="4dp"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_selected_users"
@@ -61,6 +104,14 @@
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/item_selected_user" />
+
+        <View
+            android:layout_width="match_parent"
+            android:visibility="gone"
+            android:layout_height="1dp"
+            android:id="@+id/div_selected_members"
+            android:layout_below="@id/container_send"
+            android:background="@color/light_gray" />
 
     </LinearLayout>
 
