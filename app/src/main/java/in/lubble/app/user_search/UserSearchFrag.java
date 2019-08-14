@@ -114,6 +114,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         moreContainer = view.findViewById(R.id.container_more);
 
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         userAdapter = new UserAdapter(mListener, GlideApp.with(getContext()));
         usersRecyclerView.setAdapter(userAdapter);
@@ -137,6 +138,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
                             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                                 if (isAdded() && isVisible()) {
                                     Toast.makeText(getContext(), R.string.invites_sent, Toast.LENGTH_SHORT).show();
+                                    Analytics.triggerEvent(AnalyticsEvents.REFERRAL_INVITE_MEMBERS, getContext());
                                     getActivity().finish();
                                 }
                             }
