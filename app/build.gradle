@@ -95,7 +95,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
-    implementation 'com.github.apl-devs:appintro:v4.2.3'
+    implementation 'com.github.freshdesk:freshchat-android:2.7.0'
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
     implementation 'com.cepheuen.elegant-number-button:lib:1.0.3'

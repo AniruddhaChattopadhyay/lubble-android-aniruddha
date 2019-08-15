@@ -8,6 +8,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.clevertap.android.sdk.NotificationInfo;
 import com.crashlytics.android.Crashlytics;
+import com.freshchat.consumer.sdk.Freshchat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,6 +49,8 @@ public class FcmService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             AppNotifUtils.showAppNotif(this, remoteMessage.getNotification());
 
+        } else if (Freshchat.isFreshchatNotification(remoteMessage)) {
+            Freshchat.handleFcmMessage(this, remoteMessage);
         } else if (remoteMessage.getData().size() > 0) {
             final Map<String, String> dataMap = remoteMessage.getData();
             Log.d(TAG, "Message data payload: " + dataMap);
@@ -167,6 +170,7 @@ public class FcmService extends FirebaseMessagingService {
         // Get updated InstanceID token.
         Log.d(TAG, "Refreshed token: " + token);
         CleverTapAPI.getDefaultInstance(this).pushFcmRegistrationId(token, true);
+        Freshchat.getInstance(this).setPushRegistrationToken(token);
         try {
             getThisUserRef().child("token").setValue(token);
         } catch (Exception e) {

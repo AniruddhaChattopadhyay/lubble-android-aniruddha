@@ -11,7 +11,7 @@
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:tint="@color/colorAccent"
-        app:srcCompat="@drawable/ic_arrow_forward_white" />
+        app:srcCompat="@drawable/ic_more" />
 
     <TextView
         android:layout_width="wrap_content"

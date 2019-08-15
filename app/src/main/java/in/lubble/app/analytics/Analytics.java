@@ -3,6 +3,9 @@ package in.lubble.app.analytics;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import com.freshchat.consumer.sdk.Freshchat;
+import com.freshchat.consumer.sdk.FreshchatUser;
+import com.freshchat.consumer.sdk.exception.MethodNotAllowedException;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -82,9 +85,29 @@ public class Analytics {
         firebaseAnalytics.setUserProperty("uid", userId);
         firebaseAnalytics.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        final Freshchat freshchat = Freshchat.getInstance(context);
+        FreshchatUser freshUser = freshchat.getUser();
+        freshUser.setPhone("+91", "9790987495");
         if (currentUser != null) {
             firebaseAnalytics.setUserProperty("name", currentUser.getDisplayName());
+            freshUser.setFirstName(currentUser.getDisplayName());
+            freshUser.setEmail(currentUser.getEmail());
+            freshUser.setPhone("+91", currentUser.getPhoneNumber());
         }
+
+        Map<String, String> userMeta = new HashMap<>();
+        userMeta.put("uid", userId);
+        userMeta.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+
+        try {
+            freshchat.setUserProperties(userMeta);
+            freshchat.setUser(freshUser);
+            freshchat.identifyUser(userId, null);
+        } catch (MethodNotAllowedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private static void unSetUser(Context context) {
@@ -92,6 +115,9 @@ public class Analytics {
         firebaseAnalytics.setUserId(null);
         firebaseAnalytics.setUserProperty("uid", null);
         firebaseAnalytics.setUserProperty("lubble_id", null);
+        com.segment.analytics.Analytics.with(context).reset();
+        Freshchat.resetUser(context);
+
     }
 
     public static void triggerLogoutEvent(Context context) {
@@ -102,7 +128,6 @@ public class Analytics {
             firebaseAnalytics.logEvent(AnalyticsEvents.LOGOUT_SUCCESS_EVENT, attributes);
             //CleverTapAPI.getDefaultInstance(context).pushEvent("LOGOUT", bundleToMap(attributes));
             com.segment.analytics.Analytics.with(context).track("LOGOUT", bundleToSegmentProperties(attributes));
-            com.segment.analytics.Analytics.with(context).reset();
             unSetUser(context);
         }
     }
