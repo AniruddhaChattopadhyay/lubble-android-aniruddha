@@ -233,4 +233,7 @@
     <string name="drawer_close">Drawer close</string>
     <string name="drawer_open">Drawer open</string>
 
+    <string name="freshchat_file_provider_authority">in.lubble.app.provider</string>
+    <string name="freshchat_campaign_notification_channel_name">Support messages</string>
+
 </resources>

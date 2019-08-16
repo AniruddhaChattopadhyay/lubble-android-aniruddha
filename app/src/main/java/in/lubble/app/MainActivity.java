@@ -535,9 +535,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void syncFcmToken() {
+        final String token = FirebaseInstanceId.getInstance().getToken();
         getThisUserRef().child("token")
-                .setValue(FirebaseInstanceId.getInstance().getToken());
-        CleverTapAPI.getDefaultInstance(this).pushFcmRegistrationId(FirebaseInstanceId.getInstance().getToken(), true);
+                .setValue(token);
+        CleverTapAPI.getDefaultInstance(this).pushFcmRegistrationId(token, true);
+        Freshchat.getInstance(this).setPushRegistrationToken(token);
     }
 
     private void updateDefaultGroupId() {

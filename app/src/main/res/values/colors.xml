@@ -57,4 +57,5 @@
     <color name="mute_green_dark">#CEECBE</color>
 
     <color name="black_overlay">#66000000</color>
+    <color name="freshchat_notification_accent_color">@color/colorAccent</color>
 </resources>

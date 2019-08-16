@@ -4,6 +4,7 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
+import androidx.core.app.NotificationCompat;
 import androidx.core.provider.FontRequest;
 import androidx.emoji.text.EmojiCompat;
 import androidx.emoji.text.FontRequestEmojiCompatConfig;
@@ -11,6 +12,7 @@ import com.clevertap.android.sdk.ActivityLifecycleCallback;
 import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatConfig;
+import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
@@ -90,6 +92,15 @@ public class LubbleApp extends Application {
         freshchatConfig.setCameraCaptureEnabled(true);
         freshchatConfig.setGallerySelectionEnabled(true);
         Freshchat.getInstance(getApplicationContext()).init(freshchatConfig);
+
+        FreshchatNotificationConfig notificationConfig = new FreshchatNotificationConfig()
+                .setNotificationSoundEnabled(true)
+                .setSmallIcon(R.drawable.ic_lubble_notif)
+                .setLargeIcon(R.drawable.ic_support)
+                .launchActivityOnFinish(MainActivity.class.getName())
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        Freshchat.getInstance(getApplicationContext()).setNotificationConfig(notificationConfig);
 
     }
 

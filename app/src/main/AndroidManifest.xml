@@ -129,6 +129,16 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <provider
+            android:name="in.lubble.app.LubbleFileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/freshchat_file_provider_paths" />
+        </provider>
+
         <meta-data
             android:name="CLEVERTAP_NOTIFICATION_ICON"
             android:value="ic_lubble_notif" /> <!-- name of your file in the drawable directory without the file extension. -->
@@ -235,11 +245,6 @@
             android:name=".auth.LocationActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".auth.IntroActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait"
-            android:theme="@style/BlueAppTheme" />
         <activity
             android:name=".groups.group_info.ScrollingGroupInfoActivity"
             android:configChanges="orientation"
