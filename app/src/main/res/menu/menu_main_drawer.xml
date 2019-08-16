@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <group>
         <item
             android:id="@+id/nav_item_profile"
@@ -11,11 +12,18 @@
             android:title="Invite Nearby Friends" />
     </group>
 
-    <group>
+    <group android:id="@+id/group_menu">
         <item
             android:id="@+id/nav_item_support"
             android:icon="@drawable/ic_chat_white_24dp"
             android:title="Chat with Support" />
+    </group>
+
+
+    <group android:id="@+id/nav_footer">
+        <item
+            android:id="@+id/nav_log_version"
+            app:actionLayout="@layout/footer_navigation_menu" />
     </group>
 
 </menu>

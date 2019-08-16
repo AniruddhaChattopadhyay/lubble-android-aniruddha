@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
@@ -52,6 +53,7 @@ import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServicesFrag;
+import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -81,7 +83,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private FirebaseAuth firebaseAuth;
     private DatabaseReference connectedReference;
     private ValueEventListener presenceValueListener;
+    private RelativeLayout dpContainer;
     private ImageView profileIcon;
+    private ImageView navHeaderIv;
+    private TextView navHeaderNameTv;
     private TextView toolbarRewardsTv;
     private TextView toolbarTitle;
     private View lubbleClickTarget;
@@ -105,6 +110,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
         profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
+        dpContainer = toolbar.findViewById(R.id.container_dp);
         toolbarRewardsTv = toolbar.findViewById(R.id.tv_toolbar_rewards);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setElevation(10);
@@ -112,12 +118,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toolbarTitle = findViewById(R.id.lubble_toolbar_title);
         lubbleClickTarget = findViewById(R.id.lubble_click_target);
         toolbarTitle.setVisibility(View.VISIBLE);
-        profileIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openProfile();
-            }
-        });
+
         toolbarRewardsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -173,9 +174,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         handleExploreActivity();
 
-        drawerLayout = findViewById(R.id.drawer_layout);
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
     }
 
     private void initEverything() {
@@ -208,6 +206,34 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         fetchAndPersistAppFeatures();
         fetchAndPersistMplaceItems();
         initFirebaseRemoteConfig();
+        initDrawer();
+    }
+
+    private void initDrawer() {
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
+        navHeaderIv = headerView.findViewById(R.id.nav_header_imageView);
+        navHeaderNameTv = headerView.findViewById(R.id.nav_header_username);
+        final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+
+        GlideApp.with(this).load(currentUser.getPhotoUrl())
+                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                .circleCrop()
+                .into(navHeaderIv);
+
+        dpContainer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
+            }
+        });
     }
 
     private void showQuizBadge() {
@@ -442,6 +468,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(profileIcon);
+                    GlideApp.with(MainActivity.this)
+                            .load(profileInfo == null ? "" : profileInfo.getThumbnail())
+                            .circleCrop()
+                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                            .error(R.drawable.ic_account_circle_black_no_padding)
+                            .into(navHeaderIv);
+                    navHeaderNameTv.setText(StringUtils.getTitleCase(profileInfo.getName()));
 
                     if (profileInfo != null && !isFinishing()) {
                         com.segment.analytics.Analytics.with(MainActivity.this).identify(firebaseAuth.getUid(), new Traits().putAvatar(profileInfo.getThumbnail()), null);
