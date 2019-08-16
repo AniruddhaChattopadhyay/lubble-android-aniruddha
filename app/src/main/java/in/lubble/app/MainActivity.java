@@ -16,16 +16,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.crashlytics.android.Crashlytics;
+import com.freshchat.consumer.sdk.Freshchat;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.*;
@@ -66,7 +70,7 @@ import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
     private static final String IS_NEW_USER_IN_THIS_LUBBLE = "IS_NEW_USER_IN_THIS_LUBBLE";
@@ -81,6 +85,7 @@ public class MainActivity extends BaseActivity {
     private TextView toolbarRewardsTv;
     private TextView toolbarTitle;
     private View lubbleClickTarget;
+    private DrawerLayout drawerLayout;
     private ValueEventListener dpEventListener;
     private BottomNavigationView bottomNavigation;
     private boolean isActive;
@@ -103,6 +108,7 @@ public class MainActivity extends BaseActivity {
         toolbarRewardsTv = toolbar.findViewById(R.id.tv_toolbar_rewards);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setElevation(10);
+        drawerLayout = findViewById(R.id.drawer_layout);
         toolbarTitle = findViewById(R.id.lubble_toolbar_title);
         lubbleClickTarget = findViewById(R.id.lubble_click_target);
         toolbarTitle.setVisibility(View.VISIBLE);
@@ -166,6 +172,10 @@ public class MainActivity extends BaseActivity {
         }
 
         handleExploreActivity();
+
+        drawerLayout = findViewById(R.id.drawer_layout);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     private void initEverything() {
@@ -551,6 +561,23 @@ public class MainActivity extends BaseActivity {
         }
     };
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.nav_item_profile:
+                ProfileActivity.open(this, firebaseAuth.getUid());
+                break;
+            case R.id.nav_item_refer:
+                ReferralActivity.open(this, true);
+                break;
+            case R.id.nav_item_support:
+                Freshchat.showConversations(this);
+                break;
+        }
+        drawerLayout.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
     private void switchFrag(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction().replace(R.id.tv_book_author, fragment).commitAllowingStateLoss();
@@ -608,6 +635,15 @@ public class MainActivity extends BaseActivity {
 
             tooltip.show(toolbarRewardsTv, Tooltip.Gravity.BOTTOM, true);
             GlideApp.with(this).load(FirebaseRemoteConfig.getInstance().getString(REWARDS_EXPLAINER)).preload();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 

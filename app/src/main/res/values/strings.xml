@@ -5,6 +5,11 @@
     <string name="title_notifications">Notifications</string>
 
     <!-- sep -->
+    <string-array name="login_server_url_array">
+        <item>@string/profile</item>
+        <item>@string/profile</item>
+        <item>@string/profile</item>
+    </string-array>
 
     <string name="new_post_hint">What\'s new in your locality?</string>
     <string name="new_post_add_photo">Add Photo or Screenshot</string>
