@@ -79,6 +79,9 @@ public class Analytics {
     }
 
     private static void setUser(Context context) {
+        /**
+         *  DONT Change this method. Use method setAnalyticsUser() in this class
+         */
         FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
         String userId = FirebaseAuth.getInstance().getUid();
         firebaseAnalytics.setUserId(userId);
@@ -86,28 +89,9 @@ public class Analytics {
         firebaseAnalytics.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        final Freshchat freshchat = Freshchat.getInstance(context);
-        FreshchatUser freshUser = freshchat.getUser();
-        freshUser.setPhone("+91", "9790987495");
         if (currentUser != null) {
             firebaseAnalytics.setUserProperty("name", currentUser.getDisplayName());
-            freshUser.setFirstName(currentUser.getDisplayName());
-            freshUser.setEmail(currentUser.getEmail());
-            freshUser.setPhone("+91", currentUser.getPhoneNumber());
         }
-
-        Map<String, String> userMeta = new HashMap<>();
-        userMeta.put("uid", userId);
-        userMeta.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
-
-        try {
-            freshchat.setUserProperties(userMeta);
-            freshchat.setUser(freshUser);
-            freshchat.identifyUser(userId, null);
-        } catch (MethodNotAllowedException e) {
-            e.printStackTrace();
-        }
-
     }
 
     private static void unSetUser(Context context) {
@@ -160,18 +144,37 @@ public class Analytics {
     }
 
     public static void setAnalyticsUser(Context context) {
-        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
             // user is logged in
             final Traits traits = new Traits();
             traits.putName(currentUser.getDisplayName());
             traits.putPhone(currentUser.getPhoneNumber());
             traits.putEmail(currentUser.getEmail());
-            traits.put("Firebase ID", FirebaseAuth.getInstance().getUid());
+            traits.put("Firebase ID", firebaseAuth.getUid());
             traits.put("Lubble Id", LubbleSharedPrefs.getInstance().getLubbleId());
             traits.put("version name", BuildConfig.VERSION_NAME);
             traits.put("version code", BuildConfig.VERSION_CODE);
-            com.segment.analytics.Analytics.with(context).identify(FirebaseAuth.getInstance().getUid(), traits, null);
+            com.segment.analytics.Analytics.with(context).identify(firebaseAuth.getUid(), traits, null);
+
+            final Freshchat freshchat = Freshchat.getInstance(context);
+            FreshchatUser freshUser = freshchat.getUser();
+            freshUser.setFirstName(currentUser.getDisplayName());
+            freshUser.setEmail(currentUser.getEmail());
+            freshUser.setPhone("+91", currentUser.getPhoneNumber());
+
+            Map<String, String> userMeta = new HashMap<>();
+            userMeta.put("uid", firebaseAuth.getUid());
+            userMeta.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+
+            try {
+                freshchat.setUserProperties(userMeta);
+                freshchat.setUser(freshUser);
+                freshchat.identifyUser(firebaseAuth.getUid(), null);
+            } catch (MethodNotAllowedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
