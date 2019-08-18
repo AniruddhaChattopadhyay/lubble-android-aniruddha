@@ -88,6 +88,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-places:16.0.0'
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
     implementation 'com.google.code.gson:gson:2.8.2'
+    implementation "androidx.work:work-runtime:2.2.0"
     implementation 'org.jsoup:jsoup:1.10.1'
     // Retrofit & OkHttp
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
