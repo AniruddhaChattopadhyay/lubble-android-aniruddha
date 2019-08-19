@@ -102,4 +102,11 @@ public class AnalyticsEvents {
 
     public static final String MARKED_SPAM = "MARKED_SPAM";
 
+    public static final String RATING_DIALOG_SHOWN = "RATING_DIALOG_SHOWN";
+    public static final String RATING_DIALOG_STARS = "RATING_DIALOG_STARS";
+    public static final String RATING_DIALOG_FORM = "RATING_DIALOG_FORM";
+    public static final String RATING_DIALOG_FORM_YES = "RATING_DIALOG_FORM_YES";
+    public static final String RATING_STORE_DIALOG = "RATING_STORE_DIALOG";
+    public static final String RATING_STORE_DIALOG_YES = "RATING_STORE_DIALOG_YES";
+    public static final String RATING_STORE_DIALOG_NEVER = "RATING_STORE_DIALOG_NEVER";
 }

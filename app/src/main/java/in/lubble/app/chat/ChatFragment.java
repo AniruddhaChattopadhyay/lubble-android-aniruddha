@@ -1014,7 +1014,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     messagesReference.push().setValue(chatData);
                     final Bundle bundle = new Bundle();
                     bundle.putString("group_id", groupId);
+                    bundle.putString("type", chatData.getType());
                     Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
+                    if (chatData.getType().equalsIgnoreCase(REPLY)) {
+                        LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
+                    }
                 } else if (!TextUtils.isEmpty(dmId)) {
                     messagesReference.push().setValue(chatData);
                 }

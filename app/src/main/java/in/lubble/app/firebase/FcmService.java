@@ -89,6 +89,7 @@ public class FcmService extends FirebaseMessagingService {
                     JsonElement jsonElement = gson.toJsonTree(dataMap);
                     AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
                     AppNotifUtils.showAppNotif(this, appNotifData);
+                    LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
                 } else if (StringUtils.isValidString(type) && (("chat".equalsIgnoreCase(type)) || "dm".equalsIgnoreCase(type))) {
                     // create chat notif
                     Intent broadcast = new Intent();

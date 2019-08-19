@@ -39,6 +39,8 @@ public class LubbleSharedPrefs {
     private final String IS_BOOK_EXCHANGE_OPENED = "IS_BOOK_EXCHANGE_OPENED";
     private final String IS_REWARDS_OPENED = "IS_REWARDS_OPENED";
     private final String IS_REWARDS_EXPLAINER_SEEN = "IS_REWARDS_EXPLAINER_SEEN";
+    private final String SHOW_RATING_DIALOG = "SHOW_RATING_DIALOG";
+    private final String RATING_DIALOG_LAST_SHOWN = "RATING_DIALOG_LAST_SHOWN";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -250,6 +252,22 @@ public class LubbleSharedPrefs {
         return preferences.edit().putBoolean(IS_REWARDS_EXPLAINER_SEEN, isOpened).commit();
     }
 
+    public boolean getShowRatingDialog() {
+        return preferences.getBoolean(SHOW_RATING_DIALOG, false);
+    }
+
+    public boolean setShowRatingDialog(boolean showDialog) {
+        return preferences.edit().putBoolean(SHOW_RATING_DIALOG, showDialog).commit();
+    }
+
+    public long getRatingDialogLastShown() {
+        return preferences.getLong(RATING_DIALOG_LAST_SHOWN, 1L);
+        //if ZERO then never show dialog
+    }
+
+    public boolean setRatingDialogLastShown(long unixTime) {
+        return preferences.edit().putLong(RATING_DIALOG_LAST_SHOWN, unixTime).commit();
+    }
 
     public double getCenterLati() {
         return getDouble(preferences, CENTER_LATI, Constants.SVR_LATI);

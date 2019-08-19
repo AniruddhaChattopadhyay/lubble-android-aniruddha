@@ -35,6 +35,7 @@ public class Constants {
     public static final String GROUP_QUES_ENABLED = "GROUP_QUES_ENABLED";
     public static final String DELIVERY_FEE = "DELIVERY_FEE";
     public static final String IS_REWARDS_SHOWN = "IS_REWARDS_SHOWN";
+    public static final String IS_RATING_DIALOG_ACTIVE = "IS_RATING_DIALOG_ACTIVE";
     public static final String REWARDS_EXPLAINER = "REWARDS_EXPLAINER";
 
     public static final double SVR_LATI = 28.696660;

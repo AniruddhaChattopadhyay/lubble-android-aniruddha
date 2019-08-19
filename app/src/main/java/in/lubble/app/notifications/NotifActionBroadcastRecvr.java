@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
 import com.google.gson.Gson;
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
@@ -95,6 +96,7 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
 
                         deleteUnreadMsgsForGroupId(groupId, context);
                         NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_REPLIED, groupId, context);
+                        LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
                     }
                 }
             }

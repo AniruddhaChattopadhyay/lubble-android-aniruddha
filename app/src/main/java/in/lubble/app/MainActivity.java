@@ -1,9 +1,6 @@
 package in.lubble.app;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -15,11 +12,14 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.clevertap.android.sdk.CleverTapAPI;
+import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -48,6 +48,7 @@ import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServicesFrag;
+import in.lubble.app.utils.MainUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -59,6 +60,7 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static in.lubble.app.Constants.*;
+import static in.lubble.app.analytics.AnalyticsEvents.*;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -200,6 +202,88 @@ public class MainActivity extends BaseActivity {
         initFirebaseRemoteConfig();
     }
 
+    private void showRatingsDialog() {
+        final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
+        if (prefs.getShowRatingDialog()
+                && FirebaseRemoteConfig.getInstance().getBoolean(IS_RATING_DIALOG_ACTIVE)
+                && prefs.getRatingDialogLastShown() != 0L //NEVER show when set to ZERO
+                && System.currentTimeMillis() - prefs.getRatingDialogLastShown() > TimeUnit.SECONDS.toMillis(20)) {
+            prefs.setShowRatingDialog(false);
+            prefs.setRatingDialogLastShown(System.currentTimeMillis());
+
+            final RatingDialog ratingDialog = new RatingDialog.Builder(this)
+                    //.icon(drawable)
+                    .threshold(4)
+                    .title("Enjoying Lubble?")
+                    .titleTextColor(R.color.black)
+                    .positiveButtonText("Not Now")
+                    .positiveButtonTextColor(R.color.gray)
+                    .negativeButtonText("Never")
+                    .negativeButtonTextColor(R.color.gray)
+                    .formTitle("Submit Feedback")
+                    .formHint("Tell us where we can improve")
+                    .formSubmitText("Submit")
+                    .formCancelText("Cancel")
+                    .ratingBarColor(R.color.gold)
+                    .ratingBarBackgroundColor(R.color.dark_gold)
+                    .onRatingChanged(new RatingDialog.Builder.RatingDialogListener() {
+                        @Override
+                        public void onRatingSelected(float rating, boolean thresholdCleared) {
+                            final Bundle bundle = new Bundle();
+                            bundle.putFloat("rating", rating);
+                            Analytics.triggerEvent(RATING_DIALOG_STARS, bundle, MainActivity.this);
+                            if (!thresholdCleared) {
+                                Analytics.triggerEvent(RATING_DIALOG_FORM, MainActivity.this);
+                            }
+                        }
+                    })
+                    .onThresholdCleared(new RatingDialog.Builder.RatingThresholdClearedListener() {
+                        @Override
+                        public void onThresholdCleared(RatingDialog ratingDialog, float rating, boolean thresholdCleared) {
+                            ratingDialog.dismiss();
+                            showRateInPlayStoreDialog();
+                        }
+                    })
+                    .onRatingBarFormSumbit(new RatingDialog.Builder.RatingDialogFormListener() {
+                        @Override
+                        public void onFormSubmitted(String feedback) {
+
+                            prefs.setRatingDialogLastShown(0L);
+                            Analytics.triggerEvent(RATING_DIALOG_FORM_YES, MainActivity.this);
+                        }
+                    }).build();
+
+            ratingDialog.show();
+            Analytics.triggerEvent(RATING_DIALOG_SHOWN, this);
+        }
+    }
+
+    private void showRateInPlayStoreDialog() {
+        Analytics.triggerEvent(RATING_STORE_DIALOG, this);
+        final AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("How about a rating on the Play Store, then?")
+                .setMessage("It would mean the world to us if you could rate Lubble on Play Store :)")
+                .setPositiveButton("Ok, sure", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MainUtils.openPlayStore(MainActivity.this);
+                        LubbleSharedPrefs.getInstance().setRatingDialogLastShown(0L);
+                        Analytics.triggerEvent(RATING_STORE_DIALOG_YES, MainActivity.this);
+                        dialog.dismiss();
+                    }
+                })
+                .setNeutralButton("Never", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        LubbleSharedPrefs.getInstance().setRatingDialogLastShown(0L);
+                        Analytics.triggerEvent(RATING_STORE_DIALOG_NEVER, MainActivity.this);
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setTextColor(ContextCompat.getColor(this, R.color.dark_gray));
+    }
+
     private void showQuizBadge() {
         if (!LubbleSharedPrefs.getInstance().getIsQuizOpened() && FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_QUIZ_SHOWN)) {
             BottomNavigationMenuView bottomNavigationMenuView =
@@ -296,6 +380,7 @@ public class MainActivity extends BaseActivity {
         map.put(GROUP_QUES_ENABLED, true);
         map.put(DELIVERY_FEE, 100);
         map.put(IS_REWARDS_SHOWN, false);
+        map.put(IS_RATING_DIALOG_ACTIVE, true);
         map.put(REWARDS_EXPLAINER, "https://firebasestorage.googleapis.com/v0/b/lubble-in-default/o/chat_sliders%2Freward_explainer.png?alt=media&token=33f50ce7-c1b7-4d90-84d6-c0ff41f9e39f");
         firebaseRemoteConfig.setDefaults(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
@@ -408,6 +493,7 @@ public class MainActivity extends BaseActivity {
                 }
             }
         });
+        showRatingsDialog();
     }
 
     @Override
