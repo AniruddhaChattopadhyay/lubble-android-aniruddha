@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
@@ -36,8 +35,7 @@ public class AppsListWorker extends Worker {
 
     @Override
     public Result doWork() {
-        // Do the work here--in this case, upload the images.
-
+        // Do the work here
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         final PackageManager packageManager = context.getPackageManager();
@@ -47,7 +45,6 @@ public class AppsListWorker extends Worker {
         for (ResolveInfo resolveInfo : pkgAppsList) {
             list.add(resolveInfo.loadLabel(packageManager).toString());
         }
-        Log.d(TAG, "doWork: " + list.get(0));
 
         HashMap<String, Object> params = new HashMap<>();
         HashMap<String, Object> fieldParams = new HashMap<>();
