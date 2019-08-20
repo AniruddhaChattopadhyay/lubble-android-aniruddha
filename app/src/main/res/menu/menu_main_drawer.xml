@@ -17,8 +17,8 @@
         android:orderInCategory="998">
         <item
             android:id="@+id/nav_item_support"
-            android:icon="@drawable/ic_chat_white_24dp"
-            android:title="Chat with Support" />
+            android:icon="@drawable/ic_help_black_24dp"
+            android:title="Chat with us" />
     </group>
 
 

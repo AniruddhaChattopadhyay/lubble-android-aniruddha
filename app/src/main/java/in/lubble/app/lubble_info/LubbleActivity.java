@@ -75,7 +75,7 @@ public class LubbleActivity extends BaseActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                        if (groupData != null) {
+                        if (groupData != null && !isFinishing()) {
                             GlideApp.with(LubbleActivity.this)
                                     .load(groupData.getProfilePic())
                                     .placeholder(R.drawable.city)

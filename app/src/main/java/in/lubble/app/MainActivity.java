@@ -100,6 +100,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private boolean isActive;
     private boolean isNewUserInThisLubble;
     private static final int nav_item_leaderboard = 311;
+    private Menu navMenu;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -216,8 +217,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void initDrawer() {
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
-        final Menu menu = navigationView.getMenu();
-        final MenuItem item = menu.add(R.id.group_top, nav_item_leaderboard, 2, LubbleSharedPrefs.getInstance().getLubbleName() + " Leaderboard");
+        navMenu = navigationView.getMenu();
+        final MenuItem item = navMenu.add(R.id.group_top, nav_item_leaderboard, 2, LubbleSharedPrefs.getInstance().getLubbleName() + " Leaderboard");
         item.setIcon(R.drawable.ic_favorite_white_16dp);
 
         navigationView.setNavigationItemSelectedListener(this);
@@ -648,11 +649,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                toolbarTitle.setText(dataSnapshot.child("title").getValue(String.class));
+                final String lubbleName = dataSnapshot.child("title").getValue(String.class);
+                toolbarTitle.setText(lubbleName);
                 final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
-                prefs.setLubbleName(dataSnapshot.child("title").getValue(String.class));
+                prefs.setLubbleName(lubbleName);
                 prefs.setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
                 prefs.setSupportUid(dataSnapshot.child("supportUid").getValue(String.class));
+                navMenu.findItem(nav_item_leaderboard).setTitle(lubbleName + " Leaderboard");
             }
 
             @Override
