@@ -1303,6 +1303,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     break;
                 case R.id.container_lubb:
                     toggleLubb(getAdapterPosition());
+                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
+                    LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
                     break;
                 case R.id.link_meta_container:
                     ChatData chatData = chatDataList.get(getAdapterPosition());
