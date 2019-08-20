@@ -25,6 +25,7 @@ import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
+import com.freshchat.consumer.sdk.FreshchatMessage;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
@@ -282,6 +283,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     .onRatingBarFormSumbit(new RatingDialog.Builder.RatingDialogFormListener() {
                         @Override
                         public void onFormSubmitted(String feedback) {
+                            String tag = "rating_form_submitted";
+                            FreshchatMessage FreshchatMessage = new FreshchatMessage().setTag(tag).setMessage("RATING FEEDBACK: " + feedback);
+                            Freshchat.sendMessage(MainActivity.this, FreshchatMessage);
 
                             prefs.setRatingDialogLastShown(0L);
                             Analytics.triggerEvent(RATING_DIALOG_FORM_YES, MainActivity.this);

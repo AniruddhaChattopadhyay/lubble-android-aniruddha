@@ -3,7 +3,6 @@ package in.lubble.app.profile;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -26,6 +25,7 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
+import com.freshchat.consumer.sdk.Freshchat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -199,14 +199,7 @@ public class ProfileFrag extends Fragment {
         feedbackView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_SENDTO);
-                intent.setData(Uri.parse("mailto:"));
-                intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"ayush@mittalsoft.com"});
-                intent.putExtra(Intent.EXTRA_SUBJECT, "Lubble Feedback");
-                intent.putExtra(Intent.EXTRA_TEXT, "Thanks for taking out time to write to us!\n\n" +
-                        "We're here to listen & improve Lubble for you, please write your feedback below:\n\n\n\n");
-                Intent mailer = Intent.createChooser(intent, "Choose an email app");
-                startActivity(mailer);
+                Freshchat.showConversations(requireContext());
             }
         });
 

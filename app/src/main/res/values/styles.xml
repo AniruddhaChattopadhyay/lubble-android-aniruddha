@@ -159,4 +159,8 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="Theme.Freshchat.SelectedTheme" parent="@style/Theme.Freshchat.Light.DarkActionBar">
+        <item name="freshchatTeamMemberAvatarIcon">@drawable/ic_support</item>
+    </style>
+
 </resources>
