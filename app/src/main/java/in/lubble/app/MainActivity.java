@@ -225,7 +225,7 @@ public class MainActivity extends BaseActivity {
                     .formSubmitText("Submit")
                     .formCancelText("Cancel")
                     .ratingBarColor(R.color.gold)
-                    .ratingBarBackgroundColor(R.color.dark_gold)
+                    .ratingBarBackgroundColor(R.color.light_gray)
                     .onRatingChanged(new RatingDialog.Builder.RatingDialogListener() {
                         @Override
                         public void onRatingSelected(float rating, boolean thresholdCleared) {
