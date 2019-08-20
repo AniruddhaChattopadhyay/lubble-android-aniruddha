@@ -316,7 +316,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             if (position == 0) {
                 return getTargetChatFrag(msgId, isJoining);
             } else {
-                return ChatMoreFragment.newInstance(groupId, "");
+                return ChatMoreFragment.newInstance(groupId);
             }
         }
 

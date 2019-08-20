@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -45,10 +46,8 @@ public class ChatMoreFragment extends Fragment {
     private static final String TAG = "ChatMoreFragment";
 
     private static final String ARG_GROUP_ID = "ChatMoreFragment.ARG_GROUP_ID";
-    private static final String ARG_PARAM2 = "param2";
 
     private String groupId;
-    private String mParam2;
 
     private EditText flairEt;
     private TextView updateFlairTv;
@@ -69,11 +68,10 @@ public class ChatMoreFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static ChatMoreFragment newInstance(String groupId, String param2) {
+    public static ChatMoreFragment newInstance(String groupId) {
         ChatMoreFragment fragment = new ChatMoreFragment();
         Bundle args = new Bundle();
         args.putString(ARG_GROUP_ID, groupId);
-        args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -83,7 +81,6 @@ public class ChatMoreFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             groupId = getArguments().getString(ARG_GROUP_ID);
-            mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -172,7 +169,7 @@ public class ChatMoreFragment extends Fragment {
                     for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                         if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
                             final DataSnapshot userGroupsSnapshot = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups");
-
+                            Crashlytics.log("groupid: " + groupId);
                             if (userGroupsSnapshot.hasChild(groupId) && userGroupsSnapshot.child(groupId).hasChild("joined") && (boolean) userGroupsSnapshot.child(groupId).child("joined").getValue()) {
                                 //is joined
                                 flairEt.setEnabled(true);
