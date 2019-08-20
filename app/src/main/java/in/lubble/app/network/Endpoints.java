@@ -147,4 +147,7 @@ public interface Endpoints {
 
     @PATCH
     public Call<RewardsAirtableData> uploadRewardClaim(@Url String url, @Body RequestBody params);
+
+    @POST
+    public Call<RewardsAirtableData> uploadInstalledApps(@Url String url, @Body RequestBody params);
 }

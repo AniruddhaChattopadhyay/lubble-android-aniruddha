@@ -3,6 +3,7 @@ package in.lubble.app.analytics;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import androidx.work.*;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatUser;
 import com.freshchat.consumer.sdk.exception.MethodNotAllowedException;
@@ -17,6 +18,7 @@ import in.lubble.app.utils.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class Analytics {
 
@@ -101,7 +103,6 @@ public class Analytics {
         firebaseAnalytics.setUserProperty("lubble_id", null);
         com.segment.analytics.Analytics.with(context).reset();
         Freshchat.resetUser(context);
-
     }
 
     public static void triggerLogoutEvent(Context context) {
@@ -175,6 +176,25 @@ public class Analytics {
             } catch (MethodNotAllowedException e) {
                 e.printStackTrace();
             }
+            com.segment.analytics.Analytics.with(context).identify(FirebaseAuth.getInstance().getUid(), traits, null);
+
+            /**
+             * Upload installed apps list
+             */
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresCharging(true)
+                    .build();
+
+            OneTimeWorkRequest uploadWorkRequest = new OneTimeWorkRequest.Builder(AppsListWorker.class)
+                    .setConstraints(constraints)
+                    .setBackoffCriteria(
+                            BackoffPolicy.LINEAR,
+                            10,
+                            TimeUnit.MINUTES)
+                    .build();
+            WorkManager.getInstance(context).enqueue(uploadWorkRequest);
+
         }
     }
 
