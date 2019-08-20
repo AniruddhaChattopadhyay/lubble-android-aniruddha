@@ -47,6 +47,7 @@ import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.explore.ExploreFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
+import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
@@ -98,6 +99,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private BottomNavigationView bottomNavigation;
     private boolean isActive;
     private boolean isNewUserInThisLubble;
+    private static final int nav_item_leaderboard = 311;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -214,6 +216,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void initDrawer() {
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
+        final Menu menu = navigationView.getMenu();
+        final MenuItem item = menu.add(R.id.group_top, nav_item_leaderboard, 2, LubbleSharedPrefs.getInstance().getLubbleName() + " Leaderboard");
+        item.setIcon(R.drawable.ic_favorite_white_16dp);
+
         navigationView.setNavigationItemSelectedListener(this);
 
         View headerView = navigationView.inflateHeaderView(R.layout.nav_header_main);
@@ -693,6 +699,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 break;
             case R.id.nav_item_refer:
                 ReferralActivity.open(this, true);
+                break;
+            case nav_item_leaderboard:
+                LeaderboardActivity.open(this);
                 break;
             case R.id.nav_item_support:
                 Freshchat.showConversations(this);
