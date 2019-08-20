@@ -232,6 +232,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .circleCrop()
                 .into(navHeaderIv);
 
+        headerView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ProfileActivity.open(MainActivity.this, firebaseAuth.getUid());
+            }
+        });
+
         dpContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
