@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
-import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrlForGroup;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntentForGroup;
 
 public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
@@ -227,7 +227,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
                     userAdapter.addGroupMembersList(groupMembersMap);
 
                     sharingProgressDialog = new ProgressDialog(getContext());
-                    generateBranchUrl(getContext(), linkCreateListener);
+                    generateBranchUrlForGroup(getContext(), linkCreateListener, groupData);
                     initClickHandlers(groupData);
                 }
             }
