@@ -94,7 +94,7 @@ public class ReferralUtils {
             String message = FirebaseRemoteConfig.getInstance().getString(Constants.REFER_MSG);
             final String lubbleName = LubbleSharedPrefs.getInstance().getLubbleName();
             sharingIntent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(String.format(
-                    context.getString(R.string.refer_msg_group), groupData.getTitle(), lubbleName, lubbleName
+                    context.getString(R.string.refer_msg_group), groupData.getTitle(), lubbleName
             )) + sharingUrl);
             return sharingIntent;
         }
