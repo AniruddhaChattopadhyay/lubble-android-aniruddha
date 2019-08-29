@@ -1,6 +1,10 @@
 package in.lubble.app;
 
-import android.content.*;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -12,6 +16,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
@@ -21,6 +26,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.crashlytics.android.Crashlytics;
@@ -34,11 +40,21 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.segment.analytics.Traits;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
+
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
@@ -62,13 +78,22 @@ import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import it.sephiroth.android.library.xtooltip.ClosePolicy;
 import it.sephiroth.android.library.xtooltip.Tooltip;
-import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
-
-import static in.lubble.app.Constants.*;
-import static in.lubble.app.analytics.AnalyticsEvents.*;
+import static in.lubble.app.Constants.DELIVERY_FEE;
+import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
+import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
+import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
+import static in.lubble.app.Constants.QUIZ_RESULT_UI;
+import static in.lubble.app.Constants.REFER_MSG;
+import static in.lubble.app.Constants.REWARDS_EXPLAINER;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM_YES;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_SHOWN;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_STARS;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG_NEVER;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG_YES;
 import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -365,6 +390,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     // params are the deep linked params associated with the link that the user clicked -> was re-directed to this app
                     // params will be empty if no data found
                     Log.i("BRANCH SDK", referringParams.toString());
+                    final String referrerUid = referringParams.optString("referrer_uid");
+                    final String groupId = referringParams.optString("group_id");
+                    final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
+                    if (!TextUtils.isEmpty(referrerUid)) {
+                        prefs.setReferrerUid(referrerUid);
+                    }
+                    if (!TextUtils.isEmpty(groupId)) {
+                        prefs.setInvitedGroupId(groupId);
+                        processNewGroupInvite(prefs);
+                    }
                 } else {
                     Log.i("BRANCH SDK", error.getMessage());
                 }
@@ -374,12 +409,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         final LubbleSharedPrefs sharedPrefs = LubbleSharedPrefs.getInstance();
         if (!sharedPrefs.getInvitedGroupId().isEmpty()) {
-            final DatabaseReference inviteesRef = FirebaseDatabase.getInstance().getReference("users/" + sharedPrefs.getReferrerUid()
-                    + "/lubbles/" + sharedPrefs.requireLubbleId()).child("groups").child(sharedPrefs.getInvitedGroupId()).child("invitees");
-            inviteesRef.child(firebaseAuth.getUid()).setValue(Boolean.TRUE);
-            sharedPrefs.setInvitedGroupId("");
-            sharedPrefs.setReferrerUid("");
+            processNewGroupInvite(sharedPrefs);
         }
+    }
+
+    private void processNewGroupInvite(LubbleSharedPrefs prefs) {
+        final DatabaseReference inviteesRef = FirebaseDatabase.getInstance().getReference("users/" + prefs.getReferrerUid()
+                + "/lubbles/" + prefs.requireLubbleId()).child("groups").child(prefs.getInvitedGroupId()).child("invitees");
+        inviteesRef.child(firebaseAuth.getUid()).setValue(Boolean.TRUE);
+        prefs.setInvitedGroupId("");
+        prefs.setReferrerUid("");
     }
 
     private void handleExploreActivity() {

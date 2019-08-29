@@ -46,7 +46,7 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_lubble">LubbleActivity</string>
     <string name="notice_board">Notice Board</string>
-    <string name="about_svr">Saraswati Vihar is a residential area in North West Delhi near Pitampura.\n\nIt has been divided into five blocks from A to E. Each block has a dedicated and well maintained lush green park.\n\nA green belt spanning over 1.5 km goes through Saraswati Vihar which makes it one of the posh colonies of Delhi</string>
+    <string name="about_svr">Saraswati Vihar is a residential area in North West Delhi near Pitampura.\n\nIt has been divided into five blocks from A to E.</string>
     <string name="domestic_directory">Domestic Directory</string>
     <string name="update_dialog_title">Please Update App</string>
     <string name="update_dialog_msg">You haven\'t updated Lubble app in a while. Please download the latest update from play store.</string>

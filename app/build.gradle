@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 // make sure this line comes *after* you apply the Android plugin
-apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'io.fabric'
 
 android {
@@ -9,8 +8,8 @@ android {
         applicationId "in.lubble.app"
         minSdkVersion 17
         targetSdkVersion 26
-        versionCode 168
-        versionName "1.7.0-5"
+        versionCode 169
+        versionName "1.7.0-6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         //multiDexEnabled true
@@ -45,8 +44,7 @@ buildscript {
 
         // We recommend changing it to the latest version from our changelog:
         // https://docs.fabric.io/android/changelog.html#fabric-gradle-plugin
-        classpath 'io.fabric.tools:gradle:1.26.1'
-        classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.4'
+        classpath 'io.fabric.tools:gradle:1.31.0'
     }
 }
 
@@ -60,14 +58,14 @@ dependencies {
     implementation('com.crashlytics.sdk.android:crashlytics:2.9.0@aar') {
         transitive = true;
     }
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha03'
+    implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
     implementation 'com.google.android.material:material:1.0.0'
     //implementation 'androidx.multidex:multidex:2.0.1'
     // FirebaseUI for Firebase Realtime Database
     implementation 'com.firebaseui:firebase-ui-database:4.1.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.emoji:emoji:1.0.0'
-    implementation 'androidx.core:core:1.0.1'
+    implementation 'androidx.core:core:1.0.2'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
     implementation 'com.github.sharish:ShimmerRecyclerView:v1.3'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha3'
@@ -109,7 +107,7 @@ dependencies {
         exclude module: "support-v13"
     }
     annotationProcessor "com.github.hotchemi:permissionsdispatcher-processor:3.2.0"
-    annotationProcessor 'androidx.annotation:annotation:1.0.1'
+    annotationProcessor 'androidx.annotation:annotation:1.1.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'

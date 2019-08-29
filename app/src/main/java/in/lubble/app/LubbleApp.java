@@ -4,10 +4,12 @@ import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
+
 import androidx.core.app.NotificationCompat;
 import androidx.core.provider.FontRequest;
 import androidx.emoji.text.EmojiCompat;
 import androidx.emoji.text.FontRequestEmojiCompatConfig;
+
 import com.clevertap.android.sdk.ActivityLifecycleCallback;
 import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
@@ -17,6 +19,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 import com.segment.analytics.Analytics;
+
 import in.lubble.app.database.DbSingleton;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
