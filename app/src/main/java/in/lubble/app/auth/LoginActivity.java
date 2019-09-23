@@ -8,8 +8,10 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
@@ -18,24 +20,36 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.*;
+import com.google.firebase.auth.ActionCodeSettings;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import in.lubble.app.BaseActivity;
+import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
-import in.lubble.app.*;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.utils.FragUtils.addFrag;
@@ -159,15 +173,21 @@ public class LoginActivity extends BaseActivity {
                 FirebaseUser currentUser = firebaseAuth.getCurrentUser();
                 if (response.isNewUser()) {
                     // start registration flow
-                    if (currentUser.getProviders().get(0).equals(FacebookAuthProvider.PROVIDER_ID)) {
-                        registerSocialUser(response, currentUser, "?type=large");
-                    } else if (currentUser.getProviders().get(0).equals(GoogleAuthProvider.PROVIDER_ID)) {
-                        registerSocialUser(response, currentUser, "?sz=300");
-                    } else if (currentUser.getProviders().get(0).equals(PhoneAuthProvider.PROVIDER_ID)) {
-                        NameFrag nameFrag = NameFrag.newInstance();
-                        addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
-                    } else if (currentUser.getProviders().get(0).equals(EmailAuthProvider.PROVIDER_ID)) {
-                        registerSocialUser(response, currentUser, "");
+                    for (UserInfo user : currentUser.getProviderData()) {
+                        if (user.getProviderId().equals(FacebookAuthProvider.PROVIDER_ID)) {
+                            registerSocialUser(response, currentUser, "?type=large");
+                            break;
+                        } else if (user.getProviderId().equals(GoogleAuthProvider.PROVIDER_ID)) {
+                            registerSocialUser(response, currentUser, "?sz=300");
+                            break;
+                        } else if (user.getProviderId().equals(PhoneAuthProvider.PROVIDER_ID)) {
+                            NameFrag nameFrag = NameFrag.newInstance();
+                            addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
+                            break;
+                        } else if (user.getProviderId().equals(EmailAuthProvider.PROVIDER_ID)) {
+                            registerSocialUser(response, currentUser, "");
+                            break;
+                        }
                     }
                 } else {
                     // start signin flow: fetch lubble ID
