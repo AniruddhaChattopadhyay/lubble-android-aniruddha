@@ -7,22 +7,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.EventData;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static in.lubble.app.utils.DateTimeUtils.EVENT_DATE_TIME;
 import static in.lubble.app.utils.DateTimeUtils.getTimeFromLong;
@@ -118,10 +123,16 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     void addEvent(EventData eventData) {
         if (!eventDataList.contains(eventData)) {
-            if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
+            long timestampToCompare = eventData.getEndTimestamp() == 0L ? eventData.getStartTimestamp() : eventData.getEndTimestamp();
+            if (System.currentTimeMillis() < timestampToCompare) {
                 // upcoming event
                 insertWithSort(eventData, POS_DIV);
                 POS_DIV++;
+                // persist read event id
+                final LubbleSharedPrefs sharedPrefs = LubbleSharedPrefs.getInstance();
+                final Set<String> readEventSet = sharedPrefs.getEventSet();
+                readEventSet.add(eventData.getId());
+                sharedPrefs.setEventSet(readEventSet);
             } else {
                 // past event
                 eventDataList.add(POS_DIV + 1, eventData);

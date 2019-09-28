@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
@@ -20,9 +21,21 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
+
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
@@ -31,6 +44,7 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
+import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
@@ -42,9 +56,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.util.*;
-
-import static in.lubble.app.chat.ChatActivity.*;
+import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_DP_URL;
+import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_NAME;
+import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 
@@ -266,8 +283,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         getUserGroupsRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                // all done
                 if (totalUnreadCount == 0 && isAdded() && !LubbleSharedPrefs.getInstance().getIsRewardsOpened()) {
                     ((MainActivity) getActivity()).showRewardsTooltip();
+                }
+                if (totalUnreadCount == 0 && isAdded()) {
+                    showEventUnreadCount();
                 }
             }
 
@@ -365,6 +386,36 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     }
                 });
         map.put(getLubbleGroupsRef().child(groupId), joinedGroupListener);
+    }
+
+    private void showEventUnreadCount() {
+        getEventsRef().orderByChild("startTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (totalUnreadCount == 0 && isAdded()) {
+                    int upcomingEventsCount = 0;
+                    for (DataSnapshot child : dataSnapshot.getChildren()) {
+                        final EventData eventData = child.getValue(EventData.class);
+                        if (eventData != null) {
+                            eventData.setId(child.getKey());
+                            long timestampToCompare = eventData.getEndTimestamp() == 0L ? eventData.getStartTimestamp() : eventData.getEndTimestamp();
+                            if (timestampToCompare > System.currentTimeMillis()) {
+                                final Set<String> readEventSet = LubbleSharedPrefs.getInstance().getEventSet();
+                                if (!readEventSet.contains(eventData.getId())) {
+                                    upcomingEventsCount++;
+                                }
+                            }
+                        }
+                    }
+                    ((MainActivity) getActivity()).showEventsBadge(upcomingEventsCount);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override

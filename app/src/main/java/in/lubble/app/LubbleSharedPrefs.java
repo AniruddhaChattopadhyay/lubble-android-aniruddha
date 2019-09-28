@@ -2,8 +2,14 @@ package in.lubble.app;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import androidx.annotation.Nullable;
+
 import com.crashlytics.android.Crashlytics;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import in.lubble.app.utils.UserUtils;
 
 /**
@@ -41,6 +47,7 @@ public class LubbleSharedPrefs {
     private final String IS_REWARDS_EXPLAINER_SEEN = "IS_REWARDS_EXPLAINER_SEEN";
     private final String SHOW_RATING_DIALOG = "SHOW_RATING_DIALOG";
     private final String RATING_DIALOG_LAST_SHOWN = "RATING_DIALOG_LAST_SHOWN";
+    private final String READ_EVENTS = "READ_EVENTS";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -301,6 +308,14 @@ public class LubbleSharedPrefs {
 
     public boolean setSupportUid(String supportUid) {
         return preferences.edit().putString(SUPPORT_UID, supportUid).commit();
+    }
+
+    public Set<String> getEventSet() {
+        return new HashSet<>(preferences.getStringSet(READ_EVENTS, new HashSet<String>()));
+    }
+
+    public boolean setEventSet(Set<String> set) {
+        return preferences.edit().putStringSet(READ_EVENTS, set).commit();
     }
 
 }

@@ -581,7 +581,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     } else {
                         toolbarRewardsTv.setVisibility(View.GONE);
                     }
-                    showQuizBadge();
                 }
             }
         });
@@ -799,6 +798,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         BottomNavigationItemView itemView = (BottomNavigationItemView) v;
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
+        }
+    }
+
+    public void showEventsBadge(int count) {
+        BottomNavigationMenuView bottomNavigationMenuView =
+                (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+        View v = bottomNavigationMenuView.getChildAt(2);
+        BottomNavigationItemView itemView = (BottomNavigationItemView) v;
+
+        if (count > 0) {
+            View badge = LayoutInflater.from(this)
+                    .inflate(R.layout.unread_badge, bottomNavigationMenuView, false);
+            ((TextView) badge.findViewById(R.id.tv_count)).setText(String.valueOf(count));
+            itemView.addView(badge);
+        } else {
+            if (itemView != null && itemView.getChildAt(2) != null) {
+                itemView.removeViewAt(2);
+            }
         }
     }
 
