@@ -12,9 +12,21 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -22,13 +34,30 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.Group;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -38,24 +67,44 @@ import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.events.EventPickerActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
-import in.lubble.app.models.*;
+import in.lubble.app.models.ChatData;
+import in.lubble.app.models.DmData;
+import in.lubble.app.models.EventData;
+import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.DateTimeUtils;
-import permissions.dispatcher.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
-import static in.lubble.app.models.ChatData.*;
-import static in.lubble.app.utils.FileUtils.*;
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.models.ChatData.EVENT;
+import static in.lubble.app.models.ChatData.GROUP;
+import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.REPLY;
+import static in.lubble.app.models.ChatData.SYSTEM;
+import static in.lubble.app.models.ChatData.UNREAD;
+import static in.lubble.app.utils.FileUtils.createImageFile;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.FileUtils.getGalleryIntent;
+import static in.lubble.app.utils.FileUtils.getTakePhotoIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -64,7 +113,7 @@ import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
 @RuntimePermissions
-public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener {
+public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener, ChatUserTagsAdapter.OnUserTagClick {
 
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
@@ -89,7 +138,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private ImageView declineIv;
     private RelativeLayout composeContainer;
     private Group linkMetaContainer;
-    private RecyclerView chatRecyclerView;
+    private RecyclerView chatRecyclerView, userTagRecyclerView;
     private EditText newMessageEt;
     private ImageView sendBtn;
     private ImageView attachMediaBtn;
@@ -269,6 +318,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         sendBtnProgressBtn = view.findViewById(R.id.progress_bar_send);
         chatProgressBar = view.findViewById(R.id.progressbar_chat);
         paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
+        userTagRecyclerView = view.findViewById(R.id.rv_user_tag);
+        userTagRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        userTagRecyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL));
 
         groupMembersMap = new HashMap<>();
 
@@ -276,7 +328,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             showJoiningDialog();
         }
         sendBtn.setEnabled(false);
-        setupTogglingOfSendBtn();
+        newMessageEt.addTextChangedListener(textWatcher);
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
         joinBtn.setOnClickListener(this);
@@ -1213,35 +1265,89 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
     }
 
-    private void setupTogglingOfSendBtn() {
-        newMessageEt.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+    private final TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
 
-            }
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                sendBtn.setEnabled(editable.length() > 0 && editable.toString().trim().length() > 0);
-                final String extractedUrl = extractFirstLink(editable.toString());
-                if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl) && extractYoutubeId(extractedUrl) == null) {
-                    // ignore youtube URLs
-                    prevUrl = extractedUrl;
-                    linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
-                    linkMetaAsyncTask.execute();
-                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId) && !isValidString(attachedGroupId) && !isValidString(attachedEventId)) {
-                    linkMetaContainer.setVisibility(View.GONE);
-                    prevUrl = "";
-                    linkTitle.setText("");
-                    linkDesc.setText("");
+        @Override
+        public void afterTextChanged(Editable editable) {
+            final String inputString = editable.toString();
+            sendBtn.setEnabled(editable.length() > 0 && inputString.trim().length() > 0);
+            if (inputString.contains("@") && newMessageEt.getSelectionEnd() - inputString.indexOf("@") >= 3) {
+                final int startIndex = inputString.indexOf("@") + 1;
+                final int endIndex = inputString.indexOf(" ", startIndex);
+                String nameSubstring = "";
+                if (endIndex != -1) {
+                    nameSubstring = inputString.substring(startIndex, endIndex);
+                } else {
+                    nameSubstring = inputString.substring(startIndex);
                 }
+                userTagRecyclerView.setVisibility(View.VISIBLE);
+                final ChatUserTagsAdapter tagsAdapter = new ChatUserTagsAdapter(requireContext(), GlideApp.with(requireContext()), ChatFragment.this);
+                userTagRecyclerView.setAdapter(tagsAdapter);
+                fetchUsername(tagsAdapter, nameSubstring);
+            } else if (userTagRecyclerView.getVisibility() == View.VISIBLE) {
+                userTagRecyclerView.setVisibility(View.GONE);
             }
-        });
+
+            final String extractedUrl = extractFirstLink(inputString);
+            if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl) && extractYoutubeId(extractedUrl) == null) {
+                // ignore youtube URLs
+                prevUrl = extractedUrl;
+                linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
+                linkMetaAsyncTask.execute();
+            } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId) && !isValidString(attachedGroupId) && !isValidString(attachedEventId)) {
+                linkMetaContainer.setVisibility(View.GONE);
+                prevUrl = "";
+                linkTitle.setText("");
+                linkDesc.setText("");
+            }
+        }
+    };
+
+    @Override
+    public void onUserTagClick(ProfileInfo profileInfo) {
+        userTagRecyclerView.setVisibility(View.GONE);
+        newMessageEt.removeTextChangedListener(textWatcher);
+        newMessageEt.setTextKeepState(newMessageEt.getText().replace(newMessageEt.getText().toString().indexOf("@") + 1, newMessageEt.getSelectionEnd(), profileInfo.getName()));
+        newMessageEt.addTextChangedListener(textWatcher);
+    }
+
+    private void fetchUsername(final ChatUserTagsAdapter tagsAdapter, String substring) {
+        tagsAdapter.clear();
+        FirebaseDatabase.getInstance().getReference("users").orderByChild("info/name").startAt(substring).endAt(substring + "\uf8ff")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (isAdded()) {
+                            tagsAdapter.clear();
+                            final ArrayList<ProfileInfo> profileInfoList = new ArrayList<>();
+                            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                if (!(child.getValue() instanceof Boolean)) {
+                                    final ProfileData profileData = child.getValue(ProfileData.class);
+                                    if (profileData != null && profileData.getInfo() != null && !profileData.getIsDeleted()
+                                            && child.child("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + groupId + "/joined").getValue() == Boolean.TRUE) {
+                                        profileData.setId(child.getKey());
+                                        profileData.getInfo().setId(child.getKey());
+                                        profileInfoList.add(profileData.getInfo());
+                                    }
+                                }
+                            }
+                            tagsAdapter.replaceUserList(profileInfoList);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
     }
 
     @NonNull

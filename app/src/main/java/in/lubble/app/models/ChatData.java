@@ -1,6 +1,7 @@
 package in.lubble.app.models;
 
 import androidx.annotation.Nullable;
+
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
@@ -47,6 +48,7 @@ public class ChatData implements Serializable {
     private String pollQues = "";
     private HashMap<String, Integer> pollReceipts = new HashMap<>();
     private String attachedGroupId; // or attached event ID
+    private HashMap<String, Boolean> tagged; // <UID, true>
 
     @Override
     public boolean equals(Object obj) {
@@ -238,5 +240,13 @@ public class ChatData implements Serializable {
 
     public void setLinkPicUrl(String linkPicUrl) {
         this.linkPicUrl = linkPicUrl;
+    }
+
+    public HashMap<String, Boolean> getTagged() {
+        return tagged;
+    }
+
+    public void setTagged(HashMap<String, Boolean> tagged) {
+        this.tagged = tagged;
     }
 }
