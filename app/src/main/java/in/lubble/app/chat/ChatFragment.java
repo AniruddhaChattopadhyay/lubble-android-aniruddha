@@ -9,8 +9,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.Editable;
+import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.EasyEditSpan;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,6 +36,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.Group;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -201,6 +205,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedEventPicUrl;
     private Uri sharedImageUri;
     private ValueEventListener thisUserValueListener;
+    private HashMap<String, String> taggedMap; //<UID, Full Name>
 
     public ChatFragment() {
         // Required empty public constructor
@@ -1271,26 +1276,34 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
 
         @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
         }
 
         @Override
         public void afterTextChanged(Editable editable) {
             final String inputString = editable.toString();
             sendBtn.setEnabled(editable.length() > 0 && inputString.trim().length() > 0);
-            if (inputString.contains("@") && newMessageEt.getSelectionEnd() - inputString.indexOf("@") >= 3) {
-                final int startIndex = inputString.indexOf("@") + 1;
-                final int endIndex = inputString.indexOf(" ", startIndex);
-                String nameSubstring = "";
-                if (endIndex != -1) {
-                    nameSubstring = inputString.substring(startIndex, endIndex);
+
+            int selectionEnd = newMessageEt.getSelectionEnd();
+            String text = newMessageEt.getText().toString();
+            if (selectionEnd >= 0) {
+                // gives the substring from start to the current cursor pos
+                text = text.substring(0, selectionEnd);
+            }
+            String delimiter = " ";
+            int lastDelimiterPosition = text.lastIndexOf(delimiter);
+            String lastWord = lastDelimiterPosition == -1 ? text : text.substring(lastDelimiterPosition + delimiter.length());
+
+            if (lastWord.startsWith("@")) {
+                final String inputName = lastWord.substring(1);
+                if (inputName.length() > 2) {
+                    userTagRecyclerView.setVisibility(View.VISIBLE);
+                    final ChatUserTagsAdapter tagsAdapter = new ChatUserTagsAdapter(requireContext(), GlideApp.with(requireContext()), ChatFragment.this);
+                    userTagRecyclerView.setAdapter(tagsAdapter);
+                    fetchUsername(tagsAdapter, inputName);
                 } else {
-                    nameSubstring = inputString.substring(startIndex);
+                    userTagRecyclerView.setVisibility(View.GONE);
                 }
-                userTagRecyclerView.setVisibility(View.VISIBLE);
-                final ChatUserTagsAdapter tagsAdapter = new ChatUserTagsAdapter(requireContext(), GlideApp.with(requireContext()), ChatFragment.this);
-                userTagRecyclerView.setAdapter(tagsAdapter);
-                fetchUsername(tagsAdapter, nameSubstring);
             } else if (userTagRecyclerView.getVisibility() == View.VISIBLE) {
                 userTagRecyclerView.setVisibility(View.GONE);
             }
@@ -1314,7 +1327,40 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public void onUserTagClick(ProfileInfo profileInfo) {
         userTagRecyclerView.setVisibility(View.GONE);
         newMessageEt.removeTextChangedListener(textWatcher);
-        newMessageEt.setTextKeepState(newMessageEt.getText().replace(newMessageEt.getText().toString().indexOf("@") + 1, newMessageEt.getSelectionEnd(), profileInfo.getName()));
+
+        int selectionEnd = newMessageEt.getSelectionEnd();
+        String text = newMessageEt.getText().toString();
+        if (selectionEnd >= 0) {
+            // gives the substring from start to the current cursor pos
+            text = text.substring(0, selectionEnd);
+        }
+        String delimiter = " ";
+        int lastDelimiterPosition = text.lastIndexOf(delimiter);
+        String lastWord = lastDelimiterPosition == -1 ? text : text.substring(lastDelimiterPosition + delimiter.length());
+
+        if (lastWord.startsWith("@")) {
+            final String inputName = lastWord.substring(1);
+            int startPos = lastDelimiterPosition == -1 ? 1 : lastDelimiterPosition + 2;
+            newMessageEt.getText().replace(startPos, selectionEnd, profileInfo.getName());
+
+            Spannable spannable = newMessageEt.getText();
+            final ForegroundColorSpan[] spans = spannable.getSpans(0, spannable.length(), ForegroundColorSpan.class);
+            spannable.setSpan(spans, 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(
+                    new ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.colorAccent)),
+                    startPos,
+                    startPos + profileInfo.getName().length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+            spannable.setSpan(new EasyEditSpan(), 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            newMessageEt.setTextKeepState(spannable, TextView.BufferType.SPANNABLE);
+
+            if (taggedMap == null) {
+                taggedMap = new HashMap<>();
+            }
+            taggedMap.put(profileInfo.getId(), profileInfo.getName());
+        }
         newMessageEt.addTextChangedListener(textWatcher);
     }
 

@@ -48,7 +48,7 @@ public class ChatData implements Serializable {
     private String pollQues = "";
     private HashMap<String, Integer> pollReceipts = new HashMap<>();
     private String attachedGroupId; // or attached event ID
-    private HashMap<String, Boolean> tagged; // <UID, true>
+    private HashMap<String, String> tagged; // <UID, Full Name>
 
     @Override
     public boolean equals(Object obj) {
@@ -242,11 +242,11 @@ public class ChatData implements Serializable {
         this.linkPicUrl = linkPicUrl;
     }
 
-    public HashMap<String, Boolean> getTagged() {
+    public HashMap<String, String> getTagged() {
         return tagged;
     }
 
-    public void setTagged(HashMap<String, Boolean> tagged) {
+    public void setTagged(HashMap<String, String> tagged) {
         this.tagged = tagged;
     }
 }
