@@ -4,14 +4,6 @@ apply plugin: 'com.google.firebase.firebase-perf'
 apply plugin: 'io.fabric'
 
 android {
-    signingConfigs {
-        app {
-            storeFile file('C:\\Users\\ishaa\\AndroidProjects\\LubbleKaKeystore.jks')
-            storePassword 'AcrilaN543'
-            keyAlias = 'LubbleKiKey'
-            keyPassword 'AcrilaN543'
-        }
-    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "in.lubble.app"
@@ -21,7 +13,6 @@ android {
         versionName "1.7.0-7"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
-        signingConfig signingConfigs.app
         multiDexEnabled true
     }
     buildTypes {
