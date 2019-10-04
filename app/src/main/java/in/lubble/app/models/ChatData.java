@@ -48,7 +48,7 @@ public class ChatData implements Serializable {
     private String pollQues = "";
     private HashMap<String, Integer> pollReceipts = new HashMap<>();
     private String attachedGroupId; // or attached event ID
-    private HashMap<String, String> tagged; // <UID, Full Name>
+    private HashMap<String, String> tagged; // <UID, UserName>
 
     @Override
     public boolean equals(Object obj) {

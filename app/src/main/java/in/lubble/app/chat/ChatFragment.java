@@ -12,7 +12,6 @@ import android.text.Editable;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.text.style.EasyEditSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -81,6 +80,7 @@ import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.utils.AppNotifUtils;
+import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -205,7 +205,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedEventPicUrl;
     private Uri sharedImageUri;
     private ValueEventListener thisUserValueListener;
-    private HashMap<String, String> taggedMap; //<UID, Full Name>
+    private HashMap<String, String> taggedMap; //<UID, UserName>
 
     public ChatFragment() {
         // Required empty public constructor
@@ -1019,7 +1019,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
                 chatData.setIsDm(TextUtils.isEmpty(groupId));
-
+                if (taggedMap != null && !taggedMap.isEmpty()) {
+                    chatData.setTagged(taggedMap);
+                }
                 if (isValidString(attachedGroupId)) {
                     chatData.setType(GROUP);
                     chatData.setAttachedGroupId(attachedGroupId);
@@ -1277,6 +1279,32 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+            if (before > 0) {
+                // deleting
+
+                int selectionEnd = newMessageEt.getSelectionEnd();
+                String text = newMessageEt.getText().toString();
+                if (selectionEnd >= 0) {
+                    // gives the substring from start to the current cursor pos
+                    text = text.substring(0, selectionEnd);
+                }
+                String delimiter = " ";
+                int lastDelimiterPosition = text.lastIndexOf(delimiter);
+                String lastWord = lastDelimiterPosition == -1 ? text : text.substring(lastDelimiterPosition + delimiter.length());
+
+                if (lastWord.startsWith("@")) {
+                    int startPos = lastDelimiterPosition == -1 ? 1 : lastDelimiterPosition + 2;
+
+                    newMessageEt.removeTextChangedListener(textWatcher);
+                    Spannable spannable = newMessageEt.getText().replace(startPos, startPos + lastWord.length() - 1, "");
+                    final ForegroundColorSpan[] spans = spannable.getSpans(0, spannable.length(), ForegroundColorSpan.class);
+                    spannable.setSpan(spans, 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    newMessageEt.setTextKeepState(spannable, TextView.BufferType.SPANNABLE);
+                    newMessageEt.addTextChangedListener(textWatcher);
+                    taggedMap.remove(ChatUtils.getKeyByValue(taggedMap, lastWord));
+
+                }
+            }
         }
 
         @Override
@@ -1341,7 +1369,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (lastWord.startsWith("@")) {
             final String inputName = lastWord.substring(1);
             int startPos = lastDelimiterPosition == -1 ? 1 : lastDelimiterPosition + 2;
-            newMessageEt.getText().replace(startPos, selectionEnd, profileInfo.getName());
+            newMessageEt.getText().replace(startPos, selectionEnd, profileInfo.getUsername());
 
             Spannable spannable = newMessageEt.getText();
             final ForegroundColorSpan[] spans = spannable.getSpans(0, spannable.length(), ForegroundColorSpan.class);
@@ -1349,17 +1377,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             spannable.setSpan(
                     new ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.colorAccent)),
                     startPos,
-                    startPos + profileInfo.getName().length(),
+                    startPos + profileInfo.getUsername().length(),
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             );
-            spannable.setSpan(new EasyEditSpan(), 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             newMessageEt.setTextKeepState(spannable, TextView.BufferType.SPANNABLE);
 
             if (taggedMap == null) {
                 taggedMap = new HashMap<>();
             }
-            taggedMap.put(profileInfo.getId(), profileInfo.getName());
+            taggedMap.put(profileInfo.getId(), profileInfo.getUsername());
         }
         newMessageEt.addTextChangedListener(textWatcher);
     }
