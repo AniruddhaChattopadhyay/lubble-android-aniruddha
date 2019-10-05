@@ -15,9 +15,21 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.text.style.URLSpan;
+import android.text.util.Linkify;
 import android.util.Log;
-import android.view.*;
-import android.widget.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +39,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -37,7 +50,18 @@ import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -53,16 +77,29 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.utils.*;
+import in.lubble.app.utils.ChatUtils;
+import in.lubble.app.utils.DateTimeUtils;
+import in.lubble.app.utils.FileUtils;
+import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.UiUtils;
+import in.lubble.app.utils.YoutubeData;
+import in.lubble.app.utils.YoutubeUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
-import static in.lubble.app.models.ChatData.*;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerInfoRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
+import static in.lubble.app.models.ChatData.EVENT;
+import static in.lubble.app.models.ChatData.GROUP;
+import static in.lubble.app.models.ChatData.HIDDEN;
+import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.REPLY;
+import static in.lubble.app.models.ChatData.SYSTEM;
+import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.FileUtils.deleteCache;
 import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
@@ -162,7 +199,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void bindSentChatViewHolder(RecyclerView.ViewHolder holder, int position) {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
-        ChatData chatData = chatDataList.get(position);
+        final ChatData chatData = chatDataList.get(position);
 
         final String authorUid = chatData.getAuthorUid();
         if (!chatData.getIsDm())
@@ -211,6 +248,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
         }
         sentChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.white));
+
+        Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
+        String atMentionScheme = "lubble://profile/";
+
+        Linkify.TransformFilter transformFilter = new Linkify.TransformFilter() {
+            //skip the first character to filter out '@'
+            public String transformUrl(final Matcher match, String url) {
+                return ChatUtils.getKeyByValue(chatData.getTagged(), match.group(1));
+            }
+        };
+
+        Linkify.addLinks(sentChatViewHolder.messageTv, Linkify.ALL);
+        Linkify.addLinks(sentChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
+
         if (chatData.getLubbCount() == 0) {
             sentChatViewHolder.lubbCount.setText("");
         } else {
@@ -348,7 +399,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
-        ChatData chatData = chatDataList.get(position);
+        final ChatData chatData = chatDataList.get(position);
 
         if (!chatData.getIsDm()) {
             showDpAndName(recvdChatViewHolder, chatData);
@@ -381,6 +432,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }
         recvdChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+
+        Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
+        String atMentionScheme = "lubble://profile/";
+
+        Linkify.TransformFilter transformFilter = new Linkify.TransformFilter() {
+            //skip the first character to filter out '@'
+            public String transformUrl(final Matcher match, String url) {
+                return ChatUtils.getKeyByValue(chatData.getTagged(), match.group(1));
+            }
+        };
+
+        Linkify.addLinks(recvdChatViewHolder.messageTv, Linkify.ALL);
+        Linkify.addLinks(recvdChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
+
         recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
         if (chatData.getLubbCount() == 0) {
             recvdChatViewHolder.lubbCount.setText("");

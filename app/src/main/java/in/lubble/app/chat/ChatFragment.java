@@ -1301,8 +1301,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     spannable.setSpan(spans, 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     newMessageEt.setTextKeepState(spannable, TextView.BufferType.SPANNABLE);
                     newMessageEt.addTextChangedListener(textWatcher);
-                    taggedMap.remove(ChatUtils.getKeyByValue(taggedMap, lastWord));
-
+                    if (taggedMap != null) {
+                        taggedMap.remove(ChatUtils.getKeyByValue(taggedMap, lastWord));
+                    }
                 }
             }
         }
@@ -1394,7 +1395,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private void fetchUsername(final ChatUserTagsAdapter tagsAdapter, String substring) {
         tagsAdapter.clear();
         FirebaseDatabase.getInstance().getReference("users").orderByChild("info/name").startAt(substring).endAt(substring + "\uf8ff")
-                .addValueEventListener(new ValueEventListener() {
+                .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (isAdded()) {
