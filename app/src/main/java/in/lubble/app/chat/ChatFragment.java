@@ -1274,7 +1274,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
         }
 
         @Override
@@ -1302,7 +1302,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     newMessageEt.setTextKeepState(spannable, TextView.BufferType.SPANNABLE);
                     newMessageEt.addTextChangedListener(textWatcher);
                     if (taggedMap != null) {
-                        taggedMap.remove(ChatUtils.getKeyByValue(taggedMap, lastWord));
+                        taggedMap.remove(ChatUtils.getKeyByValue(taggedMap, lastWord.substring(1)));
                     }
                 }
             }

@@ -38,7 +38,7 @@ public class ChatUtils {
     @Nullable
     public static String getKeyByValue(Map<String, String> map, String value) {
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (value.equalsIgnoreCase(entry.getValue())) {
+            if (entry.getValue().contains(value)) {
                 return entry.getKey();
             }
         }
