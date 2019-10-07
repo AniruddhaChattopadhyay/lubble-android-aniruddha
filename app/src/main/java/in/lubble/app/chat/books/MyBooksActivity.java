@@ -6,17 +6,24 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
+import in.lubble.app.models.airtable_pojo.AirtableBooksData;
+import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;

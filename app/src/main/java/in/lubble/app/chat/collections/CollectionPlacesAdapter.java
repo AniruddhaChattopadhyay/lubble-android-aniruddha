@@ -12,17 +12,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+
+import java.util.Calendar;
+import java.util.List;
+
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.models.PlacesData;
+import in.lubble.app.models.PlacesRecordData;
 import in.lubble.app.utils.StringUtils;
-
-import java.util.Calendar;
-import java.util.List;
 
 public class CollectionPlacesAdapter extends RecyclerView.Adapter<CollectionPlacesAdapter.CollectionViewHolder> {
 
