@@ -7,18 +7,21 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -30,9 +33,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.GoingStatsActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -44,12 +53,11 @@ import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -70,6 +78,7 @@ public class EventInfoActivity extends BaseActivity {
     private TextView eventNameTv;
     private TextView goingHintTv;
     private ImageView maybeIcon;
+    private ImageView goingPersonOne, goingPersonTwo, goingPersonThree;
     private TextView maybeHintTv;
     private TextView finalMarkedStatus;
     private LinearLayout goingContainer;
@@ -137,12 +146,16 @@ public class EventInfoActivity extends BaseActivity {
         ticketCountTv = findViewById(R.id.tv_ticket_count);
         luckyDrawHint = findViewById(R.id.lucky_draw_hint);
         descTv = findViewById(R.id.tv_desc);
+        goingPersonOne = findViewById(R.id.tv_stats_one);
+        goingPersonTwo = findViewById(R.id.tv_stats_two);
+        goingPersonThree = findViewById(R.id.tv_stats_three);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.joining_group);
         progressDialog.setMessage(getString(R.string.all_please_wait));
 
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
+        // Log.i("TejasEIA",eventId);
 
         eventRef = getEventsRef().child(eventId);
 
@@ -236,6 +249,60 @@ public class EventInfoActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         fetchEventInfo();
+        fetchGoingInfo();
+        statsTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(EventInfoActivity.this, GoingStatsActivity.class);
+                intent.putExtra("KEY_EVENT_ID", eventId);
+                startActivity(intent);
+                EventInfoActivity.this.finish();
+            }
+        });
+    }
+
+    private void fetchGoingInfo() {
+        final int[] countImg = {0};
+        FirebaseDatabase.getInstance().getReference().child("lubbles/DEV/events").child(eventId).child("members").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
+                    //Log.i("Tejas",dataSnapshot1.getKey());
+                    FirebaseDatabase.getInstance().getReference().child("users").child(dataSnapshot1.getKey()).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            //Log.i("Tejas",dataSnapshot.child("info").toString());
+                            if (dataSnapshot.child("info").child("thumbnail").exists()) {
+                                countImg[0]++;
+                                if (countImg[0] == 1) {
+                                    //Log.i("Tejas",dataSnapshot.child("info").child("thumbnail").getValue(String.class));
+                                    GlideApp.with(getApplicationContext()).load(dataSnapshot.child("info").child("thumbnail").getValue(String.class)).placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(goingPersonOne);
+                                    goingPersonOne.setVisibility(View.VISIBLE);
+                                } else if (countImg[0] == 2) {
+                                    //Log.i("Tejas",dataSnapshot.child("info").child("thumbnail").getValue(String.class));
+                                    GlideApp.with(getApplicationContext()).load(dataSnapshot.child("info").child("thumbnail").getValue(String.class)).placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(goingPersonTwo);
+                                    goingPersonTwo.setVisibility(View.VISIBLE);
+                                } else if (countImg[0] == 3) {
+                                    //Log.i("Tejas",dataSnapshot.child("info").child("thumbnail").getValue(String.class));
+                                    GlideApp.with(getApplicationContext()).load(dataSnapshot.child("info").child("thumbnail").getValue(String.class)).placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(goingPersonThree);
+                                    goingPersonThree.setVisibility(View.VISIBLE);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                            Log.i("TejasInternal", databaseError.getMessage());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.i("Tejas error", databaseError.getMessage());
+            }
+        });
     }
 
     private boolean checkEventAdmin() {
