@@ -236,5 +236,7 @@
 
     <string name="freshchat_file_provider_authority">in.lubble.app.provider</string>
     <string name="freshchat_campaign_notification_channel_name">Support messages</string>
+    <string name="click_group_info">Click here for group info</string>
+    <string name="members_count">%d members</string>
 
 </resources>
