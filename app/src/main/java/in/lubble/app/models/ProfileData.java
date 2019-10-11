@@ -2,6 +2,8 @@ package in.lubble.app.models;
 
 import androidx.annotation.Nullable;
 import com.google.firebase.database.Exclude;
+
+import in.lubble.app.profile.InstagramLoginState;
 import in.lubble.app.utils.DateTimeUtils;
 
 import java.util.Calendar;
@@ -14,6 +16,7 @@ public class ProfileData {
 
     private String id = "";
     private ProfileInfo info;
+    private InstagramLoginState insta;
     private String profilePic;
     private String coverPic;
     private String locality;
@@ -98,7 +101,9 @@ public class ProfileData {
     public ProfileInfo getInfo() {
         return info;
     }
-
+    public InstagramLoginState getInsta(){
+        return insta;
+    }
     public void setInfo(ProfileInfo profileInfo) {
         this.info = profileInfo;
     }

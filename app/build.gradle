@@ -133,6 +133,8 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation project(path: ':libraries:ratingdialog')
+    implementation 'com.squareup.okhttp:okhttp:2.3.0'
+    implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
 }
 
 

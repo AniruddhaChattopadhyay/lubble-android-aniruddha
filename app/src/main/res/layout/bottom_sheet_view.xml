@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="left"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WHAT DO YOU WANT TO DO?"
+        android:textSize="25sp" />
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:clickable="true"
+        android:id="@+id/goto_insta">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/instagram_icon"
+            android:paddingTop="4dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:textSize="20sp"
+            android:text="View Profile" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:clickable="true"
+        android:id="@+id/unlink_insta">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/logout_icon"
+            android:paddingTop="4dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:textSize="20sp"
+            android:text="Unlink Instagram" />
+    </LinearLayout>
+
+</LinearLayout>

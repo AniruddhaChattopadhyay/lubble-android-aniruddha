@@ -1,5 +1,4 @@
 <resources>
 
     <string name="freshchat_file_provider_authority">in.lubble.app.dev.provider</string>
-
 </resources>

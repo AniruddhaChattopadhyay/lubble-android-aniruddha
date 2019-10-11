@@ -450,7 +450,6 @@ public class BookCheckoutActiv extends BaseActivity {
     }
 
     private void openHelpBottomSheet() {
-
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
         View sheetView = getLayoutInflater().inflate(R.layout.help_bottom_sheet, null);
         bottomSheetDialog.setContentView(sheetView);
