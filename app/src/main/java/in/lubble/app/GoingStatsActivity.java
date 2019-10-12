@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,6 +24,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import in.lubble.app.events.EventInfoActivity;
+import in.lubble.app.profile.ProfileActivity;
 
 public class GoingStatsActivity extends BaseActivity {
 
@@ -40,7 +42,7 @@ public class GoingStatsActivity extends BaseActivity {
         setContentView(R.layout.activity_going_stats);
 
 
-        Intent intent = getIntent();
+        final Intent intent = getIntent();
         eventId = intent.getStringExtra("KEY_EVENT_ID");
 
         recyclerView = findViewById(R.id.goingStatsRecyclerView);
@@ -48,7 +50,31 @@ public class GoingStatsActivity extends BaseActivity {
         goingStatsAdapter = new GoingStatsAdapter(getApplicationContext(), goingStatsModelList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         recyclerView.setAdapter(goingStatsAdapter);
+        recyclerView.addOnItemTouchListener(new GoingStatsRecyclerViewClickListener(getApplicationContext(), recyclerView, new GoingStatsRecyclerViewClickListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                GoingStatsModel goingStatsModel = goingStatsModelList.get(position);
+                //Toast.makeText(getApplicationContext(),goingStatsModel.getUid(),Toast.LENGTH_LONG).show();
+                if(!goingStatsModel.getName().isEmpty())
+                {
+                    Intent intent1 = new Intent(GoingStatsActivity.this, ProfileActivity.class);
+                    intent1.putExtra("profileActivUserId",goingStatsModel.getUid());
+                    startActivity(intent1);
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(),"User doesn't exist",Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        }));
+
 
         toolbar = findViewById(R.id.goingStatsToolbar);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -94,7 +120,7 @@ public class GoingStatsActivity extends BaseActivity {
                             Collections.sort(goingStatsModelList, new Comparator<GoingStatsModel>() {
                                 @Override
                                 public int compare(GoingStatsModel o1, GoingStatsModel o2) {
-                                    return o2.getStats().compareTo(o1.getStats());
+                                    return o1.getStats().compareTo(o2.getStats());
                                 }
                             });
                             goingStatsAdapter.notifyDataSetChanged();

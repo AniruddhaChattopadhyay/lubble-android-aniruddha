@@ -11,9 +11,8 @@
         android:id="@+id/goingStatsToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="@color/white"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:titleTextColor="@color/white"
         tools:title="@string/app_name" />
 
     <androidx.recyclerview.widget.RecyclerView

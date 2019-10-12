@@ -6,7 +6,7 @@ apply plugin: 'io.fabric'
 android {
     signingConfigs {
         app {
-            storeFile file('C:\\Users\\ishaa\\AndroidProjects\\LubbleKaKeystore.jks')
+//            storeFile file('C:\\Users\\ishaa\\AndroidProjects\\LubbleKaKeystore.jks')
             storePassword 'AcrilaN543'
             keyAlias = 'LubbleKiKey'
             keyPassword 'AcrilaN543'
