@@ -10,33 +10,42 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.*;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksFields;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
-import in.lubble.app.chat.books.pojos.BookItem;
-import in.lubble.app.chat.books.pojos.BooksData;
-import in.lubble.app.chat.books.pojos.IndustryIdentifier;
-import in.lubble.app.chat.books.pojos.VolumeInfo;
+import in.lubble.app.models.airtable_pojo.AirtableBooksFields;
+import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
+import in.lubble.app.models.pojos.BookItem;
+import in.lubble.app.models.pojos.BooksData;
+import in.lubble.app.models.pojos.IndustryIdentifier;
+import in.lubble.app.models.pojos.VolumeInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
-import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.HashMap;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.chat.books.MyBooksActivity.ARG_SELECT_BOOK;

@@ -1,4 +1,4 @@
-package in.lubble.app.chat.books.airtable_pojo;
+package in.lubble.app.models.airtable_pojo;
 
 import com.google.gson.annotations.SerializedName;
 
