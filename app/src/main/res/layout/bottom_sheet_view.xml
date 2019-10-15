@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="left"
     android:orientation="vertical"
     android:padding="16dp">
@@ -9,7 +10,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="WHAT DO YOU WANT TO DO?"
+        android:text="Instagram Settings"
         android:textSize="25sp" />
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
@@ -22,7 +23,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/instagram_icon"
+            app:srcCompat="@drawable/ic_instagram_icon"
             android:paddingTop="4dp"/>
         <TextView
             android:layout_width="wrap_content"
@@ -42,7 +43,7 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/logout_icon"
+            app:srcCompat="@drawable/ic_logout_icon"
             android:paddingTop="4dp"/>
         <TextView
             android:layout_width="wrap_content"

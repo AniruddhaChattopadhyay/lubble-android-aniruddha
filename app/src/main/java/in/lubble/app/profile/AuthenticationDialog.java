@@ -20,10 +20,10 @@ public class AuthenticationDialog extends Dialog {
     public AuthenticationDialog(@NonNull Context context, AuthenticationListener listener) {
         super(context);
         this.listener = listener;
-        this.redirect_url = context.getResources().getString(R.string.redirect_url);
-        this.request_url = context.getResources().getString(R.string.base_url) +
+        this.redirect_url = context.getResources().getString(R.string.insta_redirect_url);
+        this.request_url = context.getResources().getString(R.string.insta_base_url) +
                 "oauth/authorize/?client_id=" +
-                context.getResources().getString(R.string.client_id) +
+                context.getResources().getString(R.string.insta_client_id) +
                 "&redirect_uri=" + redirect_url +
                 "&response_type=token&display=touch&scope=basic";
     }

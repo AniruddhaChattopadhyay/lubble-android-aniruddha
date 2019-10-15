@@ -14,6 +14,25 @@ public class ProfileInfo {
     private String thumbnail;
     private String badge;
 
+    //public String insta_handle;
+    //public boolean insta_linked;
+
+//    public String getInsta_handle() {
+//        return insta_handle;
+//    }
+//
+//    public void setInsta_handle(String insta_handle) {
+//        this.insta_handle = insta_handle;
+//    }
+//
+//    public boolean isInsta_linked() {
+//        return insta_linked;
+//    }
+//
+//    public void setInsta_linked(boolean insta_linked) {
+//        this.insta_linked = insta_linked;
+//    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ProfileInfo) {

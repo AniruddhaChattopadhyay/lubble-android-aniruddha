@@ -241,8 +241,8 @@
 
 
     <!-- instagram addition -->
-    <string name="client_id" translatable="false">47fd39a2acc14d66934ded5aa29d1d29</string>
-    <string name="redirect_url" translatable="false">https://lubble.in</string>
-    <string name="base_url" translatable="false">https://api.instagram.com/</string>
-    <string name="get_user_info_url" translatable="false">https://api.instagram.com/v1/users/self/?access_token=</string>
+    <string name="insta_client_id" translatable="false">47fd39a2acc14d66934ded5aa29d1d29</string>
+    <string name="insta_redirect_url" translatable="false">https://lubble.in</string>
+    <string name="insta_base_url" translatable="false">https://api.instagram.com/</string>
+    <string name="insta_get_user_info_url" translatable="false">https://api.instagram.com/v1/users/self/?access_token=</string>
 </resources>

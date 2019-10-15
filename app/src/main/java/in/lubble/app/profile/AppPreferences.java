@@ -4,16 +4,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 public class AppPreferences {
-    public static final String APP_PREFERENCES_FILE_NAME = "userdata";
-    public static final String USER_ID = "userID";
-    public static final String TOKEN = "token";
-    public static final String PROFILE_PIC = "profile_pic";
-    public static final String USER_NAME = "username";
+    public static final String INSTA_APP_PREFERENCES_FILE_NAME = "userdata";
+    public static final String INSTA_USER_ID = "userID";
+    public static final String INSTA_TOKEN = "token";
+    public static final String INSTA_PROFILE_PIC = "profile_pic";
+    public static final String INSTA_USER_NAME = "username";
 
     private SharedPreferences preferences;
 
     public AppPreferences(Context context) {
-        this.preferences = context.getSharedPreferences(APP_PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
+        this.preferences = context.getSharedPreferences(INSTA_APP_PREFERENCES_FILE_NAME, Context.MODE_PRIVATE);
     }
 
     public String getString(String key) {

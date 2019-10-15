@@ -1,13 +1,12 @@
 package in.lubble.app.profile;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -18,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -39,34 +37,18 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.squareup.picasso.Picasso;
-
-
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.InstaResponseData;
+import in.lubble.app.models.InstagramLoginState;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -78,7 +60,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -93,7 +74,7 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
     private static final String TAG = "ProfileFrag";
     private static final String ARG_USER_ID = "arg_user_id";
 
-    private String insta_handle_cloud;
+    private String insta_handle_cloud=null;
     private InstagramLoginState instagramLoginState;
 
     private View rootView;
@@ -121,19 +102,15 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
     private ProgressDialog sharingProgressDialog;
     private GroupsAdapter groupsAdapter;
     private ConstraintLayout statsContainer;
-
-    private String token = null;
-    private AppPreferences appPreferences = null;
     private AuthenticationDialog authenticationDialog = null;
     private Button instaBtn = null;
-
+    private String INSTA_TOKEN = "token";
     ImageView genderIv;
     TextView genderTv;
     ImageView businessIv;
     TextView businessTv;
     ImageView educationIv;
     TextView educationTv;
-    private boolean insta_link_status;
     public ProfileFrag() {
         // Required empty public constructor
     }
@@ -189,131 +166,6 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
         Log.d("database_uid",RealtimeDbHelper.getThisUserRef().toString());//whole link to the user we are logged in as
         Log.d("uid",userId);//user we are currently on the profile of
         Log.d("uid_this",FirebaseAuth.getInstance().getUid());//the user we are logged in as
-
-        //if owner access his profile then the below code is executed
-        if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid()))
-        {
-            instaBtn.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-
-                    if(token!=null)
-                    {
-                        //insta_logout();
-                        //if the owner has already linked insta then on click of the instaBtn BottomSheet will be called
-                        CreateBottomSheetDialog();
-                    }
-                    else {
-                        //if the owner has not linked insta then this part of the code is executed
-                        authenticationDialog = new AuthenticationDialog(getContext(), ProfileFrag.this);
-                        authenticationDialog.setCancelable(true);
-                        authenticationDialog.show();
-                    }
-                }
-            });
-            appPreferences = new AppPreferences(getContext());
-            token = appPreferences.getString(AppPreferences.TOKEN);
-            if (token != null) {
-                getUserInfoByAccessToken(token);
-            }
-        }
-        //if a person open another persons profile page then below code is executed
-        else
-        {
-            //placing the insta button correctly
-            float dip_left = 280f;
-            float dip_right = 14f;
-            Resources r = getResources();
-            float px_left = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    dip_left,
-                    r.getDisplayMetrics()
-            );
-            float px_right = TypedValue.applyDimension(
-                    TypedValue.COMPLEX_UNIT_DIP,
-                    dip_right,
-                    r.getDisplayMetrics()
-            );
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) instaBtn.getLayoutParams();
-            params.leftMargin = (int)px_left;
-            params.rightMargin = (int) px_right;
-            instaBtn.setLayoutParams(params);
-            RealtimeDbHelper.getUserRef(userId).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    //checking whether firebase contains intagram info of this user
-                    if (dataSnapshot.hasChild("instagram") ) {
-                        DatabaseReference insta_linked = RealtimeDbHelper.getUserRef(userId).child("instagram").child("insta_linked");
-
-                        insta_linked.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                insta_link_status = dataSnapshot.getValue(boolean.class);
-                                //checking whether the person wants other to see his insta or not if yes then below code is executed setting up the instaBtn view
-                                if(insta_link_status ) {
-                                    DatabaseReference insta_handle_ref = RealtimeDbHelper.getUserRef(userId).child("instagram").child("insta_handle");
-
-                                    insta_handle_ref.addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            insta_handle_cloud = dataSnapshot.getValue(String.class);
-                                            instaBtn.setText(insta_handle_cloud);
-                                            instaBtn.setOnClickListener(new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View v) {
-                                                    Uri uri = Uri.parse("http://instagram.com/_u/"+insta_handle_cloud);
-                                                    Intent i= new Intent(Intent.ACTION_VIEW,uri);
-
-                                                    i.setPackage("com.instagram.android");
-
-                                                    try {
-                                                        startActivity(i);
-                                                    } catch (ActivityNotFoundException e) {
-
-                                                        startActivity(new Intent(Intent.ACTION_VIEW,
-                                                                Uri.parse("http://instagram.com/xxx")));
-                                                    }
-                                                }
-                                            });
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-                                    });
-                                }
-                                else{
-                                    instaBtn.setVisibility(View.INVISIBLE);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
-
-                    }
-                    //if the person doesn't want others to see his instagram then instaBtn is set to invisible
-                    else
-                    {
-                        instaBtn.setVisibility(View.INVISIBLE);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-        }
-
-
-
-
-
-
-        //*************************************************
 
         sharingProgressDialog = new ProgressDialog(getContext());
         generateBranchUrl(getContext(), linkCreateListener);
@@ -389,42 +241,6 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
         return rootView;
     }
 
-    private void CreateBottomSheetDialog() {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
-        View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_view, null);
-        LinearLayout goto_insta = sheetView.findViewById(R.id.goto_insta);;
-        LinearLayout unlink_insta = sheetView.findViewById(R.id.unlink_insta);
-        bottomSheetDialog.setContentView(sheetView);
-        bottomSheetDialog.show();
-        goto_insta.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                {
-                        Uri uri = Uri.parse("http://instagram.com/_u/"+insta_handle_cloud);
-                        Intent i= new Intent(Intent.ACTION_VIEW,uri);
-
-                        i.setPackage("com.instagram.android");
-
-                        try {
-                            startActivity(i);
-                        } catch (ActivityNotFoundException e) {
-
-                            startActivity(new Intent(Intent.ACTION_VIEW,
-                                    Uri.parse("http://instagram.com/xxx")));
-                        }
-                        bottomSheetDialog.dismiss();
-                }
-            }
-        });
-
-        unlink_insta.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                insta_logout();
-                bottomSheetDialog.dismiss();
-            }
-        });
-    }
     @Override
     public void onStart() {
         super.onStart();
@@ -542,7 +358,70 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null) {
+                if (profileData != null)
+                {
+                    //If block is executed if the person has linked their instagram already and firebase has their insta handle
+                    if(profileData.getInstagram()!=null)
+                    {
+                        insta_handle_cloud = profileData.getInstagram().getInsta_handle();
+
+                        //if owner access his profile then the below code is executed
+                         if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid()))
+                         {  instaBtn.setVisibility(View.VISIBLE);
+                            instaBtn.setText(profileData.getInstagram().getInsta_handle());
+                            instaBtn.setOnClickListener(new View.OnClickListener() {
+                                public void onClick(View v) {
+                                    CreateBottomSheetDialog();
+                                }
+                            });
+
+                        }
+                        //if a person open another persons profile page then below code is executed
+                         else
+                        {
+                            //placing the instagram button correctly
+                            float dip_left = 280f;
+                            float dip_right = 14f;
+                            Resources r = getResources();
+                            float px_left = TypedValue.applyDimension(
+                                    TypedValue.COMPLEX_UNIT_DIP,
+                                    dip_left,
+                                    r.getDisplayMetrics()
+                            );
+                            float px_right = TypedValue.applyDimension(
+                                    TypedValue.COMPLEX_UNIT_DIP,
+                                    dip_right,
+                                    r.getDisplayMetrics()
+                            );
+                            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) instaBtn.getLayoutParams();
+                            params.leftMargin = (int)px_left;
+                            params.rightMargin = (int) px_right;
+                            instaBtn.setLayoutParams(params);
+
+                            instaBtn.setText(insta_handle_cloud);
+                            instaBtn.setVisibility(View.VISIBLE);
+                            instaBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    GoToInstagram();
+                                }
+                            });
+                        }
+                    }
+                    else{
+                        if(userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid()))
+                        {
+                            instaBtn.setVisibility(View.VISIBLE);
+                            instaBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    authenticationDialog = new AuthenticationDialog(getContext(), ProfileFrag.this);
+                                    authenticationDialog.setCancelable(true);
+                                    authenticationDialog.show();
+                                }
+                            });
+                        }
+                    }
                     userName.setText(profileData.getInfo().getName());
                     if (!TextUtils.isEmpty(profileData.getInfo().getBadge())) {
                         badgeTv.setVisibility(View.VISIBLE);
@@ -688,137 +567,96 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
         userRef.removeEventListener(valueEventListener);
     }
 
-    //***********************************************************
-    //insta integration code
-    public void insta_login() {
-//        Log.d("instalogin","************************************here at instalogin**********************");
-//        RealtimeDbHelper.getThisUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//
-//                for (DataSnapshot snap: dataSnapshot.getChildren()) {
-//                    if(snap.getKey().equals("instagram")) {
-//                        Log.d("instalogin","found instagram");
-//                        snap.getRef().removeValue();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//            }
-//        });
-        RealtimeDbHelper.getThisUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
+    private void CreateBottomSheetDialog() {
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
+        View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_view, null);
+        LinearLayout goto_insta = sheetView.findViewById(R.id.goto_insta);;
+        LinearLayout unlink_insta = sheetView.findViewById(R.id.unlink_insta);
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
+        goto_insta.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //Checking if our database already has the instagram information if not then in the else part we send the info obtained from the token from instagram
-                if (dataSnapshot.hasChild("instagram")) {
-                    try {
-                        RealtimeDbHelper.getThisUserRef().child("instagram").child("insta_linked").setValue("true");
-                    }catch (Exception e){
-                        e.printStackTrace();
-                    }
-                    DatabaseReference insta_handle_ref = RealtimeDbHelper.getThisUserRef().child("instagram").child("insta_handle");
-                    insta_handle_ref.addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            insta_handle_cloud = dataSnapshot.getValue(String.class);
-                            instaBtn.setText(insta_handle_cloud);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-            }
-
-                else
+            public void onClick(View v) {
                 {
-                    Map<String, Object> instagram_update = new HashMap<>();
-                    instagram_update.put("instagram", instagramLoginState);
-                    RealtimeDbHelper.getThisUserRef().updateChildren(instagram_update);
-                    instaBtn.setText(instagramLoginState.insta_handle);
+                    GoToInstagram();
+                    bottomSheetDialog.dismiss();
                 }
             }
+        });
 
+        unlink_insta.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            public void onClick(View v) {
+                insta_unlink();
+                bottomSheetDialog.dismiss();
             }
         });
     }
 
-    public void insta_logout() {
-        instaBtn.setText("INSTAGRAM");
 
-        token = null;
-        appPreferences.clear();
+    public void GoToInstagram(){
+        Uri uri = Uri.parse("http://instagram.com/_u/"+insta_handle_cloud);
+        Intent intent= new Intent(Intent.ACTION_VIEW,uri);
+
+        intent.setPackage("com.instagram.android");
+
         try {
-            RealtimeDbHelper.getThisUserRef().child("instagram").child("insta_linked").setValue("false");
-        }catch (Exception e){
-            e.printStackTrace();
+            startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            //Instagram app not found
+            Toast.makeText(getContext(),"instagram app is not installed",Toast.LENGTH_LONG).show();
         }
+    }
 
+    public void insta_login() {
+        Map<String, Object> instagram_update = new HashMap<>();
+        instagram_update.put("instagram", instagramLoginState);
+        RealtimeDbHelper.getThisUserRef().updateChildren(instagram_update);
+        instaBtn.setText(instagramLoginState.insta_handle);
+    }
+
+    public void insta_unlink() {
+        instaBtn.setText("INSTAGRAM");
+        RealtimeDbHelper.getThisUserRef().child("instagram").removeValue();
     }
 
     @Override
     public void onTokenReceived(String auth_token) {
         if (auth_token == null)
             return;
-        appPreferences.putString(AppPreferences.TOKEN, auth_token);
-        token = auth_token;
-        getUserInfoByAccessToken(token);
+        INSTA_TOKEN = auth_token;
+        getUserInfoByAccessToken();
     }
 
-    private void getUserInfoByAccessToken(String token) {
-        new RequestInstagramAPI().execute();
-    }
-
-
-    private class RequestInstagramAPI extends AsyncTask<Void, String, String> {
-
-        @Override
-        protected String doInBackground(Void... params) {
-            HttpClient httpClient = new DefaultHttpClient();
-            HttpGet httpGet = new HttpGet(getResources().getString(R.string.get_user_info_url) + token);
-            try {
-                HttpResponse response = httpClient.execute(httpGet);
-                HttpEntity httpEntity = response.getEntity();
-                return EntityUtils.toString(httpEntity);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            super.onPostExecute(response);
-            if (response != null) {
-                try {
-                    JSONObject jsonObject = new JSONObject(response);
-                    Log.e("response", jsonObject.toString());
-                    JSONObject jsonData = jsonObject.getJSONObject("data");
-                    if (jsonData.has("id")) {
-                        //сохранение данных пользователя
-                        appPreferences.putString(AppPreferences.USER_ID, jsonData.getString("id"));
-                        appPreferences.putString(AppPreferences.USER_NAME, jsonData.getString("username"));
-                        appPreferences.putString(AppPreferences.PROFILE_PIC, jsonData.getString("profile_picture"));
-                        instagramLoginState = new InstagramLoginState(jsonData.getString("username"),true);
-                        Log.d("inside post req",jsonData.getString("username"));
-                        //instagramLoginState = new InstagramLoginState(jsonData.getString("username"),jsonData.getString("profile_picture"));
-                        insta_login();
+    private void getUserInfoByAccessToken() {
+        String url = getResources().getString(R.string.insta_get_user_info_url) + INSTA_TOKEN;
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        final Activity activity = new Activity();
+        //
+        endpoints.fetchInsta(url).enqueue(new Callback<InstaResponseData>() {
+            @Override
+            public void onResponse(Call<InstaResponseData> call, Response<InstaResponseData> response) {
+                final InstaResponseData instaResponseData = response.body();
+                if (response.isSuccessful() && instaResponseData != null && !activity.isFinishing() ) {
+                    progressBar.setVisibility(View.GONE);
+                    instagramLoginState = new InstagramLoginState(instaResponseData.getData().getUsername());
+                    insta_login();
+                } else {
+                    if (!activity.isFinishing()) {
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
-
-            } else {
-                Toast toast = Toast.makeText(getContext(),"Instagram Linking failed!, please try again",Toast.LENGTH_LONG);
-                toast.show();
             }
-        }
-    }
 
+            @Override
+            public void onFailure(Call<InstaResponseData> call, Throwable t) {
+                if (true) {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "onFailure: ");
+                }
+            }
+        });
+    }
 }
