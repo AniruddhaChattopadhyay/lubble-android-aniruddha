@@ -14,5 +14,4 @@ public class InstaData {
         this.username = username;
     }
 
-
 }
