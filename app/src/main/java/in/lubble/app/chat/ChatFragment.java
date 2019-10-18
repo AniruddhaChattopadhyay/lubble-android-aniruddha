@@ -111,6 +111,7 @@ import static in.lubble.app.utils.FileUtils.getTakePhotoIntent;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
+import static in.lubble.app.utils.StringUtils.getTitleCase;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
@@ -1084,7 +1085,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 newMessageEt.setText("");
                 linkTitle.setText("");
                 linkDesc.setText("");
-                taggedMap.clear();
+                if (taggedMap != null) {
+                    taggedMap.clear();
+                }
                 linkMetaContainer.setVisibility(View.GONE);
                 replyMsgId = null;
                 attachedGroupId = null;
@@ -1395,7 +1398,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void fetchUsername(final ChatUserTagsAdapter tagsAdapter, String substring) {
         tagsAdapter.clear();
-        FirebaseDatabase.getInstance().getReference("users").orderByChild("info/name").startAt(substring).endAt(substring + "\uf8ff")
+        FirebaseDatabase.getInstance().getReference("users").orderByChild("info/name").startAt(getTitleCase(substring)).endAt(getTitleCase(substring) + "\uf8ff")
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
