@@ -1,7 +1,5 @@
 package in.lubble.app.utils;
 
-import androidx.annotation.Nullable;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ServerValue;
 
@@ -35,14 +33,15 @@ public class ChatUtils {
         return chatData;
     }
 
-    @Nullable
     public static String getKeyByValue(Map<String, String> map, String value) {
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (entry.getValue().contains(value)) {
-                return entry.getKey();
+        if (!map.isEmpty()) {
+            for (Map.Entry<String, String> entry : map.entrySet()) {
+                if (entry.getValue().contains(value)) {
+                    return entry.getKey();
+                }
             }
         }
-        return null;
+        return "";
     }
 
 }

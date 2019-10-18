@@ -1084,6 +1084,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 newMessageEt.setText("");
                 linkTitle.setText("");
                 linkDesc.setText("");
+                taggedMap.clear();
                 linkMetaContainer.setVisibility(View.GONE);
                 replyMsgId = null;
                 attachedGroupId = null;
@@ -1301,7 +1302,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     spannable.setSpan(spans, 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     newMessageEt.setTextKeepState(spannable, TextView.BufferType.SPANNABLE);
                     newMessageEt.addTextChangedListener(textWatcher);
-                    if (taggedMap != null) {
+                    if (taggedMap != null && !taggedMap.isEmpty()) {
                         taggedMap.remove(ChatUtils.getKeyByValue(taggedMap, lastWord.substring(1)));
                     }
                 }

@@ -249,18 +249,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
         sentChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.white));
 
-        Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
-        String atMentionScheme = "lubble://profile/";
-
-        Linkify.TransformFilter transformFilter = new Linkify.TransformFilter() {
-            //skip the first character to filter out '@'
-            public String transformUrl(final Matcher match, String url) {
-                return ChatUtils.getKeyByValue(chatData.getTagged(), match.group(1));
-            }
-        };
-
         Linkify.addLinks(sentChatViewHolder.messageTv, Linkify.ALL);
-        Linkify.addLinks(sentChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
+        if (chatData.getTagged() != null && !chatData.getTagged().isEmpty()) {
+            Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
+            String atMentionScheme = "lubble://profile/";
+
+            Linkify.TransformFilter transformFilter = new Linkify.TransformFilter() {
+                //skip the first character to filter out '@'
+                public String transformUrl(final Matcher match, String url) {
+                    return ChatUtils.getKeyByValue(chatData.getTagged(), match.group(1));
+                }
+            };
+
+            Linkify.addLinks(sentChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
+        }
 
         if (chatData.getLubbCount() == 0) {
             sentChatViewHolder.lubbCount.setText("");
@@ -433,19 +435,21 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
         recvdChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
 
-        Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
-        String atMentionScheme = "lubble://profile/";
-
-        Linkify.TransformFilter transformFilter = new Linkify.TransformFilter() {
-            //skip the first character to filter out '@'
-            public String transformUrl(final Matcher match, String url) {
-                return ChatUtils.getKeyByValue(chatData.getTagged(), match.group(1));
-            }
-        };
-
         Linkify.addLinks(recvdChatViewHolder.messageTv, Linkify.ALL);
-        Linkify.addLinks(recvdChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
 
+        if (chatData.getTagged() != null && !chatData.getTagged().isEmpty()) {
+            Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
+            String atMentionScheme = "lubble://profile/";
+
+            Linkify.TransformFilter transformFilter = new Linkify.TransformFilter() {
+                //skip the first character to filter out '@'
+                public String transformUrl(final Matcher match, String url) {
+                    return ChatUtils.getKeyByValue(chatData.getTagged(), match.group(1));
+                }
+            };
+
+            Linkify.addLinks(recvdChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
+        }
         recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
         if (chatData.getLubbCount() == 0) {
             recvdChatViewHolder.lubbCount.setText("");
