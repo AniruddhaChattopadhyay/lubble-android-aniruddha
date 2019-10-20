@@ -19,7 +19,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup">
-        <activity android:name=".dev.GoingStatsActivity"></activity>
         <activity
             android:name=".leaderboard.LeaderboardActivity"
             android:configChanges="orientation"
@@ -107,7 +106,10 @@
             android:configChanges="orientation"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
-        <activity android:name=".GoingStatsActivity" />
+        <activity
+            android:name=".GoingStatsActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

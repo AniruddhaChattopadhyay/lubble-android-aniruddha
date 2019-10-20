@@ -3,6 +3,8 @@ package in.lubble.app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -24,17 +26,18 @@ import java.util.Comparator;
 import java.util.List;
 
 import in.lubble.app.events.EventInfoActivity;
+import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 
 public class GoingStatsActivity extends BaseActivity {
 
-    String eventId;
-    RecyclerView recyclerView;
+    private String eventId;
 
 
-    GoingStatsAdapter goingStatsAdapter;
-    List<GoingStatsModel> goingStatsModelList;
-    Toolbar toolbar;
+    private GoingStatsAdapter goingStatsAdapter;
+    private List<GoingStatsModel> goingStatsModelList;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,27 +48,22 @@ public class GoingStatsActivity extends BaseActivity {
         final Intent intent = getIntent();
         eventId = intent.getStringExtra("KEY_EVENT_ID");
 
-        recyclerView = findViewById(R.id.goingStatsRecyclerView);
+        RecyclerView recyclerView = findViewById(R.id.goingStatsRecyclerView);
         goingStatsModelList = new ArrayList<>();
-        goingStatsAdapter = new GoingStatsAdapter(getApplicationContext(), goingStatsModelList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        goingStatsAdapter = new GoingStatsAdapter(this, goingStatsModelList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
         recyclerView.setAdapter(goingStatsAdapter);
-        recyclerView.addOnItemTouchListener(new GoingStatsRecyclerViewClickListener(getApplicationContext(), recyclerView, new GoingStatsRecyclerViewClickListener.ClickListener() {
+        recyclerView.addOnItemTouchListener(new GoingStatsRecyclerViewClickListener(this, recyclerView, new GoingStatsRecyclerViewClickListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 GoingStatsModel goingStatsModel = goingStatsModelList.get(position);
                 //Toast.makeText(getApplicationContext(),goingStatsModel.getUid(),Toast.LENGTH_LONG).show();
-                if(!goingStatsModel.getName().isEmpty())
-                {
-                    Intent intent1 = new Intent(GoingStatsActivity.this, ProfileActivity.class);
-                    intent1.putExtra("profileActivUserId",goingStatsModel.getUid());
-                    startActivity(intent1);
-                }
-                else
-                {
-                    Toast.makeText(getApplicationContext(),"User doesn't exist",Toast.LENGTH_LONG).show();
+                if (!TextUtils.isEmpty(goingStatsModel.getName())) {
+                    ProfileActivity.open(GoingStatsActivity.this, goingStatsModel.getUid());
+                } else {
+                    Toast.makeText(GoingStatsActivity.this, "User doesn't exist", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -87,7 +85,7 @@ public class GoingStatsActivity extends BaseActivity {
             }
         });
 
-        FirebaseDatabase.getInstance().getReference().child("lubbles/DEV/events").child(eventId).child("title").addValueEventListener(new ValueEventListener() {
+        RealtimeDbHelper.getEventsRef().child(eventId).child("title").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 toolbar.setTitle(dataSnapshot.getValue(String.class));
@@ -95,7 +93,7 @@ public class GoingStatsActivity extends BaseActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(GoingStatsActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -104,15 +102,16 @@ public class GoingStatsActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseDatabase.getInstance().getReference().child("lubbles/DEV/events").child(eventId).child("members").addValueEventListener(new ValueEventListener() {
+        RealtimeDbHelper.getEventsRef().child(eventId).child("members").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 goingStatsModelList.clear();
                 for (final DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                    FirebaseDatabase.getInstance().getReference().child("users").child(dataSnapshot1.getKey()).child("info").addValueEventListener(new ValueEventListener() {
+                    RealtimeDbHelper.getUserRef(dataSnapshot1.getKey()).child("info").addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             //Log.i("Tejas1", dataSnapshot1.child("response").getValue(Integer.class) + " " + dataSnapshot.toString());
+
                             if (dataSnapshot.child("thumbnail").exists())
                                 goingStatsModelList.add(new GoingStatsModel(dataSnapshot1.getKey(), dataSnapshot.child("name").getValue(String.class), dataSnapshot.child("thumbnail").getValue(String.class), String.valueOf(dataSnapshot1.child("response").getValue(Integer.class))));
                             else
@@ -124,19 +123,22 @@ public class GoingStatsActivity extends BaseActivity {
                                 }
                             });
                             goingStatsAdapter.notifyDataSetChanged();
+                            RealtimeDbHelper.getUserRef(dataSnapshot1.getKey()).child("info").removeEventListener(this);
                         }
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
                             Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                         }
+
                     });
                 }
+                RealtimeDbHelper.getEventsRef().child(eventId).child("members").removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(), databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(GoingStatsActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
