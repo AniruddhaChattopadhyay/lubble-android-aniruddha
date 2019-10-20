@@ -22,63 +22,6 @@
             android:textColor="@color/black"
             tools:text="@tools:sample/lorem/random" />
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp">
-
-            <TextView
-                android:id="@+id/tv_notice_board"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:background="@drawable/half_rounded_rectangle_hollow_top"
-                android:padding="16dp"
-                android:text="@string/notice_board"
-                android:textColor="@color/black" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/tv_notice_board"
-                android:layout_alignRight="@id/tv_notice_board"
-                android:layout_alignTop="@id/tv_notice_board"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                android:tint="@color/dark_gray"
-                app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
-
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/tv_events"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:background="@drawable/half_rounded_rectangle_hollow_bottom"
-                android:padding="16dp"
-                android:text="@string/events"
-                android:textColor="@color/black" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/tv_events"
-                android:layout_alignRight="@id/tv_events"
-                android:layout_alignTop="@id/tv_events"
-                android:layout_marginEnd="8dp"
-                android:layout_marginRight="8dp"
-                android:tint="@color/dark_gray"
-                app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
-
-        </RelativeLayout>
-
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>
