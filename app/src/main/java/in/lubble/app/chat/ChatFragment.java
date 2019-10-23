@@ -182,9 +182,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private RelativeLayout bottomContainer;
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
-    private ProgressBar sendBtnProgressBtn;
-    private ProgressBar chatProgressBar;
-    private ProgressBar paginationProgressBar;
+    private ProgressBar sendBtnProgressBtn, chatProgressBar, paginationProgressBar, taggingProgressBar;
     @Nullable
     private ValueEventListener bottomBarListener;
     @Nullable
@@ -325,6 +323,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         chatProgressBar = view.findViewById(R.id.progressbar_chat);
         paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
         userTagRecyclerView = view.findViewById(R.id.rv_user_tag);
+        taggingProgressBar = view.findViewById(R.id.progress_bar_tagging);
         userTagRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         userTagRecyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL));
 
@@ -1331,14 +1330,17 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 final String inputName = lastWord.substring(1);
                 if (inputName.length() > 2) {
                     userTagRecyclerView.setVisibility(View.VISIBLE);
+                    taggingProgressBar.setVisibility(View.VISIBLE);
                     final ChatUserTagsAdapter tagsAdapter = new ChatUserTagsAdapter(requireContext(), GlideApp.with(requireContext()), ChatFragment.this);
                     userTagRecyclerView.setAdapter(tagsAdapter);
                     fetchUsername(tagsAdapter, inputName);
                 } else {
                     userTagRecyclerView.setVisibility(View.GONE);
+                    taggingProgressBar.setVisibility(View.GONE);
                 }
             } else if (userTagRecyclerView.getVisibility() == View.VISIBLE) {
                 userTagRecyclerView.setVisibility(View.GONE);
+                taggingProgressBar.setVisibility(View.GONE);
             }
 
             final String extractedUrl = extractFirstLink(inputString);
@@ -1416,7 +1418,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     }
                                 }
                             }
+                            taggingProgressBar.setVisibility(View.GONE);
                             tagsAdapter.replaceUserList(profileInfoList);
+                            if (profileInfoList.isEmpty()) {
+                                userTagRecyclerView.setVisibility(View.GONE);
+                            }
                         }
                     }
 
