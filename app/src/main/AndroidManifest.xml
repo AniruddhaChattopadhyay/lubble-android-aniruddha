@@ -85,7 +85,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity> <!-- Branch init -->
         <meta-data
             android:name="io.branch.sdk.BranchKey"
@@ -107,6 +106,10 @@
             android:configChanges="orientation"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".GoingStatsActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -118,7 +121,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
         <provider
-            android:name="in.lubble.app.LubbleFileProvider"
+            android:name=".LubbleFileProvider"
             android:authorities="${applicationId}.provider"
             android:exported="false"
             android:grantUriPermissions="true">
@@ -130,7 +133,6 @@
         <meta-data
             android:name="CLEVERTAP_NOTIFICATION_ICON"
             android:value="ic_lubble_notif" /> <!-- name of your file in the drawable directory without the file extension. -->
-
         <meta-data
             android:name="CLEVERTAP_BACKGROUND_SYNC"
             android:value="1" /> <!-- use CTBackgroundIntentService to target users below Android 21 (Lollipop) -->
@@ -216,8 +218,8 @@
             android:name=".user_search.UserSearchActivity"
             android:configChanges="orientation"
             android:label="Invite People"
-            android:windowSoftInputMode="stateHidden|adjustResize"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden|adjustResize" />
         <activity android:name=".utils.FullScreenImageActivity" />
         <activity
             android:name=".chat.AttachImageActivity"
