@@ -233,7 +233,7 @@
             tools:visibility="visible" />
 
         <ImageView
-            android:id="@+id/tv_stats_one"
+            android:id="@+id/iv_stats_one"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_alignBottom="@id/tv_stats"
@@ -241,19 +241,19 @@
             tools:src="@mipmap/ic_launcher" />
 
         <ImageView
-            android:id="@+id/tv_stats_two"
+            android:id="@+id/iv_stats_two"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_alignBottom="@id/tv_stats"
-            android:layout_toStartOf="@id/tv_stats_one"
+            android:layout_toStartOf="@id/iv_stats_one"
             tools:src="@mipmap/ic_launcher" />
 
         <ImageView
-            android:id="@+id/tv_stats_three"
+            android:id="@+id/iv_stats_three"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_alignBottom="@id/tv_stats"
-            android:layout_toStartOf="@id/tv_stats_two"
+            android:layout_toStartOf="@id/iv_stats_two"
             tools:src="@mipmap/ic_launcher" />
 
         <ImageView

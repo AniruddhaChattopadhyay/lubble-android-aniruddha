@@ -1,7 +1,6 @@
 package in.lubble.app;
 
 import android.content.Context;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+
+import in.lubble.app.models.EventData;
 
 public class GoingStatsAdapter extends RecyclerView.Adapter<GoingStatsAdapter.MyViewHolder> {
     private List<GoingStatsModel> goingStatsModelList;
@@ -31,11 +32,16 @@ public class GoingStatsAdapter extends RecyclerView.Adapter<GoingStatsAdapter.My
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         GoingStatsModel goingStatsModel = goingStatsModelList.get(position);
-        GlideApp.with(context).load(Uri.parse(goingStatsModel.getUrl())).placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(holder.profilePicture);
+        GlideApp.with(context).
+                load(goingStatsModel.getUrl())
+                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                .error(R.drawable.ic_account_circle_black_no_padding)
+                .circleCrop()
+                .into(holder.profilePicture);
         holder.nameTextView.setText(goingStatsModel.getName());
-        if (goingStatsModel.stats.equals("1"))
+        if (goingStatsModel.getStatus() == EventData.GOING)
             holder.statsTextView.setText("Going");
-        else
+        else if (goingStatsModel.getStatus() == EventData.MAYBE)
             holder.statsTextView.setText("Maybe");
     }
 
