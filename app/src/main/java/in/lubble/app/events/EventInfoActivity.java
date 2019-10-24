@@ -158,6 +158,7 @@ public class EventInfoActivity extends BaseActivity {
         // Log.i("TejasEIA",eventId);
 
         eventRef = getEventsRef().child(eventId);
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         goingContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -491,6 +492,7 @@ public class EventInfoActivity extends BaseActivity {
                             if (emptyImageView != null) {
                                 GlideApp.with(EventInfoActivity.this)
                                         .load(profileInfo.getThumbnail())
+                                        .placeholder(R.drawable.ic_account_circle_black_no_padding)
                                         .circleCrop()
                                         .into(emptyImageView);
                                 emptyImageView.setVisibility(View.VISIBLE);

@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.ProfileInfo;
@@ -49,6 +50,7 @@ public class EventAttendeesActivity extends BaseActivity {
         setTitle("Attendees");
 
         eventData = (EventData) getIntent().getSerializableExtra("KEY_EVENT_DATA");
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         RecyclerView recyclerView = findViewById(R.id.goingStatsRecyclerView);
         goingStatsModelList = new ArrayList<>();
