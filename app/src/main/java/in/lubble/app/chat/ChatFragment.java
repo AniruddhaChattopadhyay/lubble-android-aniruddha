@@ -540,6 +540,25 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
     }
 
+    private void addGroupJoinPrompt() {
+        if (groupData != null && !TextUtils.isEmpty(groupData.getQuestion())) {
+            final ChatData personalChatData = new ChatData();
+            personalChatData.setId("101");
+            personalChatData.setType(ChatData.GROUP_PROMPT);
+            personalChatData.setAuthorUid(LubbleSharedPrefs.getInstance().getSupportUid());
+            final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
+            personalChatData.setMessage(
+                    "Welcome " + firstName + "!" +
+                            "\n\nLet's introduce you to everyone in the group with an answer to this:" +
+                            "\n\n" + groupData.getQuestion()
+            );
+            personalChatData.setPromptQues(groupData.getQuestion());
+            personalChatData.setCreatedTimestamp(System.currentTimeMillis());
+            personalChatData.setServerTimestamp(System.currentTimeMillis());
+            chatAdapter.addPersonalChatData(personalChatData);
+        }
+    }
+
     private void resetActionBar() {
         final ActionMode actionMode = ((AppCompatActivity) getContext()).startSupportActionMode(new ActionMode.Callback() {
             @Override
@@ -592,6 +611,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         showBottomBar(groupData);
                         resetUnreadCount();
                         showPublicGroupWarning(groupData);
+                        addGroupJoinPrompt();
                     } else {
                         Crashlytics.logException(new NullPointerException("groupdata is null for group id: " + groupId));
                     }
@@ -1504,6 +1524,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             }
         });
+    }
+
+    public void addReplyForPrompt(@NonNull String selectedChatId, String name, String msg) {
+        linkMetaContainer.setVisibility(View.VISIBLE);
+        replyMsgId = selectedChatId;
+        linkPicIv.setImageResource(R.drawable.ic_reply_black_24dp);
+        linkTitle.setText(name);
+        linkDesc.setText(msg);
     }
 
     void updateThisUserFlair() {

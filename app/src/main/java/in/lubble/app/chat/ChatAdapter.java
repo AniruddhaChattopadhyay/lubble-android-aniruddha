@@ -95,6 +95,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.models.ChatData.EVENT;
 import static in.lubble.app.models.ChatData.GROUP;
+import static in.lubble.app.models.ChatData.GROUP_PROMPT;
 import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.models.ChatData.REPLY;
@@ -410,6 +411,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
             recvdChatViewHolder.dpIv.setVisibility(View.GONE);
         }
+
+        recvdChatViewHolder.visibleToYouTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? View.VISIBLE : View.GONE);
+        recvdChatViewHolder.replyBottomTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? View.VISIBLE : View.GONE);
+
+        recvdChatViewHolder.replyBottomTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chatFragment.addReplyForPrompt(chatData.getId(), profileDataMap.get(chatData.getAuthorUid()).getInfo().getName(), chatData.getPromptQues());
+            }
+        });
 
         if (posToFlash == position) {
             UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
@@ -1111,6 +1122,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    public void addPersonalChatData(@NonNull ChatData chatData) {
+        if (!chatData.getType().equalsIgnoreCase(HIDDEN) && !chatDataList.get(chatDataList.size() - 1).getId().equalsIgnoreCase("101")) {
+            final int size = chatDataList.size();
+            chatDataList.add(chatData);
+            if (size - 1 >= 0) {
+                // remove the last msg lubb hint
+                notifyItemChanged(size - 1);
+            }
+            notifyItemInserted(size);
+        }
+    }
+
     void updateFlair(ProfileData thisUserProfileData) {
         profileDataMap.put(thisUserProfileData.getId(), thisUserProfileData);
         notifyDataSetChanged();
@@ -1243,7 +1266,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private RelativeLayout rootLayout;
-        private TextView authorNameTv;
+        private TextView authorNameTv, visibleToYouTv, replyBottomTv;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
         private ImageView linkPicIv;
@@ -1274,6 +1297,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             super(itemView);
             rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
             authorNameTv = itemView.findViewById(R.id.tv_author);
+            visibleToYouTv = itemView.findViewById(R.id.tv_msg_visible_to_you);
+            replyBottomTv = itemView.findViewById(R.id.tv_reply_bottom);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkPicIv = itemView.findViewById(R.id.iv_link_pic);
