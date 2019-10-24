@@ -7,18 +7,21 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -31,7 +34,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import in.lubble.app.BaseActivity;
+import in.lubble.app.EventAttendeesActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -40,16 +48,16 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -70,6 +78,7 @@ public class EventInfoActivity extends BaseActivity {
     private TextView eventNameTv;
     private TextView goingHintTv;
     private ImageView maybeIcon;
+    private ImageView goingPersonOne, goingPersonTwo, goingPersonThree;
     private TextView maybeHintTv;
     private TextView finalMarkedStatus;
     private LinearLayout goingContainer;
@@ -137,12 +146,16 @@ public class EventInfoActivity extends BaseActivity {
         ticketCountTv = findViewById(R.id.tv_ticket_count);
         luckyDrawHint = findViewById(R.id.lucky_draw_hint);
         descTv = findViewById(R.id.tv_desc);
+        goingPersonOne = findViewById(R.id.iv_stats_one);
+        goingPersonTwo = findViewById(R.id.iv_stats_two);
+        goingPersonThree = findViewById(R.id.iv_stats_three);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.joining_group);
         progressDialog.setMessage(getString(R.string.all_please_wait));
 
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
+        // Log.i("TejasEIA",eventId);
 
         eventRef = getEventsRef().child(eventId);
 
@@ -236,6 +249,14 @@ public class EventInfoActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         fetchEventInfo();
+        statsTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(EventInfoActivity.this, EventAttendeesActivity.class);
+                intent.putExtra("KEY_EVENT_DATA", eventData);
+                startActivity(intent);
+            }
+        });
     }
 
     private boolean checkEventAdmin() {
@@ -440,6 +461,7 @@ public class EventInfoActivity extends BaseActivity {
                         statsTv.setText(String.format(getString(R.string.event_maybe_count), prefixText, suffixText));
                     }
                     fetchIsLinkedGroupJoined(eventData.getGid());
+                    fetchMemberInfo(eventData);
                 }
             }
 
@@ -448,6 +470,52 @@ public class EventInfoActivity extends BaseActivity {
 
             }
         });
+    }
+
+    private void fetchMemberInfo(EventData eventData) {
+        goingPersonOne.setImageDrawable(null);
+        goingPersonOne.setVisibility(View.GONE);
+        goingPersonTwo.setImageDrawable(null);
+        goingPersonTwo.setVisibility(View.GONE);
+        goingPersonThree.setImageDrawable(null);
+        goingPersonThree.setVisibility(View.GONE);
+        for (Map.Entry<String, Object> entry : eventData.getMembers().entrySet()) {
+            HashMap<String, Object> memberInfoMap = (HashMap<String, Object>) entry.getValue();
+            if ((long) memberInfoMap.get("response") == EventData.GOING) {
+                RealtimeDbHelper.getUserInfoRef(entry.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                        if (profileInfo != null && !TextUtils.isEmpty(profileInfo.getThumbnail())) {
+                            ImageView emptyImageView = getEmptyImageView();
+                            if (emptyImageView != null) {
+                                GlideApp.with(EventInfoActivity.this)
+                                        .load(profileInfo.getThumbnail())
+                                        .circleCrop()
+                                        .into(emptyImageView);
+                                emptyImageView.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            }
+        }
+    }
+
+    @Nullable
+    private ImageView getEmptyImageView() {
+        if (goingPersonOne.getDrawable() == null) {
+            return goingPersonOne;
+        } else if (goingPersonTwo.getDrawable() == null) {
+            return goingPersonTwo;
+        } else if (goingPersonThree.getDrawable() == null) {
+            return goingPersonThree;
+        }
+        return null;
     }
 
     private void setFinalMarkedResponse(long oldResponse) {
