@@ -611,7 +611,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         showBottomBar(groupData);
                         resetUnreadCount();
                         showPublicGroupWarning(groupData);
-                        addGroupJoinPrompt();
                     } else {
                         Crashlytics.logException(new NullPointerException("groupdata is null for group id: " + groupId));
                     }
@@ -1127,6 +1126,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 getCreateOrJoinGroupRef().child(groupId).setValue(true);
                 isJoining = true;
                 showJoiningDialog();
+                addGroupJoinPrompt();
                 break;
             case R.id.iv_decline_cross:
                 RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
