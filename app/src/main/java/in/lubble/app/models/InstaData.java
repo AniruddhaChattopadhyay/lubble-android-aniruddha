@@ -13,5 +13,4 @@ public class InstaData {
     public void setUsername(String username) {
         this.username = username;
     }
-
 }

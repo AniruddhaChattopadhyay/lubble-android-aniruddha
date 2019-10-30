@@ -5,9 +5,11 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -197,6 +199,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onCreate(savedInstanceState);
 
         groupId = getArguments().getString(KEY_GROUP_ID);
+        Log.d("GroupID",groupId);
         msgIdToOpen = getArguments().getString(KEY_MSG_ID);
         dmId = getArguments().getString(KEY_DM_ID);
         receiverId = getArguments().getString(KEY_RECEIVER_ID);
@@ -1078,23 +1081,54 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("GroupID","onActivityFinished");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_IMG && resultCode == RESULT_OK) {
-            File imageFile;
-            if (data != null && data.getData() != null) {
-                Uri uri = data.getData();
-                imageFile = getFileFromInputStreamUri(getContext(), uri);
-            } else {
-                // from camera
-                imageFile = new File(currentPhotoPath);
-            }
 
-            final Uri fileUri = Uri.fromFile(imageFile);
-            String chatId = groupId;
-            if (!TextUtils.isEmpty(dmId)) {
-                chatId = dmId;
-            }
-            AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+            Uri uri = data.getData();
+                if (uri.toString().contains("image")) {
+                    File imageFile;
+                    Log.d("GroupID","image");
+                    //handle image
+                    if (data != null && data.getData() != null) {
+                        imageFile = getFileFromInputStreamUri(getContext(), uri);
+                        Log.d("GroupID","inseide if"+imageFile.toString());
+                    } else {
+                        // from camera
+                        imageFile = new File(currentPhotoPath);
+                        Log.d("GroupID","inseide else"+imageFile.toString());
+                    }
+
+                    final Uri fileUri = Uri.fromFile(imageFile);
+                    String chatId = groupId;
+                    if (!TextUtils.isEmpty(dmId)) {
+                        chatId = dmId;
+                    }
+                    Log.d("GroupID","img--->"+fileUri.toString());
+                    AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                }
+                else  if (uri.toString().contains("video")) {
+                    //handle video
+                    Log.d("GroupID","video");
+                    File videoFile;
+                    if (data != null && data.getData() != null) {
+                        videoFile = getFileFromInputStreamUri(getContext(), uri);
+                        Log.d("GroupID","inseide if vid"+videoFile.toString());
+                    } else {
+                         //from camera
+                        videoFile = new File(currentPhotoPath);
+                        Log.d("GroupID","inseide else vid"+videoFile.toString());
+                    }
+
+                    final Uri fileUri = Uri.fromFile(videoFile);
+                    String chatId = groupId;
+                    if (!TextUtils.isEmpty(dmId)) {
+                        chatId = dmId;
+                    }
+                    Log.d("GroupID","vid--->"+fileUri.toString());
+                    AttachVideoActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                }
+
         } else if (requestCode == REQUEST_CODE_GROUP_PICK && resultCode == RESULT_OK) {
             String chosenGroupId = data.getStringExtra("group_id");
             if (!TextUtils.isEmpty(chosenGroupId)) {
@@ -1108,6 +1142,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 fetchAndShowAttachedEventInfo();
             }
         }
+    }
+    public String getPath(Uri uri, Context context) {
+        String[] projection = { MediaStore.Video.Media.DATA };
+        Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null) {
+            // HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
+            // THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
+            int column_index = cursor
+                    .getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } else
+            return null;
     }
 
     private void fetchAndShowAttachedGroupInfo() {
@@ -1207,6 +1254,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
             Intent pickImageIntent = getGalleryIntent(getContext());
+            Log.d("GroupId",pickImageIntent.getExtras().toString());
             startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
         } catch (IOException e) {
             e.printStackTrace();

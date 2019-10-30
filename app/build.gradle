@@ -121,6 +121,13 @@ dependencies {
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
     implementation 'com.cepheuen.elegant-number-button:lib:1.0.3'
     implementation 'io.branch.sdk.android:library:2.19.3'
+    implementation 'com.google.android.exoplayer:exoplayer:r2.4.0'
+    implementation 'com.google.android.exoplayer:exoplayer-core:r2.4.0'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:r2.4.0'
+    implementation 'com.google.android.exoplayer:exoplayer-hls:r2.4.0'
+    implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:r2.4.0'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:r2.4.0'
+
     implementation('com.github.hotchemi:permissionsdispatcher:3.2.0') {
         // if you don't use android.app.Fragment you can exclude support for them
         exclude module: "support-v13"
@@ -135,6 +142,7 @@ dependencies {
     implementation project(path: ':libraries:ratingdialog')
     implementation 'com.squareup.okhttp:okhttp:2.3.0'
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
+    implementation 'com.iceteck.silicompressorr:silicompressor:2.2.2'
 }
 
 

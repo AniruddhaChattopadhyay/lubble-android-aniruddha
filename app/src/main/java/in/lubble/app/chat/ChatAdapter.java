@@ -2,6 +2,7 @@ package in.lubble.app.chat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -12,7 +13,12 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.nfc.Tag;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Environment;
 import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.util.Log;
@@ -27,14 +33,33 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.extractor.ExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
+import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
@@ -65,6 +90,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
 import static in.lubble.app.utils.FileUtils.deleteCache;
 import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId;
+import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId_Vid;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -97,6 +123,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private String authorId = FirebaseAuth.getInstance().getUid();
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
+
 
     public ChatAdapter(Activity activity, Context context, String groupId,
                        RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
@@ -299,6 +326,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null);
+        handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.playvidIv,sentChatViewHolder.vidThumbnailIv, chatData, null,position);
 
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
 
@@ -470,6 +498,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
+        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar,recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv,position);
+        //heythere
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
@@ -980,6 +1010,62 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private void handleVideo(FrameLayout vidContainer,final ProgressBar progressBar, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv,int position) {
+
+        if (isValidString(chatData.getVidUrl())) {
+            imageView.setOnClickListener(null);
+            vidContainer.setVisibility(View.VISIBLE);
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
+                // Permission is not granted
+                Log.d(TAG,"inside if of handle video");
+                glide.load(chatData.getVidUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
+                downloadIv.setVisibility(View.VISIBLE);
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // ask for external storage perm
+                        ChatFragmentPermissionsDispatcher
+                                .getWritePermWithPermissionCheck(chatFragment);
+                    }
+                });
+            } else {
+                RequestOptions requestOptions = new RequestOptions();
+                requestOptions.placeholder(R.color.black);
+                requestOptions.error(R.color.black);
+
+
+                Glide.with(context)
+                        .load(chatData.getVidUrl()).listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
+                        .apply(requestOptions)
+                        .thumbnail(Glide.with(context).load(chatData))
+                        .into(imageView);
+                Log.d(TAG,"inside lst else");
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (isValidString(chatData.getVidUrl())) {
+                            Log.d(TAG,"inside on click");
+                            FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
+                        }
+                    }
+                });
+            }
+        } else {
+            vidContainer.setVisibility(View.GONE);
+        }
+    }
     private void downloadAndSavePic(final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
         glide.asBitmap()
                 .load(chatData.getImgUrl())
@@ -1181,6 +1267,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
+        private FrameLayout vidContainer;
+        private ProgressBar progressBar_vid;
+        private ImageView vidThumbnailIv;
+        private ImageView playvidIv;
         private ProgressBar progressBar;
         private ImageView chatIv;
         private TextView dateTv;
@@ -1211,6 +1301,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);
+            vidContainer = itemView.findViewById(R.id.vid_container);
+            progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
+            vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
+            playvidIv = itemView.findViewById(R.id.iv_play_vid);
             lubbContainer = itemView.findViewById(R.id.container_lubb);
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
@@ -1367,6 +1461,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
+        private FrameLayout vidContainer;
+        private ImageView vidThumbnailIv;
+        private ImageView playvidIv;
+        private ProgressBar progressBar_vid;
         private ProgressBar progressBar;
         private ImageView chatIv;
         private TextView dateTv;
@@ -1393,6 +1491,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);
+            vidContainer = itemView.findViewById(R.id.vid_container);
+            vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
+            playvidIv = itemView.findViewById(R.id.iv_play_vid);
+            progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
             dateTv = itemView.findViewById(R.id.tv_date);

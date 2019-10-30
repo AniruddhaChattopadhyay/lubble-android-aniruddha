@@ -29,6 +29,7 @@ public class ChatData implements Serializable {
     private boolean authorIsSeller;
     private String message;
     private String imgUrl;
+    private String vidUrl;
     private int lubbCount = 0;
     private HashMap<String, Long> lubbReceipts = new HashMap<>();
     private long createdTimestamp;
@@ -85,6 +86,15 @@ public class ChatData implements Serializable {
 
     public void setImgUrl(String imgUrl) {
         this.imgUrl = imgUrl;
+    }
+
+
+    public String getVidUrl() {
+        return vidUrl;
+    }
+
+    public void setVidUrl(String vidUrl) {
+        this.vidUrl = vidUrl;
     }
 
     public int getLubbCount() {

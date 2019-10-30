@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -18,6 +20,7 @@ import androidx.core.content.FileProvider;
 import com.crashlytics.android.Crashlytics;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
+import kotlin.io.FilesKt;
 import permissions.dispatcher.PermissionRequest;
 
 import java.io.*;
@@ -76,9 +79,37 @@ public class FileUtils {
     }
 
     public static Intent getGalleryIntent(Context context) {
-        Intent takePhotoIntent = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        return takePhotoIntent;
+//        final CharSequence[] options = {"Images", "Videos", "Cancel"};
+//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//        builder.setTitle("Select From...");
+//        //Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+//        builder.setItems(options, new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int item) {
+//                if (options[item].equals("Images")) {
+//                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//                    //startActivityForResult(intent, 1);
+//
+//                } else if (options[item].equals("Videos")) {
+//                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+//                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//                    startActivityForResult(intent, 1);
+//                } else if (options[item].equals("Cancel")) {
+//                    dialog.dismiss();
+//                }
+//                dialog.dismiss();
+//            }
+//        });
+//        builder.show();
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("*/*");
+        photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"image/*", "video/*"});
+        Log.d("GroupID",Intent.EXTRA_MIME_TYPES);
+        return photoPickerIntent;
+//        Intent takePhotoIntent = new Intent(Intent.ACTION_PICK,
+//                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+//        return takePhotoIntent;
     }
 
     public static Intent getTakePhotoIntent(Context context, File cameraPic) {
@@ -145,7 +176,7 @@ public class FileUtils {
     }
 
     private static File createTemporalFile(Context context) {
-        return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".jpg"); // context needed
+        return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".mp4"); // context needed
     }
 
     public static void showStoragePermRationale(Context context, final PermissionRequest request) {
@@ -208,6 +239,20 @@ public class FileUtils {
         context.sendBroadcast(mediaScanIntent);
     }
 
+    @Nullable
+    public static String getSavedImageForMsgId_Vid(Context context, String msgId) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && isExternalStorageReadable()) {
+            File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    + File.separator + "Lubble_pics" + File.separator + "MP4_" + msgId + ".mp4");
+
+            if (imgFile.exists()) {
+                //return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                return imgFile.getAbsolutePath();
+            }
+        }
+        return null;
+    }
     @Nullable
     public static String getSavedImageForMsgId(Context context, String msgId) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
