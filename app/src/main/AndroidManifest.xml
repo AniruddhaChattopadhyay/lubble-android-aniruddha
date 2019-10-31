@@ -176,6 +176,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <service android:name=".UploadVideoService" />
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
@@ -469,6 +470,8 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
+        <activity android:name=".chat.AttachVideoActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
 
         <receiver
             android:name=".notifications.NotifActionBroadcastRecvr"
