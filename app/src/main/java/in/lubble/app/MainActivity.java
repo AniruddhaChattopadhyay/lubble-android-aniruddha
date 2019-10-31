@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -16,8 +17,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -38,6 +41,16 @@ import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.InstallState;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.play.core.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -76,6 +89,7 @@ import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import io.branch.referral.InstallListener;
 import it.sephiroth.android.library.xtooltip.ClosePolicy;
 import it.sephiroth.android.library.xtooltip.Tooltip;
 
@@ -127,6 +141,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final int nav_item_leaderboard = 311;
     private Menu navMenu;
 
+    private AppUpdateManager appUpdateManager;
+    private com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask;
+    private final static int MY_REQUEST_CODE = 312, MY_REQUEST_CODE_1 = 313;
+    private InstallStateUpdatedListener listener;
+
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
         startIntent.putExtra(IS_NEW_USER_IN_THIS_LUBBLE, isNewUserInThisLubble);
@@ -137,6 +156,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        checkUpdate();
 
         toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
@@ -205,6 +226,80 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         handleExploreActivity();
     }
+
+    private void checkUpdate() {
+
+        appUpdateManager = AppUpdateManagerFactory.create(MainActivity.this);
+
+
+        appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+
+        appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
+            @Override
+            public void onSuccess(AppUpdateInfo appUpdateInfo) {
+                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                    try {
+                        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, MainActivity.this, MY_REQUEST_CODE);
+                    } catch (IntentSender.SendIntentException e) {
+                        Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                } else if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                    try {
+                        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, MainActivity.this, MY_REQUEST_CODE_1);
+                        listener = new InstallStateUpdatedListener() {
+                            @Override
+                            public void onStateUpdate(InstallState state) {
+                                if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                                    Snackbar snackbar =
+                                            Snackbar.make(
+                                                    findViewById(R.id.content_frame),
+                                                    "An update has just been downloaded.",
+                                                    Snackbar.LENGTH_INDEFINITE);
+                                    snackbar.setAction("RESTART", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View view) {
+                                            appUpdateManager.completeUpdate();
+                                            appUpdateManager.unregisterListener(listener);
+                                        }
+                                    });
+                                    snackbar.setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                                    snackbar.show();
+                                }
+                            }
+                        };
+                        appUpdateManager.registerListener(listener);
+
+
+                    } catch (IntentSender.SendIntentException e) {
+                        Toast.makeText(MainActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if ((requestCode == MY_REQUEST_CODE || requestCode == MY_REQUEST_CODE_1) && resultCode != RESULT_OK) {
+            new AlertDialog.Builder(MainActivity.this).setIcon(R.mipmap.ic_launcher).setTitle(R.string.app_name).setMessage("Please Update the app").setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    checkUpdate();
+                }
+            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    MainActivity.this.finish();
+                }
+            }).create().show();
+
+        }
+    }
+
 
     private void initEverything() {
         syncFcmToken();
@@ -530,7 +625,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         super.onResume();
         handlePresence();
         setDp();
-
+        checkUpdate();
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
                 case "events":

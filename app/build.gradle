@@ -10,7 +10,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 26
         versionCode 174
-        versionName "1.7.1-4"
+        versionName "1.7.1-2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -124,9 +124,12 @@ dependencies {
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation project(path: ':libraries:ratingdialog')
+
+    // in app update
+    implementation 'com.google.android.play:core:1.6.4'
 }
 
 
