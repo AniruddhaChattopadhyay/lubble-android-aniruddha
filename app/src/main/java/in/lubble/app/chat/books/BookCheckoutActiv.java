@@ -4,50 +4,62 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.crashlytics.android.Crashlytics;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.freshchat.consumer.sdk.Freshchat;
+import com.freshchat.consumer.sdk.FreshchatMessage;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksFields;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.airtable_pojo.AirtableBooksFields;
+import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.referrals.ReferralActivity;
 import okhttp3.RequestBody;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.analytics.AnalyticsEvents.HELP_PHONE_CLICKED;
 import static in.lubble.app.chat.books.MyBooksActivity.ARG_SELECT_BOOK;
 import static in.lubble.app.chat.books.MyBooksActivity.SELECTED_BOOK_RECORD;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -443,40 +455,11 @@ public class BookCheckoutActiv extends BaseActivity {
                 onBackPressed();
                 return true;
             case R.id.action_help:
-                openHelpBottomSheet();
+                FreshchatMessage FreshchatMessage = new FreshchatMessage().setTag("BOOKS_HELP").setMessage("Please help me with Book Exchange");
+                Freshchat.sendMessage(this, FreshchatMessage);
                 return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private void openHelpBottomSheet() {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-        View sheetView = getLayoutInflater().inflate(R.layout.help_bottom_sheet, null);
-        bottomSheetDialog.setContentView(sheetView);
-        bottomSheetDialog.show();
-
-        final TextView phoneTv = sheetView.findViewById(R.id.tv_phone_number);
-
-        phoneTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Analytics.triggerEvent(HELP_PHONE_CLICKED, BookCheckoutActiv.this);
-
-                Intent sendIntent = new Intent("android.intent.action.MAIN");
-                sendIntent.setAction(Intent.ACTION_VIEW);
-                sendIntent.setPackage("com.whatsapp");
-                String url = "https://api.whatsapp.com/send?phone=" + "+917676622668" + "&text=" + "Hi please help me with book exchange";
-                sendIntent.setData(Uri.parse(url));
-                if (sendIntent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(sendIntent);
-                } else {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:+916361686026"));
-                    startActivity(intent);
-                }
-            }
-        });
-
     }
 
     @Override

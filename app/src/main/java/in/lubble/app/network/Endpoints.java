@@ -2,22 +2,24 @@ package in.lubble.app.network;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+
 import in.lubble.app.auth.LocationsData;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksData;
-import in.lubble.app.chat.books.airtable_pojo.AirtableBooksRecord;
-import in.lubble.app.chat.books.pojos.BooksData;
-import in.lubble.app.chat.collections.AirtableCollectionData;
-import in.lubble.app.chat.collections.AirtablePlacesData;
 import in.lubble.app.explore.ExploreGroupData;
 import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.marketplace.RatingData;
 import in.lubble.app.marketplace.SliderData;
+import in.lubble.app.models.AirtableCollectionData;
+import in.lubble.app.models.AirtablePlacesData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.InstaResponseData;
+import in.lubble.app.models.airtable_pojo.AirtableBooksData;
+import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
+import in.lubble.app.models.pojos.BooksData;
 import in.lubble.app.profile.UserProfileData;
 import in.lubble.app.quiz.PlaceData;
 import in.lubble.app.quiz.QuestionData;
@@ -28,9 +30,14 @@ import in.lubble.app.rewards.data.RewardsAirtableData;
 import in.lubble.app.utils.YoutubeData;
 import okhttp3.RequestBody;
 import retrofit2.Call;
-import retrofit2.http.*;
-
-import java.util.ArrayList;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.PATCH;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
+import retrofit2.http.Url;
 
 public interface Endpoints {
 

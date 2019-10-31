@@ -3,6 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- Recommended so that CleverTap knows when to attempt a network call -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
         android:name=".LubbleApp"
         android:allowBackup="false"
@@ -38,12 +45,15 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
 
+        <service
+            android:name=".FetchAddressIntentService"
+            android:exported="false" />
+
         <activity
             android:name=".chat.books.AddressChooserActiv"
             android:configChanges="orientation"
             android:label="@string/title_activity_address_chooser"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".chat.books.BookCheckoutActiv"
             android:configChanges="orientation"
@@ -79,22 +89,79 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+
+        </activity> <!-- Branch init -->
+        <meta-data
+            android:name="io.branch.sdk.BranchKey"
+            android:value="key_live_niB5GEB5sh3CprlT2Bx3EimiDFeN6RN4" />
+        <meta-data
+            android:name="io.branch.sdk.BranchKey.test"
+            android:value="key_test_hpqXJAxWDk3CexmNZyIBSepcAuoH9P4h" /> <!-- Branch testing (TestMode "true" to simulate fresh installs on dev environment) -->
+        <meta-data
+            android:name="io.branch.sdk.TestMode"
+            android:value="false" />
+
         <activity
             android:name=".auth.LoginActivity"
             android:configChanges="orientation"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" /> <!-- Branch init -->
+            android:screenOrientation="portrait" />
         <activity
             android:name=".BaseActivity"
             android:configChanges="orientation"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+        <provider
+            android:name="in.lubble.app.LubbleFileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/freshchat_file_provider_paths" />
+        </provider>
+
+        <meta-data
+            android:name="CLEVERTAP_NOTIFICATION_ICON"
+            android:value="ic_lubble_notif" /> <!-- name of your file in the drawable directory without the file extension. -->
+
+        <meta-data
+            android:name="CLEVERTAP_BACKGROUND_SYNC"
+            android:value="1" /> <!-- use CTBackgroundIntentService to target users below Android 21 (Lollipop) -->
+        <service
+            android:name="com.clevertap.android.sdk.CTBackgroundIntentService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.clevertap.BG_EVENT" />
+            </intent-filter>
+        </service> <!-- use CTBackgroundJobService to target users on and above Android 21 (Lollipop) -->
+        <service
+            android:name="com.clevertap.android.sdk.CTBackgroundJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name="com.clevertap.android.sdk.CTNotificationIntentService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.clevertap.PUSH_EVENT" />
+            </intent-filter>
+        </service>
+
         <activity
             android:name=".chat.ChatActivity"
             android:configChanges="orientation"
             android:parentActivityName=".MainActivity"
-            android:screenOrientation="portrait" /> <!-- Branch testing (TestMode "true" to simulate fresh installs on dev environment) -->
+            android:screenOrientation="portrait" />
         <activity
             android:name=".profile.ProfileActivity"
             android:configChanges="orientation"
@@ -103,19 +170,34 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
 
+        <service android:name=".UploadFileService" />
+        <service android:name=".firebase.FcmService">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="Notice Notifications" />
+
         <activity
             android:name=".groups.NewGroupActivity"
             android:configChanges="orientation"
             android:label="New Group"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
+
         <activity
             android:name=".announcements.NewAnnouncementActivity"
             android:configChanges="orientation"
             android:label="New Announcement"
             android:parentActivityName=".announcements.announcementHistory.AnnouncementsActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".announcements.announcementHistory.AnnouncementsActivity"
             android:configChanges="orientation"
@@ -124,19 +206,23 @@
             android:screenOrientation="portrait" />
         <activity android:name=".domestic_directory.DomesticDirectoryActivity" />
 
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="6fd5a7acad385fd4a56944a42c164622f03560ca" />
+
         <activity
             android:name=".DebugActivity"
             android:configChanges="orientation"
             android:label="@string/title_activity_debug"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" /> <!-- name of your file in the drawable directory without the file extension. -->
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".user_search.UserSearchActivity"
             android:configChanges="orientation"
             android:label="Invite People"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustResize" /> <!-- use CTBackgroundIntentService to target users below Android 21 (Lollipop) -->
-        <activity android:name=".utils.FullScreenImageActivity" /> <!-- use CTBackgroundJobService to target users on and above Android 21 (Lollipop) -->
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:screenOrientation="portrait" />
+        <activity android:name=".utils.FullScreenImageActivity" />
         <activity
             android:name=".chat.AttachImageActivity"
             android:configChanges="orientation"
@@ -147,7 +233,6 @@
             android:name=".auth.LocationActivity"
             android:configChanges="orientation|keyboardHidden"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".groups.group_info.ScrollingGroupInfoActivity"
             android:configChanges="orientation"
@@ -164,7 +249,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.MainActivity" />
         </activity>
-
         <activity
             android:name=".events.new_event.NewEventActivity"
             android:configChanges="orientation"
@@ -175,11 +259,18 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDKVXmP3ZzcYP-0z8ZmAb7BDnT6M4TALzA" />
+
         <activity
             android:name=".events.EventGroupJoinedActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".lubble_info.LubbleActivity"
             android:configChanges="orientation"
@@ -191,12 +282,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.MainActivity" />
         </activity>
-
         <activity
             android:name=".marketplace.MarketplaceActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".chat.chat_info.MsgInfoActivity"
             android:parentActivityName=".chat.ChatActivity"
@@ -205,7 +294,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.chat.ChatActivity" />
         </activity>
-
         <activity
             android:name=".marketplace.NewItemActiv"
             android:configChanges="orientation"
@@ -220,12 +308,10 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".marketplace.SellerEditActiv"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".marketplace.SellerDashActiv"
             android:configChanges="orientation"
@@ -285,10 +371,17 @@
                     android:host="*"
                     android:scheme="lubble" />
             </intent-filter>
-        </activity>
+        </activity> <!-- This is for removing Firebase conflict for verification of app links -->
         <activity
             android:name="com.firebase.ui.auth.ui.provider.GitHubLoginActivity"
-            tools:node="remove" />
+            tools:node="remove" /> <!-- Branch install referrer tracking -->
+        <receiver
+            android:name="io.branch.referral.InstallListener"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".events.EventsActivity"
@@ -298,6 +391,11 @@
             android:name=".explore.ExploreActiv"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
+
+        <receiver
+            android:name="com.clevertap.android.sdk.CTPushNotificationReceiver"
+            android:enabled="true"
+            android:exported="false" />
 
         <activity
             android:name=".chat.FullscreenYoutubeActiv"
@@ -309,6 +407,37 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="in.lubble.app.chat.ChatActivity" />
         </activity>
+
+        <receiver
+            android:name=".chat.NotificationResultReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="0">
+                <action android:name="in.lubble.app.NEW_MSG_INTENT" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".utils.NotifDeleteBroadcastRecvr"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".receivers.AppUpdateReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".receivers.BootCompleteReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name=".chat.NewPollActiv"
             android:screenOrientation="portrait"
@@ -340,141 +469,11 @@
                 <data android:mimeType="text/plain" />
             </intent-filter>
         </activity>
-        <activity android:name=".chat.AttachVideoActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" />
-        <meta-data
-            android:name="io.branch.sdk.BranchKey"
-            android:value="key_live_niB5GEB5sh3CprlT2Bx3EimiDFeN6RN4" />
-        <meta-data
-            android:name="io.branch.sdk.BranchKey.test"
-            android:value="key_test_hpqXJAxWDk3CexmNZyIBSepcAuoH9P4h" />
-        <meta-data
-            android:name="io.branch.sdk.TestMode"
-            android:value="false" />
-        <meta-data
-            android:name="CLEVERTAP_NOTIFICATION_ICON"
-            android:value="ic_lubble_notif" />
-        <meta-data
-            android:name="CLEVERTAP_BACKGROUND_SYNC"
-            android:value="1" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="Notice Notifications" />
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="6fd5a7acad385fd4a56944a42c164622f03560ca" />
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDKVXmP3ZzcYP-0z8ZmAb7BDnT6M4TALzA" /> <!-- This is for removing Firebase conflict for verification of app links -->
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider> <!-- Branch install referrer tracking -->
-        <provider
-            android:name=".LubbleFileProvider"
-            android:authorities="${applicationId}.provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/freshchat_file_provider_paths" />
-        </provider>
 
-        <receiver
-            android:name="io.branch.referral.InstallListener"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="com.clevertap.android.sdk.CTPushNotificationReceiver"
-            android:enabled="true"
-            android:exported="false" />
-
-        <receiver
-            android:name=".chat.NotificationResultReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter android:priority="0">
-                <action android:name="in.lubble.app.NEW_MSG_INTENT" />
-            </intent-filter>
-        </receiver>
-
-        <receiver
-            android:name=".utils.NotifDeleteBroadcastRecvr"
-            android:enabled="true"
-            android:exported="true" />
-
-        <receiver
-            android:name=".receivers.AppUpdateReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".receivers.BootCompleteReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-            </intent-filter>
-        </receiver>
         <receiver
             android:name=".notifications.NotifActionBroadcastRecvr"
             android:enabled="true"
             android:exported="true" />
-        <service
-            android:name=".FetchAddressIntentService"
-            android:exported="false" />
-
-        <service
-            android:name="com.clevertap.android.sdk.CTBackgroundIntentService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.clevertap.BG_EVENT" />
-            </intent-filter>
-        </service>
-        <service
-            android:name="com.clevertap.android.sdk.CTBackgroundJobService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name="com.clevertap.android.sdk.CTNotificationIntentService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.clevertap.PUSH_EVENT" />
-            </intent-filter>
-        </service>
-        <service android:name=".UploadFileService" />
-        <service android:name=".firebase.FcmService">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-        <service android:name=".UploadVideoService" />
     </application>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- Recommended so that CleverTap knows when to attempt a network call -->
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>

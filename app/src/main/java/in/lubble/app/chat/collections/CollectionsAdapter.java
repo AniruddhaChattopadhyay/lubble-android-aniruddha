@@ -5,13 +5,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import in.lubble.app.GlideRequests;
-import in.lubble.app.R;
-import in.lubble.app.utils.RoundedCornersTransformation;
 
 import java.util.List;
+
+import in.lubble.app.GlideRequests;
+import in.lubble.app.R;
+import in.lubble.app.models.CollectionRecordData;
+import in.lubble.app.models.CollectionsData;
+import in.lubble.app.utils.RoundedCornersTransformation;
 
 import static in.lubble.app.utils.UiUtils.dpToPx;
 

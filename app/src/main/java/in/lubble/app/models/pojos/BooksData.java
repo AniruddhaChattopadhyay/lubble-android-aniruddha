@@ -1,4 +1,4 @@
-package in.lubble.app.chat.books.pojos;
+package in.lubble.app.models.pojos;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

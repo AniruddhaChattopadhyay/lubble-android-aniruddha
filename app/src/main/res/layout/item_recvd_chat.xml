@@ -259,7 +259,6 @@
                         android:id="@+id/tv_message"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:autoLink="web"
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         tools:text="Pikachu! I choose youu!" />

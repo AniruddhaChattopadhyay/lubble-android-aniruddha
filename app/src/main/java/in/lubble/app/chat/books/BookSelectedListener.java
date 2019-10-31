@@ -1,6 +1,6 @@
 package in.lubble.app.chat.books;
 
-import in.lubble.app.chat.books.pojos.BookItem;
+import in.lubble.app.models.pojos.BookItem;
 
 public interface BookSelectedListener {
 
