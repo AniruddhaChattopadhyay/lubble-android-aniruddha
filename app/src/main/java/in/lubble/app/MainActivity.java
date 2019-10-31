@@ -246,7 +246,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                 } else if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
                     try {
-                        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, MainActivity.this, MY_REQUEST_CODE_1);
+                        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.FLEXIBLE, MainActivity.this, MY_REQUEST_CODE_1);
                         listener = new InstallStateUpdatedListener() {
                             @Override
                             public void onStateUpdate(InstallState state) {
