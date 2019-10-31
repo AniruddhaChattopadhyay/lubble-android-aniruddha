@@ -1049,7 +1049,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     }
                 })
                         .apply(requestOptions)
-                        .thumbnail(Glide.with(context).load(chatData))
                         .into(imageView);
                 Log.d(TAG,"inside lst else");
                 imageView.setOnClickListener(new View.OnClickListener() {

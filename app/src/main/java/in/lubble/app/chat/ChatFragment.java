@@ -2,6 +2,7 @@ package in.lubble.app.chat;
 
 import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.MimeTypeMap;
 import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,6 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.LubbleApp.getAppContext;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
 import static in.lubble.app.utils.FileUtils.*;
@@ -1086,7 +1089,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (requestCode == REQUEST_CODE_IMG && resultCode == RESULT_OK) {
 
             Uri uri = data.getData();
-                if (uri.toString().contains("image")) {
+            String type = getMimeType(uri);
+            Log.d(TAG,"type:"+type+"uri:"+uri.toString());
+                if (type.contains("image")||type.contains("jpg")||type.contains("jpeg")) {
                     File imageFile;
                     Log.d("GroupID","image");
                     //handle image
@@ -1107,7 +1112,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     Log.d("GroupID","img--->"+fileUri.toString());
                     AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
                 }
-                else  if (uri.toString().contains("video")) {
+                else  if (type.contains("video")||type.contains("mp4")) {
                     //handle video
                     Log.d("GroupID","video");
                     File videoFile;
@@ -1143,20 +1148,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             }
         }
     }
-    public String getPath(Uri uri, Context context) {
-        String[] projection = { MediaStore.Video.Media.DATA };
-        Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null) {
-            // HERE YOU WILL GET A NULLPOINTER IF CURSOR IS NULL
-            // THIS CAN BE, IF YOU USED OI FILE MANAGER FOR PICKING THE MEDIA
-            int column_index = cursor
-                    .getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
-            cursor.moveToFirst();
-            return cursor.getString(column_index);
-        } else
-            return null;
+    public String getMimeType(Uri uri) {
+        String mimeType = null;
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            ContentResolver cr = getAppContext().getContentResolver();
+            mimeType = cr.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                    .toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    fileExtension.toLowerCase());
+        }
+        return mimeType;
     }
-
     private void fetchAndShowAttachedGroupInfo() {
         if (!TextUtils.isEmpty(attachedGroupId)) {
             RealtimeDbHelper.getLubbleGroupsRef().child(attachedGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
