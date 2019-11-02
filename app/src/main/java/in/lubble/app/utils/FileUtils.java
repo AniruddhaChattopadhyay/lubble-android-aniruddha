@@ -1,6 +1,7 @@
 package in.lubble.app.utils;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -29,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import static in.lubble.app.LubbleApp.getAppContext;
 
 /**
  * Created by ishaangarg on 17/11/17.
@@ -79,37 +83,25 @@ public class FileUtils {
     }
 
     public static Intent getGalleryIntent(Context context) {
-//        final CharSequence[] options = {"Images", "Videos", "Cancel"};
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setTitle("Select From...");
-//        //Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-//        builder.setItems(options, new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int item) {
-//                if (options[item].equals("Images")) {
-//                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-//                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//                    //startActivityForResult(intent, 1);
-//
-//                } else if (options[item].equals("Videos")) {
-//                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-//                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//                    startActivityForResult(intent, 1);
-//                } else if (options[item].equals("Cancel")) {
-//                    dialog.dismiss();
-//                }
-//                dialog.dismiss();
-//            }
-//        });
-//        builder.show();
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
         photoPickerIntent.setType("*/*");
         photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"image/*", "video/*"});
         Log.d("GroupID",Intent.EXTRA_MIME_TYPES);
         return photoPickerIntent;
-//        Intent takePhotoIntent = new Intent(Intent.ACTION_PICK,
-//                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-//        return takePhotoIntent;
+    }
+
+    public static String getMimeType(Uri uri) {
+        String mimeType = null;
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            ContentResolver cr = getAppContext().getContentResolver();
+            mimeType = cr.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                    .toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    fileExtension.toLowerCase());
+        }
+        return mimeType;
     }
 
     public static Intent getTakePhotoIntent(Context context, File cameraPic) {
@@ -239,20 +231,6 @@ public class FileUtils {
         context.sendBroadcast(mediaScanIntent);
     }
 
-    @Nullable
-    public static String getSavedImageForMsgId_Vid(Context context, String msgId) {
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                && isExternalStorageReadable()) {
-            File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                    + File.separator + "Lubble_pics" + File.separator + "MP4_" + msgId + ".mp4");
-
-            if (imgFile.exists()) {
-                //return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                return imgFile.getAbsolutePath();
-            }
-        }
-        return null;
-    }
     @Nullable
     public static String getSavedImageForMsgId(Context context, String msgId) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED

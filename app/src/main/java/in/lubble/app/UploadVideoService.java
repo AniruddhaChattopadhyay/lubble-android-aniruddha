@@ -12,6 +12,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,6 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.utils.FileUtils;
+
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
@@ -131,7 +135,7 @@ public class UploadVideoService extends  BaseTaskService{
                 if (task.isSuccessful()) {
                     // Create file metadata including the content type
                     StorageMetadata metadata = new StorageMetadata.Builder()
-                            .setContentType("video/mp4")
+                            .setContentType(FileUtils.getMimeType(fileUri))
                             .setCustomMetadata("uid", FirebaseAuth.getInstance().getUid())
                             .setCustomMetadata("token", task.getResult().getToken())
                             .build();
@@ -158,10 +162,11 @@ public class UploadVideoService extends  BaseTaskService{
 
     private void compressAndUpload(Uri fileUri, final String caption, final String groupId, final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData, final StorageReference photoRef) {
            File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
-           if (f.mkdirs() || f.isDirectory())
+           if (f.mkdirs() || f.isDirectory()) {
                //compress and output new video specs
-               Log.d(TAG,"inside if to async task");
-               new VideoCompressAsyncTask(this,this,caption, groupId, toTransmit, metadata, dmInfoData,photoRef).execute(fileUri.toString(), f.getPath());
+               Log.d(TAG, "inside if to async task");
+               new VideoCompressAsyncTask(this, this, caption, groupId, toTransmit, metadata, dmInfoData, photoRef).execute(fileUri.toString(), f.getPath());
+           }
     }
 
     class VideoCompressAsyncTask extends AsyncTask<String, String , String> {
@@ -175,7 +180,7 @@ public class UploadVideoService extends  BaseTaskService{
         StorageMetadata metadata;
         DmInfoData dmInfoData;
         StorageReference photoRef;
-        Uri cacheimage=null;
+        Uri cachevid=null;
         public VideoCompressAsyncTask(Context context,UploadVideoService uploadVideoService, String caption, String groupId, boolean toTransmit, @Nullable StorageMetadata metadata, @Nullable DmInfoData dmInfoData,  StorageReference photoRef){
             mContext = context;
             this.uploadVideoService = uploadVideoService;
@@ -200,9 +205,10 @@ public class UploadVideoService extends  BaseTaskService{
                 Log.d(TAG,"path0 = "+paths[0]+" path1="+paths[1]+"from file "+Uri.fromFile(new File(paths[1])).toString());
                 Log.d(TAG,"path0 = "+Uri.parse(paths[0]).getPath()+" path1="+paths[1]+"from file "+Uri.fromFile(new File(paths[1])).getPath());
                 filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath() ,Uri.fromFile(new File(paths[1])).getPath());
-                cacheimage = Uri.parse(paths[0]);
+                cachevid = Uri.parse(paths[0]);
 
             } catch (URISyntaxException e) {
+                Crashlytics.logException(e);
                 e.printStackTrace();
             }
             return  filePath;
@@ -223,8 +229,8 @@ public class UploadVideoService extends  BaseTaskService{
                 value = length+" KB";
             Log.i(TAG, "Path: "+compressedFilePath);
             //delete image in cache
-            if (cacheimage!=null) {
-                File file = new File(cacheimage.getPath());
+            if (cachevid!=null) {
+                File file = new File(cachevid.getPath());
                 file.delete();
                 if(file.exists()){
                     try {
@@ -233,6 +239,7 @@ public class UploadVideoService extends  BaseTaskService{
                             getApplicationContext().deleteFile(file.getName());
                         }
                     } catch (IOException e) {
+                        Crashlytics.logException(e);
                         e.printStackTrace();
                     }
                 }
@@ -276,6 +283,7 @@ public class UploadVideoService extends  BaseTaskService{
                                         getApplicationContext().deleteFile(file.getName());
                                     }
                                 } catch (IOException e) {
+                                    Crashlytics.logException(e);
                                     e.printStackTrace();
                                 }
                             }

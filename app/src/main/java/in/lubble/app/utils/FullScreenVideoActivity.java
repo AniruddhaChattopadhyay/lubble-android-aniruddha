@@ -13,6 +13,7 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityOptionsCompat;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -36,15 +37,12 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
-import permissions.dispatcher.RuntimePermissions;
-
 public class FullScreenVideoActivity extends BaseActivity {
     private static final String TAG = "FullScreenVideoActivity";
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";
-    SimpleExoPlayerView exoPlayerView;
-    SimpleExoPlayer exoPlayer;
-    ProgressBar progressBar;
-    String videoURL = "https://www.radiantmediaplayer.com/media/bbb-360p.mp4";
+    private SimpleExoPlayerView exoPlayerView;
+    private SimpleExoPlayer exoPlayer;
+    private ProgressBar progressBar;
 
     public static void open(Activity activity, Context context, String vidPath) {
         Intent intent = new Intent(context, FullScreenVideoActivity.class);
@@ -62,64 +60,47 @@ public class FullScreenVideoActivity extends BaseActivity {
         setContentView(R.layout.activity_full_screen_video);
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
         progressBar = findViewById(R.id.progress_bar_full_vid);
-        try {
-            progressBar.setVisibility(View.VISIBLE);
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-            TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
-            exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-            exoPlayer.addListener(new ExoPlayer.EventListener() {
-                                      @Override
-                                      public void onTimelineChanged(Timeline timeline, Object manifest) {
 
-                                      }
-
-                                      @Override
-                                      public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-                                      }
-
-                                      @Override
-                                      public void onLoadingChanged(boolean isLoading) {
-
-                                      }
-
-                                      @Override
-                                      public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                                          if (playbackState == ExoPlayer.STATE_BUFFERING){
-                                              Log.d("FullScreenVideoActivit1","inside buffer");
-                                              progressBar.setVisibility(View.VISIBLE);
-                                          } else {
-                                              progressBar.setVisibility(View.INVISIBLE);
-                                          }
-                                      }
-
-                                      @Override
-                                      public void onPlayerError(ExoPlaybackException error) {
-
-                                      }
-
-                                      @Override
-                                      public void onPositionDiscontinuity() {
-
-                                      }
-
-                                      @Override
-                                      public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-
-                                      }
-                                  });
-                    //Log.d("")
-            Uri videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
-            DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory("exoplayer_video");
-            ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            MediaSource mediaSource = new ExtractorMediaSource(videourl, dataSourceFactory, extractorsFactory, null, null);
-            exoPlayerView.setPlayer(exoPlayer);
-            exoPlayer.prepare(mediaSource);
-            exoPlayer.setPlayWhenReady(true);
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Exoplayer error" + e.toString());
-        }
+        progressBar.setVisibility(View.VISIBLE);
+        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
+        exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
+        exoPlayer.addListener(new ExoPlayer.EventListener() {
+            @Override
+            public void onTimelineChanged(Timeline timeline, Object manifest) {
+            }
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+            }
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+            }
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                if (playbackState == ExoPlayer.STATE_BUFFERING){
+                    Log.d("FullScreenVideoActivit1","inside buffer");
+                    progressBar.setVisibility(View.VISIBLE);
+                } else {
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
+            }
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+            }
+            @Override
+            public void onPositionDiscontinuity() {
+            }
+            @Override
+            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+            }
+        });
+        Uri videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
+        DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory("exoplayer_video");
+        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+        MediaSource mediaSource = new ExtractorMediaSource(videourl, dataSourceFactory, extractorsFactory, null, null);
+        exoPlayerView.setPlayer(exoPlayer);
+        exoPlayer.prepare(mediaSource);
+        exoPlayer.setPlayWhenReady(true);
     }
 
     @Override
