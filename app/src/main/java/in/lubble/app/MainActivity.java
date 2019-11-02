@@ -615,13 +615,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(navHeaderIv);
-                    try {
-                        navHeaderNameTv.setText(StringUtils.getTitleCase(profileInfo.getName()));
-                    }
-                    catch (Exception e)
-                    {
-
-                    }
+                    navHeaderNameTv.setText(StringUtils.getTitleCase(profileInfo.getName()));
 
                     if (profileInfo != null && !isFinishing()) {
                         com.segment.analytics.Analytics.with(MainActivity.this).identify(firebaseAuth.getUid(), new Traits().putAvatar(profileInfo.getThumbnail()), null);

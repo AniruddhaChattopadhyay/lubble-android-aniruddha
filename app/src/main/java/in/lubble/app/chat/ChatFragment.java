@@ -12,27 +12,34 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.text.Editable;
+import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.*;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.Group;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -46,6 +53,7 @@ import in.lubble.app.models.*;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.utils.AppNotifUtils;
+import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import permissions.dispatcher.*;
 
@@ -57,19 +65,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.LubbleApp.getAppContext;
 import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.models.ChatData.*;
 import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
+import static in.lubble.app.utils.StringUtils.getTitleCase;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
 @RuntimePermissions
-public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener {
+public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener, ChatUserTagsAdapter.OnUserTagClick {
 
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
@@ -94,7 +102,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private ImageView declineIv;
     private RelativeLayout composeContainer;
     private Group linkMetaContainer;
-    private RecyclerView chatRecyclerView;
+    private RecyclerView chatRecyclerView, userTagRecyclerView;
     private EditText newMessageEt;
     private ImageView sendBtn;
     private ImageView attachMediaBtn;
@@ -133,9 +141,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private RelativeLayout bottomContainer;
     private View pvtSystemMsg;
     private ProgressDialog joiningProgressDialog;
-    private ProgressBar sendBtnProgressBtn;
-    private ProgressBar chatProgressBar;
-    private ProgressBar paginationProgressBar;
+    private ProgressBar sendBtnProgressBtn, chatProgressBar, paginationProgressBar, taggingProgressBar;
     @Nullable
     private ValueEventListener bottomBarListener;
     @Nullable
@@ -157,6 +163,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedEventPicUrl;
     private Uri sharedImageUri;
     private ValueEventListener thisUserValueListener;
+    private HashMap<String, String> taggedMap; //<UID, UserName>
 
     public ChatFragment() {
         // Required empty public constructor
@@ -202,7 +209,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onCreate(savedInstanceState);
 
         groupId = getArguments().getString(KEY_GROUP_ID);
-        Log.d("GroupID",groupId);
+        Log.d("GroupID", groupId);
         msgIdToOpen = getArguments().getString(KEY_MSG_ID);
         dmId = getArguments().getString(KEY_DM_ID);
         receiverId = getArguments().getString(KEY_RECEIVER_ID);
@@ -275,6 +282,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         sendBtnProgressBtn = view.findViewById(R.id.progress_bar_send);
         chatProgressBar = view.findViewById(R.id.progressbar_chat);
         paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
+        userTagRecyclerView = view.findViewById(R.id.rv_user_tag);
+        taggingProgressBar = view.findViewById(R.id.progress_bar_tagging);
+        userTagRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        userTagRecyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL));
 
         groupMembersMap = new HashMap<>();
 
@@ -282,7 +293,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             showJoiningDialog();
         }
         sendBtn.setEnabled(false);
-        setupTogglingOfSendBtn();
+        newMessageEt.addTextChangedListener(textWatcher);
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
         joinBtn.setOnClickListener(this);
@@ -537,7 +548,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             chatRecyclerView.setVisibility(View.VISIBLE);
                             pvtSystemMsg.setVisibility(View.GONE);
                         }
-                        //((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
+                        ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate(), groupData.getMembers().size());
                         showBottomBar(groupData);
                         resetUnreadCount();
                         showPublicGroupWarning(groupData);
@@ -610,7 +621,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                                 if (profileInfo != null) {
                                     profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                    //((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true);
+                                    ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
                                 }
                             }
                         }
@@ -629,7 +640,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                             if (profileInfo != null) {
                                 profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                               // ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true);
+                                ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
                             }
                         }
 
@@ -647,7 +658,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             });
         } else if (!TextUtils.isEmpty(receiverId)) {
             chatRecyclerView.setVisibility(View.VISIBLE);
-           // ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true);
+            ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true, 0);
         }
     }
 
@@ -968,7 +979,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
                 chatData.setIsDm(TextUtils.isEmpty(groupId));
-
+                if (taggedMap != null && !taggedMap.isEmpty()) {
+                    chatData.setTagged(taggedMap);
+                }
                 if (isValidString(attachedGroupId)) {
                     chatData.setType(GROUP);
                     chatData.setAttachedGroupId(attachedGroupId);
@@ -1031,6 +1044,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 newMessageEt.setText("");
                 linkTitle.setText("");
                 linkDesc.setText("");
+                if (taggedMap != null) {
+                    taggedMap.clear();
+                }
                 linkMetaContainer.setVisibility(View.GONE);
                 replyMsgId = null;
                 attachedGroupId = null;
@@ -1084,24 +1100,24 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d("GroupID","onActivityFinished");
+        Log.d("GroupID", "onActivityFinished");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_IMG && resultCode == RESULT_OK) {
 
             Uri uri = data.getData();
             String type = getMimeType(uri);
-            Log.d(TAG,"type:"+type+"uri:"+uri.toString());
-            if (type.contains("image")||type.contains("jpg")||type.contains("jpeg")) {
+            Log.d(TAG, "type:" + type + "uri:" + uri.toString());
+            if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
                 File imageFile;
-                Log.d("GroupID","image");
+                Log.d("GroupID", "image");
                 //handle image
                 if (data != null && data.getData() != null) {
                     imageFile = getFileFromInputStreamUri(getContext(), uri);
-                    Log.d("GroupID","inseide if"+imageFile.toString());
+                    Log.d("GroupID", "inseide if" + imageFile.toString());
                 } else {
                     // from camera
                     imageFile = new File(currentPhotoPath);
-                    Log.d("GroupID","inseide else"+imageFile.toString());
+                    Log.d("GroupID", "inseide else" + imageFile.toString());
                 }
 
                 final Uri fileUri = Uri.fromFile(imageFile);
@@ -1109,20 +1125,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 if (!TextUtils.isEmpty(dmId)) {
                     chatId = dmId;
                 }
-                Log.d("GroupID","img--->"+fileUri.toString());
+                Log.d("GroupID", "img--->" + fileUri.toString());
                 AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
-            }
-            else  if (type.contains("video")||type.contains("mp4")) {
+            } else if (type.contains("video") || type.contains("mp4")) {
                 //handle video
-                Log.d("GroupID","video");
+                Log.d("GroupID", "video");
                 File videoFile;
                 if (data != null && data.getData() != null) {
                     videoFile = getFileFromInputStreamUri(getContext(), uri);
-                    Log.d("GroupID","inseide if vid"+videoFile.toString());
+                    Log.d("GroupID", "inseide if vid" + videoFile.toString());
                 } else {
                     //from camera
                     videoFile = new File(currentPhotoPath);
-                    Log.d("GroupID","inseide else vid"+videoFile.toString());
+                    Log.d("GroupID", "inseide else vid" + videoFile.toString());
                 }
 
                 final Uri fileUri = Uri.fromFile(videoFile);
@@ -1130,7 +1145,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 if (!TextUtils.isEmpty(dmId)) {
                     chatId = dmId;
                 }
-                Log.d("GroupID","vid--->"+fileUri.toString());
+                Log.d("GroupID", "vid--->" + fileUri.toString());
                 AttachVideoActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
             }
 
@@ -1246,42 +1261,170 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
             Intent pickImageIntent = getGalleryIntent(getContext());
-            Log.d("GroupId",pickImageIntent.getExtras().toString());
+            Log.d("GroupId", pickImageIntent.getExtras().toString());
             startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void setupTogglingOfSendBtn() {
-        newMessageEt.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+    private final TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+        }
 
-            }
+        @Override
+        public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+            if (before > 0) {
+                // deleting
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                int selectionEnd = newMessageEt.getSelectionEnd();
+                String text = newMessageEt.getText().toString();
+                if (selectionEnd >= 0) {
+                    // gives the substring from start to the current cursor pos
+                    text = text.substring(0, selectionEnd);
+                }
+                String delimiter = " ";
+                int lastDelimiterPosition = text.lastIndexOf(delimiter);
+                String lastWord = lastDelimiterPosition == -1 ? text : text.substring(lastDelimiterPosition + delimiter.length());
 
-            }
+                if (lastWord.startsWith("@")) {
+                    int startPos = lastDelimiterPosition == -1 ? 1 : lastDelimiterPosition + 2;
 
-            @Override
-            public void afterTextChanged(Editable editable) {
-                sendBtn.setEnabled(editable.length() > 0 && editable.toString().trim().length() > 0);
-                final String extractedUrl = extractFirstLink(editable.toString());
-                if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl) && extractYoutubeId(extractedUrl) == null) {
-                    // ignore youtube URLs
-                    prevUrl = extractedUrl;
-                    linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
-                    linkMetaAsyncTask.execute();
-                } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId) && !isValidString(attachedGroupId) && !isValidString(attachedEventId)) {
-                    linkMetaContainer.setVisibility(View.GONE);
-                    prevUrl = "";
-                    linkTitle.setText("");
-                    linkDesc.setText("");
+                    newMessageEt.removeTextChangedListener(textWatcher);
+                    Spannable spannable = newMessageEt.getText().replace(startPos, startPos + lastWord.length() - 1, "");
+                    final ForegroundColorSpan[] spans = spannable.getSpans(0, spannable.length(), ForegroundColorSpan.class);
+                    spannable.setSpan(spans, 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    newMessageEt.setTextKeepState(spannable, TextView.BufferType.SPANNABLE);
+                    newMessageEt.addTextChangedListener(textWatcher);
+                    if (taggedMap != null && !taggedMap.isEmpty()) {
+                        taggedMap.remove(ChatUtils.getKeyByValue(taggedMap, lastWord.substring(1)));
+                    }
                 }
             }
-        });
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            final String inputString = editable.toString();
+            sendBtn.setEnabled(editable.length() > 0 && inputString.trim().length() > 0);
+
+            int selectionEnd = newMessageEt.getSelectionEnd();
+            String text = newMessageEt.getText().toString();
+            if (selectionEnd >= 0) {
+                // gives the substring from start to the current cursor pos
+                text = text.substring(0, selectionEnd);
+            }
+            String delimiter = " ";
+            int lastDelimiterPosition = text.lastIndexOf(delimiter);
+            String lastWord = lastDelimiterPosition == -1 ? text : text.substring(lastDelimiterPosition + delimiter.length());
+
+            if (lastWord.startsWith("@")) {
+                final String inputName = lastWord.substring(1);
+                if (inputName.length() > 2) {
+                    userTagRecyclerView.setVisibility(View.VISIBLE);
+                    taggingProgressBar.setVisibility(View.VISIBLE);
+                    final ChatUserTagsAdapter tagsAdapter = new ChatUserTagsAdapter(requireContext(), GlideApp.with(requireContext()), ChatFragment.this);
+                    userTagRecyclerView.setAdapter(tagsAdapter);
+                    fetchUsername(tagsAdapter, inputName);
+                } else {
+                    userTagRecyclerView.setVisibility(View.GONE);
+                    taggingProgressBar.setVisibility(View.GONE);
+                }
+            } else if (userTagRecyclerView.getVisibility() == View.VISIBLE) {
+                userTagRecyclerView.setVisibility(View.GONE);
+                taggingProgressBar.setVisibility(View.GONE);
+            }
+
+            final String extractedUrl = extractFirstLink(inputString);
+            if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl) && extractYoutubeId(extractedUrl) == null) {
+                // ignore youtube URLs
+                prevUrl = extractedUrl;
+                linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
+                linkMetaAsyncTask.execute();
+            } else if (extractedUrl == null && linkMetaContainer.getVisibility() == View.VISIBLE && !isValidString(replyMsgId) && !isValidString(attachedGroupId) && !isValidString(attachedEventId)) {
+                linkMetaContainer.setVisibility(View.GONE);
+                prevUrl = "";
+                linkTitle.setText("");
+                linkDesc.setText("");
+            }
+        }
+    };
+
+    @Override
+    public void onUserTagClick(ProfileInfo profileInfo) {
+        userTagRecyclerView.setVisibility(View.GONE);
+        newMessageEt.removeTextChangedListener(textWatcher);
+
+        int selectionEnd = newMessageEt.getSelectionEnd();
+        String text = newMessageEt.getText().toString();
+        if (selectionEnd >= 0) {
+            // gives the substring from start to the current cursor pos
+            text = text.substring(0, selectionEnd);
+        }
+        String delimiter = " ";
+        int lastDelimiterPosition = text.lastIndexOf(delimiter);
+        String lastWord = lastDelimiterPosition == -1 ? text : text.substring(lastDelimiterPosition + delimiter.length());
+
+        if (lastWord.startsWith("@")) {
+            final String inputName = lastWord.substring(1);
+            int startPos = lastDelimiterPosition == -1 ? 1 : lastDelimiterPosition + 2;
+            newMessageEt.getText().replace(startPos, selectionEnd, profileInfo.getUsername());
+
+            Spannable spannable = newMessageEt.getText();
+            final ForegroundColorSpan[] spans = spannable.getSpans(0, spannable.length(), ForegroundColorSpan.class);
+            spannable.setSpan(spans, 0, spannable.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            spannable.setSpan(
+                    new ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.colorAccent)),
+                    startPos,
+                    startPos + profileInfo.getUsername().length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+
+            newMessageEt.setTextKeepState(spannable, TextView.BufferType.SPANNABLE);
+
+            if (taggedMap == null) {
+                taggedMap = new HashMap<>();
+            }
+            taggedMap.put(profileInfo.getId(), profileInfo.getUsername());
+        }
+        newMessageEt.addTextChangedListener(textWatcher);
+    }
+
+    private void fetchUsername(final ChatUserTagsAdapter tagsAdapter, String substring) {
+        tagsAdapter.clear();
+        FirebaseDatabase.getInstance().getReference("users").orderByChild("info/name").startAt(getTitleCase(substring)).endAt(getTitleCase(substring) + "\uf8ff")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (isAdded()) {
+                            tagsAdapter.clear();
+                            final ArrayList<ProfileInfo> profileInfoList = new ArrayList<>();
+                            for (DataSnapshot child : dataSnapshot.getChildren()) {
+                                if (!(child.getValue() instanceof Boolean)) {
+                                    final ProfileData profileData = child.getValue(ProfileData.class);
+                                    if (profileData != null && profileData.getInfo() != null && !profileData.getIsDeleted()
+                                            && child.child("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + groupId + "/joined").getValue() == Boolean.TRUE) {
+                                        profileData.setId(child.getKey());
+                                        profileData.getInfo().setId(child.getKey());
+                                        profileInfoList.add(profileData.getInfo());
+                                    }
+                                }
+                            }
+                            taggingProgressBar.setVisibility(View.GONE);
+                            tagsAdapter.replaceUserList(profileInfoList);
+                            if (profileInfoList.isEmpty()) {
+                                userTagRecyclerView.setVisibility(View.GONE);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
     }
 
     @NonNull
