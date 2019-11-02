@@ -537,7 +537,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             chatRecyclerView.setVisibility(View.VISIBLE);
                             pvtSystemMsg.setVisibility(View.GONE);
                         }
-                        //((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
+                        ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate());
                         showBottomBar(groupData);
                         resetUnreadCount();
                         showPublicGroupWarning(groupData);
@@ -610,7 +610,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                                 if (profileInfo != null) {
                                     profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                    //((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true);
+                                    ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true);
                                 }
                             }
                         }
@@ -629,7 +629,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                             if (profileInfo != null) {
                                 profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                               // ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true);
+                                ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true);
                             }
                         }
 
@@ -647,7 +647,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             });
         } else if (!TextUtils.isEmpty(receiverId)) {
             chatRecyclerView.setVisibility(View.VISIBLE);
-           // ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true);
+            ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true);
         }
     }
 
@@ -1091,48 +1091,48 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             Uri uri = data.getData();
             String type = getMimeType(uri);
             Log.d(TAG,"type:"+type+"uri:"+uri.toString());
-            if (type.contains("image")||type.contains("jpg")||type.contains("jpeg")) {
-                File imageFile;
-                Log.d("GroupID","image");
-                //handle image
-                if (data != null && data.getData() != null) {
-                    imageFile = getFileFromInputStreamUri(getContext(), uri);
-                    Log.d("GroupID","inseide if"+imageFile.toString());
-                } else {
-                    // from camera
-                    imageFile = new File(currentPhotoPath);
-                    Log.d("GroupID","inseide else"+imageFile.toString());
-                }
+                if (type.contains("image")||type.contains("jpg")||type.contains("jpeg")) {
+                    File imageFile;
+                    Log.d("GroupID","image");
+                    //handle image
+                    if (data != null && data.getData() != null) {
+                        imageFile = getFileFromInputStreamUri(getContext(), uri);
+                        Log.d("GroupID","inseide if"+imageFile.toString());
+                    } else {
+                        // from camera
+                        imageFile = new File(currentPhotoPath);
+                        Log.d("GroupID","inseide else"+imageFile.toString());
+                    }
 
-                final Uri fileUri = Uri.fromFile(imageFile);
-                String chatId = groupId;
-                if (!TextUtils.isEmpty(dmId)) {
-                    chatId = dmId;
+                    final Uri fileUri = Uri.fromFile(imageFile);
+                    String chatId = groupId;
+                    if (!TextUtils.isEmpty(dmId)) {
+                        chatId = dmId;
+                    }
+                    Log.d("GroupID","img--->"+fileUri.toString());
+                    AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
                 }
-                Log.d("GroupID","img--->"+fileUri.toString());
-                AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
-            }
-            else  if (type.contains("video")||type.contains("mp4")) {
-                //handle video
-                Log.d("GroupID","video");
-                File videoFile;
-                if (data != null && data.getData() != null) {
-                    videoFile = getFileFromInputStreamUri(getContext(), uri);
-                    Log.d("GroupID","inseide if vid"+videoFile.toString());
-                } else {
-                    //from camera
-                    videoFile = new File(currentPhotoPath);
-                    Log.d("GroupID","inseide else vid"+videoFile.toString());
-                }
+                else  if (type.contains("video")||type.contains("mp4")) {
+                    //handle video
+                    Log.d("GroupID","video");
+                    File videoFile;
+                    if (data != null && data.getData() != null) {
+                        videoFile = getFileFromInputStreamUri(getContext(), uri);
+                        Log.d("GroupID","inseide if vid"+videoFile.toString());
+                    } else {
+                         //from camera
+                        videoFile = new File(currentPhotoPath);
+                        Log.d("GroupID","inseide else vid"+videoFile.toString());
+                    }
 
-                final Uri fileUri = Uri.fromFile(videoFile);
-                String chatId = groupId;
-                if (!TextUtils.isEmpty(dmId)) {
-                    chatId = dmId;
+                    final Uri fileUri = Uri.fromFile(videoFile);
+                    String chatId = groupId;
+                    if (!TextUtils.isEmpty(dmId)) {
+                        chatId = dmId;
+                    }
+                    Log.d("GroupID","vid--->"+fileUri.toString());
+                    AttachVideoActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
                 }
-                Log.d("GroupID","vid--->"+fileUri.toString());
-                AttachVideoActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
-            }
 
         } else if (requestCode == REQUEST_CODE_GROUP_PICK && resultCode == RESULT_OK) {
             String chosenGroupId = data.getStringExtra("group_id");

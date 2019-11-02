@@ -8,10 +8,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -19,11 +17,12 @@ import com.bumptech.glide.request.target.Target;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.announcements.announcementHistory.AnnouncementsActivity;
+import in.lubble.app.events.EventsActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 
@@ -33,6 +32,8 @@ public class LubbleActivity extends BaseActivity {
 
     private ImageView lubbleIv;
     private TextView lubbleInfoTv;
+    private TextView noticeBoardTv;
+    private TextView eventsTv;
     private ProgressBar progressBar;
 
     public static void open(Context context) {
@@ -50,6 +51,8 @@ public class LubbleActivity extends BaseActivity {
         lubbleIv = findViewById(R.id.iv_lubble_image);
         progressBar = findViewById(R.id.progressBar_lubbleInfo);
         lubbleInfoTv = findViewById(R.id.tv_lubble_info);
+        noticeBoardTv = findViewById(R.id.tv_notice_board);
+        eventsTv = findViewById(R.id.tv_events);
 
         setTitle("");
 
@@ -100,5 +103,19 @@ public class LubbleActivity extends BaseActivity {
 
                     }
                 });
+
+        noticeBoardTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AnnouncementsActivity.open(LubbleActivity.this);
+            }
+        });
+
+        eventsTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EventsActivity.open(LubbleActivity.this);
+            }
+        });
     }
 }

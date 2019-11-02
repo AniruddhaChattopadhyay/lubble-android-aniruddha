@@ -2,7 +2,6 @@ package in.lubble.app.models;
 
 import com.google.firebase.database.Exclude;
 
-import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +10,8 @@ import java.util.List;
  * Created by ishaan on 20/5/18.
  */
 
-public class EventData implements Serializable {
+public class EventData {
 
-    private static final long serialVersionUID = -5348821431333945167L;
     public static final int NO = 0;
     public static final int GOING = 1;
     public static final int MAYBE = 2;

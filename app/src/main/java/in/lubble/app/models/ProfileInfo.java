@@ -2,8 +2,6 @@ package in.lubble.app.models;
 
 import com.google.firebase.database.Exclude;
 
-import in.lubble.app.utils.StringUtils;
-
 /**
  * Created by ishaan on 10/2/18.
  */
@@ -15,8 +13,6 @@ public class ProfileInfo {
     private String name;
     private String thumbnail;
     private String badge;
-    @Exclude
-    private String username;
 
     @Override
     public boolean equals(Object obj) {
@@ -62,9 +58,5 @@ public class ProfileInfo {
 
     public void setBadge(String badge) {
         this.badge = badge;
-    }
-
-    public String getUsername() {
-        return StringUtils.getTitleCase(this.name).replace(" ", "");
     }
 }

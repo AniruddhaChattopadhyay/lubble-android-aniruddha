@@ -11,44 +11,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
-import android.widget.ScrollView;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
-
 import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
-import com.freshchat.consumer.sdk.Freshchat;
-import com.freshchat.consumer.sdk.FreshchatMessage;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import in.lubble.app.BaseActivity;
-import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.*;
 import in.lubble.app.R;
-import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.marketplace.Item;
@@ -57,31 +30,27 @@ import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.OnNeverAskAgain;
-import permissions.dispatcher.OnPermissionDenied;
-import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
-import permissions.dispatcher.RuntimePermissions;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import permissions.dispatcher.*;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static android.text.InputType.TYPE_CLASS_NUMBER;
-import static android.text.InputType.TYPE_CLASS_TEXT;
-import static android.text.InputType.TYPE_NUMBER_FLAG_SIGNED;
-import static android.text.InputType.TYPE_TEXT_FLAG_CAP_WORDS;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import static android.text.InputType.*;
 import static android.view.Gravity.RIGHT;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.BUCKET_MARKETPLACE;
 import static in.lubble.app.analytics.AnalyticsEvents.HELP_BTN_CLICKED;
-import static in.lubble.app.models.marketplace.Item.ITEM_PRICING_PAID;
-import static in.lubble.app.models.marketplace.Item.ITEM_PRODUCT;
-import static in.lubble.app.models.marketplace.Item.ITEM_SERVICE;
-import static in.lubble.app.utils.FileUtils.createImageFile;
-import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
-import static in.lubble.app.utils.FileUtils.getPickImageIntent;
-import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
+import static in.lubble.app.analytics.AnalyticsEvents.HELP_PHONE_CLICKED;
+import static in.lubble.app.models.marketplace.Item.*;
+import static in.lubble.app.utils.FileUtils.*;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.compressImage;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -734,12 +703,41 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
                 onBackPressed();
                 return true;
             case R.id.action_help:
-                FreshchatMessage FreshchatMessage = new FreshchatMessage().setTag("ITEMS_HELP").setMessage("Please help me with my services");
-                Freshchat.sendMessage(this, FreshchatMessage);
+                openHelpBottomSheet();
                 Analytics.triggerEvent(HELP_BTN_CLICKED, this);
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openHelpBottomSheet() {
+
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View sheetView = getLayoutInflater().inflate(R.layout.help_bottom_sheet, null);
+        bottomSheetDialog.setContentView(sheetView);
+        bottomSheetDialog.show();
+
+        final TextView phoneTv = sheetView.findViewById(R.id.tv_phone_number);
+
+        phoneTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Analytics.triggerEvent(HELP_PHONE_CLICKED, NewItemActiv.this);
+                Intent sendIntent = new Intent("android.intent.action.MAIN");
+                sendIntent.setAction(Intent.ACTION_VIEW);
+                sendIntent.setPackage("com.whatsapp");
+                String url = "https://api.whatsapp.com/send?phone=" + "+917676622668" + "&text=" + "Hi please help me with products";
+                sendIntent.setData(Uri.parse(url));
+                if (sendIntent.resolveActivity(getPackageManager()) != null) {
+                    startActivity(sendIntent);
+                } else {
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(Uri.parse("tel:+916361686026"));
+                    startActivity(intent);
+                }
+            }
+        });
+
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)

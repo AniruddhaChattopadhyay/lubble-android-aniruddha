@@ -6,36 +6,25 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.books.BookFragment;
+import in.lubble.app.chat.collections.AirtableCollectionData;
 import in.lubble.app.chat.collections.CollectionsAdapter;
-import in.lubble.app.models.AirtableCollectionData;
 import in.lubble.app.models.ChatMoreData;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.ProfileData;
@@ -48,9 +37,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import java.util.ArrayList;
+import java.util.List;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
 
 public class ChatMoreFragment extends Fragment {
     private static final String TAG = "ChatMoreFragment";

@@ -77,30 +77,6 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/ic_close_black_24dp" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_user_tag"
-                    android:layout_marginBottom="16dp"
-                    android:paddingTop="8dp"
-                    android:layout_width="match_parent"
-                    android:visibility="gone"
-                    tools:visibility="visible"
-                    android:paddingRight="8dp"
-                    tools:listitem="@layout/item_user_tag"
-                    app:layout_constraintBottom_toTopOf="@+id/et_new_message"
-                    android:layout_height="wrap_content" />
-
-                <ProgressBar
-                    android:id="@+id/progress_bar_tagging"
-                    android:padding="8dp"
-                    android:visibility="gone"
-                    tools:visibility="visible"
-                    android:layout_width="wrap_content"
-                    style="?android:attr/progressBarStyleSmall"
-                    app:layout_constraintStart_toStartOf="@id/rv_user_tag"
-                    app:layout_constraintBottom_toBottomOf="@id/rv_user_tag"
-                    app:layout_constraintTop_toTopOf="@id/rv_user_tag"
-                    android:layout_height="wrap_content" />
-
                 <View
                     android:id="@+id/view_separator"
                     android:layout_width="match_parent"
@@ -176,7 +152,7 @@
                     android:layout_height="wrap_content"
                     android:visibility="gone"
                     app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title,iv_link_cancel,iv_link_pic"
-                    tools:visibility="gone" />
+                    tools:visibility="visible" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

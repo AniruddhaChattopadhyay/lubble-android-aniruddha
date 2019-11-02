@@ -226,8 +226,6 @@
     <string name="drawer_open">Drawer open</string>
     <string name="freshchat_file_provider_authority">in.lubble.app.provider</string>
     <string name="freshchat_campaign_notification_channel_name">Support messages</string>
-    <string name="click_group_info">Click here for group info</string>
-    <string name="members_count">%d members</string>
 
     <string name="insta_client_id" translatable="false">47fd39a2acc14d66934ded5aa29d1d29</string>
     <string name="insta_redirect_url" translatable="false">https://lubble.in</string>

@@ -13,7 +13,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -22,16 +21,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-
-import java.util.Map;
-import java.util.MissingFormatArgumentException;
-
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -43,6 +37,9 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.StringUtils;
+
+import java.util.Map;
+import java.util.MissingFormatArgumentException;
 
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
@@ -64,8 +61,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_RECEIVER_NAME = "EXTRA_RECEIVER_NAME";
     public static final String EXTRA_RECEIVER_DP_URL = "EXTRA_RECEIVER_DP_URL";
     public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
-    private ImageView toolbarIcon, toolbarLockIcon;
-    private TextView toolbarTv, toolbarInviteHint;
+    private ImageView toolbarIcon;
+    private ImageView toolbarLockIcon;
+    private TextView toolbarTv;
     private LinearLayout inviteContainer;
     private ChatFragment targetFrag = null;
     private String groupId;
@@ -136,7 +134,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbarIcon = toolbar.findViewById(R.id.iv_toolbar);
         toolbarLockIcon = toolbar.findViewById(R.id.iv_lock_icon);
-        toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
+        TextView toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         inviteContainer = toolbar.findViewById(R.id.container_invite);
         setTitle("");
@@ -153,7 +151,13 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);
         dmId = getIntent().getStringExtra(EXTRA_DM_ID);
 
-        toolbarInviteHint.setText(getString(R.string.click_group_info));
+        if (!LubbleSharedPrefs.getInstance().getIsGroupInfoOpened() && !TextUtils.isEmpty(groupId)) {
+            toolbarInviteHint.setVisibility(View.VISIBLE);
+            toolbarInviteHint.setHorizontallyScrolling(true);
+            toolbarInviteHint.setSelected(true);
+        } else {
+            toolbarInviteHint.setVisibility(View.GONE);
+        }
 
         ChatViewPagerAdapter adapter = new ChatViewPagerAdapter(getSupportFragmentManager(), msgId, isJoining);
         viewPager.setAdapter(adapter);
@@ -327,7 +331,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         }
     }
 
-    public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate, int memberCount) {
+    public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate) {
         toolbarTv.setText(title);
         if (StringUtils.isValidString(thumbnailUrl)) {
             GlideApp.with(this).load(thumbnailUrl).circleCrop().into(toolbarIcon);
@@ -338,12 +342,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         groupData.setId(groupId);
         groupData.setTitle(title);
         groupData.setThumbnail(thumbnailUrl);
-
-        if (memberCount > 10) {
-            toolbarInviteHint.setText(String.format(getString(R.string.members_count), memberCount));
-        } else {
-            toolbarInviteHint.setText(getString(R.string.click_group_info));
-        }
     }
 
     public void showNewBadge() {

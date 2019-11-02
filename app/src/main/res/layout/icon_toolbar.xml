@@ -75,6 +75,7 @@
                 android:marqueeRepeatLimit="1"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
+                android:text="Click to view group info"
                 android:visibility="visible" />
 
         </LinearLayout>

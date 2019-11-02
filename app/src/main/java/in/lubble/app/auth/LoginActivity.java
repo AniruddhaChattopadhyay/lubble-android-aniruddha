@@ -48,7 +48,6 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
-import in.lubble.app.utils.StringUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
@@ -273,7 +272,7 @@ public class LoginActivity extends BaseActivity {
         final ProfileData profileData = new ProfileData();
         final ProfileInfo profileInfo = new ProfileInfo();
         profileInfo.setId(FirebaseAuth.getInstance().getUid());
-        profileInfo.setName(StringUtils.getTitleCase(currentUser.getDisplayName()));
+        profileInfo.setName(currentUser.getDisplayName());
         if (currentUser.getPhotoUrl() != null) {
             profileInfo.setThumbnail(currentUser.getPhotoUrl().toString());
             profileData.setProfilePic(currentUser.getPhotoUrl().toString().concat(bigPicString));
