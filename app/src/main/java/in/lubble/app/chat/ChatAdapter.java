@@ -567,7 +567,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
         handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar,recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv,position);
-        //heythere
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
@@ -1081,6 +1080,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void handleVideo(FrameLayout vidContainer,final ProgressBar progressBar, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv,int position) {
 
         if (isValidString(chatData.getVidUrl())) {
+            //progressBar.setVisibility(View.VISIBLE);
             imageView.setOnClickListener(null);
             vidContainer.setVisibility(View.VISIBLE);
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
@@ -1112,6 +1112,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        Log.d(TAG,"progress bar hidden");
                         progressBar.setVisibility(View.GONE);
                         return false;
                     }
@@ -1131,6 +1132,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         } else {
             vidContainer.setVisibility(View.GONE);
+            //progressBar.setVisibility(View.INVISIBLE);
         }
     }
     private void downloadAndSavePic(final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {

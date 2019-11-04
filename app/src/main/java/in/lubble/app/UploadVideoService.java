@@ -22,6 +22,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
@@ -65,6 +67,8 @@ public class UploadVideoService extends  BaseTaskService{
     public static final String EXTRA_IS_DM = "EXTRA_IS_DM";
     public static final String EXTRA_AUTHOR_ID = "EXTRA_AUTHOR_ID";
     public static final String EXTRA_IS_AUTHOR_SELLER = "EXTRA_IS_AUTHOR_SELLER";
+    public static final String TRACK_UPLOAD_TIME = "TRACK_UPLOAD_TIME";
+    public static final String TRACK_COMPRESS_TIME = "TRACK_COMPRESS_TIME";
 
     private StorageReference mStorageRef;
 
@@ -170,7 +174,7 @@ public class UploadVideoService extends  BaseTaskService{
     }
 
     class VideoCompressAsyncTask extends AsyncTask<String, String , String> {
-
+        Trace compressTime = FirebasePerformance.getInstance().newTrace(TRACK_COMPRESS_TIME);
         Context mContext;
         UploadVideoService uploadVideoService;
         Uri ccompressedUri;
@@ -181,6 +185,7 @@ public class UploadVideoService extends  BaseTaskService{
         DmInfoData dmInfoData;
         StorageReference photoRef;
         Uri cachevid=null;
+        long compessed_video_size=0;
         public VideoCompressAsyncTask(Context context,UploadVideoService uploadVideoService, String caption, String groupId, boolean toTransmit, @Nullable StorageMetadata metadata, @Nullable DmInfoData dmInfoData,  StorageReference photoRef){
             mContext = context;
             this.uploadVideoService = uploadVideoService;
@@ -195,6 +200,7 @@ public class UploadVideoService extends  BaseTaskService{
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            compressTime.start();
         }
 
         @Override
@@ -220,6 +226,8 @@ public class UploadVideoService extends  BaseTaskService{
         protected void onPostExecute(String compressedFilePath) {
             super.onPostExecute(compressedFilePath);
             File imageFile = new File(compressedFilePath);
+            compessed_video_size  = imageFile.length()/(1024*1024);
+            compressTime.stop();
             ccompressedUri = Uri.fromFile(imageFile);
             float length = imageFile.length() / 1024f; // Size in KB
             String value;
@@ -228,23 +236,27 @@ public class UploadVideoService extends  BaseTaskService{
             else
                 value = length+" KB";
             Log.i(TAG, "Path: "+compressedFilePath);
-            //delete image in cache
-            if (cachevid!=null) {
-                File file = new File(cachevid.getPath());
-                file.delete();
-                if(file.exists()){
-                    try {
-                        file.getCanonicalFile().delete();
-                        if(file.exists()){
-                            getApplicationContext().deleteFile(file.getName());
+            File file = new File(cachevid.getPath());
+            if(compessed_video_size<=FileUtils.Video_Size){
+                //delete image in cache
+                if (cachevid!=null) {
+                    file.delete();
+                    if(file.exists()){
+                        try {
+                            file.getCanonicalFile().delete();
+                            if(file.exists()){
+                                getApplicationContext().deleteFile(file.getName());
+                            }
+                        } catch (IOException e) {
+                            Crashlytics.logException(e);
+                            e.printStackTrace();
                         }
-                    } catch (IOException e) {
-                        Crashlytics.logException(e);
-                        e.printStackTrace();
                     }
                 }
+                uploadVideoService.uploadFile(ccompressedUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
             }
-            uploadVideoService.uploadFile(ccompressedUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
+            else
+                uploadVideoService.uploadFile(cachevid,photoRef,metadata,toTransmit,caption,groupId,dmInfoData);
         }
     }
 
@@ -252,6 +264,8 @@ public class UploadVideoService extends  BaseTaskService{
         // Upload file to Firebase Storage
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
         final UploadTask uploadTask;
+        final Trace uploadTime = FirebasePerformance.getInstance().newTrace(TRACK_UPLOAD_TIME);
+        uploadTime.start();
         if (metadata != null) {
             uploadTask = photoRef.putFile(compressedFileUri, metadata);
         } else {
@@ -271,7 +285,7 @@ public class UploadVideoService extends  BaseTaskService{
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         // Upload succeeded
                         Log.d(TAG, "uploadFromUri:onSuccess");
-
+                        uploadTime.stop();
                         //delete the compressed file which is no longer needed
                         if (compressedFileUri!=null) {
                             File file = new File(compressedFileUri.getPath());

@@ -10,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -48,7 +50,7 @@ public class ShareActiv extends BaseActivity {
     private String shareId;
     private ShareType shareType;
     private final ChatData chatDataToSend = new ChatData();
-    private Uri imgUri;
+    private Uri mediaUri;
 
     public static void open(Context context, String groupIdToShare, ShareType shareType) {
         final Intent intent = new Intent(context, ShareActiv.class);
@@ -79,6 +81,9 @@ public class ShareActiv extends BaseActivity {
             } else if (type.startsWith("image/")) {
                 handleSendImage(intent);
             }
+            else if( type.startsWith("video/")){
+                handleSendVideo(intent);
+            }
         } else {
             // Handle other intents
             shareId = getIntent().getStringExtra(ARG_SHARE_ID);
@@ -103,7 +108,14 @@ public class ShareActiv extends BaseActivity {
             // make a local copy of the img becoz our file upload service will lose auth for this URI
             // since the service is not part of same context/process
             File localImgFile = getFileFromInputStreamUri(this, imageUri);
-            this.imgUri = Uri.fromFile(localImgFile);
+            this.mediaUri = Uri.fromFile(localImgFile);
+        }
+    }
+    private void handleSendVideo(Intent intent) {
+        Uri videoUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if(videoUri != null){
+            File localVidFile = getFileFromInputStreamUri(this,videoUri);
+            this.mediaUri = Uri.fromFile(localVidFile);
         }
     }
 
@@ -351,9 +363,9 @@ public class ShareActiv extends BaseActivity {
                         }
                         final GroupData groupData = groupList.get(getAdapterPosition());
                         if (groupData.isDm()) {
-                            ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatDataToSend, imgUri);
+                            ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatDataToSend, mediaUri);
                         } else {
-                            ChatActivity.openForGroup(ShareActiv.this, groupData.getId(), false, null, chatDataToSend, imgUri);
+                            ChatActivity.openForGroup(ShareActiv.this, groupData.getId(), false, null, chatDataToSend, mediaUri);
                         }
                         finish();
                     }

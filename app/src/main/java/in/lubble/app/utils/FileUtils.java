@@ -40,6 +40,7 @@ import static in.lubble.app.LubbleApp.getAppContext;
 
 public class FileUtils {
 
+    public static long Video_Size = 0;
     public static File createImageFile(Context context) throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
@@ -122,7 +123,11 @@ public class FileUtils {
         if (uri.getAuthority() != null) {
             try {
                 inputStream = context.getContentResolver().openInputStream(uri); // context needed
+                if(getMimeType(uri).contains("video"))
+                    photoFile = createTemporalVideoFileFrom(context,inputStream);
+                else{
                 photoFile = createTemporalFileFrom(context, inputStream);
+                }
 
             } catch (FileNotFoundException e) {
                 // log
@@ -141,7 +146,30 @@ public class FileUtils {
 
         return photoFile;
     }
+    private static File createTemporalVideoFileFrom(Context context, InputStream inputStream) throws IOException {
+        File targetFile = null;
 
+        if (inputStream != null) {
+            int read;
+            byte[] buffer = new byte[8 * 1024];
+
+            targetFile = createTemporalVideoFile(context);
+            OutputStream outputStream = new FileOutputStream(targetFile);
+
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return targetFile;
+    }
     private static File createTemporalFileFrom(Context context, InputStream inputStream) throws IOException {
         File targetFile = null;
 
@@ -168,6 +196,9 @@ public class FileUtils {
     }
 
     private static File createTemporalFile(Context context) {
+        return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".jpg"); // context needed
+    }
+    private static File createTemporalVideoFile(Context context) {
         return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".mp4"); // context needed
     }
 
