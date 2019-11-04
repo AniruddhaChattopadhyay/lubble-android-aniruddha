@@ -72,6 +72,7 @@ import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
+import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
@@ -898,20 +899,29 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void addReplyData(String replyMsgId, final TextView linkTitleTv, final TextView linkDescTv, boolean isDm) {
+        if(replyMsgId.equalsIgnoreCase("101")){
+            // for group prompt ques
+            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue()!=null){
+                        GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                        linkDescTv.setText(groupData.getQuestion());
+                        showName(linkTitleTv, LubbleSharedPrefs.getInstance().getSupportUid());
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+        }
         ChatData emptyReplyChatData = new ChatData();
         emptyReplyChatData.setId(replyMsgId);
         int index = chatDataList.indexOf(emptyReplyChatData);
         if (index > -1) {
+
             ChatData quotedChatData = chatDataList.get(index);
-            String desc = "";
-            if (isValidString(quotedChatData.getImgUrl())) {
-                desc = desc.concat("\uD83D\uDCF7 ");
-                if (!isValidString(quotedChatData.getMessage())) {
-                    // add the word photo if there is no caption
-                    desc = desc.concat("Photo ");
-                }
-            }
-            desc = desc.concat(quotedChatData.getMessage());
+            String desc = getQuotedDesc(quotedChatData);
             linkDescTv.setText(desc);
             showName(linkTitleTv, quotedChatData.getAuthorUid());
         } else {
@@ -922,15 +932,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
                             final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                            String desc = "";
-                            if (isValidString(quotedChatData.getImgUrl())) {
-                                desc = desc.concat("\uD83D\uDCF7 ");
-                                if (!isValidString(quotedChatData.getMessage())) {
-                                    // add the word photo if there is no caption
-                                    desc = desc.concat("Photo ");
-                                }
-                            }
-                            desc = desc.concat(quotedChatData.getMessage());
+                            String desc = getQuotedDesc(quotedChatData);
                             linkDescTv.setText(desc);
                             showName(linkTitleTv, quotedChatData.getAuthorUid());
                         }
@@ -946,15 +948,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
                             final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                            String desc = "";
-                            if (isValidString(quotedChatData.getImgUrl())) {
-                                desc = desc.concat("\uD83D\uDCF7 ");
-                                if (!isValidString(quotedChatData.getMessage())) {
-                                    // add the word photo if there is no caption
-                                    desc = desc.concat("Photo ");
-                                }
-                            }
-                            desc = desc.concat(quotedChatData.getMessage());
+                            String desc = getQuotedDesc(quotedChatData);
                             linkDescTv.setText(desc);
                             showName(linkTitleTv, quotedChatData.getAuthorUid());
                         }
@@ -966,6 +960,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 });
             }
         }
+    }
+
+    private String getQuotedDesc(ChatData quotedChatData) {
+        String desc = "";
+        if (isValidString(quotedChatData.getImgUrl())) {
+            desc = desc.concat("\uD83D\uDCF7 ");
+            if (!isValidString(quotedChatData.getMessage())) {
+                // add the word photo if there is no caption
+                desc = desc.concat("Photo ");
+            }
+        }
+        desc = desc.concat(quotedChatData.getMessage());
+        return desc;
     }
 
     private void bindSystemViewHolder(RecyclerView.ViewHolder holder, int position) {

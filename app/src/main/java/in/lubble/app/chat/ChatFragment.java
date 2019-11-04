@@ -115,6 +115,7 @@ import static in.lubble.app.utils.StringUtils.getTitleCase;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
+import static in.lubble.app.utils.UiUtils.showKeyboard;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
 @RuntimePermissions
@@ -1526,12 +1527,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
     }
 
-    public void addReplyForPrompt(@NonNull String selectedChatId, String name, String msg) {
+    void addReplyForPrompt(@NonNull String selectedChatId, String name, String msg) {
         linkMetaContainer.setVisibility(View.VISIBLE);
         replyMsgId = selectedChatId;
         linkPicIv.setImageResource(R.drawable.ic_reply_black_24dp);
         linkTitle.setText(name);
         linkDesc.setText(msg);
+        newMessageEt.requestFocus();
+        showKeyboard(requireContext(), newMessageEt.getWindowToken());
     }
 
     void updateThisUserFlair() {
