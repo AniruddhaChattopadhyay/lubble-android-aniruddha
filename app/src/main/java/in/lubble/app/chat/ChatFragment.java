@@ -53,6 +53,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -90,6 +91,7 @@ import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
@@ -542,7 +544,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     private void addGroupJoinPrompt() {
-        if (groupData != null && !TextUtils.isEmpty(groupData.getQuestion())) {
+        if (groupData != null && !TextUtils.isEmpty(groupData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)) {
             final ChatData personalChatData = new ChatData();
             personalChatData.setId("101");
             personalChatData.setType(ChatData.GROUP_PROMPT);

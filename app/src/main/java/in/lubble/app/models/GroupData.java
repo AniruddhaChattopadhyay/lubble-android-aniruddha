@@ -24,7 +24,7 @@ public class GroupData {
     private String lastMessage;
     private long lastMessageTimestamp = 0;
     private String createdBy;
-    private String question = "default ques";
+    private String question;
     @Exclude
     private Set<String> invitedBy;
     private boolean isPinned;
