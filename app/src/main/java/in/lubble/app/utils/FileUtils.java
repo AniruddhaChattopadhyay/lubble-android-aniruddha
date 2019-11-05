@@ -40,7 +40,7 @@ import static in.lubble.app.LubbleApp.getAppContext;
 
 public class FileUtils {
 
-    public static long Video_Size = 0;
+    public static double Video_Size = 0;
     public static File createImageFile(Context context) throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());

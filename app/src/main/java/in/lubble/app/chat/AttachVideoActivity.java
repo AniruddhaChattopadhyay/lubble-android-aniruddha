@@ -71,12 +71,8 @@ public class AttachVideoActivity extends BaseActivity {
         final String chatId = getIntent().getStringExtra(EXTRA_GROUP_ID);
 
         exoPlayerView = findViewById(R.id.exo_player);
-        try{
-            prepareExoPlayerFromFileUri(vidUri);
-            exoPlayer.setPlayWhenReady(false);
-        }catch (Exception e){
-            Log.e("MainActivity","Exoplayer error"+e.toString());
-        }
+        prepareExoPlayerFromFileUri(vidUri);
+        exoPlayer.setPlayWhenReady(false);
 
 
         sendIcon.setOnClickListener(new View.OnClickListener() {

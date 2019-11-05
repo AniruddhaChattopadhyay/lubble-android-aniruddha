@@ -185,7 +185,7 @@ public class UploadVideoService extends  BaseTaskService{
         DmInfoData dmInfoData;
         StorageReference photoRef;
         Uri cachevid=null;
-        long compessed_video_size=0;
+        double compessed_video_size=0;
         public VideoCompressAsyncTask(Context context,UploadVideoService uploadVideoService, String caption, String groupId, boolean toTransmit, @Nullable StorageMetadata metadata, @Nullable DmInfoData dmInfoData,  StorageReference photoRef){
             mContext = context;
             this.uploadVideoService = uploadVideoService;
@@ -226,15 +226,9 @@ public class UploadVideoService extends  BaseTaskService{
         protected void onPostExecute(String compressedFilePath) {
             super.onPostExecute(compressedFilePath);
             File imageFile = new File(compressedFilePath);
-            compessed_video_size  = imageFile.length()/(1024*1024);
+            compessed_video_size  = imageFile.length()/(1024f*1024f);
             compressTime.stop();
             ccompressedUri = Uri.fromFile(imageFile);
-            float length = imageFile.length() / 1024f; // Size in KB
-            String value;
-            if(length >= 1024)
-                value = length/1024f+" MB";
-            else
-                value = length+" KB";
             Log.i(TAG, "Path: "+compressedFilePath);
             File file = new File(cachevid.getPath());
             if(compessed_video_size<=FileUtils.Video_Size){

@@ -1155,7 +1155,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     videoFile = new File(currentPhotoPath);
                     Log.d("GroupID", "inseide else vid" + videoFile.toString());
                 }
-                Video_Size = videoFile.length()/(1024*1024);
+                Video_Size = videoFile.length()/(1024f*1024f);
                 if(Video_Size>PERMITTED_VIDEO_SIZE)
                 {
                     Log.d(TAG,"inside video more than 30 mb");
