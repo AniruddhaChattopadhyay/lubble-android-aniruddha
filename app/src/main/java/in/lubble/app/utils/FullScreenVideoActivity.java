@@ -38,6 +38,9 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
+
 public class FullScreenVideoActivity extends BaseActivity {
     private static final String TAG = "FullScreenVideoActivity";
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";
@@ -58,10 +61,10 @@ public class FullScreenVideoActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED,this);
         setContentView(R.layout.activity_full_screen_video);
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
         progressBar = findViewById(R.id.progress_bar_full_vid);
-
         progressBar.setVisibility(View.VISIBLE);
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
