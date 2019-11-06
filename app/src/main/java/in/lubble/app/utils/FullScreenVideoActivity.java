@@ -7,14 +7,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityOptionsCompat;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -61,8 +58,16 @@ public class FullScreenVideoActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED,this);
         setContentView(R.layout.activity_full_screen_video);
+
+        Toolbar toolbar = findViewById(R.id.transparent_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("");
+
+        Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED,this);
+        Analytics.triggerScreenEvent(this, TAG);
+
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
         progressBar = findViewById(R.id.progress_bar_full_vid);
         progressBar.setVisibility(View.VISIBLE);
