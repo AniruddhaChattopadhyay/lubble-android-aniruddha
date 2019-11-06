@@ -57,5 +57,4 @@
         android:fitsSystemWindows="true"
         app:menu="@menu/menu_main_drawer" />
 
-
 </androidx.drawerlayout.widget.DrawerLayout>

@@ -3,22 +3,40 @@ package in.lubble.app;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.emoji.text.EmojiCompat;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.InstallState;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.play.core.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;
@@ -31,10 +49,14 @@ public class BaseActivity extends AppCompatActivity {
     private boolean isActive;
     private ValueEventListener minAppEventListener;
 
+    private AppUpdateManager appUpdateManager;
+    private com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask;
+    private final static int MY_REQUEST_CODE = 312, MY_REQUEST_CODE_1 = 313;
+    private InstallStateUpdatedListener listener;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         if (!(this instanceof MainActivity) && !(this instanceof LoginActivity) && !(this instanceof LocationActivity) &&
                 (FirebaseAuth.getInstance().getCurrentUser() == null || TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId()))) {
             // user is not signed in, start login flow
@@ -54,9 +76,113 @@ public class BaseActivity extends AppCompatActivity {
         });
     }
 
+    private void checkUpdate(String data) {
+
+        appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
+
+
+        appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+        if (data.equals("immediate")) {
+            appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
+                @Override
+                public void onSuccess(AppUpdateInfo appUpdateInfo) {
+                    if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                        try {
+                            appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, BaseActivity.this, MY_REQUEST_CODE);
+                        } catch (IntentSender.SendIntentException e) {
+                            Toast.makeText(BaseActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            });
+        } else {
+            View v = getLayoutInflater().inflate(R.layout.layout_update_bottom_sheet, null);
+            final BottomSheetDialog dialog = new BottomSheetDialog(BaseActivity.this);
+            dialog.setContentView(v);
+            dialog.show();
+
+            Button update = v.findViewById(R.id.updateButton), cancelUpdate = v.findViewById(R.id.updateCancel);
+
+            cancelUpdate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
+                    dialog.cancel();
+                }
+            });
+
+            update.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_POSITIVE, BaseActivity.this);
+                    appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
+                        @Override
+                        public void onSuccess(AppUpdateInfo appUpdateInfo) {
+                            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                                try {
+                                    appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.FLEXIBLE, BaseActivity.this, MY_REQUEST_CODE_1);
+                                    listener = new InstallStateUpdatedListener() {
+                                        @Override
+                                        public void onStateUpdate(InstallState state) {
+                                            if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                                                Snackbar snackbar =
+                                                        Snackbar.make(
+                                                                findViewById(R.id.content_frame),
+                                                                "An update has just been downloaded.",
+                                                                Snackbar.LENGTH_INDEFINITE);
+                                                snackbar.setAction("RESTART", new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View view) {
+                                                        appUpdateManager.completeUpdate();
+                                                        appUpdateManager.unregisterListener(listener);
+                                                    }
+                                                });
+                                                snackbar.setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                                                snackbar.show();
+                                            }
+                                        }
+                                    };
+                                    appUpdateManager.registerListener(listener);
+
+
+                                } catch (IntentSender.SendIntentException e) {
+                                    Toast.makeText(BaseActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                }
+
+
+                            }
+
+
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MY_REQUEST_CODE && resultCode != RESULT_OK) {
+            new AlertDialog.Builder(BaseActivity.this).setIcon(R.mipmap.ic_launcher).setTitle(R.string.app_name).setMessage("Please Update the app").setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    checkMinAppVersion();
+                }
+            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    BaseActivity.this.finish();
+                }
+            }).create().show();
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
+        //checkMinAppVersion();
         isActive = true;
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             // logged in
@@ -80,33 +206,7 @@ public class BaseActivity extends AppCompatActivity {
 
                         if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing() && isActive) {
                             // block app
-                            final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
-                            alertDialog.setTitle(getString(R.string.update_dialog_title));
-                            alertDialog.setMessage(getString(R.string.update_dialog_msg));
-                            alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_update), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    alertDialog.dismiss();
-                                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_POSITIVE, BaseActivity.this);
-                                    final String appPackageName = getPackageName();
-                                    try {
-                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                                    } catch (ActivityNotFoundException anfe) {
-                                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                                    }
-                                }
-                            });
-                            alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.update_recheck), new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    alertDialog.dismiss();
-                                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_RETRY, BaseActivity.this);
-                                    checkMinAppVersion();
-                                }
-                            });
-                            alertDialog.setCancelable(false);
-                            alertDialog.show();
-                            Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK, BaseActivity.this);
+                            checkUpdate("immediate");
                             return;
                         }
                     } else if (child.getKey().equalsIgnoreCase("softMinApp") && BaseActivity.this instanceof MainActivity) {
@@ -114,40 +214,14 @@ public class BaseActivity extends AppCompatActivity {
                         minAppVersion = minAppVersion == null ? 27 : minAppVersion;
 
                         if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing() && isActive) {
-                            // prompt to optionally update app
-                            try {
-                                final AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
-                                alertDialog.setTitle(EmojiCompat.get().process("New App Update 🎁"));
-                                alertDialog.setMessage(EmojiCompat.get().process("Cool new features await you! Get the latest update now 🎉"));
-                                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_update), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        alertDialog.dismiss();
-                                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_POSITIVE, BaseActivity.this);
-                                        final String appPackageName = getPackageName();
-                                        try {
-                                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
-                                        } catch (ActivityNotFoundException anfe) {
-                                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-                                        }
-                                    }
-                                });
-                                alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.all_later), new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        alertDialog.dismiss();
-                                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
-                                    }
-                                });
-                                alertDialog.setCancelable(false);
-                                alertDialog.show();
-                                Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER, BaseActivity.this);
-                            } catch (Exception e) {
-                                Crashlytics.logException(e);
-                            }
-                            return;
+                            checkUpdate("flexible");
                         }
+                        // prompt to optionally update app
+                        //Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_POSITIVE, BaseActivity.this);
+                        //Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
+                        //Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER, BaseActivity.this);
                     }
+                    return;
                 }
             }
 
