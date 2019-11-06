@@ -66,7 +66,7 @@ public class FullScreenVideoActivity extends BaseActivity {
         setTitle("");
 
         Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED,this);
-        Analytics.triggerScreenEvent(this, TAG);
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
         progressBar = findViewById(R.id.progress_bar_full_vid);
