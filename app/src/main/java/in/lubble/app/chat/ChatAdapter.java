@@ -1057,7 +1057,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void handleVideo(FrameLayout vidContainer, final ProgressBar progressBar, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, int position) {
 
         if (isValidString(chatData.getVidUrl())) {
-            //progressBar.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             imageView.setOnClickListener(null);
             vidContainer.setVisibility(View.VISIBLE);
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
@@ -1065,6 +1065,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 Log.d(TAG, "inside if of handle video");
                 glide.load(chatData.getVidUrl()).override(18, 18).centerCrop().into(imageView);
                 downloadIv.setVisibility(View.VISIBLE);
+                playvid.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_file_download_black_24dp));
+                progressBar.setVisibility(View.GONE);
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -1077,6 +1079,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.placeholder(R.color.black);
                 requestOptions.error(R.color.black);
+                playvid.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_play_circle_outline_gray_24dp));
 
                 glide.load(chatData.getVidUrl()).listener(new RequestListener<Drawable>() {
                     @Override
@@ -1107,7 +1110,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         } else {
             vidContainer.setVisibility(View.GONE);
-            //progressBar.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.GONE);
         }
     }
 
