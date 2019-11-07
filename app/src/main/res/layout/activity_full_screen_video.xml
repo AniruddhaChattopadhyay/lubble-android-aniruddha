@@ -4,21 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context="in.lubble.app.utils.FullScreenImageActivity">
+    tools:context="in.lubble.app.utils.FullScreenVideoActivity">
 
     <include layout="@layout/transparent_toolbar" />
 
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/exo_player_full_screen"
+        />
+
     <ProgressBar
-        android:id="@+id/progress_bar_full"
+        android:id="@+id/progress_bar_full_vid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        />
-
-    <in.lubble.app.utils.TouchImageView
-        android:id="@+id/tiv_fullscreen"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:transitionName="fullscreen_image" />
+        android:visibility="visible"/>
 
 </RelativeLayout>

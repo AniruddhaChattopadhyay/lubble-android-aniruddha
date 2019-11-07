@@ -20,6 +20,7 @@ public class LubbleSharedPrefs {
 
     private static LubbleSharedPrefs instance;
     private final SharedPreferences preferences;
+
     private final String LUBBLE_SHARED_PREFERENCE_KEY = "in.lubble.mainSharedPrefs";
 
     private final String IS_APP_INTRO_SHOWN = "is_app_intro_shown";
@@ -52,6 +53,7 @@ public class LubbleSharedPrefs {
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
     }
+
 
     public static void initializeInstance(Context context) {
         if (instance == null) {

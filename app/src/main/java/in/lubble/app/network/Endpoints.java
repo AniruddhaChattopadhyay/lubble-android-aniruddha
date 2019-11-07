@@ -157,4 +157,5 @@ public interface Endpoints {
 
     @POST
     public Call<RewardsAirtableData> uploadInstalledApps(@Url String url, @Body RequestBody params);
+
 }

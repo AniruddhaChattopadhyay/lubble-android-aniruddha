@@ -83,6 +83,7 @@ import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
+import in.lubble.app.utils.FileUtils;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -106,9 +107,11 @@ import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.models.ChatData.REPLY;
 import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.models.ChatData.UNREAD;
+import static in.lubble.app.utils.FileUtils.Video_Size;
 import static in.lubble.app.utils.FileUtils.createImageFile;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getGalleryIntent;
+import static in.lubble.app.utils.FileUtils.getMimeType;
 import static in.lubble.app.utils.FileUtils.getTakePhotoIntent;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
@@ -137,7 +140,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_RECEIVER_DP_URL = "KEY_RECEIVER_DP_URL";
     private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
     private static final String KEY_CHAT_DATA = "KEY_CHAT_DATA";
-
+    private static final int PERMITTED_VIDEO_SIZE = 30;
     @Nullable
     private GroupData groupData;
     private RelativeLayout joinContainer;
@@ -253,6 +256,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onCreate(savedInstanceState);
 
         groupId = getArguments().getString(KEY_GROUP_ID);
+        Log.d("GroupID", groupId);
         msgIdToOpen = getArguments().getString(KEY_MSG_ID);
         dmId = getArguments().getString(KEY_DM_ID);
         receiverId = getArguments().getString(KEY_RECEIVER_ID);
@@ -277,7 +281,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             sharedImageUri = getArguments().getParcelable(KEY_IMG_URI);
             if (TextUtils.isEmpty(dmId)) {
                 // not a DM
-                AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                if (FileUtils.getMimeType(sharedImageUri).contains("video")) {
+                    File file = new File(sharedImageUri.getPath());
+                    Video_Size = file.length() / (1024 * 1024);
+                    if (Video_Size < PERMITTED_VIDEO_SIZE) {
+                        AttachVideoActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                        //file.delete();
+                    } else {
+                        Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
+                        file.delete();
+                    }
+                } else {
+                    AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                }
                 sharedImageUri = null;
             }
         }
@@ -1163,23 +1179,61 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d("GroupID", "onActivityFinished");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_IMG && resultCode == RESULT_OK) {
-            File imageFile;
-            if (data != null && data.getData() != null) {
-                Uri uri = data.getData();
-                imageFile = getFileFromInputStreamUri(getContext(), uri);
-            } else {
-                // from camera
-                imageFile = new File(currentPhotoPath);
+
+            Uri uri = data.getData();
+            String type = getMimeType(uri);
+            Log.d(TAG, "type:" + type + "uri:" + uri.toString());
+            if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
+                File imageFile;
+                Log.d("GroupID", "image");
+                //handle image
+                if (data != null && data.getData() != null) {
+                    imageFile = getFileFromInputStreamUri(getContext(), uri);
+                    Log.d("GroupID", "inseide if" + imageFile.toString());
+                } else {
+                    // from camera
+                    imageFile = new File(currentPhotoPath);
+                    Log.d("GroupID", "inseide else" + imageFile.toString());
+                }
+
+                final Uri fileUri = Uri.fromFile(imageFile);
+                String chatId = groupId;
+                if (!TextUtils.isEmpty(dmId)) {
+                    chatId = dmId;
+                }
+                Log.d("GroupID", "img--->" + fileUri.toString());
+                AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+            } else if (type.contains("video") || type.contains("mp4")) {
+                //handle video
+                Log.d("GroupID", "video");
+                File videoFile;
+                if (data != null && data.getData() != null) {
+                    videoFile = getFileFromInputStreamUri(getContext(), uri);
+                    Log.d("GroupID", "inseide if vid" + videoFile.toString());
+                } else {
+                    //from camera
+                    videoFile = new File(currentPhotoPath);
+                    Log.d("GroupID", "inseide else vid" + videoFile.toString());
+                }
+                Video_Size = videoFile.length() / (1024f * 1024f);
+                if (Video_Size > PERMITTED_VIDEO_SIZE) {
+                    Log.d(TAG, "inside video more than 30 mb");
+                    Toast.makeText(getContext(), "Choose a video size less than 30 MB", Toast.LENGTH_LONG).show();
+                    videoFile.delete();
+                } else {
+                    final Uri fileUri = Uri.fromFile(videoFile);
+                    String chatId = groupId;
+                    if (!TextUtils.isEmpty(dmId)) {
+                        chatId = dmId;
+                    }
+                    Log.d("GroupID", "vid--->" + fileUri.toString());
+                    AttachVideoActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                }
             }
 
-            final Uri fileUri = Uri.fromFile(imageFile);
-            String chatId = groupId;
-            if (!TextUtils.isEmpty(dmId)) {
-                chatId = dmId;
-            }
-            AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
         } else if (requestCode == REQUEST_CODE_GROUP_PICK && resultCode == RESULT_OK) {
             String chosenGroupId = data.getStringExtra("group_id");
             if (!TextUtils.isEmpty(chosenGroupId)) {
@@ -1292,6 +1346,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
             Intent pickImageIntent = getGalleryIntent(getContext());
+            Log.d("GroupId", pickImageIntent.getExtras().toString());
             startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
         } catch (IOException e) {
             e.printStackTrace();

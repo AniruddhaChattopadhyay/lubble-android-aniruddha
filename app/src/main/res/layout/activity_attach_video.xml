@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    >
+
+    <include layout="@layout/text_toolbar" />
+
+    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:id="@+id/exo_player"
+        />
+    <ImageView
+        android:id="@+id/iv_send_btn_vid"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="8dp"
+        android:background="@drawable/blue_circle"
+        android:padding="12dp"
+        app:srcCompat="@drawable/ic_send_white_24dp" />
+
+
+    <EditText
+        android:id="@+id/et_vid_caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_toLeftOf="@id/iv_send_btn_vid"
+        android:gravity="top|left"
+        android:hint="Add a caption"
+        android:maxLines="15"
+        android:scrollbars="vertical"
+        android:textColor="@color/bright_red"
+        tools:text="@tools:sample/lorem/random" />
+
+</RelativeLayout>

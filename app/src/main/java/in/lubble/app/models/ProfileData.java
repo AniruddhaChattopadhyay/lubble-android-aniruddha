@@ -1,10 +1,12 @@
 package in.lubble.app.models;
 
 import androidx.annotation.Nullable;
+
 import com.google.firebase.database.Exclude;
-import in.lubble.app.utils.DateTimeUtils;
 
 import java.util.Calendar;
+
+import in.lubble.app.utils.DateTimeUtils;
 
 /**
  * Created by ishaangarg on 01/11/17.
