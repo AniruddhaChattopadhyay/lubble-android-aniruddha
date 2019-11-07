@@ -1,28 +1,45 @@
 package in.lubble.app;
 
 public class GoingStatsModel {
-    String uid, name, url, stats;
+    private String uid, name, url;
+    private int status;
 
-    GoingStatsModel(String uid, String name, String url, String stats) {
+    GoingStatsModel(String uid, String name, String url, int stats) {
         this.uid = uid;
         this.name = name;
         this.url = url;
-        this.stats = stats;
-    }
-
-    public String getName() {
-        return name;
+        this.status = stats;
     }
 
     public String getUid() {
         return uid;
     }
 
-    public String getStats() {
-        return stats;
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getUrl() {
         return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

@@ -108,4 +108,5 @@ public class AnalyticsEvents {
     public static final String RATING_STORE_DIALOG = "RATING_STORE_DIALOG";
     public static final String RATING_STORE_DIALOG_YES = "RATING_STORE_DIALOG_YES";
     public static final String RATING_STORE_DIALOG_NEVER = "RATING_STORE_DIALOG_NEVER";
+    public static final String VIDEO_OPENED = "VIDEO_OPENED";
 }
