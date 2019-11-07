@@ -52,7 +52,6 @@ public class AnalyticsEvents {
     public static final String EXPLORE_CONTINUE_CLICKED = "EXPLORE_CONTINUE_CLICKED";
 
     public static final String APP_UPDATE_BLOCK = "APP_UPDATE_BLOCK";
-    public static final String APP_UPDATE_BLOCK_POSITIVE = "APP_UPDATE_BLOCK_POSITIVE";
     public static final String APP_UPDATE_BLOCK_RETRY = "APP_UPDATE_BLOCK_RETRY";
 
     public static final String APP_UPDATE_REMINDER = "APP_UPDATE_REMINDER";

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -16,8 +17,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -38,6 +41,16 @@ import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.install.InstallState;
+import com.google.android.play.core.install.InstallStateUpdatedListener;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.InstallStatus;
+import com.google.android.play.core.install.model.UpdateAvailability;
+import com.google.android.play.core.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -76,6 +89,7 @@ import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import io.branch.referral.InstallListener;
 import it.sephiroth.android.library.xtooltip.ClosePolicy;
 import it.sephiroth.android.library.xtooltip.Tooltip;
 
@@ -127,6 +141,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final int nav_item_leaderboard = 311;
     private Menu navMenu;
 
+
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
         startIntent.putExtra(IS_NEW_USER_IN_THIS_LUBBLE, isNewUserInThisLubble);
@@ -137,6 +152,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
@@ -205,6 +221,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         handleExploreActivity();
     }
+
 
     private void initEverything() {
         syncFcmToken();
