@@ -9,6 +9,11 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -29,10 +34,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;

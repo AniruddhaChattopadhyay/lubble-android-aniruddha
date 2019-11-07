@@ -29,9 +29,11 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.iceteck.silicompressorr.SiliCompressor;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
 

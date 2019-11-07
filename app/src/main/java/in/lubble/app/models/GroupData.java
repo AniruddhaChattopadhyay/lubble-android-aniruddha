@@ -1,6 +1,7 @@
 package in.lubble.app.models;
 
 import androidx.annotation.Nullable;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.Exclude;
 
@@ -23,6 +24,7 @@ public class GroupData {
     private String lastMessage;
     private long lastMessageTimestamp = 0;
     private String createdBy;
+    private String question;
     @Exclude
     private Set<String> invitedBy;
     private boolean isPinned;
@@ -159,5 +161,13 @@ public class GroupData {
 
     public void setIsPinned(boolean pinned) {
         isPinned = pinned;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
     }
 }

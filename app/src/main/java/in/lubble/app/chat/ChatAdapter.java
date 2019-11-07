@@ -73,6 +73,7 @@ import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
+import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
@@ -97,6 +98,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.models.ChatData.EVENT;
 import static in.lubble.app.models.ChatData.GROUP;
+import static in.lubble.app.models.ChatData.GROUP_PROMPT;
 import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.models.ChatData.REPLY;
@@ -414,6 +416,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
             recvdChatViewHolder.dpIv.setVisibility(View.GONE);
         }
+
+        recvdChatViewHolder.visibleToYouTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? View.VISIBLE : View.GONE);
+        recvdChatViewHolder.replyBottomTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? View.VISIBLE : View.GONE);
+
+        recvdChatViewHolder.replyBottomTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chatFragment.addReplyForPrompt(chatData.getId(), profileDataMap.get(chatData.getAuthorUid()).getInfo().getName(), chatData.getPromptQues());
+            }
+        });
 
         if (posToFlash == position) {
             UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
@@ -892,20 +904,29 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void addReplyData(String replyMsgId, final TextView linkTitleTv, final TextView linkDescTv, boolean isDm) {
+        if(replyMsgId.equalsIgnoreCase("101")){
+            // for group prompt ques
+            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue()!=null){
+                        GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                        linkDescTv.setText(groupData.getQuestion());
+                        showName(linkTitleTv, LubbleSharedPrefs.getInstance().getSupportUid());
+                    }
+                }
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            });
+        }
         ChatData emptyReplyChatData = new ChatData();
         emptyReplyChatData.setId(replyMsgId);
         int index = chatDataList.indexOf(emptyReplyChatData);
         if (index > -1) {
+
             ChatData quotedChatData = chatDataList.get(index);
-            String desc = "";
-            if (isValidString(quotedChatData.getImgUrl())) {
-                desc = desc.concat("\uD83D\uDCF7 ");
-                if (!isValidString(quotedChatData.getMessage())) {
-                    // add the word photo if there is no caption
-                    desc = desc.concat("Photo ");
-                }
-            }
-            desc = desc.concat(quotedChatData.getMessage());
+            String desc = getQuotedDesc(quotedChatData);
             linkDescTv.setText(desc);
             showName(linkTitleTv, quotedChatData.getAuthorUid());
         } else {
@@ -916,15 +937,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
                             final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                            String desc = "";
-                            if (isValidString(quotedChatData.getImgUrl())) {
-                                desc = desc.concat("\uD83D\uDCF7 ");
-                                if (!isValidString(quotedChatData.getMessage())) {
-                                    // add the word photo if there is no caption
-                                    desc = desc.concat("Photo ");
-                                }
-                            }
-                            desc = desc.concat(quotedChatData.getMessage());
+                            String desc = getQuotedDesc(quotedChatData);
                             linkDescTv.setText(desc);
                             showName(linkTitleTv, quotedChatData.getAuthorUid());
                         }
@@ -940,15 +953,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         if (dataSnapshot.getValue() != null) {
                             final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                            String desc = "";
-                            if (isValidString(quotedChatData.getImgUrl())) {
-                                desc = desc.concat("\uD83D\uDCF7 ");
-                                if (!isValidString(quotedChatData.getMessage())) {
-                                    // add the word photo if there is no caption
-                                    desc = desc.concat("Photo ");
-                                }
-                            }
-                            desc = desc.concat(quotedChatData.getMessage());
+                            String desc = getQuotedDesc(quotedChatData);
                             linkDescTv.setText(desc);
                             showName(linkTitleTv, quotedChatData.getAuthorUid());
                         }
@@ -960,6 +965,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 });
             }
         }
+    }
+
+    private String getQuotedDesc(ChatData quotedChatData) {
+        String desc = "";
+        if (isValidString(quotedChatData.getImgUrl())) {
+            desc = desc.concat("\uD83D\uDCF7 ");
+            if (!isValidString(quotedChatData.getMessage())) {
+                // add the word photo if there is no caption
+                desc = desc.concat("Photo ");
+            }
+        }
+        desc = desc.concat(quotedChatData.getMessage());
+        return desc;
     }
 
     private void bindSystemViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -1176,6 +1194,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    public void addPersonalChatData(@NonNull ChatData chatData) {
+        if (!chatData.getType().equalsIgnoreCase(HIDDEN) && !chatDataList.get(chatDataList.size() - 1).getId().equalsIgnoreCase("101")) {
+            final int size = chatDataList.size();
+            chatDataList.add(chatData);
+            if (size - 1 >= 0) {
+                // remove the last msg lubb hint
+                notifyItemChanged(size - 1);
+            }
+            notifyItemInserted(size);
+        }
+    }
+
     void updateFlair(ProfileData thisUserProfileData) {
         profileDataMap.put(thisUserProfileData.getId(), thisUserProfileData);
         notifyDataSetChanged();
@@ -1308,7 +1338,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private RelativeLayout rootLayout;
-        private TextView authorNameTv;
+        private TextView authorNameTv, visibleToYouTv, replyBottomTv;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
         private ImageView linkPicIv;
@@ -1343,6 +1373,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             super(itemView);
             rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
             authorNameTv = itemView.findViewById(R.id.tv_author);
+            visibleToYouTv = itemView.findViewById(R.id.tv_msg_visible_to_you);
+            replyBottomTv = itemView.findViewById(R.id.tv_reply_bottom);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkPicIv = itemView.findViewById(R.id.iv_link_pic);

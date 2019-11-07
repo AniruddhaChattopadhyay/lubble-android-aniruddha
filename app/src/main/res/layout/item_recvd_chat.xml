@@ -42,16 +42,14 @@
                 android:layout_weight="1"
                 android:background="@drawable/chat_bubble_border"
                 android:orientation="vertical"
-                android:paddingLeft="8dp"
-                android:paddingTop="8dp"
-                android:paddingRight="8dp"
-                android:paddingBottom="8dp">
+                android:paddingTop="8dp">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginRight="8dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginLeft="8dp"
                     android:gravity="center_vertical">
 
                     <androidx.emoji.widget.EmojiTextView
@@ -66,6 +64,18 @@
                     <include layout="@layout/container_msg_badge" />
 
                 </LinearLayout>
+
+                <TextView
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginRight="8dp"
+                    android:textSize="12sp"
+                    android:textColor="@color/grey_500"
+                    android:id="@+id/tv_msg_visible_to_you"
+                    android:text="This message is only visible to you"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
                 <RelativeLayout
                     android:id="@+id/relativelayout_youtube"
@@ -163,6 +173,9 @@
                 <LinearLayout
                     android:id="@+id/msg_content_container"
                     android:layout_width="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginBottom="8dp"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
@@ -256,6 +269,17 @@
                         tools:text="Pikachu! I choose youu!" />
 
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_reply_bottom"
+                    android:text="REPLY"
+                    android:visibility="gone"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/half_rounded_rectangle_blue_bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp" />
 
             </LinearLayout>
 
