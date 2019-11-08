@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -20,6 +21,7 @@ import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
@@ -73,8 +75,10 @@ public class AttachVideoActivity extends BaseActivity {
         final String chatId = getIntent().getStringExtra(EXTRA_GROUP_ID);
 
         exoPlayerView = findViewById(R.id.exo_player);
+        exoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
         prepareExoPlayerFromFileUri(vidUri);
         exoPlayer.setPlayWhenReady(false);
+        exoPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
 
 
         sendIcon.setOnClickListener(new View.OnClickListener() {

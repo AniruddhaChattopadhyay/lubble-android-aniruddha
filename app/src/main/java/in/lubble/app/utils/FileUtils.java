@@ -91,7 +91,7 @@ public class FileUtils {
 
     public static Intent getGalleryIntent(Context context) {
         Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-        photoPickerIntent.setType("*/*");
+        photoPickerIntent.setType("image/* video/*");
         photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"image/*", "video/*"});
         Log.d("GroupID",Intent.EXTRA_MIME_TYPES);
         return photoPickerIntent;

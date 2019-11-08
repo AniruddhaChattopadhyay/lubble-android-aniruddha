@@ -11,9 +11,17 @@
 
     <com.google.android.exoplayer2.ui.SimpleExoPlayerView
         android:layout_width="match_parent"
-        android:layout_height="500dp"
-        android:id="@+id/exo_player"
-        />
+        android:layout_height="match_parent"
+        android:layout_above="@id/et_vid_caption"
+        android:id="@+id/exo_player" />
+
+    <View
+        android:layout_alignTop="@id/et_vid_caption"
+        android:layout_alignParentBottom="true"
+        android:background="#c2ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
+
     <ImageView
         android:id="@+id/iv_send_btn_vid"
         android:layout_width="48dp"
@@ -36,9 +44,8 @@
         android:layout_toLeftOf="@id/iv_send_btn_vid"
         android:gravity="top|left"
         android:hint="Add a caption"
-        android:maxLines="15"
+        android:maxLines="5"
         android:scrollbars="vertical"
-        android:textColor="@color/bright_red"
         tools:text="@tools:sample/lorem/random" />
 
 </RelativeLayout>

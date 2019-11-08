@@ -1,4 +1,5 @@
 package in.lubble.app.utils;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.widget.ProgressBar;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityOptionsCompat;
 
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -27,6 +29,7 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
@@ -73,6 +76,9 @@ public class FullScreenVideoActivity extends BaseActivity {
         progressBar.setVisibility(View.VISIBLE);
         BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
         TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
+
+        exoPlayerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
+
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
         exoPlayer.addListener(new ExoPlayer.EventListener() {
             @Override
@@ -103,6 +109,7 @@ public class FullScreenVideoActivity extends BaseActivity {
             public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
             }
         });
+        exoPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
         Uri videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
         DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory("exoplayer_video");
         ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();

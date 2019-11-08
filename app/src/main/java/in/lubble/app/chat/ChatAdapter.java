@@ -1411,6 +1411,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             messageTv.setOnLongClickListener(this);
             rootLayout.setOnLongClickListener(this);
             chatIv.setOnLongClickListener(this);
+            vidThumbnailIv.setOnLongClickListener(this);
             lubbContainer.setOnLongClickListener(this);
         }
 
@@ -1597,6 +1598,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             messageTv.setOnLongClickListener(this);
             chatIv.setOnClickListener(null);
             chatIv.setOnLongClickListener(this);
+            vidThumbnailIv.setOnLongClickListener(this);
             rootLayout.setOnLongClickListener(this);
             lubbContainer.setOnLongClickListener(this);
         }

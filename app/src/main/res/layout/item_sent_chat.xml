@@ -153,63 +153,71 @@
                         android:visibility="gone" />
 
                     <FrameLayout
-                        android:id="@+id/img_container"
+                        android:id="@+id/media_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minWidth="240dp"
-                        android:visibility="gone"
-                        tools:visibility="gone">
+                        android:minWidth="240dp">
 
-                        <ProgressBar
-                            android:id="@+id/progressbar_img"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center" />
-
-                        <ImageView
-                            android:id="@+id/iv_chat_img"
+                        <FrameLayout
+                            android:id="@+id/img_container"
                             android:layout_width="match_parent"
-                            android:layout_height="240dp"
-                            android:layout_marginBottom="4dp"
-                            android:minWidth="240dp"
-                            android:scaleType="centerCrop"
-                            android:transitionName="fullscreen_image"
-                            tools:src="@tools:sample/backgrounds/scenic" />
-
-                    </FrameLayout>
-                    <FrameLayout
-                        android:id="@+id/vid_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:minWidth="240dp"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-
-                        <ImageView
-                            android:id="@+id/iv_vid_img"
-                            android:layout_width="match_parent"
-                            android:layout_height="240dp"
-                            android:layout_marginBottom="4dp"
-                            android:minWidth="240dp"
-                            android:scaleType="centerCrop"
-                            android:transitionName="fullscreen_video"
-                            tools:src="@tools:sample/backgrounds/scenic" />
-
-                        <ProgressBar
-                            android:id="@+id/progressbar_img_vid"
-                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center" />
+                            android:minWidth="240dp"
+                            android:visibility="gone"
+                            tools:visibility="gone">
 
-                        <ImageView
-                            android:layout_width="48dp"
-                            android:layout_height="48dp"
-                            android:background="@drawable/circle_white_trans"
-                            app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp"
-                            android:layout_gravity="center"
-                            android:id="@+id/iv_play_vid"/>
+                            <ProgressBar
+                                android:id="@+id/progressbar_img"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center" />
 
+                            <ImageView
+                                android:id="@+id/iv_chat_img"
+                                android:layout_width="match_parent"
+                                android:layout_height="240dp"
+                                android:layout_marginBottom="4dp"
+                                android:minWidth="240dp"
+                                android:scaleType="centerCrop"
+                                android:transitionName="fullscreen_image"
+                                tools:src="@tools:sample/backgrounds/scenic" />
+
+                        </FrameLayout>
+
+                        <FrameLayout
+                            android:id="@+id/vid_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minWidth="240dp"
+                            android:visibility="gone"
+                            tools:visibility="visible">
+
+                            <ImageView
+                                android:id="@+id/iv_vid_img"
+                                android:layout_width="match_parent"
+                                android:layout_height="240dp"
+                                android:layout_marginBottom="4dp"
+                                android:minWidth="240dp"
+                                android:scaleType="centerCrop"
+                                android:transitionName="fullscreen_video"
+                                tools:src="@tools:sample/backgrounds/scenic" />
+
+                            <ProgressBar
+                                android:id="@+id/progressbar_img_vid"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center" />
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:background="@drawable/circle_white_trans"
+                                app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp"
+                                android:layout_gravity="center"
+                                android:id="@+id/iv_play_vid" />
+
+
+                        </FrameLayout>
 
                     </FrameLayout>
 
@@ -217,9 +225,8 @@
                         android:id="@+id/tv_message"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_below="@id/img_container"
+                        android:layout_below="@id/media_container"
                         android:textColor="@color/white"
-                        android:textSize="16sp"
                         tools:text="Psu ghiufhgud !" />
 
                 </RelativeLayout>
