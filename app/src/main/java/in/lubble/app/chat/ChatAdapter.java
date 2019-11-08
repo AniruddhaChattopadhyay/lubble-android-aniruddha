@@ -904,17 +904,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void addReplyData(String replyMsgId, final TextView linkTitleTv, final TextView linkDescTv, boolean isDm) {
-        if(replyMsgId.equalsIgnoreCase("101")){
+        if (replyMsgId.equalsIgnoreCase("101")) {
             // for group prompt ques
             RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if(dataSnapshot.getValue()!=null){
+                    if (dataSnapshot.getValue() != null) {
                         GroupData groupData = dataSnapshot.getValue(GroupData.class);
                         linkDescTv.setText(groupData.getQuestion());
                         showName(linkTitleTv, LubbleSharedPrefs.getInstance().getSupportUid());
                     }
                 }
+
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
                 }
@@ -1232,6 +1233,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void toggleLubb(int pos) {
         final ChatData chatData = chatDataList.get(pos);
+        if (chatData.getType().equalsIgnoreCase(GROUP_PROMPT)) {
+            return;
+        }
         // add or remove like to chat msg
         DatabaseReference lubbRef;
         if (chatData.getIsDm()) {
@@ -1514,6 +1518,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @Override
         public boolean onLongClick(View v) {
+            if (chatDataList.get(getAdapterPosition()).getType().equalsIgnoreCase(GROUP_PROMPT)) {
+                if (actionMode != null) {
+                    actionMode.finish();
+                }
+                return true;
+            }
             if (getAdapterPosition() != highlightedPos) {
                 actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
                 dateTv.setVisibility(View.VISIBLE);
