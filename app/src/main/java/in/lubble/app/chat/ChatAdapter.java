@@ -906,66 +906,74 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void addReplyData(String replyMsgId, final TextView linkTitleTv, final TextView linkDescTv, boolean isDm) {
         if (replyMsgId.equalsIgnoreCase("101")) {
             // for group prompt ques
-            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.getValue() != null) {
-                        GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                        linkDescTv.setText(groupData.getQuestion());
-                        showName(linkTitleTv, LubbleSharedPrefs.getInstance().getSupportUid());
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-                }
-            });
-        }
-        ChatData emptyReplyChatData = new ChatData();
-        emptyReplyChatData.setId(replyMsgId);
-        int index = chatDataList.indexOf(emptyReplyChatData);
-        if (index > -1) {
-
-            ChatData quotedChatData = chatDataList.get(index);
-            String desc = getQuotedDesc(quotedChatData);
-            linkDescTv.setText(desc);
-            showName(linkTitleTv, quotedChatData.getAuthorUid());
+            showGroupQues(linkTitleTv, linkDescTv);
         } else {
-            // chat not found, must have not been loaded yet due to pagination
-            if (!isDm) {
-                RealtimeDbHelper.getMessagesRef().child(groupId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.getValue() != null) {
-                            final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                            String desc = getQuotedDesc(quotedChatData);
-                            linkDescTv.setText(desc);
-                            showName(linkTitleTv, quotedChatData.getAuthorUid());
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
+            ChatData emptyReplyChatData = new ChatData();
+            emptyReplyChatData.setId(replyMsgId);
+            int index = chatDataList.indexOf(emptyReplyChatData);
+            if (index > -1) {
+                ChatData quotedChatData = chatDataList.get(index);
+                if (quotedChatData.getType().equalsIgnoreCase(GROUP_PROMPT)) {
+                    showGroupQues(linkTitleTv, linkDescTv);
+                } else {
+                    String desc = getQuotedDesc(quotedChatData);
+                    linkDescTv.setText(desc);
+                    showName(linkTitleTv, quotedChatData.getAuthorUid());
+                }
             } else {
-                RealtimeDbHelper.getDmMessagesRef().child(dmId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.getValue() != null) {
-                            final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                            String desc = getQuotedDesc(quotedChatData);
-                            linkDescTv.setText(desc);
-                            showName(linkTitleTv, quotedChatData.getAuthorUid());
+                // chat not found, must have not been loaded yet due to pagination
+                if (!isDm) {
+                    RealtimeDbHelper.getMessagesRef().child(groupId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                                String desc = getQuotedDesc(quotedChatData);
+                                linkDescTv.setText(desc);
+                                showName(linkTitleTv, quotedChatData.getAuthorUid());
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
+                    });
+                } else {
+                    RealtimeDbHelper.getDmMessagesRef().child(dmId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                                String desc = getQuotedDesc(quotedChatData);
+                                linkDescTv.setText(desc);
+                                showName(linkTitleTv, quotedChatData.getAuthorUid());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
+                    });
+                }
             }
         }
+    }
+
+    private void showGroupQues(final TextView linkTitleTv, final TextView linkDescTv) {
+        RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                    linkDescTv.setText(groupData.getQuestion());
+                    showName(linkTitleTv, LubbleSharedPrefs.getInstance().getSupportUid());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
     }
 
     private String getQuotedDesc(ChatData quotedChatData) {

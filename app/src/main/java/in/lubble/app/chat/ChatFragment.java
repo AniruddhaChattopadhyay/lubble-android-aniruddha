@@ -562,7 +562,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private void addGroupJoinPrompt() {
         if (groupData != null && !TextUtils.isEmpty(groupData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)) {
             final ChatData personalChatData = new ChatData();
-            personalChatData.setId("101");
+            personalChatData.setId(groupData.getQuestionChatId());
             personalChatData.setType(ChatData.GROUP_PROMPT);
             personalChatData.setAuthorUid(LubbleSharedPrefs.getInstance().getSupportUid());
             final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];

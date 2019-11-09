@@ -1,5 +1,7 @@
 package in.lubble.app.models;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Nullable;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -25,6 +27,7 @@ public class GroupData {
     private long lastMessageTimestamp = 0;
     private String createdBy;
     private String question;
+    private String questionChatId = "101";
     @Exclude
     private Set<String> invitedBy;
     private boolean isPinned;
@@ -169,5 +172,13 @@ public class GroupData {
 
     public void setQuestion(String question) {
         this.question = question;
+    }
+
+    public String getQuestionChatId() {
+        return !TextUtils.isEmpty(this.questionChatId) ? questionChatId : "101";
+    }
+
+    public void setQuestionChatId(String questionChatId) {
+        this.questionChatId = questionChatId;
     }
 }
