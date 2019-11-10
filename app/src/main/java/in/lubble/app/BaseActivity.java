@@ -34,6 +34,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import java.util.concurrent.TimeUnit;
+
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;
@@ -143,44 +145,47 @@ public class BaseActivity extends AppCompatActivity {
                 }
             });
         } else {
-            appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
-                @Override
-                public void onSuccess(final AppUpdateInfo appUpdateInfo) {
-                    if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER, BaseActivity.this);
-                        View v = getLayoutInflater().inflate(R.layout.layout_update_bottom_sheet, null);
-                        final BottomSheetDialog dialog = new BottomSheetDialog(BaseActivity.this);
-                        dialog.setContentView(v);
-                        dialog.setCancelable(true);
-                        dialog.show();
+            if (System.currentTimeMillis() - LubbleSharedPrefs.getInstance().getFlexiUpdateTs() > TimeUnit.HOURS.toMillis(24)) {
+                appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
+                    @Override
+                    public void onSuccess(final AppUpdateInfo appUpdateInfo) {
+                        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                            LubbleSharedPrefs.getInstance().setFlexiUpdateTs(System.currentTimeMillis());
+                            Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER, BaseActivity.this);
+                            View v = getLayoutInflater().inflate(R.layout.layout_update_bottom_sheet, null);
+                            final BottomSheetDialog dialog = new BottomSheetDialog(BaseActivity.this);
+                            dialog.setContentView(v);
+                            dialog.setCancelable(true);
+                            dialog.show();
 
-                        update = v.findViewById(R.id.updateButton);
-                        cancelUpdate = v.findViewById(R.id.updateCancel);
+                            update = v.findViewById(R.id.updateButton);
+                            cancelUpdate = v.findViewById(R.id.updateCancel);
 
-                        update.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
-                                Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_POSITIVE, BaseActivity.this);
-                                try {
-                                    startFlexiUpdate(appUpdateInfo);
-                                } catch (IntentSender.SendIntentException e) {
-                                    e.printStackTrace();
-                                    Crashlytics.logException(e);
+                            update.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_POSITIVE, BaseActivity.this);
+                                    try {
+                                        startFlexiUpdate(appUpdateInfo);
+                                    } catch (IntentSender.SendIntentException e) {
+                                        e.printStackTrace();
+                                        Crashlytics.logException(e);
+                                    }
                                 }
-                            }
-                        });
-                        cancelUpdate.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
-                                dialog.dismiss();
-                            }
-                        });
+                            });
+                            cancelUpdate.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
+                                    dialog.dismiss();
+                                }
+                            });
 
+                        }
                     }
-                }
-            });
+                });
+            }
         }
     }
 
