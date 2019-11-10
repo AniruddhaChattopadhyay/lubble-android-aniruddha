@@ -4,9 +4,11 @@ import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -37,6 +39,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;
@@ -53,10 +62,12 @@ public class BaseActivity extends AppCompatActivity {
     private com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask;
     private final static int MY_REQUEST_CODE = 312, MY_REQUEST_CODE_1 = 313;
     private InstallStateUpdatedListener listener;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        sharedPreferences = BaseActivity.this.getSharedPreferences("updateTime", MODE_PRIVATE);
         if (!(this instanceof MainActivity) && !(this instanceof LoginActivity) && !(this instanceof LocationActivity) &&
                 (FirebaseAuth.getInstance().getCurrentUser() == null || TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId()))) {
             // user is not signed in, start login flow
@@ -98,66 +109,72 @@ public class BaseActivity extends AppCompatActivity {
             });
         } else {
             View v = getLayoutInflater().inflate(R.layout.layout_update_bottom_sheet, null);
-            final BottomSheetDialog dialog = new BottomSheetDialog(BaseActivity.this);
-            dialog.setContentView(v);
-            dialog.show();
+            long previous_time = sharedPreferences.getLong("timestampnow", 0);
+            long current_time = Calendar.getInstance().getTimeInMillis();
+            if (current_time > previous_time) {
+                final BottomSheetDialog dialog = new BottomSheetDialog(BaseActivity.this);
+                dialog.setContentView(v);
+                dialog.show();
 
-            Button update = v.findViewById(R.id.updateButton), cancelUpdate = v.findViewById(R.id.updateCancel);
+                Button update = v.findViewById(R.id.updateButton), cancelUpdate = v.findViewById(R.id.updateCancel);
 
-            cancelUpdate.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
-                    dialog.cancel();
-                }
-            });
+                cancelUpdate.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        long current_time = Calendar.getInstance().getTimeInMillis();
+                        sharedPreferences.edit().putLong("timestampnow", current_time + TimeUnit.HOURS.toMillis(24)).apply();
+                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
+                        dialog.cancel();
+                    }
+                });
 
-            update.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_POSITIVE, BaseActivity.this);
-                    appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
-                        @Override
-                        public void onSuccess(AppUpdateInfo appUpdateInfo) {
-                            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                                try {
-                                    appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.FLEXIBLE, BaseActivity.this, MY_REQUEST_CODE_1);
-                                    listener = new InstallStateUpdatedListener() {
-                                        @Override
-                                        public void onStateUpdate(InstallState state) {
-                                            if (state.installStatus() == InstallStatus.DOWNLOADED) {
-                                                Snackbar snackbar =
-                                                        Snackbar.make(
-                                                                findViewById(R.id.content_frame),
-                                                                "An update has just been downloaded.",
-                                                                Snackbar.LENGTH_INDEFINITE);
-                                                snackbar.setAction("RESTART", new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View view) {
-                                                        appUpdateManager.completeUpdate();
-                                                        appUpdateManager.unregisterListener(listener);
-                                                    }
-                                                });
-                                                snackbar.setActionTextColor(getResources().getColor(R.color.colorPrimary));
-                                                snackbar.show();
+                update.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_POSITIVE, BaseActivity.this);
+                        appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
+                            @Override
+                            public void onSuccess(AppUpdateInfo appUpdateInfo) {
+                                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                                    try {
+                                        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.FLEXIBLE, BaseActivity.this, MY_REQUEST_CODE_1);
+                                        listener = new InstallStateUpdatedListener() {
+                                            @Override
+                                            public void onStateUpdate(InstallState state) {
+                                                if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                                                    Snackbar snackbar =
+                                                            Snackbar.make(
+                                                                    findViewById(R.id.content_frame),
+                                                                    "An update has just been downloaded.",
+                                                                    Snackbar.LENGTH_INDEFINITE);
+                                                    snackbar.setAction("RESTART", new View.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(View view) {
+                                                            appUpdateManager.completeUpdate();
+                                                            appUpdateManager.unregisterListener(listener);
+                                                        }
+                                                    });
+                                                    snackbar.setActionTextColor(getResources().getColor(R.color.colorPrimary));
+                                                    snackbar.show();
+                                                }
                                             }
-                                        }
-                                    };
-                                    appUpdateManager.registerListener(listener);
+                                        };
+                                        appUpdateManager.registerListener(listener);
 
 
-                                } catch (IntentSender.SendIntentException e) {
-                                    Toast.makeText(BaseActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                    } catch (IntentSender.SendIntentException e) {
+                                        Toast.makeText(BaseActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+
+
                                 }
 
 
                             }
-
-
-                        }
-                    });
-                }
-            });
+                        });
+                    }
+                });
+            }
         }
     }
 
