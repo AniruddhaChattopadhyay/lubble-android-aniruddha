@@ -95,6 +95,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         intent.putExtra(EXTRA_MSG_ID, msgId);
         intent.putExtra(EXTRA_CHAT_DATA, chatData);
         intent.putExtra(EXTRA_IMG_URI_DATA, imgUri);
+        Log.d("mime type chat","&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"+imgUri);
         context.startActivity(intent);
     }
 

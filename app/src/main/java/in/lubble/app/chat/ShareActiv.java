@@ -2,9 +2,12 @@ package in.lubble.app.chat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,9 +116,24 @@ public class ShareActiv extends BaseActivity {
     }
     private void handleSendVideo(Intent intent) {
         Uri videoUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-        if(videoUri != null){
-            File localVidFile = getFileFromInputStreamUri(this,videoUri);
-            this.mediaUri = Uri.fromFile(localVidFile);
+        String extension =null;
+        String[] filePathColumn = {MediaStore.Video.Media.DATA};
+        Cursor cursor = getContentResolver().query(videoUri, filePathColumn, null, null, null);
+        if (cursor.moveToFirst()) {
+            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+            String filePath = cursor.getString(columnIndex);
+            extension = filePath.substring(filePath.lastIndexOf(".") + 1); // Without dot jpg, png
+            Log.d("mime image","*********************"+extension);
+        }
+        if(extension.contains("mov")){
+            Toast.makeText(getApplicationContext(),"Unsupported File Type",Toast.LENGTH_LONG).show();
+            finish();
+        }
+        else {
+            if (videoUri != null) {
+                File localVidFile = getFileFromInputStreamUri(this, videoUri);
+                this.mediaUri = Uri.fromFile(localVidFile);
+            }
         }
     }
 

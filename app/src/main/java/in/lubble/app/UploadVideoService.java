@@ -3,6 +3,7 @@ package in.lubble.app;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -211,6 +212,14 @@ public class UploadVideoService extends  BaseTaskService{
                 Log.d(TAG,"path0 = "+paths[0]+" path1="+paths[1]+"from file "+Uri.fromFile(new File(paths[1])).toString());
                 Log.d(TAG,"path0 = "+Uri.parse(paths[0]).getPath()+" path1="+paths[1]+"from file "+Uri.fromFile(new File(paths[1])).getPath());
                 filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath() ,Uri.fromFile(new File(paths[1])).getPath());
+//                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+//                retriever.setDataSource(Uri.parse(paths[0]).getPath());
+//                int bitrate = Integer.parseInt(retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_BITRATE)));
+//                Log.d(TAG,"**************"+bitrate+"*******************");
+//                //float size = retriever.extractMetadata((MediaMetadataRetriever.META))
+//                int width = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+//                int height = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+                //filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath(), Uri.fromFile(new File(paths[1])).getPath(),width,height,(3*bitrate)/4);
                 cachevid = Uri.parse(paths[0]);
 
             } catch (URISyntaxException e) {
@@ -227,6 +236,7 @@ public class UploadVideoService extends  BaseTaskService{
             super.onPostExecute(compressedFilePath);
             File imageFile = new File(compressedFilePath);
             compessed_video_size  = imageFile.length()/(1024f*1024f);
+            Log.d(TAG , compessed_video_size+"*********************************");
             compressTime.stop();
             ccompressedUri = Uri.fromFile(imageFile);
             Log.i(TAG, "Path: "+compressedFilePath);

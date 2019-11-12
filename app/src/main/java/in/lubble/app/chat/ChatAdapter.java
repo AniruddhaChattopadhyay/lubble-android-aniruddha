@@ -566,7 +566,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
-        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar,recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv,position);
+        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid,recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv,position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
