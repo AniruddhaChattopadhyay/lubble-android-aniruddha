@@ -284,9 +284,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 if (FileUtils.getMimeType(sharedImageUri).contains("video")) {
                     File file = new File(sharedImageUri.getPath());
                     Video_Size = file.length() / (1024 * 1024);
-                    if (Video_Size < PERMITTED_VIDEO_SIZE) {
+                    if (FileUtils.getMimeType(sharedImageUri).contains("mov") || FileUtils.getMimeType(sharedImageUri).contains("MOV")) {
+                        Toast.makeText(getContext(), "Unsupported file type .mov", Toast.LENGTH_LONG).show();
+                        file.delete();
+                    } else if (Video_Size < PERMITTED_VIDEO_SIZE) {
                         AttachVideoActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
-                        //file.delete();
                     } else {
                         Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
                         file.delete();
@@ -1188,15 +1190,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             Log.d(TAG, "type:" + type + "uri:" + uri.toString());
             if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
                 File imageFile;
-                Log.d("GroupID", "image");
                 //handle image
-                if (data != null && data.getData() != null) {
+                if (data.getData() != null) {
                     imageFile = getFileFromInputStreamUri(getContext(), uri);
-                    Log.d("GroupID", "inseide if" + imageFile.toString());
                 } else {
                     // from camera
                     imageFile = new File(currentPhotoPath);
-                    Log.d("GroupID", "inseide else" + imageFile.toString());
                 }
 
                 final Uri fileUri = Uri.fromFile(imageFile);
@@ -1204,33 +1203,33 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 if (!TextUtils.isEmpty(dmId)) {
                     chatId = dmId;
                 }
-                Log.d("GroupID", "img--->" + fileUri.toString());
                 AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
             } else if (type.contains("video") || type.contains("mp4")) {
                 //handle video
-                Log.d("GroupID", "video");
-                File videoFile;
-                if (data != null && data.getData() != null) {
-                    videoFile = getFileFromInputStreamUri(getContext(), uri);
-                    Log.d("GroupID", "inseide if vid" + videoFile.toString());
+                String extension = FileUtils.getFileExtension(requireContext(), uri);
+
+                if (!TextUtils.isEmpty(extension) && (extension.contains("mov") || extension.contains("MOV"))) {
+                    Toast.makeText(getContext(), "Unsupported File type", Toast.LENGTH_LONG).show();
                 } else {
-                    //from camera
-                    videoFile = new File(currentPhotoPath);
-                    Log.d("GroupID", "inseide else vid" + videoFile.toString());
-                }
-                Video_Size = videoFile.length() / (1024f * 1024f);
-                if (Video_Size > PERMITTED_VIDEO_SIZE) {
-                    Log.d(TAG, "inside video more than 30 mb");
-                    Toast.makeText(getContext(), "Choose a video size less than 30 MB", Toast.LENGTH_LONG).show();
-                    videoFile.delete();
-                } else {
-                    final Uri fileUri = Uri.fromFile(videoFile);
-                    String chatId = groupId;
-                    if (!TextUtils.isEmpty(dmId)) {
-                        chatId = dmId;
+                    File videoFile;
+                    if (data.getData() != null) {
+                        videoFile = getFileFromInputStreamUri(getContext(), uri);
+                    } else {
+                        //from camera
+                        videoFile = new File(currentPhotoPath);
                     }
-                    Log.d("GroupID", "vid--->" + fileUri.toString());
-                    AttachVideoActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                    Video_Size = videoFile.length() / (1024f * 1024f);
+                    if (Video_Size > PERMITTED_VIDEO_SIZE) {
+                        Toast.makeText(getContext(), "Choose a video size less than 30 MB", Toast.LENGTH_LONG).show();
+                        videoFile.delete();
+                    } else {
+                        final Uri fileUri = Uri.fromFile(videoFile);
+                        String chatId = groupId;
+                        if (!TextUtils.isEmpty(dmId)) {
+                            chatId = dmId;
+                        }
+                        AttachVideoActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                    }
                 }
             }
 

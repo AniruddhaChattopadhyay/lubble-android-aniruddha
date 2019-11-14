@@ -3,6 +3,7 @@ package in.lubble.app;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
@@ -213,7 +214,19 @@ public class UploadVideoService extends BaseTaskService {
                 //Uri pathdesc = Uri.parse(paths[1]);
                 Log.d(TAG, "path0 = " + paths[0] + " path1=" + paths[1] + "from file " + Uri.fromFile(new File(paths[1])).toString());
                 Log.d(TAG, "path0 = " + Uri.parse(paths[0]).getPath() + " path1=" + paths[1] + "from file " + Uri.fromFile(new File(paths[1])).getPath());
-                filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath(), Uri.fromFile(new File(paths[1])).getPath());
+
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(Uri.parse(paths[0]).getPath());
+                int bitrate = Integer.parseInt(retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_BITRATE)));
+
+                Log.d(TAG, "OG bitrate is : " + bitrate);
+
+                int destBitrate = bitrate;
+                if (bitrate > 5 * 1024 * 1024 || new File(paths[0]).length() > 10 * 1024 * 1024) {
+                    destBitrate = Math.min(bitrate / 2, 5 * 1024 * 1024); // max Bitrate allowed = 5Mbps
+                }
+
+                filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath(), Uri.fromFile(new File(paths[1])).getPath(), 0, 0, destBitrate);
                 cachevid = Uri.parse(paths[0]);
 
             } catch (URISyntaxException e) {
@@ -234,6 +247,10 @@ public class UploadVideoService extends BaseTaskService {
             ccompressedUri = Uri.fromFile(imageFile);
             Log.i(TAG, "Path: " + compressedFilePath);
             File file = new File(cachevid.getPath());
+
+            Log.d(TAG, "OG SIZE: " + file.length() / (1024f * 1024f));
+            Log.d(TAG, "compressed size: " + compessed_video_size);
+
             if (compessed_video_size <= FileUtils.Video_Size) {
                 //delete image in cache
                 if (cachevid != null) {

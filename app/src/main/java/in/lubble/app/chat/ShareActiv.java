@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -38,6 +39,7 @@ import in.lubble.app.models.DmData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
+import in.lubble.app.utils.FileUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
@@ -92,8 +94,7 @@ public class ShareActiv extends BaseActivity {
                 handleSendText(intent);
             } else if (type.startsWith("image/")) {
                 handleSendImage(intent);
-            }
-            else if( type.startsWith("video/")){
+            } else if (type.startsWith("video/")) {
                 handleSendVideo(intent);
             }
         } else {
@@ -123,10 +124,16 @@ public class ShareActiv extends BaseActivity {
             this.mediaUri = Uri.fromFile(localImgFile);
         }
     }
+
     private void handleSendVideo(Intent intent) {
         Uri videoUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-        if(videoUri != null){
-            File localVidFile = getFileFromInputStreamUri(this,videoUri);
+
+        String extension = FileUtils.getFileExtension(this, videoUri);
+        if (extension != null && extension.contains("mov")) {
+            Toast.makeText(getApplicationContext(), "Unsupported File Type", Toast.LENGTH_LONG).show();
+            finish();
+        } else {
+            File localVidFile = getFileFromInputStreamUri(this, videoUri);
             this.mediaUri = Uri.fromFile(localVidFile);
         }
     }
