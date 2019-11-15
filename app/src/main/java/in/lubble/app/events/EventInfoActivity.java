@@ -1,24 +1,30 @@
 package in.lubble.app.events;
 
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 
@@ -42,6 +48,7 @@ import java.util.Map;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GoingStatsActivity;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -104,6 +111,7 @@ public class EventInfoActivity extends BaseActivity {
     private DatabaseReference groupTitleRef;
     private ValueEventListener groupTitleListener;
     private long oldResponse = EventData.NO;
+    private Button ticketsUrl;
 
     public static void open(Context context, String eventId) {
         Intent intent = new Intent(context, EventInfoActivity.class);
@@ -153,11 +161,46 @@ public class EventInfoActivity extends BaseActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.joining_group);
         progressDialog.setMessage(getString(R.string.all_please_wait));
-
+        ticketsUrl = findViewById(R.id.ticketUrl);
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
-        // Log.i("TejasEIA",eventId);
+
 
         eventRef = getEventsRef().child(eventId);
+        eventRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child("ticketUrl").exists()) {
+                    ticketsUrl.setVisibility(View.VISIBLE);
+                    ticketsUrl.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (dataSnapshot.child("ticketUrl").getValue().toString().contains("https://") || dataSnapshot.child("ticketUrl").getValue().toString().contains("http://")) {
+                                Uri uri = Uri.parse(dataSnapshot.child("ticketUrl").getValue().toString());
+                                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                                intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorPrimary));
+                                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorPrimaryDark));
+                                CustomTabsIntent customTabsIntent = intentBuilder.build();
+                                customTabsIntent.launchUrl(EventInfoActivity.this, uri);
+                            }
+                            else
+                            {
+                                Toast.makeText(EventInfoActivity.this,"URL is not Valid",Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+                } else {
+                    ticketsUrl.setVisibility(View.GONE);
+                }
+                eventRef.removeEventListener(this);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        //if(eventRef.child("ticketUrl"))
 
         goingContainer.setOnClickListener(new View.OnClickListener() {
             @Override

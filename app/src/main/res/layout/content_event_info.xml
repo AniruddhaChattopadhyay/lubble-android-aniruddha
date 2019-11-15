@@ -60,6 +60,19 @@
             android:maxLines="2"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             tools:text="Event Name" />
+        <Button
+            android:id="@+id/ticketUrl"
+            android:background="@color/colorAccent"
+            android:text="Event Tickets Url"
+            android:textColor="@color/white"
+            android:padding="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:layout_marginEnd="12dp"
+            android:layout_alignParentEnd="true"
+            tools:visibility="visible"
+            android:visibility="gone"/>
 
         <View
             android:layout_width="match_parent"

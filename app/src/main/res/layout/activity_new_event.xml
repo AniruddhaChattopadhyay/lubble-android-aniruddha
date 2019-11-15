@@ -351,6 +351,29 @@
                         android:lines="3" />
 
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <ImageView
+                    android:id="@+id/iv_event_url_tickets"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/till_event_address"
+                    android:layout_marginTop="25dp"
+                    android:tint="@color/darker_gray"
+                    app:srcCompat="@drawable/ic_link_black_24dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/till_event_url_tickets"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/till_event_address"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_toRightOf="@+id/iv_event_url_tickets"
+                    android:hint="Tickets Url Link">
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </com.google.android.material.textfield.TextInputLayout>
             </RelativeLayout>
         </RelativeLayout>
     </ScrollView>
