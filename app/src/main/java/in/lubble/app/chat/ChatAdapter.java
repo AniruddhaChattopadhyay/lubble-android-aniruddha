@@ -978,7 +978,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private String getQuotedDesc(ChatData quotedChatData) {
         String desc = "";
-        if (isValidString(quotedChatData.getImgUrl())) {
+        if (isValidString(quotedChatData.getVidUrl())) {
+            desc = desc.concat("\ud83c\udfa5 ");
+            if (!isValidString(quotedChatData.getMessage())) {
+                // add the word video if there is no caption
+                desc = desc.concat("Video ");
+            }
+        } else if (isValidString(quotedChatData.getImgUrl())) {
             desc = desc.concat("\uD83D\uDCF7 ");
             if (!isValidString(quotedChatData.getMessage())) {
                 // add the word photo if there is no caption
