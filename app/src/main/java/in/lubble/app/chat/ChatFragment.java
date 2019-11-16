@@ -1184,31 +1184,31 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         Log.d("GroupID", "onActivityFinished");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_IMG && resultCode == RESULT_OK) {
-
-            Uri uri = data.getData();
-            String type = getMimeType(uri);
-            Log.d(TAG, "type:" + type + "uri:" + uri.toString());
+            File imageFile;
+            String type;
+            Uri uri;
+            if (data != null && data.getData() != null) {
+                uri = data.getData();
+                type = getMimeType(uri);
+                imageFile = getFileFromInputStreamUri(getContext(), uri);
+            } else {
+                // from camera
+                imageFile = new File(currentPhotoPath);
+                type = getMimeType(Uri.fromFile(imageFile));
+            }
             if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
-                File imageFile;
-                //handle image
-                if (data.getData() != null) {
-                    imageFile = getFileFromInputStreamUri(getContext(), uri);
-                } else {
-                    // from camera
-                    imageFile = new File(currentPhotoPath);
-                }
-
                 final Uri fileUri = Uri.fromFile(imageFile);
                 String chatId = groupId;
                 if (!TextUtils.isEmpty(dmId)) {
                     chatId = dmId;
                 }
+                Log.d("GroupID", "img--->" + fileUri.toString());
                 AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
-            } else if (type.contains("video") || type.contains("mp4")) {
-                //handle video
+            } else if (data != null && (type.contains("video") || type.contains("mp4"))) {
+                //handle video from gallery picker
+                uri = data.getData();
                 String extension = FileUtils.getFileExtension(requireContext(), uri);
-
-                if (!TextUtils.isEmpty(extension) && (extension.contains("mov") || extension.contains("MOV"))) {
+                if (!TextUtils.isEmpty(extension) && extension.contains("mov")) {
                     Toast.makeText(getContext(), "Unsupported File type", Toast.LENGTH_LONG).show();
                 } else {
                     File videoFile;
