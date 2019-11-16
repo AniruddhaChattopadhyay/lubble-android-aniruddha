@@ -424,6 +424,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onClick(View v) {
                 chatFragment.addReplyForPrompt(chatData.getId(), profileDataMap.get(chatData.getAuthorUid()).getInfo().getName(), chatData.getPromptQues());
+                Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_REPLIED, context);
             }
         });
 
