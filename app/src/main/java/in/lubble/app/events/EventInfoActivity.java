@@ -163,43 +163,8 @@ public class EventInfoActivity extends BaseActivity {
         progressDialog.setMessage(getString(R.string.all_please_wait));
         ticketsUrl = findViewById(R.id.ticketUrl);
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
-
-
+        Log.i("Tejas",eventId);
         eventRef = getEventsRef().child(eventId);
-        eventRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-                if (dataSnapshot.child("ticketUrl").exists()) {
-                    ticketsUrl.setVisibility(View.VISIBLE);
-                    ticketsUrl.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (dataSnapshot.child("ticketUrl").getValue().toString().contains("https://") || dataSnapshot.child("ticketUrl").getValue().toString().contains("http://")) {
-                                Uri uri = Uri.parse(dataSnapshot.child("ticketUrl").getValue().toString());
-                                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-                                intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorPrimary));
-                                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorPrimaryDark));
-                                CustomTabsIntent customTabsIntent = intentBuilder.build();
-                                customTabsIntent.launchUrl(EventInfoActivity.this, uri);
-                            }
-                            else
-                            {
-                                Toast.makeText(EventInfoActivity.this,"URL is not Valid",Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    });
-
-                } else {
-                    ticketsUrl.setVisibility(View.GONE);
-                }
-                eventRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
         //if(eventRef.child("ticketUrl"))
 
         goingContainer.setOnClickListener(new View.OnClickListener() {
@@ -438,10 +403,30 @@ public class EventInfoActivity extends BaseActivity {
 
         eventInfoListener = eventRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(final DataSnapshot dataSnapshot) {
                 eventData = dataSnapshot.getValue(EventData.class);
+
                 if (eventData != null) {
                     setTitleWhenCollapsed();
+                    if (dataSnapshot.child("ticketUrl").exists()) {
+                        ticketsUrl.setVisibility(View.VISIBLE);
+                        ticketsUrl.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if (dataSnapshot.child("ticketUrl").getValue().toString().contains("https://") || dataSnapshot.child("ticketUrl").getValue().toString().contains("http://")) {
+                                    Uri uri = Uri.parse(dataSnapshot.child("ticketUrl").getValue().toString());
+                                    CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                                    intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorPrimary));
+                                    intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorPrimaryDark));
+                                    CustomTabsIntent customTabsIntent = intentBuilder.build();
+                                    customTabsIntent.launchUrl(EventInfoActivity.this, uri);
+                                } else {
+                                    Toast.makeText(EventInfoActivity.this, "URL is not Valid", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+
+                    }
                     GlideApp.with(EventInfoActivity.this)
                             .load(eventData.getProfilePic())
                             .error(R.drawable.ic_star_party)
