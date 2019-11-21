@@ -104,7 +104,7 @@
                     android:background="@drawable/rounded_rect_gray"
                     android:padding="8dp"
                     android:visibility="gone"
-                    tools:visibility="gone">
+                    tools:visibility="visible">
 
                     <ImageView
                         android:id="@+id/iv_link_pic"
@@ -125,7 +125,7 @@
                             android:id="@+id/tv_link_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:maxLines="1"
+                            android:maxLines="2"
                             android:textColor="@color/black"
                             android:textStyle="bold"
                             tools:text="LINK TITLE" />
@@ -220,6 +220,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/vid_container"
                         android:textColor="@color/white"
+                        android:textSize="15sp"
                         tools:text="Psu ghiufhgud !" />
 
                 </RelativeLayout>
