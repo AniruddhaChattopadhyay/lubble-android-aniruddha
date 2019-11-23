@@ -1128,17 +1128,29 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         Log.d("GroupID", "onActivityFinished");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_IMG && resultCode == RESULT_OK) {
-            Uri uri = data.getData();
-            String type = getMimeType(uri);
+            File imageFile;
+            String type;
+            Uri uri;
+            if (data != null && data.getData() != null) {
+                uri = data.getData();
+                type = getMimeType(uri);
+                imageFile = getFileFromInputStreamUri(getContext(), uri);
+            } else {
+                // from camera
+                imageFile = new File(currentPhotoPath);
+                type = getMimeType(Uri.fromFile(imageFile));
+            }
+            //Uri uri = data.getData();
+            //String type = getMimeType(uri);
             if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
-                File imageFile;
+                //File imageFile;
                 //handle image
-                if (data != null && data.getData() != null) {
-                    imageFile = getFileFromInputStreamUri(getContext(), uri);
-                } else {
-                    // from camera
-                    imageFile = new File(currentPhotoPath);
-                }
+//                if (data != null && data.getData() != null) {
+//                    imageFile = getFileFromInputStreamUri(getContext(), uri);
+//                } else {
+//                    // from camera
+//                    imageFile = new File(currentPhotoPath);
+//                }
 
                 final Uri fileUri = Uri.fromFile(imageFile);
                 String chatId = groupId;
@@ -1151,6 +1163,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 //handle video
                 String extension =null;
                 String[] filePathColumn = {MediaStore.Video.Media.DATA};
+                uri = data.getData();
                 Cursor cursor = getContext().getContentResolver().query(uri, filePathColumn, null, null, null);
                 if (cursor.moveToFirst()) {
                     int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
@@ -1263,6 +1276,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public void onAttachmentClicked(int position) {
         switch (position) {
             case 0:
+                Log.d(TAG,"inside cam intent");
                 startCameraIntent();
                 break;
             case 1:
@@ -1287,6 +1301,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             Intent pickImageIntent = getTakePhotoIntent(getContext(), cameraPic);
             startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
         } catch (IOException e) {
+            Log.d(TAG,"start camera exception");
             e.printStackTrace();
         }
     }
@@ -1667,4 +1682,48 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     void showNeverAskForExtStorage() {
         Toast.makeText(getContext(), R.string.write_storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
+
+//    final GestureDetector gd = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener(){
+//
+//
+//        //here is the method for double tap
+//
+//
+//        @Override
+//        public boolean onDoubleTap(MotionEvent e) {
+//
+//            //your action here for double tap e.g.
+//            //Log.d("OnDoubleTapListener", "onDoubleTap");
+//
+//            return true;
+//        }
+//
+//        @Override
+//        public void onLongPress(MotionEvent e) {
+//            super.onLongPress(e);
+//
+//        }
+//
+//        @Override
+//        public boolean onDoubleTapEvent(MotionEvent e) {
+//            return true;
+//        }
+//
+//        @Override
+//        public boolean onDown(MotionEvent e) {
+//            return true;
+//        }
+//
+//
+//    });
+//
+////here yourView is the View on which you want to set the double tap action
+//
+//    RelativeLayout.setOnTouchListener(new View.OnTouchListener() {
+//        @Override
+//        public boolean onTouch(View v, MotionEvent event) {
+//
+//            return gd.onTouchEvent(event);
+//        }
+//    });
 }

@@ -1,6 +1,7 @@
 package in.lubble.app.chat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.ClipData;
@@ -23,9 +24,11 @@ import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -222,7 +225,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             bindRecvdChatViewHolder(holder, position);
         }
     }
-
     private void bindSentChatViewHolder(RecyclerView.ViewHolder holder, int position) {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
@@ -397,6 +399,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+
+
     private void setBgColor(final RelativeLayout linkContainer, ChatData chatData) {
         if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
             glide.asBitmap().load(chatData.getLinkPicUrl()).into(new SimpleTarget<Bitmap>() {
@@ -483,6 +487,67 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         }
+        final GestureDetector gd = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener(){
+
+
+            //here is the method for double tap
+
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                Log.d(TAG,"**********************************************on double tap");
+                recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                super.onLongPress(e);
+
+            }
+
+            @Override
+            public boolean onDoubleTapEvent(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+
+        });
+        recvdChatViewHolder.msg_container.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                return gd.onTouchEvent(event);
+            }
+        });
+
+        recvdChatViewHolder.msg_container.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                return gd.onTouchEvent(event);
+            }
+        });
+
+        recvdChatViewHolder.imgContainer.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                return gd.onTouchEvent(event);
+            }
+        });
+        recvdChatViewHolder.playvidIv.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                return gd.onTouchEvent(event);
+            }
+        });
         if (chatData.getLubbReceipts().containsKey(authorId)) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
             if (position == chatDataList.size() - 1) {
@@ -1359,10 +1424,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout pollContainer;
         private LinearLayout lubbContainer;
         private EmojiTextView badgeTextTv;
-
+        private LinearLayout msg_container;
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
             rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
+            msg_container = itemView.findViewById(R.id.frame_msg);
             authorNameTv = itemView.findViewById(R.id.tv_author);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
@@ -1703,7 +1769,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     public class UnreadChatViewHolder extends RecyclerView.ViewHolder {
-
         UnreadChatViewHolder(View itemView) {
             super(itemView);
         }
