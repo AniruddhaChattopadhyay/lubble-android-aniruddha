@@ -127,6 +127,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final int nav_item_leaderboard = 311;
     private Menu navMenu;
 
+
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
         startIntent.putExtra(IS_NEW_USER_IN_THIS_LUBBLE, isNewUserInThisLubble);
@@ -137,6 +138,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
@@ -205,6 +207,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         handleExploreActivity();
     }
+
 
     private void initEverything() {
         syncFcmToken();

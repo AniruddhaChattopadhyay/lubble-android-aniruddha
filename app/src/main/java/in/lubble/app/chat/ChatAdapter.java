@@ -1,7 +1,6 @@
 package in.lubble.app.chat;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DownloadManager;
 import android.content.ClipData;
@@ -99,6 +98,7 @@ import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
+import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
@@ -123,6 +123,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.models.ChatData.EVENT;
 import static in.lubble.app.models.ChatData.GROUP;
+import static in.lubble.app.models.ChatData.GROUP_PROMPT;
 import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.models.ChatData.REPLY;
@@ -225,6 +226,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             bindRecvdChatViewHolder(holder, position);
         }
     }
+
     private void bindSentChatViewHolder(RecyclerView.ViewHolder holder, int position) {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
@@ -399,8 +401,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
-
-
     private void setBgColor(final RelativeLayout linkContainer, ChatData chatData) {
         if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
             glide.asBitmap().load(chatData.getLinkPicUrl()).into(new SimpleTarget<Bitmap>() {
@@ -441,6 +441,17 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
             recvdChatViewHolder.dpIv.setVisibility(View.GONE);
         }
+
+        recvdChatViewHolder.visibleToYouTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? View.VISIBLE : View.GONE);
+        recvdChatViewHolder.replyBottomTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? View.VISIBLE : View.GONE);
+
+        recvdChatViewHolder.replyBottomTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chatFragment.addReplyForPrompt(chatData.getId(), profileDataMap.get(chatData.getAuthorUid()).getInfo().getName(), chatData.getPromptQues());
+                Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_REPLIED, context);
+            }
+        });
 
         if (posToFlash == position) {
             UiUtils.animateColor(recvdChatViewHolder.itemView, ContextCompat.getColor(context, R.color.trans_colorAccent), Color.TRANSPARENT);
@@ -487,67 +498,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         }
-        final GestureDetector gd = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener(){
-
-
-            //here is the method for double tap
-
-
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                Log.d(TAG,"**********************************************on double tap");
-                recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
-                return true;
-            }
-
-            @Override
-            public void onLongPress(MotionEvent e) {
-                super.onLongPress(e);
-
-            }
-
-            @Override
-            public boolean onDoubleTapEvent(MotionEvent e) {
-                return true;
-            }
-
-            @Override
-            public boolean onDown(MotionEvent e) {
-                return true;
-            }
-
-
-        });
-        recvdChatViewHolder.msg_container.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                return gd.onTouchEvent(event);
-            }
-        });
-
-        recvdChatViewHolder.msg_container.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                return gd.onTouchEvent(event);
-            }
-        });
-
-        recvdChatViewHolder.imgContainer.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                return gd.onTouchEvent(event);
-            }
-        });
-        recvdChatViewHolder.playvidIv.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-                return gd.onTouchEvent(event);
-            }
-        });
         if (chatData.getLubbReceipts().containsKey(authorId)) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
             if (position == chatDataList.size() - 1) {
@@ -631,7 +581,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
-        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid,recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv,position);
+        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar,recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv,position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
@@ -980,74 +930,95 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void addReplyData(String replyMsgId, final TextView linkTitleTv, final TextView linkDescTv, boolean isDm) {
-        ChatData emptyReplyChatData = new ChatData();
-        emptyReplyChatData.setId(replyMsgId);
-        int index = chatDataList.indexOf(emptyReplyChatData);
-        if (index > -1) {
-            ChatData quotedChatData = chatDataList.get(index);
-            String desc = "";
-            if (isValidString(quotedChatData.getImgUrl())) {
-                desc = desc.concat("\uD83D\uDCF7 ");
-                if (!isValidString(quotedChatData.getMessage())) {
-                    // add the word photo if there is no caption
-                    desc = desc.concat("Photo ");
+        if (replyMsgId.equalsIgnoreCase("101")) {
+            // for group prompt ques
+            showGroupQues(linkTitleTv, linkDescTv);
+        } else {
+            ChatData emptyReplyChatData = new ChatData();
+            emptyReplyChatData.setId(replyMsgId);
+            int index = chatDataList.indexOf(emptyReplyChatData);
+            if (index > -1) {
+                ChatData quotedChatData = chatDataList.get(index);
+                if (quotedChatData.getType().equalsIgnoreCase(GROUP_PROMPT)) {
+                    showGroupQues(linkTitleTv, linkDescTv);
+                } else {
+                    String desc = getQuotedDesc(quotedChatData);
+                    linkDescTv.setText(desc);
+                    showName(linkTitleTv, quotedChatData.getAuthorUid());
+                }
+            } else {
+                // chat not found, must have not been loaded yet due to pagination
+                if (!isDm) {
+                    RealtimeDbHelper.getMessagesRef().child(groupId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                                String desc = getQuotedDesc(quotedChatData);
+                                linkDescTv.setText(desc);
+                                showName(linkTitleTv, quotedChatData.getAuthorUid());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
+                    });
+                } else {
+                    RealtimeDbHelper.getDmMessagesRef().child(dmId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
+                                String desc = getQuotedDesc(quotedChatData);
+                                linkDescTv.setText(desc);
+                                showName(linkTitleTv, quotedChatData.getAuthorUid());
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                        }
+                    });
                 }
             }
-            desc = desc.concat(quotedChatData.getMessage());
-            linkDescTv.setText(desc);
-            showName(linkTitleTv, quotedChatData.getAuthorUid());
-        } else {
-            // chat not found, must have not been loaded yet due to pagination
-            if (!isDm) {
-                RealtimeDbHelper.getMessagesRef().child(groupId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.getValue() != null) {
-                            final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                            String desc = "";
-                            if (isValidString(quotedChatData.getImgUrl())) {
-                                desc = desc.concat("\uD83D\uDCF7 ");
-                                if (!isValidString(quotedChatData.getMessage())) {
-                                    // add the word photo if there is no caption
-                                    desc = desc.concat("Photo ");
-                                }
-                            }
-                            desc = desc.concat(quotedChatData.getMessage());
-                            linkDescTv.setText(desc);
-                            showName(linkTitleTv, quotedChatData.getAuthorUid());
-                        }
-                    }
+        }
+    }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
-            } else {
-                RealtimeDbHelper.getDmMessagesRef().child(dmId).child(replyMsgId).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.getValue() != null) {
-                            final ChatData quotedChatData = dataSnapshot.getValue(ChatData.class);
-                            String desc = "";
-                            if (isValidString(quotedChatData.getImgUrl())) {
-                                desc = desc.concat("\uD83D\uDCF7 ");
-                                if (!isValidString(quotedChatData.getMessage())) {
-                                    // add the word photo if there is no caption
-                                    desc = desc.concat("Photo ");
-                                }
-                            }
-                            desc = desc.concat(quotedChatData.getMessage());
-                            linkDescTv.setText(desc);
-                            showName(linkTitleTv, quotedChatData.getAuthorUid());
-                        }
-                    }
+    private void showGroupQues(final TextView linkTitleTv, final TextView linkDescTv) {
+        RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                    linkDescTv.setText(groupData.getQuestion());
+                    showName(linkTitleTv, LubbleSharedPrefs.getInstance().getSupportUid());
+                }
+            }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                    }
-                });
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        });
+    }
+
+    private String getQuotedDesc(ChatData quotedChatData) {
+        String desc = "";
+        if (isValidString(quotedChatData.getVidUrl())) {
+            desc = desc.concat("\ud83c\udfa5 ");
+            if (!isValidString(quotedChatData.getMessage())) {
+                // add the word video if there is no caption
+                desc = desc.concat("Video ");
+            }
+        } else if (isValidString(quotedChatData.getImgUrl())) {
+            desc = desc.concat("\uD83D\uDCF7 ");
+            if (!isValidString(quotedChatData.getMessage())) {
+                // add the word photo if there is no caption
+                desc = desc.concat("Photo ");
             }
         }
+        desc = desc.concat(quotedChatData.getMessage());
+        return desc;
     }
 
     private void bindSystemViewHolder(RecyclerView.ViewHolder holder, int position) {
@@ -1142,17 +1113,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private void handleVideo(FrameLayout vidContainer,final ProgressBar progressBar, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv,int position) {
+    private void handleVideo(FrameLayout vidContainer, final ProgressBar progressBar, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, int position) {
 
         if (isValidString(chatData.getVidUrl())) {
-            //progressBar.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
             imageView.setOnClickListener(null);
             vidContainer.setVisibility(View.VISIBLE);
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
                 // Permission is not granted
-                Log.d(TAG,"inside if of handle video");
-                glide.load(chatData.getVidUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
+                Log.d(TAG, "inside if of handle video");
+                glide.load(chatData.getVidUrl()).override(18, 18).centerCrop().into(imageView);
                 downloadIv.setVisibility(View.VISIBLE);
+                playvid.setImageResource(R.drawable.ic_file_download_black_24dp);
+                progressBar.setVisibility(View.GONE);
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -1165,10 +1138,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.placeholder(R.color.black);
                 requestOptions.error(R.color.black);
+                playvid.setImageResource(R.drawable.ic_play_circle_outline_gray_24dp);
 
-
-                Glide.with(context)
-                        .load(chatData.getVidUrl()).listener(new RequestListener<Drawable>() {
+                glide.load(chatData.getVidUrl()).listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                         progressBar.setVisibility(View.GONE);
@@ -1177,19 +1149,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        Log.d(TAG,"progress bar hidden");
+                        Log.d(TAG, "progress bar hidden");
                         progressBar.setVisibility(View.GONE);
                         return false;
                     }
                 })
                         .apply(requestOptions)
                         .into(imageView);
-                Log.d(TAG,"inside lst else");
+                Log.d(TAG, "inside lst else");
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if (isValidString(chatData.getVidUrl())) {
-                            Log.d(TAG,"inside on click");
+                            Log.d(TAG, "inside on click");
                             FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
                         }
                     }
@@ -1197,7 +1169,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         } else {
             vidContainer.setVisibility(View.GONE);
-            //progressBar.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.GONE);
         }
     }
     private void downloadAndSavePic(final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
@@ -1262,6 +1234,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    public void addPersonalChatData(@NonNull ChatData chatData) {
+        if (!chatData.getType().equalsIgnoreCase(HIDDEN) && !chatDataList.get(chatDataList.size() - 1).getId().equalsIgnoreCase("101")) {
+            final int size = chatDataList.size();
+            chatDataList.add(chatData);
+            if (size - 1 >= 0) {
+                // remove the last msg lubb hint
+                notifyItemChanged(size - 1);
+            }
+            notifyItemInserted(size);
+        }
+    }
+
+
     void updateFlair(ProfileData thisUserProfileData) {
         profileDataMap.put(thisUserProfileData.getId(), thisUserProfileData);
         notifyDataSetChanged();
@@ -1288,6 +1273,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void toggleLubb(int pos) {
         final ChatData chatData = chatDataList.get(pos);
+        if (chatData.getType().equalsIgnoreCase(GROUP_PROMPT)) {
+            return;
+        }
         // add or remove like to chat msg
         DatabaseReference lubbRef;
         if (chatData.getIsDm()) {
@@ -1394,7 +1382,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private RelativeLayout rootLayout;
-        private TextView authorNameTv;
+        private TextView authorNameTv, visibleToYouTv, replyBottomTv;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
         private ImageView linkPicIv;
@@ -1424,12 +1412,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout pollContainer;
         private LinearLayout lubbContainer;
         private EmojiTextView badgeTextTv;
-        private LinearLayout msg_container;
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
             rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
-            msg_container = itemView.findViewById(R.id.frame_msg);
             authorNameTv = itemView.findViewById(R.id.tv_author);
+            visibleToYouTv = itemView.findViewById(R.id.tv_msg_visible_to_you);
+            replyBottomTv = itemView.findViewById(R.id.tv_reply_bottom);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkPicIv = itemView.findViewById(R.id.iv_link_pic);
@@ -1568,6 +1556,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         @Override
         public boolean onLongClick(View v) {
+            if (chatDataList.get(getAdapterPosition()).getType().equalsIgnoreCase(GROUP_PROMPT)) {
+                if (actionMode != null) {
+                    actionMode.finish();
+                }
+                return true;
+            }
             if (getAdapterPosition() != highlightedPos) {
                 actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
                 dateTv.setVisibility(View.VISIBLE);
@@ -1652,6 +1646,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             messageTv.setOnLongClickListener(this);
             chatIv.setOnClickListener(null);
             chatIv.setOnLongClickListener(this);
+            vidThumbnailIv.setOnLongClickListener(this);
             rootLayout.setOnLongClickListener(this);
             lubbContainer.setOnLongClickListener(this);
         }
@@ -1769,6 +1764,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     public class UnreadChatViewHolder extends RecyclerView.ViewHolder {
+
         UnreadChatViewHolder(View itemView) {
             super(itemView);
         }

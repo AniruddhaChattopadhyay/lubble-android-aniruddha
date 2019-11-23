@@ -19,21 +19,35 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import in.lubble.app.*;
-import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import in.lubble.app.BaseActivity;
+import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.R;
+import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.ChatData;
+import in.lubble.app.models.DmData;
+import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.models.UserGroupData;
+import in.lubble.app.utils.FileUtils;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 
 public class ShareActiv extends BaseActivity {
@@ -114,26 +128,17 @@ public class ShareActiv extends BaseActivity {
             this.mediaUri = Uri.fromFile(localImgFile);
         }
     }
+
     private void handleSendVideo(Intent intent) {
         Uri videoUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-        String extension =null;
-        String[] filePathColumn = {MediaStore.Video.Media.DATA};
-        Cursor cursor = getContentResolver().query(videoUri, filePathColumn, null, null, null);
-        if (cursor.moveToFirst()) {
-            int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-            String filePath = cursor.getString(columnIndex);
-            extension = filePath.substring(filePath.lastIndexOf(".") + 1); // Without dot jpg, png
-            Log.d("mime image","*********************"+extension);
-        }
-        if(extension.contains("mov")){
-            Toast.makeText(getApplicationContext(),"Unsupported File Type",Toast.LENGTH_LONG).show();
+
+        String extension = FileUtils.getFileExtension(this, videoUri);
+        if (extension != null && extension.contains("mov")) {
+            Toast.makeText(getApplicationContext(), "Unsupported File Type", Toast.LENGTH_LONG).show();
             finish();
-        }
-        else {
-            if (videoUri != null) {
-                File localVidFile = getFileFromInputStreamUri(this, videoUri);
-                this.mediaUri = Uri.fromFile(localVidFile);
-            }
+        } else {
+            File localVidFile = getFileFromInputStreamUri(this, videoUri);
+            this.mediaUri = Uri.fromFile(localVidFile);
         }
     }
 

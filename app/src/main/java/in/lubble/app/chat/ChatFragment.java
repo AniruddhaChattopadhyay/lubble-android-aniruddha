@@ -18,10 +18,20 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.MimeTypeMap;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,7 +49,22 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -50,32 +75,56 @@ import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.events.EventPickerActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
-import in.lubble.app.models.*;
+import in.lubble.app.models.ChatData;
+import in.lubble.app.models.DmData;
+import in.lubble.app.models.EventData;
+import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FileUtils;
-import permissions.dispatcher.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
-import static in.lubble.app.models.ChatData.*;
-import static in.lubble.app.utils.FileUtils.*;
+import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.models.ChatData.EVENT;
+import static in.lubble.app.models.ChatData.GROUP;
+import static in.lubble.app.models.ChatData.LINK;
+import static in.lubble.app.models.ChatData.REPLY;
+import static in.lubble.app.models.ChatData.SYSTEM;
+import static in.lubble.app.models.ChatData.UNREAD;
+import static in.lubble.app.utils.FileUtils.Video_Size;
+import static in.lubble.app.utils.FileUtils.createImageFile;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.FileUtils.getGalleryIntent;
+import static in.lubble.app.utils.FileUtils.getMimeType;
+import static in.lubble.app.utils.FileUtils.getTakePhotoIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.getTitleCase;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
+import static in.lubble.app.utils.UiUtils.showKeyboard;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
 @RuntimePermissions
@@ -95,7 +144,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_RECEIVER_DP_URL = "KEY_RECEIVER_DP_URL";
     private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
     private static final String KEY_CHAT_DATA = "KEY_CHAT_DATA";
-    private static final int PERMITTED_VIDEO_SIZE=30;
+    private static final int PERMITTED_VIDEO_SIZE = 30;
     @Nullable
     private GroupData groupData;
     private RelativeLayout joinContainer;
@@ -234,30 +283,21 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         if (getArguments().getParcelable(KEY_IMG_URI) != null) {
             sharedImageUri = getArguments().getParcelable(KEY_IMG_URI);
-//            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-//            retriever.setDataSource(sharedImageUr);
-            //String mime = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_MIMETYPE);
             if (TextUtils.isEmpty(dmId)) {
                 // not a DM
-                if(FileUtils.getMimeType(sharedImageUri).contains("video"))
-                {
-                    Log.d(TAG,"video type"+FileUtils.getMimeType(sharedImageUri)+"*************************"+sharedImageUri);
-                    if(FileUtils.getMimeType(sharedImageUri).contains("mov")  || FileUtils.getMimeType(sharedImageUri).contains("MOV")){
-                        Toast.makeText(getContext(),"Unsupported File type .mov",Toast.LENGTH_LONG).show();
+                if (FileUtils.getMimeType(sharedImageUri).contains("video")) {
+                    File file = new File(sharedImageUri.getPath());
+                    Video_Size = file.length() / (1024 * 1024);
+                    if (FileUtils.getMimeType(sharedImageUri).contains("mov") || FileUtils.getMimeType(sharedImageUri).contains("MOV")) {
+                        Toast.makeText(getContext(), "Unsupported file type .mov", Toast.LENGTH_LONG).show();
+                        file.delete();
+                    } else if (Video_Size < PERMITTED_VIDEO_SIZE) {
+                        AttachVideoActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                    } else {
+                        Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
+                        file.delete();
                     }
-                    else {
-                        File file = new File(sharedImageUri.getPath());
-                        Video_Size = file.length() / (1024 * 1024);
-                        if (Video_Size < PERMITTED_VIDEO_SIZE) {
-                            AttachVideoActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
-                            //file.delete();
-                        } else {
-                            Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
-                            file.delete();
-                        }
-                    }
-                }
-                else {
+                } else {
                     AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
                 }
                 sharedImageUri = null;
@@ -523,6 +563,26 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             }
         });
+    }
+
+    private void addGroupJoinPrompt() {
+        if (groupData != null && !TextUtils.isEmpty(groupData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)) {
+            final ChatData personalChatData = new ChatData();
+            personalChatData.setId(groupData.getQuestionChatId());
+            personalChatData.setType(ChatData.GROUP_PROMPT);
+            personalChatData.setAuthorUid(LubbleSharedPrefs.getInstance().getSupportUid());
+            final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
+            personalChatData.setMessage(
+                    "Welcome " + firstName + "!" +
+                            "\n\nLet's introduce you to everyone in the group with an answer to this:" +
+                            "\n\n" + groupData.getQuestion()
+            );
+            personalChatData.setPromptQues(groupData.getQuestion());
+            personalChatData.setCreatedTimestamp(System.currentTimeMillis());
+            personalChatData.setServerTimestamp(System.currentTimeMillis());
+            chatAdapter.addPersonalChatData(personalChatData);
+            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, requireContext());
+        }
     }
 
     private void resetActionBar() {
@@ -1092,6 +1152,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 getCreateOrJoinGroupRef().child(groupId).setValue(true);
                 isJoining = true;
                 showJoiningDialog();
+                addGroupJoinPrompt();
                 break;
             case R.id.iv_decline_cross:
                 RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -1140,18 +1201,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 imageFile = new File(currentPhotoPath);
                 type = getMimeType(Uri.fromFile(imageFile));
             }
-            //Uri uri = data.getData();
-            //String type = getMimeType(uri);
             if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
-                //File imageFile;
-                //handle image
-//                if (data != null && data.getData() != null) {
-//                    imageFile = getFileFromInputStreamUri(getContext(), uri);
-//                } else {
-//                    // from camera
-//                    imageFile = new File(currentPhotoPath);
-//                }
-
                 final Uri fileUri = Uri.fromFile(imageFile);
                 String chatId = groupId;
                 if (!TextUtils.isEmpty(dmId)) {
@@ -1159,24 +1209,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 }
                 Log.d("GroupID", "img--->" + fileUri.toString());
                 AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
-            } else if (type.contains("video") || type.contains("mp4")) {
-                //handle video
-                String extension =null;
-                String[] filePathColumn = {MediaStore.Video.Media.DATA};
+            } else if (data != null && (type.contains("video") || type.contains("mp4"))) {
+                //handle video from gallery picker
                 uri = data.getData();
-                Cursor cursor = getContext().getContentResolver().query(uri, filePathColumn, null, null, null);
-                if (cursor.moveToFirst()) {
-                    int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-                    String filePath = cursor.getString(columnIndex);
-                    extension = filePath.substring(filePath.lastIndexOf(".") + 1); // Without dot jpg, png
-                    Log.d("mime image","*********************"+extension);
-                }
-                if(extension.contains("mov")){
-                    Toast.makeText(getContext(),"Unsupported File type",Toast.LENGTH_LONG).show();
-                }
-                else {
+                String extension = FileUtils.getFileExtension(requireContext(), uri);
+                if (!TextUtils.isEmpty(extension) && extension.contains("mov")) {
+                    Toast.makeText(getContext(), "Unsupported File type", Toast.LENGTH_LONG).show();
+                } else {
                     File videoFile;
-                    if (data != null && data.getData() != null) {
+                    if (data.getData() != null) {
                         videoFile = getFileFromInputStreamUri(getContext(), uri);
                     } else {
                         //from camera
@@ -1276,7 +1317,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public void onAttachmentClicked(int position) {
         switch (position) {
             case 0:
-                Log.d(TAG,"inside cam intent");
                 startCameraIntent();
                 break;
             case 1:
@@ -1301,7 +1341,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             Intent pickImageIntent = getTakePhotoIntent(getContext(), cameraPic);
             startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
         } catch (IOException e) {
-            Log.d(TAG,"start camera exception");
             e.printStackTrace();
         }
     }
@@ -1524,7 +1563,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         linkPicIv.setImageResource(R.drawable.ic_reply_black_24dp);
                         linkTitle.setText(profileInfo.getName());
                         String desc = "";
-                        if (isValidString(quotedChatData.getImgUrl())) {
+                        if (isValidString(quotedChatData.getVidUrl())) {
+                            desc = desc.concat("\ud83c\udfa5 ");
+                            if (!isValidString(quotedChatData.getMessage())) {
+                                // add the word video if there is no caption
+                                desc = desc.concat("Video ");
+                            }
+                        } else if (isValidString(quotedChatData.getImgUrl())) {
                             desc = desc.concat("\uD83D\uDCF7 ");
                             if (!isValidString(quotedChatData.getMessage())) {
                                 // add the word photo if there is no caption
@@ -1547,6 +1592,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             }
         });
+    }
+
+    void addReplyForPrompt(@NonNull String selectedChatId, String name, String msg) {
+        linkMetaContainer.setVisibility(View.VISIBLE);
+        replyMsgId = selectedChatId;
+        linkPicIv.setImageResource(R.drawable.ic_reply_black_24dp);
+        linkTitle.setText(name);
+        linkDesc.setText(msg);
+        newMessageEt.requestFocus();
+        showKeyboard(requireContext(), newMessageEt.getWindowToken());
     }
 
     void updateThisUserFlair() {
@@ -1682,48 +1737,4 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     void showNeverAskForExtStorage() {
         Toast.makeText(getContext(), R.string.write_storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
-
-//    final GestureDetector gd = new GestureDetector(getContext(), new GestureDetector.SimpleOnGestureListener(){
-//
-//
-//        //here is the method for double tap
-//
-//
-//        @Override
-//        public boolean onDoubleTap(MotionEvent e) {
-//
-//            //your action here for double tap e.g.
-//            //Log.d("OnDoubleTapListener", "onDoubleTap");
-//
-//            return true;
-//        }
-//
-//        @Override
-//        public void onLongPress(MotionEvent e) {
-//            super.onLongPress(e);
-//
-//        }
-//
-//        @Override
-//        public boolean onDoubleTapEvent(MotionEvent e) {
-//            return true;
-//        }
-//
-//        @Override
-//        public boolean onDown(MotionEvent e) {
-//            return true;
-//        }
-//
-//
-//    });
-//
-////here yourView is the View on which you want to set the double tap action
-//
-//    RelativeLayout.setOnTouchListener(new View.OnTouchListener() {
-//        @Override
-//        public boolean onTouch(View v, MotionEvent event) {
-//
-//            return gd.onTouchEvent(event);
-//        }
-//    });
 }

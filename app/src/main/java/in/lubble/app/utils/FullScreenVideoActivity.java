@@ -10,11 +10,12 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityOptionsCompat;
 
+import com.google.android.exoplayer2.C;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -48,8 +49,10 @@ public class FullScreenVideoActivity extends BaseActivity {
     private SimpleExoPlayerView exoPlayerView;
     private SimpleExoPlayer exoPlayer;
     private ProgressBar progressBar;
-    Uri videourl=null;
-    Long position=C.TIME_UNSET;
+
+    private Uri videourl = null;
+    private Long position = C.TIME_UNSET;
+
     public static void open(Activity activity, Context context, String vidPath) {
         Intent intent = new Intent(context, FullScreenVideoActivity.class);
         intent.putExtra(EXTRA_IMG_PATH, vidPath);
@@ -65,56 +68,24 @@ public class FullScreenVideoActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED,this);
         setContentView(R.layout.activity_full_screen_video);
+
+        Toolbar toolbar = findViewById(R.id.transparent_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("");
+
+        Analytics.triggerScreenEvent(this, this.getClass());
+        Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED, this);
+
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
         progressBar = findViewById(R.id.progress_bar_full_vid);
         progressBar.setVisibility(View.VISIBLE);
-        if(savedInstanceState!=null)
+
+        if (savedInstanceState != null) {
             position = savedInstanceState.getLong("SELECTED_POSITION", C.TIME_UNSET);
+        }
         videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
         initializePlayer(videourl);
-//        BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-//        TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
-//        exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-//        exoPlayer.addListener(new ExoPlayer.EventListener() {
-//            @Override
-//            public void onTimelineChanged(Timeline timeline, Object manifest) {
-//            }
-//            @Override
-//            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-//            }
-//            @Override
-//            public void onLoadingChanged(boolean isLoading) {
-//            }
-//            @Override
-//            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-//                if (playbackState == ExoPlayer.STATE_BUFFERING){
-//                    Log.d("FullScreenVideoActivit1","inside buffer");
-//                    progressBar.setVisibility(View.VISIBLE);
-//                } else {
-//                    progressBar.setVisibility(View.INVISIBLE);
-//                }
-//            }
-//            @Override
-//            public void onPlayerError(ExoPlaybackException error) {
-//            }
-//            @Override
-//            public void onPositionDiscontinuity() {
-//            }
-//            @Override
-//            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-//            }
-//        });
-//        videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
-//        DefaultHttpDataSourceFactory dataSourceFactory = new DefaultHttpDataSourceFactory("exoplayer_video");
-//        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-//        MediaSource mediaSource = new ExtractorMediaSource(videourl, dataSourceFactory, extractorsFactory, null, null);
-//        exoPlayerView.setPlayer(exoPlayer);
-//        exoPlayer.prepare(mediaSource);
-//        exoPlayer.setPlayWhenReady(true);
-//        position = savedInstanceState.getLong("SELECTED_POSITION", C.TIME_UNSET);
-//        if(position!=C.TIME_UNSET){
-//            exoPlayer.seekTo(position);
-//        }
     }
 
     private void initializePlayer(Uri mediaUri) {
@@ -126,27 +97,33 @@ public class FullScreenVideoActivity extends BaseActivity {
                 @Override
                 public void onTimelineChanged(Timeline timeline, Object manifest) {
                 }
+
                 @Override
                 public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
                 }
+
                 @Override
                 public void onLoadingChanged(boolean isLoading) {
                 }
+
                 @Override
                 public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                    if (playbackState == ExoPlayer.STATE_BUFFERING){
-                        Log.d("FullScreenVideoActivit1","inside buffer");
+                    if (playbackState == ExoPlayer.STATE_BUFFERING) {
+                        Log.d("FullScreenVideoActivit1", "inside buffer");
                         progressBar.setVisibility(View.VISIBLE);
                     } else {
                         progressBar.setVisibility(View.INVISIBLE);
                     }
                 }
+
                 @Override
                 public void onPlayerError(ExoPlaybackException error) {
                 }
+
                 @Override
                 public void onPositionDiscontinuity() {
                 }
+
                 @Override
                 public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
                 }
@@ -157,7 +134,7 @@ public class FullScreenVideoActivity extends BaseActivity {
             exoPlayerView.setPlayer(exoPlayer);
             exoPlayer.prepare(mediaSource);
             exoPlayer.setPlayWhenReady(true);
-            if(position!=C.TIME_UNSET){
+            if (position != C.TIME_UNSET) {
                 exoPlayer.seekTo(position);
             }
         }
@@ -165,8 +142,9 @@ public class FullScreenVideoActivity extends BaseActivity {
 
     public void onSaveInstanceState(Bundle currentState) {
         super.onSaveInstanceState(currentState);
-        currentState.putLong("SELECTED_POSITION",position);
+        currentState.putLong("SELECTED_POSITION", position);
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -192,23 +170,18 @@ public class FullScreenVideoActivity extends BaseActivity {
     }
 
     @Override
-    protected void onPause() {
-        Log.d(TAG , "on pause");
-        super.onPause();
-        if(exoPlayer!=null) {
-            position = exoPlayer.getCurrentPosition();
-            exoPlayer.stop();
-            exoPlayer.release();
-            exoPlayer = null;
-//            exoPlayer.setPlayWhenReady(false);
+    protected void onResume() {
+        Log.d(TAG, "on resume");
+        super.onResume();
+        if (videourl != null) {
+            initializePlayer(videourl);
         }
     }
 
     @Override
-    protected void onResume() {
-        Log.d(TAG , "on resume");
-        super.onResume();
-        if (videourl!= null)
-            initializePlayer(videourl);
+    protected void onPause() {
+        super.onPause();
+        if(exoPlayer!=null)
+            exoPlayer.release();
     }
 }

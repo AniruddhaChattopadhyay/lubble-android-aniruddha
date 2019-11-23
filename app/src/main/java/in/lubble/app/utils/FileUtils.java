@@ -19,18 +19,24 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import com.crashlytics.android.Crashlytics;
-import in.lubble.app.BuildConfig;
-import in.lubble.app.R;
-import kotlin.io.FilesKt;
-import permissions.dispatcher.PermissionRequest;
 
-import java.io.*;
+import com.crashlytics.android.Crashlytics;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import in.lubble.app.BuildConfig;
+import in.lubble.app.R;
+import permissions.dispatcher.PermissionRequest;
 
 import static in.lubble.app.LubbleApp.getAppContext;
 
@@ -84,7 +90,7 @@ public class FileUtils {
     }
 
     public static Intent getGalleryIntent(Context context) {
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
         photoPickerIntent.setType("*/*");
         photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"image/*", "video/*"});
         Log.d("GroupID",Intent.EXTRA_MIME_TYPES);
@@ -103,6 +109,23 @@ public class FileUtils {
                     fileExtension.toLowerCase());
         }
         return mimeType;
+    }
+
+    public static String getFileExtension(Context context, Uri uri) {
+        String extension;
+
+        //Check uri format to avoid null
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            //If scheme is a content
+            final MimeTypeMap mime = MimeTypeMap.getSingleton();
+            extension = mime.getExtensionFromMimeType(context.getContentResolver().getType(uri));
+        } else {
+            //If scheme is a File
+            //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
+            extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(uri.getPath())).toString());
+        }
+
+        return extension;
     }
 
     public static Intent getTakePhotoIntent(Context context, File cameraPic) {

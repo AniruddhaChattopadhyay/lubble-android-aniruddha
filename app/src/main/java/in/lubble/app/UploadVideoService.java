@@ -42,7 +42,7 @@ import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketR
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
-public class UploadVideoService extends  BaseTaskService{
+public class UploadVideoService extends BaseTaskService {
     private static final String TAG = "UploadVideoService";
     public static final int BUCKET_DEFAULT = 362;
     public static final int BUCKET_CONVO = 491;
@@ -166,15 +166,15 @@ public class UploadVideoService extends  BaseTaskService{
     }
 
     private void compressAndUpload(Uri fileUri, final String caption, final String groupId, final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData, final StorageReference photoRef) {
-           File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
-           if (f.mkdirs() || f.isDirectory()) {
-               //compress and output new video specs
-               Log.d(TAG, "inside if to async task");
-               new VideoCompressAsyncTask(this, this, caption, groupId, toTransmit, metadata, dmInfoData, photoRef).execute(fileUri.toString(), f.getPath());
-           }
+        File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
+        if (f.mkdirs() || f.isDirectory()) {
+            //compress and output new video specs
+            Log.d(TAG, "inside if to async task");
+            new VideoCompressAsyncTask(this, this, caption, groupId, toTransmit, metadata, dmInfoData, photoRef).execute(fileUri.toString(), f.getPath());
+        }
     }
 
-    class VideoCompressAsyncTask extends AsyncTask<String, String , String> {
+    class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
         Trace compressTime = FirebasePerformance.getInstance().newTrace(TRACK_COMPRESS_TIME);
         Context mContext;
         UploadVideoService uploadVideoService;
@@ -185,9 +185,10 @@ public class UploadVideoService extends  BaseTaskService{
         StorageMetadata metadata;
         DmInfoData dmInfoData;
         StorageReference photoRef;
-        Uri cachevid=null;
-        double compessed_video_size=0;
-        public VideoCompressAsyncTask(Context context,UploadVideoService uploadVideoService, String caption, String groupId, boolean toTransmit, @Nullable StorageMetadata metadata, @Nullable DmInfoData dmInfoData,  StorageReference photoRef){
+        Uri cachevid = null;
+        double compessed_video_size = 0;
+
+        public VideoCompressAsyncTask(Context context, UploadVideoService uploadVideoService, String caption, String groupId, boolean toTransmit, @Nullable StorageMetadata metadata, @Nullable DmInfoData dmInfoData, StorageReference photoRef) {
             mContext = context;
             this.uploadVideoService = uploadVideoService;
             this.caption = caption;
@@ -209,17 +210,21 @@ public class UploadVideoService extends  BaseTaskService{
             String filePath = null;
             try {
                 //Uri pathdesc = Uri.parse(paths[1]);
-                Log.d(TAG,"path0 = "+paths[0]+" path1="+paths[1]+"from file "+Uri.fromFile(new File(paths[1])).toString());
-                Log.d(TAG,"path0 = "+Uri.parse(paths[0]).getPath()+" path1="+paths[1]+"from file "+Uri.fromFile(new File(paths[1])).getPath());
-                filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath() ,Uri.fromFile(new File(paths[1])).getPath());
-//                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-//                retriever.setDataSource(Uri.parse(paths[0]).getPath());
-//                int bitrate = Integer.parseInt(retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_BITRATE)));
-//                Log.d(TAG,"**************"+bitrate+"*******************");
-//                //float size = retriever.extractMetadata((MediaMetadataRetriever.META))
-//                int width = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-//                int height = Integer.valueOf(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-                //filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath(), Uri.fromFile(new File(paths[1])).getPath(),width,height,(3*bitrate)/4);
+                Log.d(TAG, "path0 = " + paths[0] + " path1=" + paths[1] + "from file " + Uri.fromFile(new File(paths[1])).toString());
+                Log.d(TAG, "path0 = " + Uri.parse(paths[0]).getPath() + " path1=" + paths[1] + "from file " + Uri.fromFile(new File(paths[1])).getPath());
+
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(Uri.parse(paths[0]).getPath());
+                int bitrate = Integer.parseInt(retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_BITRATE)));
+
+                Log.d(TAG, "OG bitrate is : " + bitrate);
+
+                int destBitrate = bitrate;
+                if (bitrate > 5 * 1024 * 1024 || new File(paths[0]).length() > 10 * 1024 * 1024) {
+                    destBitrate = Math.min(bitrate / 2, 5 * 1024 * 1024); // max Bitrate allowed = 5Mbps
+                }
+
+                filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath(), Uri.fromFile(new File(paths[1])).getPath(), 0, 0, destBitrate);
                 cachevid = Uri.parse(paths[0]);
 
             } catch (URISyntaxException e) {
@@ -235,20 +240,23 @@ public class UploadVideoService extends  BaseTaskService{
         protected void onPostExecute(String compressedFilePath) {
             super.onPostExecute(compressedFilePath);
             File imageFile = new File(compressedFilePath);
-            compessed_video_size  = imageFile.length()/(1024f*1024f);
-            Log.d(TAG , compessed_video_size+"*********************************");
+            compessed_video_size = imageFile.length() / (1024f * 1024f);
             compressTime.stop();
             ccompressedUri = Uri.fromFile(imageFile);
-            Log.i(TAG, "Path: "+compressedFilePath);
+            Log.i(TAG, "Path: " + compressedFilePath);
             File file = new File(cachevid.getPath());
-            if(compessed_video_size<=FileUtils.Video_Size){
+
+            Log.d(TAG, "OG SIZE: " + file.length() / (1024f * 1024f));
+            Log.d(TAG, "compressed size: " + compessed_video_size);
+
+            if (compessed_video_size <= FileUtils.Video_Size) {
                 //delete image in cache
-                if (cachevid!=null) {
+                if (cachevid != null) {
                     file.delete();
-                    if(file.exists()){
+                    if (file.exists()) {
                         try {
                             file.getCanonicalFile().delete();
-                            if(file.exists()){
+                            if (file.exists()) {
                                 getApplicationContext().deleteFile(file.getName());
                             }
                         } catch (IOException e) {
@@ -258,9 +266,8 @@ public class UploadVideoService extends  BaseTaskService{
                     }
                 }
                 uploadVideoService.uploadFile(ccompressedUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
-            }
-            else
-                uploadVideoService.uploadFile(cachevid,photoRef,metadata,toTransmit,caption,groupId,dmInfoData);
+            } else
+                uploadVideoService.uploadFile(cachevid, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
         }
     }
 
@@ -291,13 +298,13 @@ public class UploadVideoService extends  BaseTaskService{
                         Log.d(TAG, "uploadFromUri:onSuccess");
                         uploadTime.stop();
                         //delete the compressed file which is no longer needed
-                        if (compressedFileUri!=null) {
+                        if (compressedFileUri != null) {
                             File file = new File(compressedFileUri.getPath());
                             file.delete();
-                            if(file.exists()){
+                            if (file.exists()) {
                                 try {
                                     file.getCanonicalFile().delete();
-                                    if(file.exists()){
+                                    if (file.exists()) {
                                         getApplicationContext().deleteFile(file.getName());
                                     }
                                 } catch (IOException e) {

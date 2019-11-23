@@ -104,7 +104,6 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 startActivity(serviceIntent);
                 break;
             case "events":
-                Log.d("here","******************************here***************************");
                 final String event_id = uri.getQueryParameter("id");
                 if (event_id != null) {
                     EventInfoActivity.open(this,event_id);

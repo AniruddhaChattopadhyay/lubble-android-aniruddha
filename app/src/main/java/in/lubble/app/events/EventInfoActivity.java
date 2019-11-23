@@ -474,11 +474,8 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private void fetchMemberInfo(EventData eventData) {
-        goingPersonOne.setImageDrawable(null);
         goingPersonOne.setVisibility(View.GONE);
-        goingPersonTwo.setImageDrawable(null);
         goingPersonTwo.setVisibility(View.GONE);
-        goingPersonThree.setImageDrawable(null);
         goingPersonThree.setVisibility(View.GONE);
         for (Map.Entry<String, Object> entry : eventData.getMembers().entrySet()) {
             HashMap<String, Object> memberInfoMap = (HashMap<String, Object>) entry.getValue();

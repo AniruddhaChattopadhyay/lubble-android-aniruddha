@@ -233,9 +233,6 @@
     <string name="insta_redirect_url" translatable="false">https://lubble.in</string>
 
 
-    <!-- instagram addition -->
-    <string name="insta_base_url" translatable="false">https://api.instagram.com/</string>
-    <string name="insta_get_user_info_url" translatable="false">https://api.instagram.com/v1/users/self/?access_token=</string>
     <string-array name="login_server_url_array">
         <item>@string/profile</item>
         <item>@string/profile</item>

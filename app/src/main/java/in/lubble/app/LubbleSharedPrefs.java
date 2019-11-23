@@ -49,6 +49,7 @@ public class LubbleSharedPrefs {
     private final String SHOW_RATING_DIALOG = "SHOW_RATING_DIALOG";
     private final String RATING_DIALOG_LAST_SHOWN = "RATING_DIALOG_LAST_SHOWN";
     private final String READ_EVENTS = "READ_EVENTS";
+    private final String FLEXI_UPDATE_TS = "FLEXI_UPDATE_TS";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -310,6 +311,15 @@ public class LubbleSharedPrefs {
 
     public boolean setSupportUid(String supportUid) {
         return preferences.edit().putString(SUPPORT_UID, supportUid).commit();
+    }
+
+    @Nullable
+    public long getFlexiUpdateTs() {
+        return preferences.getLong(FLEXI_UPDATE_TS, 0L);
+    }
+
+    public boolean setFlexiUpdateTs(long ts) {
+        return preferences.edit().putLong(FLEXI_UPDATE_TS, ts).commit();
     }
 
     public Set<String> getEventSet() {

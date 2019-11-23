@@ -1,7 +1,5 @@
 package in.lubble.app.network;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.ArrayList;
 
 import in.lubble.app.auth.LocationsData;
@@ -12,7 +10,6 @@ import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.models.AirtableCollectionData;
 import in.lubble.app.models.AirtablePlacesData;
 import in.lubble.app.models.FeatureData;
-import in.lubble.app.models.InstaResponseData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.models.marketplace.Category;
@@ -139,9 +136,6 @@ public interface Endpoints {
 
     @GET
     public Call<BooksData> searchBooks(@Url String url);
-
-    @GET
-    public Call<InstaResponseData> fetchInsta(@Url String url);
 
     @GET
     public Call<AirtableBooksData> fetchBooks(@Url String url);

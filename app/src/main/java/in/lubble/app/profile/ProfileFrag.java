@@ -1,20 +1,22 @@
 package in.lubble.app.profile;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
@@ -22,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -31,51 +34,47 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
-import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
-import in.lubble.app.models.InstaResponseData;
-import in.lubble.app.models.InstagramLoginState;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.referrals.ReferralActivity;
-import in.lubble.app.utils.*;
+import in.lubble.app.utils.FragUtils;
+import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.UiUtils;
+import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
-public class ProfileFrag extends Fragment implements AuthenticationListener{
+public class ProfileFrag extends Fragment {
     private static final String TAG = "ProfileFrag";
     private static final String ARG_USER_ID = "arg_user_id";
-
-    private String insta_handle_cloud=null;
-    private InstagramLoginState instagramLoginState;
 
     private View rootView;
     private String userId;
@@ -102,15 +101,14 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
     private ProgressDialog sharingProgressDialog;
     private GroupsAdapter groupsAdapter;
     private ConstraintLayout statsContainer;
-    private AuthenticationDialog authenticationDialog = null;
-    private Button instaBtn = null;
-    private String INSTA_TOKEN = "token";
+
     ImageView genderIv;
     TextView genderTv;
     ImageView businessIv;
     TextView businessTv;
     ImageView educationIv;
     TextView educationTv;
+
     public ProfileFrag() {
         // Required empty public constructor
     }
@@ -162,16 +160,12 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
         progressBar = rootView.findViewById(R.id.progressBar_profile);
         TextView versionTv = rootView.findViewById(R.id.tv_version_name);
         RelativeLayout feedbackView = rootView.findViewById(R.id.feedback_container);
-        instaBtn = rootView.findViewById(R.id.insta_btn_login);
-        Log.d("database_uid",RealtimeDbHelper.getThisUserRef().toString());//whole link to the user we are logged in as
-        Log.d("uid",userId);//user we are currently on the profile of
-        Log.d("uid_this",FirebaseAuth.getInstance().getUid());//the user we are logged in as
+        Log.d("database_uid", RealtimeDbHelper.getThisUserRef().toString());//whole link to the user we are logged in as
+        Log.d("uid", userId);//user we are currently on the profile of
+        Log.d("uid_this", FirebaseAuth.getInstance().getUid());//the user we are logged in as
 
         sharingProgressDialog = new ProgressDialog(getContext());
         generateBranchUrl(getContext(), linkCreateListener);
-
-
-
         if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
             coinsContainer.setVisibility(View.VISIBLE);
         }
@@ -290,8 +284,6 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
         }
     };
 
-
-
     private class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder> {
 
         private ArrayList<GroupData> groupList = new ArrayList<>();
@@ -358,70 +350,7 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null)
-                {
-                    //If block is executed if the person has linked their instagram already and firebase has their insta handle
-                    if(profileData.getInstagram()!=null)
-                    {
-                        insta_handle_cloud = profileData.getInstagram().getInsta_handle();
-
-                        //if owner access his profile then the below code is executed
-                         if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid()))
-                         {  instaBtn.setVisibility(View.VISIBLE);
-                            instaBtn.setText(profileData.getInstagram().getInsta_handle());
-                            instaBtn.setOnClickListener(new View.OnClickListener() {
-                                public void onClick(View v) {
-                                    CreateBottomSheetDialog();
-                                }
-                            });
-
-                        }
-                        //if a person open another persons profile page then below code is executed
-                         else
-                        {
-                            //placing the instagram button correctly
-                            float dip_left = 280f;
-                            float dip_right = 14f;
-                            Resources r = getResources();
-                            float px_left = TypedValue.applyDimension(
-                                    TypedValue.COMPLEX_UNIT_DIP,
-                                    dip_left,
-                                    r.getDisplayMetrics()
-                            );
-                            float px_right = TypedValue.applyDimension(
-                                    TypedValue.COMPLEX_UNIT_DIP,
-                                    dip_right,
-                                    r.getDisplayMetrics()
-                            );
-                            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) instaBtn.getLayoutParams();
-                            params.leftMargin = (int)px_left;
-                            params.rightMargin = (int) px_right;
-                            instaBtn.setLayoutParams(params);
-
-                            instaBtn.setText(insta_handle_cloud);
-                            instaBtn.setVisibility(View.VISIBLE);
-                            instaBtn.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    GoToInstagram();
-                                }
-                            });
-                        }
-                    }
-                    else{
-                        if(userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid()))
-                        {
-                            instaBtn.setVisibility(View.VISIBLE);
-                            instaBtn.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    authenticationDialog = new AuthenticationDialog(getContext(), ProfileFrag.this);
-                                    authenticationDialog.setCancelable(true);
-                                    authenticationDialog.show();
-                                }
-                            });
-                        }
-                    }
+                if (profileData != null) {
                     userName.setText(profileData.getInfo().getName());
                     if (!TextUtils.isEmpty(profileData.getInfo().getBadge())) {
                         badgeTv.setVisibility(View.VISIBLE);
@@ -567,96 +496,4 @@ public class ProfileFrag extends Fragment implements AuthenticationListener{
         userRef.removeEventListener(valueEventListener);
     }
 
-    private void CreateBottomSheetDialog() {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getContext());
-        View sheetView = LayoutInflater.from(getContext()).inflate(R.layout.bottom_sheet_view, null);
-        LinearLayout goto_insta = sheetView.findViewById(R.id.goto_insta);;
-        LinearLayout unlink_insta = sheetView.findViewById(R.id.unlink_insta);
-        bottomSheetDialog.setContentView(sheetView);
-        bottomSheetDialog.show();
-        goto_insta.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                {
-                    GoToInstagram();
-                    bottomSheetDialog.dismiss();
-                }
-            }
-        });
-
-        unlink_insta.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                insta_unlink();
-                bottomSheetDialog.dismiss();
-            }
-        });
-    }
-
-
-    public void GoToInstagram(){
-        Uri uri = Uri.parse("http://instagram.com/_u/"+insta_handle_cloud);
-        Intent intent= new Intent(Intent.ACTION_VIEW,uri);
-
-        intent.setPackage("com.instagram.android");
-
-        try {
-            startActivity(intent);
-        } catch (ActivityNotFoundException e) {
-            //Instagram app not found
-            Toast.makeText(getContext(),"instagram app is not installed",Toast.LENGTH_LONG).show();
-        }
-    }
-
-    public void insta_login() {
-        Map<String, Object> instagram_update = new HashMap<>();
-        instagram_update.put("instagram", instagramLoginState);
-        RealtimeDbHelper.getThisUserRef().updateChildren(instagram_update);
-        instaBtn.setText(instagramLoginState.insta_handle);
-    }
-
-    public void insta_unlink() {
-        instaBtn.setText("INSTAGRAM");
-        RealtimeDbHelper.getThisUserRef().child("instagram").removeValue();
-    }
-
-    @Override
-    public void onTokenReceived(String auth_token) {
-        if (auth_token == null)
-            return;
-        INSTA_TOKEN = auth_token;
-        getUserInfoByAccessToken();
-    }
-
-    private void getUserInfoByAccessToken() {
-        String url = getResources().getString(R.string.insta_get_user_info_url) + INSTA_TOKEN;
-        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        final Activity activity = new Activity();
-        //
-        endpoints.fetchInsta(url).enqueue(new Callback<InstaResponseData>() {
-            @Override
-            public void onResponse(Call<InstaResponseData> call, Response<InstaResponseData> response) {
-                final InstaResponseData instaResponseData = response.body();
-                if (response.isSuccessful() && instaResponseData != null && !activity.isFinishing() ) {
-                    progressBar.setVisibility(View.GONE);
-                    instagramLoginState = new InstagramLoginState(instaResponseData.getData().getUsername());
-                    insta_login();
-                } else {
-                    if (!activity.isFinishing()) {
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<InstaResponseData> call, Throwable t) {
-                if (true) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "onFailure: ");
-                }
-            }
-        });
-    }
 }
