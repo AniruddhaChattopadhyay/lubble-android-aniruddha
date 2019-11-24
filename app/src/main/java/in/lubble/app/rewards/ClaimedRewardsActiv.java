@@ -11,6 +11,10 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -24,9 +28,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.Collections;
 import java.util.Comparator;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -152,6 +153,7 @@ public class ClaimedRewardsActiv extends BaseActivity {
             case R.id.action_help:
                 FreshchatMessage FreshchatMessage = new FreshchatMessage().setTag("REWARDS_HELP").setMessage("Please help me with Rewards");
                 Freshchat.sendMessage(this, FreshchatMessage);
+                Freshchat.showConversations(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);

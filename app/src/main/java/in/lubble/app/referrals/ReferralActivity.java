@@ -8,14 +8,15 @@ import android.view.MenuItem;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
+
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatMessage;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.widget.Toolbar;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -121,6 +122,7 @@ public class ReferralActivity extends BaseActivity {
             case R.id.action_help:
                 FreshchatMessage FreshchatMessage = new FreshchatMessage().setTag("REFERRAL_HELP").setMessage("Please help me with Referrals");
                 Freshchat.sendMessage(this, FreshchatMessage);
+                Freshchat.showConversations(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);
