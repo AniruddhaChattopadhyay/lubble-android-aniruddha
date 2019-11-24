@@ -3,9 +3,14 @@ package in.lubble.app;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.util.List;
+
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
@@ -14,8 +19,6 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServiceCategoryDetailActiv;
-
-import java.util.List;
 
 import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
 
@@ -101,9 +104,14 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 startActivity(serviceIntent);
                 break;
             case "events":
-                final Intent eventsIntent = new Intent(this, MainActivity.class);
-                eventsIntent.putExtra(EXTRA_TAB_NAME, "events");
-                startActivity(eventsIntent);
+                final String event_id = uri.getQueryParameter("id");
+                if (event_id != null) {
+                    EventInfoActivity.open(this, event_id);
+                } else {
+                    final Intent eventsIntent = new Intent(this, MainActivity.class);
+                    eventsIntent.putExtra(EXTRA_TAB_NAME, "events");
+                    startActivity(eventsIntent);
+                }
                 break;
             case "leaderboard":
                 LeaderboardActivity.open(this);
