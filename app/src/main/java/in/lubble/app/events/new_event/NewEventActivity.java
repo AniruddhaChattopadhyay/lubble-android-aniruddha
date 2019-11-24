@@ -299,12 +299,6 @@ public class NewEventActivity extends BaseActivity {
         } else {
             addressTil.setError(null);
         }
-        if (!isValidString(ticketUrl.getEditText().getText().toString())) {
-            ticketUrl.setError("Enter Valid Url");
-            return false;
-        } else {
-            ticketUrl.setError(null);
-        }
         return true;
     }
 
