@@ -9,9 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
@@ -39,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;

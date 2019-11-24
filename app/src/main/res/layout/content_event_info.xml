@@ -169,8 +169,7 @@
             android:layout_below="@id/bottom_separator"
             android:background="@color/darker_gray"
             android:padding="4dp"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:visibility="gone">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -189,8 +188,7 @@
             android:layout_marginTop="8dp"
             android:tint="@color/colorAccent"
             android:visibility="gone"
-            app:srcCompat="@drawable/ic_ticket_24dp"
-            tools:visibility="visible" />
+            app:srcCompat="@drawable/ic_ticket_24dp" />
 
         <TextView
             android:id="@+id/tv_ticket_count"
@@ -203,8 +201,7 @@
             android:text="Lucky Draw Tickets: 1"
             android:textColor="@color/black"
             android:textStyle="bold"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/iv_stats"
@@ -260,6 +257,7 @@
         <TextView
             android:id="@+id/tv_view_all_attendees"
             android:text="View all"
+            android:layout_marginLeft="2dp"
             android:textColor="@color/link_blue"
             android:layout_alignBottom="@id/iv_stats_one"
             android:gravity="center_vertical"
@@ -384,12 +382,24 @@
 
         </RelativeLayout>
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/ticketUrl"
+            android:layout_width="wrap_content"
+            android:layout_below="@id/group_container"
+            android:layout_height="wrap_content"
+            android:text="Get Tickets"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            app:icon="@drawable/ic_ticket_24dp"
+            app:cornerRadius="24dp"
+            android:layout_marginTop="8dp"
+            android:theme="@style/MaterialButton" />
+
         <TextView
             android:id="@+id/tv_desc_hint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/group_container"
-            android:layout_marginTop="16dp"
+            android:layout_below="@id/ticketUrl"
+            android:layout_marginTop="8dp"
             android:text="Details"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textStyle="bold" />

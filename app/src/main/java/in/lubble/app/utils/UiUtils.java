@@ -21,10 +21,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.palette.graphics.Palette;
-
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -33,6 +29,9 @@ import com.google.android.material.tabs.TabLayout;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.palette.graphics.Palette;
 import in.lubble.app.R;
 
 /**
