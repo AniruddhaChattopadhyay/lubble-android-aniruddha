@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
+import android.os.IBinder;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,17 +20,19 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.palette.graphics.Palette;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
-import in.lubble.app.R;
 
 import java.io.File;
 import java.io.FileOutputStream;
+
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.palette.graphics.Palette;
+import in.lubble.app.R;
 
 /**
  * Created by ishaangarg on 05/11/17.
@@ -48,6 +51,13 @@ public class UiUtils {
             return;
 
         inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+    }
+
+    public static void showKeyboard(Context ctx, IBinder windowToken) {
+        InputMethodManager inputMethodManager =
+                (InputMethodManager)ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.toggleSoftInputFromWindow(
+                windowToken, InputMethodManager.SHOW_FORCED, 0);
     }
 
     public static void animateFadeHide(Context context, final View view) {

@@ -1,16 +1,13 @@
 package in.lubble.app.events;
 
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -18,15 +15,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.content.ContextCompat;
-import androidx.emoji.widget.EmojiTextView;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -39,16 +27,21 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiTextView;
 import in.lubble.app.BaseActivity;
+import in.lubble.app.EventAttendeesActivity;
 import in.lubble.app.GlideApp;
-import in.lubble.app.GoingStatsActivity;
-import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -56,6 +49,7 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
@@ -111,7 +105,7 @@ public class EventInfoActivity extends BaseActivity {
     private DatabaseReference groupTitleRef;
     private ValueEventListener groupTitleListener;
     private long oldResponse = EventData.NO;
-    private Button ticketsUrl;
+    private Button ticketsBtn;
 
     public static void open(Context context, String eventId) {
         Intent intent = new Intent(context, EventInfoActivity.class);
@@ -154,18 +148,18 @@ public class EventInfoActivity extends BaseActivity {
         ticketCountTv = findViewById(R.id.tv_ticket_count);
         luckyDrawHint = findViewById(R.id.lucky_draw_hint);
         descTv = findViewById(R.id.tv_desc);
-        goingPersonOne = findViewById(R.id.tv_stats_one);
-        goingPersonTwo = findViewById(R.id.tv_stats_two);
-        goingPersonThree = findViewById(R.id.tv_stats_three);
+        goingPersonOne = findViewById(R.id.iv_stats_one);
+        goingPersonTwo = findViewById(R.id.iv_stats_two);
+        goingPersonThree = findViewById(R.id.iv_stats_three);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.joining_group);
         progressDialog.setMessage(getString(R.string.all_please_wait));
-        ticketsUrl = findViewById(R.id.ticketUrl);
+        ticketsBtn = findViewById(R.id.ticketUrl);
+
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
-        Log.i("Tejas",eventId);
         eventRef = getEventsRef().child(eventId);
-        //if(eventRef.child("ticketUrl"))
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         goingContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -257,58 +251,12 @@ public class EventInfoActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         fetchEventInfo();
-        fetchGoingInfo();
         statsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(EventInfoActivity.this, GoingStatsActivity.class);
-                intent.putExtra("KEY_EVENT_ID", eventId);
+                Intent intent = new Intent(EventInfoActivity.this, EventAttendeesActivity.class);
+                intent.putExtra("KEY_EVENT_DATA", eventData);
                 startActivity(intent);
-                EventInfoActivity.this.finish();
-            }
-        });
-    }
-
-    private void fetchGoingInfo() {
-        final int[] countImg = {0};
-        FirebaseDatabase.getInstance().getReference().child("lubbles/DEV/events").child(eventId).child("members").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()) {
-                    //Log.i("Tejas",dataSnapshot1.getKey());
-                    FirebaseDatabase.getInstance().getReference().child("users").child(dataSnapshot1.getKey()).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            //Log.i("Tejas",dataSnapshot.child("info").toString());
-                            if (dataSnapshot.child("info").child("thumbnail").exists()) {
-                                countImg[0]++;
-                                if (countImg[0] == 1) {
-                                    //Log.i("Tejas",dataSnapshot.child("info").child("thumbnail").getValue(String.class));
-                                    GlideApp.with(getApplicationContext()).load(dataSnapshot.child("info").child("thumbnail").getValue(String.class)).placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(goingPersonOne);
-                                    goingPersonOne.setVisibility(View.VISIBLE);
-                                } else if (countImg[0] == 2) {
-                                    //Log.i("Tejas",dataSnapshot.child("info").child("thumbnail").getValue(String.class));
-                                    GlideApp.with(getApplicationContext()).load(dataSnapshot.child("info").child("thumbnail").getValue(String.class)).placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(goingPersonTwo);
-                                    goingPersonTwo.setVisibility(View.VISIBLE);
-                                } else if (countImg[0] == 3) {
-                                    //Log.i("Tejas",dataSnapshot.child("info").child("thumbnail").getValue(String.class));
-                                    GlideApp.with(getApplicationContext()).load(dataSnapshot.child("info").child("thumbnail").getValue(String.class)).placeholder(R.drawable.ic_account_circle_black_no_padding).circleCrop().into(goingPersonThree);
-                                    goingPersonThree.setVisibility(View.VISIBLE);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            Log.i("TejasInternal", databaseError.getMessage());
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.i("Tejas error", databaseError.getMessage());
             }
         });
     }
@@ -403,29 +351,30 @@ public class EventInfoActivity extends BaseActivity {
 
         eventInfoListener = eventRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
                 eventData = dataSnapshot.getValue(EventData.class);
 
                 if (eventData != null) {
                     setTitleWhenCollapsed();
-                    if (dataSnapshot.child("ticketUrl").exists()) {
-                        ticketsUrl.setVisibility(View.VISIBLE);
-                        ticketsUrl.setOnClickListener(new View.OnClickListener() {
+                    if (!TextUtils.isEmpty(eventData.getTicketUrl()) && (eventData.getTicketUrl().contains("https://") || eventData.getTicketUrl().contains("http://"))) {
+                        // has a ticket URL
+                        ticketsBtn.setVisibility(View.VISIBLE);
+                        ticketsBtn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                if (dataSnapshot.child("ticketUrl").getValue().toString().contains("https://") || dataSnapshot.child("ticketUrl").getValue().toString().contains("http://")) {
-                                    Uri uri = Uri.parse(dataSnapshot.child("ticketUrl").getValue().toString());
-                                    CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-                                    intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorPrimary));
-                                    intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorPrimaryDark));
-                                    CustomTabsIntent customTabsIntent = intentBuilder.build();
-                                    customTabsIntent.launchUrl(EventInfoActivity.this, uri);
-                                } else {
-                                    Toast.makeText(EventInfoActivity.this, "URL is not Valid", Toast.LENGTH_SHORT).show();
-                                }
+                                Uri uri = Uri.parse(eventData.getTicketUrl());
+                                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                                intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorAccent));
+                                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dk_colorAccent));
+                                intentBuilder.enableUrlBarHiding();
+                                intentBuilder.setShowTitle(true);
+                                CustomTabsIntent customTabsIntent = intentBuilder.build();
+                                customTabsIntent.launchUrl(EventInfoActivity.this, uri);
                             }
                         });
 
+                    } else {
+                        ticketsBtn.setVisibility(View.GONE);
                     }
                     GlideApp.with(EventInfoActivity.this)
                             .load(eventData.getProfilePic())
@@ -535,6 +484,7 @@ public class EventInfoActivity extends BaseActivity {
                         statsTv.setText(String.format(getString(R.string.event_maybe_count), prefixText, suffixText));
                     }
                     fetchIsLinkedGroupJoined(eventData.getGid());
+                    fetchMemberInfo(eventData);
                 }
             }
 
@@ -543,6 +493,50 @@ public class EventInfoActivity extends BaseActivity {
 
             }
         });
+    }
+
+    private void fetchMemberInfo(EventData eventData) {
+        goingPersonOne.setVisibility(View.GONE);
+        goingPersonTwo.setVisibility(View.GONE);
+        goingPersonThree.setVisibility(View.GONE);
+        for (Map.Entry<String, Object> entry : eventData.getMembers().entrySet()) {
+            HashMap<String, Object> memberInfoMap = (HashMap<String, Object>) entry.getValue();
+            if ((long) memberInfoMap.get("response") == EventData.GOING) {
+                RealtimeDbHelper.getUserInfoRef(entry.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                        if (profileInfo != null && !TextUtils.isEmpty(profileInfo.getThumbnail())) {
+                            ImageView emptyImageView = getEmptyImageView();
+                            if (emptyImageView != null) {
+                                GlideApp.with(EventInfoActivity.this)
+                                        .load(profileInfo.getThumbnail())
+                                        .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                                        .circleCrop()
+                                        .into(emptyImageView);
+                                emptyImageView.setVisibility(View.VISIBLE);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                });
+            }
+        }
+    }
+
+    @Nullable
+    private ImageView getEmptyImageView() {
+        if (goingPersonOne.getDrawable() == null) {
+            return goingPersonOne;
+        } else if (goingPersonTwo.getDrawable() == null) {
+            return goingPersonTwo;
+        } else if (goingPersonThree.getDrawable() == null) {
+            return goingPersonThree;
+        }
+        return null;
     }
 
     private void setFinalMarkedResponse(long oldResponse) {

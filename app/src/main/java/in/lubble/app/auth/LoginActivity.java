@@ -9,9 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
-
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
@@ -39,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
@@ -48,6 +47,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.utils.StringUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
@@ -272,7 +272,7 @@ public class LoginActivity extends BaseActivity {
         final ProfileData profileData = new ProfileData();
         final ProfileInfo profileInfo = new ProfileInfo();
         profileInfo.setId(FirebaseAuth.getInstance().getUid());
-        profileInfo.setName(currentUser.getDisplayName());
+        profileInfo.setName(StringUtils.getTitleCase(currentUser.getDisplayName()));
         if (currentUser.getPhotoUrl() != null) {
             profileInfo.setThumbnail(currentUser.getPhotoUrl().toString());
             profileData.setProfilePic(currentUser.getPhotoUrl().toString().concat(bigPicString));

@@ -7,17 +7,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.recyclerview.widget.RecyclerView;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
-import in.lubble.app.utils.RoundedCornersTransformation;
-
-import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class ChatUserTagsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -46,7 +42,7 @@ public class ChatUserTagsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         glide.load(profileInfo.getThumbnail())
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .error(R.drawable.ic_account_circle_black_no_padding)
-                .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                .circleCrop()
                 .into(viewHolder.iconIv);
 
         viewHolder.titleTv.setText(profileInfo.getName());

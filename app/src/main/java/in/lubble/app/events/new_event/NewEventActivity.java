@@ -112,7 +112,7 @@ public class NewEventActivity extends BaseActivity {
         notAdminHintTv = findViewById(R.id.tv_not_admin_hint);
         relatedGroupsTv = findViewById(R.id.tv_related_groups);
         adminGroupsSpinner = findViewById(R.id.spinner_admin_groups);
-        ticketUrl = findViewById(R.id.till_event_url_tickets);
+        ticketUrl = findViewById(R.id.til_event_url_tickets);
         submitBtn = findViewById(R.id.btn_submit);
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);

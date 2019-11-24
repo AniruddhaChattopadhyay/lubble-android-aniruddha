@@ -1,23 +1,14 @@
 package in.lubble.app;
 
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.emoji.text.EmojiCompat;
+import android.widget.ImageView;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,13 +30,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;
@@ -60,20 +50,31 @@ public class BaseActivity extends AppCompatActivity {
 
     private AppUpdateManager appUpdateManager;
     private com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask;
-    private final static int MY_REQUEST_CODE = 312, MY_REQUEST_CODE_1 = 313;
+    private final static int IMMEDIATE_REQUEST_CODE = 312, FLEXI_REQUEST_CODE = 313;
     private InstallStateUpdatedListener listener;
     private SharedPreferences sharedPreferences;
+
+    private Button update;
+    private ImageView cancelUpdate;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPreferences = BaseActivity.this.getSharedPreferences("updateTime", MODE_PRIVATE);
         if (!(this instanceof MainActivity) && !(this instanceof LoginActivity) && !(this instanceof LocationActivity) &&
                 (FirebaseAuth.getInstance().getCurrentUser() == null || TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId()))) {
             // user is not signed in, start login flow
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
+        }
+        if (FirebaseAuth.getInstance().getCurrentUser() != null && !(this instanceof LoginActivity) && !(this instanceof LocationActivity)) {
+            // logged in
+            try {
+                appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
+                checkMinAppVersion();
+            } catch (Throwable e) {
+                Crashlytics.logException(e);
+            }
         }
 
         final FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
@@ -87,128 +88,10 @@ public class BaseActivity extends AppCompatActivity {
         });
     }
 
-    private void checkUpdate(String data) {
-
-        appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
-
-
-        appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
-
-        if (data.equals("immediate")) {
-            appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
-                @Override
-                public void onSuccess(AppUpdateInfo appUpdateInfo) {
-                    if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
-                        try {
-                            appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, BaseActivity.this, MY_REQUEST_CODE);
-                        } catch (IntentSender.SendIntentException e) {
-                            Toast.makeText(BaseActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            });
-        } else {
-            View v = getLayoutInflater().inflate(R.layout.layout_update_bottom_sheet, null);
-            long previous_time = sharedPreferences.getLong("timestampnow", 0);
-            long current_time = Calendar.getInstance().getTimeInMillis();
-            if (current_time > previous_time) {
-                final BottomSheetDialog dialog = new BottomSheetDialog(BaseActivity.this);
-                dialog.setContentView(v);
-                dialog.show();
-
-                Button update = v.findViewById(R.id.updateButton), cancelUpdate = v.findViewById(R.id.updateCancel);
-
-                cancelUpdate.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        long current_time = Calendar.getInstance().getTimeInMillis();
-                        sharedPreferences.edit().putLong("timestampnow", current_time + TimeUnit.HOURS.toMillis(24)).apply();
-                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
-                        dialog.cancel();
-                    }
-                });
-
-                update.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_POSITIVE, BaseActivity.this);
-                        appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
-                            @Override
-                            public void onSuccess(AppUpdateInfo appUpdateInfo) {
-                                if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
-                                    try {
-                                        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.FLEXIBLE, BaseActivity.this, MY_REQUEST_CODE_1);
-                                        listener = new InstallStateUpdatedListener() {
-                                            @Override
-                                            public void onStateUpdate(InstallState state) {
-                                                if (state.installStatus() == InstallStatus.DOWNLOADED) {
-                                                    Snackbar snackbar =
-                                                            Snackbar.make(
-                                                                    findViewById(R.id.content_frame),
-                                                                    "An update has just been downloaded.",
-                                                                    Snackbar.LENGTH_INDEFINITE);
-                                                    snackbar.setAction("RESTART", new View.OnClickListener() {
-                                                        @Override
-                                                        public void onClick(View view) {
-                                                            appUpdateManager.completeUpdate();
-                                                            appUpdateManager.unregisterListener(listener);
-                                                        }
-                                                    });
-                                                    snackbar.setActionTextColor(getResources().getColor(R.color.colorPrimary));
-                                                    snackbar.show();
-                                                }
-                                            }
-                                        };
-                                        appUpdateManager.registerListener(listener);
-
-
-                                    } catch (IntentSender.SendIntentException e) {
-                                        Toast.makeText(BaseActivity.this, e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                                    }
-
-
-                                }
-
-
-                            }
-                        });
-                    }
-                });
-            }
-        }
-    }
-
-    @Override
-    protected void onActivityResult(final int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == MY_REQUEST_CODE && resultCode != RESULT_OK) {
-            new AlertDialog.Builder(BaseActivity.this).setIcon(R.mipmap.ic_launcher).setTitle(R.string.app_name).setMessage("Please Update the app").setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    checkMinAppVersion();
-                }
-            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    BaseActivity.this.finish();
-                }
-            }).create().show();
-        }
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
-        //checkMinAppVersion();
         isActive = true;
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            // logged in
-            try {
-                checkMinAppVersion();
-            } catch (Throwable e) {
-                Crashlytics.logException(e);
-            }
-        }
     }
 
     private void checkMinAppVersion() {
@@ -233,12 +116,7 @@ public class BaseActivity extends AppCompatActivity {
                         if (BuildConfig.VERSION_CODE < minAppVersion && !isFinishing() && isActive) {
                             checkUpdate("flexible");
                         }
-                        // prompt to optionally update app
-                        //Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_POSITIVE, BaseActivity.this);
-                        //Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
-                        //Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER, BaseActivity.this);
                     }
-                    return;
                 }
             }
 
@@ -247,6 +125,113 @@ public class BaseActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void checkUpdate(String data) {
+        appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+
+        if (data.equals("immediate")) {
+            appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
+                @Override
+                public void onSuccess(AppUpdateInfo appUpdateInfo) {
+                    if ((appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE || appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS)
+                            && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                        try {
+                            Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK, BaseActivity.this);
+                            appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, BaseActivity.this, IMMEDIATE_REQUEST_CODE);
+                        } catch (IntentSender.SendIntentException e) {
+                            Crashlytics.logException(e);
+                        }
+                    }
+                }
+            });
+        } else {
+            if (System.currentTimeMillis() - LubbleSharedPrefs.getInstance().getFlexiUpdateTs() > TimeUnit.HOURS.toMillis(24)) {
+                appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
+                    @Override
+                    public void onSuccess(final AppUpdateInfo appUpdateInfo) {
+                        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                            LubbleSharedPrefs.getInstance().setFlexiUpdateTs(System.currentTimeMillis());
+                            Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER, BaseActivity.this);
+                            View v = getLayoutInflater().inflate(R.layout.layout_update_bottom_sheet, null);
+                            final BottomSheetDialog dialog = new BottomSheetDialog(BaseActivity.this);
+                            dialog.setContentView(v);
+                            dialog.setCancelable(true);
+                            dialog.show();
+
+                            update = v.findViewById(R.id.updateButton);
+                            cancelUpdate = v.findViewById(R.id.updateCancel);
+
+                            update.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_POSITIVE, BaseActivity.this);
+                                    try {
+                                        startFlexiUpdate(appUpdateInfo);
+                                    } catch (IntentSender.SendIntentException e) {
+                                        e.printStackTrace();
+                                        Crashlytics.logException(e);
+                                    }
+                                }
+                            });
+                            cancelUpdate.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER_LATER, BaseActivity.this);
+                                    dialog.dismiss();
+                                }
+                            });
+
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    private void startFlexiUpdate(AppUpdateInfo appUpdateInfo) throws IntentSender.SendIntentException {
+        listener = new InstallStateUpdatedListener() {
+            @Override
+            public void onStateUpdate(InstallState state) {
+                if (state.installStatus() == InstallStatus.DOWNLOADED) {
+                    Snackbar snackbar =
+                            Snackbar.make(
+                                    findViewById(R.id.content_frame),
+                                    "An update has just been downloaded.",
+                                    Snackbar.LENGTH_INDEFINITE);
+                    snackbar.setAction("RESTART", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            appUpdateManager.completeUpdate();
+                            appUpdateManager.unregisterListener(listener);
+                        }
+                    });
+                    snackbar.setActionTextColor(getResources().getColor(R.color.light_colorAccent));
+                    snackbar.show();
+                }
+            }
+        };
+        appUpdateManager.registerListener(listener);
+        appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.FLEXIBLE, BaseActivity.this, FLEXI_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(final int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == IMMEDIATE_REQUEST_CODE && resultCode != RESULT_OK) {
+            new AlertDialog.Builder(BaseActivity.this)
+                    .setIcon(R.mipmap.ic_launcher)
+                    .setTitle("Critical Update Pending")
+                    .setMessage("Please update the app to continue using Lubble. It will take less than a minute.")
+                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK_RETRY, BaseActivity.this);
+                            checkMinAppVersion();
+                        }
+                    }).setCancelable(false).create().show();
+        }
     }
 
     @Override

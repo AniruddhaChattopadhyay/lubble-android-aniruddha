@@ -1,16 +1,23 @@
 <resources>
+    <plurals name="vote_count">
+        <item quantity="one">%d vote</item>
+        <item quantity="other">%d votes</item>
+    </plurals>
+    <plurals name="book_count">
+        <item quantity="one">%d book</item>
+        <item quantity="other">%d books</item>
+    </plurals>
+    <plurals name="group_count">
+        <item quantity="one">%d group</item>
+        <item quantity="other">%d groups</item>
+    </plurals>
     <string name="app_name">Lubble</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
 
     <!-- sep -->
-    <string-array name="login_server_url_array">
-        <item>@string/profile</item>
-        <item>@string/profile</item>
-        <item>@string/profile</item>
-    </string-array>
+    <string name="title_home">Home</string>
 
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
     <string name="new_post_hint">What\'s new in your locality?</string>
     <string name="new_post_add_photo">Add Photo or Screenshot</string>
     <string name="priority_normal">Normal</string>
@@ -28,9 +35,9 @@
     <string name="last_name">Last Name</string>
     <string name="btn_continue">Continue</string>
     <string name="profile_pic_hint">Hi %1$s!\nAdd your photo to let your friends identify you</string>
+
     <string name="all_skip">skip</string>
     <string name="all_lets_go">Let\'s Go</string>
-
     <string name="profile">Profile</string>
     <string name="clear_db">Clear DB</string>
     <string name="edit_profile">EDIT PROFILE</string>
@@ -172,12 +179,8 @@
     <string name="seller_phone_hint"><![CDATA[Seller phone number will be publicly visible on your seller profile & on products/services you sell on Lubble]]></string>
     <string name="phone_error">Please enter your phone number</string>
     <string name="chat_with_seller">ASK FOR DETAILS</string>
-    <string name="edit_item">Edit Item</string>
-    <string-array name="price_options_array">
-        <item>Paid</item>
-        <item>Request Price</item>
-    </string-array>
 
+    <string name="edit_item">Edit Item</string>
     <string name="events">Events</string>
     <string name="title_activity_referral">Referrals</string>
     <string name="tab_text_1">Tab 1</string>
@@ -187,19 +190,15 @@
     <string name="refer_share_title">Share via:</string>
     <string name="refer_msg"><![CDATA[Join me &amp; your neighbours on Lubble, a free &amp; private social network for your neighbourhood!<br><br>Check it out:&nbsp;]]></string>
     <string name="refer_msg_group"><![CDATA[Join me in the %1$s group on Lubble, a private social network just for %2$s!<br><br>Check it out:&nbsp;]]></string>
-    <string name="all_later">Later</string>
 
+    <string name="all_later">Later</string>
     <string name="title_activity_fullscreen_youtube">Full screen Youtube</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="all_retry">Retry</string>
     <string name="signing_in">Signing in…</string>
-    <string name="poll_msg_body">[ Poll ]\nPlease update the app to vote on this poll</string>
 
-    <plurals name="vote_count">
-        <item quantity="one">%d vote</item>
-        <item quantity="other">%d votes</item>
-    </plurals>
+    <string name="poll_msg_body">[ Poll ]\nPlease update the app to vote on this poll</string>
     <string name="quiz_loc_perm_denied_text">Please grant permission to locate a place closest to you</string>
     <string name="quiz_loc_perm_never_text">To enable permissions again, go to phone settings &amp; enable location for Lubble</string>
 
@@ -211,32 +210,36 @@
     <string name="facebook_login_protocol_scheme" translatable="false">fb2413591255319136</string>
 
 
-    <plurals name="book_count">
-        <item quantity="one">%d book</item>
-        <item quantity="other">%d books</item>
-    </plurals>
     <string name="title_activity_address_chooser">Choose Address</string>
-
     <string name="bookterms">By adding books, you agree to these\n
 <a href="https://lubble.in/policies/terms">Terms</a> and
 <a href="https://lubble.in/policies/privacy">Privacy Policy</a>
     </string>
 
-    <plurals name="group_count">
-        <item quantity="one">%d group</item>
-        <item quantity="other">%d groups</item>
-    </plurals>
-
     <string name="msg_spam_confirm_title">Mark as Spam?</string>
+
     <string name="msg_spam_confirm_msg">This will permanently delete the message! Are you sure you want to continue?</string>
+
     <string name="msg_spam_confirm_del_msg">Delete Message</string>
     <string name="msg_spam_confirm_reset_lastmsg">Delete Last Msg too</string>
     <string name="drawer_close">Drawer close</string>
     <string name="drawer_open">Drawer open</string>
-
     <string name="freshchat_file_provider_authority">in.lubble.app.provider</string>
     <string name="freshchat_campaign_notification_channel_name">Support messages</string>
     <string name="click_group_info">Click here for group info</string>
     <string name="members_count">%d members</string>
 
+    <string name="insta_client_id" translatable="false">47fd39a2acc14d66934ded5aa29d1d29</string>
+    <string name="insta_redirect_url" translatable="false">https://lubble.in</string>
+
+
+    <string-array name="login_server_url_array">
+        <item>@string/profile</item>
+        <item>@string/profile</item>
+        <item>@string/profile</item>
+    </string-array>
+    <string-array name="price_options_array">
+        <item>Paid</item>
+        <item>Request Price</item>
+    </string-array>
 </resources>

@@ -9,7 +9,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
@@ -17,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -31,6 +39,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Collections;
+
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
@@ -44,15 +56,16 @@ import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.referrals.ReferralActivity;
-import in.lubble.app.utils.*;
+import in.lubble.app.utils.FragUtils;
+import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.UiUtils;
+import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.ArrayList;
-import java.util.Collections;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
@@ -147,6 +160,9 @@ public class ProfileFrag extends Fragment {
         progressBar = rootView.findViewById(R.id.progressBar_profile);
         TextView versionTv = rootView.findViewById(R.id.tv_version_name);
         RelativeLayout feedbackView = rootView.findViewById(R.id.feedback_container);
+        Log.d("database_uid", RealtimeDbHelper.getThisUserRef().toString());//whole link to the user we are logged in as
+        Log.d("uid", userId);//user we are currently on the profile of
+        Log.d("uid_this", FirebaseAuth.getInstance().getUid());//the user we are logged in as
 
         sharingProgressDialog = new ProgressDialog(getContext());
         generateBranchUrl(getContext(), linkCreateListener);

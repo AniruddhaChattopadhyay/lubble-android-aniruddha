@@ -4,34 +4,35 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
+    android:background="@color/white"
     android:orientation="vertical">
 
     <ImageView
         android:id="@+id/goingStatsImg"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        tools:src="@mipmap/ic_launcher" />
-
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        tools:src="@tools:sample/avatars" />
 
     <TextView
         android:id="@+id/goingStatsName"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@id/goingStatsImg"
-        android:paddingStart="8dp"
-        android:paddingEnd="0dp"
+        android:layout_marginLeft="8dp"
+        android:layout_toRightOf="@id/goingStatsImg"
+        android:gravity="center_vertical"
         android:textColor="@color/black"
         android:textSize="18sp"
-        tools:text="Tejas Rana" />
+        android:layout_alignTop="@id/goingStatsImg"
+        android:layout_alignBottom="@id/goingStatsImg"
+        tools:text="@tools:sample/full_names"
+        android:layout_toLeftOf="@id/goingStatsTv" />
 
     <TextView
         android:id="@+id/goingStatsTv"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/goingStatsName"
+        android:layout_centerVertical="true"
         android:layout_alignParentEnd="true"
-        android:layout_toEndOf="@id/goingStatsImg"
         android:gravity="end"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"

@@ -1,6 +1,7 @@
 package in.lubble.app.utils;
 
 import android.Manifest;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,21 +12,33 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.webkit.MimeTypeMap;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import com.crashlytics.android.Crashlytics;
-import in.lubble.app.BuildConfig;
-import in.lubble.app.R;
-import permissions.dispatcher.PermissionRequest;
 
-import java.io.*;
+import com.crashlytics.android.Crashlytics;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import in.lubble.app.BuildConfig;
+import in.lubble.app.R;
+import permissions.dispatcher.PermissionRequest;
+
+import static in.lubble.app.LubbleApp.getAppContext;
 
 /**
  * Created by ishaangarg on 17/11/17.
@@ -33,6 +46,7 @@ import java.util.Locale;
 
 public class FileUtils {
 
+    public static double Video_Size = 0;
     public static File createImageFile(Context context) throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
@@ -76,9 +90,42 @@ public class FileUtils {
     }
 
     public static Intent getGalleryIntent(Context context) {
-        Intent takePhotoIntent = new Intent(Intent.ACTION_PICK,
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        return takePhotoIntent;
+        Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        photoPickerIntent.setType("*/*");
+        photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"image/*", "video/*"});
+        Log.d("GroupID",Intent.EXTRA_MIME_TYPES);
+        return photoPickerIntent;
+    }
+
+    public static String getMimeType(Uri uri) {
+        String mimeType = null;
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            ContentResolver cr = getAppContext().getContentResolver();
+            mimeType = cr.getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri
+                    .toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                    fileExtension.toLowerCase());
+        }
+        return mimeType;
+    }
+
+    public static String getFileExtension(Context context, Uri uri) {
+        String extension;
+
+        //Check uri format to avoid null
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            //If scheme is a content
+            final MimeTypeMap mime = MimeTypeMap.getSingleton();
+            extension = mime.getExtensionFromMimeType(context.getContentResolver().getType(uri));
+        } else {
+            //If scheme is a File
+            //This will replace white spaces with %20 and also other special characters. This will avoid returning null values on file name with spaces and special characters.
+            extension = MimeTypeMap.getFileExtensionFromUrl(Uri.fromFile(new File(uri.getPath())).toString());
+        }
+
+        return extension;
     }
 
     public static Intent getTakePhotoIntent(Context context, File cameraPic) {
@@ -99,7 +146,11 @@ public class FileUtils {
         if (uri.getAuthority() != null) {
             try {
                 inputStream = context.getContentResolver().openInputStream(uri); // context needed
+                if(getMimeType(uri).contains("video"))
+                    photoFile = createTemporalVideoFileFrom(context,inputStream);
+                else{
                 photoFile = createTemporalFileFrom(context, inputStream);
+                }
 
             } catch (FileNotFoundException e) {
                 // log
@@ -118,7 +169,30 @@ public class FileUtils {
 
         return photoFile;
     }
+    private static File createTemporalVideoFileFrom(Context context, InputStream inputStream) throws IOException {
+        File targetFile = null;
 
+        if (inputStream != null) {
+            int read;
+            byte[] buffer = new byte[8 * 1024];
+
+            targetFile = createTemporalVideoFile(context);
+            OutputStream outputStream = new FileOutputStream(targetFile);
+
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return targetFile;
+    }
     private static File createTemporalFileFrom(Context context, InputStream inputStream) throws IOException {
         File targetFile = null;
 
@@ -146,6 +220,9 @@ public class FileUtils {
 
     private static File createTemporalFile(Context context) {
         return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".jpg"); // context needed
+    }
+    private static File createTemporalVideoFile(Context context) {
+        return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".mp4"); // context needed
     }
 
     public static void showStoragePermRationale(Context context, final PermissionRequest request) {

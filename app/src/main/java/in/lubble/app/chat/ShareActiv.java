@@ -10,25 +10,40 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import android.widget.Toast;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import in.lubble.app.*;
-import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import in.lubble.app.BaseActivity;
+import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.R;
+import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.ChatData;
+import in.lubble.app.models.DmData;
+import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.models.UserGroupData;
+import in.lubble.app.utils.FileUtils;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 
 public class ShareActiv extends BaseActivity {
@@ -48,7 +63,7 @@ public class ShareActiv extends BaseActivity {
     private String shareId;
     private ShareType shareType;
     private final ChatData chatDataToSend = new ChatData();
-    private Uri imgUri;
+    private Uri mediaUri;
 
     public static void open(Context context, String groupIdToShare, ShareType shareType) {
         final Intent intent = new Intent(context, ShareActiv.class);
@@ -78,6 +93,8 @@ public class ShareActiv extends BaseActivity {
                 handleSendText(intent);
             } else if (type.startsWith("image/")) {
                 handleSendImage(intent);
+            } else if (type.startsWith("video/")) {
+                handleSendVideo(intent);
             }
         } else {
             // Handle other intents
@@ -103,7 +120,20 @@ public class ShareActiv extends BaseActivity {
             // make a local copy of the img becoz our file upload service will lose auth for this URI
             // since the service is not part of same context/process
             File localImgFile = getFileFromInputStreamUri(this, imageUri);
-            this.imgUri = Uri.fromFile(localImgFile);
+            this.mediaUri = Uri.fromFile(localImgFile);
+        }
+    }
+
+    private void handleSendVideo(Intent intent) {
+        Uri videoUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+        String extension = FileUtils.getFileExtension(this, videoUri);
+        if (extension != null && extension.contains("mov")) {
+            Toast.makeText(getApplicationContext(), "Unsupported File Type", Toast.LENGTH_LONG).show();
+            finish();
+        } else {
+            File localVidFile = getFileFromInputStreamUri(this, videoUri);
+            this.mediaUri = Uri.fromFile(localVidFile);
         }
     }
 
@@ -351,9 +381,9 @@ public class ShareActiv extends BaseActivity {
                         }
                         final GroupData groupData = groupList.get(getAdapterPosition());
                         if (groupData.isDm()) {
-                            ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatDataToSend, imgUri);
+                            ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatDataToSend, mediaUri);
                         } else {
-                            ChatActivity.openForGroup(ShareActiv.this, groupData.getId(), false, null, chatDataToSend, imgUri);
+                            ChatActivity.openForGroup(ShareActiv.this, groupData.getId(), false, null, chatDataToSend, mediaUri);
                         }
                         finish();
                     }
