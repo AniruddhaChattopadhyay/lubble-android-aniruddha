@@ -1,4 +1,5 @@
 package in.lubble.app.utils;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -7,15 +8,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityOptionsCompat;
 
-import com.google.android.exoplayer2.C;
-import com.crashlytics.android.Crashlytics;
-import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -66,7 +63,6 @@ public class FullScreenVideoActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED,this);
         setContentView(R.layout.activity_full_screen_video);
 
         Toolbar toolbar = findViewById(R.id.transparent_toolbar);
@@ -155,18 +151,21 @@ public class FullScreenVideoActivity extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if(exoPlayer!=null)
+        if (exoPlayer != null) {
             exoPlayer.release();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(exoPlayer!=null)
+        if (exoPlayer != null) {
             exoPlayer.release();
+        }
     }
 
     @Override
@@ -180,8 +179,13 @@ public class FullScreenVideoActivity extends BaseActivity {
 
     @Override
     protected void onPause() {
+        Log.d(TAG, "on pause");
         super.onPause();
-        if(exoPlayer!=null)
+        if (exoPlayer != null) {
+            position = exoPlayer.getCurrentPosition();
+            exoPlayer.stop();
             exoPlayer.release();
+            exoPlayer = null;
+        }
     }
 }

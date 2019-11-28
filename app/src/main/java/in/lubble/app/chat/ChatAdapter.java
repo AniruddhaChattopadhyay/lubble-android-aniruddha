@@ -2,7 +2,6 @@ package in.lubble.app.chat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -13,21 +12,14 @@ import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.nfc.Tag;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -48,7 +40,6 @@ import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -58,22 +49,6 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
-import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -382,7 +357,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null);
-        handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.playvidIv,sentChatViewHolder.vidThumbnailIv, chatData, null,position);
+        handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.playvidIv, sentChatViewHolder.vidThumbnailIv, chatData, null, position);
 
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
 
@@ -581,7 +556,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
-        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar,recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv,position);
+        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid, recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv, position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
@@ -1172,6 +1147,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBar.setVisibility(View.GONE);
         }
     }
+
     private void downloadAndSavePic(final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
         glide.asBitmap()
                 .load(chatData.getImgUrl())
@@ -1245,7 +1221,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             notifyItemInserted(size);
         }
     }
-
 
     void updateFlair(ProfileData thisUserProfileData) {
         profileDataMap.put(thisUserProfileData.getId(), thisUserProfileData);
@@ -1412,6 +1387,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout pollContainer;
         private LinearLayout lubbContainer;
         private EmojiTextView badgeTextTv;
+
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
             rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
@@ -1454,6 +1430,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             messageTv.setOnLongClickListener(this);
             rootLayout.setOnLongClickListener(this);
             chatIv.setOnLongClickListener(this);
+            vidThumbnailIv.setOnLongClickListener(this);
             lubbContainer.setOnLongClickListener(this);
         }
 

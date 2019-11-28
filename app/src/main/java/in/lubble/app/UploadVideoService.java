@@ -30,9 +30,11 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.iceteck.silicompressorr.SiliCompressor;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
 
@@ -81,7 +83,7 @@ public class UploadVideoService extends BaseTaskService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("uploadFrom","Started");
+        Log.d("uploadFrom", "Started");
         Log.d(TAG, "onStartCommand:" + intent + ":" + startId);
 
         final int bucketId = intent.getIntExtra(EXTRA_BUCKET, BUCKET_DEFAULT);
@@ -160,7 +162,7 @@ public class UploadVideoService extends BaseTaskService {
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference photoRef = mStorageRef.child(uploadPath)
                 .child(fileName);
-       // uploadFile(fileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
+        // uploadFile(fileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
         compressAndUpload(fileUri, caption, groupId, toTransmit, metadata, dmInfoData, photoRef);
 
     }
@@ -231,7 +233,7 @@ public class UploadVideoService extends BaseTaskService {
                 Crashlytics.logException(e);
                 e.printStackTrace();
             }
-            return  filePath;
+            return filePath;
 
         }
 

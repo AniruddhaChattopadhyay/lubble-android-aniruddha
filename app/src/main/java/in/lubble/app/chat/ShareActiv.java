@@ -97,8 +97,7 @@ public class ShareActiv extends BaseActivity {
                 handleSendText(intent);
             } else if (type.startsWith("image/")) {
                 handleSendImage(intent);
-            }
-            else if( type.startsWith("video/")){
+            } else if (type.startsWith("video/")) {
                 handleSendVideo(intent);
             }
         } else {

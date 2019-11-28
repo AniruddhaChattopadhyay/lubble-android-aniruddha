@@ -44,9 +44,8 @@
         android:layout_toLeftOf="@id/iv_send_btn_vid"
         android:gravity="top|left"
         android:hint="Add a caption"
-        android:maxLines="15"
+        android:maxLines="5"
         android:scrollbars="vertical"
-        android:textColor="@color/bright_red"
         tools:text="@tools:sample/lorem/random" />
 
 </RelativeLayout>
