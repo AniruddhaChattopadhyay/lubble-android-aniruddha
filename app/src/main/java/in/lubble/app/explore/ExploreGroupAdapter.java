@@ -1,5 +1,6 @@
 package in.lubble.app.explore;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,14 +17,16 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 
-public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapter.ViewHolder> {
+public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapter.ViewHolder> implements Filterable {
 
     private List<ExploreGroupData> mValues;
+    private List<ExploreGroupData> mValues_copy;
     private final OnListFragmentInteractionListener mListener;
     private final GlideRequests glide;
     private final boolean isOnboarding;
@@ -31,6 +34,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
 
     public ExploreGroupAdapter(List<ExploreGroupData> items, OnListFragmentInteractionListener listener, GlideRequests glide, boolean isOnboarding) {
         mValues = items;
+        mValues_copy = new ArrayList<>(items);
         mListener = listener;
         this.glide = glide;
         this.isOnboarding = isOnboarding;
@@ -38,6 +42,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
 
     public void updateList(List<ExploreGroupData> items) {
         this.mValues = items;
+        this.mValues_copy = new ArrayList<>(items);
         notifyDataSetChanged();
     }
 
@@ -157,4 +162,36 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(ExploreGroupData item, boolean isAdded);
     }
+
+    @Override
+    public Filter getFilter() {
+        return explorefilter;
+    }
+
+    private Filter explorefilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<ExploreGroupData> filteredList = new ArrayList<>();
+            if(constraint == null || constraint.length()==0)
+                filteredList.addAll(mValues_copy);
+            else{
+                String filterString = constraint.toString().toLowerCase().trim();
+                for( ExploreGroupData item: mValues_copy){
+                    if(item.getTitle().toLowerCase().contains(filterString)){
+                        filteredList.add(item);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList ;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            mValues.clear();
+            mValues.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
 }
