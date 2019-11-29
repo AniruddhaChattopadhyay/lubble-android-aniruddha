@@ -2,10 +2,13 @@ package in.lubble.app.explore;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +38,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private TextView descTv;
     private ExploreGroupAdapter exploreGroupAdapter;
     private boolean isOnboarding;
-
+    private EditText searchEt;
     public ExploreFrag() {
     }
 
@@ -55,7 +58,6 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
-
         Context context = view.getContext();
         joinedAllTv = view.findViewById(R.id.tv_joined_all);
         titleTv = view.findViewById(R.id.tv_title);
@@ -63,6 +65,23 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         recyclerView = view.findViewById(R.id.rv_interest_groups);
         progressbar = view.findViewById(R.id.progressbar);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+        searchEt = view.findViewById(R.id.et_search);
+        searchEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                exploreGroupAdapter.getFilter().filter(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+               // Log.d(TAG,s+"*******************");
+            }
+        });
         joinedAllTv.setVisibility(View.GONE);
         if (isOnboarding) {
             titleTv.setVisibility(View.GONE);
