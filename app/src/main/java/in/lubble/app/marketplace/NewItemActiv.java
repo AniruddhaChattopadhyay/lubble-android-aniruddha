@@ -736,6 +736,7 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
             case R.id.action_help:
                 FreshchatMessage FreshchatMessage = new FreshchatMessage().setTag("ITEMS_HELP").setMessage("Please help me with my services");
                 Freshchat.sendMessage(this, FreshchatMessage);
+                Freshchat.showConversations(this);
                 Analytics.triggerEvent(HELP_BTN_CLICKED, this);
                 return true;
         }

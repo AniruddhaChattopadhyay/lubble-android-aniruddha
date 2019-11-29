@@ -153,6 +153,7 @@ public class ClaimedRewardsActiv extends BaseActivity {
             case R.id.action_help:
                 FreshchatMessage FreshchatMessage = new FreshchatMessage().setTag("REWARDS_HELP").setMessage("Please help me with Rewards");
                 Freshchat.sendMessage(this, FreshchatMessage);
+                Freshchat.showConversations(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);

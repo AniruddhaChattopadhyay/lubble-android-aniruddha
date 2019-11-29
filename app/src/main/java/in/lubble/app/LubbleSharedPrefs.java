@@ -3,13 +3,12 @@ package in.lubble.app;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.annotation.Nullable;
-
 import com.crashlytics.android.Crashlytics;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import androidx.annotation.Nullable;
 import in.lubble.app.utils.UserUtils;
 
 /**

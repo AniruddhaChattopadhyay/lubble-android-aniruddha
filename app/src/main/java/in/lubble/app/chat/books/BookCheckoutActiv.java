@@ -457,6 +457,7 @@ public class BookCheckoutActiv extends BaseActivity {
             case R.id.action_help:
                 FreshchatMessage FreshchatMessage = new FreshchatMessage().setTag("BOOKS_HELP").setMessage("Please help me with Book Exchange");
                 Freshchat.sendMessage(this, FreshchatMessage);
+                Freshchat.showConversations(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);

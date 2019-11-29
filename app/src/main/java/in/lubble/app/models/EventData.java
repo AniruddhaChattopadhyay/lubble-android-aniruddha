@@ -32,6 +32,7 @@ public class EventData implements Serializable {
     private String address;
     private String gid;
     private String relatedGroups = "";
+    private String ticketUrl;
 
     @Override
     public boolean equals(Object obj) {
@@ -143,6 +144,14 @@ public class EventData implements Serializable {
 
     public String getRelatedGroups() {
         return relatedGroups;
+    }
+
+    public String getTicketUrl() {
+        return ticketUrl;
+    }
+
+    public void setTicketUrl(String ticketUrl) {
+        this.ticketUrl = ticketUrl;
     }
 
     @Exclude

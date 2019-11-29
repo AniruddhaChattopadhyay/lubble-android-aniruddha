@@ -9,8 +9,8 @@ android {
         applicationId "in.lubble.app"
         minSdkVersion 17
         targetSdkVersion 28
-        versionCode 209
-        versionName "1.8.1-1"
+        versionCode 210
+        versionName "1.9-1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -139,6 +139,11 @@ dependencies {
 
     // in app update
     implementation 'com.google.android.play:core:1.6.4'
+
+    //chrome custom tab
+
+    implementation 'com.android.support:customtabs:28.0.0'
+
 }
 
 

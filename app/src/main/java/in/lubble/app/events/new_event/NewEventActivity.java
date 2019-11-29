@@ -9,8 +9,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.*;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
 import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -25,6 +27,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.*;
+
 import in.lubble.app.*;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -69,6 +72,7 @@ public class NewEventActivity extends BaseActivity {
     private TextInputLayout startTimeTil;
     private TextInputLayout endTimeTil;
     private TextInputLayout addressTil;
+    private TextInputLayout ticketUrl;
     private RadioGroup radioGroup;
     private RadioButton newGroupRadioBtn;
     private CompoundButton oldGroupRadioBtn;
@@ -108,6 +112,7 @@ public class NewEventActivity extends BaseActivity {
         notAdminHintTv = findViewById(R.id.tv_not_admin_hint);
         relatedGroupsTv = findViewById(R.id.tv_related_groups);
         adminGroupsSpinner = findViewById(R.id.spinner_admin_groups);
+        ticketUrl = findViewById(R.id.til_event_url_tickets);
         submitBtn = findViewById(R.id.btn_submit);
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -157,6 +162,7 @@ public class NewEventActivity extends BaseActivity {
                 eventData.setTitle(titleTil.getEditText().getText().toString().trim());
                 eventData.setDesc(descTil.getEditText().getText().toString().trim());
                 eventData.setOrganizer(organizerTil.getEditText().getText().toString().trim());
+                eventData.setTicketUrl(ticketUrl.getEditText().getText().toString().trim());
                 StringBuilder relatedGroupsStr = new StringBuilder();
                 for (String groudId : relatedGroupIdList) {
                     relatedGroupsStr.append(groudId + ",");

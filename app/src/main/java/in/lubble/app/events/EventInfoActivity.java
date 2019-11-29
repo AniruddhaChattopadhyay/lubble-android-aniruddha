@@ -10,17 +10,11 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.emoji.widget.EmojiTextView;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -38,6 +32,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiTextView;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.EventAttendeesActivity;
 import in.lubble.app.GlideApp;
@@ -104,6 +105,7 @@ public class EventInfoActivity extends BaseActivity {
     private DatabaseReference groupTitleRef;
     private ValueEventListener groupTitleListener;
     private long oldResponse = EventData.NO;
+    private Button ticketsBtn;
 
     public static void open(Context context, String eventId) {
         Intent intent = new Intent(context, EventInfoActivity.class);
@@ -153,10 +155,9 @@ public class EventInfoActivity extends BaseActivity {
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.joining_group);
         progressDialog.setMessage(getString(R.string.all_please_wait));
+        ticketsBtn = findViewById(R.id.ticketUrl);
 
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
-        // Log.i("TejasEIA",eventId);
-
         eventRef = getEventsRef().child(eventId);
         Analytics.triggerScreenEvent(this, this.getClass());
 
@@ -352,8 +353,29 @@ public class EventInfoActivity extends BaseActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 eventData = dataSnapshot.getValue(EventData.class);
+
                 if (eventData != null) {
                     setTitleWhenCollapsed();
+                    if (!TextUtils.isEmpty(eventData.getTicketUrl()) && (eventData.getTicketUrl().contains("https://") || eventData.getTicketUrl().contains("http://"))) {
+                        // has a ticket URL
+                        ticketsBtn.setVisibility(View.VISIBLE);
+                        ticketsBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Uri uri = Uri.parse(eventData.getTicketUrl());
+                                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                                intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorAccent));
+                                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dk_colorAccent));
+                                intentBuilder.enableUrlBarHiding();
+                                intentBuilder.setShowTitle(true);
+                                CustomTabsIntent customTabsIntent = intentBuilder.build();
+                                customTabsIntent.launchUrl(EventInfoActivity.this, uri);
+                            }
+                        });
+
+                    } else {
+                        ticketsBtn.setVisibility(View.GONE);
+                    }
                     GlideApp.with(EventInfoActivity.this)
                             .load(eventData.getProfilePic())
                             .error(R.drawable.ic_star_party)
