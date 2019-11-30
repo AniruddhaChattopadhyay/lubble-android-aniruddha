@@ -256,7 +256,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onCreate(savedInstanceState);
 
         groupId = getArguments().getString(KEY_GROUP_ID);
-        Log.d("GroupID", groupId);
+
         msgIdToOpen = getArguments().getString(KEY_MSG_ID);
         dmId = getArguments().getString(KEY_DM_ID);
         receiverId = getArguments().getString(KEY_RECEIVER_ID);
@@ -740,6 +740,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         } else if (!TextUtils.isEmpty(receiverId)) {
             chatRecyclerView.setVisibility(View.VISIBLE);
             ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true, 0);
+            bottomContainer.setVisibility(View.VISIBLE);
+            composeContainer.setVisibility(View.VISIBLE);
+            joinContainer.setVisibility(View.GONE);
         }
     }
 

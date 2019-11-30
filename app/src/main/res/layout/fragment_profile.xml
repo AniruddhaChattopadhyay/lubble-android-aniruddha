@@ -71,24 +71,42 @@
                 android:gravity="center"
                 tools:text="Edit Profile to add a bio" />
 
-            <Button
-                android:id="@+id/tv_editProfile"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <LinearLayout
+                android:id="@+id/container_ctas"
                 android:layout_below="@+id/tv_bio"
-                android:layout_centerHorizontal="true"
-                android:paddingLeft="24dp"
-                android:paddingRight="24dp"
-                android:text="@string/edit_profile"
-                android:theme="@style/AccentButton"
-                android:visibility="gone"
-                tools:visibility="visible" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
 
+                <Button
+                    android:id="@+id/tv_editProfile"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="24dp"
+                    android:paddingRight="24dp"
+                    android:text="@string/edit_profile"
+                    android:theme="@style/AccentButton"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_msg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tv_bio"
+                    android:layout_centerHorizontal="true"
+                    android:text="Message"
+                    style="@style/Widget.MaterialComponents.Button.Icon"
+                    app:icon="@drawable/ic_send_white_24dp"
+                    android:theme="@style/MaterialButton" />
+
+            </LinearLayout>
             <View
                 android:id="@+id/view_hr"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_below="@id/tv_editProfile"
+                android:layout_below="@id/container_ctas"
                 android:layout_marginTop="8dp"
                 android:background="@color/light_gray" />
 

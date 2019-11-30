@@ -34,6 +34,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -84,6 +85,7 @@ public class ProfileFrag extends Fragment {
     private TextView lubbleTv;
     private TextView userBio;
     private TextView editProfileTV;
+    private MaterialButton msgBtn;
     private TextView invitedTv;
     private TextView likesTv;
     private LinearLayout coinsContainer;
@@ -142,6 +144,7 @@ public class ProfileFrag extends Fragment {
         lubbleTv = rootView.findViewById(R.id.tv_lubble);
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
+        msgBtn = rootView.findViewById(R.id.btn_msg);
         invitedTv = rootView.findViewById(R.id.tv_invited);
         likesTv = rootView.findViewById(R.id.tv_likes);
         genderIv = rootView.findViewById(R.id.iv_gender);
@@ -229,6 +232,13 @@ public class ProfileFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 ReferralActivity.open(requireContext());
+            }
+        });
+
+        msgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ChatActivity.openForEmptyDm(requireContext(), userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail(), "");
             }
         });
 

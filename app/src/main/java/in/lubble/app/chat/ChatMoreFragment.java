@@ -2,6 +2,7 @@ package in.lubble.app.chat;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -171,73 +172,75 @@ public class ChatMoreFragment extends Fragment {
 
     private void syncFlair() {
         flairEt.setEnabled(false);
-        flairListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null) {
-                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
-                            final DataSnapshot userGroupsSnapshot = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups");
-                            Crashlytics.log("groupid: " + groupId);
-                            if (userGroupsSnapshot.hasChild(groupId) && userGroupsSnapshot.child(groupId).hasChild("joined") && (boolean) userGroupsSnapshot.child(groupId).child("joined").getValue()) {
-                                //is joined
-                                flairEt.setEnabled(true);
-                                final String flair = userGroupsSnapshot.child(groupId).child("flair").getValue(String.class);
-                                profileData.setGroupFlair(flair);
-                                flairEt.setText(flair);
-                                flairEt.setCursorVisible(true);
-                                flairEt.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        flairEt.setCursorVisible(true);
-                                    }
-                                });
+        if (!TextUtils.isEmpty(groupId)) {
+            flairListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
+                    if (profileData != null) {
+                        for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
+                            if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
+                                final DataSnapshot userGroupsSnapshot = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups");
+                                Crashlytics.log("groupid: " + groupId);
+                                if (userGroupsSnapshot.hasChild(groupId) && userGroupsSnapshot.child(groupId).hasChild("joined") && (boolean) userGroupsSnapshot.child(groupId).child("joined").getValue()) {
+                                    //is joined
+                                    flairEt.setEnabled(true);
+                                    final String flair = userGroupsSnapshot.child(groupId).child("flair").getValue(String.class);
+                                    profileData.setGroupFlair(flair);
+                                    flairEt.setText(flair);
+                                    flairEt.setCursorVisible(true);
+                                    flairEt.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            flairEt.setCursorVisible(true);
+                                        }
+                                    });
 
-                                updateFlairTv.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        flairProgressbar.setVisibility(View.VISIBLE);
-                                        updateFlairTv.setText("");
-                                        flairEt.setCursorVisible(false);
-                                        getUserGroupsRef().child(groupId).child("flair").setValue(flairEt.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                flairProgressbar.setVisibility(View.GONE);
-                                                updateFlairTv.setText("UPDATE");
-                                                if (!task.isSuccessful()) {
-                                                    Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                                                } else {
-                                                    Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, requireContext());
-                                                    Toast.makeText(requireContext(), "Updated!", Toast.LENGTH_SHORT).show();
+                                    updateFlairTv.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            flairProgressbar.setVisibility(View.VISIBLE);
+                                            updateFlairTv.setText("");
+                                            flairEt.setCursorVisible(false);
+                                            getUserGroupsRef().child(groupId).child("flair").setValue(flairEt.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    flairProgressbar.setVisibility(View.GONE);
+                                                    updateFlairTv.setText("UPDATE");
+                                                    if (!task.isSuccessful()) {
+                                                        Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                                    } else {
+                                                        Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, requireContext());
+                                                        Toast.makeText(requireContext(), "Updated!", Toast.LENGTH_SHORT).show();
+                                                    }
                                                 }
-                                            }
-                                        });
-                                        UiUtils.hideKeyboard(requireContext());
-                                        flairUpdateListener.onFlairUpdated();
-                                    }
-                                });
-                            } else {
-                                flairEt.setEnabled(false);
-                                updateFlairTv.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        Toast.makeText(requireContext(), "Please join the group first", Toast.LENGTH_SHORT).show();
-                                    }
-                                });
+                                            });
+                                            UiUtils.hideKeyboard(requireContext());
+                                            flairUpdateListener.onFlairUpdated();
+                                        }
+                                    });
+                                } else {
+                                    flairEt.setEnabled(false);
+                                    updateFlairTv.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Toast.makeText(requireContext(), "Please join the group first", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+                                break;
                             }
-                            break;
                         }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        };
-        getThisUserRef().addValueEventListener(flairListener);
+                }
+            };
+            getThisUserRef().addValueEventListener(flairListener);
+        }
     }
 
     private void fetchMore() {
