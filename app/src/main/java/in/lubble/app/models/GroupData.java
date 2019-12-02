@@ -31,6 +31,8 @@ public class GroupData {
     @Exclude
     private Set<String> invitedBy;
     private boolean isPinned;
+    @Exclude
+    private boolean isDm;
 
     public GroupData() {
     }  // Needed for Firebase
@@ -153,9 +155,12 @@ public class GroupData {
         }
     }
 
-    public boolean isDm() {
-        // Yeah. Weird.
-        return getMembers().size() == 0;
+    public boolean getIsDm(){
+        return isDm;
+    }
+
+    public void setIsDm(boolean isDm){
+        this.isDm = isDm;
     }
 
     public boolean getIsPinned() {

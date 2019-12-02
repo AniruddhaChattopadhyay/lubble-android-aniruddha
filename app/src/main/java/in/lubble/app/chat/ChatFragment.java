@@ -661,7 +661,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 // this person's profile ID, could be a seller or a user
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    isCurrUserSeller = (boolean) profileMap.get("isSeller");
+                                    isCurrUserSeller = false;
                                     authorId = profileId;
                                     chatAdapter.setAuthorId(authorId);
                                     chatAdapter.setDmId(dmId);
@@ -678,13 +678,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 // other person's profile ID, could be a seller or a user
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    final boolean isSeller = (boolean) profileMap.get("isSeller");
+                                    final boolean isSeller = false;
                                     if (isSeller) {
                                         fetchSellerProfileFrom(profileId);
                                     } else {
                                         fetchProfileFrom(profileId);
                                     }
                                 }
+                                bottomContainer.setVisibility(View.VISIBLE);
+                                composeContainer.setVisibility(View.VISIBLE);
+                                joinContainer.setVisibility(View.GONE);
                             }
                         }
                         resetUnreadCount();
@@ -1094,13 +1097,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                     final HashMap<String, Object> userMap = new HashMap<>();
                     final HashMap<Object, Object> map2 = new HashMap<>();
-                    map2.put("isSeller", true);
+                    map2.put("joinedTimestamp", System.currentTimeMillis());
+                    map2.put("isSeller", false);
+                    map2.put("otherUser", authorId);
                     userMap.put(receiverId, map2);
 
-                    HashMap<String, Object> sellerMap = new HashMap<>();
-                    sellerMap.put("isSeller", false);
-                    sellerMap.put("otherUser", receiverId);
-                    userMap.put(authorId, sellerMap);
+                    HashMap<String, Object> authorMap = new HashMap<>();
+                    authorMap.put("otherUser", receiverId);
+                    authorMap.put("joinedTimestamp", System.currentTimeMillis());
+                    authorMap.put("isSeller", false);
+                    userMap.put(authorId, authorMap);
 
                     final HashMap<String, Object> map = new HashMap<>();
                     map.put("members", userMap);
