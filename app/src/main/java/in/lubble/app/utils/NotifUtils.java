@@ -248,6 +248,7 @@ public class NotifUtils {
             messagingStyle.setConversationTitle(null);
         } else {
             messagingStyle.setConversationTitle(notifData.getGroupName());
+            messagingStyle.setGroupConversation(true);
         }
         messagingStyle.addMessage(notifData.getMessageBody(), notifData.getTimestamp(), notifData.getAuthorName());
         messagingStyleMap.put(notifData.getGroupId(), messagingStyle);
