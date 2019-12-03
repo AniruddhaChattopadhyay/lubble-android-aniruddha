@@ -1,6 +1,7 @@
 package in.lubble.app.chat;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -13,13 +14,16 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
 import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -58,8 +62,11 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -134,12 +141,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private String groupId;
     private int highlightedPos = -1;
     private int posToFlash = -1;
+    private int i=0;
     private HashMap<String, ProfileData> profileDataMap = new HashMap<>();
     private String authorId = FirebaseAuth.getInstance().getUid();
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
-
-
+    private GestureDetector mDetector_vid,mDetector_img,mDetector_sent,mDetector_recv;
+    private boolean firstTouch;
+    private Long time;
     public ChatAdapter(Activity activity, Context context, String groupId,
                        RecyclerView recyclerView, ChatFragment chatFragment, GlideRequests glide) {
         this.chatDataList = new ArrayList<>();
@@ -202,6 +211,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void bindSentChatViewHolder(RecyclerView.ViewHolder holder, int position) {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
@@ -253,7 +263,98 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
         }
         sentChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.white));
-
+        i=0;
+        Log.d(TAG, "Hey");
+//        sentChatViewHolder.messageTv.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if(event.getAction() == event.ACTION_DOWN)
+//                {
+//                    if(firstTouch && (System.currentTimeMillis()-time)<300)
+//                    {
+//                        firstTouch = false;
+//                        if(sentChatViewHolder.lubbIcon.getTag().equals(2)){
+//                            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+//                            sentChatViewHolder.lubbIcon.setTag(1);
+//                        }
+//                        else{
+//                            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+//                            sentChatViewHolder.lubbIcon.setTag(2);
+//                        }
+//                    }
+//                    else{
+//                        firstTouch = true;
+//                        time = System.currentTimeMillis();
+//                    }
+//                }
+//                return true;
+//            }
+//        });
+        i=0;
+        sentChatViewHolder.messageTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                i++;
+                Log.d(TAG, "inside onclick messg");
+                Handler handler = new Handler();
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        i = 0;
+                    }
+                };
+                if (i == 1) {
+                    //Single click
+                    Log.d(TAG, "delay started");
+                    handler.postDelayed(r, 250);
+                } else if (i == 2) {
+                    //Double click
+                    Log.d(TAG, "inside double click messg");
+                    if(sentChatViewHolder.lubbIcon.getTag().equals(2)){
+                        sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+                        sentChatViewHolder.lubbIcon.setTag(1);
+                    }
+                    else{
+                        sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+                        sentChatViewHolder.lubbIcon.setTag(2);
+                    }
+                }
+            }
+        });
+//        mDetector_sent = new GestureDetector(context, new SampleGestureListener(sentChatViewHolder.lubbIcon));
+//        View.OnTouchListener touchListener = new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                return mDetector_sent.onTouchEvent(event);
+//            }
+//        };
+//        sentChatViewHolder.messageTv.setOnTouchListener(touchListener);
+//
+//        sentChatViewHolder.messageTv.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if(event.getAction() == event.ACTION_DOWN){
+//                    if(firstTouch && (System.currentTimeMillis() - time) <= 300) {
+//                        firstTouch = false;
+//                        count=2;
+//                        if(sentChatViewHolder.lubbIcon.getTag().equals(2)){
+//                            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+//                            sentChatViewHolder.lubbIcon.setTag(1);
+//                        }
+//                        else{
+//                            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+//                            sentChatViewHolder.lubbIcon.setTag(2);
+//                        }
+//                        return mDetector.onTouchEvent(event);
+//                    }
+//                    else {
+//                        firstTouch = true;
+//                        time = System.currentTimeMillis();
+//                    }
+//                }
+//                return
+//            }
+//        });
         Linkify.addLinks(sentChatViewHolder.messageTv, Linkify.ALL);
         if (chatData.getTagged() != null && !chatData.getTagged().isEmpty()) {
             Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
@@ -276,11 +377,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
         if (chatData.getLubbReceipts().containsKey(authorId)) {
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+            sentChatViewHolder.lubbIcon.setTag(1);
             if (position == chatDataList.size() - 1) {
                 // scroll to bottom if liked last msg to show that like icon and count
                 recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
             }
         } else {
+            sentChatViewHolder.lubbIcon.setTag(2);
             sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
         }
 
@@ -355,9 +458,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
-
-        handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null);
-        handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.playvidIv, sentChatViewHolder.vidThumbnailIv, chatData, null, position);
+        //recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+        handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.lubbIcon, sentChatViewHolder.chatIv, chatData, null);
+        handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.lubbIcon,sentChatViewHolder.playvidIv, sentChatViewHolder.vidThumbnailIv, chatData, null, position);
 
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
 
@@ -405,6 +508,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
@@ -451,6 +555,67 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }
         recvdChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+        i=0;
+        recvdChatViewHolder.messageTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                i++;
+                Handler handler = new Handler();
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        i = 0;
+                    }
+                };
+                if (i == 1) {
+                    //Single click
+                    handler.postDelayed(r, 250);
+                } else if (i == 2) {
+                    //Double click
+                    if(recvdChatViewHolder.lubbIcon.getTag().equals(2)){
+                        recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+                        recvdChatViewHolder.lubbIcon.setTag(1);
+                    }
+                    else{
+                        recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+                        recvdChatViewHolder.lubbIcon.setTag(2);
+                    }
+                }
+            }
+        });
+//        mDetector_recv = new GestureDetector(context, new SampleGestureListener(recvdChatViewHolder.lubbIcon));
+//        View.OnTouchListener touchListener = new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                return mDetector_recv.onTouchEvent(event);
+//            }
+//        };
+//        recvdChatViewHolder.messageTv.setOnTouchListener(touchListener);
+//        recvdChatViewHolder.messageTv.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                if(event.getAction() == event.ACTION_DOWN){
+//                    if(firstTouch && (System.currentTimeMillis() - time) <= 300) {
+//                        firstTouch = false;
+//                        count=2;
+//                        if(recvdChatViewHolder.lubbIcon.getTag().equals(2)){
+//                            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+//                            recvdChatViewHolder.lubbIcon.setTag(1);
+//                        }
+//                        else{
+//                            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
+//                            recvdChatViewHolder.lubbIcon.setTag(2);
+//                        }
+//                        return mDetector.onTouchEvent(event);
+//                    }
+//                    else {
+//                        firstTouch = true;
+//                        time = System.currentTimeMillis();
+//                    }
+//                }
+//                return false;
+//            }
+//        });
 
         Linkify.addLinks(recvdChatViewHolder.messageTv, Linkify.ALL);
 
@@ -475,11 +640,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
         if (chatData.getLubbReceipts().containsKey(authorId)) {
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+            recvdChatViewHolder.lubbIcon.setTag(1);
             if (position == chatDataList.size() - 1) {
                 // scroll to bottom if liked last msg to show that like icon and count
                 recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
             }
         } else {
+            recvdChatViewHolder.lubbIcon.setTag(2);
             recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
         }
         if (chatData.getType().equalsIgnoreCase(GROUP) && isValidString(chatData.getAttachedGroupId())) {
@@ -555,8 +722,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
 
-        handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
-        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid, recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv, position);
+        handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.lubbIcon, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
+        handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid, recvdChatViewHolder.lubbIcon, recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv, position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
@@ -1047,7 +1214,62 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv) {
+    public class SampleGestureListener extends GestureDetector.SimpleOnGestureListener{
+        ImageView lubbleicon;
+        Context context;
+        ChatData chatData;
+        ImageView imageView;
+        Boolean is_video=false;
+        Boolean is_image=false;
+        //for video
+        public SampleGestureListener(ImageView lubbicon, Context context, ChatData chatData){
+            this.lubbleicon = lubbicon;
+            this.context = context;
+            this.chatData = chatData;
+            this.is_video = true;
+        }
+        //for image
+        public SampleGestureListener(ImageView lubbicon, Context context, ChatData chatData, ImageView imageView){
+            this.lubbleicon = lubbicon;
+            this.context = context;
+            this.chatData = chatData;
+            this.imageView = imageView;
+            this.is_image = true;
+        }
+        //for message
+        public SampleGestureListener(ImageView lubbicon){
+            this.lubbleicon = lubbicon;
+        }
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            Log.e(TAG, "SINGLE CLICK EVENT");
+            if(is_video)
+                //FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
+                Log.d(TAG,chatData.getVidUrl());
+            if (is_image)
+                Log.d(TAG,chatData.getImgUrl());
+                //FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            Log.e(TAG, "DOUBLE CLICKED HAPPENED");
+            //actions.setText("THIS CLICK IS TO LIKE IMAGE OR VIDEO ?");
+            if(lubbleicon.getTag().equals(2)){
+                lubbleicon.setImageResource(R.drawable.ic_favorite_24dp);
+                lubbleicon.setTag(1);
+            }
+            else{
+                lubbleicon.setImageResource(R.drawable.ic_favorite_border_24dp);
+                lubbleicon.setTag(2);
+            }
+            return true;
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar,final ImageView lubbleicon, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv) {
         if (isValidString(chatData.getImgUrl())) {
             imageView.setOnClickListener(null);
             imgContainer.setVisibility(View.VISIBLE);
@@ -1071,14 +1293,90 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (savedPath != null) {
                     progressBar.setVisibility(View.GONE);
                     glide.load(savedPath).centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
+
+                    i=0;
                     imageView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            if (isValidString(chatData.getImgUrl())) {
-                                FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
+                            i++;
+                            Handler handler = new Handler();
+                            Runnable r = new Runnable() {
+                                @Override
+                                public void run() {
+                                    if(i==1)
+                                        FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
+                                    i = 0;
+                                }
+                            };
+                            if (i == 1) {
+                                //Single click
+                                handler.postDelayed(r, 250);
+                            } else if (i == 2) {
+                                //Double click
+                                if(lubbleicon.getTag().equals(2)){
+                                    lubbleicon.setImageResource(R.drawable.ic_favorite_24dp);
+                                    lubbleicon.setTag(1);
+                                }
+                                else{
+                                    lubbleicon.setImageResource(R.drawable.ic_favorite_border_24dp);
+                                    lubbleicon.setTag(2);
+                                }
                             }
                         }
                     });
+                    //                    View.OnTouchListener touchListener = new View.OnTouchListener() {
+//                        @Override
+//                        public boolean onTouch(View v, MotionEvent event) {
+//                            mDetector_img = new GestureDetector(context, new SampleGestureListener(lubbleicon,context,chatData,imageView));
+//                            return mDetector_img.onTouchEvent(event);
+//                        }
+//                    };
+//                    imageView.setOnTouchListener(touchListener);
+//                    imageView.setOnTouchListener(new View.OnTouchListener() {
+//                        @Override
+//                        public boolean onTouch(View v, MotionEvent event) {
+//                            if(event.getAction() == event.ACTION_DOWN){
+//                                if(firstTouch && (System.currentTimeMillis() - time) <= 300) {
+//                                    firstTouch = false;
+//                                    count=2;
+//                                    if(lubbleicon.getTag().equals(2)){
+//                                        lubbleicon.setImageResource(R.drawable.ic_favorite_24dp);
+//                                        lubbleicon.setTag(1);
+//                                    }
+//                                    else{
+//                                        lubbleicon.setImageResource(R.drawable.ic_favorite_border_24dp);
+//                                        lubbleicon.setTag(2);
+//                                    }
+//                                    return mDetector.onTouchEvent(event);
+//                                }
+//                                else {
+//                                    firstTouch = true;
+//                                    final Handler handler = new Handler();
+//                                    handler.postDelayed(new Runnable() {
+//                                        @Override
+//                                        public void run() {
+//                                            //Do something after 100ms
+//                                            if(count==1)
+//                                                if (isValidString(chatData.getImgUrl())) {
+//                                                   FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
+//                                           }
+//                                        }
+//                                    }, 300);
+//                                    count=1;
+//                                    time = System.currentTimeMillis();
+//                                }
+//                            }
+//                            return mDetector.onTouchEvent(event);
+//                        }
+//                    });
+//                    imageView.setOnClickListener(new View.OnClickListener() {
+//                        @Override
+//                        public void onClick(View v) {
+//                            if (isValidString(chatData.getImgUrl())) {
+//                                FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
+//                            }
+//                        }
+//                    });
                 } else {
                     downloadAndSavePic(progressBar, imageView, chatData);
                 }
@@ -1087,8 +1385,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             imgContainer.setVisibility(View.GONE);
         }
     }
-
-    private void handleVideo(FrameLayout vidContainer, final ProgressBar progressBar, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, int position) {
+    @SuppressLint("ClickableViewAccessibility")
+    private void handleVideo(FrameLayout vidContainer, final ProgressBar progressBar, final ImageView lubbleicon, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, int position) {
 
         if (isValidString(chatData.getVidUrl())) {
             progressBar.setVisibility(View.VISIBLE);
@@ -1124,24 +1422,122 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                        Log.d(TAG, "progress bar hidden");
                         progressBar.setVisibility(View.GONE);
                         return false;
                     }
                 })
                         .apply(requestOptions)
                         .into(imageView);
-                Log.d(TAG, "inside lst else");
+                i=0;
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (isValidString(chatData.getVidUrl())) {
-                            Log.d(TAG, "inside on click");
-                            FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
+                        i++;
+                        Handler handler = new Handler();
+                        Runnable r = new Runnable() {
+                            @Override
+                            public void run() {
+                                if(i==1)
+                                    FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
+                                i = 0;
+                            }
+                        };
+                        if (i == 1) {
+                            //Single click
+                            handler.postDelayed(r, 250);
+                            //FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
+                        } else if (i == 2) {
+                            //Double click
+                            if(lubbleicon.getTag().equals(2)){
+                                lubbleicon.setImageResource(R.drawable.ic_favorite_24dp);
+                                lubbleicon.setTag(1);
+                            }
+                            else{
+                                lubbleicon.setImageResource(R.drawable.ic_favorite_border_24dp);
+                                lubbleicon.setTag(2);
+                            }
                         }
                     }
                 });
-            }
+//                mDetector_vid = new GestureDetector(context, new SampleGestureListener(lubbleicon,context,chatData));
+//                View.OnTouchListener touchListener = new View.OnTouchListener() {
+//                    @Override
+//                    public boolean onTouch(View v, MotionEvent event) {
+//                       // mDetector_vid = new GestureDetector(context, new SampleGestureListener(lubbleicon,context,chatData));
+//                        return mDetector_vid.onTouchEvent(event);
+//                    }
+//                };
+//
+//                imageView.setOnTouchListener(touchListener);
+//                imageView.setOnTouchListener(new View.OnTouchListener() {
+//                    @Override
+//                    public boolean onTouch(View v, final MotionEvent event) {
+//                        if(event.getAction() == event.ACTION_DOWN){
+//                            if(firstTouch && (System.currentTimeMillis() - time) <= 300) {
+//                                firstTouch = false;
+//                                count=2;
+//                                if(lubbleicon.getTag().equals(2)){
+//                                    lubbleicon.setImageResource(R.drawable.ic_favorite_24dp);
+//                                    lubbleicon.setTag(1);
+//                                }
+//                                else{
+//                                    lubbleicon.setImageResource(R.drawable.ic_favorite_border_24dp);
+//                                    lubbleicon.setTag(2);
+//                                }
+//                                return mDetector.onTouchEvent(event);
+//                            }
+//                            else {
+//                                firstTouch = true;
+//                                final Handler handler = new Handler();
+//                                handler.postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        //Do something after 100ms
+//                                        if(count==1 && event.getAction()!=event.ACTION_DOWN)
+//                                            if (isValidString(chatData.getVidUrl())) {
+//                                                Log.d(TAG, "inside on single click");
+//                                                FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
+//                                            }
+//                                    }
+//                                }, 300);
+//                                count=1;
+//                                time = System.currentTimeMillis();
+//                            }
+//                        }
+//                        return mDetector.onTouchEvent(event);
+//                    }
+//                });
+                       // return super.onTouchEvent(event);
+//                        if(is_double_tap)
+//                        {
+//                            Log.d(TAG, "inside on double click"+lubbleicon.getTag());
+//                            if(lubbleicon.getTag().equals(2))
+//                                lubbleicon.setImageResource(R.drawable.ic_favorite_24dp);
+//                            else
+//                                lubbleicon.setImageResource(R.drawable.ic_favorite_border_24dp);
+//                        }
+//                        else if(is_Single_tap) {
+//                            if (isValidString(chatData.getVidUrl())) {
+//                                Log.d(TAG, "inside on single click");
+//                                FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
+//                            }
+//                        }
+//                        return mDetector.onTouchEvent(event);
+//                    }
+                }
+//                is_double_tap = false;
+//                is_Single_tap = false;
+//                Log.d(TAG,is_double_tap+" inside handle video");
+//                imageView.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        if (isValidString(chatData.getVidUrl())) {
+//                            Log.d(TAG, "inside on click");
+//                            FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
+//                        }
+//                    }
+//                });
+
         } else {
             vidContainer.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
@@ -1363,6 +1759,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView linkPicIv;
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
+        private LinearLayout container_chat;
         private FrameLayout imgContainer;
         private FrameLayout vidContainer;
         private ProgressBar progressBar_vid;
@@ -1394,6 +1791,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             authorNameTv = itemView.findViewById(R.id.tv_author);
             visibleToYouTv = itemView.findViewById(R.id.tv_msg_visible_to_you);
             replyBottomTv = itemView.findViewById(R.id.tv_reply_bottom);
+            container_chat = itemView.findViewById(R.id.container_chat);
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkPicIv = itemView.findViewById(R.id.iv_link_pic);
