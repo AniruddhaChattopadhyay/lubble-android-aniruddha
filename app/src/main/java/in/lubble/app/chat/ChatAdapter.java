@@ -206,7 +206,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void bindSentChatViewHolder(RecyclerView.ViewHolder holder, int position) {
+    private void bindSentChatViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
 
@@ -283,10 +283,17 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     if(sentChatViewHolder.lubbIcon.getTag().equals(2)){
                         sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
                         sentChatViewHolder.lubbIcon.setTag(1);
+                        toggleLubb(position);
                     }
                     else{
                         sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
                         sentChatViewHolder.lubbIcon.setTag(2);
+                        toggleLubb(position);
+                    }
+                    if (chatData.getLubbCount() == 0) {
+                        sentChatViewHolder.lubbCount.setText("");
+                    } else {
+                        sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
                     }
                 }
             }
@@ -395,7 +402,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
 
-        handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.lubbIcon, sentChatViewHolder.chatIv, chatData, null);
+        handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.lubbIcon, sentChatViewHolder.chatIv, chatData, null,position);
         handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.lubbIcon,sentChatViewHolder.playvidIv, sentChatViewHolder.vidThumbnailIv, chatData, null, position);
 
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
@@ -511,10 +518,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     if(recvdChatViewHolder.lubbIcon.getTag().equals(2)){
                         recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
                         recvdChatViewHolder.lubbIcon.setTag(1);
+                        toggleLubb(position);
                     }
                     else{
                         recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_24dp);
                         recvdChatViewHolder.lubbIcon.setTag(2);
+                        toggleLubb(position);
                     }
                 }
             }
@@ -624,7 +633,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
         }
 
-        handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.lubbIcon, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
+        handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.lubbIcon, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv, position);
         handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid, recvdChatViewHolder.lubbIcon, recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv, position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
@@ -1117,7 +1126,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar,final ImageView lubbleicon, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv) {
+    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar,final ImageView lubbleicon, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv,final int position) {
         if (isValidString(chatData.getImgUrl())) {
             imageView.setOnClickListener(null);
             imgContainer.setVisibility(View.VISIBLE);
@@ -1164,10 +1173,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                 if(lubbleicon.getTag().equals(2)){
                                     lubbleicon.setImageResource(R.drawable.ic_favorite_24dp);
                                     lubbleicon.setTag(1);
+                                    toggleLubb(position);
                                 }
                                 else{
                                     lubbleicon.setImageResource(R.drawable.ic_favorite_border_24dp);
                                     lubbleicon.setTag(2);
+                                    toggleLubb(position);
                                 }
                             }
                         }
@@ -1181,7 +1192,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
     @SuppressLint("ClickableViewAccessibility")
-    private void handleVideo(FrameLayout vidContainer, final ProgressBar progressBar, final ImageView lubbleicon, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, int position) {
+    private void handleVideo(FrameLayout vidContainer, final ProgressBar progressBar, final ImageView lubbleicon, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, final int position) {
 
         if (isValidString(chatData.getVidUrl())) {
             progressBar.setVisibility(View.VISIBLE);
@@ -1246,10 +1257,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             if(lubbleicon.getTag().equals(2)){
                                 lubbleicon.setImageResource(R.drawable.ic_favorite_24dp);
                                 lubbleicon.setTag(1);
+                                toggleLubb(position);
                             }
                             else{
                                 lubbleicon.setImageResource(R.drawable.ic_favorite_border_24dp);
                                 lubbleicon.setTag(2);
+                                toggleLubb(position);
                             }
                         }
                     }
