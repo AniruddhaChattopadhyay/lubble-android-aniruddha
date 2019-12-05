@@ -268,7 +268,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                             }
                         }
                     }
-                    adapter.addGroupToTop(groupData);
+                    adapter.addGroupWithSortFromBottom(groupData);
                 }
             }
         }

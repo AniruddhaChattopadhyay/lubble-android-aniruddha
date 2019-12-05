@@ -1,6 +1,7 @@
 package in.lubble.app.groups;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +22,9 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
-import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.UiUtils;
 
+import static in.lubble.app.utils.DateTimeUtils.getHumanTimestamp;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -33,6 +34,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int TYPE_HEADER = 600;
     private int publicCursorPos = 0;
     private int cursorPos = 0;
+    private int dmCursorPos = 0;
     private final List<GroupData> groupDataList;
     // <GroupID, UserGroupData>
     private final HashMap<String, UserGroupData> userGroupDataMap;
@@ -161,9 +163,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             // joined or unjoined groups
             timestampTv.setVisibility(View.VISIBLE);
             if (groupData.getJoinedTimestamp() > groupData.getLastMessageTimestamp()) {
-                timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getJoinedTimestamp()));
+                timestampTv.setText(getHumanTimestamp(groupData.getJoinedTimestamp()));
             } else {
-                timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getLastMessageTimestamp()));
+                timestampTv.setText(getHumanTimestamp(groupData.getLastMessageTimestamp()));
             }
             if (!groupData.isJoined()) {
                 // align time with "view" btn
@@ -180,6 +182,29 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             groupDataList.add(newIndex, groupData);
             notifyItemInserted(newIndex);
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
+            publicCursorPos++;
+            dmCursorPos = publicCursorPos - 1;
+        } else {
+            updateGroup(groupData);
+        }
+    }
+
+    private static final String TAG = "GroupRecyclerAdapter";
+
+    public void addGroupWithSortFromBottom(GroupData groupData) {
+        if (getChildIndex(groupData.getId()) == -1) {
+
+            GroupData oldGroup = groupDataList.get(dmCursorPos);
+
+            while (groupData.getRelevantTimestamp() > oldGroup.getRelevantTimestamp() && dmCursorPos > 0) {
+                Log.d(TAG, "addGroupWithSortFromBottom: " + getHumanTimestamp(groupData.getRelevantTimestamp()) + " old: " + getHumanTimestamp(oldGroup.getRelevantTimestamp()));
+                dmCursorPos--;
+                oldGroup = groupDataList.get(dmCursorPos);
+            }
+
+            dmCursorPos = dmCursorPos < 1 ? 1 : dmCursorPos + 1; //ensure no negative index; 1 due to pinned group
+            groupDataList.add(dmCursorPos, groupData);
+            notifyItemInserted(dmCursorPos);
             publicCursorPos++;
         } else {
             updateGroup(groupData);

@@ -127,6 +127,15 @@ public class GroupData {
     }
 
     @Exclude
+    public long getRelevantTimestamp() {
+        if (this.getJoinedTimestamp() > this.getLastMessageTimestamp()) {
+            return this.getJoinedTimestamp();
+        } else {
+            return this.getLastMessageTimestamp();
+        }
+    }
+
+    @Exclude
     @Nullable
     public Set<String> getInvitedBy() {
         return invitedBy;
@@ -155,11 +164,11 @@ public class GroupData {
         }
     }
 
-    public boolean getIsDm(){
+    public boolean getIsDm() {
         return isDm;
     }
 
-    public void setIsDm(boolean isDm){
+    public void setIsDm(boolean isDm) {
         this.isDm = isDm;
     }
 
