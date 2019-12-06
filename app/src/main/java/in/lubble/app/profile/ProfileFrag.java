@@ -96,6 +96,7 @@ public class ProfileFrag extends Fragment {
     private ProgressBar progressBar;
     private CardView referralCard;
     private DatabaseReference userRef;
+    private DatabaseReference dmRef;
     private ValueEventListener valueEventListener;
     @Nullable
     private ProfileData profileData;
@@ -238,7 +239,7 @@ public class ProfileFrag extends Fragment {
         msgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ChatActivity.openForEmptyDm(requireContext(), userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail(), "");
+                DmIntroBottomSheet.newInstance(userId).show(getChildFragmentManager(), null);
             }
         });
 
@@ -250,7 +251,32 @@ public class ProfileFrag extends Fragment {
         super.onStart();
         userRef = getUserRef(userId);
         fetchProfileFeed();
+        syncDms();
     }
+
+    private void syncDms() {
+        dmRef = RealtimeDbHelper.getUserDmsRef(userId);
+        dmRef.orderByChild("profileId").equalTo(FirebaseAuth.getInstance().getUid()).addValueEventListener(dmValueEventListener);
+    }
+
+    private ValueEventListener dmValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+            if (dataSnapshot.getChildrenCount() > 0) {
+                msgBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ChatActivity.openForDm(requireContext(), dataSnapshot.getChildren().iterator().next().getKey(), null, null);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
 
     private void syncGroups() {
         RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {

@@ -866,7 +866,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 RealtimeDbHelper.getSellerDmsRef().child(dmId)
                         .child("unreadCount").setValue(0);
             } else {
-                RealtimeDbHelper.getUserDmsRef().child(dmId)
+                RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid()).child(dmId)
                         .child("unreadCount").setValue(0);
             }
         }

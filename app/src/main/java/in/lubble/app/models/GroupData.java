@@ -83,7 +83,7 @@ public class GroupData {
     @Exclude
     public boolean isJoined() {
         // is a DM if member size is 0
-        return getMembers().size() == 0 || getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
+        return getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
     }
 
     public boolean getIsPrivate() {

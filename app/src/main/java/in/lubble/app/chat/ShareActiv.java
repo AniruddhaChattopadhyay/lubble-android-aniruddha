@@ -184,7 +184,7 @@ public class ShareActiv extends BaseActivity {
     }
 
     private void syncUserDmIds() {
-        getUserDmsRef().addListenerForSingleValueEvent(new ValueEventListener() {
+        getUserDmsRef(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
