@@ -257,6 +257,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                                         groupData.setTitle(profileInfo.getName());
                                         groupData.setThumbnail(profileInfo.getThumbnail());
                                         groupData.setIsDm(true);
+                                        groupData.setIsPrivate(true);
                                         adapter.updateGroup(groupData);
                                     }
 
@@ -289,6 +290,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                                     groupData.setTitle(profileInfo.getName());
                                     groupData.setThumbnail(profileInfo.getThumbnail());
                                     groupData.setIsDm(true);
+                                    groupData.setIsPrivate(true);
                                     adapter.updateGroup(groupData);
                                 }
 
