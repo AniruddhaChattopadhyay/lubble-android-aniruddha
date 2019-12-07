@@ -247,6 +247,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())) {
                     // joined chat
                     groupData.setId(dataSnapshot.getKey());
+                    groupData.setIsDm(true);
+                    groupData.setIsPrivate(true);
                     if (TextUtils.isEmpty(groupData.getTitle())) {
                         for (String key : groupData.getMembers().keySet()) {
                             if (!key.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {

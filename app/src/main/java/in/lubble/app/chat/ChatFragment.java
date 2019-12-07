@@ -648,6 +648,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             deleteUnreadMsgsForGroupId(dmId, getContext());
             AppNotifUtils.deleteAppNotif(getContext(), dmId);
             dmEventListener = dmInfoReference.addValueEventListener(new ValueEventListener() {
+                boolean isThisUserJoined = false;
+                boolean isOtherUserJoined = false;
+
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     final DmData dmData = dataSnapshot.getValue(DmData.class);
@@ -665,6 +668,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     authorId = profileId;
                                     chatAdapter.setAuthorId(authorId);
                                     chatAdapter.setDmId(dmId);
+
+                                    isThisUserJoined = profileMap.get("joinedTimestamp") != null;
+
                                     if (sharedImageUri != null) {
                                         String chatId = groupId;
                                         if (!TextUtils.isEmpty(dmId)) {
@@ -679,16 +685,38 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
                                     final boolean isSeller = false;
+
+                                    isOtherUserJoined = profileMap.get("joinedTimestamp") != null;
+
                                     if (isSeller) {
                                         fetchSellerProfileFrom(profileId);
                                     } else {
                                         fetchProfileFrom(profileId);
                                     }
                                 }
-                                bottomContainer.setVisibility(View.VISIBLE);
-                                composeContainer.setVisibility(View.VISIBLE);
-                                joinContainer.setVisibility(View.GONE);
                             }
+                        }
+                        if (isThisUserJoined && isOtherUserJoined) {
+                            bottomContainer.setVisibility(View.VISIBLE);
+                            composeContainer.setVisibility(View.VISIBLE);
+                            joinContainer.setVisibility(View.GONE);
+                        } else if (!isThisUserJoined) {
+                            bottomContainer.setVisibility(View.VISIBLE);
+                            composeContainer.setVisibility(View.GONE);
+                            joinContainer.setVisibility(View.VISIBLE);
+                            joinDescTv.setText("They want to message you");
+                            joinBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dmInfoReference.child("members").child(authorId).child("joinedTimestamp").setValue(ServerValue.TIMESTAMP);
+                                }
+                            });
+                        } else {
+                            bottomContainer.setVisibility(View.VISIBLE);
+                            composeContainer.setVisibility(View.GONE);
+                            joinDescTv.setText("Your invitation is still pending");
+                            joinBtn.setVisibility(View.GONE);
+                            joinContainer.setVisibility(View.VISIBLE);
                         }
                         resetUnreadCount();
                     } else {
@@ -706,6 +734,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 if (profileInfo != null) {
                                     profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
                                     ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
+                                    if (!isThisUserJoined) {
+                                        joinDescTv.setText(profileInfo.getName() + " wants to message you");
+                                    }
                                 }
                             }
                         }

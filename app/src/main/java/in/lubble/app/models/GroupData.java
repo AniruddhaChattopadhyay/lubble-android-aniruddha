@@ -156,8 +156,7 @@ public class GroupData {
 
     @Exclude
     public long getJoinedTimestamp() {
-        if (isJoined() && getMembers().size() > 0) {
-            // is a DM if member size is 0
+        if (isJoined() && !this.isDm) {
             return (Long) ((HashMap) getMembers().get(FirebaseAuth.getInstance().getUid())).get("joinedTimestamp");
         } else {
             return 0;

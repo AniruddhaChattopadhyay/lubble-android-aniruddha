@@ -81,7 +81,6 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
 
         final HashMap<String, Object> userMap = new HashMap<>();
         final HashMap<Object, Object> map2 = new HashMap<>();
-        map2.put("joinedTimestamp", System.currentTimeMillis());
         map2.put("isSeller", false);
         map2.put("otherUser", authorId);
         userMap.put(receiverUid, map2);
