@@ -95,7 +95,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         intent.putExtra(EXTRA_MSG_ID, msgId);
         intent.putExtra(EXTRA_CHAT_DATA, chatData);
         intent.putExtra(EXTRA_IMG_URI_DATA, imgUri);
-        Log.d("mime type chat","&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&"+imgUri);
+        Log.d("mime type chat", "&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&" + imgUri);
         context.startActivity(intent);
     }
 
@@ -154,6 +154,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         final boolean isJoining = getIntent().getBooleanExtra(EXTRA_IS_JOINING, false);
         dmId = getIntent().getStringExtra(EXTRA_DM_ID);
 
+        if (!TextUtils.isEmpty(dmId)) {
+            tabLayout.setVisibility(View.GONE);
+        } else {
+            tabLayout.setVisibility(View.VISIBLE);
+        }
         toolbarInviteHint.setText(getString(R.string.click_group_info));
 
         ChatViewPagerAdapter adapter = new ChatViewPagerAdapter(getSupportFragmentManager(), msgId, isJoining);
@@ -319,7 +324,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
         @Override
         public int getCount() {
-            return title.length;
+            return dmId == null ? title.length : 1;
         }
 
         @Override
