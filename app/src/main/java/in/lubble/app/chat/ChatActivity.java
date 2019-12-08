@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -25,10 +26,13 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
 
@@ -43,6 +47,7 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
@@ -155,11 +160,15 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         dmId = getIntent().getStringExtra(EXTRA_DM_ID);
 
         if (!TextUtils.isEmpty(dmId)) {
+            // for DMs
             tabLayout.setVisibility(View.GONE);
+            inviteContainer.setVisibility(View.GONE);
+            toolbarInviteHint.setText("Personal Chat");
         } else {
             tabLayout.setVisibility(View.VISIBLE);
+            inviteContainer.setVisibility(View.VISIBLE);
+            toolbarInviteHint.setText(getString(R.string.click_group_info));
         }
-        toolbarInviteHint.setText(getString(R.string.click_group_info));
 
         ChatViewPagerAdapter adapter = new ChatViewPagerAdapter(getSupportFragmentManager(), msgId, isJoining);
         viewPager.setAdapter(adapter);
@@ -360,6 +369,43 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         }
     }
 
+    private void blockAccount() {
+        String title = "Block this person?";
+        if (!TextUtils.isEmpty(groupData.getTitle())) {
+            title = "Block " + groupData.getTitle() + "?";
+        }
+        UiUtils.showBottomSheetAlertLight(ChatActivity.this, getLayoutInflater(), title,
+                "They will no longer be able to message you. You can unblock anytime from the navigation.",
+                R.drawable.ic_block_black_24dp, "BLOCK", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        targetFrag.setBlockedStatus("BLOCKED");
+                        finish();
+                    }
+                });
+    }
+
+    private void reportAccount() {
+        String title = "Report this person to Lubble?";
+        if (!TextUtils.isEmpty(groupData.getTitle())) {
+            title = "Report " + groupData.getTitle() + " to Lubble?";
+        }
+        UiUtils.showBottomSheetAlertLight(ChatActivity.this, getLayoutInflater(), title,
+                "We will investigate their profile for spam, abusive, or inappropriate behaviour & take necessary action.\nThis will also block them.",
+                R.drawable.ic_error_outline_black_24dp, "REPORT", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        targetFrag.setBlockedStatus("REPORTED");
+                        // push DM id to firebase, which triggers an email for the report
+                        DatabaseReference pushRef = FirebaseDatabase.getInstance().getReference("dm_reports").push();
+                        final HashMap<Object, Object> map = new HashMap<>();
+                        map.put("dm_id", dmId);
+                        pushRef.setValue(map);
+                        finish();
+                    }
+                });
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -389,11 +435,23 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.chat_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             // Respond to the action bar's Up/Home button
             case android.R.id.home:
                 onBackPressed();
+                return true;
+            case R.id.block:
+                blockAccount();
+                return true;
+            case R.id.report:
+                reportAccount();
                 return true;
         }
         return super.onOptionsItemSelected(item);

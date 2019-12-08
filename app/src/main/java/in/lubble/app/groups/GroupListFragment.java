@@ -244,7 +244,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
             if (groupData != null) {
-                if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())) {
+                if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())
+                        && groupData.getMembers().get("blocked_status") == null) {
                     // joined chat
                     groupData.setId(dataSnapshot.getKey());
                     groupData.setIsDm(true);
@@ -279,7 +280,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         @Override
         public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-            if (groupData != null && groupData.isJoined()) {
+            if (groupData != null && groupData.isJoined()
+                    && groupData.getMembers().get("blocked_status") == null) {
                 groupData.setId(dataSnapshot.getKey());
                 groupData.setIsDm(true);
                 if (TextUtils.isEmpty(groupData.getTitle())) {
@@ -317,7 +319,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         @Override
         public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String prevKey) {
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-            if (groupData != null && groupData.isJoined()) {
+            if (groupData != null && groupData.isJoined() && groupData.getMembers().get("blocked_status") == null) {
                 groupData.setId(dataSnapshot.getKey());
                 adapter.updateGroupPos(groupData);
             }

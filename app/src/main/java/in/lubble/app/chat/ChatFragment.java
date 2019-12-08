@@ -84,6 +84,7 @@ import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FileUtils;
+import in.lubble.app.utils.UiUtils;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -711,11 +712,25 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     dmInfoReference.child("members").child(authorId).child("joinedTimestamp").setValue(ServerValue.TIMESTAMP);
                                 }
                             });
+                            declineIv.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    UiUtils.showBottomSheetAlertLight(requireContext(), getLayoutInflater(), "Decline this personal chat invitation? It will be deleted forever",
+                                            null, R.drawable.ic_cancel_red_24dp, "DECLINE", new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    dmInfoReference.child("members").child(authorId).child("blocked_status").setValue("declined");
+                                                    getActivity().finish();
+                                                }
+                                            });
+                                }
+                            });
                         } else {
                             bottomContainer.setVisibility(View.VISIBLE);
                             composeContainer.setVisibility(View.GONE);
                             joinDescTv.setText("Your invitation is still pending");
                             joinBtn.setVisibility(View.GONE);
+                            declineIv.setVisibility(View.GONE);
                             joinContainer.setVisibility(View.VISIBLE);
                         }
                         resetUnreadCount();
@@ -778,6 +793,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             composeContainer.setVisibility(View.VISIBLE);
             joinContainer.setVisibility(View.GONE);
         }
+    }
+
+    void setBlockedStatus(String status) {
+        dmInfoReference.child("members").child(authorId).child("blocked_status").setValue(status);
     }
 
     private void fetchMembersProfile(HashMap<String, Object> membersMap) {
