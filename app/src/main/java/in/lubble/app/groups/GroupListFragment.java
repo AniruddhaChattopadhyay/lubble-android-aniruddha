@@ -245,7 +245,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
             if (groupData != null) {
                 if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())
-                        && groupData.getMembers().get("blocked_status") == null) {
+                        && ((HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid())).get("blocked_status") == null) {
                     // joined chat
                     groupData.setId(dataSnapshot.getKey());
                     groupData.setIsDm(true);

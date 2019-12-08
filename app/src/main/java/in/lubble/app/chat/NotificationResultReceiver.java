@@ -116,7 +116,7 @@ public class NotificationResultReceiver extends BroadcastReceiver {
     }
 
     private void pullNewDmMsgs(NotifData notifData) {
-        RealtimeDbHelper.getDmMessagesRef().child(notifData.getGroupId()).keepSynced(true);
+        RealtimeDbHelper.getDmMessagesRef().child(notifData.getGroupId()).orderByChild("serverTimestamp").keepSynced(true);
     }
 
 }

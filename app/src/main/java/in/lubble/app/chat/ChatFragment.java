@@ -104,6 +104,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.EVENT;
 import static in.lubble.app.models.ChatData.GROUP;
+import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.models.ChatData.REPLY;
 import static in.lubble.app.models.ChatData.SYSTEM;
@@ -212,6 +213,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private Uri sharedImageUri;
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
+    private boolean isDmBlocked;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -688,6 +690,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     final boolean isSeller = false;
 
                                     isOtherUserJoined = profileMap.get("joinedTimestamp") != null;
+                                    isDmBlocked = profileMap.get("blocked_status") != null;
 
                                     if (isSeller) {
                                         fetchSellerProfileFrom(profileId);
@@ -719,7 +722,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                             null, R.drawable.ic_cancel_red_24dp, "DECLINE", new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View v) {
-                                                    dmInfoReference.child("members").child(authorId).child("blocked_status").setValue("declined");
+                                                    setBlockedStatus("declined");
                                                     getActivity().finish();
                                                 }
                                             });
@@ -797,6 +800,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     void setBlockedStatus(String status) {
         dmInfoReference.child("members").child(authorId).child("blocked_status").setValue(status);
+        dmInfoReference.child("members").child(authorId).child("blocked_timestamp").setValue(System.currentTimeMillis());
     }
 
     private void fetchMembersProfile(HashMap<String, Object> membersMap) {
@@ -1179,6 +1183,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
                     }
                 } else if (!TextUtils.isEmpty(dmId)) {
+                    if(isDmBlocked) {
+                        chatData.setSendNotif(false);
+                        chatData.setType(HIDDEN);
+                    }
                     messagesReference.push().setValue(chatData);
                 }
                 newMessageEt.setText("");
