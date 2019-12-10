@@ -653,6 +653,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             dmEventListener = dmInfoReference.addValueEventListener(new ValueEventListener() {
                 boolean isThisUserJoined = false;
                 boolean isOtherUserJoined = false;
+                boolean isBlockedByCurrUser = false;
 
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -673,6 +674,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     chatAdapter.setDmId(dmId);
 
                                     isThisUserJoined = profileMap.get("joinedTimestamp") != null;
+                                    isBlockedByCurrUser = profileMap.get("blocked_status") != null;
 
                                     if (sharedImageUri != null) {
                                         String chatId = groupId;
@@ -700,7 +702,21 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 }
                             }
                         }
-                        if (isThisUserJoined && isOtherUserJoined) {
+                        if (isBlockedByCurrUser) {
+                            bottomContainer.setVisibility(View.VISIBLE);
+                            composeContainer.setVisibility(View.GONE);
+                            joinContainer.setVisibility(View.VISIBLE);
+                            joinDescTv.setText("Unblock to message them");
+                            joinBtn.setText("unblock");
+                            joinBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dmInfoReference.child("members").child(authorId).child("blocked_status").removeValue();
+                                    dmInfoReference.child("members").child(authorId).child("blocked_timestamp").removeValue();
+                                }
+                            });
+                            declineIv.setVisibility(View.GONE);
+                        } else if (isThisUserJoined && isOtherUserJoined) {
                             bottomContainer.setVisibility(View.VISIBLE);
                             composeContainer.setVisibility(View.VISIBLE);
                             joinContainer.setVisibility(View.GONE);
@@ -1183,7 +1199,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
                     }
                 } else if (!TextUtils.isEmpty(dmId)) {
-                    if(isDmBlocked) {
+                    if (isDmBlocked) {
                         chatData.setSendNotif(false);
                         chatData.setType(HIDDEN);
                     }

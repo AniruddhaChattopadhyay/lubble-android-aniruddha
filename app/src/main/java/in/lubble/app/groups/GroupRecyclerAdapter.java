@@ -74,10 +74,17 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             final GroupData groupData = groupDataList.get(position);
             groupViewHolder.groupData = groupData;
 
+            int placeholderThumbnail;
+            if (groupData.getIsDm()) {
+                placeholderThumbnail = R.drawable.ic_account_circle_black_no_padding;
+            } else {
+                placeholderThumbnail = R.drawable.ic_circle_group_24dp;
+            }
+
             GlideApp.with(groupViewHolder.mView)
                     .load(groupData.getThumbnail())
-                    .placeholder(R.drawable.ic_circle_group_24dp)
-                    .error(R.drawable.ic_circle_group_24dp)
+                    .placeholder(placeholderThumbnail)
+                    .error(placeholderThumbnail)
                     .circleCrop()
                     .into(groupViewHolder.iconIv);
 

@@ -321,6 +321,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
             if (groupData != null && groupData.isJoined() && groupData.getMembers().get("blocked_status") == null) {
                 groupData.setId(dataSnapshot.getKey());
+                groupData.setIsDm(true);
+                groupData.setIsPrivate(true);
                 adapter.updateGroupPos(groupData);
             }
         }
