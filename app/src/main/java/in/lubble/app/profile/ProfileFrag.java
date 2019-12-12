@@ -105,12 +105,12 @@ public class ProfileFrag extends Fragment {
     private GroupsAdapter groupsAdapter;
     private ConstraintLayout statsContainer;
 
-    ImageView genderIv;
-    TextView genderTv;
-    ImageView businessIv;
-    TextView businessTv;
-    ImageView educationIv;
-    TextView educationTv;
+    private ImageView genderIv;
+    private TextView genderTv;
+    private ImageView businessIv;
+    private TextView businessTv;
+    private ImageView educationIv;
+    private TextView educationTv;
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -172,6 +172,7 @@ public class ProfileFrag extends Fragment {
         generateBranchUrl(getContext(), linkCreateListener);
         if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
             coinsContainer.setVisibility(View.VISIBLE);
+            msgBtn.setVisibility(View.GONE);
         }
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
