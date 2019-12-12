@@ -1259,7 +1259,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void showAttachmentBottomSheet() {
-        AttachmentListDialogFrag.newInstance().show(getChildFragmentManager(), null);
+        AttachmentListDialogFrag.newInstance(dmId != null).show(getChildFragmentManager(), null);
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -1403,7 +1403,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 startCameraIntent();
                 break;
             case 1:
-                NewPollActiv.open(getContext(), groupId);
+                if (dmId == null) {
+                    NewPollActiv.open(getContext(), groupId);
+                } else {
+                    Toast.makeText(requireContext(), "Not available in personal chats", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case 2:
                 startGalleryPicker();

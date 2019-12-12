@@ -7,24 +7,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import in.lubble.app.R;
-import in.lubble.app.models.AttachmentData;
 
 import java.util.ArrayList;
+
+import in.lubble.app.R;
+import in.lubble.app.models.AttachmentData;
 
 public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
 
     private static final int ITEM_COUNT = 3;
     private AttachmentClickListener mListener;
 
-    public static AttachmentListDialogFrag newInstance() {
+    private static final String IS_DM = "isDM";
+    private boolean isDm;
+
+    public static AttachmentListDialogFrag newInstance(boolean isDm) {
         final AttachmentListDialogFrag fragment = new AttachmentListDialogFrag();
         final Bundle args = new Bundle();
+        args.putBoolean(IS_DM, isDm);
         fragment.setArguments(args);
         return fragment;
     }
@@ -34,6 +41,7 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_attachment_list_dialog, container, false);
+        isDm = getArguments().getBoolean(IS_DM);
         return view;
     }
 
@@ -53,7 +61,7 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
         list.add(attachmentData);
         attachmentData = new AttachmentData();
         attachmentData.setIcon(R.drawable.ic_poll);
-        attachmentData.setColor(R.color.link_blue);
+        attachmentData.setColor(isDm ? R.color.lt_blue : R.color.link_blue);
         attachmentData.setText("Poll");
         list.add(attachmentData);
         attachmentData = new AttachmentData();
