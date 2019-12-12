@@ -354,7 +354,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         groupData.setTitle(title);
         groupData.setThumbnail(thumbnailUrl);
 
-        if (memberCount > 10) {
+        if (dmId != null) {
+            toolbarInviteHint.setText(getString(R.string.personal_chat));
+        } else if (memberCount > 10) {
             toolbarInviteHint.setText(String.format(getString(R.string.members_count), memberCount));
         } else {
             toolbarInviteHint.setText(getString(R.string.click_group_info));

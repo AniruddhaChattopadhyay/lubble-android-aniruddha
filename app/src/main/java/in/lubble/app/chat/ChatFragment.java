@@ -80,6 +80,7 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
+import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
@@ -214,6 +215,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
     private boolean isDmBlocked;
+    @Nullable
+    private String dmOtherUserId;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -687,6 +690,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 }
                             } else {
                                 // other person's profile ID, could be a seller or a user
+                                dmOtherUserId = profileId;
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
                                     final boolean isSeller = false;
@@ -1715,6 +1719,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public void openGroupInfo() {
         if (groupData != null && (groupData.isJoined() || !groupData.getIsPrivate())) {
             ScrollingGroupInfoActivity.open(getContext(), groupId);
+        } else if (dmOtherUserId != null) {
+            ProfileActivity.open(requireContext(), dmOtherUserId);
         }
     }
 
