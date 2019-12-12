@@ -46,6 +46,7 @@ import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -56,14 +57,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_DP_URL;
-import static in.lubble.app.chat.ChatActivity.EXTRA_RECEIVER_NAME;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
@@ -83,10 +83,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private Handler handler = new Handler();
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
     private int totalUnreadCount = 0;
-    private Query query;
+    private Query query, dmQuery;
     private ChildEventListener childEventListener;
     private ChildEventListener userGroupsListener;
-    ;
+    private ChildEventListener userDmsListener;
 
     public GroupListFragment() {
     }
@@ -173,6 +173,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void syncAllGroups() {
         query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
+        dmQuery = RealtimeDbHelper.getDmsRef().orderByChild("lastMessageTimestamp");
         childEventListener = new ChildEventListener() {
 
             @Override
@@ -218,6 +219,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             }
         };
         query.addChildEventListener(childEventListener);
+        dmQuery.addChildEventListener(dmChildEventListener);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -237,6 +239,101 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             }
         });
     }
+
+    private ChildEventListener dmChildEventListener = new ChildEventListener() {
+
+        @Override
+        public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
+            final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+            if (groupData != null) {
+                if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())
+                        && ((HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid())).get("blocked_status") == null) {
+                    // joined chat
+                    groupData.setId(dataSnapshot.getKey());
+                    groupData.setIsDm(true);
+                    groupData.setIsPrivate(true);
+                    if (TextUtils.isEmpty(groupData.getTitle())) {
+                        for (String key : groupData.getMembers().keySet()) {
+                            if (!key.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                                getUserInfoRef(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                        groupData.setTitle(profileInfo.getName());
+                                        groupData.setThumbnail(profileInfo.getThumbnail());
+                                        groupData.setIsDm(true);
+                                        groupData.setIsPrivate(true);
+                                        adapter.updateGroup(groupData);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    adapter.addGroupWithSortFromBottom(groupData);
+                }
+            }
+        }
+
+        @Override
+        public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+            if (groupData != null && groupData.isJoined()
+                    && groupData.getMembers().get("blocked_status") == null) {
+                groupData.setId(dataSnapshot.getKey());
+                groupData.setIsDm(true);
+                if (TextUtils.isEmpty(groupData.getTitle())) {
+                    for (String key : groupData.getMembers().keySet()) {
+                        if (!key.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                            getUserInfoRef(key).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                    groupData.setTitle(profileInfo.getName());
+                                    groupData.setThumbnail(profileInfo.getThumbnail());
+                                    groupData.setIsDm(true);
+                                    groupData.setIsPrivate(true);
+                                    adapter.updateGroup(groupData);
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    }
+                }
+                adapter.updateGroup(groupData);
+            }
+        }
+
+        @Override
+        public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+            adapter.removeGroup(dataSnapshot.getKey());
+
+        }
+
+        @Override
+        public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String prevKey) {
+            final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+            if (groupData != null && groupData.isJoined() && groupData.getMembers().get("blocked_status") == null) {
+                groupData.setId(dataSnapshot.getKey());
+                groupData.setIsDm(true);
+                groupData.setIsPrivate(true);
+                adapter.updateGroupPos(groupData);
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
 
     private void syncUserGroup() {
         userGroupsListener = getUserGroupsRef().addChildEventListener(new ChildEventListener() {
@@ -261,6 +358,45 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
                         totalUnreadCount++;
                     }
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+        userDmsListener = getUserDmsRef(FirebaseAuth.getInstance().getUid()).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                if (userGroupData != null) {
+                    adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                    totalUnreadCount += userGroupData.getUnreadCount();
+                    if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
+                        groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
+                        syncInvitedGroups(dataSnapshot.getKey());
+                    }
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                if (userGroupData != null) {
+                        adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                        totalUnreadCount++;
                 }
             }
 
@@ -430,8 +566,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (childEventListener != null) {
             query.removeEventListener(childEventListener);
         }
+        if (dmChildEventListener != null) {
+            dmQuery.removeEventListener(dmChildEventListener);
+        }
         if (userGroupsListener != null) {
             getUserGroupsRef().removeEventListener(userGroupsListener);
+        }
+        if (userDmsListener != null) {
+            getUserDmsRef(FirebaseAuth.getInstance().getUid()).removeEventListener(userDmsListener);
         }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
@@ -454,10 +596,11 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     @Override
     public void onDmClick(String dmId, String name, String thumbnailUrl) {
-        final Intent intent = new Intent(getContext(), ChatActivity.class);
-        intent.putExtra(EXTRA_DM_ID, dmId);
-        intent.putExtra(EXTRA_RECEIVER_NAME, name);
-        intent.putExtra(EXTRA_RECEIVER_DP_URL, thumbnailUrl);
-        startActivity(intent);
+        //final Intent intent = new Intent(getContext(), ChatActivity.class);
+        //intent.putExtra(EXTRA_DM_ID, dmId);
+        //intent.putExtra(EXTRA_RECEIVER_NAME, name);
+        //intent.putExtra(EXTRA_RECEIVER_DP_URL, thumbnailUrl);
+        //startActivity(intent);
+        ChatActivity.openForDm(requireContext(), dmId, null, "");
     }
 }

@@ -13,16 +13,25 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.RemoteInput;
 import androidx.core.app.TaskStackBuilder;
 import androidx.core.content.ContextCompat;
+
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
@@ -35,11 +44,11 @@ import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.NotifActionBroadcastRecvr;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 
-import java.util.*;
-
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.notifications.NotifActionBroadcastRecvr.*;
+import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_MARK_AS_READ;
+import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_REPLY;
+import static in.lubble.app.notifications.NotifActionBroadcastRecvr.KEY_TEXT_REPLY;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 
 /**
@@ -60,7 +69,7 @@ public class NotifUtils {
         ArrayList<NotifData> msgList = getAllMsgs();
         if (!msgList.isEmpty()) {
             sortListByTime(msgList);
-            sendAllNotifs(context, msgList);
+            sendAllNotifs(context, msgList, false);
         }
     }
 
@@ -71,7 +80,11 @@ public class NotifUtils {
         ArrayList<NotifData> msgList = getAllMsgs();
         sortListByTime(msgList);
         Log.d(TAG, "read notif count: " + msgList.size());
-        //sendAllNotifs(context, msgList);
+        if (notifData.getNotifType().equalsIgnoreCase("dm")) {
+            //todo notif titles are missing from group notifs
+            // group notifs must not be sent, send only dm notifs
+            sendAllNotifs(context, msgList, true);
+        }
 
     }
 
@@ -85,14 +98,16 @@ public class NotifUtils {
         });
     }
 
-    private static void sendAllNotifs(final Context context, final ArrayList<NotifData> notifDataList) {
+    private static void sendAllNotifs(final Context context, final ArrayList<NotifData> notifDataList, boolean isDmOnly) {
         sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DIGEST_CREATED, notifDataList.get(0).getGroupId(), context);
 
         final NotificationManager notificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         for (NotifData notifData : notifDataList) {
-            buildGroupNotification(getMessagingStyle(notifData.getGroupId()), notifData);
+            if (!isDmOnly || notifData.getNotifType().equalsIgnoreCase("dm")) {
+                buildGroupNotification(getMessagingStyle(notifData.getGroupId()), notifData);
+            }
         }
 
         for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
@@ -233,6 +248,7 @@ public class NotifUtils {
             messagingStyle.setConversationTitle(null);
         } else {
             messagingStyle.setConversationTitle(notifData.getGroupName());
+            messagingStyle.setGroupConversation(true);
         }
         messagingStyle.addMessage(notifData.getMessageBody(), notifData.getTimestamp(), notifData.getAuthorName());
         messagingStyleMap.put(notifData.getGroupId(), messagingStyle);

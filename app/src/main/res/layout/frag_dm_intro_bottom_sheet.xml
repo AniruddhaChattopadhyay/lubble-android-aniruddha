@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tv_hint"
+        android:layout_marginTop="16dp"
+        android:text="You can send only one message before they accept your invitation to chat privately. Be meaningful &amp; respectful."
+        android:layout_marginLeft="16dp"
+        android:layout_width="wrap_content"
+        android:layout_marginRight="16dp"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/til_intro_msg"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_below="@id/tv_hint"
+        android:hint="Intro Message"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_invite"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/MaterialButton"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        app:icon="@drawable/ic_send_white_24dp"
+        app:iconGravity="textStart"
+        app:iconPadding="24dp"
+        android:layout_below="@id/til_intro_msg"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        android:text="Invite to chat" />
+
+</RelativeLayout>

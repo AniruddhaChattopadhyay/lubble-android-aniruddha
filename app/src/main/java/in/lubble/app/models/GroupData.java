@@ -31,6 +31,8 @@ public class GroupData {
     @Exclude
     private Set<String> invitedBy;
     private boolean isPinned;
+    @Exclude
+    private boolean isDm;
 
     public GroupData() {
     }  // Needed for Firebase
@@ -81,7 +83,7 @@ public class GroupData {
     @Exclude
     public boolean isJoined() {
         // is a DM if member size is 0
-        return getMembers().size() == 0 || getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
+        return getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
     }
 
     public boolean getIsPrivate() {
@@ -125,6 +127,15 @@ public class GroupData {
     }
 
     @Exclude
+    public long getRelevantTimestamp() {
+        if (this.getJoinedTimestamp() > this.getLastMessageTimestamp()) {
+            return this.getJoinedTimestamp();
+        } else {
+            return this.getLastMessageTimestamp();
+        }
+    }
+
+    @Exclude
     @Nullable
     public Set<String> getInvitedBy() {
         return invitedBy;
@@ -145,17 +156,19 @@ public class GroupData {
 
     @Exclude
     public long getJoinedTimestamp() {
-        if (isJoined() && getMembers().size() > 0) {
-            // is a DM if member size is 0
+        if (isJoined() && !this.isDm) {
             return (Long) ((HashMap) getMembers().get(FirebaseAuth.getInstance().getUid())).get("joinedTimestamp");
         } else {
             return 0;
         }
     }
 
-    public boolean isDm() {
-        // Yeah. Weird.
-        return getMembers().size() == 0;
+    public boolean getIsDm() {
+        return isDm;
+    }
+
+    public void setIsDm(boolean isDm) {
+        this.isDm = isDm;
     }
 
     public boolean getIsPinned() {

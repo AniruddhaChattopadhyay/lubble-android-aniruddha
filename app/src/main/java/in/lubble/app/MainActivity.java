@@ -17,6 +17,16 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.crashlytics.android.Crashlytics;
@@ -45,18 +55,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.chat.BlockedChatsActiv;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.explore.ExploreFrag;
@@ -755,6 +757,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 break;
             case R.id.nav_item_support:
                 Freshchat.showConversations(this);
+                break;
+            case R.id.nav_item_blocked_chats:
+                BlockedChatsActiv.open(this);
                 break;
         }
         drawerLayout.closeDrawer(GravityCompat.START);

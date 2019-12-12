@@ -207,28 +207,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final ChatData chatData = chatDataList.get(position);
 
         final String authorUid = chatData.getAuthorUid();
-        if (!chatData.getIsDm())
-            if (profileDataMap.containsKey(authorUid)) {
-                final ProfileData profileData = profileDataMap.get(authorUid);
-                final ProfileInfo profileInfo = profileData.getInfo();
-                sentChatViewHolder.senderTv.setVisibility(View.VISIBLE);
-                sentChatViewHolder.senderTv.setText(profileInfo.getName());
-                if (!TextUtils.isEmpty(profileInfo.getBadge()) || !TextUtils.isEmpty(profileData.getGroupFlair())) {
-                    String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
-                    sentChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
-                    sentChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
-                    sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.white));
-                } else {
-                    sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
-                }
+        if (profileDataMap.containsKey(authorUid)) {
+            final ProfileData profileData = profileDataMap.get(authorUid);
+            final ProfileInfo profileInfo = profileData.getInfo();
+            sentChatViewHolder.senderTv.setVisibility(View.VISIBLE);
+            sentChatViewHolder.senderTv.setText(profileInfo.getName());
+            if (!chatData.getIsDm() && (!TextUtils.isEmpty(profileInfo.getBadge()) || !TextUtils.isEmpty(profileData.getGroupFlair()))) {
+                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
+                sentChatViewHolder.badgeTextTv.setVisibility(View.VISIBLE);
+                sentChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
+                sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             } else {
-                sentChatViewHolder.senderTv.setVisibility(View.GONE);
                 sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
-                updateProfileInfoMap(getUserRef(authorUid), authorUid, position);
             }
-        else {
+        } else {
             sentChatViewHolder.senderTv.setVisibility(View.GONE);
             sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+            updateProfileInfoMap(getUserRef(authorUid), authorUid, position);
         }
 
         if (posToFlash == position) {
@@ -269,19 +264,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
             Linkify.addLinks(sentChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
         }
 
-        if (chatData.getLubbCount() == 0) {
+        if (chatData.getLubbCount() == 0 || chatData.getIsDm()) {
             sentChatViewHolder.lubbCount.setText("");
         } else {
             sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         }
-        if (chatData.getLubbReceipts().containsKey(authorId)) {
-            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
-            if (position == chatDataList.size() - 1) {
-                // scroll to bottom if liked last msg to show that like icon and count
-                recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
-            }
+        if (chatData.getIsDm()) {
+            sentChatViewHolder.lubbIcon.setVisibility(View.GONE);
         } else {
-            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
+            sentChatViewHolder.lubbIcon.setVisibility(View.VISIBLE);
+            if (chatData.getLubbReceipts().containsKey(authorId)) {
+                sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+                if (position == chatDataList.size() - 1) {
+                    // scroll to bottom if liked last msg to show that like icon and count
+                    recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
+                }
+            } else {
+                sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
+            }
         }
 
         sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
@@ -409,13 +409,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
 
-        if (!chatData.getIsDm()) {
-            showDpAndName(recvdChatViewHolder, chatData);
-        } else {
-            recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
-            recvdChatViewHolder.authorNameTv.setVisibility(View.GONE);
-            recvdChatViewHolder.dpIv.setVisibility(View.GONE);
-        }
+        showDpAndName(recvdChatViewHolder, chatData);
 
         recvdChatViewHolder.visibleToYouTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? View.VISIBLE : View.GONE);
         recvdChatViewHolder.replyBottomTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? View.VISIBLE : View.GONE);
@@ -468,19 +462,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
             Linkify.addLinks(recvdChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
         }
         recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
-        if (chatData.getLubbCount() == 0) {
+        if (chatData.getLubbCount() == 0 || chatData.getIsDm()) {
             recvdChatViewHolder.lubbCount.setText("");
         } else {
             recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         }
-        if (chatData.getLubbReceipts().containsKey(authorId)) {
-            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
-            if (position == chatDataList.size() - 1) {
-                // scroll to bottom if liked last msg to show that like icon and count
-                recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
-            }
+        if (chatData.getIsDm()) {
+            recvdChatViewHolder.lubbIcon.setVisibility(View.GONE);
         } else {
-            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
+            recvdChatViewHolder.lubbIcon.setVisibility(View.VISIBLE);
+            if (chatData.getLubbReceipts().containsKey(authorId)) {
+                recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+                if (position == chatDataList.size() - 1) {
+                    // scroll to bottom if liked last msg to show that like icon and count
+                    recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
+                }
+            } else {
+                recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
+            }
         }
         if (chatData.getType().equalsIgnoreCase(GROUP) && isValidString(chatData.getAttachedGroupId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
@@ -878,7 +877,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (profileData != null) {
                     profileData.setId(dataSnapshot.getKey());
                     for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
+                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles") && groupId != null) {
                             final String flair = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(groupId).child("flair").getValue(String.class);
                             profileData.setGroupFlair(flair);
                             break;
@@ -1248,7 +1247,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void toggleLubb(int pos) {
         final ChatData chatData = chatDataList.get(pos);
-        if (chatData.getType().equalsIgnoreCase(GROUP_PROMPT)) {
+        if (chatData.getType().equalsIgnoreCase(GROUP_PROMPT) || chatData.getIsDm()) {
             return;
         }
         // add or remove like to chat msg

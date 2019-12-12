@@ -34,6 +34,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -67,6 +68,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static in.lubble.app.analytics.AnalyticsEvents.NEW_DM_CLICKED;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
@@ -84,6 +86,7 @@ public class ProfileFrag extends Fragment {
     private TextView lubbleTv;
     private TextView userBio;
     private TextView editProfileTV;
+    private MaterialButton msgBtn;
     private TextView invitedTv;
     private TextView likesTv;
     private LinearLayout coinsContainer;
@@ -94,6 +97,7 @@ public class ProfileFrag extends Fragment {
     private ProgressBar progressBar;
     private CardView referralCard;
     private DatabaseReference userRef;
+    private DatabaseReference dmRef;
     private ValueEventListener valueEventListener;
     @Nullable
     private ProfileData profileData;
@@ -102,12 +106,12 @@ public class ProfileFrag extends Fragment {
     private GroupsAdapter groupsAdapter;
     private ConstraintLayout statsContainer;
 
-    ImageView genderIv;
-    TextView genderTv;
-    ImageView businessIv;
-    TextView businessTv;
-    ImageView educationIv;
-    TextView educationTv;
+    private ImageView genderIv;
+    private TextView genderTv;
+    private ImageView businessIv;
+    private TextView businessTv;
+    private ImageView educationIv;
+    private TextView educationTv;
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -142,6 +146,7 @@ public class ProfileFrag extends Fragment {
         lubbleTv = rootView.findViewById(R.id.tv_lubble);
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
+        msgBtn = rootView.findViewById(R.id.btn_msg);
         invitedTv = rootView.findViewById(R.id.tv_invited);
         likesTv = rootView.findViewById(R.id.tv_likes);
         genderIv = rootView.findViewById(R.id.iv_gender);
@@ -168,6 +173,7 @@ public class ProfileFrag extends Fragment {
         generateBranchUrl(getContext(), linkCreateListener);
         if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
             coinsContainer.setVisibility(View.VISIBLE);
+            msgBtn.setVisibility(View.GONE);
         }
         profilePicIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -232,6 +238,14 @@ public class ProfileFrag extends Fragment {
             }
         });
 
+        msgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DmIntroBottomSheet.newInstance(userId).show(getChildFragmentManager(), null);
+                Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
+            }
+        });
+
         return rootView;
     }
 
@@ -240,7 +254,32 @@ public class ProfileFrag extends Fragment {
         super.onStart();
         userRef = getUserRef(userId);
         fetchProfileFeed();
+        syncDms();
     }
+
+    private void syncDms() {
+        dmRef = RealtimeDbHelper.getUserDmsRef(userId);
+        dmRef.orderByChild("profileId").equalTo(FirebaseAuth.getInstance().getUid()).addValueEventListener(dmValueEventListener);
+    }
+
+    private ValueEventListener dmValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+            if (dataSnapshot.getChildrenCount() > 0) {
+                msgBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ChatActivity.openForDm(requireContext(), dataSnapshot.getChildren().iterator().next().getKey(), null, null);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
 
     private void syncGroups() {
         RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {

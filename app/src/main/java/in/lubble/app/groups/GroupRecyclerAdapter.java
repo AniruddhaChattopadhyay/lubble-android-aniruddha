@@ -1,27 +1,30 @@
 package in.lubble.app.groups;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
-import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.R;
-import in.lubble.app.models.GroupData;
-import in.lubble.app.models.UserGroupData;
-import in.lubble.app.utils.DateTimeUtils;
-import in.lubble.app.utils.UiUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.R;
+import in.lubble.app.models.GroupData;
+import in.lubble.app.models.UserGroupData;
+import in.lubble.app.utils.UiUtils;
+
+import static in.lubble.app.utils.DateTimeUtils.getHumanTimestamp;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -31,6 +34,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     private static final int TYPE_HEADER = 600;
     private int publicCursorPos = 0;
     private int cursorPos = 0;
+    private int dmCursorPos = 0;
     private final List<GroupData> groupDataList;
     // <GroupID, UserGroupData>
     private final HashMap<String, UserGroupData> userGroupDataMap;
@@ -70,16 +74,24 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             final GroupData groupData = groupDataList.get(position);
             groupViewHolder.groupData = groupData;
 
+            int placeholderThumbnail;
+            if (groupData.getIsDm()) {
+                placeholderThumbnail = R.drawable.ic_account_circle_black_no_padding;
+            } else {
+                placeholderThumbnail = R.drawable.ic_circle_group_24dp;
+            }
+
             GlideApp.with(groupViewHolder.mView)
                     .load(groupData.getThumbnail())
-                    .placeholder(R.drawable.ic_circle_group_24dp)
-                    .error(R.drawable.ic_circle_group_24dp)
+                    .placeholder(placeholderThumbnail)
+                    .error(placeholderThumbnail)
                     .circleCrop()
                     .into(groupViewHolder.iconIv);
 
             groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
 
             groupViewHolder.titleTv.setText(groupData.getTitle());
+            final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
             if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
                 String inviter = (String) groupData.getInvitedBy().toArray()[0];
                 if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
@@ -91,9 +103,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             } else if (isValidString(groupData.getLastMessage())) {
                 groupViewHolder.subtitleTv.setText(groupData.getLastMessage());
                 groupViewHolder.inviteIcon.setVisibility(View.GONE);
+                toggleViewBtn(groupData, userGroupData, groupViewHolder);
             } else {
                 groupViewHolder.subtitleTv.setText("...");
                 groupViewHolder.inviteIcon.setVisibility(View.GONE);
+                toggleViewBtn(groupData, userGroupData, groupViewHolder);
             }
 
             groupViewHolder.mView.setOnClickListener(new View.OnClickListener() {
@@ -102,7 +116,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                     if (null != mListener) {
                         // Notify the active callbacks interface (the activity, if the
                         // fragment is attached to one) that an item has been selected.
-                        final boolean isDm = groupData.getMembers().size() == 0;
+                        final boolean isDm = groupData.getIsDm();
                         if (isDm) {
                             mListener.onDmClick(groupViewHolder.groupData.getId(), groupData.getTitle(), groupData.getThumbnail());
                         } else {
@@ -112,7 +126,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 }
             });
 
-            final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
             if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
                 groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
                 groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
@@ -133,12 +146,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
             handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
 
-            if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
-                groupViewHolder.viewGroupTv.setVisibility(View.VISIBLE);
-            } else {
-                groupViewHolder.viewGroupTv.setVisibility(View.GONE);
-            }
-
             if (posToFlash == position) {
                 UiUtils.animateColor(groupViewHolder.itemView, ContextCompat.getColor(groupViewHolder.mView.getContext(),
                         R.color.trans_colorAccent), Color.TRANSPARENT);
@@ -151,6 +158,15 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
+    private void toggleViewBtn(GroupData groupData, UserGroupData userGroupData, GroupViewHolder groupViewHolder) {
+        if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
+            groupViewHolder.viewGroupTv.setVisibility(View.VISIBLE);
+        } else {
+            groupViewHolder.viewGroupTv.setVisibility(View.GONE);
+        }
+
+    }
+
     private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
         if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
             // for pending group invite
@@ -159,9 +175,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             // joined or unjoined groups
             timestampTv.setVisibility(View.VISIBLE);
             if (groupData.getJoinedTimestamp() > groupData.getLastMessageTimestamp()) {
-                timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getJoinedTimestamp()));
+                timestampTv.setText(getHumanTimestamp(groupData.getJoinedTimestamp()));
             } else {
-                timestampTv.setText(DateTimeUtils.getHumanTimestamp(groupData.getLastMessageTimestamp()));
+                timestampTv.setText(getHumanTimestamp(groupData.getLastMessageTimestamp()));
             }
             if (!groupData.isJoined()) {
                 // align time with "view" btn
@@ -178,6 +194,29 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             groupDataList.add(newIndex, groupData);
             notifyItemInserted(newIndex);
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
+            publicCursorPos++;
+            dmCursorPos = publicCursorPos - 1;
+        } else {
+            updateGroup(groupData);
+        }
+    }
+
+    private static final String TAG = "GroupRecyclerAdapter";
+
+    public void addGroupWithSortFromBottom(GroupData groupData) {
+        if (getChildIndex(groupData.getId()) == -1) {
+
+            GroupData oldGroup = groupDataList.get(dmCursorPos);
+
+            while (groupData.getRelevantTimestamp() > oldGroup.getRelevantTimestamp() && dmCursorPos > 0) {
+                Log.d(TAG, "addGroupWithSortFromBottom: " + getHumanTimestamp(groupData.getRelevantTimestamp()) + " old: " + getHumanTimestamp(oldGroup.getRelevantTimestamp()));
+                dmCursorPos--;
+                oldGroup = groupDataList.get(dmCursorPos);
+            }
+
+            dmCursorPos = dmCursorPos < 1 ? 1 : dmCursorPos + 1; //ensure no negative index; 1 due to pinned group
+            groupDataList.add(dmCursorPos, groupData);
+            notifyItemInserted(dmCursorPos);
             publicCursorPos++;
         } else {
             updateGroup(groupData);

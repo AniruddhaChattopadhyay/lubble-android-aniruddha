@@ -46,6 +46,7 @@ public class ChatData implements Serializable {
     @Nullable
     private String replyMsgId = null;
     private boolean isDm;
+    private boolean sendNotif = true;
     // for polls
     private ArrayList<ChoiceData> choiceList;
     private String pollQues = "";
@@ -268,5 +269,13 @@ public class ChatData implements Serializable {
 
     public void setPromptQues(String promptQues) {
         this.promptQues = promptQues;
+    }
+
+    public boolean isSendNotif() {
+        return sendNotif;
+    }
+
+    public void setSendNotif(boolean sendNotif) {
+        this.sendNotif = sendNotif;
     }
 }

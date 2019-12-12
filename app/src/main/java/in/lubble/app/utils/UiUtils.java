@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -21,6 +22,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.DrawableRes;
+import androidx.annotation.Nullable;
+import androidx.palette.graphics.Palette;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -29,9 +35,6 @@ import com.google.android.material.tabs.TabLayout;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import androidx.annotation.ColorInt;
-import androidx.annotation.DrawableRes;
-import androidx.palette.graphics.Palette;
 import in.lubble.app.R;
 
 /**
@@ -55,7 +58,7 @@ public class UiUtils {
 
     public static void showKeyboard(Context ctx, IBinder windowToken) {
         InputMethodManager inputMethodManager =
-                (InputMethodManager)ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+                (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputMethodManager.toggleSoftInputFromWindow(
                 windowToken, InputMethodManager.SHOW_FORCED, 0);
     }
@@ -137,7 +140,7 @@ public class UiUtils {
         return bottomSheetDialog;
     }
 
-    public static BottomSheetDialog showBottomSheetAlertLight(Context context, LayoutInflater layoutInflater, String title, @DrawableRes int iconId, String btnText, final View.OnClickListener listener) {
+    public static BottomSheetDialog showBottomSheetAlertLight(Context context, LayoutInflater layoutInflater, String title, @Nullable String subtitle, @DrawableRes int iconId, String btnText, final View.OnClickListener listener) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
         View sheetView = layoutInflater.inflate(R.layout.bottom_sheet_alert_light, null);
         bottomSheetDialog.setContentView(sheetView);
@@ -146,9 +149,16 @@ public class UiUtils {
         final MaterialButton gotItBtn = sheetView.findViewById(R.id.btn_got_it);
         final ImageView iconIv = sheetView.findViewById(R.id.iv_bottom_sheet_icon);
         final TextView titleTv = sheetView.findViewById(R.id.tv_bottom_sheet_title);
+        final TextView subtitleTv = sheetView.findViewById(R.id.tv_bottom_sheet_subtitle);
 
         iconIv.setImageResource(iconId);
         titleTv.setText(title);
+        if (!TextUtils.isEmpty(subtitle)) {
+            subtitleTv.setVisibility(View.VISIBLE);
+            subtitleTv.setText(subtitle);
+        } else {
+            subtitleTv.setVisibility(View.GONE);
+        }
         gotItBtn.setText(btnText);
 
         gotItBtn.setOnClickListener(new View.OnClickListener() {

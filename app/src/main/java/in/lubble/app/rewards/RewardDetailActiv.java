@@ -15,11 +15,13 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.text.HtmlCompat;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -29,6 +31,13 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.MissingFormatArgumentException;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
@@ -44,14 +53,9 @@ import in.lubble.app.rewards.data.RewardsAirtableData;
 import in.lubble.app.rewards.data.RewardsData;
 import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
-import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.MissingFormatArgumentException;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -252,7 +256,7 @@ public class RewardDetailActiv extends BaseActivity {
     }
 
     private void showCoinsConfirmation() {
-        UiUtils.showBottomSheetAlertLight(this, getLayoutInflater(), "Spend " + rewardsData.getCost() + " el coins?", R.drawable.ic_coin, "Confirm", new View.OnClickListener() {
+        UiUtils.showBottomSheetAlertLight(this, getLayoutInflater(), "Spend " + rewardsData.getCost() + " el coins?", null, R.drawable.ic_coin, "Confirm", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 claimReward();
@@ -293,7 +297,7 @@ public class RewardDetailActiv extends BaseActivity {
                     fetchEmptyRewardCode();
                 } else if (!isFinishing()) {
                     progressDialog.dismiss();
-                    UiUtils.showBottomSheetAlertLight(RewardDetailActiv.this, getLayoutInflater(), "Not enough coins", R.drawable.ic_error_outline_black_24dp, "Earn More",
+                    UiUtils.showBottomSheetAlertLight(RewardDetailActiv.this, getLayoutInflater(), "Not enough coins", null, R.drawable.ic_error_outline_black_24dp, "Earn More",
                             new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {

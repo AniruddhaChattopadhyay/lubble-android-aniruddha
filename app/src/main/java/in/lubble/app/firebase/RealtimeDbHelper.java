@@ -3,6 +3,7 @@ package in.lubble.app.firebase;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
 import in.lubble.app.LubbleSharedPrefs;
 
 /**
@@ -123,8 +124,8 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("dms");
     }
 
-    public static DatabaseReference getUserDmsRef() {
-        return getUserRef(FirebaseAuth.getInstance().getUid()).child("dms");
+    public static DatabaseReference getUserDmsRef(String uid) {
+        return getUserRef(uid).child("dms");
     }
 
     public static DatabaseReference getSellerRef() {

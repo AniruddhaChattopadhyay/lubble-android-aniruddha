@@ -80,10 +80,12 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
+import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FileUtils;
+import in.lubble.app.utils.UiUtils;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -103,6 +105,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.EVENT;
 import static in.lubble.app.models.ChatData.GROUP;
+import static in.lubble.app.models.ChatData.HIDDEN;
 import static in.lubble.app.models.ChatData.LINK;
 import static in.lubble.app.models.ChatData.REPLY;
 import static in.lubble.app.models.ChatData.SYSTEM;
@@ -211,6 +214,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private Uri sharedImageUri;
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
+    private boolean isDmBlocked;
+    @Nullable
+    private String dmOtherUserId;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -256,7 +262,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onCreate(savedInstanceState);
 
         groupId = getArguments().getString(KEY_GROUP_ID);
-        Log.d("GroupID", groupId);
+
         msgIdToOpen = getArguments().getString(KEY_MSG_ID);
         dmId = getArguments().getString(KEY_DM_ID);
         receiverId = getArguments().getString(KEY_RECEIVER_ID);
@@ -301,6 +307,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
         final Bundle bundle = new Bundle();
         bundle.putString("groupid", groupId);
+        bundle.putString("dm_id", dmId);
         Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, requireContext());
     }
 
@@ -648,6 +655,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             deleteUnreadMsgsForGroupId(dmId, getContext());
             AppNotifUtils.deleteAppNotif(getContext(), dmId);
             dmEventListener = dmInfoReference.addValueEventListener(new ValueEventListener() {
+                boolean isThisUserJoined = false;
+                boolean isOtherUserJoined = false;
+                boolean isBlockedByCurrUser = false;
+
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     final DmData dmData = dataSnapshot.getValue(DmData.class);
@@ -661,10 +672,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 // this person's profile ID, could be a seller or a user
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    isCurrUserSeller = (boolean) profileMap.get("isSeller");
+                                    isCurrUserSeller = false;
                                     authorId = profileId;
                                     chatAdapter.setAuthorId(authorId);
                                     chatAdapter.setDmId(dmId);
+
+                                    isThisUserJoined = profileMap.get("joinedTimestamp") != null;
+                                    isBlockedByCurrUser = profileMap.get("blocked_status") != null;
+
                                     if (sharedImageUri != null) {
                                         String chatId = groupId;
                                         if (!TextUtils.isEmpty(dmId)) {
@@ -676,9 +691,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 }
                             } else {
                                 // other person's profile ID, could be a seller or a user
+                                dmOtherUserId = profileId;
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    final boolean isSeller = (boolean) profileMap.get("isSeller");
+                                    final boolean isSeller = false;
+
+                                    isOtherUserJoined = profileMap.get("joinedTimestamp") != null;
+                                    isDmBlocked = profileMap.get("blocked_status") != null;
+
                                     if (isSeller) {
                                         fetchSellerProfileFrom(profileId);
                                     } else {
@@ -686,6 +706,56 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     }
                                 }
                             }
+                        }
+                        if (isBlockedByCurrUser) {
+                            bottomContainer.setVisibility(View.VISIBLE);
+                            composeContainer.setVisibility(View.GONE);
+                            joinContainer.setVisibility(View.VISIBLE);
+                            joinDescTv.setText("Unblock to message them");
+                            joinBtn.setText("unblock");
+                            joinBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dmInfoReference.child("members").child(authorId).child("blocked_status").removeValue();
+                                    dmInfoReference.child("members").child(authorId).child("blocked_timestamp").removeValue();
+                                }
+                            });
+                            declineIv.setVisibility(View.GONE);
+                        } else if (isThisUserJoined && isOtherUserJoined) {
+                            bottomContainer.setVisibility(View.VISIBLE);
+                            composeContainer.setVisibility(View.VISIBLE);
+                            joinContainer.setVisibility(View.GONE);
+                        } else if (!isThisUserJoined) {
+                            bottomContainer.setVisibility(View.VISIBLE);
+                            composeContainer.setVisibility(View.GONE);
+                            joinContainer.setVisibility(View.VISIBLE);
+                            joinDescTv.setText("They want to message you");
+                            joinBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dmInfoReference.child("members").child(authorId).child("joinedTimestamp").setValue(ServerValue.TIMESTAMP);
+                                }
+                            });
+                            declineIv.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    UiUtils.showBottomSheetAlertLight(requireContext(), getLayoutInflater(), "Decline this personal chat invitation? It will be deleted forever",
+                                            null, R.drawable.ic_cancel_red_24dp, "DECLINE", new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    setBlockedStatus("declined");
+                                                    getActivity().finish();
+                                                }
+                                            });
+                                }
+                            });
+                        } else {
+                            bottomContainer.setVisibility(View.VISIBLE);
+                            composeContainer.setVisibility(View.GONE);
+                            joinDescTv.setText("Your invitation is still pending");
+                            joinBtn.setVisibility(View.GONE);
+                            declineIv.setVisibility(View.GONE);
+                            joinContainer.setVisibility(View.VISIBLE);
                         }
                         resetUnreadCount();
                     } else {
@@ -703,6 +773,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 if (profileInfo != null) {
                                     profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
                                     ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
+                                    if (!isThisUserJoined) {
+                                        joinDescTv.setText(profileInfo.getName() + " wants to message you");
+                                    }
                                 }
                             }
                         }
@@ -740,7 +813,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         } else if (!TextUtils.isEmpty(receiverId)) {
             chatRecyclerView.setVisibility(View.VISIBLE);
             ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true, 0);
+            bottomContainer.setVisibility(View.VISIBLE);
+            composeContainer.setVisibility(View.VISIBLE);
+            joinContainer.setVisibility(View.GONE);
         }
+    }
+
+    void setBlockedStatus(String status) {
+        dmInfoReference.child("members").child(authorId).child("blocked_status").setValue(status);
+        dmInfoReference.child("members").child(authorId).child("blocked_timestamp").setValue(System.currentTimeMillis());
     }
 
     private void fetchMembersProfile(HashMap<String, Object> membersMap) {
@@ -860,7 +941,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 RealtimeDbHelper.getSellerDmsRef().child(dmId)
                         .child("unreadCount").setValue(0);
             } else {
-                RealtimeDbHelper.getUserDmsRef().child(dmId)
+                RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid()).child(dmId)
                         .child("unreadCount").setValue(0);
             }
         }
@@ -1091,13 +1172,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                     final HashMap<String, Object> userMap = new HashMap<>();
                     final HashMap<Object, Object> map2 = new HashMap<>();
-                    map2.put("isSeller", true);
+                    map2.put("joinedTimestamp", System.currentTimeMillis());
+                    map2.put("isSeller", false);
+                    map2.put("otherUser", authorId);
                     userMap.put(receiverId, map2);
 
-                    HashMap<String, Object> sellerMap = new HashMap<>();
-                    sellerMap.put("isSeller", false);
-                    sellerMap.put("otherUser", receiverId);
-                    userMap.put(authorId, sellerMap);
+                    HashMap<String, Object> authorMap = new HashMap<>();
+                    authorMap.put("otherUser", receiverId);
+                    authorMap.put("joinedTimestamp", System.currentTimeMillis());
+                    authorMap.put("isSeller", false);
+                    userMap.put(authorId, authorMap);
 
                     final HashMap<String, Object> map = new HashMap<>();
                     map.put("members", userMap);
@@ -1120,6 +1204,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
                     }
                 } else if (!TextUtils.isEmpty(dmId)) {
+                    if (isDmBlocked) {
+                        chatData.setSendNotif(false);
+                        chatData.setType(HIDDEN);
+                    }
                     messagesReference.push().setValue(chatData);
                 }
                 newMessageEt.setText("");
@@ -1172,7 +1260,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void showAttachmentBottomSheet() {
-        AttachmentListDialogFrag.newInstance().show(getChildFragmentManager(), null);
+        AttachmentListDialogFrag.newInstance(dmId != null).show(getChildFragmentManager(), null);
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -1316,7 +1404,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 startCameraIntent();
                 break;
             case 1:
-                NewPollActiv.open(getContext(), groupId);
+                if (dmId == null) {
+                    NewPollActiv.open(getContext(), groupId);
+                } else {
+                    Toast.makeText(requireContext(), "Not available in personal chats", Toast.LENGTH_SHORT).show();
+                }
                 break;
             case 2:
                 startGalleryPicker();
@@ -1632,6 +1724,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public void openGroupInfo() {
         if (groupData != null && (groupData.isJoined() || !groupData.getIsPrivate())) {
             ScrollingGroupInfoActivity.open(getContext(), groupId);
+        } else if (dmOtherUserId != null) {
+            ProfileActivity.open(requireContext(), dmOtherUserId);
         }
     }
 

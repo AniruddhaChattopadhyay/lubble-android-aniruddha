@@ -2,18 +2,20 @@ package in.lubble.app.chat;
 
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -26,10 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
@@ -186,7 +184,7 @@ public class ShareActiv extends BaseActivity {
     }
 
     private void syncUserDmIds() {
-        getUserDmsRef().addListenerForSingleValueEvent(new ValueEventListener() {
+        getUserDmsRef(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -383,7 +381,7 @@ public class ShareActiv extends BaseActivity {
                             chatDataToSend.setAttachedGroupId(shareId);
                         }
                         final GroupData groupData = groupList.get(getAdapterPosition());
-                        if (groupData.isDm()) {
+                        if (groupData.getIsDm()) {
                             ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatDataToSend, mediaUri);
                         } else {
                             ChatActivity.openForGroup(ShareActiv.this, groupData.getId(), false, null, chatDataToSend, mediaUri);
