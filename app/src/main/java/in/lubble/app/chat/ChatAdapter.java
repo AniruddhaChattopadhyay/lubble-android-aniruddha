@@ -264,19 +264,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
             Linkify.addLinks(sentChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
         }
 
-        if (chatData.getLubbCount() == 0) {
+        if (chatData.getLubbCount() == 0 || chatData.getIsDm()) {
             sentChatViewHolder.lubbCount.setText("");
         } else {
             sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         }
-        if (chatData.getLubbReceipts().containsKey(authorId)) {
-            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
-            if (position == chatDataList.size() - 1) {
-                // scroll to bottom if liked last msg to show that like icon and count
-                recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
-            }
+        if (chatData.getIsDm()) {
+            sentChatViewHolder.lubbIcon.setVisibility(View.GONE);
         } else {
-            sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
+            sentChatViewHolder.lubbIcon.setVisibility(View.VISIBLE);
+            if (chatData.getLubbReceipts().containsKey(authorId)) {
+                sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+                if (position == chatDataList.size() - 1) {
+                    // scroll to bottom if liked last msg to show that like icon and count
+                    recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
+                }
+            } else {
+                sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
+            }
         }
 
         sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
@@ -457,19 +462,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
             Linkify.addLinks(recvdChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
         }
         recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
-        if (chatData.getLubbCount() == 0) {
+        if (chatData.getLubbCount() == 0 || chatData.getIsDm()) {
             recvdChatViewHolder.lubbCount.setText("");
         } else {
             recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         }
-        if (chatData.getLubbReceipts().containsKey(authorId)) {
-            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
-            if (position == chatDataList.size() - 1) {
-                // scroll to bottom if liked last msg to show that like icon and count
-                recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
-            }
+        if (chatData.getIsDm()) {
+            recvdChatViewHolder.lubbIcon.setVisibility(View.GONE);
         } else {
-            recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
+            recvdChatViewHolder.lubbIcon.setVisibility(View.VISIBLE);
+            if (chatData.getLubbReceipts().containsKey(authorId)) {
+                recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
+                if (position == chatDataList.size() - 1) {
+                    // scroll to bottom if liked last msg to show that like icon and count
+                    recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
+                }
+            } else {
+                recvdChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
+            }
         }
         if (chatData.getType().equalsIgnoreCase(GROUP) && isValidString(chatData.getAttachedGroupId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
