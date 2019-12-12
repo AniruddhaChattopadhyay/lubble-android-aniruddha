@@ -87,19 +87,7 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
     private void fetchBlockedGroups() {
         query = RealtimeDbHelper.getDmsRef().orderByChild("lastMessageTimestamp");
         query.addChildEventListener(dmListener);
-        getUserGroupsRef().addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot userGroupDataSnapshot : dataSnapshot.getChildren()) {
-                    adapter.updateUserGroupData(userGroupDataSnapshot.getKey(), userGroupDataSnapshot.getValue(UserGroupData.class));
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        getUserGroupsRef().addValueEventListener(userDmListener);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -215,6 +203,20 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
         }
     };
 
+    private final ValueEventListener userDmListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            for (DataSnapshot userGroupDataSnapshot : dataSnapshot.getChildren()) {
+                adapter.updateUserGroupData(userGroupDataSnapshot.getKey(), userGroupDataSnapshot.getValue(UserGroupData.class));
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -232,4 +234,12 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
         mListener = null;
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        query.removeEventListener(dmListener);
+        getUserGroupsRef().removeEventListener(userDmListener);
+
+    }
 }

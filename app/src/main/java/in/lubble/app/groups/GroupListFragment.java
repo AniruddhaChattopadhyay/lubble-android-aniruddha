@@ -61,6 +61,7 @@ import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
@@ -82,9 +83,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private Handler handler = new Handler();
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
     private int totalUnreadCount = 0;
-    private Query query;
+    private Query query, dmQuery;
     private ChildEventListener childEventListener;
     private ChildEventListener userGroupsListener;
+    private ChildEventListener userDmsListener;
 
     public GroupListFragment() {
     }
@@ -171,7 +173,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void syncAllGroups() {
         query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
-        Query dmQuery = RealtimeDbHelper.getDmsRef().orderByChild("lastMessageTimestamp");
+        dmQuery = RealtimeDbHelper.getDmsRef().orderByChild("lastMessageTimestamp");
         childEventListener = new ChildEventListener() {
 
             @Override
@@ -375,6 +377,45 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             }
         });
 
+        userDmsListener = getUserDmsRef(FirebaseAuth.getInstance().getUid()).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                if (userGroupData != null) {
+                    adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                    totalUnreadCount += userGroupData.getUnreadCount();
+                    if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
+                        groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
+                        syncInvitedGroups(dataSnapshot.getKey());
+                    }
+                }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+                final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                if (userGroupData != null) {
+                        adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                        totalUnreadCount++;
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
         getUserGroupsRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -525,8 +566,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (childEventListener != null) {
             query.removeEventListener(childEventListener);
         }
+        if (dmChildEventListener != null) {
+            dmQuery.removeEventListener(dmChildEventListener);
+        }
         if (userGroupsListener != null) {
             getUserGroupsRef().removeEventListener(userGroupsListener);
+        }
+        if (userDmsListener != null) {
+            getUserDmsRef(FirebaseAuth.getInstance().getUid()).removeEventListener(userDmsListener);
         }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
