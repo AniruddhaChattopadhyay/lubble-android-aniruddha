@@ -72,8 +72,6 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
         noBlocksTv = view.findViewById(R.id.tv_no_block);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        adapter = new BlockedChatsAdapter(mListener);
-        recyclerView.setAdapter(adapter);
 
         return view;
     }
@@ -81,6 +79,8 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
     @Override
     public void onResume() {
         super.onResume();
+        adapter = new BlockedChatsAdapter(mListener);
+        recyclerView.setAdapter(adapter);
         fetchBlockedGroups();
     }
 
