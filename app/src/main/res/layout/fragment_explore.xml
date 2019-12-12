@@ -38,6 +38,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:gravity="center"
+        android:textSize="12sp"
         android:text="Connect with neighbours who share your interests.\nGroups you join here will appear in your Chats" />
 
     <LinearLayout
