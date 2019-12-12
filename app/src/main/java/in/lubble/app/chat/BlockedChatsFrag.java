@@ -25,6 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileInfo;
@@ -56,8 +57,8 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-        }
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
+
     }
 
     @Override

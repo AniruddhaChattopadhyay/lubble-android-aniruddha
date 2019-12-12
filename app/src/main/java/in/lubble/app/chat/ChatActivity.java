@@ -382,6 +382,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     @Override
                     public void onClick(View v) {
                         targetFrag.setBlockedStatus("BLOCKED");
+                        Analytics.triggerEvent(AnalyticsEvents.DM_BLOCKED, ChatActivity.this);
                         finish();
                     }
                 });
@@ -403,6 +404,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                         final HashMap<Object, Object> map = new HashMap<>();
                         map.put("dm_id", dmId);
                         pushRef.setValue(map);
+                        Analytics.triggerEvent(AnalyticsEvents.DM_REPORTED, ChatActivity.this);
                         finish();
                     }
                 });

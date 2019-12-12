@@ -68,6 +68,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static in.lubble.app.analytics.AnalyticsEvents.NEW_DM_CLICKED;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
@@ -241,6 +242,7 @@ public class ProfileFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 DmIntroBottomSheet.newInstance(userId).show(getChildFragmentManager(), null);
+                Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
             }
         });
 

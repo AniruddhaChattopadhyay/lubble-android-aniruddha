@@ -113,4 +113,9 @@ public class AnalyticsEvents {
 
     public static final String GROUP_PROMPT_SHOWN = "GROUP_PROMPT_SHOWN";
     public static final String GROUP_PROMPT_REPLIED = "GROUP_PROMPT_REPLIED";
+
+    public static final String NEW_DM_CLICKED = "NEW_DM_CLICKED";
+    public static final String NEW_DM_SENT = "NEW_DM_SENT";
+    public static final String DM_BLOCKED = "DM_BLOCKED";
+    public static final String DM_REPORTED = "DM_REPORTED";
 }

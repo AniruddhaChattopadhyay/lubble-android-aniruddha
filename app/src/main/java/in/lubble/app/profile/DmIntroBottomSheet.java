@@ -19,8 +19,11 @@ import com.google.firebase.database.ServerValue;
 import java.util.HashMap;
 
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
+
+import static in.lubble.app.analytics.AnalyticsEvents.NEW_DM_SENT;
 
 public class DmIntroBottomSheet extends BottomSheetDialogFragment {
 
@@ -105,6 +108,7 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
         pushRef.setValue(map);
         String dmId = pushRef.getKey();
 
+        Analytics.triggerEvent(NEW_DM_SENT, getContext());
         dismiss();
     }
 
