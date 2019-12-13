@@ -17,9 +17,11 @@ import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -1054,14 +1056,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 // Permission is not granted
                 glide.load(chatData.getImgUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
                 downloadIv.setVisibility(View.VISIBLE);
-                imageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // ask for external storage perm
-                        ChatFragmentPermissionsDispatcher
-                                .getWritePermWithPermissionCheck(chatFragment);
-                    }
-                });
+
             } else {
                 if (downloadIv != null) {
                     downloadIv.setVisibility(View.GONE);
@@ -1070,14 +1065,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (savedPath != null) {
                     progressBar.setVisibility(View.GONE);
                     glide.load(savedPath).centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
-                    imageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (isValidString(chatData.getImgUrl())) {
-                                FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
-                            }
-                        }
-                    });
                 } else {
                     downloadAndSavePic(progressBar, imageView, chatData);
                 }
@@ -1100,14 +1087,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 downloadIv.setVisibility(View.VISIBLE);
                 playvid.setImageResource(R.drawable.ic_file_download_black_24dp);
                 progressBar.setVisibility(View.GONE);
-                imageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // ask for external storage perm
-                        ChatFragmentPermissionsDispatcher
-                                .getWritePermWithPermissionCheck(chatFragment);
-                    }
-                });
             } else {
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.placeholder(R.color.black);
@@ -1131,15 +1110,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         .apply(requestOptions)
                         .into(imageView);
                 Log.d(TAG, "inside lst else");
-                imageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (isValidString(chatData.getVidUrl())) {
-                            Log.d(TAG, "inside on click");
-                            FullScreenVideoActivity.open(activity, context, chatData.getVidUrl());
-                        }
-                    }
-                });
             }
         } else {
             vidContainer.setVisibility(View.GONE);
@@ -1302,6 +1272,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
             }
         });
+        Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, context);
+        LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
     }
 
     private void addLikeToAuthorProfile(final ChatData chatData) {
@@ -1353,7 +1325,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
 
         private RelativeLayout rootLayout;
         private TextView authorNameTv, visibleToYouTv, replyBottomTv;
@@ -1420,17 +1392,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
 
-            dpIv.setOnClickListener(this);
-            lubbContainer.setOnClickListener(this);
-            chatIv.setOnClickListener(null);
-            linkContainer.setOnClickListener(this);
-            linkContainer.setOnLongClickListener(this);
-            pollContainer.setOnLongClickListener(this);
-            messageTv.setOnLongClickListener(this);
-            rootLayout.setOnLongClickListener(this);
-            chatIv.setOnLongClickListener(this);
-            vidThumbnailIv.setOnLongClickListener(this);
-            lubbContainer.setOnLongClickListener(this);
+            dpIv.setOnTouchListener(this);
+            linkContainer.setOnTouchListener(this);
+            pollContainer.setOnTouchListener(this);
+            messageTv.setOnTouchListener(this);
+            rootLayout.setOnTouchListener(this);
+            chatIv.setOnTouchListener(this);
+            vidThumbnailIv.setOnTouchListener(this);
+            lubbContainer.setOnTouchListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -1488,76 +1457,112 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         };
 
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.iv_dp:
-                    ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
-                    break;
-                case R.id.container_lubb:
-                    toggleLubb(getAdapterPosition());
-                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
-                    LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
-                    break;
-                case R.id.link_meta_container:
-                    ChatData chatData = chatDataList.get(getAdapterPosition());
-                    if (GROUP.equalsIgnoreCase(chatData.getType())) {
-                        ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
-                    } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
-                        EventInfoActivity.open(context, chatData.getAttachedGroupId());
-                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
-                        ChatData emptyReplyChatData = new ChatData();
-                        emptyReplyChatData.setId(chatData.getReplyMsgId());
-                        int pos = chatDataList.indexOf(emptyReplyChatData);
-                        if (pos != -1) {
-                            recyclerView.scrollToPosition(pos);
-                            posToFlash = pos;
-                            notifyItemChanged(pos);
-                        }
-                    } else if (LINK.equalsIgnoreCase(chatData.getType())) {
-                        final URLSpan[] urls = messageTv.getUrls();
-                        final String url = urls[0].getURL();
-                        if (isValidString(url)) {
-                            Intent i = new Intent(Intent.ACTION_VIEW);
-                            i.setData(Uri.parse(url));
-                            context.startActivity(i);
-                        }
-                    }
-                    break;
-            }
-            if (actionMode != null) {
-                actionMode.finish();
-            }
-        }
+        private View touchedView;
 
         @Override
-        public boolean onLongClick(View v) {
-            if (chatDataList.get(getAdapterPosition()).getType().equalsIgnoreCase(GROUP_PROMPT)) {
+        public boolean onTouch(View v, MotionEvent event) {
+            touchedView = v;
+            return gestureDetector.onTouchEvent(event);
+        }
+
+        private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                toggleLubb(getAdapterPosition());
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                switch (touchedView.getId()) {
+                    case R.id.iv_dp:
+                        ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
+                        break;
+                    case R.id.container_lubb:
+                        toggleLubb(getAdapterPosition());
+                        break;
+                    case R.id.link_meta_container:
+                        ChatData chatData = chatDataList.get(getAdapterPosition());
+                        if (GROUP.equalsIgnoreCase(chatData.getType())) {
+                            ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
+                        } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
+                            EventInfoActivity.open(context, chatData.getAttachedGroupId());
+                        } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                            ChatData emptyReplyChatData = new ChatData();
+                            emptyReplyChatData.setId(chatData.getReplyMsgId());
+                            int pos = chatDataList.indexOf(emptyReplyChatData);
+                            if (pos != -1) {
+                                recyclerView.scrollToPosition(pos);
+                                posToFlash = pos;
+                                notifyItemChanged(pos);
+                            }
+                        } else if (LINK.equalsIgnoreCase(chatData.getType())) {
+                            final URLSpan[] urls = messageTv.getUrls();
+                            final String url = urls[0].getURL();
+                            if (isValidString(url)) {
+                                Intent i = new Intent(Intent.ACTION_VIEW);
+                                i.setData(Uri.parse(url));
+                                context.startActivity(i);
+                            }
+                        }
+                        break;
+                    case R.id.iv_chat_img:
+                        ChatData imgChatData = chatDataList.get(getAdapterPosition());
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
+                            // ask for external storage perm
+                            ChatFragmentPermissionsDispatcher
+                                    .getWritePermWithPermissionCheck(chatFragment);
+                        } else if (isValidString(imgChatData.getImgUrl())) {
+                            FullScreenImageActivity.open(activity, context, imgChatData.getImgUrl(), chatIv, null, R.drawable.ic_cancel_black_24dp);
+                        }
+                        break;
+                    case R.id.iv_vid_img:
+                        ChatData vidChatData = chatDataList.get(getAdapterPosition());
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
+                            // ask for external storage perm
+                            ChatFragmentPermissionsDispatcher
+                                    .getWritePermWithPermissionCheck(chatFragment);
+                        } else if (isValidString(vidChatData.getVidUrl())) {
+                            FullScreenVideoActivity.open(activity, context, vidChatData.getVidUrl());
+                        }
+                        break;
+                }
                 if (actionMode != null) {
                     actionMode.finish();
                 }
                 return true;
             }
-            if (getAdapterPosition() != highlightedPos) {
-                actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
-                dateTv.setVisibility(View.VISIBLE);
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-                if (highlightedPos != -1) {
-                    // another item was highlighted, remove its highlight
-                    notifyItemChanged(highlightedPos);
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (chatDataList.get(getAdapterPosition()).getType().equalsIgnoreCase(GROUP_PROMPT)) {
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
+
+                } else if (getAdapterPosition() != highlightedPos) {
+                    actionMode = ((AppCompatActivity) context).startSupportActionMode(actionModeCallbacks);
+                    dateTv.setVisibility(View.VISIBLE);
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                    if (highlightedPos != -1) {
+                        // another item was highlighted, remove its highlight
+                        notifyItemChanged(highlightedPos);
+                    }
+                    highlightedPos = getAdapterPosition();
+                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+                } else {
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
                 }
-                highlightedPos = getAdapterPosition();
-                selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            } else {
-                if (actionMode != null) {
-                    actionMode.finish();
-                }
+                super.onLongPress(e);
             }
-            return true;
-        }
+        });
+
     }
 
-    public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    public class SentChatViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
 
         private RelativeLayout rootLayout;
         private EmojiTextView messageTv;
@@ -1615,16 +1620,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
             senderTv = itemView.findViewById(R.id.tv_sender_name);
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
 
-            linkContainer.setOnClickListener(this);
-            linkContainer.setOnLongClickListener(this);
-            lubbContainer.setOnClickListener(this);
-            pollContainer.setOnLongClickListener(this);
-            messageTv.setOnLongClickListener(this);
-            chatIv.setOnClickListener(null);
-            chatIv.setOnLongClickListener(this);
-            vidThumbnailIv.setOnLongClickListener(this);
-            rootLayout.setOnLongClickListener(this);
-            lubbContainer.setOnLongClickListener(this);
+            linkContainer.setOnTouchListener(this);
+            pollContainer.setOnTouchListener(this);
+            messageTv.setOnTouchListener(this);
+            chatIv.setOnTouchListener(this);
+            vidThumbnailIv.setOnTouchListener(this);
+            rootLayout.setOnTouchListener(this);
+            lubbContainer.setOnTouchListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -1670,63 +1672,116 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         };
 
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.container_lubb:
-                    toggleLubb(getAdapterPosition());
-                    Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, v.getContext());
-                    break;
-                case R.id.link_meta_container:
-                    ChatData chatData = chatDataList.get(getAdapterPosition());
-                    if (GROUP.equalsIgnoreCase(chatData.getType())) {
-                        ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
-                    } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
-                        EventInfoActivity.open(context, chatData.getAttachedGroupId());
-                    } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
-                        ChatData emptyReplyChatData = new ChatData();
-                        emptyReplyChatData.setId(chatData.getReplyMsgId());
-                        int pos = chatDataList.indexOf(emptyReplyChatData);
-                        if (pos != -1) {
-                            recyclerView.scrollToPosition(pos);
-                            posToFlash = pos;
-                            notifyItemChanged(pos);
-                        }
-                    } else if (LINK.equalsIgnoreCase(chatData.getType())) {
-                        final URLSpan[] urls = messageTv.getUrls();
-                        final String url = urls[0].getURL();
-                        if (isValidString(url)) {
-                            Intent i = new Intent(Intent.ACTION_VIEW);
-                            i.setData(Uri.parse(url));
-                            context.startActivity(i);
-                        }
-                    }
-                    break;
-            }
-            if (actionMode != null) {
-                actionMode.finish();
-            }
-        }
+        private View touchedView;
 
         @Override
-        public boolean onLongClick(View v) {
-            if (getAdapterPosition() != highlightedPos) {
-                actionMode = ((AppCompatActivity) v.getContext()).startSupportActionMode(actionModeCallbacks);
-                dateTv.setVisibility(View.VISIBLE);
-                itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
-                if (highlightedPos != -1) {
-                    // another item was highlighted, remove its highlight
-                    notifyItemChanged(highlightedPos);
+        public boolean onTouch(View v, MotionEvent event) {
+            touchedView = v;
+            return gestureDetector.onTouchEvent(event);
+        }
+
+        private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onDown(MotionEvent event) {
+                // triggers first for both single tap and long press
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                toggleLubb(getAdapterPosition());
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                switch (touchedView.getId()) {
+                    case R.id.iv_dp:
+                        ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
+                        break;
+                    case R.id.container_lubb:
+                        toggleLubb(getAdapterPosition());
+                        break;
+                    case R.id.link_meta_container:
+                        ChatData chatData = chatDataList.get(getAdapterPosition());
+                        if (GROUP.equalsIgnoreCase(chatData.getType())) {
+                            ChatActivity.openForGroup(context, chatData.getAttachedGroupId(), false, null);
+                        } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
+                            EventInfoActivity.open(context, chatData.getAttachedGroupId());
+                        } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
+                            ChatData emptyReplyChatData = new ChatData();
+                            emptyReplyChatData.setId(chatData.getReplyMsgId());
+                            int pos = chatDataList.indexOf(emptyReplyChatData);
+                            if (pos != -1) {
+                                recyclerView.scrollToPosition(pos);
+                                posToFlash = pos;
+                                notifyItemChanged(pos);
+                            }
+                        } else if (LINK.equalsIgnoreCase(chatData.getType())) {
+                            final URLSpan[] urls = messageTv.getUrls();
+                            final String url = urls[0].getURL();
+                            if (isValidString(url)) {
+                                Intent i = new Intent(Intent.ACTION_VIEW);
+                                i.setData(Uri.parse(url));
+                                context.startActivity(i);
+                            }
+                        }
+                        break;
+                    case R.id.iv_chat_img:
+                        ChatData imgChatData = chatDataList.get(getAdapterPosition());
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            // ask for external storage perm
+                            ChatFragmentPermissionsDispatcher
+                                    .getWritePermWithPermissionCheck(chatFragment);
+                        } else if (isValidString(imgChatData.getImgUrl())) {
+                            FullScreenImageActivity.open(activity, context, imgChatData.getImgUrl(), chatIv, null, R.drawable.ic_cancel_black_24dp);
+                        }
+                        break;
+                    case R.id.iv_vid_img:
+                        ChatData vidChatData = chatDataList.get(getAdapterPosition());
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                            // ask for external storage perm
+                            ChatFragmentPermissionsDispatcher
+                                    .getWritePermWithPermissionCheck(chatFragment);
+                        } else if (isValidString(vidChatData.getVidUrl())) {
+                            FullScreenVideoActivity.open(activity, context, vidChatData.getVidUrl());
+                        }
+                        break;
                 }
-                highlightedPos = getAdapterPosition();
-                selectedChatId = chatDataList.get(getAdapterPosition()).getId();
-            } else {
                 if (actionMode != null) {
                     actionMode.finish();
                 }
+                return true;
             }
-            return true;
-        }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (chatDataList.get(getAdapterPosition()).getType().equalsIgnoreCase(GROUP_PROMPT)) {
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
+
+                } else if (getAdapterPosition() != highlightedPos) {
+                    actionMode = ((AppCompatActivity) context).startSupportActionMode(actionModeCallbacks);
+                    dateTv.setVisibility(View.VISIBLE);
+                    itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
+                    if (highlightedPos != -1) {
+                        // another item was highlighted, remove its highlight
+                        notifyItemChanged(highlightedPos);
+                    }
+                    highlightedPos = getAdapterPosition();
+                    selectedChatId = chatDataList.get(getAdapterPosition()).getId();
+                } else {
+                    if (actionMode != null) {
+                        actionMode.finish();
+                    }
+                }
+                super.onLongPress(e);
+            }
+        });
+
+
     }
 
     public class SystemChatViewHolder extends RecyclerView.ViewHolder {
