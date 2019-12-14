@@ -220,6 +220,7 @@ public class ShareActiv extends BaseActivity {
                     dmGroupData.setLastMessage(dmData.getLastMessage());
                     dmGroupData.setLastMessageTimestamp(dmData.getLastMessageTimestamp());
                     dmGroupData.setIsPrivate(true);
+                    dmGroupData.setIsDm(true);
 
                     final HashMap<String, Object> members = dmData.getMembers();
                     for (String profileId : members.keySet()) {
@@ -227,7 +228,7 @@ public class ShareActiv extends BaseActivity {
                         if (!FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId) && !sellerId.equalsIgnoreCase(profileId)) {
                             final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                             if (profileMap != null) {
-                                final boolean isSeller = (boolean) profileMap.get("isSeller");
+                                final boolean isSeller = Boolean.valueOf(String.valueOf(profileMap.get("isSeller")));
                                 if (isSeller) {
                                     fetchSellerProfileFrom(profileId, dmGroupData);
                                 } else {
