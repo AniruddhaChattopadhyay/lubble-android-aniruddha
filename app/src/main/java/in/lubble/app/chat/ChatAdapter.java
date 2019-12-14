@@ -1468,6 +1468,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
 
             @Override
+            public boolean onDown(MotionEvent event) {
+                // triggers first for both single tap and long press
+                return true;
+            }
+
+            @Override
             public boolean onDoubleTap(MotionEvent e) {
                 toggleLubb(getAdapterPosition());
                 return true;
