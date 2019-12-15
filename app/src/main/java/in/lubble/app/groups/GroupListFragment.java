@@ -29,6 +29,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,6 +87,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private ChildEventListener childEventListener;
     private ChildEventListener userGroupsListener;
     private ChildEventListener userDmsListener;
+    private Trace groupTrace;
 
     public GroupListFragment() {
     }
@@ -170,6 +173,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     }
 
     private void syncAllGroups() {
+        groupTrace = FirebasePerformance.getInstance().newTrace("group_list_trace");
+        groupTrace.start();
         query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
         dmQuery = RealtimeDbHelper.getDmsRef().orderByChild("lastMessageTimestamp");
         childEventListener = new ChildEventListener() {
@@ -228,6 +233,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     if (progressBar.getVisibility() == View.VISIBLE) {
                         progressBar.setVisibility(View.GONE);
                     }
+                    groupTrace.stop();
                 }
             }
 
