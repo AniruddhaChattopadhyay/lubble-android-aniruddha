@@ -1,7 +1,6 @@
 package in.lubble.app.groups;
 
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -175,11 +174,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         } else {
             // joined or unjoined groups
             timestampTv.setVisibility(View.VISIBLE);
-            if (groupData.getJoinedTimestamp() > groupData.getLastMessageTimestamp()) {
-                timestampTv.setText(getHumanTimestamp(groupData.getJoinedTimestamp()));
-            } else {
-                timestampTv.setText(getHumanTimestamp(groupData.getLastMessageTimestamp()));
-            }
+            timestampTv.setText(getHumanTimestamp(groupData.getLastMessageTimestamp()));
             if (!groupData.isJoined()) {
                 // align time with "view" btn
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -209,8 +204,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             GroupData oldGroup = groupDataList.get(dmCursorPos);
 
-            while (groupData.getRelevantTimestamp() > oldGroup.getRelevantTimestamp() && dmCursorPos > 0) {
-                Log.d(TAG, "addGroupWithSortFromBottom: " + getHumanTimestamp(groupData.getRelevantTimestamp()) + " old: " + getHumanTimestamp(oldGroup.getRelevantTimestamp()));
+            while (groupData.getLastMessageTimestamp() > oldGroup.getLastMessageTimestamp() && dmCursorPos > 0) {
                 dmCursorPos--;
                 oldGroup = groupDataList.get(dmCursorPos);
             }
