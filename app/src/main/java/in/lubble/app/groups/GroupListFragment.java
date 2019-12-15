@@ -46,7 +46,6 @@ import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
-import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -63,7 +62,6 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
@@ -252,29 +250,15 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     groupData.setId(dataSnapshot.getKey());
                     groupData.setIsDm(true);
                     groupData.setIsPrivate(true);
-                    if (TextUtils.isEmpty(groupData.getTitle())) {
-                        for (String key : groupData.getMembers().keySet()) {
-                            if (!key.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                                getUserInfoRef(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                        groupData.setTitle(profileInfo.getName());
-                                        groupData.setThumbnail(profileInfo.getThumbnail());
-                                        groupData.setIsDm(true);
-                                        groupData.setIsPrivate(true);
-                                        adapter.updateGroup(groupData);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                    }
-                                });
-                            }
+                    for (String memberUid : groupData.getMembers().keySet()) {
+                        if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                            final String name = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("name"));
+                            final String dp = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("profilePic"));
+                            groupData.setTitle(name);
+                            groupData.setThumbnail(dp);
+                            adapter.addGroupWithSortFromBottom(groupData);
                         }
                     }
-                    adapter.addGroupWithSortFromBottom(groupData);
                 }
             }
         }
@@ -286,29 +270,16 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     && groupData.getMembers().get("blocked_status") == null) {
                 groupData.setId(dataSnapshot.getKey());
                 groupData.setIsDm(true);
-                if (TextUtils.isEmpty(groupData.getTitle())) {
-                    for (String key : groupData.getMembers().keySet()) {
-                        if (!key.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                            getUserInfoRef(key).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                    groupData.setTitle(profileInfo.getName());
-                                    groupData.setThumbnail(profileInfo.getThumbnail());
-                                    groupData.setIsDm(true);
-                                    groupData.setIsPrivate(true);
-                                    adapter.updateGroup(groupData);
-                                }
 
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            });
-                        }
+                for (String memberUid : groupData.getMembers().keySet()) {
+                    if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                        final String name = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("name"));
+                        final String dp = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("profilePic"));
+                        groupData.setTitle(name);
+                        groupData.setThumbnail(dp);
+                        adapter.updateGroup(groupData);
                     }
                 }
-                adapter.updateGroup(groupData);
             }
         }
 
@@ -395,8 +366,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
-                        adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                        totalUnreadCount++;
+                    adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                    totalUnreadCount++;
                 }
             }
 

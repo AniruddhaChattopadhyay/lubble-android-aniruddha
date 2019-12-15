@@ -7,17 +7,20 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileInfo;
-
-import java.util.ArrayList;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
@@ -71,7 +74,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(viewHolder.userIv);
-                    viewHolder.userNameTv.setText(profileInfo.getName());
+                    viewHolder.userNameTv.setText(profileInfo == null? "deleted user" : profileInfo.getName());
                 } catch (IllegalArgumentException e) {
                     Crashlytics.logException(e);
                 }

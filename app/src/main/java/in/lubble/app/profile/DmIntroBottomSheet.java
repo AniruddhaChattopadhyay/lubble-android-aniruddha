@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
@@ -13,8 +14,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -22,8 +26,10 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
+import in.lubble.app.models.ProfileInfo;
 
 import static in.lubble.app.analytics.AnalyticsEvents.NEW_DM_SENT;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 
 public class DmIntroBottomSheet extends BottomSheetDialogFragment {
 
@@ -31,12 +37,14 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
 
     private TextInputLayout introMsgTil;
     private MaterialButton inviteBtn;
-    private String receiverUid;
+    private String receiverUid, receiverName, receiverProfilePic, authorProfilePic;
 
-    public static DmIntroBottomSheet newInstance(String receiverUid) {
+    public static DmIntroBottomSheet newInstance(String receiverUid, String receiverName, String receiverProfilePic) {
 
         Bundle args = new Bundle();
         args.putString("receiverUid", receiverUid);
+        args.putString("receiverName", receiverName);
+        args.putString("receiverProfilePic", receiverProfilePic);
         DmIntroBottomSheet fragment = new DmIntroBottomSheet();
         fragment.setArguments(args);
         return fragment;
@@ -59,9 +67,29 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
 
         if (getArguments() != null) {
             receiverUid = getArguments().getString("receiverUid");
+            receiverName = getArguments().getString("receiverName");
+            receiverProfilePic = getArguments().getString("receiverProfilePic");
         } else {
             dismiss();
         }
+
+        // get updated author DP
+        getUserInfoRef(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                if (profileInfo != null) {
+                    authorProfilePic = profileInfo.getThumbnail();
+                } else {
+                    authorProfilePic = String.valueOf(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         inviteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,7 +105,9 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
 
     private void createNewDm() {
 
-        String authorId = FirebaseAuth.getInstance().getUid();
+        final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        String authorId = firebaseAuth.getUid();
+        String authorName = firebaseAuth.getCurrentUser().getDisplayName();
 
         final ChatData chatData = new ChatData();
         chatData.setAuthorUid(authorId);
@@ -93,6 +123,8 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
         final HashMap<Object, Object> map2 = new HashMap<>();
         map2.put("isSeller", false);
         map2.put("otherUser", authorId);
+        map2.put("name", receiverName);
+        map2.put("profilePic", receiverProfilePic);
         userMap.put(receiverUid, map2);
 
         HashMap<String, Object> authorMap = new HashMap<>();
@@ -100,6 +132,8 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
         authorMap.put("joinedTimestamp", System.currentTimeMillis());
         authorMap.put("isSeller", false);
         authorMap.put("author", true);
+        authorMap.put("name", authorName);
+        authorMap.put("profilePic", authorProfilePic);
         userMap.put(authorId, authorMap);
 
         final HashMap<String, Object> map = new HashMap<>();
