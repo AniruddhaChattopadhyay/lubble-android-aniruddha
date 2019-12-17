@@ -1199,6 +1199,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     final Bundle bundle = new Bundle();
                     bundle.putString("group_id", groupId);
                     bundle.putString("type", chatData.getType());
+                    bundle.putBoolean("isDm", false);
                     Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
                     if (chatData.getType().equalsIgnoreCase(REPLY)) {
                         LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
@@ -1209,6 +1210,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         chatData.setType(HIDDEN);
                     }
                     messagesReference.push().setValue(chatData);
+                    final Bundle bundle = new Bundle();
+                    bundle.putString("dm_id", dmId);
+                    bundle.putString("type", chatData.getType());
+                    bundle.putBoolean("isDm", true);
+                    Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
                 }
                 newMessageEt.setText("");
                 linkTitle.setText("");

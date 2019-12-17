@@ -13,6 +13,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
@@ -1215,7 +1216,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         return chatDataList.size();
     }
 
-    private void toggleLubb(int pos) {
+    private void toggleLubb(int pos, boolean isSrcDoubleTap) {
         final ChatData chatData = chatDataList.get(pos);
         if (chatData.getType().equalsIgnoreCase(GROUP_PROMPT) || chatData.getIsDm()) {
             return;
@@ -1272,7 +1273,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
             }
         });
-        Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, context);
+        final Bundle bundle = new Bundle();
+        if (isSrcDoubleTap) {
+            bundle.putBoolean("is_src_double_tap", true);
+        } else {
+            bundle.putBoolean("is_src_double_tap", false);
+            Toast.makeText(context, "You can also double tap a message to like it", Toast.LENGTH_SHORT).show();
+        }
+        Analytics.triggerEvent(AnalyticsEvents.POP_LIKE_CLICK, bundle, context);
         LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
     }
 
@@ -1475,7 +1483,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                toggleLubb(getAdapterPosition());
+                toggleLubb(getAdapterPosition(), true);
                 return true;
             }
 
@@ -1486,7 +1494,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
                         break;
                     case R.id.container_lubb:
-                        toggleLubb(getAdapterPosition());
+                        toggleLubb(getAdapterPosition(), false);
                         break;
                     case R.id.link_meta_container:
                         ChatData chatData = chatDataList.get(getAdapterPosition());
@@ -1696,7 +1704,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                toggleLubb(getAdapterPosition());
+                toggleLubb(getAdapterPosition(), true);
                 return true;
             }
 
@@ -1707,7 +1715,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
                         break;
                     case R.id.container_lubb:
-                        toggleLubb(getAdapterPosition());
+                        toggleLubb(getAdapterPosition(), false);
                         break;
                     case R.id.link_meta_container:
                         ChatData chatData = chatDataList.get(getAdapterPosition());
