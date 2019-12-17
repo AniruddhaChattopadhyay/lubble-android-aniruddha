@@ -54,7 +54,7 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.DialogStyle);
-        Analytics.triggerScreenEvent(getContext(), "DmIntroBottomSheet");
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
     }
 
     @Nullable
