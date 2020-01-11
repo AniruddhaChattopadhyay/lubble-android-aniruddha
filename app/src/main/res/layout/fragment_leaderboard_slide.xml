@@ -82,7 +82,7 @@
                 android:textSize="10sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/light_teal"
-                tools:fontFamily="@font/molle_regular" />
+                app:fontFamily="@font/molle_regular" />
 
             <TextView
                 android:id="@+id/tv_name_second"
@@ -130,7 +130,7 @@
                 android:textSize="10sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/gold"
-                tools:fontFamily="@font/molle_regular" />
+                app:fontFamily="@font/molle_regular" />
 
             <TextView
                 android:id="@+id/tv_name_first"
@@ -178,7 +178,7 @@
                 android:textSize="10sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/lt_pink"
-                tools:fontFamily="@font/molle_regular" />
+                app:fontFamily="@font/molle_regular" />
 
             <TextView
                 android:id="@+id/tv_name_third"
