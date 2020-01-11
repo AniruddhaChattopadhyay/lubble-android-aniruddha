@@ -1,6 +1,7 @@
 package in.lubble.app.utils;
 
 import android.text.format.DateUtils;
+
 import androidx.annotation.NonNull;
 
 import java.text.DateFormat;
@@ -33,6 +34,14 @@ public class DateTimeUtils {
         Calendar c = Calendar.getInstance();
 
         SimpleDateFormat df = new SimpleDateFormat(SERVER_DATE_TIME, Locale.ENGLISH);
+        df.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
+        return df.format(c.getTimeInMillis());
+    }
+
+    public static String getCurrMonth() {
+        Calendar c = Calendar.getInstance();
+
+        SimpleDateFormat df = new SimpleDateFormat(SHORT_MONTH, Locale.ENGLISH);
         df.setTimeZone(TimeZone.getTimeZone("Asia/Kolkata"));
         return df.format(c.getTimeInMillis());
     }

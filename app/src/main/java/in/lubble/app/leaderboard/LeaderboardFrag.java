@@ -9,27 +9,31 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.mapUtils.MathUtil;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class LeaderboardFrag extends Fragment implements OnListFragmentInteractionListener {
 
@@ -37,8 +41,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
     private LeaderboardAdapter adapter;
     private static final String TAG = "LeaderboardFrag";
 
-    private TextView subtitleTv;
-    private TextView explainTv;
+    private TextView subtitleTv, explainTv, titleTv;
     private ImageView logoIv;
 
     private RelativeLayout firstContainer;
@@ -83,6 +86,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
         RecyclerView recyclerView = view.findViewById(R.id.rv_leaderboard);
         recyclerView.setNestedScrollingEnabled(true);
         progressbar = view.findViewById(R.id.progressbar_leaderboard);
+        titleTv = view.findViewById(R.id.tv_title);
         subtitleTv = view.findViewById(R.id.tv_subtitle);
         explainTv = view.findViewById(R.id.tv_explain);
         logoIv = view.findViewById(R.id.iv_logo);
@@ -117,6 +121,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
         adapter = new LeaderboardAdapter(GlideApp.with(requireContext()), mListener, requireContext());
         recyclerView.setAdapter(adapter);
 
+        titleTv.setText("Most Liked in " + DateTimeUtils.getCurrMonth());
         subtitleTv.setText(String.format("in %s", LubbleSharedPrefs.getInstance().getLubbleId()));
 
         fetchAllLubbleUsers();
@@ -147,7 +152,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
                             @Override
                             public int compare(ProfileData o1, ProfileData o2) {
                                 // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                                return MathUtil.compareDesc(o1.getLikes(), o2.getLikes());
+                                return MathUtil.compareDesc(o1.getMonthly_likes(), o2.getMonthly_likes());
                             }
                         });
                         if (isAdded()) {
@@ -169,7 +174,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
     private void setTop3(List<ProfileData> top3List) {
         final ProfileData firstUser = top3List.get(0);
         firstNameTv.setText(StringUtils.getTitleCase(firstUser.getInfo().getName()));
-        firstPointsTv.setText(String.valueOf(firstUser.getLikes()));
+        firstPointsTv.setText(String.valueOf(firstUser.getMonthly_likes()));
         GlideApp.with(requireContext()).load(firstUser.getInfo().getThumbnail()).circleCrop()
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .error(R.drawable.ic_account_circle_black_no_padding)
@@ -183,7 +188,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
 
         final ProfileData secondUser = top3List.get(1);
         secondNameTv.setText(StringUtils.getTitleCase(secondUser.getInfo().getName()));
-        secondPointsTv.setText(String.valueOf(secondUser.getLikes()));
+        secondPointsTv.setText(String.valueOf(secondUser.getMonthly_likes()));
         GlideApp.with(requireContext()).load(secondUser.getInfo().getThumbnail()).circleCrop()
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .error(R.drawable.ic_account_circle_black_no_padding)
@@ -197,7 +202,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
 
         final ProfileData thirdUser = top3List.get(2);
         thirdNameTv.setText(StringUtils.getTitleCase(thirdUser.getInfo().getName()));
-        thirdPointsTv.setText(String.valueOf(thirdUser.getLikes()));
+        thirdPointsTv.setText(String.valueOf(thirdUser.getMonthly_likes()));
         GlideApp.with(requireContext()).load(thirdUser.getInfo().getThumbnail()).circleCrop()
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .error(R.drawable.ic_account_circle_black_no_padding)

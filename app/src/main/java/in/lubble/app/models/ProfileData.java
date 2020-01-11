@@ -33,6 +33,7 @@ public class ProfileData {
     private boolean isDeleted;
     private long coins;
     private long likes = 0L;
+    private long monthly_likes = 0L;
     private ProfileAddress profileAddress;
     @Exclude
     private String groupFlair;
@@ -250,5 +251,13 @@ public class ProfileData {
 
     public void setIsDeleted(boolean deleted) {
         isDeleted = deleted;
+    }
+
+    public long getMonthly_likes() {
+        return monthly_likes;
+    }
+
+    public void setMonthly_likes(long monthly_likes) {
+        this.monthly_likes = monthly_likes;
     }
 }
