@@ -6,14 +6,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.utils.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.ViewHolder> {
 
@@ -42,7 +44,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         final ProfileData referralPersonData = profileList.get(position);
         holder.rankTv.setText(String.valueOf(position + 4));
         holder.nameTv.setText(StringUtils.getTitleCase(referralPersonData.getInfo().getName()));
-        holder.pointsTv.setText(String.valueOf(referralPersonData.getLikes()));
+        holder.pointsTv.setText(String.valueOf(referralPersonData.getMonthly_likes()));
 
         glide.load(referralPersonData.getInfo().getThumbnail()).circleCrop()
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)

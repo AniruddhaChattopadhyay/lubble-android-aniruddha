@@ -111,7 +111,7 @@ public class LeaderboardSlideFrag extends Fragment {
                             @Override
                             public int compare(ProfileData o1, ProfileData o2) {
                                 // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
-                                return MathUtil.compareDesc(o1.getLikes(), o2.getLikes());
+                                return MathUtil.compareDesc(o1.getMonthly_likes(), o2.getMonthly_likes());
                             }
                         });
                         if (isAdded()) {
