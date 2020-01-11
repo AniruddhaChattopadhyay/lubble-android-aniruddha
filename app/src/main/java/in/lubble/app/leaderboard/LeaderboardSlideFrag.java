@@ -6,26 +6,32 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.R;
-import in.lubble.app.models.ProfileData;
-import in.lubble.app.utils.StringUtils;
-import in.lubble.app.utils.mapUtils.MathUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.R;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.utils.DateTimeUtils;
+import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.mapUtils.MathUtil;
+
 public class LeaderboardSlideFrag extends Fragment {
     private static final String ARG_SLIDER_DATA = "ARG_SLIDER_DATA";
+
+    private TextView titleTv;
 
     private ImageView firstIv;
     private TextView firstNameTv;
@@ -60,6 +66,8 @@ public class LeaderboardSlideFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_leaderboard_slide, container, false);
 
+        titleTv = view.findViewById(R.id.tv_title);
+
         firstIv = view.findViewById(R.id.iv_first);
         firstNameTv = view.findViewById(R.id.tv_name_first);
 
@@ -69,6 +77,7 @@ public class LeaderboardSlideFrag extends Fragment {
         thirdIv = view.findViewById(R.id.iv_third);
         thirdNameTv = view.findViewById(R.id.tv_name_third);
 
+        titleTv.setText("Most Liked in " + DateTimeUtils.getCurrMonth());
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override

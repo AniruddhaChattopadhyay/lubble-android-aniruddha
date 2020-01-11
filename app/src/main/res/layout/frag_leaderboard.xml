@@ -35,7 +35,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="8dp"
             android:drawablePadding="4dp"
-            android:text="Most Liked"
+            android:text="Most Liked this Month"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             android:textColor="@color/white"
             app:drawableLeftCompat="@drawable/ic_favorite_white_16dp" />
