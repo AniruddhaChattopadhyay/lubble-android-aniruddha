@@ -559,6 +559,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 if (chatProgressBar != null && chatProgressBar.getVisibility() == View.VISIBLE) {
                     chatProgressBar.setVisibility(View.GONE);
                 }
+                if (groupId != null && GroupPromptSharedPrefs.getInstance().getGroupId(groupId)){
+                    addGroupJoinPrompt();
+                }
             }
 
             @Override
@@ -585,6 +588,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             personalChatData.setServerTimestamp(System.currentTimeMillis());
             chatAdapter.addPersonalChatData(personalChatData);
             Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, requireContext());
+            GroupPromptSharedPrefs.getInstance().removeGroupId(groupId);
         }
     }
 

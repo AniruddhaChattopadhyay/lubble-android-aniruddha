@@ -20,6 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 import com.segment.analytics.Analytics;
 
+import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.database.DbSingleton;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
@@ -63,6 +64,7 @@ public class LubbleApp extends MultiDexApplication {
         MutedChatsSharedPrefs.initializeInstance(getApplicationContext());
         KeyMappingSharedPrefs.initializeInstance(getApplicationContext());
         AnswerSharedPrefs.initializeInstance(getApplicationContext());
+        GroupPromptSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
         // Create an analytics client with the given context and Segment write key.
