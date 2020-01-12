@@ -7,9 +7,11 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
@@ -25,11 +27,15 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import in.lubble.app.models.ChatData;
 
 import java.io.ByteArrayOutputStream;
 
-import static in.lubble.app.firebase.FirebaseStorageHelper.*;
+import in.lubble.app.models.ChatData;
+import in.lubble.app.utils.FileUtils;
+
+import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
+import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
+import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
@@ -134,7 +140,7 @@ public class UploadFileService extends BaseTaskService {
                 if (task.isSuccessful()) {
                     // Create file metadata including the content type
                     StorageMetadata metadata = new StorageMetadata.Builder()
-                            .setContentType("image/jpg")
+                            .setContentType(FileUtils.getMimeType(fileUri))
                             .setCustomMetadata("uid", FirebaseAuth.getInstance().getUid())
                             .setCustomMetadata("token", task.getResult().getToken())
                             .build();
