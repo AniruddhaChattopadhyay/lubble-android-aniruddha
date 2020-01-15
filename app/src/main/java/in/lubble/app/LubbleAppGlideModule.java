@@ -1,6 +1,7 @@
 package in.lubble.app;
 
 import android.content.Context;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.GlideBuilder;
 import com.bumptech.glide.Registry;
@@ -22,7 +23,7 @@ public class LubbleAppGlideModule extends AppGlideModule {
         builder.setDefaultRequestOptions(
                 new RequestOptions()
                         .format(DecodeFormat.PREFER_ARGB_8888))
-                .setDiskCache(new ExternalPreferredCacheDiskCacheFactory(context, 15 * 1024 * 1024)); //max cache size: 15mb
+                .setDiskCache(new ExternalPreferredCacheDiskCacheFactory(context, 100 * 1024 * 1024)); //max cache size: 100mb
     }
 
     @Override

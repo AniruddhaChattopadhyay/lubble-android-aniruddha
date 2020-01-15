@@ -61,6 +61,7 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -84,7 +85,6 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
-import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.FullScreenVideoActivity;
 import in.lubble.app.utils.UiUtils;
@@ -1119,15 +1119,19 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void downloadAndSavePic(final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
-        glide.asBitmap()
-                .load(chatData.getImgUrl())
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .into(new SimpleTarget<Bitmap>() {
+        glide.download(chatData.getImgUrl())
+                .listener(new RequestListener<File>() {
                     @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        FileUtils.saveImageInGallery(resource, chatData.getId(), context);
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<File> target, boolean isFirstResource) {
                         progressBar.setVisibility(View.GONE);
-                        glide.load(resource).centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
+                        imageView.setOnClickListener(null);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(File resource, Object model, Target<File> target, DataSource dataSource, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        glide.load(resource).centerCrop().into(imageView);
                         imageView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -1136,15 +1140,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                 }
                             }
                         });
+                        return false;
                     }
-
-                    @Override
-                    public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                        super.onLoadFailed(errorDrawable);
-                        progressBar.setVisibility(View.GONE);
-                        imageView.setOnClickListener(null);
-                    }
-                });
+                }).submit();
     }
 
     public void addChatData(@NonNull ChatData chatData) {

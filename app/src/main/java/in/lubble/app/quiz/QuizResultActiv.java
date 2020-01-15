@@ -18,19 +18,33 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.view.animation.ScaleAnimation;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.Group;
 import androidx.core.content.FileProvider;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
+
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import in.lubble.app.*;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+
+import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
+import in.lubble.app.Constants;
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -41,14 +55,15 @@ import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
-import org.json.JSONException;
-import org.json.JSONObject;
-import permissions.dispatcher.*;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.io.File;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.quiz.QuizResultActivPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
@@ -141,7 +156,7 @@ public class QuizResultActiv extends BaseActivity {
     public void shareScreenshot() {
         View rootView = getWindow().getDecorView().findViewById(android.R.id.content);
         final Bitmap screenShot = getScreenShot(rootView);
-        final String path = FileUtils.saveImageInGallery(screenShot, "quiz_screenie_" + System.currentTimeMillis(), QuizResultActiv.this);
+        final String path = FileUtils.saveImageInGallery(screenShot, "quiz_screenie_" + System.currentTimeMillis(), QuizResultActiv.this, null);
         Uri uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(path));
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);

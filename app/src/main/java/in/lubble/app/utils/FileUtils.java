@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -47,6 +48,7 @@ import static in.lubble.app.LubbleApp.getAppContext;
 public class FileUtils {
 
     public static double Video_Size = 0;
+
     public static File createImageFile(Context context) throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(new Date());
@@ -92,8 +94,8 @@ public class FileUtils {
     public static Intent getGalleryIntent(Context context) {
         Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
         photoPickerIntent.setType("*/*");
-        photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {"image/*", "video/*"});
-        Log.d("GroupID",Intent.EXTRA_MIME_TYPES);
+        photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "video/*"});
+        Log.d("GroupID", Intent.EXTRA_MIME_TYPES);
         return photoPickerIntent;
     }
 
@@ -146,10 +148,11 @@ public class FileUtils {
         if (uri.getAuthority() != null) {
             try {
                 inputStream = context.getContentResolver().openInputStream(uri); // context needed
-                if(getMimeType(uri).contains("video"))
-                    photoFile = createTemporalVideoFileFrom(context,inputStream);
-                else{
-                photoFile = createTemporalFileFrom(context, inputStream);
+                String mimeType = getMimeType(uri);
+                if (mimeType.contains("video"))
+                    photoFile = createTemporalVideoFileFrom(context, inputStream);
+                else {
+                    photoFile = createTemporalFileFrom(context, inputStream, mimeType);
                 }
 
             } catch (FileNotFoundException e) {
@@ -169,6 +172,7 @@ public class FileUtils {
 
         return photoFile;
     }
+
     private static File createTemporalVideoFileFrom(Context context, InputStream inputStream) throws IOException {
         File targetFile = null;
 
@@ -193,14 +197,15 @@ public class FileUtils {
 
         return targetFile;
     }
-    private static File createTemporalFileFrom(Context context, InputStream inputStream) throws IOException {
+
+    private static File createTemporalFileFrom(Context context, InputStream inputStream, String mimeType) throws IOException {
         File targetFile = null;
 
         if (inputStream != null) {
             int read;
             byte[] buffer = new byte[8 * 1024];
 
-            targetFile = createTemporalFile(context);
+            targetFile = createTemporalFile(context, mimeType);
             OutputStream outputStream = new FileOutputStream(targetFile);
 
             while ((read = inputStream.read(buffer)) != -1) {
@@ -218,9 +223,21 @@ public class FileUtils {
         return targetFile;
     }
 
-    private static File createTemporalFile(Context context) {
-        return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".jpg"); // context needed
+    private static File createTemporalFile(Context context, String mimeType) {
+        String extension = "jpg";
+        if (!TextUtils.isEmpty(mimeType)) {
+            try {
+                String calculatedExtension = mimeType.split("/")[1];
+                if (!TextUtils.isEmpty(calculatedExtension)) {
+                    extension = calculatedExtension;
+                }
+            } catch (Exception e) {
+                Crashlytics.logException(e);
+            }
+        }
+        return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + "." + extension); // context needed
     }
+
     private static File createTemporalVideoFile(Context context) {
         return new File(context.getExternalCacheDir(), String.valueOf(System.currentTimeMillis()) + ".mp4"); // context needed
     }
@@ -246,12 +263,26 @@ public class FileUtils {
         alertDialog.show();
     }
 
-    public static String saveImageInGallery(Bitmap image, String msgId, Context context) {
+    public static String saveImageInGallery(Bitmap image, String msgId, Context context, @Nullable Uri uri) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && isExternalStorageWritable()) {
             String savedImagePath = null;
+            String extension = "jpg";
+            if (uri != null) {
+                try {
+                    final String mimeType = getMimeType(uri);
+                    if (mimeType != null) {
+                        String calculatedExtension = mimeType.split("/")[1];
+                        if (!TextUtils.isEmpty(calculatedExtension)) {
+                            extension = calculatedExtension;
+                        }
+                    }
+                } catch (Exception e) {
+                    Crashlytics.logException(e);
+                }
+            }
 
-            String imageFileName = "JPEG_" + msgId + ".jpg";
+            String imageFileName = "JPEG_" + msgId + "." + extension;
             File storageDir = new File(
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
                             + File.separator + "Lubble_pics");
@@ -290,7 +321,7 @@ public class FileUtils {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && isExternalStorageReadable()) {
             File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                    + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + ".jpg");
+                    + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + ".*");
 
             if (imgFile.exists()) {
                 //return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
