@@ -303,6 +303,7 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name=".explore.ExploreActiv"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />
 
