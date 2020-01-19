@@ -7,10 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.List;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.List;
+
 import in.lubble.app.models.EventData;
 
 public class GoingStatsAdapter extends RecyclerView.Adapter<GoingStatsAdapter.MyViewHolder> {
@@ -42,6 +43,8 @@ public class GoingStatsAdapter extends RecyclerView.Adapter<GoingStatsAdapter.My
             holder.statsTextView.setText("Going");
         else if (goingStatsModel.getStatus() == EventData.MAYBE)
             holder.statsTextView.setText("Maybe");
+        else
+            holder.statsTextView.setText("Not Going");
     }
 
     @Override
