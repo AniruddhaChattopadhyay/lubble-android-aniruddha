@@ -12,6 +12,9 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
+import static android.text.format.DateUtils.FORMAT_ABBREV_RELATIVE;
+
 /**
  * Created by ishaangarg on 27/10/17.
  */
@@ -109,7 +112,7 @@ public class DateTimeUtils {
 
     @NonNull
     public static String getHumanTimestamp(long time) {
-        String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString();
+        String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, FORMAT_ABBREV_RELATIVE | FORMAT_ABBREV_MONTH ).toString();
         if (humanTime.equalsIgnoreCase("0 min. ago")
                 || humanTime.equalsIgnoreCase("0 mins ago")
                 || humanTime.equalsIgnoreCase("In 0 min.")
@@ -127,7 +130,7 @@ public class DateTimeUtils {
      */
     public static String getHumanTimestampWithTime(long time) {
         if (System.currentTimeMillis() - time < 5 * DateUtils.MINUTE_IN_MILLIS) {
-            String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, DateUtils.FORMAT_ABBREV_RELATIVE).toString();
+            String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, FORMAT_ABBREV_RELATIVE | FORMAT_ABBREV_MONTH).toString();
             if (humanTime.equalsIgnoreCase("0 min. ago")
                     || humanTime.equalsIgnoreCase("0 mins ago")
                     || humanTime.equalsIgnoreCase("In 0 min.")

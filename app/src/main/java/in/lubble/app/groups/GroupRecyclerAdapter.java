@@ -73,6 +73,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             final GroupData groupData = groupDataList.get(position);
             groupViewHolder.groupData = groupData;
 
+            if (groupData == null) {
+                return;
+            }
+
             int placeholderThumbnail;
             if (groupData.getIsDm()) {
                 placeholderThumbnail = R.drawable.ic_account_circle_black_no_padding;
@@ -168,7 +172,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
-        if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
+        if ((!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) || groupData.getLastMessageTimestamp() == 0) {
             // for pending group invite
             timestampTv.setVisibility(View.GONE);
         } else {
@@ -204,7 +208,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             GroupData oldGroup = groupDataList.get(dmCursorPos);
 
-            while (groupData.getLastMessageTimestamp() > oldGroup.getLastMessageTimestamp() && dmCursorPos > 0) {
+            while (oldGroup != null && groupData.getLastMessageTimestamp() > oldGroup.getLastMessageTimestamp() && dmCursorPos > 0) {
                 dmCursorPos--;
                 oldGroup = groupDataList.get(dmCursorPos);
             }
@@ -243,8 +247,15 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void updateGroup(GroupData newGroupData) {
         final int pos = getChildIndex(newGroupData.getId());
         if (pos != -1) {
-            groupDataList.set(pos, newGroupData);
-            notifyItemChanged(pos);
+            final GroupData oldGroupData = groupDataList.get(pos);
+            if (!oldGroupData.isJoined() && newGroupData.isJoined()) {
+                // move group from public list to joined list
+                removeGroup(newGroupData.getId());
+                addGroupWithSortFromBottom(newGroupData);
+            } else {
+                groupDataList.set(pos, newGroupData);
+                notifyItemChanged(pos);
+            }
         } else {
             addGroupToTop(newGroupData);
         }

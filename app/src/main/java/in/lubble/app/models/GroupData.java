@@ -119,7 +119,7 @@ public class GroupData {
     }
 
     public long getLastMessageTimestamp() {
-        return this.lastMessageTimestamp == 0 ? getJoinedTimestamp() : lastMessageTimestamp;
+        return this.lastMessageTimestamp;
     }
 
     public void setLastMessageTimestamp(long lastMessageTimestamp) {

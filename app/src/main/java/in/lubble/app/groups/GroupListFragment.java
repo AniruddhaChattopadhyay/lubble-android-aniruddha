@@ -276,6 +276,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     && groupData.getMembers().get("blocked_status") == null) {
                 groupData.setId(dataSnapshot.getKey());
                 groupData.setIsDm(true);
+                groupData.setIsPrivate(true);
 
                 for (String memberUid : groupData.getMembers().keySet()) {
                     if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {

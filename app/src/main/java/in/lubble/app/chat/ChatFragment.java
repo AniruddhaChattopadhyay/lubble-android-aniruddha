@@ -559,7 +559,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 if (chatProgressBar != null && chatProgressBar.getVisibility() == View.VISIBLE) {
                     chatProgressBar.setVisibility(View.GONE);
                 }
-                if (groupId != null && GroupPromptSharedPrefs.getInstance().getGroupId(groupId)){
+                if (groupId != null && GroupPromptSharedPrefs.getInstance().getGroupId(groupId)) {
                     addGroupJoinPrompt();
                 }
             }
@@ -914,17 +914,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    String lubbleName = dataSnapshot.child("title").getValue(String.class);
-                    showBottomSheetAlert(getContext(), getLayoutInflater(),
-                            String.format(getString(R.string.lubble_group_warning_title), lubbleName),
-                            String.format(getString(R.string.lubble_group_warning_subtitle), lubbleName),
-                            R.drawable.ic_public_black_24dp, new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
-                                    LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
-                                }
-                            });
+                    if (isAdded()) {
+                        String lubbleName = dataSnapshot.child("title").getValue(String.class);
+                        showBottomSheetAlert(getContext(), getLayoutInflater(),
+                                String.format(getString(R.string.lubble_group_warning_title), lubbleName),
+                                String.format(getString(R.string.lubble_group_warning_subtitle), lubbleName),
+                                R.drawable.ic_public_black_24dp, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
+                                        LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
+                                    }
+                                });
+                    }
                 }
 
                 @Override
