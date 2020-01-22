@@ -774,7 +774,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
                             if (map != null) {
                                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                if (profileInfo != null) {
+                                if (profileInfo != null && getActivity() != null) {
                                     profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
                                     ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
                                     if (!isThisUserJoined) {
