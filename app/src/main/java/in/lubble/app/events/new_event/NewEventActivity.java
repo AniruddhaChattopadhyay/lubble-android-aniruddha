@@ -33,6 +33,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.Places;
@@ -531,11 +532,11 @@ public class NewEventActivity extends BaseActivity {
         List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS);
 
         // Start the autocomplete intent.
-        LatLng northEast = SphericalUtil.computeOffset(latLng, 800, 45); // Shift 800m to the north-east
-        LatLng southWest = SphericalUtil.computeOffset(latLng, 800, 225); // Shift 800m to the north-east
+        LatLng northEast = SphericalUtil.computeOffset(latLng, 2000, 45); // Shift 2km to the north-east
+        LatLng southWest = SphericalUtil.computeOffset(latLng, 2000, 225); // Shift 2km to the north-east
         Intent intent = new Autocomplete.IntentBuilder(
                 AutocompleteActivityMode.FULLSCREEN, fields)
-                .setLocationBias(RectangularBounds.newInstance(northEast, southWest))
+                .setLocationBias(RectangularBounds.newInstance(new LatLngBounds(southWest, northEast)))
                 .build(this);
         startActivityForResult(intent, PLACE_PICKER_REQUEST);
     }
@@ -544,7 +545,7 @@ public class NewEventActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
-                Place place = Autocomplete.getPlaceFromIntent(data);
+                place = Autocomplete.getPlaceFromIntent(data);
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
                 if (place != null) {
                     loadMapAt(place.getLatLng());
