@@ -32,6 +32,7 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
@@ -88,6 +89,14 @@ public class ShareActiv extends BaseActivity {
         Intent intent = getIntent();
         String action = intent.getAction();
         String type = intent.getType();
+
+        if (FirebaseAuth.getInstance().getUid() == null) {
+            // user is trying to share from gallery but isnt not logged in
+            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, MainActivity.class));
+            finishAffinity();
+            return;
+        }
 
         if (Intent.ACTION_SEND.equals(action) && type != null) {
             if ("text/plain".equals(type)) {
