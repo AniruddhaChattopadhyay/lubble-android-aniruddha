@@ -1215,6 +1215,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void toggleLubb(int pos, boolean isSrcDoubleTap) {
+        if (pos == -1) {
+            Toast.makeText(activity, "Please try liking again", Toast.LENGTH_SHORT).show();
+            Crashlytics.logException(new ArrayIndexOutOfBoundsException("while lubbing a msg. length = " + chatDataList.size() + " and index = " + pos));
+            return;
+        }
         final ChatData chatData = chatDataList.get(pos);
         if (chatData.getType().equalsIgnoreCase(GROUP_PROMPT) || chatData.getIsDm()) {
             return;
