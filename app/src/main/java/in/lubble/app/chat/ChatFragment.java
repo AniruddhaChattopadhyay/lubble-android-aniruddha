@@ -824,6 +824,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     void setBlockedStatus(String status) {
+        if (dmInfoReference == null) {
+            if (dmId != null) {
+                dmInfoReference = getDmsRef().child(dmId);
+            } else {
+                Toast.makeText(getContext(), "Something went wrong. Please retry", Toast.LENGTH_SHORT).show();
+                Crashlytics.logException(new Exception("tried to block/report user but dmInfoReference & dmId are NULL"));
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
+                return;
+            }
+        }
         dmInfoReference.child("members").child(authorId).child("blocked_status").setValue(status);
         dmInfoReference.child("members").child(authorId).child("blocked_timestamp").setValue(System.currentTimeMillis());
     }
