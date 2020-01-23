@@ -9,6 +9,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
+
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
@@ -36,8 +39,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
@@ -111,13 +112,21 @@ public class LoginActivity extends BaseActivity {
                 .setActionCodeSettings(actionCodeSettings).build();
 
         List<String> whitelistedCountries = new ArrayList<String>();
-        whitelistedCountries.add("in");
+        whitelistedCountries.add("IN");
         List<AuthUI.IdpConfig> selectedProviders = new ArrayList<>();
-        selectedProviders
-                .add(new AuthUI.IdpConfig.PhoneBuilder()
-                        .setDefaultCountryIso("in")
-                        .setWhitelistedCountries(whitelistedCountries)
-                        .build());
+        AuthUI.IdpConfig idpConfig;
+        try {
+            idpConfig = new AuthUI.IdpConfig.PhoneBuilder()
+                    .setDefaultCountryIso("IN")
+                    .setWhitelistedCountries(whitelistedCountries)
+                    .build();
+        } catch (IllegalStateException ex) {
+            Crashlytics.logException(ex);
+            idpConfig = new AuthUI.IdpConfig.PhoneBuilder()
+                    .setWhitelistedCountries(whitelistedCountries)
+                    .build();
+        }
+        selectedProviders.add(idpConfig);
         selectedProviders.add(facebookIdp);
         selectedProviders.add(googleIdp);
         selectedProviders.add(emailIdp);
