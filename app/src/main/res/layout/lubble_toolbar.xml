@@ -48,28 +48,22 @@
             android:id="@+id/lubble_toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:layout_gravity="center"
+            android:layout_toRightOf="@id/container_dp"
             android:gravity="center"
+            android:layout_marginLeft="16dp"
             android:textAllCaps="true"
             android:textColor="@color/darker_gray"
+            android:drawableRight="@drawable/ic_arrow_drop_down_black_24dp"
+            android:drawableTint="@color/dark_gray"
             android:visibility="gone"
             tools:text="Saraswati vihar"
             tools:visibility="visible" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@id/lubble_toolbar_title"
-            android:tint="@color/dark_gray"
-            app:srcCompat="@drawable/ic_arrow_drop_down_black_24dp" />
 
         <View
             android:id="@+id/lubble_click_target"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_toLeftOf="@id/tv_toolbar_rewards"
+            android:layout_toLeftOf="@id/tv_toolbar_search"
             android:layout_toRightOf="@id/container_dp" />
 
         <TextView
@@ -82,9 +76,47 @@
             android:padding="8dp"
             android:text="Rewards"
             android:textColor="@color/black"
-            android:textSize="12sp"
+            android:textSize="10sp"
             app:drawableTint="@color/colorAccent"
             app:drawableTopCompat="@drawable/ic_premium_badge" />
+
+        <TextView
+            android:id="@+id/tv_toolbar_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/tv_toolbar_rewards"
+            android:layout_centerVertical="true"
+            android:gravity="center"
+            android:padding="8dp"
+            android:text="Search"
+            android:textColor="@color/black"
+            android:textSize="10sp"
+            app:drawableTopCompat="@drawable/ic_search_gray_24dp" />
+
+        <ImageView
+            android:id="@+id/iv_search_back"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_arrow_back"
+            android:tint="@color/colorAccent"
+            android:paddingLeft="8dp"
+            android:visibility="gone"
+            android:paddingRight="8dp" />
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:queryHint="Search all groups"
+            app:iconifiedByDefault="false"
+            app:searchIcon="@null"
+            android:layout_toRightOf="@id/iv_search_back"
+            app:closeIcon="@drawable/ic_close_black_24dp"
+            android:paddingLeft="-12dp"
+            android:focusableInTouchMode="true"
+            android:focusable="true"
+            android:paddingStart="-12dp" />
 
     </RelativeLayout>
 

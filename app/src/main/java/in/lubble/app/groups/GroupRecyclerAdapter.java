@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,7 +29,7 @@ import static in.lubble.app.utils.DateTimeUtils.getHumanTimestamp;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
-public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
 
     private static final int TYPE_GROUP = 525;
     private static final int TYPE_HEADER = 600;
@@ -35,20 +37,23 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     private int cursorPos = 0;
     private int dmCursorPos = 0;
     private final List<GroupData> groupDataList;
+    private final List<GroupData> groupDataListCopy;
     // <GroupID, UserGroupData>
     private final HashMap<String, UserGroupData> userGroupDataMap;
     private final OnListFragmentInteractionListener mListener;
     private int posToFlash = -1;
+    private GroupDataFilter filter;
 
     public GroupRecyclerAdapter(OnListFragmentInteractionListener listener) {
         groupDataList = new ArrayList<>();
+        groupDataListCopy = new ArrayList<>();
         userGroupDataMap = new HashMap<>();
         mListener = listener;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (position == publicCursorPos) {
+        if (position == publicCursorPos || groupDataList.get(position) == null) {
             return TYPE_HEADER;
         } else {
             return TYPE_GROUP;
@@ -306,6 +311,31 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     @Override
     public int getItemCount() {
         return groupDataList.size();
+    }
+
+    public void reinitGroupListCopy(){
+        groupDataListCopy.clear();
+        groupDataListCopy.addAll(groupDataList);
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (filter == null) {
+            filter = new GroupDataFilter(this, groupDataList);
+        }
+        return filter;
+    }
+
+    public void replaceAll(List<GroupData> filteredList) {
+        groupDataList.clear();
+        groupDataList.addAll(groupDataListCopy);
+        for (int i = groupDataList.size() - 1; i >= 0; i--) {
+            final GroupData groupData = groupDataList.get(i);
+            if (groupData != null && !filteredList.contains(groupData)) {
+                groupDataList.remove(groupData);
+            }
+        }
+        notifyDataSetChanged();
     }
 
     class GroupViewHolder extends RecyclerView.ViewHolder {

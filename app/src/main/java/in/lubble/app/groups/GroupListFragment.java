@@ -80,6 +80,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private PagerContainer pagerContainer;
     private ViewPager viewPager;
     private int currentPage = 0;
+    private TabLayout tabLayout;
     private Handler handler = new Handler();
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
     private int totalUnreadCount = 0;
@@ -109,7 +110,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         newGroupContainer = view.findViewById(R.id.container_create_group);
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
-        TabLayout tabLayout = view.findViewById(R.id.tab_dots);
+        tabLayout = view.findViewById(R.id.tab_dots);
         Button exploreBtn = view.findViewById(R.id.btn_explore);
         tabLayout.setupWithViewPager(viewPager, true);
         viewPager.setClipChildren(false);
@@ -536,6 +537,24 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     public void onAttach(Context context) {
         super.onAttach(context);
         mListener = this;
+    }
+
+    public void reinitGroupListCopy() {
+        adapter.reinitGroupListCopy();
+    }
+
+    public void toggleVisibilityOfSlider(boolean show) {
+        if (show) {
+            pagerContainer.setVisibility(View.VISIBLE);
+            tabLayout.setVisibility(View.VISIBLE);
+        } else {
+            pagerContainer.setVisibility(View.GONE);
+            tabLayout.setVisibility(View.GONE);
+        }
+    }
+
+    public void filterGroups(String searchString) {
+        adapter.getFilter().filter(searchString);
     }
 
     @Override
