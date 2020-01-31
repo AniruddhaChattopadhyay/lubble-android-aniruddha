@@ -96,12 +96,27 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 if (!TextUtils.isEmpty(introMsgTil.getEditText().getText().toString())) {
-                    createNewDm();
+                    if (isHighQualityDm(introMsgTil.getEditText().getText().toString())) {
+                        createNewDm();
+                    } else {
+                        introMsgTil.setError("Please send meaningful invitations. Try to explain why you want to message them. Spamming members may get you banned from Lubble.");
+                    }
                 }
             }
         });
 
         return view;
+    }
+
+    private boolean isHighQualityDm(String dmText) {
+        String filteredText = dmText.trim().toLowerCase();
+        filteredText = filteredText.replaceAll("hi+", "");
+        filteredText = filteredText.replaceAll("hello+", "");
+        filteredText = filteredText.replaceAll("yo+", "");
+        filteredText = filteredText.replaceAll("hey+", "");
+        filteredText = filteredText.replaceAll("hola+", "");
+        filteredText = filteredText.replaceAll(receiverName, "");
+        return filteredText.length() >= 10;
     }
 
     private void createNewDm() {

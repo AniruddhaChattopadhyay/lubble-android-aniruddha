@@ -30,6 +30,7 @@ public class ProfileData {
     private long birthdate = 0L;
     private boolean isOwner;
     private boolean isAgePublic = true;
+    private boolean isDmEnabled = true;
     private boolean isDeleted;
     private long coins;
     private long likes = 0L;
@@ -259,5 +260,13 @@ public class ProfileData {
 
     public void setMonthly_likes(long monthly_likes) {
         this.monthly_likes = monthly_likes;
+    }
+
+    public boolean getIsDmEnabled() {
+        return isDmEnabled;
+    }
+
+    public void setIsDmEnabled(boolean dmEnabled) {
+        isDmEnabled = dmEnabled;
     }
 }

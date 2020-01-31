@@ -97,6 +97,7 @@
                     android:layout_below="@+id/tv_bio"
                     android:layout_centerHorizontal="true"
                     android:text="Message"
+                    android:enabled="false"
                     style="@style/Widget.MaterialComponents.Button.Icon"
                     app:icon="@drawable/ic_send_white_24dp"
                     android:theme="@style/MaterialButton" />
