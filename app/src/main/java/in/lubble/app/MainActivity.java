@@ -169,11 +169,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             return;
         }
 
-        if (LubbleSharedPrefs.getInstance().getIsLogoutPending()) {
-            UserUtils.logout(this);
-            return;
-        }
-
         GlideApp.with(this).load(currentUser.getPhotoUrl())
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .circleCrop()
@@ -532,6 +527,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (LubbleSharedPrefs.getInstance().getIsLogoutPending()) {
+            UserUtils.logout(this);
+            for (Fragment fragment : getSupportFragmentManager().getFragments()) {
+                getSupportFragmentManager().beginTransaction().remove(fragment).commit();
+            }
+            return;
+        }
+
         handlePresence();
         setDp();
 
@@ -710,7 +714,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onPause() {
         super.onPause();
-        connectedReference.removeEventListener(presenceValueListener);
+        if (connectedReference != null) {
+            connectedReference.removeEventListener(presenceValueListener);
+        }
         getUserInfoRef(firebaseAuth.getUid()).removeEventListener(dpEventListener);
     }
 
