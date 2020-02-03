@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -74,6 +75,7 @@ import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.MainUtils;
 import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -116,8 +118,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private RelativeLayout dpContainer;
     private ImageView profileIcon;
     private ImageView navHeaderIv;
-    private TextView navHeaderNameTv;
-    private TextView toolbarRewardsTv;
+    private TextView navHeaderNameTv, toolbarRewardsTv, toolbarSearchTv;
+    private SearchView searchView;
+    private ImageView searchBackIv;
     private TextView toolbarTitle;
     private View lubbleClickTarget;
     private DrawerLayout drawerLayout;
@@ -127,7 +130,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private boolean isNewUserInThisLubble;
     private static final int nav_item_leaderboard = 311;
     private Menu navMenu;
-
+    private GroupListFragment groupListFragment;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -146,12 +149,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
         dpContainer = toolbar.findViewById(R.id.container_dp);
         toolbarRewardsTv = toolbar.findViewById(R.id.tv_toolbar_rewards);
+        toolbarSearchTv = toolbar.findViewById(R.id.tv_toolbar_search);
+        searchView = toolbar.findViewById(R.id.search_view);
+        searchBackIv = toolbar.findViewById(R.id.iv_search_back);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setElevation(10);
         drawerLayout = findViewById(R.id.drawer_layout);
         toolbarTitle = findViewById(R.id.lubble_toolbar_title);
         lubbleClickTarget = findViewById(R.id.lubble_click_target);
-        toolbarTitle.setVisibility(View.VISIBLE);
 
         toolbarRewardsTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,15 +212,85 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
         handleExploreActivity();
+
+        toolbarSearchTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleSearchViewVisibility(true);
+                if (groupListFragment != null && groupListFragment.isVisible()) {
+                    groupListFragment.reinitGroupListCopy();
+                    groupListFragment.toggleVisibilityOfSlider(false);
+                }
+
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextChange(String newText) {
+                        if (groupListFragment != null && groupListFragment.isVisible()) {
+                            groupListFragment.filterGroups(newText);
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onQueryTextSubmit(String query) {
+                        if (groupListFragment != null && groupListFragment.isVisible()) {
+                            groupListFragment.filterGroups(query);
+                        }
+                        return false;
+                    }
+                });
+            }
+        });
+
+        searchBackIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UiUtils.hideKeyboard(MainActivity.this);
+                searchView.setQuery("", true);
+                toggleSearchViewVisibility(false);
+            }
+        });
+
     }
 
+    private void toggleSearchViewVisibility(boolean show) {
+        if (show) {
+            searchView.setVisibility(View.VISIBLE);
+            searchView.setFocusable(true);
+            searchView.requestFocusFromTouch();
+            searchView.setIconifiedByDefault(false);
+            searchView.setIconified(false);
+            searchBackIv.setVisibility(View.VISIBLE);
+            dpContainer.setVisibility(View.GONE);
+            lubbleClickTarget.setVisibility(View.GONE);
+            toolbarSearchTv.setVisibility(View.GONE);
+            toolbarRewardsTv.setVisibility(View.GONE);
+            toolbarTitle.setVisibility(View.GONE);
+            if (groupListFragment != null && groupListFragment.isVisible()) {
+                groupListFragment.toggleVisibilityOfSlider(false);
+            }
+        } else {
+            searchView.setOnQueryTextListener(null);
+            searchView.setVisibility(View.GONE);
+            searchBackIv.setVisibility(View.GONE);
+            dpContainer.setVisibility(View.VISIBLE);
+            toolbarSearchTv.setVisibility(View.VISIBLE);
+            lubbleClickTarget.setVisibility(View.VISIBLE);
+            toolbarRewardsTv.setVisibility(View.VISIBLE);
+            toolbarTitle.setVisibility(View.VISIBLE);
+            if (groupListFragment != null && groupListFragment.isVisible()) {
+                groupListFragment.toggleVisibilityOfSlider(true);
+            }
+        }
+    }
 
     private void initEverything() {
         syncFcmToken();
         logUser(FirebaseAuth.getInstance().getCurrentUser());
         Branch.getInstance().setIdentity(FirebaseAuth.getInstance().getUid());
 
-        switchFrag(GroupListFragment.newInstance());
+        groupListFragment = GroupListFragment.newInstance();
+        switchFrag(groupListFragment);
 
         bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -534,6 +609,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         super.onResume();
         handlePresence();
         setDp();
+        toggleSearchViewVisibility(false);
+        searchView.setQuery("", false);
 
         if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
             switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
@@ -693,6 +770,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final String lubbleName = dataSnapshot.child("title").getValue(String.class);
                 toolbarTitle.setText(lubbleName);
+                toolbarTitle.setVisibility(View.VISIBLE);
                 final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
                 prefs.setLubbleName(lubbleName);
                 prefs.setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));

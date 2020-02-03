@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
+import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -44,16 +45,21 @@ import in.lubble.app.R;
 public class UiUtils {
 
 
-    public static void hideKeyboard(Context ctx) {
-        InputMethodManager inputManager = (InputMethodManager) ctx
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
+    public static void hideKeyboard(final Context ctx) {
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                InputMethodManager inputManager = (InputMethodManager) ctx
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        // check if no view has focus:
-        View v = ((Activity) ctx).getCurrentFocus();
-        if (v == null)
-            return;
+                // check if no view has focus:
+                View v = ((Activity) ctx).getCurrentFocus();
+                if (v == null)
+                    return;
 
-        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+            }
+        });
     }
 
     public static void showKeyboard(Context ctx, IBinder windowToken) {
