@@ -2,7 +2,7 @@ package in.lubble.app;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -11,7 +11,15 @@ import static org.junit.Assert.*;
  */
 public class ExampleUnitTest {
     @Test
-    public void addition_isCorrect() throws Exception {
-        assertEquals(4, 2 + 2);
+    public void dm_quality_filter() throws Exception {
+        String name = "pikachu";
+        String filteredText = ("this is regarding the rwa membership plz accept me " + name).toLowerCase();
+        filteredText = filteredText.replaceAll("hi+", "");
+        filteredText = filteredText.replaceAll("hello+", "");
+        filteredText = filteredText.replaceAll("yo+", "");
+        filteredText = filteredText.replaceAll("hey+", "");
+        filteredText = filteredText.replaceAll(name, "");
+        assertFalse(filteredText.length() >= 10);
+
     }
 }

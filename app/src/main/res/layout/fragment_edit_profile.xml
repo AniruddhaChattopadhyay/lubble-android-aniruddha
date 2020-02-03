@@ -134,11 +134,36 @@
 
         <Switch
             android:id="@+id/switch_age"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_margin="8dp"
+            android:padding="8dp"
             android:layout_height="wrap_content"
             android:text="Show Age Publicly"
             android:checked="true" />
+
+        <Switch
+            android:id="@+id/switch_dms"
+            android:layout_width="match_parent"
+            android:layout_margin="8dp"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:text="Receive messages from anyone"
+            android:checked="true" />
+
+        <TextView
+            android:id="@+id/tv_dm_switch_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="-8dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="You will be able to receive Direct Message\nrequests from anyone" />
 
         <Button
             android:id="@+id/btn_save_profile"

@@ -5,15 +5,23 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -29,14 +37,6 @@ import com.segment.analytics.Traits;
 import com.tsongkha.spinnerdatepicker.DatePicker;
 import com.tsongkha.spinnerdatepicker.DatePickerDialog;
 import com.tsongkha.spinnerdatepicker.SpinnerDatePickerDialogBuilder;
-import in.lubble.app.GlideApp;
-import in.lubble.app.R;
-import in.lubble.app.UploadFileService;
-import in.lubble.app.analytics.Analytics;
-import in.lubble.app.models.ProfileData;
-import in.lubble.app.utils.DateTimeUtils;
-import in.lubble.app.utils.StringUtils;
-import permissions.dispatcher.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,11 +45,29 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.R;
+import in.lubble.app.UploadFileService;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.utils.DateTimeUtils;
+import in.lubble.app.utils.StringUtils;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
+
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.models.ProfileData.getGenderText;
 import static in.lubble.app.utils.DateTimeUtils.OFFICIAL_DATE_YEAR;
-import static in.lubble.app.utils.FileUtils.*;
+import static in.lubble.app.utils.FileUtils.createImageFile;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 
 @RuntimePermissions
 public class EditProfileFrag extends Fragment {
@@ -59,15 +77,14 @@ public class EditProfileFrag extends Fragment {
     private static final int REQUEST_CODE_DP = 211;
 
     private ImageView profilePicIv;
-    private TextView fullNameTv;
-    private TextView lubbleTv;
+    private TextView fullNameTv, lubbleTv, dmHintTv;
     private TextInputLayout bioTil;
     private TabLayout genderTabLayout;
     private TextInputLayout jobTitleTil;
     private TextInputLayout companyTil;
     private TextInputLayout schoolTil;
     private TextView bdayTv;
-    private Switch ageSwitch;
+    private Switch ageSwitch, dmSwitch;
     private Button saveBtn;
     private View rootView;
     private String currentPhotoPath;
@@ -107,6 +124,8 @@ public class EditProfileFrag extends Fragment {
         schoolTil = rootView.findViewById(R.id.til_college);
         bdayTv = rootView.findViewById(R.id.tv_bday);
         ageSwitch = rootView.findViewById(R.id.switch_age);
+        dmSwitch = rootView.findViewById(R.id.switch_dms);
+        dmHintTv = rootView.findViewById(R.id.tv_dm_switch_hint);
         saveBtn = rootView.findViewById(R.id.btn_save_profile);
         progressBar = rootView.findViewById(R.id.progressBar_profile);
 
@@ -138,6 +157,7 @@ public class EditProfileFrag extends Fragment {
                         bdayEpochTime = fetchedProfileData.getBirthdate();
                     }
                     ageSwitch.setChecked(fetchedProfileData.getIsAgePublic());
+                    dmSwitch.setChecked(fetchedProfileData.getIsDmEnabled());
                     GlideApp.with(getContext())
                             .load(fetchedProfileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
@@ -202,6 +222,7 @@ public class EditProfileFrag extends Fragment {
                 getThisUserRef().child("school").setValue(StringUtils.getStringFromTil(schoolTil));
                 getThisUserRef().child("birthdate").setValue(bdayEpochTime);
                 getThisUserRef().child("isAgePublic").setValue(ageSwitch.isChecked());
+                getThisUserRef().child("isDmEnabled").setValue(dmSwitch.isChecked());
 
                 final Traits traits = new Traits();
                 traits.putGender(getGenderText(genderTabLayout.getSelectedTabPosition()));
@@ -247,6 +268,10 @@ public class EditProfileFrag extends Fragment {
             });
         }
 
+        final String lubbleName = LubbleSharedPrefs.getInstance().getLubbleName();
+        if (!TextUtils.isEmpty(lubbleName)) {
+            dmHintTv.setText("You will be able to receive Direct Message\nrequests from anyone in " + lubbleName);
+        }
         return rootView;
     }
 

@@ -265,7 +265,9 @@ public class ProfileFrag extends Fragment {
     private ValueEventListener dmValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+            boolean dmExists = false;
             if (dataSnapshot.getChildrenCount() > 0) {
+                dmExists = true;
                 msgBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -273,6 +275,7 @@ public class ProfileFrag extends Fragment {
                     }
                 });
             }
+            msgBtn.setEnabled(dmExists || profileData.getIsDmEnabled());
         }
 
         @Override
@@ -427,6 +430,7 @@ public class ProfileFrag extends Fragment {
                     }
                     likesTv.setText(String.valueOf(profileData.getLikes()));
                     coinsTv.setText(String.valueOf(profileData.getCoins()));
+                    msgBtn.setEnabled(profileData.getIsDmEnabled());
                     GlideApp.with(getContext())
                             .load(profileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)

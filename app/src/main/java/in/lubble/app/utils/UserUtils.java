@@ -6,9 +6,11 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -16,6 +18,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.FirebaseUserMetadata;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -40,10 +43,11 @@ public class UserUtils {
     }
 
     public static void logout(@NonNull final FragmentActivity activity) {
-        final ProgressDialog progressDialog = new ProgressDialog(activity);
-        progressDialog.setMessage(activity.getString(R.string.logging_out));
-        progressDialog.show();
         try {
+            final ProgressDialog progressDialog = new ProgressDialog(activity);
+            progressDialog.setMessage(activity.getString(R.string.logging_out));
+            progressDialog.setCancelable(false);
+            progressDialog.show();
             getThisUserRef().child("token").setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -75,10 +79,11 @@ public class UserUtils {
     }
 
     public static void logout(@NonNull final Context context) {
-        final ProgressDialog progressDialog = new ProgressDialog(context);
-        progressDialog.setMessage(context.getString(R.string.logging_out));
-        progressDialog.show();
         try {
+            final ProgressDialog progressDialog = new ProgressDialog(context);
+            progressDialog.setMessage(context.getString(R.string.logging_out));
+            progressDialog.setCancelable(false);
+            progressDialog.show();
             getThisUserRef().child("token").setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
