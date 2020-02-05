@@ -231,8 +231,8 @@
 
     <string name="insta_client_id" translatable="false">47fd39a2acc14d66934ded5aa29d1d29</string>
     <string name="insta_redirect_url" translatable="false">https://lubble.in</string>
-
-
+    10.145.223.7
+    <string name="fetch_test_event" translatable="false">http://10.145.149.89:8000/</string>
     <string-array name="login_server_url_array">
         <item>@string/profile</item>
         <item>@string/profile</item>

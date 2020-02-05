@@ -170,6 +170,9 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         return eventDataList.size();
     }
 
+
+
+
     class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View mView;
         final CardView card;
@@ -191,7 +194,7 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onClick(View v) {
-            EventInfoActivity.open(context, eventDataList.get(getAdapterPosition()).getId());
+            EventInfoActivity.open(context, eventDataList.get(getAdapterPosition()).getEvent_id());
         }
     }
 

@@ -28,6 +28,7 @@ import java.util.Map;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.mapUtils.MathUtil;
@@ -85,8 +86,8 @@ public class EventAttendeesActivity extends BaseActivity {
 
         goingStatsModelList.clear();
 
-        for (final Map.Entry<String, Object> entry : eventData.getMembers().entrySet()) {
-            String userId = entry.getKey();
+        for (final EventMemberData eventMemberData: eventData.getMembers()) {
+            String userId = eventMemberData.getUid();
             RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -99,7 +100,7 @@ public class EventAttendeesActivity extends BaseActivity {
                                         profileInfo.getId(),
                                         profileInfo.getName(),
                                         profileInfo.getThumbnail(),
-                                        ((Long) (((HashMap<String, Object>) entry.getValue()).get("response"))).intValue()
+                                        ( eventMemberData.getResponse())
                                 );
                         goingStatsModelList.add(goingStatsModel);
                         Collections.sort(goingStatsModelList, new Comparator<GoingStatsModel>() {
