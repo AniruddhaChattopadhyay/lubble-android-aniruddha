@@ -10,4 +10,6 @@ public interface OnListFragmentInteractionListener {
 
     void onDmClick(String dmId, String name, String thumbnailUrl);
 
+    void onSearched(int resultSize);
+
 }

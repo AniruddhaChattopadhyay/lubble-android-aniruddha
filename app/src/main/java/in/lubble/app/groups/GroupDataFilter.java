@@ -43,9 +43,6 @@ public class GroupDataFilter extends Filter {
     @Override
     protected void publishResults(CharSequence constraint, FilterResults results) {
         //adapter.clearGroups();
-        if (filteredList.size() == 0) {
-            return;
-        }
         adapter.replaceAll(filteredList);
         /*adapter.clearGroups();
         for (GroupData groupData : filteredList) {

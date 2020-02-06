@@ -313,7 +313,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         return groupDataList.size();
     }
 
-    public void reinitGroupListCopy(){
+    public void reinitGroupListCopy() {
         groupDataListCopy.clear();
         groupDataListCopy.addAll(groupDataList);
     }
@@ -329,12 +329,20 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void replaceAll(List<GroupData> filteredList) {
         groupDataList.clear();
         groupDataList.addAll(groupDataListCopy);
-        for (int i = groupDataList.size() - 1; i >= 0; i--) {
-            final GroupData groupData = groupDataList.get(i);
-            if (groupData != null && !filteredList.contains(groupData)) {
-                groupDataList.remove(groupData);
+
+        if (filteredList.size() == 0) {
+            // no results; remove the public header
+            groupDataList.clear();
+        } else {
+            for (int i = groupDataList.size() - 1; i >= 0; i--) {
+                final GroupData groupData = groupDataList.get(i);
+                if (groupData != null && !filteredList.contains(groupData)) {
+                    groupDataList.remove(groupData);
+                }
             }
         }
+
+        mListener.onSearched(filteredList.size());
         notifyDataSetChanged();
     }
 

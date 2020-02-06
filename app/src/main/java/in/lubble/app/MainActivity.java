@@ -932,6 +932,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (searchView.getVisibility() == View.VISIBLE) {
+            UiUtils.hideKeyboard(MainActivity.this);
+            searchView.setQuery("", true);
+            toggleSearchViewVisibility(false);
         } else {
             super.onBackPressed();
         }
