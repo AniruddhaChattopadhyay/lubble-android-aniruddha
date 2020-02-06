@@ -403,7 +403,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     ((MainActivity) getActivity()).showRewardsTooltip();
                 }
                 if (totalUnreadCount == 0 && isAdded()) {
-                    showEventUnreadCount();
+                    //******************************************************************************
+                    //showEventUnreadCount();
+                    //******************************************************************************
                 }
             }
 

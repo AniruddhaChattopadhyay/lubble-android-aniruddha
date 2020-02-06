@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -30,6 +31,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import androidx.annotation.NonNull;
@@ -39,9 +41,14 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.EventAttendeesActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -49,15 +56,24 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.StringUtils;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -65,6 +81,9 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 public class EventInfoActivity extends BaseActivity {
 
     public static final String KEY_EVENT_ID = "KEY_EVENT_ID";
+    private static final String TAG = "EventInfoActivity";
+
+
 
     private String eventId;
     private DatabaseReference eventRef;
@@ -106,6 +125,8 @@ public class EventInfoActivity extends BaseActivity {
     private ValueEventListener groupTitleListener;
     private long oldResponse = EventData.NO;
     private Button ticketsBtn;
+    private EventMemberData current_member=null;
+    private Endpoints endpoints;
 
     public static void open(Context context, String eventId) {
         Intent intent = new Intent(context, EventInfoActivity.class);
@@ -158,7 +179,7 @@ public class EventInfoActivity extends BaseActivity {
         ticketsBtn = findViewById(R.id.ticketUrl);
 
         eventId = getIntent().getStringExtra(KEY_EVENT_ID);
-        eventRef = getEventsRef().child(eventId);
+        //eventRef = getEventsRef().child(eventId);
         Analytics.triggerScreenEvent(this, this.getClass());
 
         goingContainer.setOnClickListener(new View.OnClickListener() {
@@ -183,7 +204,9 @@ public class EventInfoActivity extends BaseActivity {
                                     }
                                 })
                                 .show();
+                        Log.d(TAG,"inside going");
                     } else {
+                        Log.d(TAG,"inside going");
                         changeStatus(EventData.GOING);
                     }
                 }
@@ -216,10 +239,12 @@ public class EventInfoActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (eventData != null) {
+                    Log.e(TAG,eventData.getLati()+""+eventData.getLongi()+""+eventData.getTitle());
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:" + eventData.getLati() +
                             "," + eventData.getLongi() + "?q=" + eventData.getLati() + "," + eventData.getLongi() + "(" + eventData.getTitle() + ")"));
                     startActivity(intent);
                 }
+                Log.e(TAG,"event data is null");
             }
         });
         try {
@@ -250,7 +275,26 @@ public class EventInfoActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(getResources().getString(R.string.fetch_test_event))
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        endpoints = ServiceGenerator.createService(Endpoints.class);
+        //endpoints = retrofit.create(Endpoints.class);
+
         fetchEventInfo();
+        //********************************************************************************
+        if (eventData != null) {
+            final List<EventMemberData> members = eventData.getMembers();
+            for (EventMemberData eventMemberData : members) {
+                if (eventMemberData.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                    current_member = eventMemberData;
+                    break;
+                }
+            }
+        }
+        //*****************************************
+
         statsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -262,9 +306,9 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private boolean checkEventAdmin() {
-        final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
+        //final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
         boolean isAdmin;
-        isAdmin = memberMap != null && memberMap.get("isAdmin") != null && ((boolean) memberMap.get("isAdmin"));
+        isAdmin = current_member != null && current_member.getisAdmin() != null && ((boolean) current_member.getisAdmin());
         if (isAdmin) {
             new AlertDialog.Builder(EventInfoActivity.this)
                     .setTitle(R.string.event_host_leave_title)
@@ -282,22 +326,71 @@ public class EventInfoActivity extends BaseActivity {
 
     private void changeStatus(int newResponse) {
         progressDialog.show();
-        final DatabaseReference eventMemberRef = getEventsRef()
-                .child(eventId)
-                .child("members")
-                .child(FirebaseAuth.getInstance().getUid());
-
-        final HashMap<String, Object> map = new HashMap<>();
-        map.put("response", newResponse);
+//        final DatabaseReference eventMemberRef = getEventsRef()
+//                .child(eventId)
+//                .child("members")
+//                .child(FirebaseAuth.getInstance().getUid());
+//
+//        final HashMap<String, Object> map = new HashMap<>();
+//        map.put("response", newResponse);
+//        if (newResponse == EventData.NO) {
+//            map.put("guests", 0);
+//        }
+//        map.put("timestamp", System.currentTimeMillis());
+//
+        Log.d(TAG,"inside change status");
+        Map<String,String> map = new HashMap<>();
+        map.put("response",Integer.toString(newResponse));
+        map.put("event_id",eventId);
+        map.put("uid",FirebaseAuth.getInstance().getUid());
+        map.put("timestamp",Long.toString(System.currentTimeMillis()));
         if (newResponse == EventData.NO) {
-            map.put("guests", 0);
+            map.put("guests", "0");
         }
-        map.put("timestamp", System.currentTimeMillis());
-
         if (newResponse != EventData.NO) {
             getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
         }
-        eventMemberRef.updateChildren(map);
+
+        final JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("response",Integer.toString(newResponse));
+            jsonObject.put("event_id",eventId);
+            jsonObject.put("uid",FirebaseAuth.getInstance().getUid());
+            jsonObject.put("timestamp",Long.toString(System.currentTimeMillis()));
+            jsonObject.put("admin","false");
+            if (newResponse == EventData.NO) {
+                jsonObject.put("guests", "0");
+            }
+            if (newResponse != EventData.NO) {
+                getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
+            }
+            RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+
+            //Call<List<EventData>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
+            Call<List<EventData>> call = endpoints.uploadattendee(body);
+            call.enqueue(new Callback<List<EventData>>() {
+                @Override
+                public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                    Log.d(TAG,"successfully posted");
+                }
+
+                @Override
+                public void onFailure(Call<List<EventData>> call, Throwable t) {
+                    Log.e(TAG,"failed to post");
+                }
+            });
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+//        eventMemberRef.updateChildren(map);
+
+
+
+
 
         checkGroupJoined(eventData.getGid(), newResponse);
     }
@@ -324,6 +417,7 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private void toggleGoingButton(boolean isGoing) {
+        Log.d(TAG,"inside tooglegoing");
         if (isGoing) {
             goingIcon.setImageResource(R.drawable.ic_check_circle_black_24dp);
             goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_green), android.graphics.PorterDuff.Mode.SRC_IN);
@@ -348,161 +442,327 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private void fetchEventInfo() {
+        Log.d(TAG,"Event Id is "+ eventId);
 
-        eventInfoListener = eventRef.addValueEventListener(new ValueEventListener() {
+        //Call<List<EventData>> call = endpoints.getEvent("ayush_django_backend_token","ayush_django_backend",eventId);
+        Call<List<EventData>> call = endpoints.getEvent(eventId);
+        call.enqueue(new Callback<List<EventData>>() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                eventData = dataSnapshot.getValue(EventData.class);
-
-                if (eventData != null) {
-                    setTitleWhenCollapsed();
-                    if (!TextUtils.isEmpty(eventData.getTicketUrl()) && (eventData.getTicketUrl().contains("https://") || eventData.getTicketUrl().contains("http://"))) {
-                        // has a ticket URL
-                        ticketsBtn.setVisibility(View.VISIBLE);
-                        ticketsBtn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Uri uri = Uri.parse(eventData.getTicketUrl());
-                                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-                                intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorAccent));
-                                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dk_colorAccent));
-                                intentBuilder.enableUrlBarHiding();
-                                intentBuilder.setShowTitle(true);
-                                CustomTabsIntent customTabsIntent = intentBuilder.build();
-                                customTabsIntent.launchUrl(EventInfoActivity.this, uri);
+            public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG,response.code()+"Not successful");
+                    return;
+                }
+                List<EventData> data = response.body();
+                for (EventData eventData_loop:data) {
+                        eventData = eventData_loop;
+                        System.out.println("***************************inside evendata loop" + eventData.getEvent_id());
+                        if (eventData != null)
+                        {
+                            System.out.println("***************************inside evendata not null" + eventData.getEvent_id());
+                            final List<EventMemberData> members = eventData.getMembers();
+                            for (EventMemberData eventMemberData : members) {
+                                System.out.println(eventMemberData.getUid()+"***************"+eventData.getEvent_id());
+                                if (eventMemberData.getUid().equals(FirebaseAuth.getInstance().getUid())) {
+                                    current_member = eventMemberData;
+                                    break;
+                                }
                             }
-                        });
 
-                    } else {
-                        ticketsBtn.setVisibility(View.GONE);
-                    }
-                    GlideApp.with(EventInfoActivity.this)
-                            .load(eventData.getProfilePic())
-                            .error(R.drawable.ic_star_party)
-                            .listener(new RequestListener<Drawable>() {
-                                @Override
-                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                    progressBar.setVisibility(View.GONE);
-                                    groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dark_teal));
-                                    groupHeaderIv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                                    groupHeaderIv.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
-                                    return false;
-                                }
+                            setTitleWhenCollapsed();
+                            if (!TextUtils.isEmpty(eventData.getTicketUrl()) && (eventData.getTicketUrl().contains("https://") || eventData.getTicketUrl().contains("http://"))) {
+                                // has a ticket URL
+                                ticketsBtn.setVisibility(View.VISIBLE);
+                                ticketsBtn.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Uri uri = Uri.parse(eventData.getTicketUrl());
+                                        CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                                        intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorAccent));
+                                        intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dk_colorAccent));
+                                        intentBuilder.enableUrlBarHiding();
+                                        intentBuilder.setShowTitle(true);
+                                        CustomTabsIntent customTabsIntent = intentBuilder.build();
+                                        customTabsIntent.launchUrl(EventInfoActivity.this, uri);
+                                    }
+                                });
 
-                                @Override
-                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                    progressBar.setVisibility(View.GONE);
-                                    groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.black));
-                                    groupHeaderIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                                    groupHeaderIv.setPadding(0, 0, 0, 0);
-                                    return false;
-                                }
-                            })
-                            .into(groupHeaderIv);
-                    organizerTv.setText(eventData.getOrganizer());
-                    eventNameTv.setText(eventData.getTitle());
-                    addressTv.setText(eventData.getAddress());
-                    descTv.setText(eventData.getDesc());
-
-                    if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
-                        finalMarkedStatus.setVisibility(View.GONE);
-                    } else {
-                        finalMarkedStatus.setVisibility(View.VISIBLE);
-                        goingContainer.setVisibility(View.GONE);
-                        maybeContainer.setVisibility(View.GONE);
-                    }
-
-                    final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
-                    if (memberMap != null) {
-                        oldResponse = (long) memberMap.get("response");
-                        toggleGoingButton(oldResponse == EventData.GOING);
-                        toggleMaybeButton(oldResponse == EventData.MAYBE);
-
-                        setFinalMarkedResponse(oldResponse);
-                        if (memberMap.get("tickets") != null && ((long) memberMap.get("tickets")) > 0) {
-                            ticketIv.setVisibility(View.VISIBLE);
-                            ticketCountTv.setVisibility(View.VISIBLE);
-                            luckyDrawHint.setVisibility(View.GONE);
-                            ticketCountTv.setText("Lucky Draw Tickets: " + ((long) memberMap.get("tickets")));
-                        } else {
-                            if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
-                                luckyDrawHint.setVisibility(View.VISIBLE);
                             } else {
-                                luckyDrawHint.setVisibility(View.GONE);
+                                ticketsBtn.setVisibility(View.GONE);
                             }
-                            ticketIv.setVisibility(View.GONE);
-                            ticketCountTv.setVisibility(View.GONE);
-                        }
-                    } else {
-                        if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
-                            luckyDrawHint.setVisibility(View.VISIBLE);
-                        } else {
-                            luckyDrawHint.setVisibility(View.GONE);
-                        }
-                        ticketIv.setVisibility(View.GONE);
-                        ticketCountTv.setVisibility(View.GONE);
-                    }
-                    final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
-                    final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
-                    final String date = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "dd");
-                    final String dayOfWeek = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "EEE");
-                    final String startTime = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "h:mm a");
-                    String endTime = getString(R.string.event_time_onwards);
-                    if (eventData.getEndTimestamp() > 0) {
-                        endTime = "- " + DateTimeUtils.getTimeFromLong(eventData.getEndTimestamp(), "h:mm a");
-                    }
-                    monthTv.setText(month);
-                    dateTv.setText(date);
-                    timeTv.setText(String.format(getString(R.string.event_time_text), dayOfWeek, date, monthFull, startTime, endTime));
+                            GlideApp.with(EventInfoActivity.this)
+                                    .load(eventData.getProfilePic())
+                                    .error(R.drawable.ic_star_party)
+                                    .listener(new RequestListener<Drawable>() {
+                                        @Override
+                                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                            progressBar.setVisibility(View.GONE);
+                                            groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dark_teal));
+                                            groupHeaderIv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                                            groupHeaderIv.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
+                                            return false;
+                                        }
 
-                    fetchLinkedGroupInfo(eventData.getGid());
+                                        @Override
+                                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                            progressBar.setVisibility(View.GONE);
+                                            groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.black));
+                                            groupHeaderIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                                            groupHeaderIv.setPadding(0, 0, 0, 0);
+                                            return false;
+                                        }
+                                    })
+                                    .into(groupHeaderIv);
+                            organizerTv.setText(eventData.getOrganizer());
+                            eventNameTv.setText(eventData.getTitle());
+                            addressTv.setText(eventData.getAddress());
+                            descTv.setText(eventData.getDesc());
 
-                    int goingCount = 0;
-                    int maybeCount = 0;
-                    for (Map.Entry<String, Object> entry : eventData.getMembers().entrySet()) {
-                        final Integer responseInt = (int) ((long) ((HashMap<String, Object>) entry.getValue()).get("response"));
-                        if (responseInt == EventData.GOING) {
-                            goingCount++;
-                        } else if (responseInt == EventData.MAYBE) {
-                            maybeCount++;
+                            if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
+                                finalMarkedStatus.setVisibility(View.GONE);
+                            } else {
+                                finalMarkedStatus.setVisibility(View.VISIBLE);
+                                goingContainer.setVisibility(View.GONE);
+                                maybeContainer.setVisibility(View.GONE);
+                            }
+
+                            //final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
+                            if (current_member != null) {
+                                oldResponse = (long) current_member.getResponse();
+                                Log.e(TAG,"*************************** current member not null");
+                                toggleGoingButton(oldResponse == EventData.GOING);
+                                toggleMaybeButton(oldResponse == EventData.MAYBE);
+
+                                setFinalMarkedResponse(oldResponse);
+                                if (current_member!=null && current_member.getTickets() > 0) {
+                                    ticketIv.setVisibility(View.VISIBLE);
+                                    ticketCountTv.setVisibility(View.VISIBLE);
+                                    luckyDrawHint.setVisibility(View.GONE);
+                                    ticketCountTv.setText("Lucky Draw Tickets: " + ((long) current_member.getTickets()));
+                                } else {
+                                    if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
+                                        luckyDrawHint.setVisibility(View.VISIBLE);
+                                    } else {
+                                        luckyDrawHint.setVisibility(View.GONE);
+                                    }
+                                    ticketIv.setVisibility(View.GONE);
+                                    ticketCountTv.setVisibility(View.GONE);
+                                }
+                            } else {
+                                if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
+                                    luckyDrawHint.setVisibility(View.VISIBLE);
+                                } else {
+                                    luckyDrawHint.setVisibility(View.GONE);
+                                }
+                                ticketIv.setVisibility(View.GONE);
+                                ticketCountTv.setVisibility(View.GONE);
+                            }
+                            final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
+                            final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
+                            final String date = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "dd");
+                            final String dayOfWeek = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "EEE");
+                            final String startTime = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "h:mm a");
+                            String endTime = getString(R.string.event_time_onwards);
+                            if (eventData.getEndTimestamp() > 0) {
+                                endTime = "- " + DateTimeUtils.getTimeFromLong(eventData.getEndTimestamp(), "h:mm a");
+                            }
+                            monthTv.setText(month);
+                            dateTv.setText(date);
+                            timeTv.setText(String.format(getString(R.string.event_time_text), dayOfWeek, date, monthFull, startTime, endTime));
+
+                            fetchLinkedGroupInfo(eventData.getGid());
+
+                            int goingCount = 0;
+                            int maybeCount = 0;
+                            for (EventMemberData eventMemberData:eventData.getMembers()) {
+                                final Integer responseInt = (int) eventMemberData.getResponse();
+                                if (responseInt == EventData.GOING) {
+                                    goingCount++;
+                                } else if (responseInt == EventData.MAYBE) {
+                                    maybeCount++;
+                                }
+                            }
+                            if (goingCount > 0) {
+                                statsIcon.setVisibility(View.VISIBLE);
+                                statsTv.setVisibility(View.VISIBLE);
+                                statsTv.setText(String.format(getString(R.string.event_going_count), goingCount));
+                            }
+                            if (maybeCount > 0) {
+                                statsIcon.setVisibility(View.VISIBLE);
+                                statsTv.setVisibility(View.VISIBLE);
+                                final CharSequence prefixText = statsTv.getText();
+                                String suffixText = "";
+                                if (StringUtils.isValidString(prefixText.toString())) {
+                                    suffixText = " · ";
+                                }
+                                suffixText += String.format(getString(R.string.event_maybe_suffix), maybeCount);
+                                statsTv.setText(String.format(getString(R.string.event_maybe_count), prefixText, suffixText));
+                            }
+                            fetchIsLinkedGroupJoined(eventData.getGid());
+                            fetchMemberInfo(eventData);
                         }
-                    }
-                    if (goingCount > 0) {
-                        statsIcon.setVisibility(View.VISIBLE);
-                        statsTv.setVisibility(View.VISIBLE);
-                        statsTv.setText(String.format(getString(R.string.event_going_count), goingCount));
-                    }
-                    if (maybeCount > 0) {
-                        statsIcon.setVisibility(View.VISIBLE);
-                        statsTv.setVisibility(View.VISIBLE);
-                        final CharSequence prefixText = statsTv.getText();
-                        String suffixText = "";
-                        if (StringUtils.isValidString(prefixText.toString())) {
-                            suffixText = " · ";
-                        }
-                        suffixText += String.format(getString(R.string.event_maybe_suffix), maybeCount);
-                        statsTv.setText(String.format(getString(R.string.event_maybe_count), prefixText, suffixText));
-                    }
-                    fetchIsLinkedGroupJoined(eventData.getGid());
-                    fetchMemberInfo(eventData);
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+            public void onFailure(Call<List<EventData>> call, Throwable t) {
+                Log.e(TAG,"failed to get response from django");
             }
         });
+
+//        eventInfoListener = eventRef.addValueEventListener(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                eventData = dataSnapshot.getValue(EventData.class);
+//
+//                if (eventData != null) {
+//                    setTitleWhenCollapsed();
+//                    if (!TextUtils.isEmpty(eventData.getTicketUrl()) && (eventData.getTicketUrl().contains("https://") || eventData.getTicketUrl().contains("http://"))) {
+//                        // has a ticket URL
+//                        ticketsBtn.setVisibility(View.VISIBLE);
+//                        ticketsBtn.setOnClickListener(new View.OnClickListener() {
+//                            @Override
+//                            public void onClick(View v) {
+//                                Uri uri = Uri.parse(eventData.getTicketUrl());
+//                                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+//                                intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorAccent));
+//                                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dk_colorAccent));
+//                                intentBuilder.enableUrlBarHiding();
+//                                intentBuilder.setShowTitle(true);
+//                                CustomTabsIntent customTabsIntent = intentBuilder.build();
+//                                customTabsIntent.launchUrl(EventInfoActivity.this, uri);
+//                            }
+//                        });
+//
+//                    } else {
+//                        ticketsBtn.setVisibility(View.GONE);
+//                    }
+//                    GlideApp.with(EventInfoActivity.this)
+//                            .load(eventData.getProfilePic())
+//                            .error(R.drawable.ic_star_party)
+//                            .listener(new RequestListener<Drawable>() {
+//                                @Override
+//                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+//                                    progressBar.setVisibility(View.GONE);
+//                                    groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dark_teal));
+//                                    groupHeaderIv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+//                                    groupHeaderIv.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
+//                                    return false;
+//                                }
+//
+//                                @Override
+//                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+//                                    progressBar.setVisibility(View.GONE);
+//                                    groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.black));
+//                                    groupHeaderIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//                                    groupHeaderIv.setPadding(0, 0, 0, 0);
+//                                    return false;
+//                                }
+//                            })
+//                            .into(groupHeaderIv);
+//                    organizerTv.setText(eventData.getOrganizer());
+//                    eventNameTv.setText(eventData.getTitle());
+//                    addressTv.setText(eventData.getAddress());
+//                    descTv.setText(eventData.getDesc());
+//
+//                    if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
+//                        finalMarkedStatus.setVisibility(View.GONE);
+//                    } else {
+//                        finalMarkedStatus.setVisibility(View.VISIBLE);
+//                        goingContainer.setVisibility(View.GONE);
+//                        maybeContainer.setVisibility(View.GONE);
+//                    }
+//
+//                    //final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
+//                    if (current_member != null) {
+//                        oldResponse = (long) current_member.getResponse();
+//                        toggleGoingButton(oldResponse == EventData.GOING);
+//                        toggleMaybeButton(oldResponse == EventData.MAYBE);
+//
+//                        setFinalMarkedResponse(oldResponse);
+//                        if (current_member!=null && current_member.getTickets() > 0) {
+//                            ticketIv.setVisibility(View.VISIBLE);
+//                            ticketCountTv.setVisibility(View.VISIBLE);
+//                            luckyDrawHint.setVisibility(View.GONE);
+//                            ticketCountTv.setText("Lucky Draw Tickets: " + ((long) current_member.getTickets()));
+//                        } else {
+//                            if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
+//                                luckyDrawHint.setVisibility(View.VISIBLE);
+//                            } else {
+//                                luckyDrawHint.setVisibility(View.GONE);
+//                            }
+//                            ticketIv.setVisibility(View.GONE);
+//                            ticketCountTv.setVisibility(View.GONE);
+//                        }
+//                    } else {
+//                        if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
+//                            luckyDrawHint.setVisibility(View.VISIBLE);
+//                        } else {
+//                            luckyDrawHint.setVisibility(View.GONE);
+//                        }
+//                        ticketIv.setVisibility(View.GONE);
+//                        ticketCountTv.setVisibility(View.GONE);
+//                    }
+//                    final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
+//                    final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
+//                    final String date = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "dd");
+//                    final String dayOfWeek = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "EEE");
+//                    final String startTime = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "h:mm a");
+//                    String endTime = getString(R.string.event_time_onwards);
+//                    if (eventData.getEndTimestamp() > 0) {
+//                        endTime = "- " + DateTimeUtils.getTimeFromLong(eventData.getEndTimestamp(), "h:mm a");
+//                    }
+//                    monthTv.setText(month);
+//                    dateTv.setText(date);
+//                    timeTv.setText(String.format(getString(R.string.event_time_text), dayOfWeek, date, monthFull, startTime, endTime));
+//
+//                    fetchLinkedGroupInfo(eventData.getGid());
+//
+//                    int goingCount = 0;
+//                    int maybeCount = 0;
+//                    for (EventMemberData eventMemberData:eventData.getMembers()) {
+//                        final Integer responseInt = (int) eventMemberData.getResponse();
+//                        if (responseInt == EventData.GOING) {
+//                            goingCount++;
+//                        } else if (responseInt == EventData.MAYBE) {
+//                            maybeCount++;
+//                        }
+//                    }
+//                    if (goingCount > 0) {
+//                        statsIcon.setVisibility(View.VISIBLE);
+//                        statsTv.setVisibility(View.VISIBLE);
+//                        statsTv.setText(String.format(getString(R.string.event_going_count), goingCount));
+//                    }
+//                    if (maybeCount > 0) {
+//                        statsIcon.setVisibility(View.VISIBLE);
+//                        statsTv.setVisibility(View.VISIBLE);
+//                        final CharSequence prefixText = statsTv.getText();
+//                        String suffixText = "";
+//                        if (StringUtils.isValidString(prefixText.toString())) {
+//                            suffixText = " · ";
+//                        }
+//                        suffixText += String.format(getString(R.string.event_maybe_suffix), maybeCount);
+//                        statsTv.setText(String.format(getString(R.string.event_maybe_count), prefixText, suffixText));
+//                    }
+//                    fetchIsLinkedGroupJoined(eventData.getGid());
+//                    fetchMemberInfo(eventData);
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
     }
 
     private void fetchMemberInfo(EventData eventData) {
         goingPersonOne.setVisibility(View.GONE);
         goingPersonTwo.setVisibility(View.GONE);
         goingPersonThree.setVisibility(View.GONE);
-        for (Map.Entry<String, Object> entry : eventData.getMembers().entrySet()) {
-            HashMap<String, Object> memberInfoMap = (HashMap<String, Object>) entry.getValue();
-            if ((long) memberInfoMap.get("response") == EventData.GOING) {
-                RealtimeDbHelper.getUserInfoRef(entry.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
+        for (EventMemberData eventMemberData: eventData.getMembers()) {
+            if ((long) eventMemberData.getResponse() == EventData.GOING) {
+                RealtimeDbHelper.getUserInfoRef(eventMemberData.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);

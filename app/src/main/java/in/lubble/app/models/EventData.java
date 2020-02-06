@@ -1,8 +1,10 @@
 package in.lubble.app.models;
 
 import com.google.firebase.database.Exclude;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,31 +21,53 @@ public class EventData implements Serializable {
     public static final int MAYBE = 2;
 
     @Exclude
-    private String id;
+    private String id=null;
     private String profilePic = "";
+    @SerializedName("name")
     private String title;
     private String desc;
     private String organizer = "";
-    private HashMap<String, Object> members = new HashMap<>();
+    @SerializedName("attendee")
+    private List<EventMemberData> members = new ArrayList<>();
     private long startTimestamp;
     private long endTimestamp = 0L;
+    @SerializedName("latitude")
     private double lati;
+    @SerializedName("longitude")
     private double longi;
     private String address;
     private String gid;
+    private String lubble_id;
     private String relatedGroups = "";
     private String ticketUrl;
+    private String event_id;
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof EventData) {
-            EventData objectToCompare = (EventData) obj;
-            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
-                return true;
-            }
-            return false;
-        }
-        return super.equals(obj);
+    public String getEvent_id() {
+        return event_id;
+    }
+
+    public void setEvent_id(String event_id) {
+        this.event_id = event_id;
+    }
+
+//    @Override
+//    public boolean equals(Object obj) {
+//        if (obj instanceof EventData) {
+//            EventData objectToCompare = (EventData) obj;
+//            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
+//                return true;
+//            }
+//            return false;
+//        }
+//        return super.equals(obj);
+//    }
+
+    public String getLubble_id() {
+        return lubble_id;
+    }
+
+    public void setLubble_id(String lubble_id) {
+        this.lubble_id = lubble_id;
     }
 
     public String getProfilePic() {
@@ -118,13 +142,7 @@ public class EventData implements Serializable {
         this.gid = gid;
     }
 
-    public HashMap<String, Object> getMembers() {
-        return members;
-    }
 
-    public void setMembers(HashMap<String, Object> members) {
-        this.members = members;
-    }
 
     public String getOrganizer() {
         return organizer;
@@ -152,6 +170,13 @@ public class EventData implements Serializable {
 
     public void setTicketUrl(String ticketUrl) {
         this.ticketUrl = ticketUrl;
+    }
+    public List<EventMemberData> getMembers() {
+        return members;
+    }
+
+    public void setMembers(List<EventMemberData> members) {
+        this.members = members;
     }
 
     @Exclude

@@ -66,16 +66,16 @@
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/tv_msg_visible_to_you"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp"
                     android:layout_marginRight="8dp"
-                    android:textSize="12sp"
-                    android:textColor="@color/grey_500"
-                    android:id="@+id/tv_msg_visible_to_you"
+                    android:layout_marginBottom="2dp"
                     android:text="This message is only visible to you"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:textColor="@color/grey_500"
+                    android:textSize="12sp" />
 
                 <RelativeLayout
                     android:id="@+id/relativelayout_youtube"
