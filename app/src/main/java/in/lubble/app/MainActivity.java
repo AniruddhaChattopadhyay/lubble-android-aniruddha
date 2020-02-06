@@ -805,7 +805,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
-                    switchFrag(GroupListFragment.newInstance());
+                    switchFrag(groupListFragment = GroupListFragment.newInstance());
                     return true;
                 case R.id.navigation_explore:
                     switchFrag(ExploreFrag.newInstance());
