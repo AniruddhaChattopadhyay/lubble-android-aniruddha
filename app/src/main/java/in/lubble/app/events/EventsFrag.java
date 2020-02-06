@@ -137,6 +137,9 @@ public class EventsFrag extends Fragment {
 
             }
         });
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+        }
     }
 
     @Override

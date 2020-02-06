@@ -248,6 +248,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     }
 
+    public void toggleSearchInToolbar(boolean show) {
+        toolbarSearchTv.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
     private void toggleSearchViewVisibility(boolean show) {
         if (show) {
             searchView.setVisibility(View.VISIBLE);

@@ -174,6 +174,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         exploreContainer.setVisibility(View.GONE);
         totalUnreadCount = 0;
         syncAllGroups();
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(true);
+        }
     }
 
     private void syncAllGroups() {
@@ -582,6 +585,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
+        }
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
     }
 

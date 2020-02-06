@@ -12,11 +12,16 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
+import java.util.ArrayList;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.network.Endpoints;
@@ -24,8 +29,6 @@ import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.ArrayList;
 
 public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
@@ -39,6 +42,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private ExploreGroupAdapter exploreGroupAdapter;
     private boolean isOnboarding;
     private EditText searchEt;
+
     public ExploreFrag() {
     }
 
@@ -79,7 +83,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
 
             @Override
             public void afterTextChanged(Editable s) {
-               // Log.d(TAG,s+"*******************");
+                // Log.d(TAG,s+"*******************");
             }
         });
         joinedAllTv.setVisibility(View.GONE);
@@ -101,6 +105,9 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     public void onResume() {
         super.onResume();
         fetchExploreGroups();
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+        }
     }
 
     private void fetchExploreGroups() {
