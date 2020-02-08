@@ -1492,6 +1492,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (getAdapterPosition() == RecyclerView.NO_POSITION) {
+                    Toast.makeText(activity, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
+                    Crashlytics.logException(new ArrayIndexOutOfBoundsException("index = -1"));
+                    return true;
+                }
                 switch (touchedView.getId()) {
                     case R.id.iv_dp:
                         ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
