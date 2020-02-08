@@ -170,6 +170,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         super.onResume();
         adapter.clearGroups();
         progressBar.setVisibility(View.VISIBLE);
+        toggleSearch(false);
         groupsRecyclerView.setVisibility(View.INVISIBLE);
         exploreContainer.setVisibility(View.GONE);
         totalUnreadCount = 0;
@@ -240,7 +241,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     if (progressBar.getVisibility() == View.VISIBLE) {
                         progressBar.setVisibility(View.GONE);
                     }
+                    toggleSearch(true);
                     groupTrace.stop();
+                    reinitGroupListCopy();
                 }
             }
 
@@ -249,6 +252,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             }
         });
+    }
+
+    private void toggleSearch(boolean isEnabled) {
+        if (getActivity() != null & getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setIsSearchEnabled(isEnabled);
+        }
     }
 
     private ChildEventListener dmChildEventListener = new ChildEventListener() {
