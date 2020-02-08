@@ -241,8 +241,10 @@ public class ProfileFrag extends Fragment {
         msgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DmIntroBottomSheet.newInstance(userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail()).show(getChildFragmentManager(), null);
-                Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
+                if (profileData != null) {
+                    DmIntroBottomSheet.newInstance(userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail()).show(getChildFragmentManager(), null);
+                    Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
+                }
             }
         });
 
