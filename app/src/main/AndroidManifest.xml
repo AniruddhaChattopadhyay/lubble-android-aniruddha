@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
-    android:versionCode="219"
-    android:versionName="1.13-2">
+    android:versionCode="220"
+    android:versionName="1.13-3">
 
     <application
         android:name=".LubbleApp"
@@ -77,7 +77,7 @@
             android:name=".MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:windowSoftInputMode="adjustPan"
+            android:windowSoftInputMode="adjustNothing"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
