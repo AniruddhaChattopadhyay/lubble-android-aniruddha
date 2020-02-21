@@ -587,7 +587,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             personalChatData.setCreatedTimestamp(System.currentTimeMillis());
             personalChatData.setServerTimestamp(System.currentTimeMillis());
             chatAdapter.addPersonalChatData(personalChatData);
-            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, requireContext());
+            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, getContext());
             GroupPromptSharedPrefs.getInstance().removeGroupId(groupId);
         }
     }
