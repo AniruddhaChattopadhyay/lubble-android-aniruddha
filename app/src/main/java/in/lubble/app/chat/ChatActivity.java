@@ -167,7 +167,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         } else {
             tabLayout.setVisibility(View.VISIBLE);
             inviteContainer.setVisibility(View.VISIBLE);
-            toolbarInviteHint.setText(getString(R.string.click_group_info));
         }
 
         ChatViewPagerAdapter adapter = new ChatViewPagerAdapter(getSupportFragmentManager(), msgId, isJoining);
