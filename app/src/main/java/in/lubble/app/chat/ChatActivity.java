@@ -440,7 +440,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.chat_menu, menu);
+        int menuId = dmId != null ? R.menu.chat_menu : R.menu.group_chat_menu;
+        getMenuInflater().inflate(menuId, menu);
+
         return true;
     }
 
@@ -456,6 +458,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 return true;
             case R.id.report:
                 reportAccount();
+                return true;
+            case R.id.group_info:
+                if (targetFrag != null) {
+                    targetFrag.openGroupInfo();
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
