@@ -210,7 +210,7 @@ public class ChatMoreFragment extends Fragment {
                                                     if (!task.isSuccessful()) {
                                                         Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                                     } else {
-                                                        Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, requireContext());
+                                                        Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, getContext());
                                                         Toast.makeText(requireContext(), "Updated!", Toast.LENGTH_SHORT).show();
                                                     }
                                                 }

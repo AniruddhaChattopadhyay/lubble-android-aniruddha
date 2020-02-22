@@ -15,8 +15,6 @@ import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -32,8 +30,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.Group;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -524,7 +520,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             }
         });
 
-        resetActionBar();
     }
 
     @Override
@@ -587,36 +582,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             personalChatData.setCreatedTimestamp(System.currentTimeMillis());
             personalChatData.setServerTimestamp(System.currentTimeMillis());
             chatAdapter.addPersonalChatData(personalChatData);
-            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, requireContext());
+            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, getContext());
             GroupPromptSharedPrefs.getInstance().removeGroupId(groupId);
-        }
-    }
-
-    private void resetActionBar() {
-        final ActionMode actionMode = ((AppCompatActivity) getContext()).startSupportActionMode(new ActionMode.Callback() {
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
-                return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-
-            }
-        });
-        if (actionMode != null) {
-            actionMode.finish();
         }
     }
 

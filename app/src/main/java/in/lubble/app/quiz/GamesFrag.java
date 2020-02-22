@@ -80,7 +80,7 @@ public class GamesFrag extends Fragment {
         earnCoinsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, requireContext());
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, getContext());
                 ReferralActivity.open(requireContext(), true);
             }
         });

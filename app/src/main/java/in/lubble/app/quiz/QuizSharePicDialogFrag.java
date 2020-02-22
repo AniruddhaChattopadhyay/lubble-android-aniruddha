@@ -14,22 +14,25 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
+
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.bumptech.glide.request.RequestOptions;
+
+import java.util.Random;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
-
-import java.util.Random;
 
 import static in.lubble.app.Constants.APP_NOTIF_CHANNEL;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.ALL;
@@ -95,7 +98,7 @@ public class QuizSharePicDialogFrag extends DialogFragment {
             @Override
             public void onClick(View v) {
 
-                Analytics.triggerEvent(AnalyticsEvents.QUIZ_SHARE_CLICKED, requireContext());
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_SHARE_CLICKED, getContext());
                 shareTv.setVisibility(View.INVISIBLE);
                 shareProgressbar.setVisibility(View.VISIBLE);
 
@@ -117,7 +120,7 @@ public class QuizSharePicDialogFrag extends DialogFragment {
         saveTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Analytics.triggerEvent(AnalyticsEvents.QUIZ_PIC_SAVE_CLICKED, requireContext());
+                Analytics.triggerEvent(AnalyticsEvents.QUIZ_PIC_SAVE_CLICKED, getContext());
                 final Intent intent = new Intent(Intent.ACTION_VIEW)
                         .setDataAndType(picUri,
                                 "image/*").addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
