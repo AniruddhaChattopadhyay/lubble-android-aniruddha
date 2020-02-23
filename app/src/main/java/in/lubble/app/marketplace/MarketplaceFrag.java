@@ -107,7 +107,7 @@ public class MarketplaceFrag extends Fragment {
         category2Rv = cat2cv.findViewById(R.id.rv_cat_items);
         category2Rv.setNestedScrollingEnabled(false);
 
-        categoriesRv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        categoriesRv.setLayoutManager(new GridLayoutManager(getContext(), 2, GridLayoutManager.HORIZONTAL, false));
         category1Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         category2Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         allItemsRv.setLayoutManager(new GridLayoutManager(getContext(), 2));
