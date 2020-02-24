@@ -1149,10 +1149,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
             final int size = chatDataList.size();
             chatDataList.add(chatData);
-            if (size - 1 >= 0) {
-                // remove the last msg lubb hint
-                notifyItemChanged(size - 1);
-            }
             notifyItemInserted(size);
         }
     }
@@ -1160,10 +1156,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void addChatData(int pos, @NonNull ChatData chatData) {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
             chatDataList.add(pos, chatData);
-            if (pos - 1 >= 0) {
-                // remove the last msg lubb hint
-                notifyItemChanged(pos - 1);
-            }
             notifyItemInserted(pos);
         }
     }
@@ -1179,13 +1171,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     public void addPersonalChatData(@NonNull ChatData chatData) {
-        if (!chatData.getType().equalsIgnoreCase(HIDDEN) && !chatDataList.get(chatDataList.size() - 1).getId().equalsIgnoreCase("101")) {
+        if (!chatData.getType().equalsIgnoreCase(HIDDEN) &&
+                (chatDataList.size() == 0 || !chatDataList.get(chatDataList.size() - 1).getId().equalsIgnoreCase("101"))) {
             final int size = chatDataList.size();
             chatDataList.add(chatData);
-            if (size - 1 >= 0) {
-                // remove the last msg lubb hint
-                notifyItemChanged(size - 1);
-            }
             notifyItemInserted(size);
         }
     }
@@ -1492,6 +1481,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
+                if (getAdapterPosition() == RecyclerView.NO_POSITION) {
+                    Toast.makeText(activity, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
+                    Crashlytics.logException(new ArrayIndexOutOfBoundsException("index = -1"));
+                    return true;
+                }
                 switch (touchedView.getId()) {
                     case R.id.iv_dp:
                         ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());

@@ -48,12 +48,11 @@ import in.lubble.app.utils.UiUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-//import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+
+//import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 
 public class ChatMoreFragment extends Fragment {
     private static final String TAG = "ChatMoreFragment";
@@ -216,7 +215,7 @@ public class ChatMoreFragment extends Fragment {
                                                     if (!task.isSuccessful()) {
                                                         Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                                     } else {
-                                                        Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, requireContext());
+                                                        Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, getContext());
                                                         Toast.makeText(requireContext(), "Updated!", Toast.LENGTH_SHORT).show();
                                                     }
                                                 }

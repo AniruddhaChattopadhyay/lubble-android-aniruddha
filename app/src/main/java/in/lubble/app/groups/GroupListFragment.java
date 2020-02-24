@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -74,6 +75,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private GroupRecyclerAdapter adapter;
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private RecyclerView groupsRecyclerView;
+    private TextView noSearchResultsTv;
     private LinearLayout exploreContainer;
     private ProgressBar progressBar;
     private HashMap<String, Set<String>> groupInvitedByMap;
@@ -105,6 +107,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         NestedScrollView nestedScrollView = view.findViewById(R.id.container_scrollview);
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
+        noSearchResultsTv = view.findViewById(R.id.tv_search_no_results);
         exploreContainer = view.findViewById(R.id.container_explore);
         progressBar = view.findViewById(R.id.progressBar_groups);
         newGroupContainer = view.findViewById(R.id.container_create_group);
@@ -167,10 +170,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         super.onResume();
         adapter.clearGroups();
         progressBar.setVisibility(View.VISIBLE);
+        toggleSearch(false);
         groupsRecyclerView.setVisibility(View.INVISIBLE);
         exploreContainer.setVisibility(View.GONE);
         totalUnreadCount = 0;
         syncAllGroups();
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(true);
+        }
     }
 
     private void syncAllGroups() {
@@ -234,7 +241,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     if (progressBar.getVisibility() == View.VISIBLE) {
                         progressBar.setVisibility(View.GONE);
                     }
+                    toggleSearch(true);
                     groupTrace.stop();
+                    reinitGroupListCopy();
                 }
             }
 
@@ -243,6 +252,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             }
         });
+    }
+
+    private void toggleSearch(boolean isEnabled) {
+        if (getActivity() != null & getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setIsSearchEnabled(isEnabled);
+        }
     }
 
     private ChildEventListener dmChildEventListener = new ChildEventListener() {
@@ -482,6 +497,11 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     }
 
+    @Override
+    public void onSearched(int resultSize) {
+        noSearchResultsTv.setVisibility(resultSize == 0 ? View.VISIBLE : View.GONE);
+    }
+
     private void syncInvitedGroups(final String groupId) {
         // get meta data of the groups joined by the user
         final ValueEventListener joinedGroupListener = getLubbleGroupsRef().child(groupId)
@@ -576,6 +596,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
+        }
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
     }
 

@@ -241,8 +241,10 @@ public class ProfileFrag extends Fragment {
         msgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DmIntroBottomSheet.newInstance(userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail()).show(getChildFragmentManager(), null);
-                Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
+                if (profileData != null) {
+                    DmIntroBottomSheet.newInstance(userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail()).show(getChildFragmentManager(), null);
+                    Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
+                }
             }
         });
 
@@ -254,35 +256,7 @@ public class ProfileFrag extends Fragment {
         super.onStart();
         userRef = getUserRef(userId);
         fetchProfileFeed();
-        syncDms();
     }
-
-    private void syncDms() {
-        dmRef = RealtimeDbHelper.getUserDmsRef(userId);
-        dmRef.orderByChild("profileId").equalTo(FirebaseAuth.getInstance().getUid()).addValueEventListener(dmValueEventListener);
-    }
-
-    private ValueEventListener dmValueEventListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
-            boolean dmExists = false;
-            if (dataSnapshot.getChildrenCount() > 0) {
-                dmExists = true;
-                msgBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ChatActivity.openForDm(requireContext(), dataSnapshot.getChildren().iterator().next().getKey(), null, null);
-                    }
-                });
-            }
-            msgBtn.setEnabled(dmExists || profileData.getIsDmEnabled());
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-        }
-    };
 
     private void syncGroups() {
         RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -419,6 +393,7 @@ public class ProfileFrag extends Fragment {
                         userBio.setText(R.string.no_bio_text);
                     }
                     populateProfileDetails();
+                    syncDms();
                     if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                         editProfileTV.setVisibility(View.VISIBLE);
                         referralCard.setVisibility(View.VISIBLE);
@@ -462,6 +437,33 @@ public class ProfileFrag extends Fragment {
         };
         userRef.addValueEventListener(valueEventListener);
     }
+
+    private void syncDms() {
+        dmRef = RealtimeDbHelper.getUserDmsRef(userId);
+        dmRef.orderByChild("profileId").equalTo(FirebaseAuth.getInstance().getUid()).addValueEventListener(dmValueEventListener);
+    }
+
+    private ValueEventListener dmValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+            boolean dmExists = false;
+            if (dataSnapshot.getChildrenCount() > 0) {
+                dmExists = true;
+                msgBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ChatActivity.openForDm(requireContext(), dataSnapshot.getChildren().iterator().next().getKey(), null, null);
+                    }
+                });
+            }
+            msgBtn.setEnabled(dmExists || profileData.getIsDmEnabled());
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
 
     private void populateProfileDetails() {
         if (!TextUtils.isEmpty(profileData.getGenderText())) {

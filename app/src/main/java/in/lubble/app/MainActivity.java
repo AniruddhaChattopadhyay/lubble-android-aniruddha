@@ -211,29 +211,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toolbarSearchTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                toggleSearchViewVisibility(true);
-                if (groupListFragment != null && groupListFragment.isVisible()) {
-                    groupListFragment.reinitGroupListCopy();
-                    groupListFragment.toggleVisibilityOfSlider(false);
-                }
-
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                    @Override
-                    public boolean onQueryTextChange(String newText) {
-                        if (groupListFragment != null && groupListFragment.isVisible()) {
-                            groupListFragment.filterGroups(newText);
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onQueryTextSubmit(String query) {
-                        if (groupListFragment != null && groupListFragment.isVisible()) {
-                            groupListFragment.filterGroups(query);
-                        }
-                        return false;
-                    }
-                });
+                onToolbarSearchClicked();
             }
         });
 
@@ -246,6 +224,41 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
 
+    }
+
+    private void onToolbarSearchClicked() {
+        toggleSearchViewVisibility(true);
+        if (groupListFragment != null && groupListFragment.isVisible()) {
+            groupListFragment.reinitGroupListCopy();
+            groupListFragment.toggleVisibilityOfSlider(false);
+        }
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (groupListFragment != null && groupListFragment.isVisible()) {
+                    groupListFragment.filterGroups(newText);
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (groupListFragment != null && groupListFragment.isVisible()) {
+                    groupListFragment.filterGroups(query);
+                }
+                return false;
+            }
+        });
+    }
+
+    public void setIsSearchEnabled(boolean isSearchEnabled) {
+        toolbarSearchTv.setEnabled(isSearchEnabled);
+    }
+
+    public void toggleSearchInToolbar(boolean show) {
+        toggleSearchViewVisibility(false);
+        toolbarSearchTv.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     private void toggleSearchViewVisibility(boolean show) {
@@ -805,7 +818,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
-                    switchFrag(GroupListFragment.newInstance());
+                    switchFrag(groupListFragment = GroupListFragment.newInstance());
                     return true;
                 case R.id.navigation_explore:
                     switchFrag(ExploreFrag.newInstance());
@@ -932,6 +945,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (searchView.getVisibility() == View.VISIBLE) {
+            UiUtils.hideKeyboard(MainActivity.this);
+            searchView.setQuery("", true);
+            toggleSearchViewVisibility(false);
         } else {
             super.onBackPressed();
         }

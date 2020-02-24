@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -16,8 +15,6 @@ import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -33,9 +30,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.ActionMode;
-import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.constraintlayout.widget.Group;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -43,10 +37,6 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -75,14 +65,12 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
-import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.events.EventPickerActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.DmData;
 import in.lubble.app.models.EventData;
-import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
@@ -96,7 +84,6 @@ import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FileUtils;
-import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -107,8 +94,6 @@ import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
@@ -543,7 +528,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             }
         });
 
-        resetActionBar();
     }
 
     @Override
@@ -606,36 +590,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             personalChatData.setCreatedTimestamp(System.currentTimeMillis());
             personalChatData.setServerTimestamp(System.currentTimeMillis());
             chatAdapter.addPersonalChatData(personalChatData);
-            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, requireContext());
+            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, getContext());
             GroupPromptSharedPrefs.getInstance().removeGroupId(groupId);
-        }
-    }
-
-    private void resetActionBar() {
-        final ActionMode actionMode = ((AppCompatActivity) getContext()).startSupportActionMode(new ActionMode.Callback() {
-            @Override
-            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
-                return true;
-            }
-
-            @Override
-            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                return false;
-            }
-
-            @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                return false;
-            }
-
-            @Override
-            public void onDestroyActionMode(ActionMode mode) {
-
-            }
-        });
-        if (actionMode != null) {
-            actionMode.finish();
         }
     }
 

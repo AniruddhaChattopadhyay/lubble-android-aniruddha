@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="in.lubble.app">
+    package="in.lubble.app"
+    android:versionCode="221"
+    android:versionName="1.13.1-1">
 
     <application
         android:name=".LubbleApp"
@@ -75,7 +77,7 @@
             android:name=".MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:windowSoftInputMode="adjustPan"
+            android:windowSoftInputMode="adjustNothing"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -397,7 +399,7 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider> <!-- Branch install referrer tracking -->
+        </provider>
         <provider
             android:name=".LubbleFileProvider"
             android:authorities="${applicationId}.provider"
@@ -408,13 +410,6 @@
                 android:resource="@xml/freshchat_file_provider_paths" />
         </provider>
 
-        <receiver
-            android:name="io.branch.referral.InstallListener"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
-            </intent-filter>
-        </receiver>
         <receiver
             android:name="com.clevertap.android.sdk.CTPushNotificationReceiver"
             android:enabled="true"

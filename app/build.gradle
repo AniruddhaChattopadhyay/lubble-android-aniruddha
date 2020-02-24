@@ -9,8 +9,6 @@ android {
         applicationId "in.lubble.app"
         minSdkVersion 17
         targetSdkVersion 28
-        versionCode 217
-        versionName "1.12-1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -112,7 +110,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics:17.2.0'
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
     implementation 'com.cepheuen.elegant-number-button:lib:1.0.3'
-    implementation 'io.branch.sdk.android:library:2.19.3'
+    implementation 'io.branch.sdk.android:library:4.3.2'
     implementation 'com.google.android.exoplayer:exoplayer:r2.4.0'
     implementation 'com.google.android.exoplayer:exoplayer-core:r2.4.0'
     implementation 'com.google.android.exoplayer:exoplayer-dash:r2.4.0'
