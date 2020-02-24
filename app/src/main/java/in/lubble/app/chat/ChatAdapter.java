@@ -880,7 +880,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (profileData != null) {
                     profileData.setId(dataSnapshot.getKey());
                     for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles") && groupId != null) {
+                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles") && groupId!=null) {
                             final String flair = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(groupId).child("flair").getValue(String.class);
                             profileData.setGroupFlair(flair);
                             break;

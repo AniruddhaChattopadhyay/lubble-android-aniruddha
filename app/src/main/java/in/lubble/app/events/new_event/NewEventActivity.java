@@ -27,6 +27,8 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.Status;
+//import com.google.android.gms.location.places.Place;
+//import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -36,6 +38,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.RectangularBounds;
@@ -45,6 +48,13 @@ import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -73,8 +83,20 @@ import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.EventIdData;
+import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.pojos.EmptyPostResponse;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.mapUtils.SphericalUtil;
+import okhttp3.RequestBody;
+import permissions.dispatcher.*;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -82,6 +104,14 @@ import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.firebase.RealtimeDbHelper.*;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
@@ -104,6 +134,7 @@ public class NewEventActivity extends BaseActivity {
 
     private String currentPhotoPath;
     private Uri picUri = null;
+    private Endpoints endpoints;
 
     private SupportMapFragment mapFragment;
     private LatLng defaultLatLng;
@@ -119,6 +150,7 @@ public class NewEventActivity extends BaseActivity {
     private TextInputLayout ticketUrl;
     private RadioGroup radioGroup;
     private RadioButton newGroupRadioBtn;
+    private String eventId;
     private CompoundButton oldGroupRadioBtn;
     private TextView notAdminHintTv;
     private TextView relatedGroupsTv;
@@ -230,34 +262,64 @@ public class NewEventActivity extends BaseActivity {
                     eventData.setLati(place.getLatLng().latitude);
                     eventData.setLongi(place.getLatLng().longitude);
                     eventData.setAddress(addressTil.getEditText().getText().toString());
+                    eventData.setLubble_id(LubbleSharedPrefs.getInstance().getLubbleId());
                     if (oldGroupRadioBtn.isChecked()) {
                         final GroupData selectedGroupData = (GroupData) adminGroupsSpinner.getSelectedItem();
                         eventData.setGid(selectedGroupData.getId());
                     } else {
                         eventData.setGid("");
                     }
+                    EventMemberData eventMemberData = new EventMemberData();
+                    eventMemberData.setisAdmin(true);
+                    eventMemberData.setResponse(GOING);
+                    eventMemberData.setTimestamp(System.currentTimeMillis());
+                    eventMemberData.setUid(FirebaseAuth.getInstance().getUid());
+                    List<EventMemberData> member_list = new ArrayList<>();
+                    member_list.add(eventMemberData);
+                    eventData.setMembers(member_list);
+
 
                     final HashMap<String, Object> membersMap = new HashMap<>();
                     final HashMap<String, Object> memberInfoMap = new HashMap<>();
                     memberInfoMap.put("response", GOING);
                     memberInfoMap.put("timestamp", System.currentTimeMillis());
                     memberInfoMap.put("isAdmin", true);
-                    membersMap.put(FirebaseAuth.getInstance().getUid(), memberInfoMap);
-                    eventData.setMembers(membersMap);
 
-                    final DatabaseReference pushRef = getEventsRef().push();
-                    pushRef.setValue(eventData);
+                    Gson gson = new Gson();
+                    String json = gson.toJson(eventData);
+                    Log.e(TAG,json);
+                    JsonElement element = gson.fromJson (json, JsonElement.class);
+                    JsonObject jsonObj = element.getAsJsonObject();
+                    RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObj.toString());
 
-                    if (picUri != null) {
-                        startService(new Intent(NewEventActivity.this, UploadFileService.class)
-                                .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
-                                .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
-                                .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/events/" + pushRef.getKey())
-                                .setAction(UploadFileService.ACTION_UPLOAD));
-                    }
+                    endpoints = ServiceGenerator.createService(Endpoints.class);
+                    //endpoints = retrofit.create(Endpoints.class);
+                    //Call<EventIdData> call = endpoints.upload_new_event("ayush_django_backend_token","ayush_django_backend",body);
+                    Call<EventIdData> call = endpoints.upload_new_event(body);
+                    call.enqueue(new Callback<EventIdData>() {
+                        @Override
+                        public void onResponse(Call<EventIdData> call, Response<EventIdData> response) {
+                            EventIdData data = response.body();
+                            eventId = data.getEvent_id();
+                            if (picUri != null) {
+                                startService(new Intent(NewEventActivity.this, UploadFileService.class)
+                                        .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
+                                        .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
+                                        .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/events/" + eventId)
+                                        .setAction(UploadFileService.ACTION_UPLOAD));
+                            }
 
-                    Toast.makeText(NewEventActivity.this, R.string.event_published, Toast.LENGTH_SHORT).show();
-                    finish();
+                            finish();
+                            Log.d(TAG,"successfully posted");
+                        }
+
+                        @Override
+                        public void onFailure(Call<EventIdData> call, Throwable t) {
+                            Toast.makeText(NewEventActivity.this,"Event publish failure. Please try again", Toast.LENGTH_SHORT).show();
+                            finish();
+                            Log.e(TAG,"failed to post");
+                        }
+                    });
 
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -541,6 +603,7 @@ public class NewEventActivity extends BaseActivity {
         startActivityForResult(intent, PLACE_PICKER_REQUEST);
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PLACE_PICKER_REQUEST) {

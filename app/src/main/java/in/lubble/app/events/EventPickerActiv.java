@@ -3,6 +3,7 @@ package in.lubble.app.events;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,21 @@ import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.events.new_event.NewEventActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static in.lubble.app.utils.DateTimeUtils.*;
 
@@ -36,6 +46,7 @@ public class EventPickerActiv extends BaseActivity {
     private RecyclerView recyclerView;
     private Query query;
     private ValueEventListener valueEventListener;
+    private Endpoints endpoints;
 
     public static Intent getIntent(Context context) {
         return new Intent(context, EventPickerActiv.class);
@@ -77,17 +88,25 @@ public class EventPickerActiv extends BaseActivity {
     protected void onResume() {
         super.onResume();
         recyclerView.setAdapter(new EventPickerAdapter(new ArrayList<EventData>(), GlideApp.with(EventPickerActiv.this)));
-
-        query = RealtimeDbHelper.getEventsRef().orderByChild("startTimestamp");
-        valueEventListener = new ValueEventListener() {
+        endpoints = ServiceGenerator.createService(Endpoints.class);
+        //endpoints = retrofit.create(Endpoints.class);
+        String lubble_id = LubbleSharedPrefs.getInstance().getLubbleId();
+        //Call<List<EventData>> call = endpoints.getEvents("ayush_django_backend_token","ayush_django_backend", LubbleSharedPrefs.getInstance().getLubbleId());
+        Call<List<EventData>> call = endpoints.getEvents(LubbleSharedPrefs.getInstance().getLubbleId());
+        call.enqueue(new Callback<List<EventData>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                if (!response.isSuccessful()) {
+                    Log.e(TAG,response.code()+"");
+                    Toast.makeText(getApplicationContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
+                    EventPickerActiv.this.finish();
+                    return;
+                }
                 final ArrayList<EventData> eventDataList = new ArrayList<>();
-
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    final EventData eventData = child.getValue(EventData.class);
+                List<EventData> data = response.body();
+                for (EventData eventData:data) {
                     if (eventData != null && eventData.getStartTimestamp() > System.currentTimeMillis()) {
-                        eventData.setId(child.getKey());
+                        eventData.setId(eventData.getEvent_id());
                         eventDataList.add(eventData);
                     }
                 }
@@ -103,11 +122,14 @@ public class EventPickerActiv extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            public void onFailure(Call<List<EventData>> call, Throwable t) {
+                Log.e(TAG,"failed to get response from django");
+                Toast.makeText(getApplicationContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
+                EventPickerActiv.this.finish();
             }
-        };
-        query.addValueEventListener(valueEventListener);
+        });
+
+
     }
 
     private class EventPickerAdapter extends RecyclerView.Adapter<EventPickerAdapter.ViewHolder> {
@@ -156,6 +178,7 @@ public class EventPickerActiv extends BaseActivity {
                     @Override
                     public void onClick(View v) {
                         final Intent intent = new Intent();
+                        Log.d(TAG,"inside on click"+eventList.get(getAdapterPosition()).getId());
                         intent.putExtra("event_id", eventList.get(getAdapterPosition()).getId());
                         setResult(RESULT_OK, intent);
                         finish();

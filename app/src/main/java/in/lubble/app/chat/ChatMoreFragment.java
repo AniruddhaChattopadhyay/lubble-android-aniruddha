@@ -48,8 +48,10 @@ import in.lubble.app.utils.UiUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
+//import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 
@@ -74,6 +76,7 @@ public class ChatMoreFragment extends Fragment {
     private ValueEventListener flairListener;
     private ValueEventListener eventsListener;
     private FlairUpdateListener flairUpdateListener;
+    private  Endpoints endpoints;
 
     public ChatMoreFragment() {
         // Required empty public constructor
@@ -130,44 +133,47 @@ public class ChatMoreFragment extends Fragment {
 
     private void syncEvents() {
         eventProgressBar.setVisibility(View.VISIBLE);
-        eventsListener = getEventsRef().orderByChild("startTimestamp").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (eventProgressBar != null) {
-                    eventProgressBar.setVisibility(View.GONE);
-                }
-                eventsRecyclerView.setVisibility(View.VISIBLE);
-                noEventsContainer.setVisibility(View.GONE);
-                if (dataSnapshot.getChildrenCount() > 0) {
-                    final ArrayList<EventData> eventDataList = new ArrayList<>();
-                    for (DataSnapshot dataSnapshotChild : dataSnapshot.getChildren()) {
-                        final EventData eventData = dataSnapshotChild.getValue(EventData.class);
-                        if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp() && eventData.getRelatedGroupsList().contains(groupId)) {
-                            eventData.setId(dataSnapshotChild.getKey());
-                            eventDataList.add(eventData);
-                        }
-                    }
-                    if (eventDataList.size() > 0) {
-                        eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
-                    } else {
-                        eventsRecyclerView.setVisibility(View.GONE);
-                        noEventsContainer.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    // no events
-                    if (eventProgressBar != null) {
-                        eventProgressBar.setVisibility(View.GONE);
-                    }
-                    eventsRecyclerView.setVisibility(View.GONE);
-                    noEventsContainer.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+        endpoints = ServiceGenerator.createService(Endpoints.class);
+        //endpoints = retrofit.create(Endpoints.class);
+        //Call<List<EventData>> call = endpoints.getEvents("ayush_django_backend_token","ayush_django_backend",LubbleSharedPrefs.getInstance().getLubbleId());
+        Call<List<EventData>> call = endpoints.getEvents( LubbleSharedPrefs.getInstance().getLubbleId());
+        final ArrayList<EventData> eventDataList = new ArrayList<>();
+        call.enqueue(new Callback<List<EventData>>() {
+                         @Override
+                         public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                             if (!response.isSuccessful()) {
+                                 eventsRecyclerView.setVisibility(View.GONE);
+                                 noEventsContainer.setVisibility(View.VISIBLE);
+                                 eventProgressBar.setVisibility(View.GONE);
+                                 return;
+                             }
+                             List<EventData> data = response.body();
+                             if (data != null) {
+                                 for (EventData eventData : data) {
+                                     if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp()) {//&& eventData.getRelatedGroupsList().contains(groupId)) {
+                                         eventData.setId(eventData.getEvent_id());
+                                         eventDataList.add(eventData);
+                                     }
+                                 }
+                             }
+                             if (eventDataList.size() > 0) {
+                                 eventProgressBar.setVisibility(View.GONE);
+                                 noEventsContainer.setVisibility(View.GONE);
+                                 eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
+                             } else {
+                                 eventsRecyclerView.setVisibility(View.GONE);
+                                 noEventsContainer.setVisibility(View.VISIBLE);
+                                 eventProgressBar.setVisibility(View.GONE);
+                             }
+                         }
+                         @Override
+                         public void onFailure(Call<List<EventData>> call, Throwable t) {
+                             eventsRecyclerView.setVisibility(View.GONE);
+                             noEventsContainer.setVisibility(View.VISIBLE);
+                             eventProgressBar.setVisibility(View.GONE);
+                             Log.e(TAG,"failed to get response from django");
+                         }
+                     });
     }
 
     private void syncFlair() {
@@ -352,9 +358,6 @@ public class ChatMoreFragment extends Fragment {
         super.onPause();
         if (flairListener != null) {
             getThisUserRef().removeEventListener(flairListener);
-        }
-        if (eventsListener != null) {
-            getEventsRef().orderByChild("startTimestamp").removeEventListener(eventsListener);
         }
     }
 

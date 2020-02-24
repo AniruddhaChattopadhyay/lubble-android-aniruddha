@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -34,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.constraintlayout.widget.Group;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -41,6 +43,10 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -60,6 +66,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import in.lubble.app.GlideApp;
@@ -68,23 +75,28 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
+import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.events.EventPickerActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.DmData;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
+import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FileUtils;
+import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -92,6 +104,11 @@ import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
@@ -144,6 +161,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
     private static final String KEY_CHAT_DATA = "KEY_CHAT_DATA";
     private static final int PERMITTED_VIDEO_SIZE = 30;
+    private Endpoints endpoints;
+    private EventData eventData;
     @Nullable
     private GroupData groupData;
     private RelativeLayout joinContainer;
@@ -1393,27 +1412,40 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void fetchAndShowAttachedEventInfo() {
         if (!TextUtils.isEmpty(attachedEventId)) {
-            RealtimeDbHelper.getEventsRef().child(attachedEventId).addListenerForSingleValueEvent(new ValueEventListener() {
+            endpoints = ServiceGenerator.createService(Endpoints.class);
+           // endpoints = retrofit.create(Endpoints.class);
+            //Call<List<EventData>> call = endpoints.getEvent("ayush_django_backend_token","ayush_django_backend",attachedEventId);
+            Call<List<EventData>> call = endpoints.getEvent(attachedEventId);
+            call.enqueue(new Callback<List<EventData>>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.getValue() != null) {
-                        linkMetaContainer.setVisibility(View.VISIBLE);
-                        final EventData eventData = dataSnapshot.getValue(EventData.class);
-                        linkTitle.setText(eventData.getTitle());
-                        linkDesc.setText(DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), DateTimeUtils.APP_DATE_NO_YEAR) + ": " + eventData.getDesc());
-                        GlideApp.with(getContext())
-                                .load(eventData.getProfilePic())
-                                .circleCrop()
-                                .placeholder(R.drawable.ic_event)
-                                .error(R.drawable.ic_event)
-                                .into(linkPicIv);
-                        attachedEventPicUrl = eventData.getProfilePic();
+                public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                    if (!response.isSuccessful()) {
+                        Toast.makeText(getContext(),"Failed to get response! please try again",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    List<EventData> data = response.body();
+                    for (EventData eventData_loop:data) {
+                        eventData = eventData_loop;
+                        if (eventData != null)
+                        {
+                            linkMetaContainer.setVisibility(View.VISIBLE);
+                            linkTitle.setText(eventData.getTitle());
+                            linkDesc.setText(DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), DateTimeUtils.APP_DATE_NO_YEAR) + ": " + eventData.getDesc());
+                            GlideApp.with(getContext())
+                                    .load(eventData.getProfilePic())
+                                    .circleCrop()
+                                    .placeholder(R.drawable.ic_event)
+                                    .error(R.drawable.ic_event)
+                                    .into(linkPicIv);
+                            attachedEventPicUrl = eventData.getProfilePic();
+                        }
                     }
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                public void onFailure(Call<List<EventData>> call, Throwable t) {
+                    Log.e(TAG,"failed to get response from django");
+                    Toast.makeText(getContext(),"Failed to get response! please try again",Toast.LENGTH_SHORT).show();
                 }
             });
         } else {

@@ -1,6 +1,8 @@
 package in.lubble.app.network;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import in.lubble.app.auth.LocationsData;
 import in.lubble.app.explore.ExploreGroupData;
@@ -9,6 +11,8 @@ import in.lubble.app.marketplace.RatingData;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.models.AirtableCollectionData;
 import in.lubble.app.models.AirtablePlacesData;
+import in.lubble.app.models.EventData;
+import in.lubble.app.models.EventIdData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
@@ -17,6 +21,7 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.pojos.BooksData;
+import in.lubble.app.models.pojos.EmptyPostResponse;
 import in.lubble.app.profile.UserProfileData;
 import in.lubble.app.quiz.PlaceData;
 import in.lubble.app.quiz.QuestionData;
@@ -29,11 +34,17 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.Field;
+import retrofit2.http.FieldMap;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
+import retrofit2.http.QueryMap;
 import retrofit2.http.Url;
 
 public interface Endpoints {
@@ -158,4 +169,33 @@ public interface Endpoints {
     @POST
     public Call<RewardsAirtableData> uploadInstalledApps(@Url String url, @Body RequestBody params);
 
+//    @GET("marketplace/events/list/")
+//    Call<List<EventData>> getEvents(@Header("token") String token,
+//                                    @Header("uid")String uid,
+//                                    @Query("lubble_id")String lubble_id);
+//
+//    @GET("marketplace/events/")
+//    Call<List<EventData>> getEvent(@Header("token") String token,
+//                                    @Header("uid")String uid,
+//                                    @Query("event_id")String event_id);
+//
+//    @POST("marketplace/events/attendee/")
+//    Call<EmptyPostResponse> uploadattendee(@Header("token") String token,
+//                                         @Header("uid")String uid,
+//                                         @Body RequestBody params);
+//    @POST("marketplace/events/")
+//    Call<EventIdData> upload_new_event(@Header("token") String token,
+//                                           @Header("uid")String uid,
+//                                           @Body RequestBody params);
+
+    @GET("marketplace/events/list/")
+    Call<List<EventData>> getEvents(@Query("lubble_id")String lubble_id);
+
+    @GET("marketplace/events/")
+    Call<List<EventData>> getEvent(@Query("event_id")String event_id);
+
+    @POST("marketplace/events/attendee/")
+    Call<EmptyPostResponse> uploadattendee(@Body RequestBody params);
+    @POST("marketplace/events/")
+    Call<EventIdData> upload_new_event(@Body RequestBody params);
 }
