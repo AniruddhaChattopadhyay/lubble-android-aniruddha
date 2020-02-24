@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
@@ -59,6 +60,7 @@ import in.lubble.app.models.EventData;
 import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
+import in.lubble.app.models.pojos.EmptyPostResponse;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.DateTimeUtils;
@@ -204,9 +206,7 @@ public class EventInfoActivity extends BaseActivity {
                                     }
                                 })
                                 .show();
-                        Log.d(TAG,"inside going");
                     } else {
-                        Log.d(TAG,"inside going");
                         changeStatus(EventData.GOING);
                     }
                 }
@@ -275,10 +275,6 @@ public class EventInfoActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(getResources().getString(R.string.fetch_test_event))
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
         endpoints = ServiceGenerator.createService(Endpoints.class);
         //endpoints = retrofit.create(Endpoints.class);
 
@@ -324,33 +320,8 @@ public class EventInfoActivity extends BaseActivity {
         return isAdmin;
     }
 
-    private void changeStatus(int newResponse) {
+    private void changeStatus(final int newResponse) {
         progressDialog.show();
-//        final DatabaseReference eventMemberRef = getEventsRef()
-//                .child(eventId)
-//                .child("members")
-//                .child(FirebaseAuth.getInstance().getUid());
-//
-//        final HashMap<String, Object> map = new HashMap<>();
-//        map.put("response", newResponse);
-//        if (newResponse == EventData.NO) {
-//            map.put("guests", 0);
-//        }
-//        map.put("timestamp", System.currentTimeMillis());
-//
-        Log.d(TAG,"inside change status");
-        Map<String,String> map = new HashMap<>();
-        map.put("response",Integer.toString(newResponse));
-        map.put("event_id",eventId);
-        map.put("uid",FirebaseAuth.getInstance().getUid());
-        map.put("timestamp",Long.toString(System.currentTimeMillis()));
-        if (newResponse == EventData.NO) {
-            map.put("guests", "0");
-        }
-        if (newResponse != EventData.NO) {
-            getCreateOrJoinGroupRef().child(eventData.getGid()).setValue(true);
-        }
-
         final JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("response",Integer.toString(newResponse));
@@ -366,33 +337,38 @@ public class EventInfoActivity extends BaseActivity {
             }
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
-            //Call<List<EventData>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
-            Call<List<EventData>> call = endpoints.uploadattendee(body);
-            call.enqueue(new Callback<List<EventData>>() {
+            //Call<List<EmptyPostResponse>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
+            Call<EmptyPostResponse> call = endpoints.uploadattendee(body);
+            call.enqueue(new Callback<EmptyPostResponse>() {
                 @Override
-                public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                public void onResponse(Call<EmptyPostResponse> call, Response<EmptyPostResponse> response) {
                     Log.d(TAG,"successfully posted");
+                    if(response.isSuccessful() && !isFinishing()){
+                        progressDialog.dismiss();
+                        toggleGoingButton(newResponse == EventData.GOING);
+                        toggleMaybeButton(newResponse == EventData.MAYBE);
+                        if (newResponse != EventData.NO) {
+                            EventGroupJoinedActivity.open(EventInfoActivity.this, newResponse, eventId, eventData.getGid(), isLinkedGroupJoined);
+                        }
+                        oldResponse = newResponse;
+                    }
+
                 }
 
                 @Override
-                public void onFailure(Call<List<EventData>> call, Throwable t) {
+                public void onFailure(Call<EmptyPostResponse> call, Throwable t) {
                     Log.e(TAG,"failed to post");
+                    Toast.makeText(EventInfoActivity.this, "Failed to post attendees. Please try again.", Toast.LENGTH_SHORT).show();
                 }
             });
+
         }
         catch (JSONException e) {
+            Crashlytics.logException(e);
             e.printStackTrace();
         }
 
-
-
-//        eventMemberRef.updateChildren(map);
-
-
-
-
-
-        checkGroupJoined(eventData.getGid(), newResponse);
+        //checkGroupJoined(eventData.getGid(), newResponse);
     }
 
     private void checkGroupJoined(@NonNull final String groupId, final int status) {
@@ -417,7 +393,6 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private void toggleGoingButton(boolean isGoing) {
-        Log.d(TAG,"inside tooglegoing");
         if (isGoing) {
             goingIcon.setImageResource(R.drawable.ic_check_circle_black_24dp);
             goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_green), android.graphics.PorterDuff.Mode.SRC_IN);
@@ -442,8 +417,6 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private void fetchEventInfo() {
-        Log.d(TAG,"Event Id is "+ eventId);
-
         //Call<List<EventData>> call = endpoints.getEvent("ayush_django_backend_token","ayush_django_backend",eventId);
         Call<List<EventData>> call = endpoints.getEvent(eventId);
         call.enqueue(new Callback<List<EventData>>() {
@@ -451,18 +424,17 @@ public class EventInfoActivity extends BaseActivity {
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
                 if (!response.isSuccessful()) {
                     Log.e(TAG,response.code()+"Not successful");
+                    Toast.makeText(getApplicationContext(),"Failed to fetch event Data! please try again",Toast.LENGTH_SHORT).show();
+                    EventInfoActivity.this.finish();
                     return;
                 }
                 List<EventData> data = response.body();
                 for (EventData eventData_loop:data) {
                         eventData = eventData_loop;
-                        System.out.println("***************************inside evendata loop" + eventData.getEvent_id());
                         if (eventData != null)
                         {
-                            System.out.println("***************************inside evendata not null" + eventData.getEvent_id());
                             final List<EventMemberData> members = eventData.getMembers();
                             for (EventMemberData eventMemberData : members) {
-                                System.out.println(eventMemberData.getUid()+"***************"+eventData.getEvent_id());
                                 if (eventMemberData.getUid().equals(FirebaseAuth.getInstance().getUid())) {
                                     current_member = eventMemberData;
                                     break;
@@ -526,7 +498,6 @@ public class EventInfoActivity extends BaseActivity {
                                 maybeContainer.setVisibility(View.GONE);
                             }
 
-                            //final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
                             if (current_member != null) {
                                 oldResponse = (long) current_member.getResponse();
                                 Log.e(TAG,"*************************** current member not null");
@@ -607,153 +578,10 @@ public class EventInfoActivity extends BaseActivity {
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
                 Log.e(TAG,"failed to get response from django");
+                Toast.makeText(getApplicationContext(),"Failed to fetch event Data! please try again",Toast.LENGTH_SHORT).show();
+                EventInfoActivity.this.finish();
             }
         });
-
-//        eventInfoListener = eventRef.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                eventData = dataSnapshot.getValue(EventData.class);
-//
-//                if (eventData != null) {
-//                    setTitleWhenCollapsed();
-//                    if (!TextUtils.isEmpty(eventData.getTicketUrl()) && (eventData.getTicketUrl().contains("https://") || eventData.getTicketUrl().contains("http://"))) {
-//                        // has a ticket URL
-//                        ticketsBtn.setVisibility(View.VISIBLE);
-//                        ticketsBtn.setOnClickListener(new View.OnClickListener() {
-//                            @Override
-//                            public void onClick(View v) {
-//                                Uri uri = Uri.parse(eventData.getTicketUrl());
-//                                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-//                                intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorAccent));
-//                                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dk_colorAccent));
-//                                intentBuilder.enableUrlBarHiding();
-//                                intentBuilder.setShowTitle(true);
-//                                CustomTabsIntent customTabsIntent = intentBuilder.build();
-//                                customTabsIntent.launchUrl(EventInfoActivity.this, uri);
-//                            }
-//                        });
-//
-//                    } else {
-//                        ticketsBtn.setVisibility(View.GONE);
-//                    }
-//                    GlideApp.with(EventInfoActivity.this)
-//                            .load(eventData.getProfilePic())
-//                            .error(R.drawable.ic_star_party)
-//                            .listener(new RequestListener<Drawable>() {
-//                                @Override
-//                                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-//                                    progressBar.setVisibility(View.GONE);
-//                                    groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dark_teal));
-//                                    groupHeaderIv.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//                                    groupHeaderIv.setPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16));
-//                                    return false;
-//                                }
-//
-//                                @Override
-//                                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-//                                    progressBar.setVisibility(View.GONE);
-//                                    groupHeaderIv.setBackgroundColor(ContextCompat.getColor(EventInfoActivity.this, R.color.black));
-//                                    groupHeaderIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
-//                                    groupHeaderIv.setPadding(0, 0, 0, 0);
-//                                    return false;
-//                                }
-//                            })
-//                            .into(groupHeaderIv);
-//                    organizerTv.setText(eventData.getOrganizer());
-//                    eventNameTv.setText(eventData.getTitle());
-//                    addressTv.setText(eventData.getAddress());
-//                    descTv.setText(eventData.getDesc());
-//
-//                    if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
-//                        finalMarkedStatus.setVisibility(View.GONE);
-//                    } else {
-//                        finalMarkedStatus.setVisibility(View.VISIBLE);
-//                        goingContainer.setVisibility(View.GONE);
-//                        maybeContainer.setVisibility(View.GONE);
-//                    }
-//
-//                    //final HashMap<String, Object> memberMap = (HashMap<String, Object>) eventData.getMembers().get(FirebaseAuth.getInstance().getUid());
-//                    if (current_member != null) {
-//                        oldResponse = (long) current_member.getResponse();
-//                        toggleGoingButton(oldResponse == EventData.GOING);
-//                        toggleMaybeButton(oldResponse == EventData.MAYBE);
-//
-//                        setFinalMarkedResponse(oldResponse);
-//                        if (current_member!=null && current_member.getTickets() > 0) {
-//                            ticketIv.setVisibility(View.VISIBLE);
-//                            ticketCountTv.setVisibility(View.VISIBLE);
-//                            luckyDrawHint.setVisibility(View.GONE);
-//                            ticketCountTv.setText("Lucky Draw Tickets: " + ((long) current_member.getTickets()));
-//                        } else {
-//                            if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
-//                                luckyDrawHint.setVisibility(View.VISIBLE);
-//                            } else {
-//                                luckyDrawHint.setVisibility(View.GONE);
-//                            }
-//                            ticketIv.setVisibility(View.GONE);
-//                            ticketCountTv.setVisibility(View.GONE);
-//                        }
-//                    } else {
-//                        if (System.currentTimeMillis() < DateTimeUtils.FAMILY_FUN_NIGHT_END_TIME) {
-//                            luckyDrawHint.setVisibility(View.VISIBLE);
-//                        } else {
-//                            luckyDrawHint.setVisibility(View.GONE);
-//                        }
-//                        ticketIv.setVisibility(View.GONE);
-//                        ticketCountTv.setVisibility(View.GONE);
-//                    }
-//                    final String month = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMM");
-//                    final String monthFull = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "MMMM");
-//                    final String date = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "dd");
-//                    final String dayOfWeek = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "EEE");
-//                    final String startTime = DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), "h:mm a");
-//                    String endTime = getString(R.string.event_time_onwards);
-//                    if (eventData.getEndTimestamp() > 0) {
-//                        endTime = "- " + DateTimeUtils.getTimeFromLong(eventData.getEndTimestamp(), "h:mm a");
-//                    }
-//                    monthTv.setText(month);
-//                    dateTv.setText(date);
-//                    timeTv.setText(String.format(getString(R.string.event_time_text), dayOfWeek, date, monthFull, startTime, endTime));
-//
-//                    fetchLinkedGroupInfo(eventData.getGid());
-//
-//                    int goingCount = 0;
-//                    int maybeCount = 0;
-//                    for (EventMemberData eventMemberData:eventData.getMembers()) {
-//                        final Integer responseInt = (int) eventMemberData.getResponse();
-//                        if (responseInt == EventData.GOING) {
-//                            goingCount++;
-//                        } else if (responseInt == EventData.MAYBE) {
-//                            maybeCount++;
-//                        }
-//                    }
-//                    if (goingCount > 0) {
-//                        statsIcon.setVisibility(View.VISIBLE);
-//                        statsTv.setVisibility(View.VISIBLE);
-//                        statsTv.setText(String.format(getString(R.string.event_going_count), goingCount));
-//                    }
-//                    if (maybeCount > 0) {
-//                        statsIcon.setVisibility(View.VISIBLE);
-//                        statsTv.setVisibility(View.VISIBLE);
-//                        final CharSequence prefixText = statsTv.getText();
-//                        String suffixText = "";
-//                        if (StringUtils.isValidString(prefixText.toString())) {
-//                            suffixText = " · ";
-//                        }
-//                        suffixText += String.format(getString(R.string.event_maybe_suffix), maybeCount);
-//                        statsTv.setText(String.format(getString(R.string.event_maybe_count), prefixText, suffixText));
-//                    }
-//                    fetchIsLinkedGroupJoined(eventData.getGid());
-//                    fetchMemberInfo(eventData);
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
     }
 
     private void fetchMemberInfo(EventData eventData) {

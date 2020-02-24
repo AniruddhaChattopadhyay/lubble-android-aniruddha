@@ -1,7 +1,6 @@
 package in.lubble.app.chat;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -15,7 +14,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
@@ -87,7 +85,6 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
-import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.FullScreenVideoActivity;
 import in.lubble.app.utils.UiUtils;
@@ -140,7 +137,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private String groupId;
     private int highlightedPos = -1;
     private int posToFlash = -1;
-    private int i=0;
     private HashMap<String, ProfileData> profileDataMap = new HashMap<>();
     private String authorId = FirebaseAuth.getInstance().getUid();
     @Nullable
@@ -884,7 +880,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (profileData != null) {
                     profileData.setId(dataSnapshot.getKey());
                     for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
+                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles") && groupId!=null) {
                             final String flair = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(groupId).child("flair").getValue(String.class);
                             profileData.setGroupFlair(flair);
                             break;

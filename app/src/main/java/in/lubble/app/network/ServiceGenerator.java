@@ -12,7 +12,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ServiceGenerator {
 
     private static final String BASE_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://devapi.lubble.in/" : "https://api.lubble.in/";
-    //private static final String BASE_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "http://10.145.171.142:8000/" : "https://api.lubble.in/";
     private static final String AIRTABLE_API_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://api.airtable.com/v0/" : "https://api.lubble.in/";
 
     private static Retrofit.Builder builder =

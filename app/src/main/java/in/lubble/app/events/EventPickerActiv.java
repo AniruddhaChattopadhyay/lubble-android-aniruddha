@@ -88,42 +88,6 @@ public class EventPickerActiv extends BaseActivity {
     protected void onResume() {
         super.onResume();
         recyclerView.setAdapter(new EventPickerAdapter(new ArrayList<EventData>(), GlideApp.with(EventPickerActiv.this)));
-
-//        query = RealtimeDbHelper.getEventsRef().orderByChild("startTimestamp");
-//        valueEventListener = new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                final ArrayList<EventData> eventDataList = new ArrayList<>();
-//
-//                for (DataSnapshot child : dataSnapshot.getChildren()) {
-//                    final EventData eventData = child.getValue(EventData.class);
-//                    if (eventData != null && eventData.getStartTimestamp() > System.currentTimeMillis()) {
-//                        eventData.setId(child.getKey());
-//                        eventDataList.add(eventData);
-//                    }
-//                }
-//                progressbar.setVisibility(View.GONE);
-//                if (eventDataList.isEmpty()) {
-//                    emptyEventsContainer.setVisibility(View.VISIBLE);
-//                    recyclerView.setVisibility(View.GONE);
-//                } else {
-//                    emptyEventsContainer.setVisibility(View.GONE);
-//                    recyclerView.setVisibility(View.VISIBLE);
-//                    recyclerView.setAdapter(new EventPickerAdapter(eventDataList, GlideApp.with(EventPickerActiv.this)));
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        };
-//        query.addValueEventListener(valueEventListener);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(getResources().getString(R.string.fetch_test_event))
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
         endpoints = ServiceGenerator.createService(Endpoints.class);
         //endpoints = retrofit.create(Endpoints.class);
         String lubble_id = LubbleSharedPrefs.getInstance().getLubbleId();
@@ -134,6 +98,8 @@ public class EventPickerActiv extends BaseActivity {
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
                 if (!response.isSuccessful()) {
                     Log.e(TAG,response.code()+"");
+                    Toast.makeText(getApplicationContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
+                    EventPickerActiv.this.finish();
                     return;
                 }
                 final ArrayList<EventData> eventDataList = new ArrayList<>();
@@ -158,6 +124,8 @@ public class EventPickerActiv extends BaseActivity {
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
                 Log.e(TAG,"failed to get response from django");
+                Toast.makeText(getApplicationContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
+                EventPickerActiv.this.finish();
             }
         });
 

@@ -133,10 +133,6 @@ public class ChatMoreFragment extends Fragment {
 
     private void syncEvents() {
         eventProgressBar.setVisibility(View.VISIBLE);
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(getResources().getString(R.string.fetch_test_event))
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
         endpoints = ServiceGenerator.createService(Endpoints.class);
         //endpoints = retrofit.create(Endpoints.class);
         //Call<List<EventData>> call = endpoints.getEvents("ayush_django_backend_token","ayush_django_backend",LubbleSharedPrefs.getInstance().getLubbleId());
@@ -178,51 +174,6 @@ public class ChatMoreFragment extends Fragment {
                              Log.e(TAG,"failed to get response from django");
                          }
                      });
-        /*eventsListener = getEventsRef().orderByChild("startTimestamp").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (eventProgressBar != null) {
-                    eventProgressBar.setVisibility(View.GONE);
-                }
-                eventsRecyclerView.setVisibility(View.VISIBLE);
-                noEventsContainer.setVisibility(View.GONE);
-                Retrofit retrofit = new Retrofit.Builder()
-                        .baseUrl(getResources().getString(R.string.fetch_test_event))
-                        .addConverterFactory(GsonConverterFactory.create())
-                        .build();
-                endpoints = retrofit.create(Endpoints.class);
-
-
-                if (dataSnapshot.getChildrenCount() > 0) {
-                    final ArrayList<EventData> eventDataList = new ArrayList<>();
-                    for (DataSnapshot dataSnapshotChild : dataSnapshot.getChildren()) {
-                        final EventData eventData = dataSnapshotChild.getValue(EventData.class);
-                        if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp() && eventData.getRelatedGroupsList().contains(groupId)) {
-                            eventData.setId(dataSnapshotChild.getKey());
-                            eventDataList.add(eventData);
-                        }
-                    }
-                    if (eventDataList.size() > 0) {
-                        eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
-                    } else {
-                        eventsRecyclerView.setVisibility(View.GONE);
-                        noEventsContainer.setVisibility(View.VISIBLE);
-                    }
-                } else {
-                    // no events
-                    if (eventProgressBar != null) {
-                        eventProgressBar.setVisibility(View.GONE);
-                    }
-                    eventsRecyclerView.setVisibility(View.GONE);
-                    noEventsContainer.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });*/
     }
 
     private void syncFlair() {
@@ -408,9 +359,6 @@ public class ChatMoreFragment extends Fragment {
         if (flairListener != null) {
             getThisUserRef().removeEventListener(flairListener);
         }
-//        if (eventsListener != null) {
-//            getEventsRef().orderByChild("startTimestamp").removeEventListener(eventsListener);
-//        }
     }
 
     @Override

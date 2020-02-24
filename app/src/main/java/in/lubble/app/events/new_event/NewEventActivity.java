@@ -83,8 +83,10 @@ import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.EventIdData;
 import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.pojos.EmptyPostResponse;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.mapUtils.SphericalUtil;
@@ -148,6 +150,7 @@ public class NewEventActivity extends BaseActivity {
     private TextInputLayout ticketUrl;
     private RadioGroup radioGroup;
     private RadioButton newGroupRadioBtn;
+    private String eventId;
     private CompoundButton oldGroupRadioBtn;
     private TextView notAdminHintTv;
     private TextView relatedGroupsTv;
@@ -289,60 +292,34 @@ public class NewEventActivity extends BaseActivity {
                     JsonObject jsonObj = element.getAsJsonObject();
                     RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObj.toString());
 
-                    Retrofit retrofit = new Retrofit.Builder()
-                            .baseUrl(getResources().getString(R.string.fetch_test_event))
-                            .addConverterFactory(GsonConverterFactory.create())
-                            .build();
                     endpoints = ServiceGenerator.createService(Endpoints.class);
                     //endpoints = retrofit.create(Endpoints.class);
-                    //Call<List<EventData>> call = endpoints.upload_new_event("ayush_django_backend_token","ayush_django_backend",body);
-                    Call<List<EventData>> call = endpoints.upload_new_event(body);
-                    call.enqueue(new Callback<List<EventData>>() {
+                    //Call<EventIdData> call = endpoints.upload_new_event("ayush_django_backend_token","ayush_django_backend",body);
+                    Call<EventIdData> call = endpoints.upload_new_event(body);
+                    call.enqueue(new Callback<EventIdData>() {
                         @Override
-                        public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                        public void onResponse(Call<EventIdData> call, Response<EventIdData> response) {
+                            EventIdData data = response.body();
+                            eventId = data.getEvent_id();
+                            if (picUri != null) {
+                                startService(new Intent(NewEventActivity.this, UploadFileService.class)
+                                        .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
+                                        .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
+                                        .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/events/" + eventId)
+                                        .setAction(UploadFileService.ACTION_UPLOAD));
+                            }
+
+                            finish();
                             Log.d(TAG,"successfully posted");
                         }
 
                         @Override
-                        public void onFailure(Call<List<EventData>> call, Throwable t) {
+                        public void onFailure(Call<EventIdData> call, Throwable t) {
+                            Toast.makeText(NewEventActivity.this,"Event publish failure. Please try again", Toast.LENGTH_SHORT).show();
+                            finish();
                             Log.e(TAG,"failed to post");
                         }
                     });
-                    //final JSONObject jsonObject = new JSONObject();
-                    //jsonObject = gson.toJson(eventData);
-
-//                    final JSONObject jsonObject = new JSONObject();
-//                    try {
-//                        jsonObject.put("response", GOING);
-//                        jsonObject.put("event_id", eventId);
-//                        jsonObject.put("uid", FirebaseAuth.getInstance().getUid());
-//                        jsonObject.put("timestamp", Long.toString(System.currentTimeMillis()));
-//                        jsonObject.put("isAdmin",true);
-//                        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
-//                    }
-//                    catch (JSONException e) {
-//                        e.printStackTrace();
-//                    }
-
-
-
-
-                    //membersMap.put(FirebaseAuth.getInstance().getUid(), memberInfoMap);
-                    //eventData.setMembers(membersMap);
-
-//                    final DatabaseReference pushRef = getEventsRef().push();
-//                    pushRef.setValue(eventData);
-
-//                    if (picUri != null) {
-//                        startService(new Intent(NewEventActivity.this, UploadFileService.class)
-//                                .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
-//                                .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
-//                                .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/events/" + pushRef.getKey())
-//                                .setAction(UploadFileService.ACTION_UPLOAD));
-//                    }
-
-                    Toast.makeText(NewEventActivity.this, R.string.event_published, Toast.LENGTH_SHORT).show();
-                    finish();
 
                 } catch (ParseException e) {
                     e.printStackTrace();

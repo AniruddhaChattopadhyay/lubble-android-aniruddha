@@ -50,17 +50,17 @@ public class EventData implements Serializable {
         this.event_id = event_id;
     }
 
-//    @Override
-//    public boolean equals(Object obj) {
-//        if (obj instanceof EventData) {
-//            EventData objectToCompare = (EventData) obj;
-//            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
-//                return true;
-//            }
-//            return false;
-//        }
-//        return super.equals(obj);
-//    }
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof EventData) {
+            EventData objectToCompare = (EventData) obj;
+            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
+                return true;
+            }
+            return false;
+        }
+        return super.equals(obj);
+    }
 
     public String getLubble_id() {
         return lubble_id;

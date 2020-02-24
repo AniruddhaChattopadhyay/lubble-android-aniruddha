@@ -12,6 +12,7 @@ import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.models.AirtableCollectionData;
 import in.lubble.app.models.AirtablePlacesData;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.EventIdData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
@@ -20,6 +21,7 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.pojos.BooksData;
+import in.lubble.app.models.pojos.EmptyPostResponse;
 import in.lubble.app.profile.UserProfileData;
 import in.lubble.app.quiz.PlaceData;
 import in.lubble.app.quiz.QuestionData;
@@ -167,25 +169,24 @@ public interface Endpoints {
     @POST
     public Call<RewardsAirtableData> uploadInstalledApps(@Url String url, @Body RequestBody params);
 
-    /*@GET("marketplace/events/list/")
-    Call<List<EventData>> getEvents(@Header("token") String token,
-                                    @Header("uid")String uid,
-                                    @Query("lubble_id")String lubble_id);
-
-    @GET("marketplace/events/")
-    Call<List<EventData>> getEvent(@Header("token") String token,
-                                    @Header("uid")String uid,
-                                    @Query("event_id")String event_id);
-
-    @POST("marketplace/events/attendee/")
-    Call<List<EventData>> uploadattendee(@Header("token") String token,
-                                         @Header("uid")String uid,
-                                         @Body RequestBody params);
-    @POST("marketplace/events/")
-    Call<List<EventData>> upload_new_event(@Header("token") String token,
-                                           @Header("uid")String uid,
-                                           @Body RequestBody params);
-*/
+//    @GET("marketplace/events/list/")
+//    Call<List<EventData>> getEvents(@Header("token") String token,
+//                                    @Header("uid")String uid,
+//                                    @Query("lubble_id")String lubble_id);
+//
+//    @GET("marketplace/events/")
+//    Call<List<EventData>> getEvent(@Header("token") String token,
+//                                    @Header("uid")String uid,
+//                                    @Query("event_id")String event_id);
+//
+//    @POST("marketplace/events/attendee/")
+//    Call<EmptyPostResponse> uploadattendee(@Header("token") String token,
+//                                         @Header("uid")String uid,
+//                                         @Body RequestBody params);
+//    @POST("marketplace/events/")
+//    Call<EventIdData> upload_new_event(@Header("token") String token,
+//                                           @Header("uid")String uid,
+//                                           @Body RequestBody params);
 
     @GET("marketplace/events/list/")
     Call<List<EventData>> getEvents(@Query("lubble_id")String lubble_id);
@@ -194,7 +195,7 @@ public interface Endpoints {
     Call<List<EventData>> getEvent(@Query("event_id")String event_id);
 
     @POST("marketplace/events/attendee/")
-    Call<List<EventData>> uploadattendee(@Body RequestBody params);
+    Call<EmptyPostResponse> uploadattendee(@Body RequestBody params);
     @POST("marketplace/events/")
-    Call<List<EventData>> upload_new_event(@Body RequestBody params);
+    Call<EventIdData> upload_new_event(@Body RequestBody params);
 }

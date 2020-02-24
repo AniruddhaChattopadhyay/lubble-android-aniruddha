@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -90,6 +91,7 @@ public class EventsFrag extends Fragment {
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
                 if (!response.isSuccessful()) {
                     Log.e(TAG,response.code()+"");
+                    Toast.makeText(getContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
                     return;
                 }
                 if (progressBar != null) {
@@ -107,7 +109,8 @@ public class EventsFrag extends Fragment {
 
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
-               Log.e(TAG,"failed to get response from django");
+                Toast.makeText(getContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
+                Log.e(TAG,"failed to get response from django");
             }
         });
     }
@@ -118,78 +121,13 @@ public class EventsFrag extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
         emptyEventContainer.setVisibility(View.GONE);
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(getResources().getString(R.string.fetch_test_event))
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
         endpoints = ServiceGenerator.createService(Endpoints.class);
         //endpoints = retrofit.create(Endpoints.class);
         getEvents();
-
-
-
-
-//        childEventListener = getEventsRef().orderByChild("startTimestamp").addChildEventListener(new ChildEventListener() {
-//            @Override
-//            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-//                if (progressBar != null) {
-//                    progressBar.setVisibility(View.GONE);
-//                }
-//                final EventData eventData = dataSnapshot.getValue(EventData.class);
-//                if (eventData != null) {
-//                    eventData.setId(dataSnapshot.getKey());
-//                    adapter.addEvent(eventData);
-//                }
-//            }
-//
-//            @Override
-//            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onChildRemoved(DataSnapshot dataSnapshot) {
-//
-//            }
-//
-//            @Override
-//            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-//
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-//        getEventsRef().orderByChild("startTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                if (dataSnapshot.getValue() == null) {
-//                    // zero events
-//                    if (progressBar != null) {
-//                        progressBar.setVisibility(View.GONE);
-//                    }
-//                    recyclerView.setVisibility(View.GONE);
-//                    emptyEventContainer.setVisibility(View.VISIBLE);
-//                }
-//
-//                if (getActivity() != null && getActivity() instanceof MainActivity) {
-//                    ((MainActivity) getActivity()).showEventsBadge(0);
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        //getLubbleGroupsRef().removeEventListener(childEventListener);
     }
 }

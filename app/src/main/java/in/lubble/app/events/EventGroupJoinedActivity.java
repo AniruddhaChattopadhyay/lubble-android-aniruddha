@@ -31,6 +31,7 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.pojos.EmptyPostResponse;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import okhttp3.RequestBody;
@@ -106,10 +107,6 @@ public class EventGroupJoinedActivity extends BaseActivity {
         Analytics.triggerScreenEvent(this, getClass());
 
         fetchLinkedGroupInfo(groupId);
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(getResources().getString(R.string.fetch_test_event))
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
         endpoints = ServiceGenerator.createService(Endpoints.class);
         //endpoints = retrofit.create(Endpoints.class);
         guestCounter.setOnClickListener(new ElegantNumberButton.OnClickListener() {
@@ -125,12 +122,6 @@ public class EventGroupJoinedActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 final String guestCount = guestCounter.getNumber();
-//                final DatabaseReference eventMemberRef = getEventsRef()
-//                        .child(eventId)
-//                        .child("members")
-//                        .child(FirebaseAuth.getInstance().getUid())
-//                        .child("guests");
-//                eventMemberRef.setValue(Integer.parseInt(guestCount));
 
                 final JSONObject jsonObject = new JSONObject();
                 try {
@@ -140,17 +131,20 @@ public class EventGroupJoinedActivity extends BaseActivity {
                     jsonObject.put("admin","false");
                     RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
-                    //Call<List<EventData>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
-                    Call<List<EventData>> call = endpoints.uploadattendee(body);
-                    call.enqueue(new Callback<List<EventData>>() {
+                    //Call<List<EmptyPostResponse>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
+                    Call<EmptyPostResponse> call = endpoints.uploadattendee(body);
+                    call.enqueue(new Callback<EmptyPostResponse>() {
                         @Override
-                        public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                        public void onResponse(Call<EmptyPostResponse> call, Response<EmptyPostResponse> response) {
                             Log.d(TAG,"successfully posted");
+                            Toast.makeText(EventGroupJoinedActivity.this,"response successfully noted",Toast.LENGTH_SHORT).show();
                         }
 
                         @Override
-                        public void onFailure(Call<List<EventData>> call, Throwable t) {
+                        public void onFailure(Call<EmptyPostResponse> call, Throwable t) {
                             Log.e(TAG,"failed to post");
+                            Toast.makeText(EventGroupJoinedActivity.this,"response unsuccessful. Please try again",Toast.LENGTH_SHORT).show();
+
                         }
                     });
                 }
@@ -158,24 +152,6 @@ public class EventGroupJoinedActivity extends BaseActivity {
                     e.printStackTrace();
                 }
 
-
-
-//                Map<String,String> map = new HashMap<>();
-//                map.put("event_id",eventId);
-//                map.put("uid",FirebaseAuth.getInstance().getUid());
-//                map.put("guests",guestCount);
-//                Call<List<EventData>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",map);
-//                call.enqueue(new Callback<List<EventData>>() {
-//                    @Override
-//                    public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
-//                        Log.d(TAG,"successfully posted");
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<List<EventData>> call, Throwable t) {
-//
-//                    }
-//                });
 
                 guestCounter.setVisibility(View.GONE);
                 confirmGuestsBtn.setVisibility(View.GONE);

@@ -1412,18 +1412,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void fetchAndShowAttachedEventInfo() {
         if (!TextUtils.isEmpty(attachedEventId)) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl(getResources().getString(R.string.fetch_test_event))
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
             endpoints = ServiceGenerator.createService(Endpoints.class);
            // endpoints = retrofit.create(Endpoints.class);
-           // Call<List<EventData>> call = endpoints.getEvent("ayush_django_backend_token","ayush_django_backend",attachedEventId);
+            //Call<List<EventData>> call = endpoints.getEvent("ayush_django_backend_token","ayush_django_backend",attachedEventId);
             Call<List<EventData>> call = endpoints.getEvent(attachedEventId);
             call.enqueue(new Callback<List<EventData>>() {
                 @Override
                 public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
                     if (!response.isSuccessful()) {
+                        Toast.makeText(getContext(),"Failed to get response! please try again",Toast.LENGTH_SHORT).show();
                         return;
                     }
                     List<EventData> data = response.body();
@@ -1448,33 +1445,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 @Override
                 public void onFailure(Call<List<EventData>> call, Throwable t) {
                     Log.e(TAG,"failed to get response from django");
+                    Toast.makeText(getContext(),"Failed to get response! please try again",Toast.LENGTH_SHORT).show();
                 }
             });
-
-
-            /*RealtimeDbHelper.getEventsRef().child(attachedEventId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.getValue() != null) {
-                        linkMetaContainer.setVisibility(View.VISIBLE);
-                        final EventData eventData = dataSnapshot.getValue(EventData.class);
-                        linkTitle.setText(eventData.getTitle());
-                        linkDesc.setText(DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), DateTimeUtils.APP_DATE_NO_YEAR) + ": " + eventData.getDesc());
-                        GlideApp.with(getContext())
-                                .load(eventData.getProfilePic())
-                                .circleCrop()
-                                .placeholder(R.drawable.ic_event)
-                                .error(R.drawable.ic_event)
-                                .into(linkPicIv);
-                        attachedEventPicUrl = eventData.getProfilePic();
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });*/
         } else {
             linkMetaContainer.setVisibility(View.GONE);
         }
