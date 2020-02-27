@@ -2,6 +2,7 @@ package in.lubble.app.events.new_event;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -145,6 +146,7 @@ public class NewEventActivity extends BaseActivity {
     private Button submitBtn;
     private Place place;
     private ArrayList<String> relatedGroupIdList = new ArrayList<>();
+    private ProgressDialog progressDialog;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, NewEventActivity.class));
@@ -217,6 +219,10 @@ public class NewEventActivity extends BaseActivity {
                 if (!isValidationPassed()) {
                     return;
                 }
+                progressDialog.setTitle(R.string.progress_uploading);
+                progressDialog.setTitle(R.string.all_please_wait);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
                 final EventData eventData = new EventData();
                 eventData.setTitle(titleTil.getEditText().getText().toString().trim());
                 eventData.setDesc(descTil.getEditText().getText().toString().trim());
@@ -281,6 +287,7 @@ public class NewEventActivity extends BaseActivity {
                         @Override
                         public void onResponse(Call<EventIdData> call, Response<EventIdData> response) {
                             if (response.isSuccessful() && !isFinishing()) {
+                                progressDialog.dismiss();
                                 EventIdData data = response.body();
                                 eventId = data.getEvent_id();
                                 if (picUri != null) {
@@ -292,7 +299,8 @@ public class NewEventActivity extends BaseActivity {
                                 }
                                 Toast.makeText(NewEventActivity.this, "Event is LIVE!", Toast.LENGTH_SHORT).show();
                                 finish();
-                            } else {
+                            } else if (!isFinishing()) {
+                                progressDialog.dismiss();
                                 Toast.makeText(NewEventActivity.this, "Event publish failure. Please try again", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -300,6 +308,7 @@ public class NewEventActivity extends BaseActivity {
                         @Override
                         public void onFailure(Call<EventIdData> call, Throwable t) {
                             if (!isFinishing()) {
+                                progressDialog.dismiss();
                                 Toast.makeText(NewEventActivity.this, "Please check internet connection & try again", Toast.LENGTH_SHORT).show();
                             }
                         }
