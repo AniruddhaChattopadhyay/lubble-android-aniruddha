@@ -18,6 +18,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiTextView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -31,25 +39,14 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.content.ContextCompat;
-import androidx.emoji.widget.EmojiTextView;
-
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.EventAttendeesActivity;
 import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -69,8 +66,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
@@ -84,7 +79,6 @@ public class EventInfoActivity extends BaseActivity {
 
     public static final String KEY_EVENT_ID = "KEY_EVENT_ID";
     private static final String TAG = "EventInfoActivity";
-
 
 
     private String eventId;
@@ -127,7 +121,7 @@ public class EventInfoActivity extends BaseActivity {
     private ValueEventListener groupTitleListener;
     private long oldResponse = EventData.NO;
     private Button ticketsBtn;
-    private EventMemberData current_member=null;
+    private EventMemberData current_member = null;
     private Endpoints endpoints;
 
     public static void open(Context context, String eventId) {
@@ -239,12 +233,12 @@ public class EventInfoActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 if (eventData != null) {
-                    Log.e(TAG,eventData.getLati()+""+eventData.getLongi()+""+eventData.getTitle());
+                    Log.e(TAG, eventData.getLati() + "" + eventData.getLongi() + "" + eventData.getTitle());
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:" + eventData.getLati() +
                             "," + eventData.getLongi() + "?q=" + eventData.getLati() + "," + eventData.getLongi() + "(" + eventData.getTitle() + ")"));
                     startActivity(intent);
                 }
-                Log.e(TAG,"event data is null");
+                Log.e(TAG, "event data is null");
             }
         });
         try {
@@ -324,11 +318,11 @@ public class EventInfoActivity extends BaseActivity {
         progressDialog.show();
         final JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("response",Integer.toString(newResponse));
-            jsonObject.put("event_id",eventId);
-            jsonObject.put("uid",FirebaseAuth.getInstance().getUid());
-            jsonObject.put("timestamp",Long.toString(System.currentTimeMillis()));
-            jsonObject.put("admin","false");
+            jsonObject.put("response", Integer.toString(newResponse));
+            jsonObject.put("event_id", eventId);
+            jsonObject.put("uid", FirebaseAuth.getInstance().getUid());
+            jsonObject.put("timestamp", Long.toString(System.currentTimeMillis()));
+            jsonObject.put("admin", "false");
             if (newResponse == EventData.NO) {
                 jsonObject.put("guests", "0");
             }
@@ -342,8 +336,7 @@ public class EventInfoActivity extends BaseActivity {
             call.enqueue(new Callback<EmptyPostResponse>() {
                 @Override
                 public void onResponse(Call<EmptyPostResponse> call, Response<EmptyPostResponse> response) {
-                    Log.d(TAG,"successfully posted");
-                    if(response.isSuccessful() && !isFinishing()){
+                    if (response.isSuccessful() && !isFinishing()) {
                         progressDialog.dismiss();
                         toggleGoingButton(newResponse == EventData.GOING);
                         toggleMaybeButton(newResponse == EventData.MAYBE);
@@ -357,13 +350,13 @@ public class EventInfoActivity extends BaseActivity {
 
                 @Override
                 public void onFailure(Call<EmptyPostResponse> call, Throwable t) {
-                    Log.e(TAG,"failed to post");
-                    Toast.makeText(EventInfoActivity.this, "Failed to post attendees. Please try again.", Toast.LENGTH_SHORT).show();
+                    if (!isFinishing()) {
+                        Toast.makeText(EventInfoActivity.this, "Failed to post attendees. Please try again.", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             Crashlytics.logException(e);
             e.printStackTrace();
         }
@@ -422,17 +415,11 @@ public class EventInfoActivity extends BaseActivity {
         call.enqueue(new Callback<List<EventData>>() {
             @Override
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG,response.code()+"Not successful");
-                    Toast.makeText(getApplicationContext(),"Failed to fetch event Data! please try again",Toast.LENGTH_SHORT).show();
-                    EventInfoActivity.this.finish();
-                    return;
-                }
-                List<EventData> data = response.body();
-                for (EventData eventData_loop:data) {
+                if (response.isSuccessful() && !isFinishing()) {
+                    List<EventData> data = response.body();
+                    for (EventData eventData_loop : data) {
                         eventData = eventData_loop;
-                        if (eventData != null)
-                        {
+                        if (eventData != null) {
                             final List<EventMemberData> members = eventData.getMembers();
                             for (EventMemberData eventMemberData : members) {
                                 if (eventMemberData.getUid().equals(FirebaseAuth.getInstance().getUid())) {
@@ -500,12 +487,12 @@ public class EventInfoActivity extends BaseActivity {
 
                             if (current_member != null) {
                                 oldResponse = (long) current_member.getResponse();
-                                Log.e(TAG,"*************************** current member not null");
+                                Log.e(TAG, "*************************** current member not null");
                                 toggleGoingButton(oldResponse == EventData.GOING);
                                 toggleMaybeButton(oldResponse == EventData.MAYBE);
 
                                 setFinalMarkedResponse(oldResponse);
-                                if (current_member!=null && current_member.getTickets() > 0) {
+                                if (current_member != null && current_member.getTickets() > 0) {
                                     ticketIv.setVisibility(View.VISIBLE);
                                     ticketCountTv.setVisibility(View.VISIBLE);
                                     luckyDrawHint.setVisibility(View.GONE);
@@ -545,7 +532,7 @@ public class EventInfoActivity extends BaseActivity {
 
                             int goingCount = 0;
                             int maybeCount = 0;
-                            for (EventMemberData eventMemberData:eventData.getMembers()) {
+                            for (EventMemberData eventMemberData : eventData.getMembers()) {
                                 final Integer responseInt = (int) eventMemberData.getResponse();
                                 if (responseInt == EventData.GOING) {
                                     goingCount++;
@@ -572,14 +559,19 @@ public class EventInfoActivity extends BaseActivity {
                             fetchIsLinkedGroupJoined(eventData.getGid());
                             fetchMemberInfo(eventData);
                         }
+                    }
+                } else if (!isFinishing()) {
+                    Toast.makeText(getApplicationContext(), "Failed to fetch event! Please try again", Toast.LENGTH_SHORT).show();
+                    EventInfoActivity.this.finish();
                 }
             }
 
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
-                Log.e(TAG,"failed to get response from django");
-                Toast.makeText(getApplicationContext(),"Failed to fetch event Data! please try again",Toast.LENGTH_SHORT).show();
-                EventInfoActivity.this.finish();
+                if (!isFinishing()) {
+                    Toast.makeText(getApplicationContext(), "Failed to fetch event! Please try again", Toast.LENGTH_SHORT).show();
+                    EventInfoActivity.this.finish();
+                }
             }
         });
     }
@@ -588,7 +580,7 @@ public class EventInfoActivity extends BaseActivity {
         goingPersonOne.setVisibility(View.GONE);
         goingPersonTwo.setVisibility(View.GONE);
         goingPersonThree.setVisibility(View.GONE);
-        for (EventMemberData eventMemberData: eventData.getMembers()) {
+        for (EventMemberData eventMemberData : eventData.getMembers()) {
             if ((long) eventMemberData.getResponse() == EventData.GOING) {
                 RealtimeDbHelper.getUserInfoRef(eventMemberData.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
