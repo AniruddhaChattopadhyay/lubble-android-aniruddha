@@ -57,7 +57,6 @@ import in.lubble.app.models.EventData;
 import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
-import in.lubble.app.models.pojos.EmptyPostResponse;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.DateTimeUtils;
@@ -315,6 +314,7 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private void changeStatus(final int newResponse) {
+        progressDialog.setCancelable(false);
         progressDialog.show();
         final JSONObject jsonObject = new JSONObject();
         try {
@@ -331,11 +331,10 @@ public class EventInfoActivity extends BaseActivity {
             }
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
-            //Call<List<EmptyPostResponse>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
-            Call<EmptyPostResponse> call = endpoints.uploadattendee(body);
-            call.enqueue(new Callback<EmptyPostResponse>() {
+            Call<Void> call = endpoints.uploadattendee(body);
+            call.enqueue(new Callback<Void>() {
                 @Override
-                public void onResponse(Call<EmptyPostResponse> call, Response<EmptyPostResponse> response) {
+                public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful() && !isFinishing()) {
                         progressDialog.dismiss();
                         toggleGoingButton(newResponse == EventData.GOING);
@@ -344,14 +343,17 @@ public class EventInfoActivity extends BaseActivity {
                             EventGroupJoinedActivity.open(EventInfoActivity.this, newResponse, eventId, eventData.getGid(), isLinkedGroupJoined);
                         }
                         oldResponse = newResponse;
+                    } else if (!isFinishing()) {
+                        progressDialog.dismiss();
+                        Toast.makeText(EventInfoActivity.this, "Failed to mark RSVP. Please try again.", Toast.LENGTH_SHORT).show();
                     }
-
                 }
 
                 @Override
-                public void onFailure(Call<EmptyPostResponse> call, Throwable t) {
+                public void onFailure(Call<Void> call, Throwable t) {
                     if (!isFinishing()) {
-                        Toast.makeText(EventInfoActivity.this, "Failed to post attendees. Please try again.", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();
+                        Toast.makeText(EventInfoActivity.this, "Failed to mark RSVP. Please try again.", Toast.LENGTH_SHORT).show();
                     }
                 }
             });

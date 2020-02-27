@@ -3,24 +3,26 @@ package in.lubble.app.events;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
+import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
@@ -31,20 +33,16 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
-import in.lubble.app.models.pojos.EmptyPostResponse;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 
 public class EventGroupJoinedActivity extends BaseActivity {
 
@@ -125,38 +123,38 @@ public class EventGroupJoinedActivity extends BaseActivity {
 
                 final JSONObject jsonObject = new JSONObject();
                 try {
-                    jsonObject.put("event_id",eventId);
-                    jsonObject.put("uid",FirebaseAuth.getInstance().getUid());
-                    jsonObject.put("guests",guestCount);
-                    jsonObject.put("admin","false");
+                    jsonObject.put("event_id", eventId);
+                    jsonObject.put("uid", FirebaseAuth.getInstance().getUid());
+                    jsonObject.put("guests", guestCount);
+                    jsonObject.put("admin", "false");
                     RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
                     //Call<List<EmptyPostResponse>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
-                    Call<EmptyPostResponse> call = endpoints.uploadattendee(body);
-                    call.enqueue(new Callback<EmptyPostResponse>() {
+                    Call<Void> call = endpoints.uploadattendee(body);
+                    call.enqueue(new Callback<Void>() {
                         @Override
-                        public void onResponse(Call<EmptyPostResponse> call, Response<EmptyPostResponse> response) {
-                            Log.d(TAG,"successfully posted");
-                            Toast.makeText(EventGroupJoinedActivity.this,"response successfully noted",Toast.LENGTH_SHORT).show();
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (response.isSuccessful() && !isFinishing()) {
+                                guestCounter.setVisibility(View.GONE);
+                                confirmGuestsBtn.setVisibility(View.GONE);
+                                finalGuestCountTv.setVisibility(View.VISIBLE);
+                                finalGuestCountTv.setText(" + " + guestCount + " guests");
+                            } else if (!isFinishing()) {
+                                Toast.makeText(EventGroupJoinedActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
+                            }
                         }
 
                         @Override
-                        public void onFailure(Call<EmptyPostResponse> call, Throwable t) {
-                            Log.e(TAG,"failed to post");
-                            Toast.makeText(EventGroupJoinedActivity.this,"response unsuccessful. Please try again",Toast.LENGTH_SHORT).show();
-
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            if (!isFinishing()) {
+                                Toast.makeText(EventGroupJoinedActivity.this, "Please check your internet connection & try again", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
-                }
-                catch (JSONException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
+                    Crashlytics.logException(e);
                 }
-
-
-                guestCounter.setVisibility(View.GONE);
-                confirmGuestsBtn.setVisibility(View.GONE);
-                finalGuestCountTv.setVisibility(View.VISIBLE);
-                finalGuestCountTv.setText(" + " + guestCount + " guests");
             }
         });
 

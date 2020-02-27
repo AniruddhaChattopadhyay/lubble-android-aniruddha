@@ -1,7 +1,6 @@
 package in.lubble.app.events;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +38,7 @@ public class EventsFrag extends Fragment {
     private ChildEventListener childEventListener;
     private ProgressBar progressBar;
     private Endpoints endpoints;
+
     public EventsFrag() {
         // Required empty public constructor
     }
@@ -74,42 +74,42 @@ public class EventsFrag extends Fragment {
         adapter.clear();
         return view;
     }
-    public void getEvents(){
-        Log.d(TAG, "inside get events on on event frag");
-        String lubble_id = LubbleSharedPrefs.getInstance().getLubbleId();
-        //Call<List<EventData>> call = endpoints.getEvents("ayush_django_backend_token","ayush_django_backend",LubbleSharedPrefs.getInstance().getLubbleId());
+
+    private void getEvents() {
         Call<List<EventData>> call = endpoints.getEvents(LubbleSharedPrefs.getInstance().getLubbleId());
         call.enqueue(new Callback<List<EventData>>() {
             @Override
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
-                if (!response.isSuccessful()) {
-                    Log.e(TAG,response.code()+"");
-                    Toast.makeText(getContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
-                List<EventData> data = response.body();
-                adapter.clear();
-                for (EventData eventData:data) {
-                    if (eventData != null) {
-                        eventData.setId(eventData.getEvent_id());
-                        adapter.addEvent(eventData);
+                if (response.isSuccessful()) {
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
                     }
+                    adapter.clear();
+                    List<EventData> data = response.body();
+                    for (EventData eventData : data) {
+                        if (eventData != null) {
+                            eventData.setId(eventData.getEvent_id());
+                            adapter.addEvent(eventData);
+                        }
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
-                Toast.makeText(getContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
-                Log.e(TAG,"failed to get response from django");
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                Toast.makeText(getContext(), "Please check your internet connection & try again.", Toast.LENGTH_SHORT).show();
             }
         });
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
     }
+
     @Override
     public void onResume() {
         super.onResume();

@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -213,6 +212,8 @@ public class NewEventActivity extends BaseActivity {
             }
         });
 
+        progressDialog = new ProgressDialog(this);
+
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -276,7 +277,6 @@ public class NewEventActivity extends BaseActivity {
 
                     Gson gson = new Gson();
                     String json = gson.toJson(eventData);
-                    Log.e(TAG, json);
                     JsonElement element = gson.fromJson(json, JsonElement.class);
                     JsonObject jsonObj = element.getAsJsonObject();
                     RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObj.toString());
@@ -602,14 +602,12 @@ public class NewEventActivity extends BaseActivity {
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 place = Autocomplete.getPlaceFromIntent(data);
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
                 if (place != null) {
                     loadMapAt(place.getLatLng());
                     addressTil.getEditText().setText(place.getAddress());
                 }
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
-                Log.e(TAG, status.getStatusMessage());
                 Crashlytics.log(status.getStatusMessage());
                 Crashlytics.logException(new Exception(status.getStatusMessage()));
             }
