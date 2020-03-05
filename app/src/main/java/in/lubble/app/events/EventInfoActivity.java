@@ -8,9 +8,14 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -110,6 +115,7 @@ public class EventInfoActivity extends BaseActivity {
     private TextView ticketCountTv;
     private LinearLayout luckyDrawHint;
     private EmojiTextView descTv;
+    private WebView descWebView;
     private ProgressDialog progressDialog;
     private boolean isLinkedGroupJoined;
     private DatabaseReference checkGroupJoinedRef;
@@ -164,6 +170,7 @@ public class EventInfoActivity extends BaseActivity {
         ticketCountTv = findViewById(R.id.tv_ticket_count);
         luckyDrawHint = findViewById(R.id.lucky_draw_hint);
         descTv = findViewById(R.id.tv_desc);
+        descWebView = findViewById(R.id.webview_event_desc);
         goingPersonOne = findViewById(R.id.iv_stats_one);
         goingPersonTwo = findViewById(R.id.iv_stats_two);
         goingPersonThree = findViewById(R.id.iv_stats_three);
@@ -437,14 +444,7 @@ public class EventInfoActivity extends BaseActivity {
                                 ticketsBtn.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
-                                        Uri uri = Uri.parse(eventData.getTicketUrl());
-                                        CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-                                        intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorAccent));
-                                        intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dk_colorAccent));
-                                        intentBuilder.enableUrlBarHiding();
-                                        intentBuilder.setShowTitle(true);
-                                        CustomTabsIntent customTabsIntent = intentBuilder.build();
-                                        customTabsIntent.launchUrl(EventInfoActivity.this, uri);
+                                        openLinkInChromeTab(Uri.parse(eventData.getTicketUrl()));
                                     }
                                 });
 
@@ -477,8 +477,42 @@ public class EventInfoActivity extends BaseActivity {
                             organizerTv.setText(eventData.getOrganizer());
                             eventNameTv.setText(eventData.getTitle());
                             addressTv.setText(eventData.getAddress());
-                            descTv.setText(eventData.getDesc());
+                            if (eventData.getIsDescHtml()) {
+                                descWebView.getSettings().setUserAgentString("Android");
+                                descWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+                                descWebView.getSettings().setJavaScriptEnabled(true);
 
+                                descWebView.setWebViewClient(new WebViewClient() {
+                                    @Override
+                                    public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                            openLinkInChromeTab(request.getUrl());
+                                            return true;
+                                        }
+                                        return super.shouldOverrideUrlLoading(view, request);
+                                    }
+
+                                    @Override
+                                    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                            openLinkInChromeTab(Uri.parse(url));
+                                            return true;
+                                        }
+                                        return super.shouldOverrideUrlLoading(view, url);
+                                    }
+
+                                });
+
+                                String encodedHtml = Base64.encodeToString(eventData.getDesc().getBytes(),
+                                        Base64.NO_PADDING);
+                                descWebView.loadData(encodedHtml, "text/html", "base64");
+                                descWebView.setVisibility(View.VISIBLE);
+                                descTv.setVisibility(View.GONE);
+                            } else {
+                                descWebView.setVisibility(View.GONE);
+                                descTv.setVisibility(View.VISIBLE);
+                                descTv.setText(eventData.getDesc());
+                            }
                             if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
                                 finalMarkedStatus.setVisibility(View.GONE);
                             } else {
@@ -576,6 +610,16 @@ public class EventInfoActivity extends BaseActivity {
                 }
             }
         });
+    }
+
+    private void openLinkInChromeTab(Uri uri) {
+        CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+        intentBuilder.setToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.colorAccent));
+        intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(EventInfoActivity.this, R.color.dk_colorAccent));
+        intentBuilder.enableUrlBarHiding();
+        intentBuilder.setShowTitle(true);
+        CustomTabsIntent customTabsIntent = intentBuilder.build();
+        customTabsIntent.launchUrl(EventInfoActivity.this, uri);
     }
 
     private void fetchMemberInfo(EventData eventData) {

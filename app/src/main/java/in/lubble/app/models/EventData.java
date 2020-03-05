@@ -6,7 +6,6 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -41,6 +40,8 @@ public class EventData implements Serializable {
     private String relatedGroups = "";
     private String ticketUrl;
     private String event_id;
+    @SerializedName("desc_type_html")
+    private boolean isDescHtml;
 
     public String getEvent_id() {
         return event_id;
@@ -186,5 +187,13 @@ public class EventData implements Serializable {
 
     public void setRelatedGroups(String relatedGroups) {
         this.relatedGroups = relatedGroups;
+    }
+
+    public boolean getIsDescHtml() {
+        return isDescHtml;
+    }
+
+    public void setIsDescHtml(boolean descHtml) {
+        isDescHtml = descHtml;
     }
 }
