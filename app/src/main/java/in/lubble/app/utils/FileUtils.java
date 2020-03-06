@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -378,6 +379,38 @@ public class FileUtils {
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * This temporarily saves bitmap in cache to get the URI then deletes it in next runover
+     */
+    @Nullable
+    public static Uri getUriFromTempBitmap(Context inContext, Bitmap bitmap, String title, String mime) {
+        try {
+            File cachePath = new File(inContext.getCacheDir(), "images");
+            cachePath.mkdirs();
+            deleteFilesIn(cachePath);
+            FileOutputStream stream = new FileOutputStream(cachePath + File.separator + title + "." + mime); // overwrites this image every time
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+            stream.close();
+            File imagePath = new File(inContext.getCacheDir(), "images");
+            File newFile = new File(imagePath, title + "." + mime);
+            return FileProvider.getUriForFile(inContext, inContext.getPackageName() + ".fileprovider", newFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+            return null;
+        }
+    }
+
+    private static void deleteFilesIn(@NonNull File directory) {
+        final File[] files = directory.listFiles();
+        if (files != null && files.length > 0) {
+            for (File child : files) {
+                child.delete();
+            }
+        }
     }
 
 }
