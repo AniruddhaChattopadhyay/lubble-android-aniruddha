@@ -69,14 +69,7 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                         if (!TextUtils.isEmpty(dmId)) {
                             ChatActivity.openForDm(context, dmId, null, serviceData.getTitle());
                         } else {
-                            if (sellerData != null) {/*
-                                ChatActivity.openForEmptyDm(
-                                        context,
-                                        String.valueOf(sellerData.getId()),
-                                        sellerData.getName(),
-                                        sellerData.getPhotoUrl(),
-                                        serviceData.getTitle()
-                                );*/
+                            if (sellerData != null) {
                                 DmSellerBottomSheet.newInstance(
                                         String.valueOf(sellerData.getId()),
                                         sellerData.getName(),

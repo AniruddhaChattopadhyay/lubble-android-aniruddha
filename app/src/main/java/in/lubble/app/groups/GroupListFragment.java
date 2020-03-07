@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -264,24 +265,30 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
-            final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-            if (groupData != null) {
-                if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())
-                        && ((HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid())).get("blocked_status") == null) {
-                    // joined chat
-                    groupData.setId(dataSnapshot.getKey());
-                    groupData.setIsDm(true);
-                    groupData.setIsPrivate(true);
-                    for (String memberUid : groupData.getMembers().keySet()) {
-                        if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                            final String name = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("name"));
-                            final String dp = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("profilePic"));
-                            groupData.setTitle(name);
-                            groupData.setThumbnail(dp);
-                            adapter.addGroupWithSortFromBottom(groupData);
+            try {
+                final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                if (groupData != null) {
+                    final String sellerIdStr = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
+                    if ((groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && ((HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid())).get("blocked_status") == null)
+                            || (!sellerIdStr.equalsIgnoreCase("-1") && groupData.getMembers().containsKey(sellerIdStr) && ((HashMap) groupData.getMembers().get(sellerIdStr)).get("blocked_status") == null)) {
+                        // joined chat
+                        groupData.setId(dataSnapshot.getKey());
+                        groupData.setIsDm(true);
+                        groupData.setIsPrivate(true);
+                        for (String memberUid : groupData.getMembers().keySet()) {
+                            if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                                final String name = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("name"));
+                                final String dp = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("profilePic"));
+                                groupData.setTitle(name);
+                                groupData.setThumbnail(dp);
+                                adapter.addGroupWithSortFromBottom(groupData);
+                            }
                         }
                     }
                 }
+            } catch (NullPointerException npe) {
+                npe.printStackTrace();
+                Crashlytics.logException(npe);
             }
         }
 

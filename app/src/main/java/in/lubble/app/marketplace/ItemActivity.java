@@ -542,15 +542,8 @@ public class ItemActivity extends BaseActivity {
                                         if (!TextUtils.isEmpty(dmId)) {
                                             ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
                                         } else {
-                                            /*ChatActivity.openForEmptyDm(
-                                                    ItemActivity.this,
-                                                    String.valueOf(sellerData.getId()),
-                                                    sellerData.getName(),
-                                                    sellerData.getPhotoUrl(),
-                                                    item.getName()
-                                            );*/
                                             DmSellerBottomSheet.newInstance(
-                                                    "",
+                                                    String.valueOf(sellerData.getId()),
                                                     sellerData.getName(),
                                                     sellerData.getPhotoUrl()
                                             );
