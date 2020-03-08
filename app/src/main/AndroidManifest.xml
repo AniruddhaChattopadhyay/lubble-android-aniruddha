@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
     android:versionCode="221"
-    android:versionName="1.13.1-1">
+    android:versionName="1.14-1">
 
     <application
         android:name=".LubbleApp"
