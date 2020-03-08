@@ -51,6 +51,8 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import org.jsoup.Jsoup;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -1382,7 +1384,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             if (eventData != null) {
                                 linkMetaContainer.setVisibility(View.VISIBLE);
                                 linkTitle.setText(eventData.getTitle());
-                                linkDesc.setText(DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), DateTimeUtils.APP_DATE_NO_YEAR) + ": " + eventData.getDesc());
+                                linkDesc.setText(DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), DateTimeUtils.APP_DATE_NO_YEAR) + ": " + Jsoup.parse(eventData.getDesc()).text());
                                 GlideApp.with(getContext())
                                         .load(eventData.getProfilePic())
                                         .circleCrop()

@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -184,7 +185,7 @@ public class UploadFileService extends BaseTaskService {
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        final Uri compressedFileUri = getUriFromTempBitmap(UploadFileService.this, resource, fileName, FileUtils.getMimeType(fileUri));
+                        final Uri compressedFileUri = getUriFromTempBitmap(UploadFileService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
                         uploadFile(compressedFileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
                     }
                 });

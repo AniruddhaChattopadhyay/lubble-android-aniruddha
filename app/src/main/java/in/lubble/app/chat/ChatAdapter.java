@@ -61,6 +61,8 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
+import org.jsoup.Jsoup;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -307,7 +309,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             sentChatViewHolder.linkTitleTv.setText("Event: " + chatData.getLinkTitle());
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
-            sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            sentChatViewHolder.linkDescTv.setText(Jsoup.parse(chatData.getLinkDesc()).text());
             sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
@@ -501,7 +503,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setText("Event: " + chatData.getLinkTitle());
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
-            recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
+            recvdChatViewHolder.linkDescTv.setText(Jsoup.parse(chatData.getLinkDesc()).text());
             recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
@@ -880,7 +882,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (profileData != null) {
                     profileData.setId(dataSnapshot.getKey());
                     for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles") && groupId!=null) {
+                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles") && groupId != null) {
                             final String flair = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(groupId).child("flair").getValue(String.class);
                             profileData.setGroupFlair(flair);
                             break;

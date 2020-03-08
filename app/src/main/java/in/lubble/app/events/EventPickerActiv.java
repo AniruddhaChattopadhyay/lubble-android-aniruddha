@@ -7,35 +7,41 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
-import androidx.annotation.NonNull;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.jsoup.Jsoup;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.events.new_event.NewEventActivity;
-import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static in.lubble.app.utils.DateTimeUtils.*;
+import static in.lubble.app.utils.DateTimeUtils.DATE;
+import static in.lubble.app.utils.DateTimeUtils.SHORT_MONTH;
+import static in.lubble.app.utils.DateTimeUtils.getTimeFromLong;
 
 public class EventPickerActiv extends BaseActivity {
 
@@ -97,14 +103,14 @@ public class EventPickerActiv extends BaseActivity {
             @Override
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
                 if (!response.isSuccessful()) {
-                    Log.e(TAG,response.code()+"");
-                    Toast.makeText(getApplicationContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, response.code() + "");
+                    Toast.makeText(getApplicationContext(), "Failed to load events! please try again.", Toast.LENGTH_SHORT).show();
                     EventPickerActiv.this.finish();
                     return;
                 }
                 final ArrayList<EventData> eventDataList = new ArrayList<>();
                 List<EventData> data = response.body();
-                for (EventData eventData:data) {
+                for (EventData eventData : data) {
                     if (eventData != null && eventData.getStartTimestamp() > System.currentTimeMillis()) {
                         eventData.setId(eventData.getEvent_id());
                         eventDataList.add(eventData);
@@ -123,8 +129,8 @@ public class EventPickerActiv extends BaseActivity {
 
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
-                Log.e(TAG,"failed to get response from django");
-                Toast.makeText(getApplicationContext(),"Failed to load events! please try again.",Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "failed to get response from django");
+                Toast.makeText(getApplicationContext(), "Failed to load events! please try again.", Toast.LENGTH_SHORT).show();
                 EventPickerActiv.this.finish();
             }
         });
@@ -153,7 +159,7 @@ public class EventPickerActiv extends BaseActivity {
             holder.eventMonthTv.setText(getTimeFromLong(eventData.getStartTimestamp(), SHORT_MONTH));
             holder.eventDateTv.setText(getTimeFromLong(eventData.getStartTimestamp(), DATE));
             holder.eventNameTv.setText(eventData.getTitle());
-            holder.eventDescTv.setText(eventData.getDesc());
+            holder.eventDescTv.setText(Jsoup.parse(eventData.getDesc()).text());
         }
 
         @Override
@@ -178,7 +184,7 @@ public class EventPickerActiv extends BaseActivity {
                     @Override
                     public void onClick(View v) {
                         final Intent intent = new Intent();
-                        Log.d(TAG,"inside on click"+eventList.get(getAdapterPosition()).getId());
+                        Log.d(TAG, "inside on click" + eventList.get(getAdapterPosition()).getId());
                         intent.putExtra("event_id", eventList.get(getAdapterPosition()).getId());
                         setResult(RESULT_OK, intent);
                         finish();
