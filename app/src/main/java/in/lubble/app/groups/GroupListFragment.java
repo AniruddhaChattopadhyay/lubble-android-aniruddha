@@ -81,6 +81,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private HashMap<String, Set<String>> groupInvitedByMap;
     private PagerContainer pagerContainer;
     private ViewPager viewPager;
+    private Timer sliderTimer;
     private int currentPage = 0;
     private TabLayout tabLayout;
     private Handler handler = new Handler();
@@ -115,7 +116,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         viewPager = view.findViewById(R.id.viewpager);
         tabLayout = view.findViewById(R.id.tab_dots);
         Button exploreBtn = view.findViewById(R.id.btn_explore);
-        tabLayout.setupWithViewPager(viewPager, true);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
         groupsRecyclerView.setNestedScrollingEnabled(false);
@@ -150,9 +150,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             }
         });
 
-        setupSlider();
-        fetchHomeBanners();
-
         exploreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -178,6 +175,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(true);
         }
+        setupSlider();
+        fetchHomeBanners();
     }
 
     private void syncAllGroups() {
@@ -432,6 +431,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     }
 
     private void setupSlider() {
+        tabLayout.setupWithViewPager(viewPager, true);
         viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList));
 
         new CoverFlow.Builder()
@@ -442,15 +442,16 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 .rotationY(0f)
                 .build();
 
+        viewPager.clearOnPageChangeListeners();
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
             }
 
             @Override
             public void onPageSelected(int position) {
                 currentPage = position;
+                tabLayout.getTabAt(position).select();
             }
 
             @Override
@@ -459,7 +460,11 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             }
         });
 
-        new Timer().schedule(new TimerTask() {
+        if (sliderTimer != null) {
+            sliderTimer.cancel();
+        }
+        sliderTimer = new Timer();
+        sliderTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 handler.post(update);

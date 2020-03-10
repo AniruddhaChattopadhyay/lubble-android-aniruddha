@@ -13,7 +13,6 @@ import androidx.multidex.MultiDexApplication;
 import com.clevertap.android.sdk.ActivityLifecycleCallback;
 import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
-import com.freshchat.consumer.sdk.FreshchatConfig;
 import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
@@ -92,11 +91,6 @@ public class LubbleApp extends MultiDexApplication {
                 R.array.com_google_android_gms_fonts_certs);
         EmojiCompat.Config config = new FontRequestEmojiCompatConfig(this, fontRequest);
         EmojiCompat.init(config);
-
-        FreshchatConfig freshchatConfig = new FreshchatConfig("8affdb23-6a28-4165-8cc0-14df42b1ad88", "293944df-73eb-4055-95a0-f2537cf42499");
-        freshchatConfig.setCameraCaptureEnabled(true);
-        freshchatConfig.setGallerySelectionEnabled(true);
-        Freshchat.getInstance(getApplicationContext()).init(freshchatConfig);
 
         FreshchatNotificationConfig notificationConfig = new FreshchatNotificationConfig()
                 .setNotificationSoundEnabled(true)
