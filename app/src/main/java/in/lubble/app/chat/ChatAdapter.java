@@ -1150,6 +1150,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
     public void addChatData(@NonNull ChatData chatData) {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
             final int size = chatDataList.size();
+            if (chatData.getReporters() != null) {
+                if (chatData.getReporters().containsKey(authorId)) {
+                    chatData.setType(SYSTEM);
+                    chatData.setMessage("Message has been reported");
+                }
+            }
             chatDataList.add(chatData);
             notifyItemInserted(size);
         }
@@ -1157,6 +1163,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     public void addChatData(int pos, @NonNull ChatData chatData) {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
+            if (chatData.getReporters() != null) {
+                if (chatData.getReporters().containsKey(authorId)) {
+                    chatData.setType(SYSTEM);
+                    chatData.setMessage("Message has been reported");
+                }
+            }
             chatDataList.add(pos, chatData);
             notifyItemInserted(pos);
         }
@@ -1166,6 +1178,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (!chatData.getType().equalsIgnoreCase(HIDDEN)) {
             final int pos = chatDataList.indexOf(chatData);
             if (pos != -1) {
+                if (chatData.getReporters() != null) {
+                    if (chatData.getReporters().containsKey(authorId)) {
+                        chatData.setType(SYSTEM);
+                        chatData.setMessage("Message has been reported");
+                    }
+                }
                 chatDataList.set(pos, chatData);
                 notifyItemChanged(pos);
             }
@@ -1408,11 +1426,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
-                if (authorId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
-                    menu.findItem(R.id.action_spam).setVisible(true);
-                } else {
-                    menu.findItem(R.id.action_spam).setVisible(false);
-                }
+                menu.findItem(R.id.action_spam).setVisible(true);
                 return true;
             }
 
