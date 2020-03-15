@@ -4,8 +4,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,8 +37,10 @@ public class ReportMsgBottomSheet extends BottomSheetDialogFragment {
 
     private static final String TAG = "ReportMsgBottomSheet";
 
+    private LinearLayout reportContainer, doneContainer;
     private RadioGroup reportRadioGroup;
     private MaterialButton reportBtn;
+    private TextView okayTv;
     private String reporterUid, groupId, chatId;
     private boolean isDm;
 
@@ -65,9 +69,14 @@ public class ReportMsgBottomSheet extends BottomSheetDialogFragment {
                              @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.frag_report_msg_bottom_sheet, container, false);
 
+        reportContainer = view.findViewById(R.id.container_report);
+        doneContainer = view.findViewById(R.id.container_done);
         reportRadioGroup = view.findViewById(R.id.rg_report_msg);
         reportBtn = view.findViewById(R.id.btn_report);
+        okayTv = view.findViewById(R.id.tv_okay);
         reportBtn.setEnabled(false);
+        reportContainer.setVisibility(View.VISIBLE);
+        doneContainer.setVisibility(View.GONE);
 
         if (getArguments() != null) {
             reporterUid = getArguments().getString("reporterUid");
@@ -117,7 +126,8 @@ public class ReportMsgBottomSheet extends BottomSheetDialogFragment {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
-                                dismiss();
+                                reportContainer.setVisibility(View.GONE);
+                                doneContainer.setVisibility(View.VISIBLE);
                             } else {
                                 Toast.makeText(getContext(), "Something went wrong. Plz try again or contact support", Toast.LENGTH_SHORT).show();
                                 reportBtn.setEnabled(true);
@@ -131,6 +141,13 @@ public class ReportMsgBottomSheet extends BottomSheetDialogFragment {
                     bundle.putString("chatId", chatId);
                     Analytics.triggerEvent(AnalyticsEvents.REPORT_MSG, bundle, getContext());
                 }
+            }
+        });
+
+        okayTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
             }
         });
 

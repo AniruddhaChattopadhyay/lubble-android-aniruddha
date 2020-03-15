@@ -3,47 +3,96 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     android:orientation="vertical"
+    android:animateLayoutChanges="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/tv_report_title"
-        android:layout_marginTop="16dp"
-        android:text="Report this message"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:layout_marginLeft="16dp"
-        android:layout_width="wrap_content"
-        android:layout_marginRight="16dp"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/tv_desc"
-        android:layout_marginLeft="16dp"
-        android:layout_width="match_parent"
-        android:layout_below="@id/tv_report_title"
-        android:text="Please choose a reason for reporting this message"
-        android:layout_height="wrap_content"/>
-
-    <RadioGroup
-        android:id="@+id/rg_report_msg"
+    <LinearLayout
+        android:id="@+id/container_report"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_desc"
-        android:layout_margin="16dp"/>
+        android:orientation="vertical">
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_report"
+        <TextView
+            android:id="@+id/tv_report_title"
+            android:layout_marginTop="16dp"
+            android:text="Report this message anonymously"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:layout_marginLeft="16dp"
+            android:layout_width="wrap_content"
+            android:layout_marginRight="16dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/tv_desc"
+            android:layout_marginLeft="16dp"
+            android:layout_width="match_parent"
+            android:text="Please choose a reason for reporting this message.\n\nThe author of this message will NOT know who reported their content."
+            android:layout_height="wrap_content" />
+
+        <RadioGroup
+            android:id="@+id/rg_report_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_report"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/MaterialButton"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            app:icon="@drawable/ic_warning_red_24dp"
+            app:iconGravity="textStart"
+            app:iconPadding="24dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="Report this message" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/container_done"
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="wrap_content"
-        android:theme="@style/MaterialButton"
-        style="@style/Widget.MaterialComponents.Button.Icon"
-        app:icon="@drawable/ic_warning_red_24dp"
-        app:iconGravity="textStart"
-        app:iconPadding="24dp"
-        android:layout_below="@id/rg_report_msg"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="16dp"
-        android:text="Report this message" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_report_done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message Reported!"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:drawablePadding="8dp"
+            app:drawableLeftCompat="@drawable/ic_check_circle_black_24dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+        <TextView
+            android:id="@+id/tv_report_done_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thanks for helping us keep the community clean &amp; healthy!\n\nWe will review the report &amp; take appropriate action as per our community guidelines."
+            android:layout_marginLeft="16dp" />
+
+        <TextView
+            android:id="@+id/tv_okay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Done"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.Button"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            android:layout_gravity="right|end"
+            android:layout_margin="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            />
+
+    </LinearLayout>
 
 </RelativeLayout>
