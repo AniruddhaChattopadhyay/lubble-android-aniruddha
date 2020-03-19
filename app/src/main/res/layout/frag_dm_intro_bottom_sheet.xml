@@ -41,6 +41,7 @@
         android:layout_below="@id/til_intro_msg"
         android:layout_marginLeft="16dp"
         android:layout_marginBottom="16dp"
+        app:backgroundTint="@color/button_color_selector"
         android:layout_marginRight="16dp"
         android:text="Invite to chat" />
 

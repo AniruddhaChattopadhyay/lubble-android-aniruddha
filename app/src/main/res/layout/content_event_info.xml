@@ -391,6 +391,7 @@
             style="@style/Widget.MaterialComponents.Button.Icon"
             app:icon="@drawable/ic_ticket_24dp"
             app:cornerRadius="24dp"
+            app:backgroundTint="@color/button_color_selector"
             android:layout_marginTop="8dp"
             android:theme="@style/MaterialButton" />
 

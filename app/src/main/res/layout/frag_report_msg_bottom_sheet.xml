@@ -42,6 +42,7 @@
             android:theme="@style/MaterialButton"
             style="@style/Widget.MaterialComponents.Button.Icon"
             app:icon="@drawable/ic_warning_red_24dp"
+            app:backgroundTint="@color/button_color_selector"
             app:iconGravity="textStart"
             app:iconPadding="24dp"
             android:layout_marginLeft="16dp"
