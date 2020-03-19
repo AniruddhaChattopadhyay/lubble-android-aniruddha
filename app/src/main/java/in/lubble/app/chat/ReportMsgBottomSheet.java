@@ -24,7 +24,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -127,10 +126,18 @@ public class ReportMsgBottomSheet extends BottomSheetDialogFragment {
                     reporterMap.put("time", System.currentTimeMillis());
                     reporterMap.put("reasonId", checkedId);
 
+                    String key = FirebaseDatabase.getInstance().getReference("chat_reports").push().getKey();
+                    final HashMap<String, Object> chatReportMap = new HashMap<>();
+                    chatReportMap.put("groupId", groupId);
+                    chatReportMap.put("chatId", chatId);
+                    chatReportMap.put("reasonId", checkedId);
+                    chatReportMap.put("reporterUid", reporterUid);
+                    chatReportMap.put("time", System.currentTimeMillis());
+
                     Map<String, Object> childUpdates = new HashMap<>();
                     final DatabaseReference reporterRef = msgRef.child("reporters").child(reporterUid);
                     childUpdates.put(reporterRef.toString().substring(reporterRef.getRoot().toString().length()), reporterMap);
-                    childUpdates.put("chat_reports/" + chatId, ServerValue.TIMESTAMP);
+                    childUpdates.put("chat_reports/" + key, chatReportMap);
                     FirebaseDatabase.getInstance().getReference().updateChildren(childUpdates).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
