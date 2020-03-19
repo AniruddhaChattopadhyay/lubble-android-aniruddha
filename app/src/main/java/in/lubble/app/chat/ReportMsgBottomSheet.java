@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -16,6 +18,8 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.database.DatabaseReference;
@@ -90,7 +94,12 @@ public class ReportMsgBottomSheet extends BottomSheetDialogFragment {
         final ArrayList<String> reasonList = new ArrayList<>();
         reasonList.add("I just don't like it");
         reasonList.add("Spam");
+        reasonList.add("Unsolicited/Self Promotion");
+        reasonList.add("Sale or promotion of drugs");
         reasonList.add("Nudity");
+        reasonList.add("Harassment or bullying");
+        reasonList.add("Hate Speech");
+        reasonList.add("Violence or threat");
         populateRadioGroup(reasonList);
 
         reportRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -161,6 +170,21 @@ public class ReportMsgBottomSheet extends BottomSheetDialogFragment {
             rb.setText(reasonList.get(i));
             reportRadioGroup.addView(rb);
         }
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                BottomSheetDialog dialog = (BottomSheetDialog) getDialog();
+                FrameLayout bottomSheet = dialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+                BottomSheetBehavior behavior = BottomSheetBehavior.from(bottomSheet);
+                behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                behavior.setPeekHeight(0);
+            }
+        });
     }
 
 }
