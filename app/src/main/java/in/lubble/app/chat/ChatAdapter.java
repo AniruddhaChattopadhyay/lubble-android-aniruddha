@@ -46,6 +46,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -300,8 +301,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .circleCrop()
                     .placeholder(R.drawable.ic_circle_group_24dp)
                     .error(R.drawable.ic_circle_group_24dp)
-                    .into(sentChatViewHolder.linkPicIv);
-            sentChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+                    .into(sentChatViewHolder.attachPicIv);
+            sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            sentChatViewHolder.attachPicIv.setVisibility(View.VISIBLE);
 
             setBgColor(sentChatViewHolder.linkContainer, chatData);
 
@@ -315,8 +317,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .circleCrop()
                     .placeholder(R.drawable.ic_event)
                     .error(R.drawable.ic_event)
-                    .into(sentChatViewHolder.linkPicIv);
-            sentChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+                    .into(sentChatViewHolder.attachPicIv);
+            sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            sentChatViewHolder.attachPicIv.setVisibility(View.VISIBLE);
 
             setBgColor(sentChatViewHolder.linkContainer, chatData);
 
@@ -329,6 +332,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             sentChatViewHolder.linkContainer.setBackground(drawable);
             sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            sentChatViewHolder.attachPicIv.setVisibility(View.GONE);
             /*sentChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
@@ -348,12 +352,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
             sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
-            glide.load(chatData.getLinkPicUrl())
-                    .circleCrop()
-                    .placeholder(R.drawable.ic_public_black_24dp)
-                    .error(R.drawable.ic_public_black_24dp)
-                    .into(sentChatViewHolder.linkPicIv);
-            sentChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+            sentChatViewHolder.attachPicIv.setVisibility(View.GONE);
+            if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
+                glide.load(chatData.getLinkPicUrl())
+                        .apply(RequestOptions.bitmapTransform(new RoundedCorners(UiUtils.dpToPx(44))))
+                        .into(sentChatViewHolder.linkPicIv);
+                sentChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+            } else {
+                sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            }
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.rect_rounded_trans_white);
             DrawableCompat.setTintList(drawable, null);
             sentChatViewHolder.linkContainer.setBackground(drawable);
@@ -496,8 +503,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .circleCrop()
                     .placeholder(R.drawable.ic_circle_group_24dp)
                     .error(R.drawable.ic_circle_group_24dp)
-                    .into(recvdChatViewHolder.linkPicIv);
-            recvdChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+                    .into(recvdChatViewHolder.attachPicIv);
+            recvdChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            recvdChatViewHolder.attachPicIv.setVisibility(View.VISIBLE);
             setBgColor(recvdChatViewHolder.linkContainer, chatData);
         } else if (chatData.getType().equalsIgnoreCase(EVENT) && isValidString(chatData.getAttachedGroupId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
@@ -507,10 +515,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.trans_white));
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
-                    .placeholder(R.drawable.ic_circle_group_24dp)
-                    .error(R.drawable.ic_circle_group_24dp)
-                    .into(recvdChatViewHolder.linkPicIv);
-            recvdChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+                    .placeholder(R.drawable.ic_event)
+                    .error(R.drawable.ic_event)
+                    .into(recvdChatViewHolder.attachPicIv);
+            recvdChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            recvdChatViewHolder.attachPicIv.setVisibility(View.VISIBLE);
             setBgColor(recvdChatViewHolder.linkContainer, chatData);
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
@@ -521,6 +530,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             DrawableCompat.setTintList(drawable, null);
             recvdChatViewHolder.linkContainer.setBackground(drawable);
             recvdChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            recvdChatViewHolder.attachPicIv.setVisibility(View.GONE);
             /*recvdChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
@@ -546,12 +556,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
             recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
-            glide.load(chatData.getLinkPicUrl())
-                    .circleCrop()
-                    .placeholder(R.drawable.ic_public_black_24dp)
-                    .error(R.drawable.ic_public_black_24dp)
-                    .into(recvdChatViewHolder.linkPicIv);
-            recvdChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+            recvdChatViewHolder.attachPicIv.setVisibility(View.GONE);
+
+            if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
+                glide.load(chatData.getLinkPicUrl())
+                        .apply(RequestOptions.bitmapTransform(new RoundedCorners(UiUtils.dpToPx(44))))
+                        .into(recvdChatViewHolder.linkPicIv);
+                recvdChatViewHolder.linkPicIv.setVisibility(View.VISIBLE);
+            } else {
+                recvdChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            }
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.sent_chat_bubble_border);
             DrawableCompat.setTintList(drawable, null);
             recvdChatViewHolder.linkContainer.setBackground(drawable);
@@ -1333,7 +1347,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView authorNameTv, visibleToYouTv, replyBottomTv;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
-        private ImageView linkPicIv;
+        private ImageView linkPicIv, attachPicIv;
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
@@ -1370,6 +1384,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkPicIv = itemView.findViewById(R.id.iv_link_pic);
+            attachPicIv = itemView.findViewById(R.id.iv_attach_pic);
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);
@@ -1580,7 +1595,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private RelativeLayout rootLayout;
         private EmojiTextView messageTv;
         private RelativeLayout linkContainer;
-        private ImageView linkPicIv;
+        private ImageView linkPicIv, attachPicIv;
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
@@ -1611,6 +1626,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             messageTv = itemView.findViewById(R.id.tv_message);
             linkContainer = itemView.findViewById(R.id.link_meta_container);
             linkPicIv = itemView.findViewById(R.id.iv_link_pic);
+            attachPicIv = itemView.findViewById(R.id.iv_attach_pic);
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);

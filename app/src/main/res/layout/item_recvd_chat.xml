@@ -132,39 +132,42 @@
                     android:layout_margin="8dp"
                     tools:visibility="visible">
 
-
                     <ImageView
                         android:id="@+id/iv_link_pic"
+                        android:layout_width="match_parent"
+                        android:scaleType="fitStart"
+                        android:layout_height="wrap_content"
+                        android:maxHeight="120dp"
+                        android:visibility="gone"
+                        android:adjustViewBounds="true"
+                        tools:src="@tools:sample/backgrounds/scenic"/>
+
+                    <ImageView
+                        android:id="@+id/iv_attach_pic"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
+                        android:layout_marginRight="4dp"
                         app:srcCompat="@drawable/ic_public_black_24dp" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:id="@+id/tv_link_title"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_centerVertical="true"
-                        android:layout_marginLeft="4dp"
-                        android:layout_toRightOf="@id/iv_link_pic"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
+                        android:layout_below="@id/iv_link_pic"
+                        android:layout_toRightOf="@id/iv_attach_pic"
+                        android:maxLines="3"
+                        android:textColor="@color/black"
+                        tools:text="LINK TITLE" />
 
-                        <TextView
-                            android:id="@+id/tv_link_title"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxLines="2"
-                            android:textColor="@color/black"
-                            tools:text="LINK TITLE" />
-
-                        <androidx.emoji.widget.EmojiTextView
-                            android:id="@+id/tv_link_desc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:maxLines="2"
-                            tools:text="@tools:sample/lorem/random" />
-
-                    </LinearLayout>
+                    <androidx.emoji.widget.EmojiTextView
+                        android:id="@+id/tv_link_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/tv_link_title"
+                        android:layout_alignLeft="@id/tv_link_title"
+                        android:ellipsize="end"
+                        android:maxLines="3"
+                        tools:text="@tools:sample/lorem/random" />
 
                 </RelativeLayout>
 
@@ -246,8 +249,7 @@
                             android:id="@+id/progressbar_img_vid"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_gravity="center"
-                            />
+                            android:layout_gravity="center" />
 
                         <ImageView
                             android:layout_width="48dp"
@@ -255,7 +257,7 @@
                             android:background="@drawable/circle_white_trans"
                             app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp"
                             android:layout_gravity="center"
-                            android:id="@+id/iv_play_vid"/>
+                            android:id="@+id/iv_play_vid" />
                     </FrameLayout>
 
                     <androidx.emoji.widget.EmojiTextView
