@@ -1660,6 +1660,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_chat, menu);
+                menu.findItem(R.id.action_spam).setVisible(false);
                 return true;
             }
 
