@@ -2,6 +2,7 @@ package in.lubble.app.network;
 
 import android.os.AsyncTask;
 import android.text.TextUtils;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -44,7 +45,14 @@ public class LinkMetaAsyncTask extends AsyncTask<Void, Void, Void> {
             } else {
                 description = doc.select("meta[name=description]").attr("content");
             }
-            listener.onMetaFetched(title, description);
+            String imgUrl = "";
+            Elements metaOgImage = doc.select("meta[property=og:image]");
+            if (metaOgImage != null && !TextUtils.isEmpty(metaOgImage.attr("content"))) {
+                imgUrl = metaOgImage.attr("content");
+            } else {
+                imgUrl = null;
+            }
+            listener.onMetaFetched(title, description, imgUrl);
         } catch (IOException e) {
             e.printStackTrace();
             listener.onMetaFailed();

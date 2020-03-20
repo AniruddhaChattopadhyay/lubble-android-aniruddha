@@ -154,7 +154,6 @@
                             android:layout_height="wrap_content"
                             android:maxLines="2"
                             android:textColor="@color/black"
-                            android:textStyle="bold"
                             tools:text="LINK TITLE" />
 
                         <androidx.emoji.widget.EmojiTextView

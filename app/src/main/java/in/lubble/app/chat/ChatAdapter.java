@@ -295,7 +295,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
-            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.trans_white));
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
                     .placeholder(R.drawable.ic_circle_group_24dp)
@@ -310,7 +310,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkTitleTv.setText("Event: " + chatData.getLinkTitle());
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             sentChatViewHolder.linkDescTv.setText(Jsoup.parse(chatData.getLinkDesc()).text());
-            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.trans_white));
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
                     .placeholder(R.drawable.ic_event)
@@ -326,7 +326,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.rect_rounded_trans_white);
             DrawableCompat.setTintList(drawable, null);
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
-            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             sentChatViewHolder.linkContainer.setBackground(drawable);
             sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
             /*sentChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -347,7 +347,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
-            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+            sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
                     .placeholder(R.drawable.ic_public_black_24dp)
@@ -491,7 +491,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
-            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.trans_white));
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
                     .placeholder(R.drawable.ic_circle_group_24dp)
@@ -504,7 +504,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkTitleTv.setText("Event: " + chatData.getLinkTitle());
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             recvdChatViewHolder.linkDescTv.setText(Jsoup.parse(chatData.getLinkDesc()).text());
-            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.trans_white));
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
                     .placeholder(R.drawable.ic_circle_group_24dp)
@@ -515,7 +515,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
-            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             addReplyData(chatData.getReplyMsgId(), recvdChatViewHolder.linkTitleTv, recvdChatViewHolder.linkDescTv, chatData.getIsDm());
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.sent_chat_bubble_border);
             DrawableCompat.setTintList(drawable, null);
@@ -544,7 +544,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(View.VISIBLE);
             recvdChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
-            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.black));
+            recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
             glide.load(chatData.getLinkPicUrl())
                     .circleCrop()
