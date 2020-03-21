@@ -118,4 +118,6 @@ public class AnalyticsEvents {
     public static final String NEW_DM_SENT = "NEW_DM_SENT";
     public static final String DM_BLOCKED = "DM_BLOCKED";
     public static final String DM_REPORTED = "DM_REPORTED";
+
+    public static final String REPORT_MSG = "REPORT_MSG";
 }

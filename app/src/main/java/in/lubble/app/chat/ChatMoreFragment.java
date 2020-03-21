@@ -49,9 +49,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+
+//import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
 
 public class ChatMoreFragment extends Fragment {
     private static final String TAG = "ChatMoreFragment";
@@ -74,6 +75,7 @@ public class ChatMoreFragment extends Fragment {
     private ValueEventListener flairListener;
     private ValueEventListener eventsListener;
     private FlairUpdateListener flairUpdateListener;
+    private Endpoints endpoints;
 
     public ChatMoreFragment() {
         // Required empty public constructor
@@ -130,42 +132,46 @@ public class ChatMoreFragment extends Fragment {
 
     private void syncEvents() {
         eventProgressBar.setVisibility(View.VISIBLE);
-        eventsListener = getEventsRef().orderByChild("startTimestamp").addValueEventListener(new ValueEventListener() {
+        endpoints = ServiceGenerator.createService(Endpoints.class);
+        //endpoints = retrofit.create(Endpoints.class);
+        //Call<List<EventData>> call = endpoints.getEvents("ayush_django_backend_token","ayush_django_backend",LubbleSharedPrefs.getInstance().getLubbleId());
+        Call<List<EventData>> call = endpoints.getEvents(LubbleSharedPrefs.getInstance().getLubbleId());
+        final ArrayList<EventData> eventDataList = new ArrayList<>();
+        call.enqueue(new Callback<List<EventData>>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (eventProgressBar != null) {
+            public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                if (!response.isSuccessful()) {
+                    eventsRecyclerView.setVisibility(View.GONE);
+                    noEventsContainer.setVisibility(View.VISIBLE);
                     eventProgressBar.setVisibility(View.GONE);
+                    return;
                 }
-                eventsRecyclerView.setVisibility(View.VISIBLE);
-                noEventsContainer.setVisibility(View.GONE);
-                if (dataSnapshot.getChildrenCount() > 0) {
-                    final ArrayList<EventData> eventDataList = new ArrayList<>();
-                    for (DataSnapshot dataSnapshotChild : dataSnapshot.getChildren()) {
-                        final EventData eventData = dataSnapshotChild.getValue(EventData.class);
-                        if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp() && eventData.getRelatedGroupsList().contains(groupId)) {
-                            eventData.setId(dataSnapshotChild.getKey());
+                List<EventData> data = response.body();
+                if (data != null) {
+                    for (EventData eventData : data) {
+                        if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp()) {//&& eventData.getRelatedGroupsList().contains(groupId)) {
+                            eventData.setId(eventData.getEvent_id());
                             eventDataList.add(eventData);
                         }
                     }
-                    if (eventDataList.size() > 0) {
-                        eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
-                    } else {
-                        eventsRecyclerView.setVisibility(View.GONE);
-                        noEventsContainer.setVisibility(View.VISIBLE);
-                    }
+                }
+                if (eventDataList.size() > 0) {
+                    eventProgressBar.setVisibility(View.GONE);
+                    noEventsContainer.setVisibility(View.GONE);
+                    eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
                 } else {
-                    // no events
-                    if (eventProgressBar != null) {
-                        eventProgressBar.setVisibility(View.GONE);
-                    }
                     eventsRecyclerView.setVisibility(View.GONE);
                     noEventsContainer.setVisibility(View.VISIBLE);
+                    eventProgressBar.setVisibility(View.GONE);
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            public void onFailure(Call<List<EventData>> call, Throwable t) {
+                eventsRecyclerView.setVisibility(View.GONE);
+                noEventsContainer.setVisibility(View.VISIBLE);
+                eventProgressBar.setVisibility(View.GONE);
+                Log.e(TAG, "failed to get response from django");
             }
         });
     }
@@ -205,13 +211,15 @@ public class ChatMoreFragment extends Fragment {
                                             getUserGroupsRef().child(groupId).child("flair").setValue(flairEt.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                    flairProgressbar.setVisibility(View.GONE);
-                                                    updateFlairTv.setText("UPDATE");
-                                                    if (!task.isSuccessful()) {
-                                                        Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                                                    } else {
-                                                        Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, getContext());
-                                                        Toast.makeText(requireContext(), "Updated!", Toast.LENGTH_SHORT).show();
+                                                    if (isAdded()) {
+                                                        flairProgressbar.setVisibility(View.GONE);
+                                                        updateFlairTv.setText("UPDATE");
+                                                        if (!task.isSuccessful()) {
+                                                            Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                                        } else {
+                                                            Analytics.triggerEvent(AnalyticsEvents.FLAIR_UPDATED, getContext());
+                                                            Toast.makeText(requireContext(), "Updated!", Toast.LENGTH_SHORT).show();
+                                                        }
                                                     }
                                                 }
                                             });
@@ -352,9 +360,6 @@ public class ChatMoreFragment extends Fragment {
         super.onPause();
         if (flairListener != null) {
             getThisUserRef().removeEventListener(flairListener);
-        }
-        if (eventsListener != null) {
-            getEventsRef().orderByChild("startTimestamp").removeEventListener(eventsListener);
         }
     }
 

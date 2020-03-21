@@ -5,8 +5,8 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,8 +28,6 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
-
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
 
@@ -38,6 +36,7 @@ import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.utils.FileUtils.getUriFromTempBitmap;
 
 /**
  * Service to handle uploading files to Firebase Storage
@@ -152,13 +151,6 @@ public class UploadFileService extends BaseTaskService {
         });
     }
 
-    private Uri getImageUri(Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path);
-    }
-
     private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId,
                                final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
@@ -175,7 +167,7 @@ public class UploadFileService extends BaseTaskService {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         if (resource.getWidth() > 1000 || resource.getHeight() > 1000) {
-                            compressAndUpload(fileUri, caption, groupId, toTransmit, metadata, dmInfoData, photoRef);
+                            compressAndUpload(fileUri, fileName, caption, groupId, toTransmit, metadata, dmInfoData, photoRef);
                         } else {
                             uploadFile(fileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
                         }
@@ -183,7 +175,8 @@ public class UploadFileService extends BaseTaskService {
                 });
     }
 
-    private void compressAndUpload(Uri fileUri, final String caption, final String groupId, final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData, final StorageReference photoRef) {
+    private void compressAndUpload(final Uri fileUri, final String fileName, final String caption, final String groupId, final boolean toTransmit,
+                                   @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData, final StorageReference photoRef) {
         GlideApp.with(this).asBitmap()
                 .override(1000, 1000)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -192,7 +185,7 @@ public class UploadFileService extends BaseTaskService {
                 .into(new SimpleTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        final Uri compressedFileUri = getImageUri(resource);
+                        final Uri compressedFileUri = getUriFromTempBitmap(UploadFileService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
                         uploadFile(compressedFileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
                     }
                 });

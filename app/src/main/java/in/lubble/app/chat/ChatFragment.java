@@ -51,11 +51,14 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import org.jsoup.Jsoup;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import in.lubble.app.GlideApp;
@@ -74,8 +77,10 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
+import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.ChatUtils;
@@ -88,6 +93,9 @@ import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
@@ -140,6 +148,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
     private static final String KEY_CHAT_DATA = "KEY_CHAT_DATA";
     private static final int PERMITTED_VIDEO_SIZE = 30;
+    private Endpoints endpoints;
+    private EventData eventData;
     @Nullable
     private GroupData groupData;
     private RelativeLayout joinContainer;
@@ -207,6 +217,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedEventId;
     private String attachedGroupPicUrl;
     private String attachedEventPicUrl;
+    private String attachedLinkPicUrl;
     private Uri sharedImageUri;
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
@@ -1148,6 +1159,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     chatData.setType(LINK);
                     chatData.setLinkTitle(linkTitle.getText().toString());
                     chatData.setLinkDesc(linkDesc.getText().toString());
+                    chatData.setLinkPicUrl(attachedLinkPicUrl);
                 }
 
                 if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
@@ -1360,27 +1372,38 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void fetchAndShowAttachedEventInfo() {
         if (!TextUtils.isEmpty(attachedEventId)) {
-            RealtimeDbHelper.getEventsRef().child(attachedEventId).addListenerForSingleValueEvent(new ValueEventListener() {
+            endpoints = ServiceGenerator.createService(Endpoints.class);
+            // endpoints = retrofit.create(Endpoints.class);
+            //Call<List<EventData>> call = endpoints.getEvent("ayush_django_backend_token","ayush_django_backend",attachedEventId);
+            Call<List<EventData>> call = endpoints.getEvent(attachedEventId);
+            call.enqueue(new Callback<List<EventData>>() {
                 @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.getValue() != null) {
-                        linkMetaContainer.setVisibility(View.VISIBLE);
-                        final EventData eventData = dataSnapshot.getValue(EventData.class);
-                        linkTitle.setText(eventData.getTitle());
-                        linkDesc.setText(DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), DateTimeUtils.APP_DATE_NO_YEAR) + ": " + eventData.getDesc());
-                        GlideApp.with(getContext())
-                                .load(eventData.getProfilePic())
-                                .circleCrop()
-                                .placeholder(R.drawable.ic_event)
-                                .error(R.drawable.ic_event)
-                                .into(linkPicIv);
-                        attachedEventPicUrl = eventData.getProfilePic();
+                public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                    if (response.isSuccessful()) {
+                        List<EventData> data = response.body();
+                        for (EventData eventData_loop : data) {
+                            eventData = eventData_loop;
+                            if (eventData != null) {
+                                linkMetaContainer.setVisibility(View.VISIBLE);
+                                linkTitle.setText(eventData.getTitle());
+                                linkDesc.setText(DateTimeUtils.getTimeFromLong(eventData.getStartTimestamp(), DateTimeUtils.APP_DATE_NO_YEAR) + ": " + Jsoup.parse(eventData.getDesc()).text());
+                                GlideApp.with(getContext())
+                                        .load(eventData.getProfilePic())
+                                        .circleCrop()
+                                        .placeholder(R.drawable.ic_event)
+                                        .error(R.drawable.ic_event)
+                                        .into(linkPicIv);
+                                attachedEventPicUrl = eventData.getProfilePic();
+                            }
+                        }
+                    } else {
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                public void onFailure(Call<List<EventData>> call, Throwable t) {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
@@ -1599,7 +1622,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private LinkMetaListener getLinkMetaListener() {
         return new LinkMetaListener() {
             @Override
-            public void onMetaFetched(final String title, final String desc) {
+            public void onMetaFetched(final String title, final String desc, final String imgUrl) {
                 if (isAdded() && isVisible() && getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -1607,7 +1630,17 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             linkMetaContainer.setVisibility(View.VISIBLE);
                             linkTitle.setText(title);
                             linkDesc.setText(desc);
-                            linkPicIv.setImageResource(R.drawable.ic_public_black_24dp);
+                            if (!TextUtils.isEmpty(imgUrl)) {
+                                attachedLinkPicUrl = imgUrl;
+                                GlideApp.with(requireContext())
+                                        .load(imgUrl)
+                                        .circleCrop()
+                                        .placeholder(R.drawable.ic_public_black_24dp)
+                                        .error(R.drawable.ic_public_black_24dp)
+                                        .into(linkPicIv);
+                            } else {
+                                linkPicIv.setImageResource(R.drawable.ic_public_black_24dp);
+                            }
                         }
                     });
                 }
@@ -1734,45 +1767,50 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     public void markSpam(final String selectedChatId, final String ogMsg) {
         if (selectedChatId != null) {
-            final CharSequence[] items = {"Delete last msg too", "Delete msg", "Cancel"};
-            new AlertDialog.Builder(requireContext())
-                    .setTitle(R.string.msg_spam_confirm_title)
-                    .setMessage(R.string.msg_spam_confirm_msg)
-                    .setPositiveButton(R.string.msg_spam_confirm_reset_lastmsg, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Map<String, Object> childUpdates = new HashMap<>();
-                            childUpdates.put("type", SYSTEM);
-                            childUpdates.put("message", "Marked as spam");
-                            childUpdates.put("ogMessage", ogMsg);
-                            messagesReference.child(selectedChatId).updateChildren(childUpdates);
+            if (authorId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+                final CharSequence[] items = {"Delete last msg too", "Delete msg", "Cancel"};
+                new AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.msg_spam_confirm_title)
+                        .setMessage(R.string.msg_spam_confirm_msg)
+                        .setPositiveButton(R.string.msg_spam_confirm_reset_lastmsg, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Map<String, Object> childUpdates = new HashMap<>();
+                                childUpdates.put("type", SYSTEM);
+                                childUpdates.put("message", "Marked as spam");
+                                childUpdates.put("ogMessage", ogMsg);
+                                messagesReference.child(selectedChatId).updateChildren(childUpdates);
 
-                            Map<String, Object> groupUpdates = new HashMap<>();
-                            groupUpdates.put("lastMessage", "...");
-                            groupReference.updateChildren(groupUpdates);
-                            Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
-                            dialog.dismiss();
-                        }
-                    })
-                    .setNegativeButton(R.string.msg_spam_confirm_del_msg, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Map<String, Object> childUpdates = new HashMap<>();
-                            childUpdates.put("type", SYSTEM);
-                            childUpdates.put("message", "Marked as spam");
-                            childUpdates.put("ogMessage", ogMsg);
-                            messagesReference.child(selectedChatId).updateChildren(childUpdates);
-                            Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
-                            dialog.dismiss();
-                        }
-                    })
-                    .setNeutralButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    })
-                    .show();
+                                Map<String, Object> groupUpdates = new HashMap<>();
+                                groupUpdates.put("lastMessage", "...");
+                                groupReference.updateChildren(groupUpdates);
+                                Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNegativeButton(R.string.msg_spam_confirm_del_msg, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Map<String, Object> childUpdates = new HashMap<>();
+                                childUpdates.put("type", SYSTEM);
+                                childUpdates.put("message", "Marked as spam");
+                                childUpdates.put("ogMessage", ogMsg);
+                                messagesReference.child(selectedChatId).updateChildren(childUpdates);
+                                Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
+                                dialog.dismiss();
+                            }
+                        })
+                        .setNeutralButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .show();
+            } else {
+                //for the commoners
+                ReportMsgBottomSheet.newInstance(authorId, groupId, selectedChatId, dmId != null).show(getFragmentManager(), null);
+            }
         } else {
             Crashlytics.logException(new NullPointerException("chatId is null when trying to mark it spam"));
         }

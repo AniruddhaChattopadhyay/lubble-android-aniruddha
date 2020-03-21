@@ -10,7 +10,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.crashlytics.android.Crashlytics;
+import com.freshchat.consumer.sdk.Freshchat;
+import com.freshchat.consumer.sdk.FreshchatConfig;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -32,10 +39,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;
@@ -86,6 +89,11 @@ public class BaseActivity extends AppCompatActivity {
                 }
             }
         });
+
+        FreshchatConfig freshchatConfig = new FreshchatConfig("8affdb23-6a28-4165-8cc0-14df42b1ad88", "293944df-73eb-4055-95a0-f2537cf42499");
+        freshchatConfig.setCameraCaptureEnabled(true);
+        freshchatConfig.setGallerySelectionEnabled(true);
+        Freshchat.getInstance(getApplicationContext()).init(freshchatConfig);
     }
 
     @Override

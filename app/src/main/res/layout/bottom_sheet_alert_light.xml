@@ -47,6 +47,7 @@
         android:layout_gravity="right"
         android:text="OK"
         android:textAllCaps="true"
+        app:backgroundTint="@color/button_color_selector"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:theme="@style/MaterialButton"

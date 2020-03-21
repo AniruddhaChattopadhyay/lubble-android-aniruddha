@@ -234,6 +234,7 @@
     <string name="personal_chat">Personal Chat</string>
 
 
+    <string name="fetch_test_event" translatable="false">http://10.145.205.136:8000/</string>
     <string-array name="login_server_url_array">
         <item>@string/profile</item>
         <item>@string/profile</item>

@@ -67,7 +67,7 @@ dependencies {
         transitive = true;
     }
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     // FirebaseUI for Firebase Realtime Database
     implementation 'com.firebaseui:firebase-ui-database:4.1.0'
@@ -102,7 +102,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.10.1'
     // Retrofit & OkHttp
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
-    implementation 'com.clevertap.android:clevertap-android-sdk:3.5.1'
+    implementation 'com.clevertap.android:clevertap-android-sdk:3.6.4'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
@@ -117,7 +117,7 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-hls:r2.4.0'
     implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:r2.4.0'
     implementation 'com.google.android.exoplayer:exoplayer-ui:r2.4.0'
-
+    implementation 'org.jsoup:jsoup:1.13.1'
     implementation('com.github.hotchemi:permissionsdispatcher:3.2.0') {
         // if you don't use android.app.Fragment you can exclude support for them
         exclude module: "support-v13"

@@ -53,6 +53,7 @@ public class ChatData implements Serializable {
     private HashMap<String, Integer> pollReceipts = new HashMap<>();
     private String attachedGroupId; // or attached event ID
     private HashMap<String, String> tagged; // <UID, UserName>
+    private HashMap<String, Object> reporters; // <UID, Timestamp>
 
     @Override
     public boolean equals(Object obj) {
@@ -277,5 +278,13 @@ public class ChatData implements Serializable {
 
     public void setSendNotif(boolean sendNotif) {
         this.sendNotif = sendNotif;
+    }
+
+    public HashMap<String, Object> getReporters() {
+        return reporters;
+    }
+
+    public void setReporters(HashMap<String, Object> reporters) {
+        this.reporters = reporters;
     }
 }

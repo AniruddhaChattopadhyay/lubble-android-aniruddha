@@ -2,12 +2,12 @@ package in.lubble.app.events.new_event;
 
 import android.Manifest;
 import android.app.DatePickerDialog;
+import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -48,9 +48,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,16 +75,24 @@ import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
+import in.lubble.app.models.EventIdData;
+import in.lubble.app.models.EventMemberData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.mapUtils.SphericalUtil;
+import okhttp3.RequestBody;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.models.EventData.GOING;
@@ -94,6 +104,9 @@ import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
+//import com.google.android.gms.location.places.Place;
+//import com.google.android.gms.location.places.Places;
+
 @RuntimePermissions
 public class NewEventActivity extends BaseActivity {
 
@@ -104,6 +117,7 @@ public class NewEventActivity extends BaseActivity {
 
     private String currentPhotoPath;
     private Uri picUri = null;
+    private Endpoints endpoints;
 
     private SupportMapFragment mapFragment;
     private LatLng defaultLatLng;
@@ -119,6 +133,7 @@ public class NewEventActivity extends BaseActivity {
     private TextInputLayout ticketUrl;
     private RadioGroup radioGroup;
     private RadioButton newGroupRadioBtn;
+    private String eventId;
     private CompoundButton oldGroupRadioBtn;
     private TextView notAdminHintTv;
     private TextView relatedGroupsTv;
@@ -130,6 +145,7 @@ public class NewEventActivity extends BaseActivity {
     private Button submitBtn;
     private Place place;
     private ArrayList<String> relatedGroupIdList = new ArrayList<>();
+    private ProgressDialog progressDialog;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, NewEventActivity.class));
@@ -196,12 +212,18 @@ public class NewEventActivity extends BaseActivity {
             }
         });
 
+        progressDialog = new ProgressDialog(this);
+
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!isValidationPassed()) {
                     return;
                 }
+                progressDialog.setTitle(R.string.progress_uploading);
+                progressDialog.setTitle(R.string.all_please_wait);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
                 final EventData eventData = new EventData();
                 eventData.setTitle(titleTil.getEditText().getText().toString().trim());
                 eventData.setDesc(descTil.getEditText().getText().toString().trim());
@@ -230,34 +252,67 @@ public class NewEventActivity extends BaseActivity {
                     eventData.setLati(place.getLatLng().latitude);
                     eventData.setLongi(place.getLatLng().longitude);
                     eventData.setAddress(addressTil.getEditText().getText().toString());
+                    eventData.setLubble_id(LubbleSharedPrefs.getInstance().getLubbleId());
                     if (oldGroupRadioBtn.isChecked()) {
                         final GroupData selectedGroupData = (GroupData) adminGroupsSpinner.getSelectedItem();
                         eventData.setGid(selectedGroupData.getId());
                     } else {
                         eventData.setGid("");
                     }
+                    EventMemberData eventMemberData = new EventMemberData();
+                    eventMemberData.setisAdmin(true);
+                    eventMemberData.setResponse(GOING);
+                    eventMemberData.setTimestamp(System.currentTimeMillis());
+                    eventMemberData.setUid(FirebaseAuth.getInstance().getUid());
+                    List<EventMemberData> member_list = new ArrayList<>();
+                    member_list.add(eventMemberData);
+                    eventData.setMembers(member_list);
+
 
                     final HashMap<String, Object> membersMap = new HashMap<>();
                     final HashMap<String, Object> memberInfoMap = new HashMap<>();
                     memberInfoMap.put("response", GOING);
                     memberInfoMap.put("timestamp", System.currentTimeMillis());
                     memberInfoMap.put("isAdmin", true);
-                    membersMap.put(FirebaseAuth.getInstance().getUid(), memberInfoMap);
-                    eventData.setMembers(membersMap);
 
-                    final DatabaseReference pushRef = getEventsRef().push();
-                    pushRef.setValue(eventData);
+                    Gson gson = new Gson();
+                    String json = gson.toJson(eventData);
+                    JsonElement element = gson.fromJson(json, JsonElement.class);
+                    JsonObject jsonObj = element.getAsJsonObject();
+                    RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObj.toString());
 
-                    if (picUri != null) {
-                        startService(new Intent(NewEventActivity.this, UploadFileService.class)
-                                .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
-                                .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
-                                .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/events/" + pushRef.getKey())
-                                .setAction(UploadFileService.ACTION_UPLOAD));
-                    }
+                    endpoints = ServiceGenerator.createService(Endpoints.class);
+                    Call<EventIdData> call = endpoints.upload_new_event(body);
+                    call.enqueue(new Callback<EventIdData>() {
+                        @Override
+                        public void onResponse(Call<EventIdData> call, Response<EventIdData> response) {
+                            if (response.isSuccessful() && !isFinishing()) {
+                                progressDialog.dismiss();
+                                EventIdData data = response.body();
+                                eventId = data.getEvent_id();
+                                if (picUri != null) {
+                                    startService(new Intent(NewEventActivity.this, UploadFileService.class)
+                                            .putExtra(UploadFileService.EXTRA_FILE_NAME, "profile_pic_" + System.currentTimeMillis() + ".jpg")
+                                            .putExtra(UploadFileService.EXTRA_FILE_URI, picUri)
+                                            .putExtra(UploadFileService.EXTRA_UPLOAD_PATH, "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/events/" + eventId)
+                                            .setAction(UploadFileService.ACTION_UPLOAD));
+                                }
+                                Toast.makeText(NewEventActivity.this, "Event is LIVE!", Toast.LENGTH_SHORT).show();
+                                finish();
+                            } else if (!isFinishing()) {
+                                progressDialog.dismiss();
+                                Toast.makeText(NewEventActivity.this, "Event publish failure. Please try again", Toast.LENGTH_SHORT).show();
+                            }
+                        }
 
-                    Toast.makeText(NewEventActivity.this, R.string.event_published, Toast.LENGTH_SHORT).show();
-                    finish();
+                        @Override
+                        public void onFailure(Call<EventIdData> call, Throwable t) {
+                            if (!isFinishing()) {
+                                progressDialog.dismiss();
+                                Toast.makeText(NewEventActivity.this, "Please check internet connection & try again", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
 
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -541,19 +596,18 @@ public class NewEventActivity extends BaseActivity {
         startActivityForResult(intent, PLACE_PICKER_REQUEST);
     }
 
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PLACE_PICKER_REQUEST) {
             if (resultCode == RESULT_OK) {
                 place = Autocomplete.getPlaceFromIntent(data);
-                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
                 if (place != null) {
                     loadMapAt(place.getLatLng());
                     addressTil.getEditText().setText(place.getAddress());
                 }
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
-                Log.e(TAG, status.getStatusMessage());
                 Crashlytics.log(status.getStatusMessage());
                 Crashlytics.logException(new Exception(status.getStatusMessage()));
             }

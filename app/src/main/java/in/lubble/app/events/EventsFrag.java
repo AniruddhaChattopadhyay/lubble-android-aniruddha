@@ -6,17 +6,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
@@ -24,18 +23,21 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.events.new_event.NewEventActivity;
 import in.lubble.app.models.EventData;
-
-import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class EventsFrag extends Fragment {
-
+    private static final String TAG = "EventsFrag";
     private RecyclerView recyclerView;
     private FloatingActionButton fab;
     private LinearLayout emptyEventContainer;
     private EventsAdapter adapter;
     private ChildEventListener childEventListener;
     private ProgressBar progressBar;
+    private Endpoints endpoints;
 
     public EventsFrag() {
         // Required empty public constructor
@@ -69,9 +71,43 @@ public class EventsFrag extends Fragment {
         });
 
         LubbleSharedPrefs.getInstance().setEventSet(null);
-
         adapter.clear();
         return view;
+    }
+
+    private void getEvents() {
+        Call<List<EventData>> call = endpoints.getEvents(LubbleSharedPrefs.getInstance().getLubbleId());
+        call.enqueue(new Callback<List<EventData>>() {
+            @Override
+            public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
+                if (response.isSuccessful()) {
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                    adapter.clear();
+                    List<EventData> data = response.body();
+                    for (EventData eventData : data) {
+                        if (eventData != null) {
+                            eventData.setId(eventData.getEvent_id());
+                            adapter.addEvent(eventData);
+                        }
+                    }
+                } else {
+                    Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<EventData>> call, Throwable t) {
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+                Toast.makeText(getContext(), "Please check your internet connection & try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+        }
     }
 
     @Override
@@ -81,70 +117,13 @@ public class EventsFrag extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
         emptyEventContainer.setVisibility(View.GONE);
-
-        childEventListener = getEventsRef().orderByChild("startTimestamp").addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
-                }
-                final EventData eventData = dataSnapshot.getValue(EventData.class);
-                if (eventData != null) {
-                    eventData.setId(dataSnapshot.getKey());
-                    adapter.addEvent(eventData);
-                }
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        getEventsRef().orderByChild("startTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() == null) {
-                    // zero events
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                    recyclerView.setVisibility(View.GONE);
-                    emptyEventContainer.setVisibility(View.VISIBLE);
-                }
-
-                if (getActivity() != null && getActivity() instanceof MainActivity) {
-                    ((MainActivity) getActivity()).showEventsBadge(0);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-        if (getActivity() != null && getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
-        }
+        endpoints = ServiceGenerator.createService(Endpoints.class);
+        //endpoints = retrofit.create(Endpoints.class);
+        getEvents();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        getLubbleGroupsRef().removeEventListener(childEventListener);
     }
 }
