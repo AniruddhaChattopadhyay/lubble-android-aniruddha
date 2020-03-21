@@ -6,7 +6,7 @@
     android:layout_margin="8dp">
 
     <ImageView
-        android:id="@+id/iv_item"
+        android:id="@+id/iv_seller"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:background="@color/very_light_gray"
@@ -30,9 +30,9 @@
         android:id="@+id/tv_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/iv_item"
-        android:layout_alignRight="@id/iv_item"
-        android:layout_below="@id/iv_item"
+        android:layout_alignLeft="@id/iv_seller"
+        android:layout_alignRight="@id/iv_seller"
+        android:layout_below="@id/iv_seller"
         android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:maxLines="2"
@@ -40,20 +40,10 @@
         tools:text="Agra se Joote kahin bech do nahi to kya hoga" />
 
     <TextView
-        android:id="@+id/tv_price"
+        android:id="@+id/tv_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_name"
-        android:textColor="@color/black"
-        tools:text="₹99999" />
-
-    <TextView
-        android:id="@+id/tv_mrp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_name"
-        android:layout_marginLeft="4dp"
-        android:layout_toRightOf="@id/tv_price"
-        tools:text="₹99999" />
+        tools:text="<1km" />
 
 </RelativeLayout>

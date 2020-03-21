@@ -115,10 +115,10 @@ public class MarketplaceFrag extends Fragment {
         final ColoredChipsAdapter catAdapter = new ColoredChipsAdapter(GlideApp.with(getContext()));
         categoriesRv.setAdapter(catAdapter);
 
-        final SmallItemAdapter cat1Adapter = new SmallItemAdapter(GlideApp.with(getContext()));
+        final SmallSellerAdapter cat1Adapter = new SmallSellerAdapter(GlideApp.with(getContext()));
         category1Rv.setAdapter(cat1Adapter);
 
-        final SmallItemAdapter cat2Adapter = new SmallItemAdapter(GlideApp.with(getContext()));
+        final SmallSellerAdapter cat2Adapter = new SmallSellerAdapter(GlideApp.with(getContext()));
         category2Rv.setAdapter(cat2Adapter);
 
         allItemsAdapter = new BigItemAdapter(GlideApp.with(getContext()), false);
@@ -207,7 +207,7 @@ public class MarketplaceFrag extends Fragment {
         });
     }
 
-    private void fetchMarketplaceData(final SmallItemAdapter cat1Adapter, final SmallItemAdapter cat2Adapter, final BigItemAdapter allItemsAdapter, final ColoredChipsAdapter catAdapter) {
+    private void fetchMarketplaceData(final SmallSellerAdapter cat1Adapter, final SmallSellerAdapter cat2Adapter, final BigItemAdapter allItemsAdapter, final ColoredChipsAdapter catAdapter) {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchMarketplaceData().enqueue(new Callback<MarketplaceData>() {
             @Override
@@ -218,18 +218,18 @@ public class MarketplaceFrag extends Fragment {
                     final Category category1 = marketplaceData.getShowcaseCategories().get(0);
                     cat1Name.setText(category1.getName());
                     for (Item item : category1.getItems()) {
-                        cat1Adapter.addData(item);
+                        //todo add seller -> cat1Adapter.addSeller(item);
                     }
                     if (category1.getItems().size() > 4) {
-                        cat1Adapter.addData(null);
+                        cat1Adapter.addSeller(null);
                     }
                     final Category category2 = marketplaceData.getShowcaseCategories().get(1);
                     cat2Name.setText(category2.getName());
                     for (Item item : category2.getItems()) {
-                        cat2Adapter.addData(item);
+                        //todo add seller -> cat2Adapter.addSeller(item);
                     }
                     if (category2.getItems().size() > 4) {
-                        cat2Adapter.addData(null);
+                        cat2Adapter.addSeller(null);
                     }
 
                     for (Item item : marketplaceData.getItems()) {
