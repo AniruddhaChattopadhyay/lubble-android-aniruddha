@@ -7,12 +7,21 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.button.MaterialButton;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -23,6 +32,7 @@ import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.profile.DmIntroBottomSheet;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,8 +48,8 @@ public class ItemListActiv extends BaseActivity {
 
     private ImageView sellerPicIv;
     private ProgressBar progressBar;
-    private TextView sellerNameTv;
-    private TextView sellerBioTv;
+    private TextView sellerNameTv, sellerBioTv;
+    private MaterialButton msgBtn;
     private boolean isSeller;
     private int sellerId;
     @Nullable
@@ -49,8 +59,7 @@ public class ItemListActiv extends BaseActivity {
     private BigItemAdapter adapter;
     private TextView recommendationCountTv;
     private RelativeLayout sellerActionContainer;
-    private LinearLayout shareContainer;
-    private LinearLayout recommendContainer;
+    private LinearLayout shareContainer,recommendContainer;
     private ImageView recommendIv;
     private TextView recommendHintTV;
     private boolean isRecommended;
@@ -83,6 +92,7 @@ public class ItemListActiv extends BaseActivity {
         progressBar = findViewById(R.id.progress_bar);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
+        msgBtn = findViewById(R.id.btn_msg);
         recyclerView = findViewById(R.id.rv_items);
         noItemsHintTv = findViewById(R.id.tv_no_items_hint);
         recommendIv = findViewById(R.id.iv_recommend);
@@ -115,12 +125,14 @@ public class ItemListActiv extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (!isSeller) {
+            msgBtn.setVisibility(View.GONE);
             sellerActionContainer.setVisibility(View.GONE);
             sellerBioTv.setVisibility(View.GONE);
             recommendationCountTv.setVisibility(View.GONE);
             fetchCategoryItems();
         } else {
             fetchSellerItems();
+            msgBtn.setVisibility(View.VISIBLE);
             sellerActionContainer.setVisibility(View.VISIBLE);
             recommendationCountTv.setVisibility(View.VISIBLE);
         }
@@ -245,6 +257,14 @@ public class ItemListActiv extends BaseActivity {
                     recommendationCountTv.setText(recommendationCount + " recommendations");
                     isRecommended = sellerData.getIsRecommended();
                     updateRecommendContainer();
+
+                    msgBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            DmIntroBottomSheet.newInstance(String.valueOf(sellerId), sellerData.getName(), sellerData.getPhotoUrl()).show(getSupportFragmentManager(), null);
+                        }
+                    });
+
                     recommendContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
