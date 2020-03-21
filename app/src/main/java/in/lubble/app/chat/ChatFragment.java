@@ -217,6 +217,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String attachedEventId;
     private String attachedGroupPicUrl;
     private String attachedEventPicUrl;
+    private String attachedLinkPicUrl;
     private Uri sharedImageUri;
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
@@ -1158,6 +1159,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     chatData.setType(LINK);
                     chatData.setLinkTitle(linkTitle.getText().toString());
                     chatData.setLinkDesc(linkDesc.getText().toString());
+                    chatData.setLinkPicUrl(attachedLinkPicUrl);
                 }
 
                 if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
@@ -1620,7 +1622,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private LinkMetaListener getLinkMetaListener() {
         return new LinkMetaListener() {
             @Override
-            public void onMetaFetched(final String title, final String desc) {
+            public void onMetaFetched(final String title, final String desc, final String imgUrl) {
                 if (isAdded() && isVisible() && getActivity() != null) {
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
@@ -1628,7 +1630,17 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             linkMetaContainer.setVisibility(View.VISIBLE);
                             linkTitle.setText(title);
                             linkDesc.setText(desc);
-                            linkPicIv.setImageResource(R.drawable.ic_public_black_24dp);
+                            if (!TextUtils.isEmpty(imgUrl)) {
+                                attachedLinkPicUrl = imgUrl;
+                                GlideApp.with(requireContext())
+                                        .load(imgUrl)
+                                        .circleCrop()
+                                        .placeholder(R.drawable.ic_public_black_24dp)
+                                        .error(R.drawable.ic_public_black_24dp)
+                                        .into(linkPicIv);
+                            } else {
+                                linkPicIv.setImageResource(R.drawable.ic_public_black_24dp);
+                            }
                         }
                     });
                 }

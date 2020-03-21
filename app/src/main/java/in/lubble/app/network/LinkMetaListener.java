@@ -6,7 +6,7 @@ package in.lubble.app.network;
 
 public interface LinkMetaListener {
 
-    void onMetaFetched(String title, String desc);
+    void onMetaFetched(String title, String desc, String imgUrl);
 
     void onMetaFailed();
 }
