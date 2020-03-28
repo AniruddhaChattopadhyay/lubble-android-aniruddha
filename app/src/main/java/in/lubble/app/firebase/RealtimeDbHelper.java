@@ -132,6 +132,10 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("sellers");
     }
 
+    public static DatabaseReference getSellerRef(String uid) {
+        return FirebaseDatabase.getInstance().getReference("sellers").child(uid);
+    }
+
     public static DatabaseReference getSellerDmsRef() {
         return FirebaseDatabase.getInstance().getReference("sellers")
                 .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())).child("dms");

@@ -676,11 +676,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 dmOtherUserId = profileId;
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    final boolean isSeller = false;
-
                                     isOtherUserJoined = profileMap.get("joinedTimestamp") != null;
                                     isDmBlocked = profileMap.get("blocked_status") != null;
-
+                                    boolean isSeller = false;
+                                    if (profileMap.get("isSeller") != null) {
+                                        isSeller = (boolean) profileMap.get("isSeller");
+                                    }
                                     if (isSeller) {
                                         fetchSellerProfileFrom(profileId);
                                     } else {

@@ -72,6 +72,7 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
+import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.MainUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
@@ -832,7 +833,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     switchFrag(MarketplaceFrag.newInstance());
                     return true;
                 case R.id.navigation_services:
-                    switchFrag(MarketplaceFrag.newInstance());
+                    switchFrag(ServicesFrag.newInstance());
                     return true;
             }
             return false;

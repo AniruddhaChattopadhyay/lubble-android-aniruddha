@@ -275,7 +275,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         groupData.setIsDm(true);
                         groupData.setIsPrivate(true);
                         for (String memberUid : groupData.getMembers().keySet()) {
-                            if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                            if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())
+                                    && !memberUid.equalsIgnoreCase(sellerIdStr)) {
                                 final String name = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("name"));
                                 final String dp = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("profilePic"));
                                 groupData.setTitle(name);

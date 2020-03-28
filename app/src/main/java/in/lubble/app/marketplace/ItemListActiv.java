@@ -258,10 +258,12 @@ public class ItemListActiv extends BaseActivity {
                     isRecommended = sellerData.getIsRecommended();
                     updateRecommendContainer();
 
+                    msgBtn.setEnabled(true);
                     msgBtn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            DmIntroBottomSheet.newInstance(String.valueOf(sellerId), sellerData.getName(), sellerData.getPhotoUrl()).show(getSupportFragmentManager(), null);
+                            DmIntroBottomSheet.newInstance(String.valueOf(sellerId), sellerData.getName(), sellerData.getPhotoUrl(), sellerData.getPhone())
+                                    .show(getSupportFragmentManager(), null);
                         }
                     });
 

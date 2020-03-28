@@ -44,6 +44,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_name"
-        tools:text="<1km" />
+        tools:text="1km" />
 
 </RelativeLayout>

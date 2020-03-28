@@ -99,7 +99,7 @@ import retrofit2.Response;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getSellerInfoRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
 import static in.lubble.app.models.ChatData.EVENT;
@@ -911,7 +911,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         notifyItemChanged(pos);
                     }
                 } else {
-                    updateProfileInfoMap(getSellerInfoRef(uid), uid, pos);
+                    updateProfileInfoMap(getSellerRef(uid), uid, pos);
                 }
             }
 

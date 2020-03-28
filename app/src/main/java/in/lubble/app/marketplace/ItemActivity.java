@@ -478,20 +478,16 @@ public class ItemActivity extends BaseActivity {
                         for (Item sellerItem : sellerData.getItemList()) {
                             itemAdapter.addData(sellerItem);
                         }
-                        if (sellerData.getItemList().size() > 1) {
-                            visitShopTv.setVisibility(View.VISIBLE);
-                            visitShopTv.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    final Bundle bundle = new Bundle();
-                                    bundle.putInt("seller_id", sellerData.getId());
-                                    Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
-                                    ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
-                                }
-                            });
-                        } else {
-                            visitShopTv.setVisibility(View.GONE);
-                        }
+                        visitShopTv.setVisibility(View.VISIBLE);
+                        visitShopTv.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                final Bundle bundle = new Bundle();
+                                bundle.putInt("seller_id", sellerData.getId());
+                                Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
+                                ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
+                            }
+                        });
                         syncDmId(sellerData);
                         if (sellerData.isCallEnabled()) {
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.mb_green)));
