@@ -3,12 +3,13 @@ package in.lubble.app;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.Nullable;
+
 import com.crashlytics.android.Crashlytics;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import androidx.annotation.Nullable;
 import in.lubble.app.utils.UserUtils;
 
 /**
@@ -49,6 +50,7 @@ public class LubbleSharedPrefs {
     private final String RATING_DIALOG_LAST_SHOWN = "RATING_DIALOG_LAST_SHOWN";
     private final String READ_EVENTS = "READ_EVENTS";
     private final String FLEXI_UPDATE_TS = "FLEXI_UPDATE_TS";
+    private final String IS_MAP_DISCLAIMER_CLOSED = "IS_MAP_DISCLAIMER_CLOSED";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -259,6 +261,14 @@ public class LubbleSharedPrefs {
 
     public boolean setIsRewardsExplainerSeen(boolean isOpened) {
         return preferences.edit().putBoolean(IS_REWARDS_EXPLAINER_SEEN, isOpened).commit();
+    }
+
+    public boolean getIsMapDisclaimerClosed() {
+        return preferences.getBoolean(IS_MAP_DISCLAIMER_CLOSED, false);
+    }
+
+    public boolean setIsMapDisclaimerClosed(boolean isClosed) {
+        return preferences.edit().putBoolean(IS_MAP_DISCLAIMER_CLOSED, isClosed).commit();
     }
 
     public boolean getShowRatingDialog() {

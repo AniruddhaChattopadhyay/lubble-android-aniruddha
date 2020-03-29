@@ -8,15 +8,18 @@ import android.view.ViewGroup;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.widget.RelativeLayout;
 
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 
 import static in.lubble.app.Constants.MAP_BTN_URL;
@@ -27,7 +30,9 @@ public class MapFragment extends Fragment {
     private static final String TAG = "MapFragment";
 
     private WebView mapWebView;
-    private MaterialButton submitBtn;
+    private RelativeLayout btnsContainer;
+    private MaterialCardView disclaimerCv;
+    private MaterialButton submitBtn, dismissDisclaimerBtn;
 
     private String mapViewHtml;
     private String btnLink;
@@ -53,8 +58,20 @@ public class MapFragment extends Fragment {
 
         mapWebView = view.findViewById(R.id.webview_map);
         submitBtn = view.findViewById(R.id.btn_submit);
+        dismissDisclaimerBtn = view.findViewById(R.id.btn_dismiss_disclaimer);
+        btnsContainer = view.findViewById(R.id.container_map_btns);
+        disclaimerCv = view.findViewById(R.id.cv_map_disclaimer);
 
-        mapViewHtml = FirebaseRemoteConfig.getInstance().getString(MAP_HTML);;
+        if (LubbleSharedPrefs.getInstance().getIsMapDisclaimerClosed()) {
+            disclaimerCv.setVisibility(View.GONE);
+            btnsContainer.setVisibility(View.VISIBLE);
+        } else {
+            disclaimerCv.setVisibility(View.VISIBLE);
+            btnsContainer.setVisibility(View.GONE);
+        }
+
+        mapViewHtml = FirebaseRemoteConfig.getInstance().getString(MAP_HTML);
+        ;
         btnLink = FirebaseRemoteConfig.getInstance().getString(MAP_BTN_URL);
         if (btnLink.contains("^^")) {
             btnLink = btnLink.replace("^^uid", FirebaseAuth.getInstance().getUid());
@@ -81,6 +98,15 @@ public class MapFragment extends Fragment {
                 intentBuilder.setShowTitle(true);
                 CustomTabsIntent customTabsIntent = intentBuilder.build();
                 customTabsIntent.launchUrl(requireContext(), Uri.parse(btnLink));
+            }
+        });
+
+        dismissDisclaimerBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LubbleSharedPrefs.getInstance().setIsMapDisclaimerClosed(true);
+                disclaimerCv.setVisibility(View.GONE);
+                btnsContainer.setVisibility(View.VISIBLE);
             }
         });
 

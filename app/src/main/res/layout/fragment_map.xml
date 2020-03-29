@@ -1,38 +1,107 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:animateLayoutChanges="true"
     tools:context="in.lubble.app.map.MapFragment">
 
     <WebView
         android:id="@+id/webview_map"
         android:layout_width="match_parent"
-        android:layout_above="@id/btn_submit"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:layout_above="@id/container_map_btns"/>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_submit"
+    <RelativeLayout
+        android:id="@+id/container_map_btns"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Submit a new Place"
-        app:backgroundTint="@color/button_color_selector"
-        android:layout_above="@id/tv_hint"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        style="@style/Widget.MaterialComponents.Button.Icon"
-        android:theme="@style/MaterialButton"/>
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_above="@id/cv_map_disclaimer">
 
-    <TextView
-        android:id="@+id/tv_hint"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_submit"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="8dp"
+            android:layout_toLeftOf="@id/btn_whatsapp_share"
+            android:text="Submit a new Place"
+            android:theme="@style/MaterialButton"
+            app:backgroundTint="@color/button_color_selector" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_whatsapp_share"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="16dp"
+            android:text="Share"
+            android:theme="@style/MaterialButton"
+            app:backgroundTint="@color/dark_green"
+            app:icon="@drawable/ic_whatsapp_outline" />
+
+        <TextView
+            android:id="@+id/tv_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_submit"
+            android:layout_alignRight="@id/btn_submit"
+            android:layout_marginLeft="16dp"
+            android:layout_marginBottom="4dp"
+            android:text="Please contribute by submitting more places to help your local community."
+            android:textSize="12sp" />
+
+    </RelativeLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cv_map_disclaimer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="16dp"
+        android:layout_marginTop="4dp"
         android:layout_marginRight="16dp"
-        android:gravity="center"
-        android:textSize="12sp"
-        android:layout_marginBottom="4dp"
-        android:text="This is a crowdsourced map with data from verified sources.\nPlease contribute by submitting more places."/>
+        android:layout_marginBottom="8dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        app:strokeColor="@color/grey_300"
+        app:strokeWidth="1dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DISCLAIMER"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="This data is crowdsourced from multiple sources incl. verified residents. Lubble is not liable for false/incomplete data. Use the data here at your own risk." />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_dismiss_disclaimer"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|end"
+                android:text="AGREE &amp; DISMISS"
+                android:textColor="@color/colorAccent"
+                android:theme="@style/MaterialButton" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </RelativeLayout>
