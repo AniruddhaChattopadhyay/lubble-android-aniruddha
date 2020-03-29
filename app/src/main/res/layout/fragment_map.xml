@@ -1,0 +1,38 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="in.lubble.app.map.MapFragment">
+
+    <WebView
+        android:id="@+id/webview_map"
+        android:layout_width="match_parent"
+        android:layout_above="@id/btn_submit"
+        android:layout_height="match_parent"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Submit a new Place"
+        app:backgroundTint="@color/button_color_selector"
+        android:layout_above="@id/tv_hint"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:theme="@style/MaterialButton"/>
+
+    <TextView
+        android:id="@+id/tv_hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:layout_marginBottom="4dp"
+        android:text="This is a crowdsourced map with data from verified sources.\nPlease contribute by submitting more places."/>
+
+</RelativeLayout>

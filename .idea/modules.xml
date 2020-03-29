@@ -2,10 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
-      <module fileurl="file://$PROJECT_DIR$/lubble_android.iml" filepath="$PROJECT_DIR$/lubble_android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libraries/ratingdialog/ratingdialog.iml" filepath="$PROJECT_DIR$/libraries/ratingdialog/ratingdialog.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="lubble_android/app" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" group="lubble_android/libraries" />
+      <module fileurl="file://$PROJECT_DIR$/lubble_android.iml" filepath="$PROJECT_DIR$/lubble_android.iml" group="lubble_android" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/ratingdialog/ratingdialog.iml" filepath="$PROJECT_DIR$/libraries/ratingdialog/ratingdialog.iml" group="lubble_android/libraries/ratingdialog" />
     </modules>
   </component>
 </project>

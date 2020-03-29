@@ -67,10 +67,10 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
+import in.lubble.app.map.MapFragment;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.MainUtils;
@@ -83,10 +83,13 @@ import it.sephiroth.android.library.xtooltip.ClosePolicy;
 import it.sephiroth.android.library.xtooltip.Tooltip;
 
 import static in.lubble.app.Constants.DELIVERY_FEE;
+import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
 import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
 import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
 import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
+import static in.lubble.app.Constants.MAP_BTN_URL;
+import static in.lubble.app.Constants.MAP_HTML;
 import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.Constants.REWARDS_EXPLAINER;
@@ -561,6 +564,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(IS_REWARDS_SHOWN, false);
         map.put(IS_RATING_DIALOG_ACTIVE, true);
         map.put(REWARDS_EXPLAINER, "https://firebasestorage.googleapis.com/v0/b/lubble-in-default/o/chat_sliders%2Freward_explainer.png?alt=media&token=33f50ce7-c1b7-4d90-84d6-c0ff41f9e39f");
+        map.put(MAP_HTML, "<iframe src=\"https://www.google.com/maps/d/u/0/embed?mid=1WOlTsxB_1GBnn6PCVL-uOJO7ePw_X2rO\" frameborder=\"0\" style=\"overflow: hidden; height: 100%; width: 100%; position: absolute;\"></iframe>");
+        map.put(MAP_BTN_URL, "https://mplace.typeform.com/to/M1OXzy?name=^^username&uid=^^uid");
+        map.put(EVENTS_MAINTENANCE_TEXT, "");
+
         firebaseRemoteConfig.setDefaults(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
             toolbarRewardsTv.setVisibility(View.VISIBLE);
@@ -634,12 +641,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case "events":
                     bottomNavigation.setSelectedItemId(R.id.navigation_events);
                     break;
+                case "map":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_map);
+                    break;
                 case "services":
                     bottomNavigation.setSelectedItemId(R.id.navigation_services);
                     break;
-                case "games":
+                /*case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
-                    break;
+                    break;*/
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
         }
@@ -669,11 +679,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     if (!firebaseRemoteConfig.getBoolean(Constants.IS_QUIZ_SHOWN)) {
                         bottomNavigation.getMenu().clear();
                         bottomNavigation.inflateMenu(R.menu.navigation_market);
-                    } else if (bottomNavigation.getMenu().findItem(R.id.navigation_fun) == null) {
+                    }/* else if (bottomNavigation.getMenu().findItem(R.id.navigation_fun) == null) {
                         // change only if new menu wasnt present before
                         bottomNavigation.getMenu().clear();
                         bottomNavigation.inflateMenu(R.menu.navigation);
-                    }
+                    }*/
                     if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
                         toolbarRewardsTv.setVisibility(View.VISIBLE);
                     } else {
@@ -823,12 +833,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case R.id.navigation_explore:
                     switchFrag(ExploreFrag.newInstance());
                     return true;
+                case R.id.navigation_map:
+                    switchFrag(MapFragment.newInstance());
+                    return true;
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
                     return true;
-                case R.id.navigation_fun:
+                /*case R.id.navigation_fun:
                     switchFrag(GamesFrag.newInstance());
-                    return true;
+                    return true;*/
                 case R.id.navigation_market:
                     switchFrag(MarketplaceFrag.newInstance());
                     return true;
