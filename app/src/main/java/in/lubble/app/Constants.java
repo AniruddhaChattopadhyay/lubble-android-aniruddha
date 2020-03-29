@@ -39,6 +39,7 @@ public class Constants {
     public static final String REWARDS_EXPLAINER = "REWARDS_EXPLAINER";
     public static final String MAP_HTML = "MAP_HTML";
     public static final String MAP_BTN_URL = "MAP_BTN_URL";
+    public static final String MAP_SHARE_TEXT = "MAP_SHARE_TEXT";
     public static final String EVENTS_MAINTENANCE_TEXT = "EVENTS_MAINTENANCE_TEXT";
 
     public static final double SVR_LATI = 28.696660;

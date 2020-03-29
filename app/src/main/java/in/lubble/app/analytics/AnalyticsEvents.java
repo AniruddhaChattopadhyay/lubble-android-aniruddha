@@ -120,4 +120,5 @@ public class AnalyticsEvents {
     public static final String DM_REPORTED = "DM_REPORTED";
 
     public static final String REPORT_MSG = "REPORT_MSG";
+    public static final String MAP_SHARE = "MAP_SHARE";
 }
