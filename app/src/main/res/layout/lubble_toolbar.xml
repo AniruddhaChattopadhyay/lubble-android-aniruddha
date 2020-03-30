@@ -53,7 +53,7 @@
             android:layout_marginLeft="16dp"
             android:textAllCaps="true"
             android:textColor="@color/darker_gray"
-            android:drawableRight="@drawable/ic_arrow_drop_down_black_24dp"
+            app:drawableRightCompat="@drawable/ic_arrow_drop_down_black_24dp"
             android:drawableTint="@color/dark_gray"
             android:visibility="gone"
             tools:text="Saraswati vihar"
