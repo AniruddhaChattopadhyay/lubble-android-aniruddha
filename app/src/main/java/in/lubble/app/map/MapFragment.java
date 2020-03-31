@@ -69,6 +69,8 @@ public class MapFragment extends Fragment {
         btnsContainer = view.findViewById(R.id.container_map_btns);
         disclaimerCv = view.findViewById(R.id.cv_map_disclaimer);
 
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
+
         if (LubbleSharedPrefs.getInstance().getIsMapDisclaimerClosed()) {
             disclaimerCv.setVisibility(View.GONE);
             btnsContainer.setVisibility(View.VISIBLE);
