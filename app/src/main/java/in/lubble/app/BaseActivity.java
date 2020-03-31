@@ -158,7 +158,7 @@ public class BaseActivity extends AppCompatActivity {
                 appUpdateInfoTask.addOnSuccessListener(new OnSuccessListener<AppUpdateInfo>() {
                     @Override
                     public void onSuccess(final AppUpdateInfo appUpdateInfo) {
-                        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)) {
+                        if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) && isActive) {
                             LubbleSharedPrefs.getInstance().setFlexiUpdateTs(System.currentTimeMillis());
                             Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_REMINDER, BaseActivity.this);
                             View v = getLayoutInflater().inflate(R.layout.layout_update_bottom_sheet, null);
