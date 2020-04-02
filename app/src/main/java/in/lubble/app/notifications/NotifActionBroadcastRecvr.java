@@ -6,11 +6,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.RemoteInput;
+
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+
+import java.util.Map;
+
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -18,8 +27,6 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.utils.NotifUtils;
-
-import java.util.Map;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
@@ -30,6 +37,7 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
 
     public static String ACTION_MARK_AS_READ = BuildConfig.APPLICATION_ID + ".notif.action.mark_as_read";
     public static String ACTION_REPLY = BuildConfig.APPLICATION_ID + ".notif.action.reply";
+    public static String ACTION_SNOOZE = BuildConfig.APPLICATION_ID + ".notif.action.snooze";
     // Key for the string that's delivered in the action's intent.
     public static final String KEY_TEXT_REPLY = "key_text_reply";
 
@@ -47,7 +55,7 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
                     final NotifData notifData = new Gson().fromJson(chatEntry.getValue(), NotifData.class);
                     if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
                         // mark msg as read
-                        DatabaseReference msgRef = RealtimeDbHelper.getMessagesRef().child(groupId).child(notifData.getMessageId());
+                        DatabaseReference msgRef = getMessagesRef().child(groupId).child(notifData.getMessageId());
                         msgRef.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -99,6 +107,13 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
                         LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
                     }
                 }
+            }
+        } else if ((intent != null && intent.getAction().equalsIgnoreCase(ACTION_SNOOZE) && intent.hasExtra("snooze.groupId"))) {
+            final String groupId = intent.getStringExtra("snooze.groupId");
+            if (groupId != null) {
+                SnoozedGroupsSharedPrefs.getInstance().getPreferences().edit().putLong(groupId, System.currentTimeMillis()).apply();
+                NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_GROUP_SNOOZE_CLICKED, groupId, context);
+                deleteUnreadMsgsForGroupId(groupId, context);
             }
         }
     }

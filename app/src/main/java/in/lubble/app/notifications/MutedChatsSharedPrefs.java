@@ -36,7 +36,7 @@ public class MutedChatsSharedPrefs {
     }
 
     /**
-     * Clear all SharedPreferences for RiderInfo
+     * Clear all SharedPreferences
      */
     public void clearAll() {
         preferences.edit().clear().commit();

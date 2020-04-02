@@ -27,6 +27,7 @@ public class AnalyticsEvents {
     public static final String NOTIF_RECVD = "NOTIF_RECVD";
     public static final String NOTIF_ABORTED = "NOTIF_ABORTED";
     public static final String NOTIF_MUTED = "NOTIF_MUTED";
+    public static final String NOTIF_SNOOZED = "NOTIF_SNOOZED";
     public static final String NOTIF_DIGEST_CREATED = "NOTIF_DIGEST_CREATED";
     public static final String NOTIF_DISPLAYED = "NOTIF_DISPLAYED";
     public static final String NOTIF_SUMMARY_DISPLAYED = "NOTIF_DISPLAYED";
@@ -34,6 +35,7 @@ public class AnalyticsEvents {
     public static final String NOTIF_DISMISSED = "NOTIF_DISMISSED";
     public static final String NOTIF_MARKED_READ = "NOTIF_MARKED_READ";
     public static final String NOTIF_REPLIED = "NOTIF_REPLIED";
+    public static final String NOTIF_GROUP_SNOOZE_CLICKED = "NOTIF_GROUP_SNOOZE_CLICKED";
 
     public static final String REFERRAL_FB_SHARE = "REFERRAL_FB_SHARE";
     public static final String REFERRAL_WA_SHARE = "REFERRAL_WA_SHARE";

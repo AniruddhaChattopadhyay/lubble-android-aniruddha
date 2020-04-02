@@ -24,6 +24,7 @@ import in.lubble.app.database.DbSingleton;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
+import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
@@ -64,6 +65,7 @@ public class LubbleApp extends MultiDexApplication {
         KeyMappingSharedPrefs.initializeInstance(getApplicationContext());
         AnswerSharedPrefs.initializeInstance(getApplicationContext());
         GroupPromptSharedPrefs.initializeInstance(getApplicationContext());
+        SnoozedGroupsSharedPrefs.initializeInstance(getApplicationContext());
 
         Fabric.with(this, new Crashlytics());
         // Create an analytics client with the given context and Segment write key.

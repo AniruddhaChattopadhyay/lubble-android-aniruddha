@@ -25,6 +25,7 @@ import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.utils.NotifUtils;
 
+import static in.lubble.app.utils.NotifUtils.isGroupSnoozed;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class NotificationResultReceiver extends BroadcastReceiver {
@@ -54,11 +55,13 @@ public class NotificationResultReceiver extends BroadcastReceiver {
         Gson gson = new Gson();
         JsonElement jsonElement = gson.toJsonTree(dataMap);
         NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
-        // only show notif if that group is not in foreground & the group's notifs are not muted
-        if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
-            NotifUtils.updateChatNotifs(context, notifData);
-        } else {
+        // only show notif if that group is not muted or snoozed
+        if (MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
             sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_MUTED, dataMap, context);
+        } else if (isGroupSnoozed(notifData.getGroupId())) {
+            sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SNOOZED, dataMap, context);
+        } else {
+            NotifUtils.updateChatNotifs(context, notifData);
         }
         updateUnreadCounter(notifData, false);
         pullNewMsgs(notifData);
