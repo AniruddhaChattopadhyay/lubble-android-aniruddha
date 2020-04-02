@@ -102,7 +102,7 @@ public class SmallSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View v) {
-            v.getContext().startActivity(ItemActivity.getIntent(v.getContext(), sellerList.get(getAdapterPosition()).getId()));
+            ItemListActiv.open(v.getContext(), true, sellerList.get(getAdapterPosition()).getId());
         }
     }
 

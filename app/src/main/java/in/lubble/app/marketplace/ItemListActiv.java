@@ -56,10 +56,11 @@ public class ItemListActiv extends BaseActivity {
     private String sellerUniqueName = null;
     private RecyclerView recyclerView;
     private TextView noItemsHintTv;
-    private BigItemAdapter adapter;
+    private BigItemAdapter itemAdapter;
+    private BigSellerAdapter sellerAdapter;
     private TextView recommendationCountTv;
     private RelativeLayout sellerActionContainer;
-    private LinearLayout shareContainer,recommendContainer;
+    private LinearLayout shareContainer, recommendContainer;
     private ImageView recommendIv;
     private TextView recommendHintTV;
     private boolean isRecommended;
@@ -102,8 +103,8 @@ public class ItemListActiv extends BaseActivity {
         sellerActionContainer = findViewById(R.id.container_action);
         shareContainer = findViewById(R.id.container_seller_share);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter = new BigItemAdapter(GlideApp.with(this), false);
-        recyclerView.setAdapter(adapter);
+        itemAdapter = new BigItemAdapter(GlideApp.with(this), false);
+        sellerAdapter = new BigSellerAdapter(GlideApp.with(this));
 
 
         isSeller = getIntent().getBooleanExtra(PARAM_IS_SELLER, false);
@@ -199,9 +200,18 @@ public class ItemListActiv extends BaseActivity {
                     if (categoryData.getItems() != null && !categoryData.getItems().isEmpty()) {
                         recyclerView.setVisibility(View.VISIBLE);
                         noItemsHintTv.setVisibility(View.GONE);
-                        adapter.clear();
+                        itemAdapter.clear();
+                        recyclerView.setAdapter(itemAdapter);
                         for (Item item : categoryData.getItems()) {
-                            adapter.addData(item);
+                            itemAdapter.addData(item);
+                        }
+                    } else if (categoryData.getSellers() != null && !categoryData.getSellers().isEmpty()) {
+                        recyclerView.setVisibility(View.VISIBLE);
+                        noItemsHintTv.setVisibility(View.GONE);
+                        sellerAdapter.clear();
+                        recyclerView.setAdapter(sellerAdapter);
+                        for (SellerData sellerData : categoryData.getSellers()) {
+                            sellerAdapter.addData(sellerData);
                         }
                     } else {
                         recyclerView.setVisibility(View.GONE);
@@ -248,9 +258,10 @@ public class ItemListActiv extends BaseActivity {
                     setTitle(sellerData.getName());
 
                     if (sellerData.getItemList() != null) {
-                        adapter.clear();
+                        itemAdapter.clear();
+                        recyclerView.setAdapter(itemAdapter);
                         for (Item item : sellerData.getItemList()) {
-                            adapter.addData(item);
+                            itemAdapter.addData(item);
                         }
                     }
                     recommendationCount = sellerData.getRecommendationCount();

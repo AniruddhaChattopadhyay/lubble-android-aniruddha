@@ -2,6 +2,7 @@
 package in.lubble.app.models.marketplace;
 
 import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -22,6 +23,9 @@ public class Category {
     @Expose
     @Nullable
     private List<Item> items = null;
+    @SerializedName("sellers")
+    @Nullable
+    private List<SellerData> sellers = null;
     @SerializedName("type")
     @Expose
     private int type = Item.ITEM_PRODUCT;
@@ -65,5 +69,14 @@ public class Category {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    @Nullable
+    public List<SellerData> getSellers() {
+        return sellers;
+    }
+
+    public void setSellers(@Nullable List<SellerData> sellers) {
+        this.sellers = sellers;
     }
 }

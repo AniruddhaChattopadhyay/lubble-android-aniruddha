@@ -32,6 +32,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.MarketplaceData;
+import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import me.crosswall.lib.coverflow.CoverFlow;
@@ -62,6 +63,7 @@ public class MarketplaceFrag extends Fragment {
     private int currentPage = 0;
     private Handler handler = new Handler();
     private BigItemAdapter allItemsAdapter;
+    private RelativeLayout cat1cv, cat2cv;
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
 
     public MarketplaceFrag() {
@@ -93,8 +95,8 @@ public class MarketplaceFrag extends Fragment {
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
 
-        RelativeLayout cat1cv = view.findViewById(R.id.layout_cat1);
-        RelativeLayout cat2cv = view.findViewById(R.id.layout_cat2);
+        cat1cv = view.findViewById(R.id.layout_cat1);
+        cat2cv = view.findViewById(R.id.layout_cat2);
 
         cat1Name = cat1cv.findViewById(R.id.tv_category);
         cat2Name = cat2cv.findViewById(R.id.tv_category);
@@ -215,21 +217,35 @@ public class MarketplaceFrag extends Fragment {
                 progressBar.setVisibility(View.GONE);
                 final MarketplaceData marketplaceData = response.body();
                 if (response.isSuccessful() && marketplaceData != null && isAdded() && isVisible()) {
-                    final Category category1 = marketplaceData.getShowcaseCategories().get(0);
-                    cat1Name.setText(category1.getName());
-                    for (Item item : category1.getItems()) {
-                        //todo add seller -> cat1Adapter.addSeller(item);
-                    }
-                    if (category1.getItems().size() > 4) {
-                        cat1Adapter.addSeller(null);
-                    }
-                    final Category category2 = marketplaceData.getShowcaseCategories().get(1);
-                    cat2Name.setText(category2.getName());
-                    for (Item item : category2.getItems()) {
-                        //todo add seller -> cat2Adapter.addSeller(item);
-                    }
-                    if (category2.getItems().size() > 4) {
-                        cat2Adapter.addSeller(null);
+                    if (marketplaceData.getShowcaseCategories().size() > 0) {
+                        final Category category1 = marketplaceData.getShowcaseCategories().get(0);
+                        cat1Name.setText(category1.getName());
+                        if (category1.getSellers().size() > 0) {
+                            category1Rv.setVisibility(View.VISIBLE);
+                            for (SellerData sellerData : category1.getSellers()) {
+                                cat1Adapter.addSeller(sellerData);
+                            }
+                        } else {
+                            cat1cv.setVisibility(View.GONE);
+                        }
+
+                        if (marketplaceData.getShowcaseCategories().size() >= 2) {
+                            final Category category2 = marketplaceData.getShowcaseCategories().get(1);
+                            cat2Name.setText(category2.getName());
+                            if (category2.getSellers().size() > 0) {
+                                category2Rv.setVisibility(View.VISIBLE);
+                                for (SellerData sellerData : category2.getSellers()) {
+                                    cat2Adapter.addSeller(sellerData);
+                                }
+                            } else {
+                                cat2cv.setVisibility(View.GONE);
+                            }
+                        } else {
+                            cat2cv.setVisibility(View.GONE);
+                        }
+                    } else {
+                        cat1cv.setVisibility(View.GONE);
+                        cat2cv.setVisibility(View.GONE);
                     }
 
                     for (Item item : marketplaceData.getItems()) {
