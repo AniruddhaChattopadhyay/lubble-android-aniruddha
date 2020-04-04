@@ -33,27 +33,50 @@
         android:gravity="center_horizontal"
         tools:text="@tools:sample/lorem" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_msg"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/container_cta_btns"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tv_seller_bio"
+        android:gravity="center"
         android:layout_marginTop="8dp"
-        android:layout_centerHorizontal="true"
-        android:text="Message"
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:enabled="false"
-        style="@style/Widget.MaterialComponents.Button.Icon"
-        app:backgroundTint="@color/button_color_selector"
-        app:icon="@drawable/ic_send_white_24dp"
-        android:theme="@style/MaterialButton" />
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_call"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Call"
+            android:theme="@style/OutlineButton"
+            android:textColor="@color/dk_colorAccent"
+            app:iconTint="@color/dk_colorAccent"
+            android:visibility="gone"
+            app:icon="@drawable/ic_call_black_24dp"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_msg"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:layout_marginLeft="4dp"
+            android:text="Message"
+            android:textColor="@color/white"
+            android:theme="@style/MaterialButton"
+            android:visibility="gone"
+            app:backgroundTint="@color/button_color_selector"
+            app:icon="@drawable/ic_send_white_24dp"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/container_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/btn_msg"
+        android:layout_below="@id/container_cta_btns"
         android:layout_marginTop="8dp">
 
         <View
@@ -75,8 +98,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_action_hint"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             android:orientation="horizontal"
             android:weightSum="2">
 
@@ -189,8 +212,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/container_action"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
         android:nestedScrollingEnabled="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 

@@ -243,7 +243,6 @@
         <activity
             android:name=".marketplace.ItemListActiv"
             android:configChanges="orientation"
-            android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
         <activity
             android:name=".marketplace.CategoriesActiv"

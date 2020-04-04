@@ -84,7 +84,7 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
             sellerPhoneNumber = getArguments().getString("sellerPhoneNumber");
             isSeller = !TextUtils.isEmpty(sellerPhoneNumber);
 
-            if(isSeller){
+            if (isSeller) {
                 hintTv.setText("You can send only one message before they accept your invitation to chat privately. Write your requirements here.");
                 introMsgTil.setHint("Your query/requirements");
                 inviteBtn.setText("Send Message");

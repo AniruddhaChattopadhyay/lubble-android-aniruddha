@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.crashlytics.android.Crashlytics;
@@ -40,6 +41,8 @@ import me.crosswall.lib.coverflow.core.PagerContainer;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static androidx.recyclerview.widget.StaggeredGridLayoutManager.HORIZONTAL;
 
 public class MarketplaceFrag extends Fragment {
 
@@ -109,7 +112,7 @@ public class MarketplaceFrag extends Fragment {
         category2Rv = cat2cv.findViewById(R.id.rv_cat_items);
         category2Rv.setNestedScrollingEnabled(false);
 
-        categoriesRv.setLayoutManager(new GridLayoutManager(getContext(), 2, GridLayoutManager.HORIZONTAL, false));
+        categoriesRv.setLayoutManager(new StaggeredGridLayoutManager(2, HORIZONTAL));
         category1Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         category2Rv.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         allItemsRv.setLayoutManager(new GridLayoutManager(getContext(), 2));

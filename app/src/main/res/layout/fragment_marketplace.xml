@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:background="@color/very_light_gray"
+    tools:background="@color/white"
     tools:context="in.lubble.app.marketplace.MarketplaceFrag">
 
     <androidx.core.widget.NestedScrollView
@@ -77,7 +77,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/rv_categories"
-                android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp" />
 
             <include
@@ -86,7 +85,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/layout_cat1"
-                android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp" />
 
             <androidx.recyclerview.widget.RecyclerView

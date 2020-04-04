@@ -12,16 +12,18 @@
 
     <ImageView
         android:id="@+id/iv_icon"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         app:srcCompat="@drawable/ic_category" />
 
     <TextView
         android:id="@+id/tv_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
         android:textColor="@color/black"
+        android:textSize="12sp"
+        android:maxWidth="80dp"
+        android:gravity="center"
         tools:text="@tools:sample/lorem" />
 
 </LinearLayout>

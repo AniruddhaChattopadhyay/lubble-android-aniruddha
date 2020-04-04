@@ -42,6 +42,11 @@
         <item name="android:minHeight">56dp</item>
     </style>
 
+    <style name="OutlineButton" parent="Theme.MaterialComponents.Light">
+        <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="android:minHeight">56dp</item>
+    </style>
+
     <style name="MaterialButton" parent="Theme.MaterialComponents.Light">
         <item name="colorControlHighlight">@color/white</item>
         <item name="colorButtonNormal">@color/colorAccent</item>
