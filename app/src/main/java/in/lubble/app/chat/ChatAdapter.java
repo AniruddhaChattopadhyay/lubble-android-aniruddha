@@ -1359,6 +1359,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
+    void scrollToChatId(String targetChatId) {
+        ChatData emptyReplyChatData = new ChatData();
+        emptyReplyChatData.setId(targetChatId);
+        int pos = chatDataList.indexOf(emptyReplyChatData);
+        if (pos != -1) {
+            recyclerView.scrollToPosition(pos);
+            posToFlash = pos;
+            notifyItemChanged(pos);
+        } else {
+            // load more paginated chats
+            chatFragment.moreMsgListener(targetChatId);
+        }
+    }
+
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
 
         private RelativeLayout rootLayout;
@@ -1531,14 +1545,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
                             EventInfoActivity.open(context, chatData.getAttachedGroupId());
                         } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
-                            ChatData emptyReplyChatData = new ChatData();
-                            emptyReplyChatData.setId(chatData.getReplyMsgId());
-                            int pos = chatDataList.indexOf(emptyReplyChatData);
-                            if (pos != -1) {
-                                recyclerView.scrollToPosition(pos);
-                                posToFlash = pos;
-                                notifyItemChanged(pos);
-                            }
+                            scrollToChatId(chatData.getReplyMsgId());
                         } else if (LINK.equalsIgnoreCase(chatData.getType())) {
                             final URLSpan[] urls = messageTv.getUrls();
                             final String url = urls[0].getURL();
@@ -1754,14 +1761,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
                             EventInfoActivity.open(context, chatData.getAttachedGroupId());
                         } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
-                            ChatData emptyReplyChatData = new ChatData();
-                            emptyReplyChatData.setId(chatData.getReplyMsgId());
-                            int pos = chatDataList.indexOf(emptyReplyChatData);
-                            if (pos != -1) {
-                                recyclerView.scrollToPosition(pos);
-                                posToFlash = pos;
-                                notifyItemChanged(pos);
-                            }
+                            scrollToChatId(chatData.getReplyMsgId());
                         } else if (LINK.equalsIgnoreCase(chatData.getType())) {
                             final URLSpan[] urls = messageTv.getUrls();
                             final String url = urls[0].getURL();

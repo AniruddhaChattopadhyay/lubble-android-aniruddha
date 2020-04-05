@@ -211,6 +211,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private boolean isLoadingMoreChats;
     private boolean isLastPage;
     private long endAtTimestamp;
+    private String endAtChatId;
     private final static int PAGE_SIZE = 20;
     //private int unreadCount = 0;
     private String attachedGroupId;
@@ -525,12 +526,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
                 if (firstVisibleItemPosition == 0 && !isLoadingMoreChats && !isLastPage && totalItemCount != visibleItemCount) {
-                    paginationProgressBar.setVisibility(View.VISIBLE);
-                    moreMsgListener(messagesReference);
+                    moreMsgListener(null);
                 }
             }
         });
 
+    }
+
+    void scrollToChatId(String targetChatId) {
+        chatAdapter.scrollToChatId(targetChatId);
     }
 
     @Override
@@ -568,6 +572,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 if (groupId != null && GroupPromptSharedPrefs.getInstance().getGroupId(groupId)) {
                     addGroupJoinPrompt();
                 }
+                ((ChatActivity) getActivity()).chatLoadingComplete();
             }
 
             @Override
@@ -965,6 +970,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     chatAdapter.addChatData(chatData);
                     if (tempChatList.size() == PAGE_SIZE) {
                         endAtTimestamp = tempChatList.get(0).getServerTimestampInLong();
+                        endAtChatId = tempChatList.get(0).getId();
                         /*for (int i = 0; i < tempChatList.size(); i++) {
                             final ChatData currChatData = tempChatList.get(i);
                         }*/
@@ -1003,10 +1009,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
     }
 
-    private void moreMsgListener(@NonNull DatabaseReference messagesReference) {
+    void moreMsgListener(@Nullable final String targetChatId) {
+        paginationProgressBar.setVisibility(View.VISIBLE);
         isLoadingMoreChats = true;
-        final Query query = messagesReference.orderByChild("serverTimestamp").endAt(endAtTimestamp).limitToLast(PAGE_SIZE);
-
+        final Query query;
+        if (!TextUtils.isEmpty(targetChatId)) {
+            query = messagesReference.orderByKey().startAt(targetChatId).endAt(endAtChatId);
+        } else {
+            query = messagesReference.orderByChild("serverTimestamp").endAt(endAtTimestamp).limitToLast(PAGE_SIZE);
+        }
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             final ArrayList<ChatData> newChatDataList = new ArrayList<>();
 
@@ -1025,7 +1036,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         chatData.setId(childDataSnapshot.getKey());
                         sendReadReceipt(chatData);
                         newChatDataList.add(chatData);
-                        if (newChatDataList.size() == PAGE_SIZE) {
+                        if (chatData.getId().equalsIgnoreCase(endAtChatId) || (targetChatId == null && newChatDataList.size() == PAGE_SIZE)) {
                             endAtTimestamp = newChatDataList.get(0).getServerTimestampInLong();
                             newChatDataList.remove(newChatDataList.size() - 1);
                             Collections.reverse(newChatDataList);
@@ -1037,8 +1048,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             newChatDataList.clear();
                             isLoadingMoreChats = false;
                             paginationProgressBar.setVisibility(View.GONE);
-                            chatRecyclerView.scrollBy(0, -dpToPx(40));
-                        } else if (endAtTimestamp == chatData.getServerTimestampInLong() && newChatDataList.size() >= 1) {
+                            if (targetChatId != null) {
+                                chatAdapter.scrollToChatId(targetChatId);
+                            } else {
+                                chatRecyclerView.scrollBy(0, -dpToPx(40));
+                            }
+                        } else if (targetChatId == null && endAtTimestamp == chatData.getServerTimestampInLong() && newChatDataList.size() >= 1) {
                             // last page
                             isLastPage = true;
                             if (newChatDataList.size() == 1) {
