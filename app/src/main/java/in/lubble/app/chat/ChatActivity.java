@@ -82,7 +82,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private Toolbar toolbar;
     private TextView toolbarTv, toolbarInviteHint;
     private LinearLayout inviteContainer;
-    private ImageView searchIv, searchBackIv, searchUpIv, searchDownIv;
+    private ImageView searchBackIv, searchUpIv, searchDownIv;
     private SearchView searchView;
     private ChatFragment targetFrag = null;
     private String groupId;
@@ -160,7 +160,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         inviteContainer = toolbar.findViewById(R.id.container_invite);
-        searchIv = toolbar.findViewById(R.id.iv_toolbar_search);
         searchBackIv = toolbar.findViewById(R.id.iv_search_back);
         searchView = toolbar.findViewById(R.id.search_view);
         searchUpIv = toolbar.findViewById(R.id.iv_search_up);
@@ -258,13 +257,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             @Override
             public void onClick(View v) {
                 UserSearchActivity.newInstance(ChatActivity.this, groupId);
-            }
-        });
-
-        searchIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // empty to consume clicks; late init after chats are loaded, logic in startChatSearch()
             }
         });
 
@@ -386,19 +378,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
     }
 
-    public void chatLoadingComplete() {
-        searchIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startChatSearch();
-            }
-        });
-    }
-
-    private void startChatSearch() {
-        toggleSearchViewVisibility(true);
-    }
-
     @Override
     public boolean onQueryTextSubmit(String query) {
         if (!TextUtils.isEmpty(query)) {
@@ -516,7 +495,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             toolbarIcon.setVisibility(View.GONE);
             toolbarLockIcon.setVisibility(View.GONE);
             toolbarTv.setVisibility(View.GONE);
-            searchIv.setVisibility(View.GONE);
             toolbarInviteHint.setVisibility(View.GONE);
             inviteContainer.setVisibility(View.GONE);
             tabLayout.setVisibility(View.GONE);
@@ -531,7 +509,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             toolbarIcon.setVisibility(View.VISIBLE);
             toolbarTv.setVisibility(View.VISIBLE);
             toolbarLockIcon.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
-            searchIv.setVisibility(View.VISIBLE);
             inviteContainer.setVisibility(View.VISIBLE);
             tabLayout.setVisibility(View.VISIBLE);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -638,6 +615,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 if (targetFrag != null) {
                     targetFrag.openGroupInfo();
                 }
+                return true;
+            case R.id.group_menu_search:
+                toggleSearchViewVisibility(true);
                 return true;
         }
         return super.onOptionsItemSelected(item);

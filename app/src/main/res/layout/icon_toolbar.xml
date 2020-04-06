@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="4dp"
-            android:layout_toLeftOf="@id/iv_toolbar_search"
+            android:layout_toLeftOf="@id/container_invite"
             android:layout_toRightOf="@id/container_dp"
             android:foregroundGravity="center_vertical"
             android:gravity="center_vertical"
@@ -81,17 +81,6 @@
                 android:visibility="visible" />
 
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/iv_toolbar_search"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_toLeftOf="@id/container_invite"
-            android:layout_centerVertical="true"
-            android:gravity="center"
-            android:padding="8dp"
-            android:textColor="@color/black"
-            app:srcCompat="@drawable/ic_search_gray_24dp" />
 
         <ImageView
             android:id="@+id/iv_search_back"

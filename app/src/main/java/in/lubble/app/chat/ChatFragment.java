@@ -572,7 +572,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 if (groupId != null && GroupPromptSharedPrefs.getInstance().getGroupId(groupId)) {
                     addGroupJoinPrompt();
                 }
-                ((ChatActivity) getActivity()).chatLoadingComplete();
             }
 
             @Override
