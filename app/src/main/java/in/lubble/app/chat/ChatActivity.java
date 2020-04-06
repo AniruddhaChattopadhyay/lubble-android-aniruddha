@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -90,6 +91,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private String dmId;
     private SearchResultData searchResultData = null;
     private int currSearchCursorPos = 0;
+    private ProgressDialog searchProgressDialog;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -278,7 +280,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             public void onClick(View v) {
                 UiUtils.hideKeyboard(ChatActivity.this);
                 if (searchResultData != null) {
-                    if (currSearchCursorPos < searchResultData.getHits().size()) {
+                    if (currSearchCursorPos < searchResultData.getHits().size() - 1) {
                         currSearchCursorPos++;
                     }
                     Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
@@ -412,11 +414,19 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     }
 
     private void initSearchResultListener(String searchKey) {
+        if (searchProgressDialog == null) {
+            searchProgressDialog = new ProgressDialog(this);
+        }
+        searchProgressDialog.setTitle("Searching");
+        searchProgressDialog.setMessage("Please Wait");
+        searchProgressDialog.setCancelable(false);
+        searchProgressDialog.show();
         RealtimeDbHelper.getSearchResultRef().child(searchKey).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 searchResultData = dataSnapshot.getValue(SearchResultData.class);
                 if (searchResultData != null) {
+                    searchProgressDialog.dismiss();
                     if (searchResultData.getNbHits() > 0) {
                         Hit searchHit = searchResultData.getHits().get(0);
                         targetFrag.scrollToChatId(searchHit.getChatId());
@@ -429,7 +439,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                searchProgressDialog.dismiss();
             }
         });
     }
