@@ -18,11 +18,11 @@ public class Hit {
     @Expose
     private String text;
 
-    public HighlightResult getHighlightResult() {
+    public HighlightResult get_highlightResult() {
         return highlightResult;
     }
 
-    public void setHighlightResult(HighlightResult highlightResult) {
+    public void set_highlightResult(HighlightResult highlightResult) {
         this.highlightResult = highlightResult;
     }
 

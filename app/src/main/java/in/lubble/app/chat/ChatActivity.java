@@ -271,12 +271,12 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             @Override
             public void onClick(View v) {
                 UiUtils.hideKeyboard(ChatActivity.this);
-                if (searchResultData != null) {
+                if (searchResultData != null && searchResultData.getQuery().equalsIgnoreCase(searchView.getQuery().toString())) {
                     if (currSearchCursorPos < searchResultData.getHits().size() - 1) {
                         currSearchCursorPos++;
                     }
                     Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
-                    targetFrag.scrollToChatId(searchHit.getChatId());
+                    targetFrag.scrollToChatId(searchHit.getChatId(), searchHit.get_highlightResult().getText().getMatchedWords().get(0));
                 } else {
                     onQueryTextSubmit(searchView.getQuery().toString());
                 }
@@ -287,12 +287,12 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             @Override
             public void onClick(View v) {
                 UiUtils.hideKeyboard(ChatActivity.this);
-                if (searchResultData != null) {
+                if (searchResultData != null && searchResultData.getQuery().equalsIgnoreCase(searchView.getQuery().toString())) {
                     if (currSearchCursorPos > 0) {
                         currSearchCursorPos--;
                     }
                     Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
-                    targetFrag.scrollToChatId(searchHit.getChatId());
+                    targetFrag.scrollToChatId(searchHit.getChatId(), searchHit.get_highlightResult().getText().getMatchedWords().get(0));
                 } else {
                     onQueryTextSubmit(searchView.getQuery().toString());
                 }
@@ -308,6 +308,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         currSearchCursorPos = 0;
         toolbar.clearFocus();
         toggleSearchViewVisibility(false);
+        targetFrag.removeSearchHighlights();
     }
 
     private GroupData groupData;
@@ -408,7 +409,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     searchProgressDialog.dismiss();
                     if (searchResultData.getNbHits() > 0) {
                         Hit searchHit = searchResultData.getHits().get(0);
-                        targetFrag.scrollToChatId(searchHit.getChatId());
+                        targetFrag.scrollToChatId(searchHit.getChatId(), searchHit.get_highlightResult().getText().getMatchedWords().get(0));
                         currSearchCursorPos = 0;
                     } else {
                         Toast.makeText(ChatActivity.this, "No results found", Toast.LENGTH_SHORT).show();
@@ -489,6 +490,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             searchView.requestFocusFromTouch();
             searchView.setIconifiedByDefault(false);
             searchView.setIconified(false);
+            searchView.setOnQueryTextListener(this);
             searchBackIv.setVisibility(View.VISIBLE);
             searchUpIv.setVisibility(View.VISIBLE);
             searchDownIv.setVisibility(View.VISIBLE);
@@ -521,6 +523,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         if (customView != null) {
             customView.findViewById(R.id.badge).setVisibility(View.VISIBLE);
         }
+    }
+
+    int getTabLayoutHeight() {
+        return tabLayout.getHeight();
     }
 
     private void blockAccount() {

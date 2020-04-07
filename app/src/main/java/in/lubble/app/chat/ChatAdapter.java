@@ -14,7 +14,10 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -67,6 +70,7 @@ import org.jsoup.Jsoup;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -144,6 +148,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private String authorId = FirebaseAuth.getInstance().getUid();
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
+    private HashMap<String, String> searchHighlightMap = new HashMap<>();
 
 
     public ChatAdapter(Activity activity, Context context, String groupId,
@@ -254,6 +259,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
         }
         sentChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.white));
+
+        if (searchHighlightMap.containsKey(chatData.getId())) {
+            setHighLightedText(sentChatViewHolder.messageTv, searchHighlightMap.get(chatData.getId()));
+        }
 
         Linkify.addLinks(sentChatViewHolder.messageTv, Linkify.ALL);
         if (chatData.getTagged() != null && !chatData.getTagged().isEmpty()) {
@@ -388,6 +397,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private void setHighLightedText(TextView tv, String textToHighlight) {
+        String tvt = tv.getText().toString().toLowerCase();
+        int ofe = tvt.indexOf(textToHighlight.toLowerCase(), 0);
+        Spannable wordToSpan = new SpannableString(tv.getText());
+        for (int ofs = 0; ofs < tvt.length() && ofe != -1; ofs = ofe + 1) {
+            ofe = tvt.indexOf(textToHighlight.toLowerCase(), ofs);
+            if (ofe == -1)
+                break;
+            else {
+                // set color here
+                wordToSpan.setSpan(new BackgroundColorSpan(0xc3a77000), ofe, ofe + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                tv.setText(wordToSpan, TextView.BufferType.SPANNABLE);
+            }
+        }
+    }
+
     private void setBgColor(final RelativeLayout linkContainer, ChatData chatData) {
         if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
             glide.asBitmap().load(chatData.getLinkPicUrl()).into(new SimpleTarget<Bitmap>() {
@@ -457,6 +482,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }
         recvdChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+
+        if (searchHighlightMap.containsKey(chatData.getId())) {
+            setHighLightedText(recvdChatViewHolder.messageTv, searchHighlightMap.get(chatData.getId()));
+        }
 
         Linkify.addLinks(recvdChatViewHolder.messageTv, Linkify.ALL);
 
@@ -1359,7 +1388,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
         notifyDataSetChanged();
     }
 
-    void scrollToChatId(String targetChatId) {
+    void scrollToChatId(String targetChatId, @Nullable String highlightText) {
+        if (!TextUtils.isEmpty(highlightText)) {
+            searchHighlightMap.put(targetChatId, highlightText);
+        }
         ChatData emptyReplyChatData = new ChatData();
         emptyReplyChatData.setId(targetChatId);
         int pos = chatDataList.indexOf(emptyReplyChatData);
@@ -1370,6 +1402,23 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             // load more paginated chats
             chatFragment.moreMsgListener(targetChatId);
+        }
+    }
+
+    void removeSearchHighlights() {
+        if (searchHighlightMap != null && !searchHighlightMap.isEmpty()) {
+            Iterator<String> iterator = searchHighlightMap.keySet().iterator();
+            while (iterator.hasNext()) {
+                String chatIdToRemove = iterator.next();
+                iterator.remove();
+                ChatData emptyReplyChatData = new ChatData();
+                emptyReplyChatData.setId(chatIdToRemove);
+                int pos = chatDataList.indexOf(emptyReplyChatData);
+                if (pos != -1) {
+                    notifyItemChanged(pos);
+                }
+            }
+            searchHighlightMap.clear();
         }
     }
 
@@ -1545,7 +1594,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
                             EventInfoActivity.open(context, chatData.getAttachedGroupId());
                         } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
-                            scrollToChatId(chatData.getReplyMsgId());
+                            scrollToChatId(chatData.getReplyMsgId(), null);
                         } else if (LINK.equalsIgnoreCase(chatData.getType())) {
                             final URLSpan[] urls = messageTv.getUrls();
                             final String url = urls[0].getURL();
@@ -1761,7 +1810,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         } else if (EVENT.equalsIgnoreCase(chatData.getType())) {
                             EventInfoActivity.open(context, chatData.getAttachedGroupId());
                         } else if (REPLY.equalsIgnoreCase(chatData.getType())) {
-                            scrollToChatId(chatData.getReplyMsgId());
+                            scrollToChatId(chatData.getReplyMsgId(), null);
                         } else if (LINK.equalsIgnoreCase(chatData.getType())) {
                             final URLSpan[] urls = messageTv.getUrls();
                             final String url = urls[0].getURL();

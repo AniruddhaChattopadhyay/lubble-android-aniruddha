@@ -505,7 +505,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                if (bottom < oldBottom) {
+                int newBottom = bottom;
+                if ((getActivity()) != null && getActivity() instanceof ChatActivity && ((ChatActivity) getActivity()).getTabLayoutHeight() > 0) {
+                    newBottom += ((ChatActivity) getActivity()).getTabLayoutHeight();
+                }
+                if (newBottom < oldBottom) {
                     int position = chatAdapter.getItemCount() - 1;
                     if (position != -1) {
                         // scrollToPosition() doesn't work here. why?
@@ -533,8 +537,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     }
 
-    void scrollToChatId(String targetChatId) {
-        chatAdapter.scrollToChatId(targetChatId);
+    void scrollToChatId(String targetChatId, String highlightText) {
+        chatAdapter.scrollToChatId(targetChatId, highlightText);
+    }
+
+    void removeSearchHighlights() {
+        chatAdapter.removeSearchHighlights();
     }
 
     @Override
@@ -1048,7 +1056,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             isLoadingMoreChats = false;
                             paginationProgressBar.setVisibility(View.GONE);
                             if (targetChatId != null) {
-                                chatAdapter.scrollToChatId(targetChatId);
+                                chatAdapter.scrollToChatId(targetChatId, null);
                             } else {
                                 chatRecyclerView.scrollBy(0, -dpToPx(40));
                             }

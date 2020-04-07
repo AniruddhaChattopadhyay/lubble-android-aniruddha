@@ -103,6 +103,7 @@
         <activity
             android:name=".chat.ChatActivity"
             android:configChanges="orientation"
+            android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
 
