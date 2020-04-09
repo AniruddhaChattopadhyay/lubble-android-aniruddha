@@ -407,7 +407,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 break;
             else {
                 // set color here
-                wordToSpan.setSpan(new BackgroundColorSpan(0xc3a77000), ofe, ofe + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                wordToSpan.setSpan(new BackgroundColorSpan(ContextCompat.getColor(context, R.color.trans_dark_gold)), ofe, ofe + textToHighlight.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 tv.setText(wordToSpan, TextView.BufferType.SPANNABLE);
             }
         }
