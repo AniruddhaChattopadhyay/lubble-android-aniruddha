@@ -409,7 +409,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     searchProgressDialog.dismiss();
                     if (searchResultData.getNbHits() > 0) {
                         Hit searchHit = searchResultData.getHits().get(0);
-                        targetFrag.scrollToChatId(searchHit.getChatId(), searchHit.get_highlightResult().getText().getMatchedWords().get(0));
+                        String highlightedStr = searchHit.get_highlightResult().getText().getValue();
+                        targetFrag.scrollToChatId(searchHit.getChatId(), highlightedStr.substring(highlightedStr.indexOf("<hem>") + 5, highlightedStr.indexOf("</hem>")));
                         currSearchCursorPos = 0;
                     } else {
                         Toast.makeText(ChatActivity.this, "No results found", Toast.LENGTH_SHORT).show();
