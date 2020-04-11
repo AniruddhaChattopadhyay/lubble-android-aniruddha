@@ -654,7 +654,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 // this person's profile ID, could be a seller or a user
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    isCurrUserSeller = false;
+                                    isCurrUserSeller = sellerId.equalsIgnoreCase(profileId);
                                     authorId = profileId;
                                     chatAdapter.setAuthorId(authorId);
                                     chatAdapter.setDmId(dmId);

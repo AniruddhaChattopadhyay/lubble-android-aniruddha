@@ -8,12 +8,22 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
+
+import java.util.ArrayList;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -163,11 +173,11 @@ public class SellerDashActiv extends BaseActivity {
     private void fetchSellerProfile() {
         progressBar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<SellerData>() {
+        endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<ArrayList<SellerData>>() {
             @Override
-            public void onResponse(Call<SellerData> call, Response<SellerData> response) {
+            public void onResponse(Call<ArrayList<SellerData>> call, Response<ArrayList<SellerData>> response) {
                 progressBar.setVisibility(View.GONE);
-                final SellerData sellerData = response.body();
+                final SellerData sellerData = response.body().get(0);
                 if (sellerData != null && !isFinishing()) {
                     sellerNameTv.setText(sellerData.getName());
                     sellerBioTv.setText(sellerData.getBio());
@@ -179,8 +189,10 @@ public class SellerDashActiv extends BaseActivity {
 
                     setTitle(sellerData.getName());
 
-                    for (Item item : sellerData.getItemList()) {
-                        adapter.addData(item);
+                    if (sellerData.getItemList() != null && !sellerData.getItemList().isEmpty()) {
+                        for (Item item : sellerData.getItemList()) {
+                            adapter.addData(item);
+                        }
                     }
                     recommendationCount.setText(sellerData.getRecommendationCount() + " recommendations");
 
@@ -196,14 +208,14 @@ public class SellerDashActiv extends BaseActivity {
                         }
                     });
 
-                } else  if (!isFinishing()){
+                } else if (!isFinishing()) {
                     Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
                     Toast.makeText(SellerDashActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onFailure(Call<SellerData> call, Throwable t) {
+            public void onFailure(Call<ArrayList<SellerData>> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(SellerDashActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
