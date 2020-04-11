@@ -38,6 +38,10 @@ public class Category {
         this.id = id;
     }
 
+    public String getHumanReadableName() {
+        return name.replace("_", " ");
+    }
+
     public String getName() {
         return name;
     }

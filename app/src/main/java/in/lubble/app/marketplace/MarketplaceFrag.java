@@ -36,6 +36,7 @@ import in.lubble.app.models.marketplace.MarketplaceData;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.StringUtils;
 import me.crosswall.lib.coverflow.CoverFlow;
 import me.crosswall.lib.coverflow.core.PagerContainer;
 import retrofit2.Call;
@@ -222,7 +223,7 @@ public class MarketplaceFrag extends Fragment {
                 if (response.isSuccessful() && marketplaceData != null && isAdded() && isVisible()) {
                     if (marketplaceData.getShowcaseCategories().size() > 0) {
                         final Category category1 = marketplaceData.getShowcaseCategories().get(0);
-                        cat1Name.setText(category1.getName());
+                        cat1Name.setText(StringUtils.getTitleCase(category1.getHumanReadableName()));
                         if (category1.getSellers().size() > 0) {
                             category1Rv.setVisibility(View.VISIBLE);
                             for (SellerData sellerData : category1.getSellers()) {
@@ -234,7 +235,7 @@ public class MarketplaceFrag extends Fragment {
 
                         if (marketplaceData.getShowcaseCategories().size() >= 2) {
                             final Category category2 = marketplaceData.getShowcaseCategories().get(1);
-                            cat2Name.setText(category2.getName());
+                            cat2Name.setText(StringUtils.getTitleCase(category2.getHumanReadableName()));
                             if (category2.getSellers().size() > 0) {
                                 category2Rv.setVisibility(View.VISIBLE);
                                 for (SellerData sellerData : category2.getSellers()) {

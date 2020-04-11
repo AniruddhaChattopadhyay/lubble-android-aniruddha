@@ -7,11 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Category;
@@ -81,7 +84,7 @@ public class ServiceCategoryDetailFrag extends Fragment {
                 final Category categoryData = response.body();
                 if (response.isSuccessful() && categoryData != null && isAdded() && isVisible()) {
 
-                    getActivity().setTitle(categoryData.getName());
+                    getActivity().setTitle(categoryData.getHumanReadableName());
 
                     if (categoryData.getItems() != null && !categoryData.getItems().isEmpty()) {
                         servicesAdapter.clear();

@@ -16,6 +16,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -23,12 +24,19 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.SellerData;
@@ -69,6 +77,7 @@ public class ItemListActiv extends BaseActivity {
     private boolean isRecommended;
     private long recommendationCount = 0;
     private SellerData sellerData;
+    private DatabaseReference dmRef;
 
     public static void open(Context context, boolean isSeller, int id) {
         final Intent intent = new Intent(context, ItemListActiv.class);
@@ -193,7 +202,7 @@ public class ItemListActiv extends BaseActivity {
                 progressBar.setVisibility(View.GONE);
                 final Category categoryData = response.body();
                 if (categoryData != null) {
-                    sellerNameTv.setText(categoryData.getName());
+                    sellerNameTv.setText(categoryData.getHumanReadableName());
 
                     GlideApp.with(ItemListActiv.this)
                             .load(categoryData.getIcon())
@@ -202,7 +211,7 @@ public class ItemListActiv extends BaseActivity {
 
                     sellerPicIv.setBackgroundResource(R.drawable.circle);
 
-                    setTitle(categoryData.getName());
+                    setTitle(categoryData.getHumanReadableName());
 
                     if (categoryData.getItems() != null && !categoryData.getItems().isEmpty()) {
                         recyclerView.setVisibility(View.VISIBLE);
@@ -275,6 +284,7 @@ public class ItemListActiv extends BaseActivity {
                     recommendationCountTv.setText(recommendationCount + " recommendations");
                     isRecommended = sellerData.getIsRecommended();
                     updateRecommendContainer();
+                    syncDms(String.valueOf(sellerId));
 
                     msgBtn.setEnabled(true);
                     msgBtn.setOnClickListener(new View.OnClickListener() {
@@ -338,6 +348,30 @@ public class ItemListActiv extends BaseActivity {
             }
         });
     }
+
+    private void syncDms(String sellerId) {
+        dmRef = RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid());
+        dmRef.orderByChild("profileId").equalTo(sellerId).addValueEventListener(dmValueEventListener);
+    }
+
+    private ValueEventListener dmValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+            if (dataSnapshot.getChildrenCount() > 0) {
+                msgBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ChatActivity.openForDm(ItemListActiv.this, dataSnapshot.getChildren().iterator().next().getKey(), null, null);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
