@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,7 +25,9 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.UiUtils;
 
+import static in.lubble.app.notifications.MutedChatsSharedPrefs.isGroupMuted;
 import static in.lubble.app.utils.DateTimeUtils.getHumanTimestamp;
+import static in.lubble.app.utils.NotifUtils.isGroupSnoozed;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -97,6 +99,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                     .into(groupViewHolder.iconIv);
 
             groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
+            groupViewHolder.notifStatusIv.setVisibility(isGroupSnoozed(groupData.getId()) || isGroupMuted(groupData.getId()) ? View.VISIBLE : View.GONE);
 
             groupViewHolder.titleTv.setText(groupData.getTitle());
             final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
@@ -186,7 +189,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             timestampTv.setText(getHumanTimestamp(groupData.getLastMessageTimestamp()));
             if (!groupData.isJoined()) {
                 // align time with "view" btn
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.setMargins(0, 0, dpToPx(8), dpToPx(4));
                 timestampTv.setLayoutParams(params);
             }
@@ -347,7 +350,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     class GroupViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final ImageView iconIv;
-        final ImageView lockIv;
+        final ImageView lockIv, notifStatusIv;
         final EmojiTextView titleTv;
         final EmojiTextView subtitleTv;
         final TextView unreadCountTv;
@@ -365,6 +368,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             titleTv = view.findViewById(R.id.tv_title);
             subtitleTv = view.findViewById(R.id.tv_subtitle);
             unreadCountTv = view.findViewById(R.id.tv_unread_count);
+            notifStatusIv = view.findViewById(R.id.iv_notif_status);
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
             viewGroupTv = view.findViewById(R.id.tv_view_group);
             inviteIcon = view.findViewById(R.id.ic_invite);

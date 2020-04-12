@@ -35,6 +35,10 @@ public class MutedChatsSharedPrefs {
         return preferences;
     }
 
+    public static boolean isGroupMuted(String groupId) {
+        return MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(groupId, false);
+    }
+
     /**
      * Clear all SharedPreferences
      */
