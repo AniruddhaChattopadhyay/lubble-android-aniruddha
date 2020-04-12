@@ -67,8 +67,11 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
+import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
@@ -80,6 +83,9 @@ import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import it.sephiroth.android.library.xtooltip.ClosePolicy;
 import it.sephiroth.android.library.xtooltip.Tooltip;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static in.lubble.app.Constants.DELIVERY_FEE;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
@@ -206,6 +212,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
         handleExploreActivity();
+        if (isNewUserInThisLubble) {
+            if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
+                fetchAssociatedSeller(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
+            }
+        }
 
         toolbarSearchTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -797,6 +808,35 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });
+    }
+
+    private void fetchAssociatedSeller(String phoneNumber) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchExistingSellerFromPh(phoneNumber).enqueue(new Callback<Endpoints.ExistingSellerData>() {
+            @Override
+            public void onResponse(Call<Endpoints.ExistingSellerData> call, Response<Endpoints.ExistingSellerData> response) {
+                final Endpoints.ExistingSellerData existingSellerData = response.body();
+                if (existingSellerData != null && existingSellerData.getSellerIdList() != null && !existingSellerData.getSellerIdList().isEmpty()) {
+                    final int sellerId = Integer.parseInt(existingSellerData.getSellerIdList().get(0));
+                    LubbleSharedPrefs.getInstance().setSellerId(sellerId);
+                    UiUtils.showBottomSheetAlertLight(MainActivity.this, getLayoutInflater(),
+                            "Your business is already on Lubble!", "\nWe have found a business associated with your phone number! You can now manage your business profile & start selling locally on Lubble!\n",
+                            R.drawable.ic_open, "Check My Business", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ItemListActiv.open(MainActivity.this, true, sellerId);
+                                }
+                            });
+                } else {
+                    Log.e(TAG, "onResponse failed: " + response.body().toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Endpoints.ExistingSellerData> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
             }
         });
     }

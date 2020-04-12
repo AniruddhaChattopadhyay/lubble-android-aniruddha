@@ -1,5 +1,7 @@
 package in.lubble.app.network;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -173,4 +175,22 @@ public interface Endpoints {
 
     @POST("marketplace/events/")
     Call<EventIdData> upload_new_event(@Body RequestBody params);
+
+    @POST("marketplace/seller/phone_find/")
+    Call<ExistingSellerData> fetchExistingSellerFromPh(@Query("phone") String phone);
+
+    public class ExistingSellerData {
+
+        @SerializedName("seller_id")
+        private ArrayList<String> sellerIdList;
+
+        public ArrayList<String> getSellerIdList() {
+            return sellerIdList;
+        }
+
+        public void setSellerIdList(ArrayList<String> sellerIdList) {
+            this.sellerIdList = sellerIdList;
+        }
+    }
+
 }

@@ -43,6 +43,20 @@
         android:orientation="horizontal">
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_edit_seller"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EDIT"
+            android:theme="@style/OutlineButton"
+            android:textColor="@color/dk_colorAccent"
+            app:iconTint="@color/dk_colorAccent"
+            android:layout_marginRight="4dp"
+            android:visibility="gone"
+            app:icon="@drawable/ic_edit_white_24dp"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_call"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
             android:layout_width="wrap_content"

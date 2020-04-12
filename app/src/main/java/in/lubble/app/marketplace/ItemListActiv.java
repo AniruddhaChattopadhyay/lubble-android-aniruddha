@@ -32,6 +32,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -60,7 +61,7 @@ public class ItemListActiv extends BaseActivity {
     private ImageView sellerPicIv;
     private ProgressBar progressBar;
     private TextView sellerNameTv, sellerBioTv;
-    private MaterialButton msgBtn, callBtn;
+    private MaterialButton msgBtn, callBtn, sellerEditBtn;
     private boolean isSeller;
     private int sellerId;
     @Nullable
@@ -108,6 +109,7 @@ public class ItemListActiv extends BaseActivity {
         sellerBioTv = findViewById(R.id.tv_seller_bio);
         msgBtn = findViewById(R.id.btn_msg);
         callBtn = findViewById(R.id.btn_call);
+        sellerEditBtn = findViewById(R.id.btn_edit_seller);
         recyclerView = findViewById(R.id.rv_items);
         noItemsHintTv = findViewById(R.id.tv_no_items_hint);
         recommendIv = findViewById(R.id.iv_recommend);
@@ -290,6 +292,10 @@ public class ItemListActiv extends BaseActivity {
                     msgBtn.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            if (sellerId == LubbleSharedPrefs.getInstance().getSellerId()) {
+                                Toast.makeText(ItemListActiv.this, "You cannot chat with yourself :)", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
                             DmIntroBottomSheet.newInstance(String.valueOf(sellerId), sellerData.getName(), sellerData.getPhotoUrl(), sellerData.getPhone())
                                     .show(getSupportFragmentManager(), null);
                         }
@@ -311,6 +317,18 @@ public class ItemListActiv extends BaseActivity {
                         });
                     } else {
                         callBtn.setVisibility(View.GONE);
+                    }
+
+                    if (sellerId == LubbleSharedPrefs.getInstance().getSellerId()) {
+                        sellerEditBtn.setVisibility(View.VISIBLE);
+                        sellerEditBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startActivity(SellerDashActiv.getIntent(ItemListActiv.this, sellerId, false, Item.ITEM_PRODUCT));
+                            }
+                        });
+                    } else {
+                        sellerEditBtn.setVisibility(View.GONE);
                     }
 
                     recommendContainer.setOnClickListener(new View.OnClickListener() {
