@@ -16,6 +16,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ActionMode;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -582,6 +584,15 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     public void filterGroups(String searchString) {
         adapter.getFilter().filter(searchString);
+    }
+
+
+    @Override
+    public ActionMode onActionModeEnabled(@NonNull ActionMode.Callback callback) {
+        if (getActivity() != null) {
+            return ((AppCompatActivity) getActivity()).startSupportActionMode(callback);
+        }
+        return null;
     }
 
     @Override

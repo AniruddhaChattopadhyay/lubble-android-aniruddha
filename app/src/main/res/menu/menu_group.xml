@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/action_mute"
+        android:icon="@drawable/ic_volume_off_black_24dp"
+        app:iconTint="@color/black"
+        android:title="Mute Notifications"
+        android:visible="false"
+        app:showAsAction="always"
+        tools:visible="true" />
+
+</menu>

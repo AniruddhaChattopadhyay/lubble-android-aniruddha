@@ -2,13 +2,18 @@ package in.lubble.app.groups;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
@@ -19,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
@@ -45,6 +51,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     private final OnListFragmentInteractionListener mListener;
     private int posToFlash = -1;
     private GroupDataFilter filter;
+    @Nullable
+    private String selectedGroupId = null;
+    private int highlightedPos = -1;
 
     public GroupRecyclerAdapter(OnListFragmentInteractionListener listener) {
         groupDataList = new ArrayList<>();
@@ -120,6 +129,12 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 groupViewHolder.subtitleTv.setText("...");
                 groupViewHolder.inviteIcon.setVisibility(View.GONE);
                 toggleViewBtn(groupData, userGroupData, groupViewHolder);
+            }
+
+            if (highlightedPos == position) {
+                groupViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(groupViewHolder.mView.getContext(), R.color.very_light_gray));
+            } else {
+                groupViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
             }
 
             groupViewHolder.mView.setOnClickListener(new View.OnClickListener() {
@@ -359,6 +374,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final ImageView inviteIcon;
         final ImageView pinIv;
         GroupData groupData;
+        @Nullable
+        private ActionMode actionMode;
 
         public GroupViewHolder(View view) {
             super(view);
@@ -373,7 +390,65 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             viewGroupTv = view.findViewById(R.id.tv_view_group);
             inviteIcon = view.findViewById(R.id.ic_invite);
             pinIv = view.findViewById(R.id.iv_pin);
+
+            mView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (getAdapterPosition() != highlightedPos) {
+                        actionMode = mListener.onActionModeEnabled(actionModeCallbacks);
+                        itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.very_light_gray));
+                        if (highlightedPos != -1) {
+                            // another item was highlighted, remove its highlight
+                            notifyItemChanged(highlightedPos);
+                        }
+                        highlightedPos = getAdapterPosition();
+                        selectedGroupId = groupDataList.get(getAdapterPosition()).getId();
+                    } else {
+                        if (actionMode != null) {
+                            actionMode.finish();
+                        }
+                    }
+                    return true;
+                }
+            });
         }
+
+        private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.menu_group, menu);
+                menu.findItem(R.id.action_mute).setVisible(true);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_mute:
+                        if (null != selectedGroupId) {
+                            Toast.makeText(LubbleApp.getAppContext(), "hollaa", Toast.LENGTH_SHORT).show();
+                            //todo
+                        }
+                        break;
+                }
+                mode.finish();
+                return true;
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                selectedGroupId = null;
+                if (highlightedPos != -1) {
+                    notifyItemChanged(highlightedPos);
+                    highlightedPos = -1;
+                }
+            }
+        };
 
     }
 
