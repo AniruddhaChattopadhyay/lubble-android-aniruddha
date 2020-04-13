@@ -272,11 +272,16 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             public void onClick(View v) {
                 UiUtils.hideKeyboard(ChatActivity.this);
                 if (searchResultData != null && searchResultData.getQuery().equalsIgnoreCase(searchView.getQuery().toString())) {
-                    if (currSearchCursorPos < searchResultData.getHits().size() - 1) {
-                        currSearchCursorPos++;
+                    if (searchResultData.getNbHits() > 0) {
+                        if (currSearchCursorPos < searchResultData.getHits().size() - 1) {
+                            currSearchCursorPos++;
+                        }
+                        Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
+                        String highlightedStr = searchHit.get_highlightResult().getText().getValue();
+                        targetFrag.scrollToChatId(searchHit.getChatId(), highlightedStr.substring(highlightedStr.indexOf("<hem>") + 5, highlightedStr.indexOf("</hem>")));
+                    } else {
+                        Toast.makeText(ChatActivity.this, "No results found", Toast.LENGTH_SHORT).show();
                     }
-                    Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
-                    targetFrag.scrollToChatId(searchHit.getChatId(), searchHit.get_highlightResult().getText().getMatchedWords().get(0));
                 } else {
                     onQueryTextSubmit(searchView.getQuery().toString());
                 }
@@ -288,11 +293,16 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             public void onClick(View v) {
                 UiUtils.hideKeyboard(ChatActivity.this);
                 if (searchResultData != null && searchResultData.getQuery().equalsIgnoreCase(searchView.getQuery().toString())) {
-                    if (currSearchCursorPos > 0) {
-                        currSearchCursorPos--;
+                    if (searchResultData.getNbHits() > 0) {
+                        if (currSearchCursorPos > 0) {
+                            currSearchCursorPos--;
+                        }
+                        Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
+                        String highlightedStr = searchHit.get_highlightResult().getText().getValue();
+                        targetFrag.scrollToChatId(searchHit.getChatId(), highlightedStr.substring(highlightedStr.indexOf("<hem>") + 5, highlightedStr.indexOf("</hem>")));
+                    } else {
+                        Toast.makeText(ChatActivity.this, "No results found", Toast.LENGTH_SHORT).show();
                     }
-                    Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
-                    targetFrag.scrollToChatId(searchHit.getChatId(), searchHit.get_highlightResult().getText().getMatchedWords().get(0));
                 } else {
                     onQueryTextSubmit(searchView.getQuery().toString());
                 }
