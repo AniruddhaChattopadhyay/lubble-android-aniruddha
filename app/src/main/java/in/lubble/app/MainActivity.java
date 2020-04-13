@@ -214,7 +214,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         handleExploreActivity();
         if (isNewUserInThisLubble) {
             if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
-                fetchAssociatedSeller(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
+                try {
+                    String phNum = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().substring(3, 13);
+                    fetchAssociatedSeller(phNum);
+                } catch (IndexOutOfBoundsException e) {
+                    Crashlytics.logException(e);
+                }
             }
         }
 

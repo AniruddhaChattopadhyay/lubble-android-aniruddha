@@ -176,7 +176,7 @@ public interface Endpoints {
     @POST("marketplace/events/")
     Call<EventIdData> upload_new_event(@Body RequestBody params);
 
-    @POST("marketplace/seller/phone_find/")
+    @GET("marketplace/seller/phone_find/")
     Call<ExistingSellerData> fetchExistingSellerFromPh(@Query("phone") String phone);
 
     public class ExistingSellerData {
