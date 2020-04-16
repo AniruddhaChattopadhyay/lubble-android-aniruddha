@@ -87,6 +87,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static in.lubble.app.Constants.DEFAULT_SHOP_PIC;
 import static in.lubble.app.Constants.DELIVERY_FEE;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
 import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
@@ -576,6 +577,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(IS_REWARDS_SHOWN, false);
         map.put(IS_RATING_DIALOG_ACTIVE, true);
         map.put(REWARDS_EXPLAINER, "https://firebasestorage.googleapis.com/v0/b/lubble-in-default/o/chat_sliders%2Freward_explainer.png?alt=media&token=33f50ce7-c1b7-4d90-84d6-c0ff41f9e39f");
+        map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
             toolbarRewardsTv.setVisibility(View.VISIBLE);

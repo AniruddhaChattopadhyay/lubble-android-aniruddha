@@ -27,6 +27,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.palette.graphics.Palette;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -289,6 +290,13 @@ public class UiUtils {
                 }
             });
         }
+    }
+
+    public static CircularProgressDrawable getCircularProgressDrawable(Context context) {
+        final CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(context);
+        circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
+        circularProgressDrawable.start();
+        return circularProgressDrawable;
     }
 
 }

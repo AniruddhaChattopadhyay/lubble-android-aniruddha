@@ -37,6 +37,7 @@ public class Constants {
     public static final String IS_REWARDS_SHOWN = "IS_REWARDS_SHOWN";
     public static final String IS_RATING_DIALOG_ACTIVE = "IS_RATING_DIALOG_ACTIVE";
     public static final String REWARDS_EXPLAINER = "REWARDS_EXPLAINER";
+    public static final String DEFAULT_SHOP_PIC = "DEFAULT_SHOP_PIC";
 
     public static final double SVR_LATI = 28.696660;
     public static final double SVR_LONGI = 77.124772;

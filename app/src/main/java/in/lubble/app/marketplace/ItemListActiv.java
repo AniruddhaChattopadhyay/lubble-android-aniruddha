@@ -30,8 +30,10 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import in.lubble.app.BaseActivity;
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -45,6 +47,7 @@ import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.DmIntroBottomSheet;
+import in.lubble.app.utils.UiUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -207,10 +210,20 @@ public class ItemListActiv extends BaseActivity {
                 if (categoryData != null) {
                     sellerNameTv.setText(categoryData.getHumanReadableName());
 
-                    GlideApp.with(ItemListActiv.this)
-                            .load(categoryData.getIcon())
-                            .circleCrop()
-                            .into(sellerPicIv);
+                    if (!TextUtils.isEmpty(categoryData.getIcon())) {
+                        GlideApp.with(ItemListActiv.this)
+                                .load(categoryData.getIcon())
+                                .placeholder(UiUtils.getCircularProgressDrawable(ItemListActiv.this))
+                                .circleCrop()
+                                .into(sellerPicIv);
+                    } else {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                        GlideApp.with(ItemListActiv.this)
+                                .load(FirebaseRemoteConfig.getInstance().getString(Constants.DEFAULT_SHOP_PIC))
+                                .centerInside()
+                                .placeholder(UiUtils.getCircularProgressDrawable(ItemListActiv.this))
+                                .into(sellerPicIv);
+                    }
 
                     sellerPicIv.setBackgroundResource(R.drawable.circle);
 
@@ -270,10 +283,19 @@ public class ItemListActiv extends BaseActivity {
                     sellerBioTv.setText(sellerData.getBio());
                     Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
-                    GlideApp.with(ItemListActiv.this)
-                            .load(sellerData.getPhotoUrl())
-                            .circleCrop()
-                            .into(sellerPicIv);
+                    if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                        GlideApp.with(ItemListActiv.this)
+                                .load(sellerData.getPhotoUrl())
+                                .circleCrop()
+                                .placeholder(UiUtils.getCircularProgressDrawable(ItemListActiv.this))
+                                .into(sellerPicIv);
+                    } else {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                        GlideApp.with(ItemListActiv.this)
+                                .load(FirebaseRemoteConfig.getInstance().getString(Constants.DEFAULT_SHOP_PIC))
+                                .placeholder(UiUtils.getCircularProgressDrawable(ItemListActiv.this))
+                                .into(sellerPicIv);
+                    }
 
                     setTitle(sellerData.getName());
 

@@ -5,20 +5,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import in.lubble.app.Constants;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.SellerData;
+import in.lubble.app.utils.UiUtils;
 
 public class BigSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -49,16 +51,18 @@ public class BigSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         viewHolder.savingTv.setVisibility(View.GONE);
 
         if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
-            viewHolder.itemPicProgressBar.setVisibility(View.GONE);
+            viewHolder.itemIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
             glide.load(sellerData.getPhotoUrl())
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .thumbnail(0.1f)
+                    .placeholder(UiUtils.getCircularProgressDrawable(viewHolder.view.getContext()))
                     .into(viewHolder.itemIv);
         } else {
-            viewHolder.itemPicProgressBar.setVisibility(View.VISIBLE);
-            glide.load("")
+            viewHolder.itemIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+            glide.load(FirebaseRemoteConfig.getInstance().getString(Constants.DEFAULT_SHOP_PIC))
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .thumbnail(0.1f)
+                    .placeholder(UiUtils.getCircularProgressDrawable(viewHolder.view.getContext()))
                     .into(viewHolder.itemIv);
         }
 
@@ -96,7 +100,6 @@ public class BigSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         final View view;
         final ImageView itemIv;
         final TextView approvalStatusTv;
-        final ProgressBar itemPicProgressBar;
         final TextView nameTv;
         final TextView mrpTv;
         final TextView savingTv;
@@ -105,7 +108,6 @@ public class BigSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             super(view);
             this.view = view;
             itemIv = view.findViewById(R.id.iv_item);
-            itemPicProgressBar = view.findViewById(R.id.progress_bar_item_pic);
             approvalStatusTv = view.findViewById(R.id.tv_header);
             nameTv = view.findViewById(R.id.tv_name);
             mrpTv = view.findViewById(R.id.tv_seller_subtitle);
