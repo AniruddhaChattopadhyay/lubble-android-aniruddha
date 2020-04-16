@@ -58,6 +58,7 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
                 android:gravity="center_horizontal"
+                android:textColor="@color/black"
                 tools:text="@tools:sample/lorem" />
 
             <LinearLayout

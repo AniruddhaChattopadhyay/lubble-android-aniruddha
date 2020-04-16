@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
@@ -471,6 +472,7 @@ public class ItemActivity extends BaseActivity {
                         sellerNameTv.setText(sellerData.getName());
                         sellerBioTv.setText(sellerData.getBio());
                         GlideApp.with(ItemActivity.this).load(sellerData.getPhotoUrl()).circleCrop().into(sellerIv);
+                        Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
                         sellerItemsRv.setLayoutManager(new GridLayoutManager(ItemActivity.this, 2));
                         final BigItemAdapter itemAdapter = new BigItemAdapter(GlideApp.with(ItemActivity.this), false);

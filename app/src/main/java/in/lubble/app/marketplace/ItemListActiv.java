@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -267,6 +268,7 @@ public class ItemListActiv extends BaseActivity {
                     sellerId = sellerData.getId();
                     sellerNameTv.setText(sellerData.getName());
                     sellerBioTv.setText(sellerData.getBio());
+                    Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
                     GlideApp.with(ItemListActiv.this)
                             .load(sellerData.getPhotoUrl())
@@ -393,7 +395,9 @@ public class ItemListActiv extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.seller_menu, menu);
+        if (isSeller) {
+            getMenuInflater().inflate(R.menu.seller_menu, menu);
+        }
         return true;
     }
 

@@ -1,5 +1,7 @@
 package in.lubble.app.models.marketplace;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -123,7 +125,7 @@ public class SellerData {
     }
 
     public boolean isCallEnabled() {
-        return isCallEnabled;
+        return isCallEnabled && !TextUtils.isEmpty(this.phone);
     }
 
     public void setCallEnabled(boolean callEnabled) {

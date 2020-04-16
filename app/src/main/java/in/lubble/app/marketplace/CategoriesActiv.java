@@ -8,23 +8,24 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.marketplace.Category;
-import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.ArrayList;
 
 public class CategoriesActiv extends BaseActivity {
 
@@ -73,9 +74,7 @@ public class CategoriesActiv extends BaseActivity {
                 final ArrayList<Category> categoryList = response.body();
                 if (categoryList != null && categoryList.size() > 0) {
                     for (Category category : categoryList) {
-                        if (category.getType() == Item.ITEM_PRODUCT) {
-                            categoryAdapter.addData(category);
-                        }
+                        categoryAdapter.addData(category);
                     }
                 } else {
                     Toast.makeText(CategoriesActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
