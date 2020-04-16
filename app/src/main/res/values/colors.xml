@@ -14,6 +14,7 @@
     <color name="red">#b41a1a</color>
     <color name="white">#FFFFFF</color>
     <color name="dark_gold">#e1b000</color>
+    <color name="trans_dark_gold">#AEFF9800</color>
     <color name="gold">#FFCA0A</color>
     <color name="lt_gold">#FFD542</color>
     <color name="very_trans_white">#45FFFFFF</color>

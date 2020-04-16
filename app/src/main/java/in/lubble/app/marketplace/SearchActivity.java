@@ -18,14 +18,20 @@ import com.algolia.search.saas.Client;
 import com.algolia.search.saas.CompletionHandler;
 import com.algolia.search.saas.Index;
 import com.algolia.search.saas.Query;
+import com.google.gson.Gson;
 
-import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.models.search.Hit;
+import in.lubble.app.models.search.SearchResultData;
+
+import static in.lubble.app.analytics.AnalyticsEvents.FAILED_SEARCH;
 
 public class SearchActivity extends BaseActivity implements CompletionHandler {
 
@@ -56,7 +62,7 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
         Client client = new Client("IIVL0B0EIY", "12ac422e05119422ec03224a9da738a7");
         final Index index = client.getIndex(BuildConfig.DEBUG ? "dev_mplace" : "prod_mplace");
 
-        try {
+        /*try {
             index.addObjectAsync(new JSONObject()
                     .put("title", "Occasions")
                     .put("id", 1994)
@@ -71,7 +77,7 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
                     .put("entity", "item"), null);
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
 
         searchEt.addTextChangedListener(new TextWatcher() {
             @Override
@@ -86,10 +92,8 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s != null && s.length() > 0) {
-
-                    index.searchAsync(new Query("jimmie"), SearchActivity.this);
-
+                if (s != null && s.length() > 3) {
+                    index.searchAsync(new Query(s.toString()), SearchActivity.this);
                 } else {
                     adapter.clearAll();
                 }
@@ -101,17 +105,23 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
     public void requestCompleted(@Nullable JSONObject jsonObject, @Nullable AlgoliaException e) {
         if (jsonObject != null) {
             Log.d(TAG, "requestCompleted: " + jsonObject.toString());
-            ItemSearchData itemSearchData = new ItemSearchData();
-            itemSearchData.setId(jsonObject.optInt("id"));
-            itemSearchData.setName(jsonObject.optString("title"));
 
-            //todo adapter.addData(itemSearchDataList);
-            //if (itemSearchDataList.isEmpty()) {
-            //    // failed search
-            //    final Bundle bundle = new Bundle();
-            //    bundle.putString("search_term", s.toString());
-            //    Analytics.triggerEvent(FAILED_SEARCH, bundle, SearchActivity.this);
-            //}
+            SearchResultData searchResultData = new Gson().fromJson(jsonObject.toString(), SearchResultData.class);
+            if (searchResultData.getNbHits() > 0) {
+                ArrayList<ItemSearchData> itemSearchDataList = new ArrayList<>();
+                for (Hit hit : searchResultData.getHits()) {
+                    ItemSearchData itemSearchData = new ItemSearchData();
+                    itemSearchData.setId(hit.getId());
+                    itemSearchData.setName(hit.getTitle());
+                    itemSearchDataList.add(itemSearchData);
+                }
+                adapter.addData(itemSearchDataList);
+            } else {
+                // failed search
+                final Bundle bundle = new Bundle();
+                bundle.putString("mplace_search_term", searchResultData.getQuery());
+                Analytics.triggerEvent(FAILED_SEARCH, bundle, SearchActivity.this);
+            }
         }
     }
 }
