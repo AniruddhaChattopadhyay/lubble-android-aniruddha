@@ -104,6 +104,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.clevertap.android:clevertap-android-sdk:3.6.4'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.algolia:algoliasearch-android:3.27.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
     implementation 'com.github.freshdesk:freshchat-android:2.7.0'
