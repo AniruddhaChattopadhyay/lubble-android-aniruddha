@@ -285,7 +285,7 @@ public class MarketplaceFrag extends Fragment {
     }
 
     private void setupSlider() {
-        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList));
+        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList, false));
 
         new CoverFlow.Builder()
                 .with(viewPager)

@@ -478,7 +478,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void setupSlider() {
         tabLayout.setupWithViewPager(viewPager, true);
-        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList));
+        viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList, true));
 
         new CoverFlow.Builder()
                 .with(viewPager)
