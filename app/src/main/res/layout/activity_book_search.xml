@@ -59,7 +59,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
                 android:tint="@color/white"
-                app:srcCompat="@drawable/ic_keyboard_arrow_right_black_24dp" />
+                app:srcCompat="@drawable/ic_arrow_forward_black_24dp" />
 
         </RelativeLayout>
 

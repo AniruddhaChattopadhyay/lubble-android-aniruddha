@@ -224,11 +224,19 @@ public class MarketplaceFrag extends Fragment {
                     if (marketplaceData.getShowcaseCategories().size() > 0) {
                         final Category category1 = marketplaceData.getShowcaseCategories().get(0);
                         cat1Name.setText(StringUtils.getTitleCase(category1.getHumanReadableName()));
+                        cat1Name.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ItemListActiv.open(requireContext(), false, category1.getId());
+                            }
+                        });
                         if (category1.getSellers().size() > 0) {
                             category1Rv.setVisibility(View.VISIBLE);
                             for (SellerData sellerData : category1.getSellers()) {
                                 cat1Adapter.addSeller(sellerData);
                             }
+                            cat1Adapter.addSeller(null);
+                            cat1Adapter.setCategoryId(category1.getId());
                         } else {
                             cat1cv.setVisibility(View.GONE);
                         }
@@ -236,11 +244,19 @@ public class MarketplaceFrag extends Fragment {
                         if (marketplaceData.getShowcaseCategories().size() >= 2) {
                             final Category category2 = marketplaceData.getShowcaseCategories().get(1);
                             cat2Name.setText(StringUtils.getTitleCase(category2.getHumanReadableName()));
+                            cat2Name.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ItemListActiv.open(requireContext(), false, category2.getId());
+                                }
+                            });
                             if (category2.getSellers().size() > 0) {
                                 category2Rv.setVisibility(View.VISIBLE);
                                 for (SellerData sellerData : category2.getSellers()) {
                                     cat2Adapter.addSeller(sellerData);
                                 }
+                                cat2Adapter.addSeller(null);
+                                cat2Adapter.setCategoryId(category2.getId());
                             } else {
                                 cat2cv.setVisibility(View.GONE);
                             }

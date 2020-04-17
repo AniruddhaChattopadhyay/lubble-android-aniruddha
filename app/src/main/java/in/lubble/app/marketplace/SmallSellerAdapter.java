@@ -1,5 +1,6 @@
 package in.lubble.app.marketplace;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -7,16 +8,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.SellerData;
+import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.UiUtils;
 
 public class SmallSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -26,6 +33,7 @@ public class SmallSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     private final List<SellerData> sellerList;
     private final GlideRequests glide;
+    private int categoryId;
 
     public SmallSellerAdapter(GlideRequests glide) {
         sellerList = new ArrayList<>();
@@ -64,11 +72,24 @@ public class SmallSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             viewHolder.nameTv.setText(sellerData.getName());
             viewHolder.savingTv.setVisibility(View.GONE);
 
-            glide.load(sellerData.getPhotoUrl())
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .placeholder(R.drawable.gradient_black_trans)
-                    .error(R.drawable.gradient_black_trans)
-                    .into(viewHolder.sellerIv);
+            RequestOptions requestOptions = new RequestOptions();
+            requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0));
+            if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                viewHolder.sellerIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                viewHolder.sellerIv.setBackground(null);
+                glide.load(sellerData.getPhotoUrl())
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .placeholder(R.drawable.gradient_black_trans)
+                        .error(R.drawable.gradient_black_trans)
+                        .apply(requestOptions)
+                        .into(viewHolder.sellerIv);
+            } else {
+                viewHolder.sellerIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                viewHolder.sellerIv.setBackground(ContextCompat.getDrawable(LubbleApp.getAppContext(), R.drawable.rounded_rect_very_light_gray));
+                glide.load(R.drawable.ic_shop)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .into(viewHolder.sellerIv);
+            }
 
         } else {
             // nothing to do here..
@@ -80,9 +101,13 @@ public class SmallSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         return sellerList.size();
     }
 
-    public void addSeller(SellerData seller) {
+    void addSeller(SellerData seller) {
         sellerList.add(seller);
         notifyDataSetChanged();
+    }
+
+    void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -115,7 +140,7 @@ public class SmallSellerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
         @Override
         public void onClick(View v) {
-            ItemListActiv.open(v.getContext(), true, sellerList.get(getAdapterPosition()).getId());
+            ItemListActiv.open(v.getContext(), false, categoryId);
         }
     }
 
