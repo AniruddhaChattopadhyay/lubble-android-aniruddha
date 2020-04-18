@@ -63,7 +63,7 @@ public interface Endpoints {
     Call<SellerData> uploadSellerProfile(@Body RequestBody params);
 
     @GET("marketplace/seller/{seller_id}/")
-    Call<ArrayList<SellerData>> fetchSellerProfile(@Path("seller_id") int sellerId);
+    Call<SellerData> fetchSellerProfile(@Path("seller_id") int sellerId);
 
     @PUT("marketplace/seller/{seller_id}/")
     Call<SellerData> updateSellerProfile(@Path("seller_id") int sellerId, @Body RequestBody params);

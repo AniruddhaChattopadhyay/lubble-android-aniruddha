@@ -23,8 +23,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.crashlytics.android.Crashlytics;
 
-import java.util.ArrayList;
-
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -174,11 +172,11 @@ public class SellerDashActiv extends BaseActivity {
     private void fetchSellerProfile() {
         progressBar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<ArrayList<SellerData>>() {
+        endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<SellerData>() {
             @Override
-            public void onResponse(Call<ArrayList<SellerData>> call, Response<ArrayList<SellerData>> response) {
+            public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 progressBar.setVisibility(View.GONE);
-                final SellerData sellerData = response.body().get(0);
+                final SellerData sellerData = response.body();
                 if (sellerData != null && !isFinishing()) {
                     sellerNameTv.setText(sellerData.getName());
                     sellerBioTv.setText(sellerData.getBio());
@@ -217,7 +215,7 @@ public class SellerDashActiv extends BaseActivity {
             }
 
             @Override
-            public void onFailure(Call<ArrayList<SellerData>> call, Throwable t) {
+            public void onFailure(Call<SellerData> call, Throwable t) {
                 progressBar.setVisibility(View.GONE);
                 Toast.makeText(SellerDashActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }

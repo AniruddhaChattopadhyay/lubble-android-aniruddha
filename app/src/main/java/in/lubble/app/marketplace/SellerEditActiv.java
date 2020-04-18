@@ -31,7 +31,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -192,11 +191,11 @@ public class SellerEditActiv extends BaseActivity implements View.OnClickListene
         progressDialog.show();
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<ArrayList<SellerData>>() {
+        endpoints.fetchSellerProfile(sellerId).enqueue(new Callback<SellerData>() {
             @Override
-            public void onResponse(Call<ArrayList<SellerData>> call, Response<ArrayList<SellerData>> response) {
+            public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 progressDialog.dismiss();
-                final SellerData sellerData = response.body().get(0);
+                final SellerData sellerData = response.body();
                 if (sellerData != null) {
                     sellerNameTil.getEditText().setText(sellerData.getName());
                     if (!TextUtils.isEmpty(sellerData.getPhone())) {
@@ -228,7 +227,7 @@ public class SellerEditActiv extends BaseActivity implements View.OnClickListene
             }
 
             @Override
-            public void onFailure(Call<ArrayList<SellerData>> call, Throwable t) {
+            public void onFailure(Call<SellerData> call, Throwable t) {
                 progressDialog.dismiss();
                 Toast.makeText(SellerEditActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
             }
