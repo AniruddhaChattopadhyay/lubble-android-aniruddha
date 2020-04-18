@@ -208,7 +208,7 @@
                 android:background="@drawable/rounded_rect_super_light_gray"
                 android:padding="8dp"
                 android:visibility="gone"
-                tools:visibility="gone">
+                tools:visibility="visible">
 
                 <ImageView
                     android:id="@+id/iv_lock"
@@ -276,7 +276,7 @@
                         app:srcCompat="@drawable/ic_access_time_black_24dp" />
 
                     <TextView
-                        android:id="@+id/tv_header"
+                        android:id="@+id/tv_approval_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginLeft="4dp"

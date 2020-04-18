@@ -213,11 +213,19 @@ public class SellerEditActiv extends BaseActivity implements View.OnClickListene
                         setShopWebLink(sellerData.getName());
                         syncSellerWebName();
                     }
-
-                    GlideApp.with(SellerEditActiv.this)
-                            .load(sellerData.getPhotoUrl())
-                            .circleCrop()
-                            .into(photoIv);
+                    if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                        photoIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        GlideApp.with(SellerEditActiv.this)
+                                .load(sellerData.getPhotoUrl())
+                                .error(R.drawable.ic_shop)
+                                .circleCrop()
+                                .into(photoIv);
+                    } else {
+                        photoIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                        GlideApp.with(SellerEditActiv.this)
+                                .load(R.drawable.ic_shop)
+                                .into(photoIv);
+                    }
                     setTitle(sellerData.getName());
 
                 } else {

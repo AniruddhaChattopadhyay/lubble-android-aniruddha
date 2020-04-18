@@ -182,10 +182,21 @@ public class SellerDashActiv extends BaseActivity {
                     sellerBioTv.setText(sellerData.getBio());
                     Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
-                    GlideApp.with(SellerDashActiv.this)
-                            .load(sellerData.getPhotoUrl())
-                            .circleCrop()
-                            .into(sellerPicIv);
+                    if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        GlideApp.with(SellerDashActiv.this)
+                                .load(sellerData.getPhotoUrl())
+                                .placeholder(R.drawable.circle)
+                                .error(R.drawable.ic_shop)
+                                .circleCrop()
+                                .into(sellerPicIv);
+                    } else {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                        GlideApp.with(SellerDashActiv.this)
+                                .load(R.drawable.ic_shop)
+                                .centerInside()
+                                .into(sellerPicIv);
+                    }
 
                     setTitle(sellerData.getName());
 

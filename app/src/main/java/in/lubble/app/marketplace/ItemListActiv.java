@@ -284,6 +284,7 @@ public class ItemListActiv extends BaseActivity {
                     Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
                     if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
                         GlideApp.with(ItemListActiv.this)
                                 .load(sellerData.getPhotoUrl())
                                 .circleCrop()

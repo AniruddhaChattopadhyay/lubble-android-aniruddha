@@ -471,7 +471,13 @@ public class ItemActivity extends BaseActivity {
 
                         sellerNameTv.setText(sellerData.getName());
                         sellerBioTv.setText(sellerData.getBio());
-                        GlideApp.with(ItemActivity.this).load(sellerData.getPhotoUrl()).circleCrop().into(sellerIv);
+                        if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                            sellerIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                            GlideApp.with(ItemActivity.this).load(sellerData.getPhotoUrl()).error(R.drawable.ic_shop).circleCrop().into(sellerIv);
+                        } else {
+                            sellerIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                            GlideApp.with(ItemActivity.this).load(R.drawable.ic_shop).into(sellerIv);
+                        }
                         Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
                         sellerItemsRv.setLayoutManager(new GridLayoutManager(ItemActivity.this, 2));
