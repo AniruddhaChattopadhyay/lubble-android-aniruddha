@@ -75,6 +75,7 @@ import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
+import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.MainUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
@@ -324,10 +325,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
-        if (!FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_QUIZ_SHOWN)) {
-            bottomNavigation.getMenu().clear();
-            bottomNavigation.inflateMenu(R.menu.navigation_market);
-        }
+        bottomNavigation.getMenu().clear();
+        bottomNavigation.inflateMenu(R.menu.navigation_market);
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
@@ -612,7 +611,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
                 itemView.addView(badge);
             }
-            if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
+            /*if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
                 BottomNavigationMenuView bottomNavigationMenuView =
                         (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
                 View v = bottomNavigationMenuView.getChildAt(3);
@@ -622,7 +621,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
                 itemView.addView(badge);
-            }
+            }*/
         }
     }
 
@@ -664,7 +663,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     bottomNavigation.setSelectedItemId(R.id.navigation_map);
                     break;
                 case "services":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_services);
+                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
+                    break;
+                case "mplace":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
                     break;
                 /*case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
@@ -695,14 +697,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     firebaseRemoteConfig.activateFetched();
-                    if (!firebaseRemoteConfig.getBoolean(Constants.IS_QUIZ_SHOWN)) {
-                        bottomNavigation.getMenu().clear();
-                        bottomNavigation.inflateMenu(R.menu.navigation_market);
-                    }/* else if (bottomNavigation.getMenu().findItem(R.id.navigation_fun) == null) {
-                        // change only if new menu wasnt present before
-                        bottomNavigation.getMenu().clear();
-                        bottomNavigation.inflateMenu(R.menu.navigation);
-                    }*/
                     if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
                         toolbarRewardsTv.setVisibility(View.VISIBLE);
                     } else {
@@ -712,6 +706,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
         showRatingsDialog();
+        showBottomNavBadge();
     }
 
     @Override
@@ -894,7 +889,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     switchFrag(MarketplaceFrag.newInstance());
                     return true;
                 case R.id.navigation_services:
-                    switchFrag(MarketplaceFrag.newInstance());
+                    switchFrag(ServicesFrag.newInstance());
                     return true;
             }
             return false;
