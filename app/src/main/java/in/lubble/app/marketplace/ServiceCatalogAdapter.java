@@ -24,6 +24,7 @@ import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.marketplace.ServiceData;
+import in.lubble.app.profile.DmIntroBottomSheet;
 
 public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -70,11 +71,8 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                             ChatActivity.openForDm(context, dmId, null, serviceData.getTitle());
                         } else {
                             if (sellerData != null) {
-                                DmSellerBottomSheet.newInstance(
-                                        String.valueOf(sellerData.getId()),
-                                        sellerData.getName(),
-                                        sellerData.getPhotoUrl()
-                                ).show(supportFragmentManager, null);
+                                DmIntroBottomSheet.newInstance(String.valueOf(sellerData.getId()), sellerData.getName(), sellerData.getPhotoUrl(), sellerData.getPhone())
+                                        .show(supportFragmentManager, null);
                             } else {
                                 final IllegalArgumentException throwable = new IllegalArgumentException("Service Data is NULL when trying to request service price");
                                 Log.e(TAG, "onClick: ", throwable);

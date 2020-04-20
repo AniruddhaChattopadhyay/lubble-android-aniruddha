@@ -63,6 +63,7 @@ import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.profile.DmIntroBottomSheet;
 import in.lubble.app.utils.FullScreenImageActivity;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -546,11 +547,8 @@ public class ItemActivity extends BaseActivity {
                                         if (!TextUtils.isEmpty(dmId)) {
                                             ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
                                         } else {
-                                            DmSellerBottomSheet.newInstance(
-                                                    String.valueOf(sellerData.getId()),
-                                                    sellerData.getName(),
-                                                    sellerData.getPhotoUrl()
-                                            );
+                                            DmIntroBottomSheet.newInstance(String.valueOf(sellerData.getId()), sellerData.getName(), sellerData.getPhotoUrl(), sellerData.getPhone())
+                                                    .show(getSupportFragmentManager(), null);
                                         }
                                     }
                                 }
