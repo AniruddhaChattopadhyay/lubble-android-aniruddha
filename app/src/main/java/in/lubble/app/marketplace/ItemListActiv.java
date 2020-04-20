@@ -53,6 +53,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.analytics.AnalyticsEvents.CALL_BTN_CLICKED;
+import static in.lubble.app.analytics.AnalyticsEvents.MPLACE_CHAT_BTN_CLICKED;
 import static in.lubble.app.analytics.AnalyticsEvents.RECOMMEND_BTN_CLICK;
 
 public class ItemListActiv extends BaseActivity {
@@ -323,6 +324,9 @@ public class ItemListActiv extends BaseActivity {
                             }
                             DmIntroBottomSheet.newInstance(String.valueOf(sellerId), sellerData.getName(), sellerData.getPhotoUrl(), sellerData.getPhone())
                                     .show(getSupportFragmentManager(), null);
+                            final Bundle bundle = new Bundle();
+                            bundle.putInt("seller_id", sellerData.getId());
+                            Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, bundle, ItemListActiv.this);
                         }
                     });
                     if (sellerData.isCallEnabled()) {

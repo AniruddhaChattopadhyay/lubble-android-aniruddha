@@ -218,7 +218,10 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
 
         String dmId = pushRef.getKey();
 
-        Analytics.triggerEvent(NEW_DM_SENT, getContext());
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("isSeller", isSeller);
+        bundle.putString("receiverUid", receiverUid);
+        Analytics.triggerEvent(NEW_DM_SENT, bundle, getContext());
     }
 
 }
