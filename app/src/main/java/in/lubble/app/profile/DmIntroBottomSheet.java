@@ -89,7 +89,7 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
                 introMsgTil.setHint("Your query/requirements");
                 inviteBtn.setText("Send Message");
             } else {
-                hintTv.setText("You can send only one message before they accept your invitation to chat privately. Be meaningful &amp; respectful.");
+                hintTv.setText("You can send only one message before they accept your invitation to chat privately. Be meaningful & respectful.");
                 introMsgTil.setHint("Intro message");
                 inviteBtn.setText("INVITE TO CHAT");
             }
@@ -184,6 +184,8 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
         map.put("members", userMap);
         map.put("message", chatData);
 
+        sendAnalyticsEvent();
+
         if (isSeller) {
             final HashMap<String, Object> createSellerDmMap = new HashMap<>();
             createSellerDmMap.put("sellerId", receiverUid);
@@ -214,10 +216,13 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
             });
         } else {
             pushRef.setValue(map);
+            Toast.makeText(LubbleApp.getAppContext(), "Message sent", Toast.LENGTH_SHORT).show();
+            dismiss();
         }
+        //String dmId = pushRef.getKey();
+    }
 
-        String dmId = pushRef.getKey();
-
+    private void sendAnalyticsEvent() {
         Bundle bundle = new Bundle();
         bundle.putBoolean("isSeller", isSeller);
         bundle.putString("receiverUid", receiverUid);

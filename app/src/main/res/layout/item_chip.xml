@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/iv_icon"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         app:srcCompat="@drawable/ic_category" />
 
     <TextView
@@ -22,8 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/black"
-        android:maxWidth="80dp"
+        android:maxWidth="100dp"
         android:gravity="center"
-        tools:text="@tools:sample/lorem" />
+        tools:text="Emergency Services" />
 
 </LinearLayout>
