@@ -62,23 +62,6 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
         Client client = new Client("IIVL0B0EIY", "12ac422e05119422ec03224a9da738a7");
         final Index index = client.getIndex(BuildConfig.DEBUG ? "dev_mplace" : "prod_mplace");
 
-        /*try {
-            index.addObjectAsync(new JSONObject()
-                    .put("title", "Occasions")
-                    .put("id", 1994)
-                    .put("entity", "seller"), null);
-            index.addObjectAsync(new JSONObject()
-                    .put("title", "Bakery")
-                    .put("id", 1995)
-                    .put("entity", "category"), null);
-            index.addObjectAsync(new JSONObject()
-                    .put("title", "Rainbow Cake")
-                    .put("id", 1996)
-                    .put("entity", "item"), null);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-
         searchEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -113,6 +96,7 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
                     ItemSearchData itemSearchData = new ItemSearchData();
                     itemSearchData.setId(hit.getId());
                     itemSearchData.setName(hit.getTitle());
+                    itemSearchData.setEntity(hit.getEntity());
                     itemSearchDataList.add(itemSearchData);
                 }
                 adapter.addData(itemSearchDataList);

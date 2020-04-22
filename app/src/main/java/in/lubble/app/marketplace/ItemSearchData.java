@@ -7,6 +7,8 @@ public class ItemSearchData {
     private int id;
     @SerializedName("name")
     private String name;
+    @SerializedName("entity")
+    private String entity;
 
     public int getId() {
         return id;
@@ -22,5 +24,13 @@ public class ItemSearchData {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEntity() {
+        return entity;
+    }
+
+    public void setEntity(String entity) {
+        this.entity = entity;
     }
 }

@@ -365,7 +365,6 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/container_item_share"
                 android:layout_marginTop="8dp"
-                android:background="@drawable/rect_rounded_border"
                 android:orientation="vertical"
                 android:padding="8dp">
 
@@ -375,6 +374,7 @@
                     android:layout_height="wrap_content"
                     android:text="Description"
                     android:textColor="@color/black"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -382,7 +382,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    tools:text="@tools:sample/lorem/" />
+                    android:autoLink="web"
+                    android:lineSpacingExtra="8dp"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    tools:text="@tools:sample/lorem/random" />
 
             </LinearLayout>
 

@@ -5,12 +5,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import in.lubble.app.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import in.lubble.app.R;
 
 public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -39,6 +41,7 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
         final ItemSearchData itemSearchData = itemSearchDataList.get(position);
 
         viewHolder.itemNameTv.setText(itemSearchData.getName());
+        viewHolder.entityTv.setText("in " + itemSearchData.getEntity());
 
     }
 
@@ -60,19 +63,30 @@ public class SearchResultsAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View view;
-        final TextView itemNameTv;
+        final TextView itemNameTv, entityTv;
 
         ViewHolder(View view) {
             super(view);
             this.view = view;
             itemNameTv = view.findViewById(R.id.tv_item_name);
+            entityTv = view.findViewById(R.id.tv_entity);
             view.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
             final ItemSearchData itemSearchData = itemSearchDataList.get(getAdapterPosition());
-            context.startActivity(ItemActivity.getIntent(context, itemSearchData.getId()));
+            switch (itemSearchData.getEntity().toLowerCase()) {
+                case "seller":
+                    ItemListActiv.open(context, true, itemSearchData.getId());
+                    break;
+                case "item":
+                    context.startActivity(ItemActivity.getIntent(context, itemSearchData.getId()));
+                    break;
+                case "category":
+                    ItemListActiv.open(context, false, itemSearchData.getId());
+                    break;
+            }
         }
     }
 

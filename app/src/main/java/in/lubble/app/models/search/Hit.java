@@ -19,13 +19,13 @@ public class Hit {
     private String text;
     @SerializedName("title")
     @Expose
-    private String title;
+    private String title; //for mplace
     @SerializedName("id")
     @Expose
-    private int id;
+    private int id; //for mplace
     @SerializedName("entity")
     @Expose
-    private String entity;
+    private String entity; //for mplace
 
     public HighlightResult get_highlightResult() {
         return highlightResult;
