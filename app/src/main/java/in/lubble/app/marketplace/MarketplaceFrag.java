@@ -153,13 +153,6 @@ public class MarketplaceFrag extends Fragment {
             }
         });
 
-        if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
-            LubbleSharedPrefs.getInstance().setIsMplaceOpened(true);
-            if (getActivity() != null) {
-                ((MainActivity) getActivity()).removeMplaceBadge();
-            }
-        }
-
         viewAllTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -176,6 +169,13 @@ public class MarketplaceFrag extends Fragment {
         super.onResume();
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+
+            if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
+                LubbleSharedPrefs.getInstance().setIsMplaceOpened(true);
+                if (getActivity() != null) {
+                    ((MainActivity) getActivity()).removeMplaceBadge();
+                }
+            }
         }
     }
 
