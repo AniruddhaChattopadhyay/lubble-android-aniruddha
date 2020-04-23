@@ -21,6 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/iv_seller_pic"
         android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         tools:text="Seller Name" />
 
