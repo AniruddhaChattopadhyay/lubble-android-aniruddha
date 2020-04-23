@@ -90,13 +90,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/layout_cat1"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="14dp" />
+
+            <TextView
+                android:id="@+id/tv_nearby_products"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nearby Products"
+                android:layout_below="@id/layout_cat2"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:layout_marginTop="14dp"
+                android:layout_marginLeft="14dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_all_items"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/layout_cat2"
+                android:layout_below="@id/tv_nearby_products"
                 android:layout_marginLeft="8dp"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="2"

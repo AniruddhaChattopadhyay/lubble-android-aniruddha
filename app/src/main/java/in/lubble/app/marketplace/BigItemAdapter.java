@@ -8,17 +8,25 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import in.lubble.app.GlideRequests;
-import in.lubble.app.R;
-import in.lubble.app.models.marketplace.Item;
-import in.lubble.app.models.marketplace.PhotoData;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleApp;
+import in.lubble.app.R;
+import in.lubble.app.models.marketplace.Item;
+import in.lubble.app.models.marketplace.PhotoData;
+import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.models.marketplace.Item.ITEM_PRICING_PAID;
 
@@ -92,12 +100,17 @@ public class BigItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         final ArrayList<PhotoData> photoList = item.getPhotos();
         if (photoList.size() > 0) {
             viewHolder.itemPicProgressBar.setVisibility(View.GONE);
+            RequestOptions requestOptions = new RequestOptions();
+            requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0));
+            viewHolder.itemIv.setBackground(null);
             glide.load(photoList.get(0).getUrl())
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .thumbnail(0.1f)
+                    .apply(requestOptions)
                     .into(viewHolder.itemIv);
         } else {
             viewHolder.itemPicProgressBar.setVisibility(View.VISIBLE);
+            viewHolder.itemIv.setBackground(ContextCompat.getDrawable(LubbleApp.getAppContext(), R.drawable.rounded_rect_very_light_gray));
             glide.load("")
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .thumbnail(0.1f)

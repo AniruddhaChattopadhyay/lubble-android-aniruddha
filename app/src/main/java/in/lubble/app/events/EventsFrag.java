@@ -109,7 +109,9 @@ public class EventsFrag extends Fragment {
                         }
                     }
                 } else {
-                    Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
+                    if (getContext() != null) {
+                        Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
