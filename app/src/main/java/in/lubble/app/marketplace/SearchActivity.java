@@ -61,7 +61,7 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
         searchResultsRv.setAdapter(adapter);
 
         Client client = new Client("IIVL0B0EIY", "12ac422e05119422ec03224a9da738a7");
-        final Index index = client.getIndex(BuildConfig.DEBUG ? "dev_mplace" : "prod_mplace");
+        final Index index = client.getIndex(BuildConfig.FLAVOR.equalsIgnoreCase("dev") ? "dev_mplace" : "prod_mplace");
 
         searchEt.addTextChangedListener(new TextWatcher() {
             @Override

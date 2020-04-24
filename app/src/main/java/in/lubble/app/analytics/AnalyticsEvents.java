@@ -121,4 +121,7 @@ public class AnalyticsEvents {
 
     public static final String REPORT_MSG = "REPORT_MSG";
     public static final String MAP_SHARE = "MAP_SHARE";
+
+    public static final String EXISTING_SELLER_DIALOG_SHOWN = "EXISTING_SELLER_DIALOG_SHOWN";
+    public static final String EXISTING_SELLER_DIALOG_CLICK = "EXISTING_SELLER_DIALOG_CLICK";
 }

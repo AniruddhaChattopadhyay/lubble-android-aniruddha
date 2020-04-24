@@ -836,13 +836,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     final int sellerId = Integer.parseInt(existingSellerData.getSellerIdList().get(0));
                     LubbleSharedPrefs.getInstance().setSellerId(sellerId);
                     UiUtils.showBottomSheetAlertLight(MainActivity.this, getLayoutInflater(),
-                            "Your business is already on Lubble!", "\nWe have found a business associated with your phone number! You can now manage your business profile & start selling locally on Lubble!\n",
+                            "Your business is already on Lubble!", "\nWe have found a business associated with your phone number! You can now manage your business profile & start selling locally on Lubble for Free!\n",
                             R.drawable.ic_open, "Check My Business", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     ItemListActiv.open(MainActivity.this, true, sellerId);
+                                    Analytics.triggerEvent(AnalyticsEvents.EXISTING_SELLER_DIALOG_CLICK, MainActivity.this);
                                 }
                             });
+                    Analytics.triggerEvent(AnalyticsEvents.EXISTING_SELLER_DIALOG_SHOWN, MainActivity.this);
                 } else {
                     Log.e(TAG, "onResponse failed: " + response.body().toString());
                 }
