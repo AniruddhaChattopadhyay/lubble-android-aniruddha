@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.search.Hit;
@@ -75,8 +76,9 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s != null && s.length() > 3) {
-                    index.searchAsync(new Query(s.toString()), SearchActivity.this);
+                if (s != null && s.length() >= 3) {
+                    String lubbleId = BuildConfig.DEBUG ? "koramangala" : LubbleSharedPrefs.getInstance().getLubbleId();
+                    index.searchAsync(new Query(s.toString()).setFilters("lubbleID:" + lubbleId), SearchActivity.this);
                 } else {
                     adapter.clearAll();
                 }
