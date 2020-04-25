@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
-    android:versionCode="229"
-    android:versionName="1.18-2">
+    android:versionCode="230"
+    android:versionName="1.18-3">
 
     <application
         android:name=".LubbleApp"
