@@ -6,6 +6,38 @@
     tools:background="@color/white"
     tools:context="in.lubble.app.marketplace.MarketplaceFrag">
 
+    <RelativeLayout
+        android:id="@+id/layout_maintenance_mode"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tv_maintenance_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            app:drawableTopCompat="@drawable/ic_closed"
+            android:drawablePadding="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:gravity="center"
+            android:text="Market will be opening soon in your neighbourhood!\n\nOwn a local business?\nStart selling for free now"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_curved_arrow"
+            android:rotation="110"
+            android:layout_marginLeft="160dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="72dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/tv_maintenance_text"/>
+
+    </RelativeLayout>
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollview_content"
         android:layout_width="match_parent"

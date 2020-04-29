@@ -98,6 +98,7 @@ import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
 import static in.lubble.app.Constants.MAP_BTN_URL;
 import static in.lubble.app.Constants.MAP_HTML;
 import static in.lubble.app.Constants.MAP_SHARE_TEXT;
+import static in.lubble.app.Constants.MARKET_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.Constants.REWARDS_EXPLAINER;
@@ -584,6 +585,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MAP_BTN_URL, "https://mplace.typeform.com/to/M1OXzy?name=^^username&uid=^^uid");
         map.put(MAP_SHARE_TEXT, "Check out this map of open grocery stores in Koramangala: https://lubble.in/online-grocery-stores-map-koramangala/");
         map.put(EVENTS_MAINTENANCE_TEXT, "");
+        map.put(MARKET_MAINTENANCE_TEXT, "");
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
