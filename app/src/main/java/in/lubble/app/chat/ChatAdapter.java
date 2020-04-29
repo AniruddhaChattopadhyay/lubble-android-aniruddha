@@ -1131,7 +1131,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 Log.d(TAG, "inside if of handle video");
                 glide.load(chatData.getVidUrl()).override(18, 18).centerCrop().into(imageView);
                 downloadIv.setVisibility(View.VISIBLE);
-                playvid.setImageResource(R.drawable.ic_play_circle_outline_gray_24dp);
+                playvid.setImageResource(R.drawable.ic_file_download_black_24dp);
                 progressBar.setVisibility(View.GONE);
             } else {
                 RequestOptions requestOptions = new RequestOptions();
