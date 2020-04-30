@@ -90,6 +90,7 @@ import retrofit2.Response;
 
 import static in.lubble.app.Constants.DEFAULT_SHOP_PIC;
 import static in.lubble.app.Constants.DELIVERY_FEE;
+import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
 import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
@@ -585,6 +586,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MAP_BTN_URL, "https://mplace.typeform.com/to/M1OXzy?name=^^username&uid=^^uid");
         map.put(MAP_SHARE_TEXT, "Check out this map of open grocery stores in Koramangala: https://lubble.in/online-grocery-stores-map-koramangala/");
         map.put(EVENTS_MAINTENANCE_TEXT, "");
+        map.put(EVENTS_MAINTENANCE_IMG, "");
         map.put(MARKET_MAINTENANCE_TEXT, "");
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
