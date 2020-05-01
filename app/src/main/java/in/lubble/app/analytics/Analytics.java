@@ -3,7 +3,13 @@ package in.lubble.app.analytics;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.work.*;
+
+import androidx.work.BackoffPolicy;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatUser;
 import com.freshchat.consumer.sdk.exception.MethodNotAllowedException;
@@ -12,13 +18,14 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.segment.analytics.Properties;
 import com.segment.analytics.Traits;
-import in.lubble.app.BuildConfig;
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.utils.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.utils.StringUtils;
 
 public class Analytics {
 
@@ -155,6 +162,7 @@ public class Analytics {
             traits.putEmail(currentUser.getEmail());
             traits.put("Firebase ID", firebaseAuth.getUid());
             traits.put("Lubble Id", LubbleSharedPrefs.getInstance().getLubbleId());
+            traits.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
             traits.put("version name", BuildConfig.VERSION_NAME);
             traits.put("version code", BuildConfig.VERSION_CODE);
             com.segment.analytics.Analytics.with(context).identify(firebaseAuth.getUid(), traits, null);
