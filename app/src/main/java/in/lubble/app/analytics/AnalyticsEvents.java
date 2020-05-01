@@ -124,4 +124,6 @@ public class AnalyticsEvents {
 
     public static final String EXISTING_SELLER_DIALOG_SHOWN = "EXISTING_SELLER_DIALOG_SHOWN";
     public static final String EXISTING_SELLER_DIALOG_CLICK = "EXISTING_SELLER_DIALOG_CLICK";
+
+    public static final String DOWNLOAD_VIDEO = "DOWNLOAD_VIDEO";
 }
