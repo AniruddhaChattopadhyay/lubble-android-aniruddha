@@ -12,4 +12,13 @@
         app:showAsAction="always"
         tools:visible="true" />
 
+    <item
+        android:id="@+id/action_unmute"
+        android:icon="@drawable/ic_volume_up_black_24dp"
+        app:iconTint="@color/black"
+        android:title="Mute Notifications"
+        android:visible="false"
+        app:showAsAction="always"
+        tools:visible="true" />
+
 </menu>

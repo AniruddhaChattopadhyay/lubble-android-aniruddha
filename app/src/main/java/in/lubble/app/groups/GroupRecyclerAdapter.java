@@ -29,6 +29,8 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
+import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
+import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.notifications.MutedChatsSharedPrefs.isGroupMuted;
@@ -417,7 +419,13 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_group, menu);
-                menu.findItem(R.id.action_mute).setVisible(true);
+                MenuItem snoozeItem = menu.findItem(R.id.action_mute);
+                if (NotifUtils.isGroupSnoozed(selectedGroupId)) {
+                    snoozeItem.setIcon(R.drawable.ic_volume_up_black_24dp);
+                } else {
+                    snoozeItem.setIcon(R.drawable.ic_volume_off_black_24dp);
+                }
+                snoozeItem.setVisible(true);
                 return true;
             }
 
@@ -432,7 +440,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                     case R.id.action_mute:
                         if (null != selectedGroupId) {
                             Toast.makeText(LubbleApp.getAppContext(), "hollaa", Toast.LENGTH_SHORT).show();
-                            //todo
+                            if (NotifUtils.isGroupSnoozed(selectedGroupId)) {
+                                SnoozedGroupsSharedPrefs.getInstance().getPreferences().edit().remove(selectedGroupId).apply();
+                            } else {
+                                // todo open bottom sheet
+                            }
                         }
                         break;
                 }
