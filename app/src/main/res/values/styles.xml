@@ -8,6 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:datePickerStyle">@style/datepicker</item>
+        <item name="actionModeStyle">@style/CustomActionModeStyle</item>
+    </style>
+
+    <style name="CustomActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
+        <item name="background">@color/white</item>
     </style>
 
     <style name="AppTheme.WhiteAccent">
