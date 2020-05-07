@@ -32,8 +32,8 @@ import in.lubble.app.chat.SnoozeGroupBottomSheet;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
+import in.lubble.app.utils.CompleteListener;
 import in.lubble.app.utils.NotifUtils;
-import in.lubble.app.utils.SuccessListener;
 import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.utils.DateTimeUtils.getHumanTimestamp;
@@ -428,7 +428,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 if (NotifUtils.isGroupSnoozed(selectedGroupId)) {
                     snoozeItem.setIcon(R.drawable.ic_volume_up_black_24dp);
                 } else {
-                    snoozeItem.setIcon(R.drawable.ic_volume_off_black_24dp);
+                    snoozeItem.setIcon(R.drawable.ic_mute);
                 }
                 snoozeItem.setVisible(true);
                 return true;
@@ -436,12 +436,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                MenuItem snoozeItem = menu.findItem(R.id.action_mute);
-                if (NotifUtils.isGroupSnoozed(selectedGroupId)) {
-                    snoozeItem.setIcon(R.drawable.ic_volume_up_black_24dp);
-                } else {
-                    snoozeItem.setIcon(R.drawable.ic_volume_off_black_24dp);
-                }
                 return false;
             }
 
@@ -456,9 +450,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                                 actionMode = null;
                                 Toast.makeText(LubbleApp.getAppContext(), "Un-Snoozed Chat", Toast.LENGTH_SHORT).show();
                             } else {
-                                SnoozeGroupBottomSheet.newInstance(selectedGroupId, new SuccessListener() {
+                                SnoozeGroupBottomSheet.newInstance(selectedGroupId, new CompleteListener() {
                                     @Override
-                                    public void OnSuccess() {
+                                    public void onComplete(boolean isSuccess) {
                                         notifyItemChanged(highlightedPos);
                                         mode.finish();
                                     }
@@ -472,7 +466,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             @Override
             public void onDestroyActionMode(ActionMode mode) {
-                selectedGroupId = null;
+                //selectedGroupId = null;
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;

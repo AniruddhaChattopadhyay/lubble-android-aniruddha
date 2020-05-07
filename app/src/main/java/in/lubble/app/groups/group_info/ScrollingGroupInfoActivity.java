@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -51,9 +52,9 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.user_search.UserSearchActivity;
+import in.lubble.app.utils.CompleteListener;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.NotifUtils;
-import in.lubble.app.utils.SuccessListener;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -122,12 +123,16 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
 
         muteSwitch.setChecked(NotifUtils.isGroupSnoozed(groupId));
 
-        snoozeNotifsTv.setOnClickListener(new View.OnClickListener() {
+        muteSwitch.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View v) {
-                toggleMuteNotifs();
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    toggleMuteNotifs();
+                }
+                return true;
             }
         });
+
         muteNotifsContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,11 +149,11 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
             muteSwitch.setChecked(false);
             Toast.makeText(this, R.string.unmuted, Toast.LENGTH_SHORT).show();
         } else {
-            SnoozeGroupBottomSheet.newInstance(groupId, new SuccessListener() {
+            SnoozeGroupBottomSheet.newInstance(groupId, new CompleteListener() {
                 @Override
-                public void OnSuccess() {
+                public void onComplete(boolean isSuccess) {
                     if (!isFinishing()) {
-                        muteSwitch.setChecked(true);
+                        muteSwitch.setChecked(isSuccess);
                     }
                 }
             }).show(getSupportFragmentManager(), null);

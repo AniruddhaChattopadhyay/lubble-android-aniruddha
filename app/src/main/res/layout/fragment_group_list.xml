@@ -65,7 +65,7 @@
             android:id="@+id/iv_notif_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:srcCompat="@drawable/ic_volume_off_black_24dp"
+            app:srcCompat="@drawable/ic_mute"
             android:layout_below="@id/tv_last_msg_time"
             app:layout_constraintTop_toBottomOf="@id/tv_last_msg_time"
             app:layout_constraintRight_toLeftOf="@id/tv_unread_count"
@@ -84,6 +84,7 @@
             android:textColor="@color/white"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_last_msg_time"
+            app:layout_constraintRight_toLeftOf="@id/iv_pin"
             android:visibility="gone"
             tools:text="5"
             tools:visibility="gone" />
@@ -95,9 +96,10 @@
             android:layout_below="@id/tv_unread_count"
             android:tint="@color/dark_gray"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_unread_count"
+            app:layout_constraintTop_toBottomOf="@id/tv_last_msg_time"
+            android:layout_marginTop="8dp"
             android:visibility="gone"
-            tools:visibility="gone"
+            tools:visibility="visible"
             app:srcCompat="@drawable/ic_pin" />
 
         <TextView

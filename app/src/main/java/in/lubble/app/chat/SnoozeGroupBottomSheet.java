@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +22,7 @@ import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
-import in.lubble.app.utils.SuccessListener;
+import in.lubble.app.utils.CompleteListener;
 
 import static in.lubble.app.notifications.SnoozedGroupsSharedPrefs.DISABLED_NOTIFS_TS;
 
@@ -30,13 +31,13 @@ public class SnoozeGroupBottomSheet extends BottomSheetDialogFragment {
     private static final String ARG_GROUP_ID = BuildConfig.APPLICATION_ID + "ARG_GROUP_ID";
     private static final String ARG_INTERFACE = BuildConfig.APPLICATION_ID + "ARG_INTERFACE";
     @Nullable
-    private SuccessListener successListener;
+    private CompleteListener completeListener;
 
-    public static SnoozeGroupBottomSheet newInstance(String groupId, SuccessListener successListener) {
+    public static SnoozeGroupBottomSheet newInstance(String groupId, CompleteListener completeListener) {
         final SnoozeGroupBottomSheet fragment = new SnoozeGroupBottomSheet();
         final Bundle args = new Bundle();
         args.putString(ARG_GROUP_ID, groupId);
-        args.putSerializable(ARG_INTERFACE, successListener);
+        args.putSerializable(ARG_INTERFACE, completeListener);
         fragment.setArguments(args);
         return fragment;
     }
@@ -53,7 +54,7 @@ public class SnoozeGroupBottomSheet extends BottomSheetDialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         final RecyclerView recyclerView = view.findViewById(R.id.rv_snooze_list);
         String groupId = getArguments().getString(ARG_GROUP_ID);
-        this.successListener = (SuccessListener) getArguments().getSerializable(ARG_INTERFACE);
+        this.completeListener = (CompleteListener) getArguments().getSerializable(ARG_INTERFACE);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(new SnoozePeriodAdapter(groupId));
@@ -91,8 +92,8 @@ public class SnoozeGroupBottomSheet extends BottomSheetDialogFragment {
             }
             SnoozedGroupsSharedPrefs.getInstance().getPreferences().edit().putLong(groupId, snoozeMillis).apply();
             Toast.makeText(LubbleApp.getAppContext(), "Snoozed", Toast.LENGTH_SHORT).show();
-            if (successListener != null) {
-                successListener.OnSuccess();
+            if (completeListener != null) {
+                completeListener.onComplete(true);
             }
             dismiss();
         }
@@ -129,4 +130,10 @@ public class SnoozeGroupBottomSheet extends BottomSheetDialogFragment {
 
     }
 
+
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog) {
+        super.onCancel(dialog);
+        completeListener.onComplete(false);
+    }
 }
