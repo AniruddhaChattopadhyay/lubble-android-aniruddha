@@ -583,7 +583,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MAP_BTN_URL, "https://mplace.typeform.com/to/M1OXzy?name=^^username&uid=^^uid");
         map.put(MAP_SHARE_TEXT, "Check out this map of open grocery stores in Koramangala: https://lubble.in/online-grocery-stores-map-koramangala/");
         map.put(EVENTS_MAINTENANCE_TEXT, "");
-        map.put(IS_NOTIF_SNOOZE_ON, false);
+        map.put(IS_NOTIF_SNOOZE_ON, true);
 
         firebaseRemoteConfig.setDefaults(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {

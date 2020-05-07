@@ -157,10 +157,10 @@ public class NotifUtils {
             if (!TextUtils.isEmpty(map.getValue().getConversationTitle())) {
                 // not a DM, add actions
                 addActionReply(context, groupId, builder);
-                addActionMarkAsRead(context, groupId, builder);
                 if (FirebaseRemoteConfig.getInstance().getBoolean(IS_NOTIF_SNOOZE_ON)) {
                     addActionSnooze(context, groupId, builder);
                 }
+                addActionMarkAsRead(context, groupId, builder);
             }
 
             if (StringUtils.isValidString(groupDpUrl)) {
