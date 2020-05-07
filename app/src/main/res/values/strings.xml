@@ -117,6 +117,7 @@
     <string name="muted">Snoozed Notifications</string>
     <string name="unmuted">Un-Snoozed Notifications</string>
     <string name="all_are_you_sure">Are you sure?</string>
+    <string name="leave_group_ques">Leave Group?</string>
     <string name="leave_group_desc">You will no longer be a part of this group</string>
     <string name="leave_group_title">Leave Group</string>
     <string name="leaving_group_title">Leaving Group</string>

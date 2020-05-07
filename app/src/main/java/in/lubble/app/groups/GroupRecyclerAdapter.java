@@ -1,5 +1,7 @@
 package in.lubble.app.groups;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -13,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
@@ -20,15 +23,22 @@ import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.SnoozeGroupBottomSheet;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
@@ -425,12 +435,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
                 mode.getMenuInflater().inflate(R.menu.menu_group, menu);
                 MenuItem snoozeItem = menu.findItem(R.id.action_mute);
+                MenuItem exitGroupItem = menu.findItem(R.id.action_exit);
                 if (NotifUtils.isGroupSnoozed(selectedGroupId)) {
                     snoozeItem.setIcon(R.drawable.ic_volume_up_black_24dp);
                 } else {
                     snoozeItem.setIcon(R.drawable.ic_mute);
                 }
                 snoozeItem.setVisible(true);
+                exitGroupItem.setVisible(!groupDataList.get(getAdapterPosition()).getIsDm());
                 return true;
             }
 
@@ -460,6 +472,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                             }
                         }
                         break;
+                    case R.id.action_exit:
+                        showConfirmationDialog(itemView.getContext(), selectedGroupId);
+                        actionMode.finish();
+                        actionMode = null;
+                        break;
                 }
                 return true;
             }
@@ -474,6 +491,44 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
         };
 
+    }
+
+    private void showConfirmationDialog(final Context context, final String selectedGroupId) {
+        final AlertDialog alertDialog = new AlertDialog.Builder(context).create();
+        alertDialog.setTitle(context.getString(R.string.leave_group_ques));
+        alertDialog.setMessage(context.getString(R.string.leave_group_desc));
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, context.getString(R.string.leave_group_title), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.dismiss();
+                leaveGroup(context, selectedGroupId);
+            }
+        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.all_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
+    }
+
+    private void leaveGroup(final Context context, final String groupId) {
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(RealtimeDbHelper.getUserGroupPath() + "/" + groupId, null);
+        childUpdates.put(
+                RealtimeDbHelper.getLubbleGroupPath() + "/" + groupId + "/members/" + FirebaseAuth.getInstance().getUid(),
+                null
+        );
+
+        FirebaseDatabase.getInstance().getReference().updateChildren(childUpdates, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (!fragmentManager.isStateSaved() && !fragmentManager.isDestroyed()) {
+                    removeGroup(selectedGroupId);
+                }
+            }
+        });
     }
 
     class PublicGroupHeaderViewHolder extends RecyclerView.ViewHolder {
