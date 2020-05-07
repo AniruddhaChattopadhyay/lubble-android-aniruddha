@@ -450,7 +450,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                                 actionMode = null;
                                 Toast.makeText(LubbleApp.getAppContext(), "Un-Snoozed Chat", Toast.LENGTH_SHORT).show();
                             } else {
-                                SnoozeGroupBottomSheet.newInstance(selectedGroupId, new CompleteListener() {
+                                SnoozeGroupBottomSheet.newInstance(selectedGroupId, "group_list", new CompleteListener() {
                                     @Override
                                     public void onComplete(boolean isSuccess) {
                                         notifyItemChanged(highlightedPos);

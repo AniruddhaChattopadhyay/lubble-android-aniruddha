@@ -149,7 +149,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
             muteSwitch.setChecked(false);
             Toast.makeText(this, R.string.unmuted, Toast.LENGTH_SHORT).show();
         } else {
-            SnoozeGroupBottomSheet.newInstance(groupId, new CompleteListener() {
+            SnoozeGroupBottomSheet.newInstance(groupId, "group_info", new CompleteListener() {
                 @Override
                 public void onComplete(boolean isSuccess) {
                     if (!isFinishing()) {

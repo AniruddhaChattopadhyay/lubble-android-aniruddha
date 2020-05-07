@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.utils.CompleteListener;
 
@@ -30,14 +32,17 @@ public class SnoozeGroupBottomSheet extends BottomSheetDialogFragment {
 
     private static final String ARG_GROUP_ID = BuildConfig.APPLICATION_ID + "ARG_GROUP_ID";
     private static final String ARG_INTERFACE = BuildConfig.APPLICATION_ID + "ARG_INTERFACE";
+    private static final String ARG_SNOOZE_SRC = BuildConfig.APPLICATION_ID + "ARG_SNOOZE_SRC";
     @Nullable
     private CompleteListener completeListener;
+    private String analyticsSource;
 
-    public static SnoozeGroupBottomSheet newInstance(String groupId, CompleteListener completeListener) {
+    public static SnoozeGroupBottomSheet newInstance(String groupId, String src, CompleteListener completeListener) {
         final SnoozeGroupBottomSheet fragment = new SnoozeGroupBottomSheet();
         final Bundle args = new Bundle();
         args.putString(ARG_GROUP_ID, groupId);
         args.putSerializable(ARG_INTERFACE, completeListener);
+        args.putString(ARG_SNOOZE_SRC, src);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,6 +60,7 @@ public class SnoozeGroupBottomSheet extends BottomSheetDialogFragment {
         final RecyclerView recyclerView = view.findViewById(R.id.rv_snooze_list);
         String groupId = getArguments().getString(ARG_GROUP_ID);
         this.completeListener = (CompleteListener) getArguments().getSerializable(ARG_INTERFACE);
+        analyticsSource = getArguments().getString(ARG_SNOOZE_SRC);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(new SnoozePeriodAdapter(groupId));
@@ -95,6 +101,12 @@ public class SnoozeGroupBottomSheet extends BottomSheetDialogFragment {
             if (completeListener != null) {
                 completeListener.onComplete(true);
             }
+
+            Bundle bundle = new Bundle();
+            bundle.putString("src", analyticsSource);
+            bundle.putString("group_id", groupId);
+            Analytics.triggerEvent(AnalyticsEvents.GROUP_SNOOZED, bundle, getContext());
+
             dismiss();
         }
     }

@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
@@ -113,8 +114,11 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
             final String groupId = intent.getStringExtra("snooze.groupId");
             if (groupId != null) {
                 SnoozedGroupsSharedPrefs.getInstance().getPreferences().edit().putLong(groupId, System.currentTimeMillis() + TimeUnit.HOURS.toMillis(4)).apply();
-                NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_GROUP_SNOOZE_CLICKED, groupId, context);
                 deleteUnreadMsgsForGroupId(groupId, context);
+                Bundle bundle = new Bundle();
+                bundle.putString("src", "notif");
+                bundle.putString("group_id", groupId);
+                Analytics.triggerEvent(AnalyticsEvents.GROUP_SNOOZED, bundle, context);
             }
         }
     }
