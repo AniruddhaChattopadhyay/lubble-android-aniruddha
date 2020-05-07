@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
@@ -126,7 +125,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
-        adapter = new GroupRecyclerAdapter(mListener);
+        adapter = new GroupRecyclerAdapter(mListener, getFragmentManager());
         groupsRecyclerView.setAdapter(adapter);
         DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL);
         groupsRecyclerView.addItemDecoration(itemDecor);
@@ -590,7 +589,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     @Override
     public ActionMode onActionModeEnabled(@NonNull ActionMode.Callback callback) {
         if (getActivity() != null) {
-            return ((AppCompatActivity) getActivity()).startSupportActionMode(callback);
+            return ((MainActivity) getActivity()).toggleActionMode(true, callback);
         }
         return null;
     }
@@ -615,6 +614,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         }
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+            ((MainActivity) getActivity()).toggleActionMode(false, null);
         }
     }
 

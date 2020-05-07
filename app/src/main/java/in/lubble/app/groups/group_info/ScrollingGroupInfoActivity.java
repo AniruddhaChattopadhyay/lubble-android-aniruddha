@@ -8,7 +8,13 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -16,26 +22,38 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.*;
-import in.lubble.app.R;
-import in.lubble.app.*;
-import in.lubble.app.chat.ShareActiv;
-import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.GroupData;
-import in.lubble.app.models.ProfileData;
-import in.lubble.app.notifications.MutedChatsSharedPrefs;
-import in.lubble.app.user_search.UserSearchActivity;
-import in.lubble.app.utils.FullScreenImageActivity;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import in.lubble.app.BaseActivity;
+import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
+import in.lubble.app.R;
+import in.lubble.app.chat.ShareActiv;
+import in.lubble.app.chat.SnoozeGroupBottomSheet;
+import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
+import in.lubble.app.user_search.UserSearchActivity;
+import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.NotifUtils;
+import in.lubble.app.utils.SuccessListener;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -54,7 +72,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
     private LinearLayout inviteMembersContainer;
     private LinearLayout shareGroupContainer;
     private RecyclerView recyclerView;
-    private TextView leaveGroupTV;
+    private TextView leaveGroupTV, snoozeNotifsTv;
     private RelativeLayout muteNotifsContainer;
     private SwitchCompat muteSwitch;
     private GroupMembersAdapter adapter;
@@ -88,6 +106,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
         leaveGroupTV = findViewById(R.id.tv_leave_group);
         muteNotifsContainer = findViewById(R.id.mute_container);
         muteSwitch = findViewById(R.id.switch_mute);
+        snoozeNotifsTv = findViewById(R.id.tv_snooze_notifs);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new GroupMembersAdapter(GlideApp.with(this));
@@ -101,10 +120,9 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
             }
         });
 
-        boolean isMuted = MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(groupId, false);
-        muteSwitch.setChecked(isMuted);
+        muteSwitch.setChecked(NotifUtils.isGroupSnoozed(groupId));
 
-        muteSwitch.setOnClickListener(new View.OnClickListener() {
+        snoozeNotifsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 toggleMuteNotifs();
@@ -121,15 +139,19 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
     }
 
     private void toggleMuteNotifs() {
-        boolean isMuted = MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(groupId, false);
-        if (isMuted) {
-            MutedChatsSharedPrefs.getInstance().getPreferences().edit().remove(groupId).apply();
+        if (NotifUtils.isGroupSnoozed(groupId)) {
+            SnoozedGroupsSharedPrefs.getInstance().getPreferences().edit().remove(groupId).apply();
             muteSwitch.setChecked(false);
             Toast.makeText(this, R.string.unmuted, Toast.LENGTH_SHORT).show();
         } else {
-            MutedChatsSharedPrefs.getInstance().getPreferences().edit().putBoolean(groupId, true).apply();
-            muteSwitch.setChecked(true);
-            Toast.makeText(this, R.string.muted, Toast.LENGTH_SHORT).show();
+            SnoozeGroupBottomSheet.newInstance(groupId, new SuccessListener() {
+                @Override
+                public void OnSuccess() {
+                    if (!isFinishing()) {
+                        muteSwitch.setChecked(true);
+                    }
+                }
+            }).show(getSupportFragmentManager(), null);
         }
     }
 

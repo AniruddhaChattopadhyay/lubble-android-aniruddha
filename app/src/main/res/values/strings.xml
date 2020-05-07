@@ -114,8 +114,8 @@
     <string name="event_maybe_count">%s%s</string>
     <string name="event_maybe_suffix">%d maybe</string>
     <string name="event_linked_group_hint">Linked Group: %s</string>
-    <string name="muted">MUTED</string>
-    <string name="unmuted">UN-MUTED</string>
+    <string name="muted">Snoozed Notifications</string>
+    <string name="unmuted">Un-Snoozed Notifications</string>
     <string name="all_are_you_sure">Are you sure?</string>
     <string name="leave_group_desc">You will no longer be a part of this group</string>
     <string name="leave_group_title">Leave Group</string>

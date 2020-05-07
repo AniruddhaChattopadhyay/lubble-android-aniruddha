@@ -19,6 +19,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
@@ -111,7 +112,7 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
         } else if ((intent != null && intent.getAction().equalsIgnoreCase(ACTION_SNOOZE) && intent.hasExtra("snooze.groupId"))) {
             final String groupId = intent.getStringExtra("snooze.groupId");
             if (groupId != null) {
-                SnoozedGroupsSharedPrefs.getInstance().getPreferences().edit().putLong(groupId, System.currentTimeMillis()).apply();
+                SnoozedGroupsSharedPrefs.getInstance().getPreferences().edit().putLong(groupId, System.currentTimeMillis() + TimeUnit.HOURS.toMillis(4)).apply();
                 NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_GROUP_SNOOZE_CLICKED, groupId, context);
                 deleteUnreadMsgsForGroupId(groupId, context);
             }

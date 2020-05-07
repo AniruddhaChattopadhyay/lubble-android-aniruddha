@@ -17,6 +17,7 @@ import androidx.appcompat.view.ActionMode;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -27,13 +28,14 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.chat.SnoozeGroupBottomSheet;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.utils.NotifUtils;
+import in.lubble.app.utils.SuccessListener;
 import in.lubble.app.utils.UiUtils;
 
-import static in.lubble.app.notifications.MutedChatsSharedPrefs.isGroupMuted;
 import static in.lubble.app.utils.DateTimeUtils.getHumanTimestamp;
 import static in.lubble.app.utils.NotifUtils.isGroupSnoozed;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -51,17 +53,19 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     // <GroupID, UserGroupData>
     private final HashMap<String, UserGroupData> userGroupDataMap;
     private final OnListFragmentInteractionListener mListener;
+    private final FragmentManager fragmentManager;
     private int posToFlash = -1;
     private GroupDataFilter filter;
     @Nullable
     private String selectedGroupId = null;
     private int highlightedPos = -1;
 
-    public GroupRecyclerAdapter(OnListFragmentInteractionListener listener) {
+    GroupRecyclerAdapter(OnListFragmentInteractionListener listener, FragmentManager fragmentManager) {
         groupDataList = new ArrayList<>();
         groupDataListCopy = new ArrayList<>();
         userGroupDataMap = new HashMap<>();
         mListener = listener;
+        this.fragmentManager = fragmentManager;
     }
 
     @Override
@@ -110,7 +114,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                     .into(groupViewHolder.iconIv);
 
             groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
-            groupViewHolder.notifStatusIv.setVisibility(isGroupSnoozed(groupData.getId()) || isGroupMuted(groupData.getId()) ? View.VISIBLE : View.GONE);
+            groupViewHolder.notifStatusIv.setVisibility(isGroupSnoozed(groupData.getId()) ? View.VISIBLE : View.GONE);
 
             groupViewHolder.titleTv.setText(groupData.getTitle());
             final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
@@ -397,6 +401,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 @Override
                 public boolean onLongClick(View v) {
                     if (getAdapterPosition() != highlightedPos) {
+                        selectedGroupId = groupDataList.get(getAdapterPosition()).getId();
                         actionMode = mListener.onActionModeEnabled(actionModeCallbacks);
                         itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.very_light_gray));
                         if (highlightedPos != -1) {
@@ -404,10 +409,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                             notifyItemChanged(highlightedPos);
                         }
                         highlightedPos = getAdapterPosition();
-                        selectedGroupId = groupDataList.get(getAdapterPosition()).getId();
                     } else {
                         if (actionMode != null) {
                             actionMode.finish();
+                            actionMode = null;
                         }
                     }
                     return true;
@@ -431,24 +436,37 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             @Override
             public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                MenuItem snoozeItem = menu.findItem(R.id.action_mute);
+                if (NotifUtils.isGroupSnoozed(selectedGroupId)) {
+                    snoozeItem.setIcon(R.drawable.ic_volume_up_black_24dp);
+                } else {
+                    snoozeItem.setIcon(R.drawable.ic_volume_off_black_24dp);
+                }
                 return false;
             }
 
             @Override
-            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            public boolean onActionItemClicked(final ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.action_mute:
                         if (null != selectedGroupId) {
-                            Toast.makeText(LubbleApp.getAppContext(), "hollaa", Toast.LENGTH_SHORT).show();
                             if (NotifUtils.isGroupSnoozed(selectedGroupId)) {
                                 SnoozedGroupsSharedPrefs.getInstance().getPreferences().edit().remove(selectedGroupId).apply();
+                                actionMode.finish();
+                                actionMode = null;
+                                Toast.makeText(LubbleApp.getAppContext(), "Un-Snoozed Chat", Toast.LENGTH_SHORT).show();
                             } else {
-                                // todo open bottom sheet
+                                SnoozeGroupBottomSheet.newInstance(selectedGroupId, new SuccessListener() {
+                                    @Override
+                                    public void OnSuccess() {
+                                        notifyItemChanged(highlightedPos);
+                                        mode.finish();
+                                    }
+                                }).show(fragmentManager, null);
                             }
                         }
                         break;
                 }
-                mode.finish();
                 return true;
             }
 

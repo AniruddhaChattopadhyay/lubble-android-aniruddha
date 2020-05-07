@@ -13,6 +13,9 @@ public class SnoozedGroupsSharedPrefs {
     private final SharedPreferences preferences;
     private final String SNOOZED_GROUPS_SHARED_PREFERENCE_KEY = "in.lubble.SnoozedGroupsSharedPrefs";
 
+    // if a group is snoozed till this TS then notifs are permanently disabled
+    public static final long DISABLED_NOTIFS_TS = 1337;
+
     private SnoozedGroupsSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(SNOOZED_GROUPS_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
     }

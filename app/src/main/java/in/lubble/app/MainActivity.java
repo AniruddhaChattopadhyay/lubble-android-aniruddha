@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -135,6 +136,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final int nav_item_leaderboard = 311;
     private Menu navMenu;
     private GroupListFragment groupListFragment;
+    private ActionMode actionMode;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -263,6 +265,17 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public void toggleSearchInToolbar(boolean show) {
         toggleSearchViewVisibility(false);
         toolbarSearchTv.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public ActionMode toggleActionMode(boolean show, ActionMode.Callback callback) {
+        if (show && callback != null) {
+            return actionMode = startSupportActionMode(callback);
+        } else {
+            if (actionMode != null) {
+                actionMode.finish();
+            }
+        }
+        return null;
     }
 
     private void toggleSearchViewVisibility(boolean show) {

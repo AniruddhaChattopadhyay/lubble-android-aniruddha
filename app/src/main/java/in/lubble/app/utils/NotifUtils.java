@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
@@ -52,6 +51,7 @@ import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_MARK_
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_REPLY;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_SNOOZE;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.KEY_TEXT_REPLY;
+import static in.lubble.app.notifications.SnoozedGroupsSharedPrefs.DISABLED_NOTIFS_TS;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 
 /**
@@ -392,8 +392,8 @@ public class NotifUtils {
     }
 
     public static boolean isGroupSnoozed(String groupId) {
-        long snoozeTs = SnoozedGroupsSharedPrefs.getInstance().getPreferences().getLong(groupId, 0L);
-        return System.currentTimeMillis() - snoozeTs <= TimeUnit.HOURS.toMillis(4);
+        long snoozedTill = SnoozedGroupsSharedPrefs.getInstance().getPreferences().getLong(groupId, 0L);
+        return (System.currentTimeMillis() <= snoozedTill) || snoozedTill == DISABLED_NOTIFS_TS;
     }
 
     public static void sendNotifAnalyticEvent(String eventName, Map<String, String> dataMap, Context context) {
