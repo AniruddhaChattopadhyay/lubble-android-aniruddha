@@ -86,6 +86,7 @@ import it.sephiroth.android.library.xtooltip.Tooltip;
 import static in.lubble.app.Constants.DELIVERY_FEE;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
 import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
 import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
 import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
@@ -582,6 +583,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MAP_BTN_URL, "https://mplace.typeform.com/to/M1OXzy?name=^^username&uid=^^uid");
         map.put(MAP_SHARE_TEXT, "Check out this map of open grocery stores in Koramangala: https://lubble.in/online-grocery-stores-map-koramangala/");
         map.put(EVENTS_MAINTENANCE_TEXT, "");
+        map.put(IS_NOTIF_SNOOZE_ON, false);
 
         firebaseRemoteConfig.setDefaults(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {

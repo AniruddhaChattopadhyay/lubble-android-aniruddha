@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import in.lubble.app.notifications.NotifActionBroadcastRecvr;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 
+import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_MARK_AS_READ;
@@ -156,7 +158,9 @@ public class NotifUtils {
                 // not a DM, add actions
                 addActionReply(context, groupId, builder);
                 addActionMarkAsRead(context, groupId, builder);
-                addActionSnooze(context, groupId, builder);
+                if (FirebaseRemoteConfig.getInstance().getBoolean(IS_NOTIF_SNOOZE_ON)) {
+                    addActionSnooze(context, groupId, builder);
+                }
             }
 
             if (StringUtils.isValidString(groupDpUrl)) {
