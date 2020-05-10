@@ -1138,7 +1138,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 requestOptions.placeholder(R.color.black);
                 requestOptions.error(R.color.black);
                 playvid.setImageResource(R.drawable.ic_play_circle_outline_gray_24dp);
-
                 glide.load(chatData.getVidUrl()).listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {

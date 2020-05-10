@@ -36,6 +36,7 @@ import com.google.firebase.perf.metrics.Trace;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -91,8 +92,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private int totalUnreadCount = 0;
     private Query query, dmQuery;
     private ChildEventListener childEventListener, userGroupsListener, userDmsListener, sellerDmsListener;
+    private ValueEventListener queryValueEventListener,dmquerValueEventListner;
     private Trace groupTrace;
-
+    public static List<GroupData> groupDataAddedList;
+    public static Boolean isInitialGroupAddComplete = false;
+    long time_1 = -1;
+    long time_2 = -1;
     public GroupListFragment() {
     }
 
@@ -158,13 +163,26 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 }
             }
         });
-
+//        adapter.clearGroups();
+//        progressBar.setVisibility(View.VISIBLE);
+//        toggleSearch(false);
+//        groupsRecyclerView.setVisibility(View.INVISIBLE);
+//        exploreContainer.setVisibility(View.GONE);
+//        totalUnreadCount = 0;
+//        syncAllGroups();
+//        if (getActivity() != null && getActivity() instanceof MainActivity) {
+//            ((MainActivity) getActivity()).toggleSearchInToolbar(true);
+//        }
+//        setupSlider();
+//        fetchHomeBanners();
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        time_1 = -1;
+        isInitialGroupAddComplete = false;
         adapter.clearGroups();
         progressBar.setVisibility(View.VISIBLE);
         toggleSearch(false);
@@ -185,9 +203,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
         dmQuery = RealtimeDbHelper.getDmsRef().orderByChild("lastMessageTimestamp");
         childEventListener = new ChildEventListener() {
-
             @Override
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
+//                if(time_1==-1)
+//                    time_1 = System.currentTimeMillis();
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 if (groupData != null) {
                     if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && groupData.getId() != null) {
@@ -228,8 +247,108 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             }
         };
-        query.addChildEventListener(childEventListener);
-        dmQuery.addChildEventListener(dmChildEventListener);
+        groupDataAddedList = new ArrayList<>();
+        queryValueEventListener =  new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                time_1 = System.currentTimeMillis();
+                for(DataSnapshot childSnapshot:dataSnapshot.getChildren()){
+                    GroupData groupData = childSnapshot.getValue(GroupData.class);
+                    if (groupData != null) {
+                        if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && groupData.getId() != null) {
+                            // joined group
+                            groupDataAddedList.add(groupData);
+                            adapter.addGroupToTop(groupData);
+                        } else if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
+                                && groupData.getMembers().size() > 0) {
+                            // non-joined public groups with non-zero members
+                            groupDataAddedList.add(groupData);
+                            adapter.addPublicGroupToTop(groupData);
+                        }
+                    }
+                }
+                Log.d(TAG,"time for group load" + Long.toString(System.currentTimeMillis() - time_1));
+                isInitialGroupAddComplete = true;
+                query.removeEventListener(queryValueEventListener);
+                query.addChildEventListener(childEventListener);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        dmquerValueEventListner = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                time_2 = System.currentTimeMillis();
+                for (DataSnapshot childDataSnapShot : dataSnapshot.getChildren()) {
+                    try {
+                        final GroupData groupData = childDataSnapShot.getValue(GroupData.class);
+                        if (groupData != null) {
+                            final String sellerIdStr = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
+                            if ((groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && ((HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid())).get("blocked_status") == null)
+                                    || (!sellerIdStr.equalsIgnoreCase("-1") && groupData.getMembers().containsKey(sellerIdStr) && ((HashMap) groupData.getMembers().get(sellerIdStr)).get("blocked_status") == null)) {
+                                // joined chat
+                                groupData.setId(dataSnapshot.getKey());
+                                groupData.setIsDm(true);
+                                groupData.setIsPrivate(true);
+                                for (String memberUid : groupData.getMembers().keySet()) {
+                                    if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())
+                                            && !memberUid.equalsIgnoreCase(sellerIdStr)) {
+                                        final String name = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("name"));
+                                        final String dp = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("profilePic"));
+                                        groupData.setTitle(name);
+                                        groupData.setThumbnail(dp);
+                                        adapter.addGroupWithSortFromBottom(groupData);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (NullPointerException npe) {
+                        npe.printStackTrace();
+                        Crashlytics.logException(npe);
+                    }
+                }
+                Log.d(TAG,"time for dm load" + Long.toString(System.currentTimeMillis() - time_2));
+                isInitialGroupAddComplete = true;
+                dmQuery.removeEventListener(dmChildEventListener);
+                dmQuery.addChildEventListener(dmChildEventListener);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+//        query.addChildEventListener(childEventListener);
+//        dmQuery.addChildEventListener(dmChildEventListener);
+
+//        query.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                //Log.d(TAG,"query time" + Long.toString(System.currentTimeMillis() - time_1));
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+//
+//        dmQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//               // Log.d(TAG,"dmquery time" + Long.toString(System.currentTimeMillis() - time_2));
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+        query.addValueEventListener(queryValueEventListener);
+        dmQuery.addValueEventListener(dmquerValueEventListner);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -243,6 +362,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     toggleSearch(true);
                     groupTrace.stop();
                     reinitGroupListCopy();
+                    //Log.d(TAG,"new" + Long.toString(System.currentTimeMillis() - time_1));
                 }
             }
 
@@ -260,10 +380,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     }
 
     private ChildEventListener dmChildEventListener = new ChildEventListener() {
-
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
             try {
+//                if(time_2==-1){
+//                    time_2 = System.currentTimeMillis();
+//                }
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 if (groupData != null) {
                     final String sellerIdStr = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
