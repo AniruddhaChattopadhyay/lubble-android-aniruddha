@@ -943,14 +943,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void resetUnreadCount() {
         if (!TextUtils.isEmpty(groupId) && groupData != null && groupData.isJoined()) {
-            RealtimeDbHelper.getUserGroupsRef().child(groupId)
+            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
                     .child("unreadCount").setValue(0);
         } else if (!TextUtils.isEmpty(dmId)) {
             if (isCurrUserSeller) {
-                RealtimeDbHelper.getSellerDmsRef().child(dmId)
+                RealtimeDbHelper.getDmsRef().child(dmId).child("members")
+                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
                         .child("unreadCount").setValue(0);
             } else {
-                RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid()).child(dmId)
+                RealtimeDbHelper.getDmsRef().child(dmId).child("members").child(FirebaseAuth.getInstance().getUid())
                         .child("unreadCount").setValue(0);
             }
         }

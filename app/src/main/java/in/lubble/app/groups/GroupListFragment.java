@@ -159,20 +159,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 }
             }
         });
-
+        exploreContainer.setVisibility(View.GONE);
+        syncAllGroups();
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        adapter.clearGroups();
-        progressBar.setVisibility(View.VISIBLE);
-        toggleSearch(false);
-        groupsRecyclerView.setVisibility(View.INVISIBLE);
-        exploreContainer.setVisibility(View.GONE);
-        totalUnreadCount = 0;
-        syncAllGroups();
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(true);
         }
@@ -181,6 +175,11 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     }
 
     private void syncAllGroups() {
+        progressBar.setVisibility(View.VISIBLE);
+        toggleSearch(false);
+        groupsRecyclerView.setVisibility(View.INVISIBLE);
+        totalUnreadCount = 0;
+
         groupTrace = FirebasePerformance.getInstance().newTrace("group_list_trace");
         groupTrace.start();
         queryCounter = 2;
@@ -221,7 +220,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         groupData.setUnreadCount((Long) userMap.get("unreadCount"));
                     }
                     adapter.updateGroup(groupData);
-                    adapter.updateGroupPos(groupData);
+                    adapter.sortGroupList();
                 }
             }
 
@@ -377,7 +376,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                             groupData.setTitle(name);
                             groupData.setThumbnail(dp);
                             adapter.updateGroup(groupData);
-                            adapter.updateGroupPos(groupData);
+                            adapter.sortGroupList();
                         }
                     }
                 }
@@ -414,7 +413,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
                     //adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                    totalUnreadCount += userGroupData.getUnreadCount();
                     if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
                         syncInvitedGroups(dataSnapshot.getKey());
@@ -428,7 +426,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (userGroupData != null) {
                     if (userGroupData.isJoined()) {
                         adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                        totalUnreadCount++;
                     }
                 }
             }
@@ -455,7 +452,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
                     //adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                    totalUnreadCount += userGroupData.getUnreadCount();
                     if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
                         syncInvitedGroups(dataSnapshot.getKey());
@@ -468,7 +464,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
                     adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                    totalUnreadCount++;
                 }
             }
 
@@ -494,7 +489,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
                     //adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                    totalUnreadCount += userGroupData.getUnreadCount();
                     if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
                         syncInvitedGroups(dataSnapshot.getKey());
@@ -507,7 +501,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
                     adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                    totalUnreadCount++;
                 }
             }
 
@@ -531,9 +524,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 // all done
-                if (totalUnreadCount == 0 && isAdded() && !LubbleSharedPrefs.getInstance().getIsRewardsOpened()) {
+                /*if (totalUnreadCount == 0 && isAdded() && !LubbleSharedPrefs.getInstance().getIsRewardsOpened()) {
                     ((MainActivity) getActivity()).showRewardsTooltip();
-                }
+                }*/
                 if (totalUnreadCount == 0 && isAdded()) {
                     //******************************************************************************
                     //showEventUnreadCount();
@@ -705,11 +698,23 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     @Override
     public void onPause() {
         super.onPause();
-        if (childEventListener != null) {
+
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        /*if (childEventListener != null) {
             query.removeEventListener(childEventListener);
         }
         if (dmChildEventListener != null) {
             dmQuery.removeEventListener(dmChildEventListener);
+        }
+        if (sellerDmQuery != null && dmChildEventListener != null) {
+            sellerDmQuery.removeEventListener(dmChildEventListener);
         }
         if (userGroupsListener != null) {
             getUserGroupsRef().removeEventListener(userGroupsListener);
@@ -722,10 +727,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
-        }
-        if (getActivity() != null && getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
-        }
+        }*/
     }
 
     @Override

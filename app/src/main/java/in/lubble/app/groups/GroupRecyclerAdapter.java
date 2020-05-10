@@ -280,6 +280,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
+    @Deprecated
+    /**
+     * use sortGroupList(), it takes 2-5ms on a list of 100+ groups/dms
+     */
     public void updateGroupPos(GroupData groupData) {
         final int oldIndex = getChildIndex(groupData.getId());
         if (oldIndex != -1) {
