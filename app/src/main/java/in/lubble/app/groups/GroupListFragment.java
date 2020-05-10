@@ -92,6 +92,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private Query query, dmQuery, sellerDmQuery;
     private ChildEventListener childEventListener, userGroupsListener, userDmsListener, sellerDmsListener;
     private Trace groupTrace;
+    private int queryCounter = 0;
 
     public GroupListFragment() {
     }
@@ -182,9 +183,11 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private void syncAllGroups() {
         groupTrace = FirebasePerformance.getInstance().newTrace("group_list_trace");
         groupTrace.start();
+        queryCounter = 2;
         query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).startAt("");
         dmQuery = RealtimeDbHelper.getDmsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).startAt("");
         if (LubbleSharedPrefs.getInstance().getSellerId() != -1) {
+            queryCounter++;
             sellerDmQuery = RealtimeDbHelper.getDmsRef().orderByChild("members/" + LubbleSharedPrefs.getInstance().getSellerId()).startAt("");
         }
         syncUserGroup();
@@ -250,15 +253,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (isAdded()) {
-                    adapter.sortGroupList();
-                    groupsRecyclerView.setVisibility(View.VISIBLE);
-                    //exploreContainer.setVisibility(View.VISIBLE);
-                    if (progressBar.getVisibility() == View.VISIBLE) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                    toggleSearch(true);
-                    groupTrace.stop();
-                    reinitGroupListCopy();
+                    queryCounter--;
+                    checkAllChatsSynced();
                 }
             }
 
@@ -267,6 +263,50 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             }
         });
+        dmQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (isAdded()) {
+                    queryCounter--;
+                    checkAllChatsSynced();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+        if (sellerDmQuery != null) {
+            sellerDmQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (isAdded()) {
+                        queryCounter--;
+                        checkAllChatsSynced();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+        }
+    }
+
+    private void checkAllChatsSynced() {
+        if (queryCounter == 0) {
+            // all groups, DMs, and seller DMs (if applicable) are synced
+            adapter.sortGroupList();
+            groupsRecyclerView.setVisibility(View.VISIBLE);
+            if (progressBar.getVisibility() == View.VISIBLE) {
+                progressBar.setVisibility(View.GONE);
+            }
+            toggleSearch(true);
+            groupTrace.stop();
+            reinitGroupListCopy();
+        }
     }
 
     private void toggleSearch(boolean isEnabled) {
