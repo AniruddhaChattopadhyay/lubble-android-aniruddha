@@ -89,7 +89,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private Handler handler = new Handler();
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
     private int totalUnreadCount = 0;
-    private Query query, dmQuery;
+    private Query query, dmQuery, sellerDmQuery;
     private ChildEventListener childEventListener, userGroupsListener, userDmsListener, sellerDmsListener;
     private Trace groupTrace;
 
@@ -182,8 +182,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private void syncAllGroups() {
         groupTrace = FirebasePerformance.getInstance().newTrace("group_list_trace");
         groupTrace.start();
-        query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
-        dmQuery = RealtimeDbHelper.getDmsRef().orderByChild("lastMessageTimestamp");
+        query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).startAt("");
+        dmQuery = RealtimeDbHelper.getDmsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).startAt("");
+        if (LubbleSharedPrefs.getInstance().getSellerId() != -1) {
+            sellerDmQuery = RealtimeDbHelper.getDmsRef().orderByChild("members/" + LubbleSharedPrefs.getInstance().getSellerId()).startAt("");
+        }
+        syncUserGroup();
         childEventListener = new ChildEventListener() {
 
             @Override
@@ -192,6 +196,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (groupData != null) {
                     if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && groupData.getId() != null) {
                         // joined group
+                        HashMap userMap = (HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid());
+                        if (userMap != null && !userMap.isEmpty() && userMap.containsKey("unreadCount")) {
+                            groupData.setUnreadCount((Long) userMap.get("unreadCount"));
+                        }
                         adapter.addGroupToTop(groupData);
                     } else if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
                             && groupData.getMembers().size() > 0) {
@@ -205,7 +213,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 if (groupData != null && groupData.isJoined() && groupData.getId() != null) {
+                    HashMap userMap = (HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid());
+                    if (userMap != null && !userMap.isEmpty() && userMap.containsKey("unreadCount")) {
+                        groupData.setUnreadCount((Long) userMap.get("unreadCount"));
+                    }
                     adapter.updateGroup(groupData);
+                    adapter.updateGroupPos(groupData);
                 }
             }
 
@@ -230,11 +243,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         };
         query.addChildEventListener(childEventListener);
         dmQuery.addChildEventListener(dmChildEventListener);
+        if (sellerDmQuery != null) {
+            sellerDmQuery.addChildEventListener(dmChildEventListener);
+        }
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (isAdded()) {
-                    syncUserGroup();
+                    adapter.sortGroupList();
                     groupsRecyclerView.setVisibility(View.VISIBLE);
                     //exploreContainer.setVisibility(View.VISIBLE);
                     if (progressBar.getVisibility() == View.VISIBLE) {
@@ -276,11 +292,19 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         for (String memberUid : groupData.getMembers().keySet()) {
                             if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())
                                     && !memberUid.equalsIgnoreCase(sellerIdStr)) {
-                                final String name = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("name"));
-                                final String dp = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("profilePic"));
-                                groupData.setTitle(name);
-                                groupData.setThumbnail(dp);
-                                adapter.addGroupWithSortFromBottom(groupData);
+                                HashMap memberMap = (HashMap) groupData.getMembers().get(memberUid);
+                                if (memberMap != null) {
+                                    final String name = String.valueOf(memberMap.get("name"));
+                                    final String dp = String.valueOf(memberMap.get("profilePic"));
+                                    if (memberMap.containsKey("unreadCount")) {
+                                        final long unreadCount = (long) memberMap.get("unreadCount");
+                                        groupData.setUnreadCount(unreadCount);
+                                    }
+                                    groupData.setTitle(name);
+                                    groupData.setThumbnail(dp);
+
+                                    adapter.addGroupToTop(groupData);
+                                }
                             }
                         }
                     }
@@ -302,11 +326,19 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
                 for (String memberUid : groupData.getMembers().keySet()) {
                     if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
-                        final String name = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("name"));
-                        final String dp = String.valueOf(((HashMap) groupData.getMembers().get(memberUid)).get("profilePic"));
-                        groupData.setTitle(name);
-                        groupData.setThumbnail(dp);
-                        adapter.updateGroup(groupData);
+                        HashMap memberMap = (HashMap) groupData.getMembers().get(memberUid);
+                        if (memberMap != null) {
+                            final String name = String.valueOf(memberMap.get("name"));
+                            final String dp = String.valueOf(memberMap.get("profilePic"));
+                            if (memberMap.containsKey("unreadCount")) {
+                                final long unreadCount = (long) memberMap.get("unreadCount");
+                                groupData.setUnreadCount(unreadCount);
+                            }
+                            groupData.setTitle(name);
+                            groupData.setThumbnail(dp);
+                            adapter.updateGroup(groupData);
+                            adapter.updateGroupPos(groupData);
+                        }
                     }
                 }
             }
@@ -341,7 +373,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
-                    adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                    //adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
                     totalUnreadCount += userGroupData.getUnreadCount();
                     if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
@@ -382,7 +414,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
-                    adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                    //adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
                     totalUnreadCount += userGroupData.getUnreadCount();
                     if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
@@ -421,7 +453,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
-                    adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                    //adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
                     totalUnreadCount += userGroupData.getUnreadCount();
                     if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());

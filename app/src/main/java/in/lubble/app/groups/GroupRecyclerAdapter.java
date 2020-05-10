@@ -1,6 +1,7 @@
 package in.lubble.app.groups;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,8 @@ import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -135,9 +138,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 }
             });
 
-            if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
+            if (groupData.getUnreadCount() > 0) {
                 groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
-                groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
+                groupViewHolder.unreadCountTv.setText(String.valueOf(groupData.getUnreadCount()));
                 groupViewHolder.pinIv.setVisibility(View.GONE);
             } else {
                 if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened() && groupData.getIsPinned()) {
@@ -201,6 +204,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
             publicCursorPos++;
             dmCursorPos = publicCursorPos - 1;
+            Log.d("trace", "addGroupToTop: ");
         } else {
             updateGroup(groupData);
         }
@@ -222,6 +226,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             groupDataList.add(dmCursorPos, groupData);
             notifyItemInserted(dmCursorPos);
             publicCursorPos++;
+            Log.d("trace", "addGroupWithSortFromBottom: ");
         } else {
             updateGroup(groupData);
         }
@@ -236,6 +241,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 groupDataList.add(groupData);
                 notifyItemInserted(groupDataList.size() - 1);
             }
+            Log.d("trace", "addPublicGroupToTop: ");
         } else {
             updateGroup(groupData);
         }
@@ -247,6 +253,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (pos != -1) {
             notifyItemChanged(pos);
         }
+        Log.d("trace", "updateUserGroupData: ");
     }
 
     public void updateGroup(GroupData newGroupData) {
@@ -262,6 +269,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 notifyItemChanged(pos);
             }
         }
+        Log.d("trace", "updateGroup: ");
     }
 
     public void removeGroup(String groupId) {
@@ -281,6 +289,24 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             notifyItemMoved(oldIndex, newIndex);
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
         }
+        Log.d("trace", "updateGroupPos: ");
+    }
+
+    void sortGroupList() {
+        Log.d("trace", "--------------------\nsorting started: ");
+        Collections.sort(groupDataList, new Comparator<GroupData>() {
+            @Override
+            public int compare(GroupData o1, GroupData o2) {
+                if (o1 != null && o2 != null) {
+                    if (o1.getIsPinned()) return -1;
+                    if (o2.getIsPinned()) return 1;
+                    return (o1.getLastMessageTimestamp() < o2.getLastMessageTimestamp()) ? 1 : ((o1.getLastMessageTimestamp() == o2.getLastMessageTimestamp()) ? 0 : -1);
+                }
+                return 0;
+            }
+        });
+        notifyDataSetChanged();
+        Log.d("trace", "--------------------\nsorting ended: ");
     }
 
     public void flashPos(int pos) {
