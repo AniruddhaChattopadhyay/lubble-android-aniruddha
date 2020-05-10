@@ -2,6 +2,7 @@ package in.lubble.app.marketplace;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,11 +23,13 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
@@ -48,9 +53,10 @@ import static androidx.recyclerview.widget.StaggeredGridLayoutManager.HORIZONTAL
 public class MarketplaceFrag extends Fragment {
 
     private static final String TAG = "MarketplaceFrag";
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
+    private RelativeLayout maintenanceModeLayout;
+    private TextView maintenanceTv;
+    private NestedScrollView mainMarketLayout;
     private LinearLayout searchContainer;
     private TextView viewAllTv;
     private ProgressBar viewAllProgressBar;
@@ -87,6 +93,9 @@ public class MarketplaceFrag extends Fragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_marketplace, container, false);
 
+        maintenanceModeLayout = view.findViewById(R.id.layout_maintenance_mode);
+        maintenanceTv = view.findViewById(R.id.tv_maintenance_text);
+        mainMarketLayout = view.findViewById(R.id.scrollview_content);
         searchContainer = view.findViewById(R.id.container_search);
         viewAllTv = view.findViewById(R.id.tv_view_all_items);
         viewAllProgressBar = view.findViewById(R.id.progressbar_view_all);
@@ -130,8 +139,25 @@ public class MarketplaceFrag extends Fragment {
         allItemsAdapter = new BigItemAdapter(GlideApp.with(getContext()), false);
         allItemsRv.setAdapter(allItemsAdapter);
 
-        fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter, catAdapter);
+        String maintenanceText = FirebaseRemoteConfig.getInstance().getString(Constants.MARKET_MAINTENANCE_TEXT);
+        if (!TextUtils.isEmpty(maintenanceText)) {
+            maintenanceModeLayout.setVisibility(View.VISIBLE);
+            mainMarketLayout.setVisibility(View.GONE);
+            maintenanceTv.setText(maintenanceText.replace("\\n", "\n"));
 
+            CoordinatorLayout.LayoutParams p = (CoordinatorLayout.LayoutParams) newItemContainer.getLayoutParams();
+            p.setAnchorId(maintenanceModeLayout.getId());
+            newItemContainer.setLayoutParams(p);
+        } else {
+            maintenanceModeLayout.setVisibility(View.GONE);
+            mainMarketLayout.setVisibility(View.VISIBLE);
+
+            CoordinatorLayout.LayoutParams p = (CoordinatorLayout.LayoutParams) newItemContainer.getLayoutParams();
+            p.setAnchorId(mainMarketLayout.getId());
+            newItemContainer.setLayoutParams(p);
+
+            fetchMarketplaceData(cat1Adapter, cat2Adapter, allItemsAdapter, catAdapter);
+        }
         newItemContainer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

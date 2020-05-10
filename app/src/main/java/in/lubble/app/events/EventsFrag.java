@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -32,12 +33,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 
 public class EventsFrag extends Fragment {
     private static final String TAG = "EventsFrag";
     private RecyclerView recyclerView;
     private TextView maintenanceTv;
+    private LottieAnimationView maintenanceAnim;
     private FloatingActionButton fab;
     private LinearLayout emptyEventContainer;
     private EventsAdapter adapter;
@@ -61,6 +64,7 @@ public class EventsFrag extends Fragment {
 
         progressBar = view.findViewById(R.id.progressBar_events);
         maintenanceTv = view.findViewById(R.id.tv_maintenance_text);
+        maintenanceAnim = view.findViewById(R.id.anim_maintenance);
         recyclerView = view.findViewById(R.id.rv_events);
         fab = view.findViewById(R.id.fab_new_event);
         emptyEventContainer = view.findViewById(R.id.container_empty_events);
@@ -79,14 +83,6 @@ public class EventsFrag extends Fragment {
 
         LubbleSharedPrefs.getInstance().setEventSet(null);
         adapter.clear();
-
-        String maintenanceText = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_TEXT);
-        if (!TextUtils.isEmpty(maintenanceText)) {
-            maintenanceTv.setVisibility(View.VISIBLE);
-            maintenanceTv.setText(maintenanceText.replace("\\n", "\n"));
-        } else {
-            maintenanceTv.setVisibility(View.GONE);
-        }
 
         return view;
     }
@@ -131,13 +127,25 @@ public class EventsFrag extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        progressBar.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.VISIBLE);
-        emptyEventContainer.setVisibility(View.GONE);
         endpoints = ServiceGenerator.createService(Endpoints.class);
         //endpoints = retrofit.create(Endpoints.class);
-        getEvents();
+
+        String maintenanceText = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_TEXT);
+        String maintenanceImageUrl = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_IMG);
+        if (!TextUtils.isEmpty(maintenanceText)) {
+            maintenanceTv.setVisibility(View.VISIBLE);
+            maintenanceTv.setText(maintenanceText.replace("\\n", "\n"));
+            maintenanceAnim.setAnimationFromUrl(maintenanceImageUrl);
+            recyclerView.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+        } else {
+            maintenanceTv.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+            emptyEventContainer.setVisibility(View.GONE);
+
+            getEvents();
+        }
     }
 
     @Override

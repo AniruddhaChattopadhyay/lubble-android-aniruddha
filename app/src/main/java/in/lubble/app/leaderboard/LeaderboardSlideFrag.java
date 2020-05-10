@@ -114,7 +114,7 @@ public class LeaderboardSlideFrag extends Fragment {
                                 return MathUtil.compareDesc(o1.getMonthly_likes(), o2.getMonthly_likes());
                             }
                         });
-                        if (isAdded()) {
+                        if (isAdded() && profileDataList.size() >= 3) {
                             setTop3(profileDataList.subList(0, 3));
                         }
                     }

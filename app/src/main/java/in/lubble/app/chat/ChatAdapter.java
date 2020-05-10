@@ -290,10 +290,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.lubbIcon.setVisibility(View.VISIBLE);
             if (chatData.getLubbReceipts().containsKey(authorId)) {
                 sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_24dp);
-                if (position == chatDataList.size() - 1) {
-                    // scroll to bottom if liked last msg to show that like icon and count
-                    recyclerView.smoothScrollToPosition(chatDataList.size() - 1 > -1 ? chatDataList.size() - 1 : 0);
-                }
             } else {
                 sentChatViewHolder.lubbIcon.setImageResource(R.drawable.ic_favorite_border_light);
             }

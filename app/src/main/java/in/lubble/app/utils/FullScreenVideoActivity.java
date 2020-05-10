@@ -12,8 +12,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -41,8 +39,10 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+
 import java.io.File;
 import java.net.URLDecoder;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
@@ -99,17 +99,16 @@ public class FullScreenVideoActivity extends BaseActivity {
         videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
         videoname = getFileName();
         FullScreenVideoActivityPermissionsDispatcher.makeGetFileForDownloadWithPermissionCheck(FullScreenVideoActivity.this);
-        Log.d(TAG,"before" + videourl.toString());
-        if(matchingFile !=null){
-            Log.d(TAG,"*****************"+matchingFile.getName());
+        Log.d(TAG, "before" + videourl.toString());
+        if (matchingFile != null) {
+            Log.d(TAG, "*****************" + matchingFile.getName());
             videourl = Uri.fromFile(matchingFile);
-        }
-        else{
+        } else {
             progressBar.setVisibility(View.VISIBLE);
         }
-        Log.d(TAG,"after" + videourl.toString());
-        Log.d(TAG,videoname);
-        Log.d(TAG,videourl.toString());
+        Log.d(TAG, "after" + videourl.toString());
+        Log.d(TAG, videoname);
+        Log.d(TAG, videourl.toString());
         if (savedInstanceState != null) {
             position = savedInstanceState.getLong("SELECTED_POSITION", C.TIME_UNSET);
         }
@@ -117,8 +116,7 @@ public class FullScreenVideoActivity extends BaseActivity {
     }
 
 
-
-    private String getFileName(){
+    private String getFileName() {
         String decode = null;
         decode = URLDecoder.decode(getIntent().getStringExtra(EXTRA_IMG_PATH));
         Uri uri = Uri.parse(decode);
@@ -127,15 +125,15 @@ public class FullScreenVideoActivity extends BaseActivity {
 
     private static File findFilesForId(File dir, final String file_name_to_be_searched) {
         File[] files = dir.listFiles();
-        for(File f:files){
-            if(f.getName().equals(file_name_to_be_searched))
+        for (File f : files) {
+            if (f.getName().equals(file_name_to_be_searched))
                 return f;
         }
         return null;
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    public void makeGetFileForDownload(){
+    public void makeGetFileForDownload() {
         File f = new File(Environment.getExternalStorageDirectory(), lubble_vid_dir);
         if (!f.exists()) {
             f.mkdirs();
@@ -146,7 +144,7 @@ public class FullScreenVideoActivity extends BaseActivity {
 
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    public void download_Video(Uri videouri,String videoname){
+    public void download_Video(Uri videouri, String videoname) {
         DownloadManager.Request request = new DownloadManager.Request(videouri);
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
         request.setTitle(videoname);
@@ -157,7 +155,10 @@ public class FullScreenVideoActivity extends BaseActivity {
 
         DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);
-        Log.d(TAG,"hey");
+        Toast.makeText(this, "Download started, you will be notified", Toast.LENGTH_SHORT).show();
+        Bundle bundle = new Bundle();
+        bundle.putString("video_name", videoname);
+        Analytics.triggerEvent(AnalyticsEvents.DOWNLOAD_VIDEO, bundle, this);
     }
 
     private void initializePlayer(Uri mediaUri) {
@@ -200,7 +201,7 @@ public class FullScreenVideoActivity extends BaseActivity {
                 public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
                 }
             });
-            DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this,"ua");
+            DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this, "ua");
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
             MediaSource mediaSource = new ExtractorMediaSource(videourl, dataSourceFactory, extractorsFactory, null, null);
             exoPlayerView.setPlayer(exoPlayer);
@@ -232,7 +233,7 @@ public class FullScreenVideoActivity extends BaseActivity {
                 onBackPressed();
                 return true;
             case R.id.action_download_vid:
-                FullScreenVideoActivityPermissionsDispatcher.download_VideoWithPermissionCheck(FullScreenVideoActivity.this,videourl,videoname);
+                FullScreenVideoActivityPermissionsDispatcher.download_VideoWithPermissionCheck(FullScreenVideoActivity.this, videourl, videoname);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -240,7 +241,7 @@ public class FullScreenVideoActivity extends BaseActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        FullScreenVideoActivityPermissionsDispatcher.onRequestPermissionsResult(this,requestCode,grantResults);
+        FullScreenVideoActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
     @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
