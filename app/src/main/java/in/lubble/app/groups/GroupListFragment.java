@@ -9,14 +9,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -53,7 +51,6 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.utils.UiUtils;
 import me.crosswall.lib.coverflow.CoverFlow;
 import me.crosswall.lib.coverflow.core.PagerContainer;
 import retrofit2.Call;
@@ -67,6 +64,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.groups.GroupRecyclerAdapter.TYPE_HEADER;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
@@ -78,8 +76,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private RecyclerView groupsRecyclerView;
     private TextView noSearchResultsTv;
-    private LinearLayout exploreContainer;
     private ProgressBar progressBar;
+    private LinearLayoutManager layoutManager;
     private HashMap<String, Set<String>> groupInvitedByMap;
     private PagerContainer pagerContainer;
     private ViewPager viewPager;
@@ -107,24 +105,21 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         View view = inflater.inflate(R.layout.fragment_group_item, container, false);
         Context context = view.getContext();
 
-        NestedScrollView nestedScrollView = view.findViewById(R.id.container_scrollview);
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
         noSearchResultsTv = view.findViewById(R.id.tv_search_no_results);
-        exploreContainer = view.findViewById(R.id.container_explore);
         progressBar = view.findViewById(R.id.progressBar_groups);
         newGroupContainer = view.findViewById(R.id.container_create_group);
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
         tabLayout = view.findViewById(R.id.tab_dots);
-        Button exploreBtn = view.findViewById(R.id.btn_explore);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
-        groupsRecyclerView.setNestedScrollingEnabled(false);
 
         groupInvitedByMap = new HashMap<>();
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
-        groupsRecyclerView.setLayoutManager(new LinearLayoutManager(context));
+        layoutManager = new LinearLayoutManager(context);
+        groupsRecyclerView.setLayoutManager(layoutManager);
         adapter = new GroupRecyclerAdapter(mListener);
         groupsRecyclerView.setAdapter(adapter);
         DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL);
@@ -140,7 +135,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         final SliderData sliderData = new SliderData();
         sliderDataList.add(sliderData);
 
-        nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+        /*nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
                 if (scrollY > oldScrollY) {
@@ -149,17 +144,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     UiUtils.animateSlideUpShow(getContext(), newGroupContainer);
                 }
             }
-        });
+        });*/
 
-        exploreBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getActivity() != null) {
-                    ((MainActivity) getActivity()).openExplore();
-                }
-            }
-        });
-        exploreContainer.setVisibility(View.GONE);
         syncAllGroups();
         return view;
     }
@@ -175,6 +161,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     }
 
     private void syncAllGroups() {
+        adapter.clearGroups();
         progressBar.setVisibility(View.VISIBLE);
         toggleSearch(false);
         groupsRecyclerView.setVisibility(View.INVISIBLE);
@@ -305,6 +292,16 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             toggleSearch(true);
             groupTrace.stop();
             reinitGroupListCopy();
+
+            groupsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    if (adapter.getItemViewType(layoutManager.findLastVisibleItemPosition()) == TYPE_HEADER) {
+                        Log.d(TAG, "onScrolled: last item");
+                    }
+                }
+            });
         }
     }
 

@@ -35,7 +35,7 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
 
     private static final int TYPE_GROUP = 525;
-    private static final int TYPE_HEADER = 600;
+    static final int TYPE_HEADER = 600;
     private int publicCursorPos = 0;
     private int cursorPos = 0;
     private int dmCursorPos = 0;
