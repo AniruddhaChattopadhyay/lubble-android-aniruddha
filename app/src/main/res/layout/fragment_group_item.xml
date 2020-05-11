@@ -62,7 +62,7 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/container_groups"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -74,7 +74,6 @@
             android:id="@+id/progressBar_groups"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/pager_container"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="8dp" />
 
@@ -82,7 +81,6 @@
             android:id="@+id/tv_search_no_results"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/pager_container"
             android:layout_centerHorizontal="true"
             android:padding="8dp"
             android:text="No groups found. You can create a new one!"
@@ -93,12 +91,24 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:descendantFocusability="blocksDescendants"
-            android:layout_below="@id/pager_container"
             android:background="@color/white"
+            tools:itemCount="7"
+            android:paddingBottom="80dp"
+            android:clipToPadding="false"
             tools:context="in.lubble.app.groups.GroupListFragment"
             tools:listitem="@layout/fragment_group_list" />
 
-    </LinearLayout>
+        <ProgressBar
+            android:id="@+id/progress_bar_public_groups"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            tools:visibility="visible"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"/>
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/container_create_group"

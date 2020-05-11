@@ -51,6 +51,7 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.UiUtils;
 import me.crosswall.lib.coverflow.CoverFlow;
 import me.crosswall.lib.coverflow.core.PagerContainer;
 import retrofit2.Call;
@@ -76,7 +77,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private RecyclerView groupsRecyclerView;
     private TextView noSearchResultsTv;
-    private ProgressBar progressBar;
+    private ProgressBar progressBar, progressBarPublicGroups;
     private LinearLayoutManager layoutManager;
     private HashMap<String, Set<String>> groupInvitedByMap;
     private PagerContainer pagerContainer;
@@ -91,6 +92,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private ChildEventListener childEventListener, userGroupsListener, userDmsListener, sellerDmsListener;
     private Trace groupTrace;
     private int queryCounter = 0;
+    private boolean isPublicGroupsLoading;
 
     public GroupListFragment() {
     }
@@ -108,6 +110,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         groupsRecyclerView = view.findViewById(R.id.rv_groups);
         noSearchResultsTv = view.findViewById(R.id.tv_search_no_results);
         progressBar = view.findViewById(R.id.progressBar_groups);
+        progressBarPublicGroups = view.findViewById(R.id.progress_bar_public_groups);
         newGroupContainer = view.findViewById(R.id.container_create_group);
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
@@ -281,8 +284,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         }
     }
 
-    private boolean isLoading;
-
     private void checkAllChatsSynced() {
         if (queryCounter == 0) {
             // all groups, DMs, and seller DMs (if applicable) are synced
@@ -295,22 +296,32 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             toggleSearch(true);
             groupTrace.stop();
             reinitGroupListCopy();
-            isLoading = false;
+            isPublicGroupsLoading = false;
 
             groupsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    if (adapter.getItemViewType(layoutManager.findLastVisibleItemPosition()) == TYPE_HEADER && !isLoading) {
+
+                    if (dy > 0) {
+                        UiUtils.animateSlideDownHide(getContext(), newGroupContainer);
+                    } else {
+                        UiUtils.animateSlideUpShow(getContext(), newGroupContainer);
+                    }
+
+                    if (adapter.getItemViewType(layoutManager.findLastVisibleItemPosition()) == TYPE_HEADER && !isPublicGroupsLoading) {
                         Log.d(TAG, "onScrolled: last item");
-                        isLoading = true;
+                        isPublicGroupsLoading = true;
+                        progressBarPublicGroups.setVisibility(View.VISIBLE);
                         Query publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
                         publicGroupsQuery.addChildEventListener(childEventListener);
                         publicGroupsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 // custom sort of just public groups
+                                progressBarPublicGroups.setVisibility(View.GONE);
                                 adapter.sortPublicGroupList();
+                                groupsRecyclerView.setPadding(0,0,0,0);
                             }
 
                             @Override
