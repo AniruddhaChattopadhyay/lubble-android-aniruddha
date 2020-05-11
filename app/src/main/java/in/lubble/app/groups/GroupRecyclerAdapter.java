@@ -313,6 +313,25 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         Log.d("trace", "--------------------\nsorting ended: ");
     }
 
+    void sortPublicGroupList() {
+        Log.d("trace", "--------------------\nsorting started: ");
+        List<GroupData> list = groupDataList.subList(publicCursorPos, groupDataList.size());
+        Collections.sort(list, new Comparator<GroupData>() {
+            @Override
+            public int compare(GroupData o1, GroupData o2) {
+                if (o1 != null && o2 != null) {
+                    if (o1.getIsPinned()) return -1;
+                    if (o2.getIsPinned()) return 1;
+                    return (o1.getLastMessageTimestamp() < o2.getLastMessageTimestamp()) ? 1 : ((o1.getLastMessageTimestamp() == o2.getLastMessageTimestamp()) ? 0 : -1);
+                }
+                return 0;
+            }
+        });
+        //notifyDataSetChanged();
+        notifyItemRangeChanged(publicCursorPos, list.size());
+        Log.d("trace", "--------------------\nsorting ended: ");
+    }
+
     public void flashPos(int pos) {
         posToFlash = pos;
         notifyItemChanged(pos);
@@ -332,8 +351,13 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         groupDataList.clear();
         cursorPos = 0;
         publicCursorPos = 0;
-        groupDataList.add(0, null);
+
         notifyDataSetChanged();
+    }
+
+    void addPublicHeader() {
+        groupDataList.add(publicCursorPos, null);
+        notifyItemInserted(publicCursorPos);
     }
 
     @Override

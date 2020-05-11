@@ -281,9 +281,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         }
     }
 
+    private boolean isLoading;
+
     private void checkAllChatsSynced() {
         if (queryCounter == 0) {
             // all groups, DMs, and seller DMs (if applicable) are synced
+            adapter.addPublicHeader();
             adapter.sortGroupList();
             groupsRecyclerView.setVisibility(View.VISIBLE);
             if (progressBar.getVisibility() == View.VISIBLE) {
@@ -292,13 +295,29 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             toggleSearch(true);
             groupTrace.stop();
             reinitGroupListCopy();
+            isLoading = false;
 
             groupsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    if (adapter.getItemViewType(layoutManager.findLastVisibleItemPosition()) == TYPE_HEADER) {
+                    if (adapter.getItemViewType(layoutManager.findLastVisibleItemPosition()) == TYPE_HEADER && !isLoading) {
                         Log.d(TAG, "onScrolled: last item");
+                        isLoading = true;
+                        Query publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
+                        publicGroupsQuery.addChildEventListener(childEventListener);
+                        publicGroupsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                // custom sort of just public groups
+                                adapter.sortPublicGroupList();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
                     }
                 }
             });
