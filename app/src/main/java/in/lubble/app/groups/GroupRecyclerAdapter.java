@@ -194,41 +194,15 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public void addGroupToTop(GroupData groupData) {
-//        if (getChildIndex(groupData.getId()) == -1) {
-//            int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
-//            groupDataList.add(newIndex, groupData);
-//            notifyItemInserted(newIndex);
-//            cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
-//            publicCursorPos++;
-//            dmCursorPos = publicCursorPos - 1;
-//        } else {
-//            updateGroup(groupData);
-//        }
-        if(!GroupListFragment.isInitialGroupAddComplete){
-            if (getChildIndex(groupData.getId()) == -1) {
-                int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
-                groupDataList.add(newIndex, groupData);
-                notifyItemInserted(newIndex);
-                cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
-                publicCursorPos++;
-                dmCursorPos = publicCursorPos - 1;
-            } else {
-                updateGroup(groupData);
-            }
-        }
-        else{
-            if(!GroupListFragment.groupDataAddedList.contains(groupData)){
-                if (getChildIndex(groupData.getId()) == -1) {
-                    int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
-                    groupDataList.add(newIndex, groupData);
-                    notifyItemInserted(newIndex);
-                    cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
-                    publicCursorPos++;
-                    dmCursorPos = publicCursorPos - 1;
-                } else {
-                    updateGroup(groupData);
-                }
-            }
+        if (getChildIndex(groupData.getId()) == -1) {
+            int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
+            groupDataList.add(newIndex, groupData);
+            notifyItemInserted(newIndex);
+            cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
+            publicCursorPos++;
+            dmCursorPos = publicCursorPos - 1;
+        } else {
+            updateGroup(groupData);
         }
     }
 
@@ -254,44 +228,16 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public void addPublicGroupToTop(GroupData groupData) {
-//        if (getChildIndex(groupData.getId()) == -1) {
-//            if (publicCursorPos + 1 < groupDataList.size()) {
-//                groupDataList.add(publicCursorPos + 1, groupData);
-//                notifyItemInserted(publicCursorPos + 1);
-//            } else {
-//                groupDataList.add(groupData);
-//                notifyItemInserted(groupDataList.size() - 1);
-//            }
-//        } else {
-//            updateGroup(groupData);
-//        }
-        if(!GroupListFragment.isInitialGroupAddComplete){
-            if (getChildIndex(groupData.getId()) == -1) {
-                if (publicCursorPos + 1 < groupDataList.size()) {
-                    groupDataList.add(publicCursorPos + 1, groupData);
-                    notifyItemInserted(publicCursorPos + 1);
-                } else {
-                    groupDataList.add(groupData);
-                    notifyItemInserted(groupDataList.size() - 1);
-                }
+        if (getChildIndex(groupData.getId()) == -1) {
+            if (publicCursorPos + 1 < groupDataList.size()) {
+                groupDataList.add(publicCursorPos + 1, groupData);
+                notifyItemInserted(publicCursorPos + 1);
             } else {
-                updateGroup(groupData);
+                groupDataList.add(groupData);
+                notifyItemInserted(groupDataList.size() - 1);
             }
-        }
-        else{
-            if(!GroupListFragment.groupDataAddedList.contains(groupData)){
-                if (getChildIndex(groupData.getId()) == -1) {
-                    if (publicCursorPos + 1 < groupDataList.size()) {
-                        groupDataList.add(publicCursorPos + 1, groupData);
-                        notifyItemInserted(publicCursorPos + 1);
-                    } else {
-                        groupDataList.add(groupData);
-                        notifyItemInserted(groupDataList.size() - 1);
-                    }
-                } else {
-                    updateGroup(groupData);
-                }
-            }
+        } else {
+            updateGroup(groupData);
         }
     }
 

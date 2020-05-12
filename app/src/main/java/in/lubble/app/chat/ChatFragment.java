@@ -61,9 +61,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.UploadPDFService;
+import in.lubble.app.UploadVideoService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
@@ -99,6 +102,7 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
@@ -148,6 +152,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
     private static final String KEY_CHAT_DATA = "KEY_CHAT_DATA";
     private static final int PERMITTED_VIDEO_SIZE = 30;
+    private static final int REQUEST_CODE_FILE_PICK = 999 ;
     private Endpoints endpoints;
     private EventData eventData;
     @Nullable
@@ -1360,6 +1365,52 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 attachedEventId = chosenEventId;
                 fetchAndShowAttachedEventInfo();
             }
+        } else if (requestCode == REQUEST_CODE_FILE_PICK && resultCode == RESULT_OK) {
+            // Get the Uri of the selected file
+            final boolean isDm = !TextUtils.isEmpty(dmId);
+            String name = FileUtils.getFileNameFromUri(data.getData());
+            name = name.replace(".pdf","");
+            String chat_Id = groupId;
+            if (!TextUtils.isEmpty(dmId)) {
+                chat_Id = dmId;
+            }
+            String uPath = "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + chat_Id;
+            if (isDm) {
+                uPath = "dms/" + chat_Id;
+            }
+            final String uploadPath = uPath;
+            final String chatId = chat_Id;
+            final Intent data1 = data;
+            new AlertDialog.Builder(getContext())
+                    .setIcon(R.mipmap.ic_launcher)
+                    .setTitle("")
+                    .setMessage("Are you sure you want to share this document?")
+                    .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Uri uri = data1.getData();
+                            String name = FileUtils.getFileNameFromUri(uri);
+                            name = name.replace(".pdf","");
+                            Log.d(TAG, "File Uri: " + uri.toString());
+                            getContext().startService(new Intent(getContext(), UploadPDFService.class)
+                                    .putExtra(UploadPDFService.EXTRA_BUCKET, UploadPDFService.BUCKET_CONVO)
+                                    .putExtra(UploadPDFService.EXTRA_FILE_NAME, name)
+                                    .putExtra(EXTRA_FILE_URI, uri)
+                                    .putExtra(UploadVideoService.EXTRA_UPLOAD_PATH, uploadPath)
+                                    .putExtra(UploadVideoService.EXTRA_CHAT_ID, chatId)
+                                    .putExtra(UploadVideoService.EXTRA_IS_DM, isDm)
+                                    .putExtra(UploadVideoService.EXTRA_AUTHOR_ID, authorId)
+                                    .putExtra(UploadVideoService.EXTRA_IS_AUTHOR_SELLER, isCurrUserSeller)
+                                    .setAction(UploadVideoService.ACTION_UPLOAD));
+                        }
+                    })
+                    .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    }).create().show();
+
         }
     }
 
@@ -1456,6 +1507,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             case 4:
                 startActivityForResult(EventPickerActiv.getIntent(getContext()), REQUEST_CODE_EVENT_PICK);
                 break;
+            case 5:
+                startFilePicker();
+                break;
         }
     }
 
@@ -1479,6 +1533,20 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    private void startFilePicker(){
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        try {
+            startActivityForResult(
+                    Intent.createChooser(intent, "Select a File to Upload"),
+                    REQUEST_CODE_FILE_PICK);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+            Toast.makeText(getContext(), "Please install a File Manager.", Toast.LENGTH_SHORT).show();
         }
     }
 

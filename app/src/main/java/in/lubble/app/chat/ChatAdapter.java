@@ -2,6 +2,8 @@ package in.lubble.app.chat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.DownloadManager;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -14,6 +16,7 @@ import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -28,6 +31,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,6 +45,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
@@ -68,12 +73,14 @@ import com.google.firebase.database.ValueEventListener;
 import org.jsoup.Jsoup;
 
 import java.io.File;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -97,6 +104,7 @@ import in.lubble.app.utils.FullScreenVideoActivity;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.YoutubeData;
 import in.lubble.app.utils.YoutubeUtils;
+import permissions.dispatcher.NeedsPermission;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -144,6 +152,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private String groupId;
     private int highlightedPos = -1;
     private int posToFlash = -1;
+    private final String lubbleDocumentDirectory = "Lubble Documents";
+    private File lubbleDocumenrFile;
+    File matchingFile = null;
     private HashMap<String, ProfileData> profileDataMap = new HashMap<>();
     private String authorId = FirebaseAuth.getInstance().getUid();
     @Nullable
@@ -375,8 +386,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null);
         handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.playvidIv, sentChatViewHolder.vidThumbnailIv, chatData, null, position);
-
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
+        handlePdf(sentChatViewHolder.pdfContainer,sentChatViewHolder.progressBarPdf,sentChatViewHolder.pdfThumbnailIv,chatData,null);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
@@ -601,6 +612,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
         handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid, recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv, position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
+        handlePdf(recvdChatViewHolder.pdfContainer,recvdChatViewHolder.progressBarPdf,recvdChatViewHolder.pdfThumbnailIv,chatData,null);
+
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
@@ -1090,6 +1103,75 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private String getFileName(String pdfUrl) {
+        String decode = null;
+        decode = URLDecoder.decode(pdfUrl);
+        Uri uri = Uri.parse(decode);
+        return uri.getLastPathSegment();
+    }
+    private static File findFilesForId(File dir, final String file_name_to_be_searched) {
+        File[] files = dir.listFiles();
+        for (File f : files) {
+            if (f.getName().equals(file_name_to_be_searched))
+                return f;
+        }
+        return null;
+    }
+
+   @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public void makeGetFileForDownload(String fileName) {
+        File f = new File(Environment.getExternalStorageDirectory(), lubbleDocumentDirectory);
+        if (!f.exists()) {
+            f.mkdirs();
+        }
+        lubbleDocumenrFile = f;
+        matchingFile = findFilesForId(lubbleDocumenrFile,fileName);
+    }
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    private void openPdf(String pdfUrl){
+        matchingFile = null;
+        lubbleDocumenrFile = null;
+        String fileName = getFileName(pdfUrl);
+        makeGetFileForDownload(fileName);
+        if(matchingFile!=null){
+            String s = matchingFile.getAbsolutePath();
+            Intent target = new Intent(Intent.ACTION_VIEW);
+            //target.setDataAndType(Uri.fromFile(matchingFile),"application/pdf");
+            target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+            Uri apkURI = FileProvider.getUriForFile(
+                    context,
+                    BuildConfig.APPLICATION_ID + ".fileprovider", matchingFile);
+            target.setDataAndType(apkURI, "application/pdf");
+            target.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            //Intent intent = Intent.createChooser(target, "Open File");
+            try {
+                context.startActivity(target);
+            } catch (ActivityNotFoundException e) {
+                // Instruct the user to install a PDF reader here, or something
+            }
+
+        }
+        else{
+            Uri pdfUri = Uri.parse(pdfUrl);
+
+            DownloadManager.Request request = new DownloadManager.Request(pdfUri);
+            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
+            request.setTitle(fileName);
+            request.setDescription("Downloading pdf ...");
+            request.allowScanningByMediaScanner();
+            request.setMimeType("application/pdf");
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalPublicDir(lubbleDocumentDirectory, fileName);
+
+            DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+            manager.enqueue(request);
+            Toast.makeText(context, "Download started, Click the pdf after the download completes to open it", Toast.LENGTH_LONG).show();
+            Bundle bundle = new Bundle();
+            bundle.putString("Pdf name", fileName);
+            Analytics.triggerEvent(AnalyticsEvents.DOWNLOAD_PDF, bundle, context);
+        }
+    }
+
     private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv) {
         if (isValidString(chatData.getImgUrl())) {
             imageView.setOnClickListener(null);
@@ -1116,6 +1198,44 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private void handlePdf(FrameLayout imgContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv){
+        if (isValidString(chatData.getPdfThumbnailUrl())) {
+            imageView.setOnClickListener(null);
+            imgContainer.setVisibility(View.VISIBLE);
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
+                // Permission is not granted
+                glide.load(chatData.getImgUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
+                downloadIv.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+
+            } else {
+                RequestOptions requestOptions = new RequestOptions();
+                requestOptions.placeholder(R.color.black);
+                requestOptions.error(R.color.black);
+                glide.load(chatData.getPdfThumbnailUrl()).listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        progressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                        Log.d(TAG, "progress bar hidden");
+                        progressBar.setVisibility(View.GONE);
+                        return false;
+                    }
+                })
+                        .apply(requestOptions)
+                        .into(imageView);
+                Log.d(TAG, "inside lst else");
+            }
+        } else {
+            imgContainer.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
     private void handleVideo(FrameLayout vidContainer, final ProgressBar progressBar, final ImageView playvid, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, int position) {
 
         if (isValidString(chatData.getVidUrl())) {
@@ -1124,7 +1244,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             vidContainer.setVisibility(View.VISIBLE);
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
                 // Permission is not granted
-                Log.d(TAG, "inside if of handle video");
                 glide.load(chatData.getVidUrl()).override(18, 18).centerCrop().into(imageView);
                 downloadIv.setVisibility(View.VISIBLE);
                 playvid.setImageResource(R.drawable.ic_file_download_black_24dp);
@@ -1428,6 +1547,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
         private FrameLayout vidContainer;
+        private FrameLayout pdfContainer;
+        private ImageView pdfThumbnailIv;
+        private ProgressBar progressBarPdf;
         private ProgressBar progressBar_vid;
         private ImageView vidThumbnailIv;
         private ImageView playvidIv;
@@ -1468,6 +1590,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
             vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
             playvidIv = itemView.findViewById(R.id.iv_play_vid);
+            pdfContainer = itemView.findViewById(R.id.pdf_container);
+            pdfThumbnailIv = itemView.findViewById(R.id.iv_pdf_img);
+            progressBarPdf = itemView.findViewById(R.id.progressbar_img_pdf);
             lubbContainer = itemView.findViewById(R.id.container_lubb);
             progressBar = itemView.findViewById(R.id.progressbar_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
@@ -1493,6 +1618,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             chatIv.setOnTouchListener(this);
             vidThumbnailIv.setOnTouchListener(this);
             lubbContainer.setOnTouchListener(this);
+            pdfThumbnailIv.setOnTouchListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -1620,6 +1746,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             FullScreenVideoActivity.open(activity, context, vidChatData.getVidUrl());
                         }
                         break;
+                    case R.id.iv_pdf_img:
+                        ChatData pdfChatData = chatDataList.get(getAdapterPosition());
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
+                            // ask for external storage perm
+                            ChatFragmentPermissionsDispatcher
+                                    .getWritePermWithPermissionCheck(chatFragment);
+                        } else if (isValidString(pdfChatData.getPdfUrl())) {
+                            Log.d(TAG,"pdf here" + pdfChatData.getPdfUrl());
+                            openPdf(pdfChatData.getPdfUrl());
+                        }
                 }
                 if (actionMode != null) {
                     actionMode.finish();
@@ -1667,6 +1803,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private FrameLayout vidContainer;
         private ImageView vidThumbnailIv;
         private ImageView playvidIv;
+        private FrameLayout pdfContainer;
+        private ImageView pdfThumbnailIv;
+        private ProgressBar progressBarPdf;
         private ProgressBar progressBar_vid;
         private ProgressBar progressBar;
         private ImageView chatIv;
@@ -1697,6 +1836,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             imgContainer = itemView.findViewById(R.id.img_container);
             vidContainer = itemView.findViewById(R.id.vid_container);
             vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
+            pdfContainer = itemView.findViewById(R.id.pdf_container);
+            pdfThumbnailIv = itemView.findViewById(R.id.iv_pdf_img);
+            progressBarPdf = itemView.findViewById(R.id.progressbar_img_pdf);
             playvidIv = itemView.findViewById(R.id.iv_play_vid);
             progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
             progressBar = itemView.findViewById(R.id.progressbar_img);
@@ -1721,6 +1863,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             vidThumbnailIv.setOnTouchListener(this);
             rootLayout.setOnTouchListener(this);
             lubbContainer.setOnTouchListener(this);
+            pdfThumbnailIv.setOnTouchListener(this);
         }
 
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
@@ -1836,6 +1979,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             FullScreenVideoActivity.open(activity, context, vidChatData.getVidUrl());
                         }
                         break;
+                    case R.id.iv_pdf_img:
+                        ChatData pdfChatData = chatDataList.get(getAdapterPosition());
+                        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
+                            // ask for external storage perm
+                            ChatFragmentPermissionsDispatcher
+                                    .getWritePermWithPermissionCheck(chatFragment);
+                        } else if (isValidString(pdfChatData.getPdfUrl())) {
+                            Log.d(TAG,"pdf here" + pdfChatData.getPdfUrl());
+                            openPdf(pdfChatData.getPdfUrl());
+                        }
                 }
                 if (actionMode != null) {
                     actionMode.finish();
