@@ -5,9 +5,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.text.Html;
 import android.text.TextUtils;
+
 import androidx.annotation.Nullable;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
 import in.lubble.app.Constants;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -72,8 +75,8 @@ public class ReferralUtils {
         final LinkProperties linkProperties = new LinkProperties()
                 .setChannel("Android")
                 .setFeature("GroupInvite")
-                .addControlParameter("$desktop_url", "https://lubble.in/redirect.html")
-                .addControlParameter("$ios_url", "https://lubble.in/redirect.html");
+                .addControlParameter("$desktop_url", "https://play.google.com/store/apps/details?id=in.lubble.app")
+                .addControlParameter("$ios_url", "https://play.google.com/store/apps/details?id=in.lubble.app");
 
         branchUniversalObject.generateShortUrl(context, linkProperties, callback);
     }
