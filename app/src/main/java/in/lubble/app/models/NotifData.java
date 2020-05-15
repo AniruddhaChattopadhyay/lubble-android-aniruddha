@@ -35,6 +35,8 @@ public class NotifData {
     private String hasImage;
     @SerializedName("isPdf")
     private String hasPdf;
+    @SerializedName("pdfFileName")
+    private String pdfFileName;
     @SerializedName("type")
     private String notifType;
     @SerializedName("isSeller")
@@ -95,7 +97,7 @@ public class NotifData {
             return "\uD83D\uDCCA POLL";
         }
         else if(StringUtils.isValidString(hasPdf) && hasPdf.equalsIgnoreCase("True")){
-            return "\uD83D\uDCC4 " + messageBody;
+            return "\uD83D\uDCC4 " + pdfFileName + ".pdf " + messageBody;
         }
         else {
             return messageBody;
