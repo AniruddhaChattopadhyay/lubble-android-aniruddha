@@ -3,7 +3,6 @@ package in.lubble.app.models;
 import androidx.annotation.Nullable;
 
 import com.google.firebase.database.Exclude;
-import com.segment.analytics.internal.Private;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,7 +33,7 @@ public class ChatData implements Serializable {
     private String imgUrl;
     private String vidUrl;
     private String pdfUrl;
-    private String pdfFilename;
+    private String pdfFileName;
     private String pdfThumbnailUrl;
     private int lubbCount = 0;
     private HashMap<String, Long> lubbReceipts = new HashMap<>();
@@ -106,12 +105,12 @@ public class ChatData implements Serializable {
         this.pdfThumbnailUrl = pdfThumbnailUrl;
     }
 
-    public String getPdfFilename() {
-        return pdfFilename;
+    public String getPdfFileName() {
+        return pdfFileName;
     }
 
-    public void setPdfFilename(String pdfFilename) {
-        this.pdfFilename = pdfFilename;
+    public void setPdfFileName(String pdfFileName) {
+        this.pdfFileName = pdfFileName;
     }
 
     public String getImgUrl() {

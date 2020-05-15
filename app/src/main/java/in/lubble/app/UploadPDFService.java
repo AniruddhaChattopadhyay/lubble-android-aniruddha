@@ -1,13 +1,9 @@
 package in.lubble.app;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -31,15 +27,10 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.iceteck.silicompressorr.SiliCompressor;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
 
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
@@ -349,7 +340,7 @@ public class UploadPDFService extends BaseTaskService {
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
         chatData.setMessage("");
-        chatData.setPdfFilename(filename);
+        chatData.setPdfFileName(filename);
         chatData.setPdfUrl(downloadUrl.toString());
         chatData.setPdfThumbnailUrl(downloadThumbnailUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());
