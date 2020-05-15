@@ -34,6 +34,7 @@ public class ChatData implements Serializable {
     private String imgUrl;
     private String vidUrl;
     private String pdfUrl;
+    private String pdfFilename;
     private String pdfThumbnailUrl;
     private int lubbCount = 0;
     private HashMap<String, Long> lubbReceipts = new HashMap<>();
@@ -104,6 +105,15 @@ public class ChatData implements Serializable {
     public void setPdfThumbnailUrl(String pdfThumbnailUrl) {
         this.pdfThumbnailUrl = pdfThumbnailUrl;
     }
+
+    public String getPdfFilename() {
+        return pdfFilename;
+    }
+
+    public void setPdfFilename(String pdfFilename) {
+        this.pdfFilename = pdfFilename;
+    }
+
     public String getImgUrl() {
         return imgUrl;
     }

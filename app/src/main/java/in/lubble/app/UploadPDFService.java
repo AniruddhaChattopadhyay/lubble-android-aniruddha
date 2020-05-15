@@ -39,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
@@ -246,7 +247,7 @@ public class UploadPDFService extends BaseTaskService {
                                                                 final Uri downloadUriThumbnail = task.getResult();
 
                                                                 // [START_EXCLUDE]
-                                                                broadcastUploadFinished(downloadUri,downloadUriThumbnail,FileUri, toTransmit, groupId, dmInfoData);
+                                                                broadcastUploadFinished(downloadUri,downloadUriThumbnail,fileName,FileUri, toTransmit, groupId, dmInfoData);
                                                                 showUploadFinishedNotification(downloadUri,downloadUriThumbnail, FileUri, toTransmit);
                                                                 taskCompleted();
                                                                 // [END_EXCLUDE]
@@ -254,7 +255,7 @@ public class UploadPDFService extends BaseTaskService {
                                                                 Log.d(TAG, "onComplete: failed");
 
                                                                 // [START_EXCLUDE]
-                                                                broadcastUploadFinished(null,null, FileUri, toTransmit, groupId, dmInfoData);
+                                                                broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
                                                                 showUploadFinishedNotification(null,null, FileUri, toTransmit);
                                                                 taskCompleted();
                                                                 // [END_EXCLUDE]
@@ -271,7 +272,7 @@ public class UploadPDFService extends BaseTaskService {
                                                     Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                                                     // [START_EXCLUDE]
-                                                    broadcastUploadFinished(null,null, FileUri, toTransmit, groupId, dmInfoData);
+                                                    broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
                                                     showUploadFinishedNotification(null,null, FileUri, toTransmit);
                                                     taskCompleted();
                                                     //[END_EXCLUDE]
@@ -286,7 +287,7 @@ public class UploadPDFService extends BaseTaskService {
                                     Log.d(TAG, "onComplete: failed");
 
                                     // [START_EXCLUDE]
-                                    broadcastUploadFinished(null,null, FileUri, toTransmit, groupId, dmInfoData);
+                                    broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
                                     showUploadFinishedNotification(null,null, FileUri, toTransmit);
                                     taskCompleted();
                                     // [END_EXCLUDE]
@@ -303,7 +304,7 @@ public class UploadPDFService extends BaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null,null, FileUri, toTransmit, groupId, dmInfoData);
+                        broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
                         showUploadFinishedNotification(null, null, FileUri, toTransmit);
                         taskCompleted();
                         //[END_EXCLUDE]
@@ -317,7 +318,7 @@ public class UploadPDFService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri downloadUriThumbnail, @Nullable Uri fileUri, boolean toTransmit,
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri downloadUriThumbnail, @Nullable String filename,@Nullable Uri fileUri, boolean toTransmit,
                                             String chatId, UploadPDFService.DmInfoData dmInfoData) {
         boolean success = downloadUrl != null;
 
@@ -328,14 +329,14 @@ public class UploadPDFService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            transmitMedia(downloadUrl,downloadUriThumbnail, chatId, dmInfoData.isDm, dmInfoData.authorId, dmInfoData.isAuthorSeller);
+            transmitMedia(downloadUrl,downloadUriThumbnail,filename, chatId, dmInfoData.isDm, dmInfoData.authorId, dmInfoData.isAuthorSeller);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())
                 .sendBroadcast(broadcast);
     }
 
-    private void transmitMedia(Uri downloadUrl,Uri downloadThumbnailUrl,String chatId, boolean isDm, String authorId, boolean isAuthorSeller) {
+    private void transmitMedia(Uri downloadUrl,Uri downloadThumbnailUrl,String filename, String chatId, boolean isDm, String authorId, boolean isAuthorSeller) {
         final DatabaseReference msgReference;
         if (isDm) {
             msgReference = getDmMessagesRef().child(chatId);
@@ -348,6 +349,7 @@ public class UploadPDFService extends BaseTaskService {
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
         chatData.setMessage("");
+        chatData.setPdfFilename(filename);
         chatData.setPdfUrl(downloadUrl.toString());
         chatData.setPdfThumbnailUrl(downloadThumbnailUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());

@@ -1136,9 +1136,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         String fileName = getFileName(pdfUrl);
         makeGetFileForDownload(fileName);
         if(matchingFile!=null){
-            String s = matchingFile.getAbsolutePath();
             Intent target = new Intent(Intent.ACTION_VIEW);
-            //target.setDataAndType(Uri.fromFile(matchingFile),"application/pdf");
             target.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             Uri apkURI = FileProvider.getUriForFile(
                     context,
@@ -1189,7 +1187,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                         final int dl_progress = (int) ((bytes_downloaded * 100l) / bytes_total);
                         ((Activity)context).runOnUiThread(new Runnable() {
-
                             @Override
                             public void run() {
                                 mProgressBar.setProgress((int) dl_progress);
