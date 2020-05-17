@@ -362,17 +362,20 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                                 if (memberMap != null) {
                                     final String name = String.valueOf(memberMap.get("name"));
                                     final String dp = String.valueOf(memberMap.get("profilePic"));
-                                    if (memberMap.containsKey("unreadCount")) {
-                                        final long unreadCount = (long) memberMap.get("unreadCount");
-                                        groupData.setUnreadCount(unreadCount);
-                                    }
                                     groupData.setTitle(name);
                                     groupData.setThumbnail(dp);
 
-                                    adapter.addGroupToTop(groupData);
+                                }
+                            } else {
+                                //this user/seller
+                                HashMap memberMap = (HashMap) groupData.getMembers().get(memberUid);
+                                if (memberMap.containsKey("unreadCount")) {
+                                    final long unreadCount = (long) memberMap.get("unreadCount");
+                                    groupData.setUnreadCount(unreadCount);
                                 }
                             }
                         }
+                        adapter.addGroupToTop(groupData);
                     }
                 }
             } catch (NullPointerException npe) {
@@ -386,27 +389,31 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
             if (groupData != null && groupData.isJoined()
                     && groupData.getMembers().get("blocked_status") == null) {
+                final String sellerIdStr = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
                 groupData.setId(dataSnapshot.getKey());
                 groupData.setIsDm(true);
                 groupData.setIsPrivate(true);
 
                 for (String memberUid : groupData.getMembers().keySet()) {
-                    if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                    if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid()) && !memberUid.equalsIgnoreCase(sellerIdStr)) {
                         HashMap memberMap = (HashMap) groupData.getMembers().get(memberUid);
                         if (memberMap != null) {
                             final String name = String.valueOf(memberMap.get("name"));
                             final String dp = String.valueOf(memberMap.get("profilePic"));
-                            if (memberMap.containsKey("unreadCount")) {
-                                final long unreadCount = (long) memberMap.get("unreadCount");
-                                groupData.setUnreadCount(unreadCount);
-                            }
                             groupData.setTitle(name);
                             groupData.setThumbnail(dp);
-                            adapter.updateGroup(groupData);
-                            adapter.sortGroupList();
+                        }
+                    } else {
+                        //this user/seller
+                        HashMap memberMap = (HashMap) groupData.getMembers().get(memberUid);
+                        if (memberMap.containsKey("unreadCount")) {
+                            final long unreadCount = (long) memberMap.get("unreadCount");
+                            groupData.setUnreadCount(unreadCount);
                         }
                     }
                 }
+                adapter.updateGroup(groupData);
+                adapter.sortGroupList();
             }
         }
 

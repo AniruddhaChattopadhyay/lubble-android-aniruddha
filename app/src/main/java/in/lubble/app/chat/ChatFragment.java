@@ -550,7 +550,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onResume();
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
-        resetUnreadCount();
         syncGroupInfo();
     }
 
