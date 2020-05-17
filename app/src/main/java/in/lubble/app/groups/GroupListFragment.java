@@ -58,6 +58,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getEventsRef;
@@ -309,7 +310,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         UiUtils.animateSlideUpShow(getContext(), newGroupContainer);
                     }
 
-                    if (adapter.getItemViewType(layoutManager.findLastVisibleItemPosition()) == TYPE_HEADER && !isPublicGroupsLoading) {
+                    int lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition();
+                    if (lastVisibleItemPosition != NO_POSITION && adapter.getItemViewType(lastVisibleItemPosition) == TYPE_HEADER && !isPublicGroupsLoading) {
                         Log.d(TAG, "onScrolled: last item");
                         isPublicGroupsLoading = true;
                         progressBarPublicGroups.setVisibility(View.VISIBLE);
