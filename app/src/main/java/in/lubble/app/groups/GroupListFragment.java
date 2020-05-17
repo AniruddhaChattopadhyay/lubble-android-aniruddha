@@ -314,21 +314,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         isPublicGroupsLoading = true;
                         progressBarPublicGroups.setVisibility(View.VISIBLE);
                         Query publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
-                        publicGroupsQuery.addChildEventListener(childEventListener);
-                        publicGroupsQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                // custom sort of just public groups
-                                progressBarPublicGroups.setVisibility(View.GONE);
-                                adapter.sortPublicGroupList();
-                                groupsRecyclerView.setPadding(0,0,0,0);
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                            }
-                        });
+                        publicGroupsQuery.addListenerForSingleValueEvent(publicGroupListener);
                     }
                 }
             });
@@ -340,6 +326,31 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             ((MainActivity) getActivity()).setIsSearchEnabled(isEnabled);
         }
     }
+
+    private ValueEventListener publicGroupListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            for (DataSnapshot snapshotChild : dataSnapshot.getChildren()) {
+                final GroupData groupData = snapshotChild.getValue(GroupData.class);
+                if (groupData != null) {
+                    if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
+                            && groupData.getMembers().size() > 0) {
+                        // non-joined public groups with non-zero members
+                        adapter.addPublicGroupToTop(groupData);
+                    }
+                }
+            }
+            // custom sort of just public groups
+            progressBarPublicGroups.setVisibility(View.GONE);
+            adapter.sortPublicGroupList();
+            groupsRecyclerView.setPadding(0, 0, 0, 0);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
 
     private ChildEventListener dmChildEventListener = new ChildEventListener() {
 
