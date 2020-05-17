@@ -166,7 +166,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 groupViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
             }
         } else {
-            // nothing to process
+            ((PublicGroupHeaderViewHolder) holder).publicHeaderTv.setText(LubbleSharedPrefs.getInstance().getLubbleName() + " Public Groups");
         }
     }
 
@@ -429,8 +429,11 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     class PublicGroupHeaderViewHolder extends RecyclerView.ViewHolder {
 
+        final TextView publicHeaderTv;
+
         public PublicGroupHeaderViewHolder(View view) {
             super(view);
+            publicHeaderTv = view.findViewById(R.id.tv_public_groups_hdr);
         }
     }
 
