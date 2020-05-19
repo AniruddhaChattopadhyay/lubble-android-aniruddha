@@ -34,6 +34,7 @@ import com.google.firebase.perf.metrics.Trace;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,6 +44,7 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
@@ -95,12 +97,18 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private int queryCounter = 0;
     private boolean isPublicGroupsLoading;
     private Query publicGroupsQuery;
+    private boolean isNewUser = true;
+    private Map<String, ?> newUserGroupsMap;
 
     public GroupListFragment() {
     }
 
-    public static GroupListFragment newInstance() {
-        return new GroupListFragment();
+    public static GroupListFragment newInstance(boolean isNewUserInThisLubble) {
+        GroupListFragment groupListFragment = new GroupListFragment();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean("isNewUserInThisLubble", isNewUserInThisLubble);
+        groupListFragment.setArguments(bundle);
+        return groupListFragment;
     }
 
     @Override
@@ -119,6 +127,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         tabLayout = view.findViewById(R.id.tab_dots);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
+
+        isNewUser = getArguments().getBoolean("isNewUserInThisLubble", false);
 
         groupInvitedByMap = new HashMap<>();
         Analytics.triggerScreenEvent(getContext(), this.getClass());
@@ -195,6 +205,16 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                             groupData.setUnreadCount((Long) userMap.get("unreadCount"));
                         }
                         adapter.addGroupToTop(groupData);
+                        // delayed sorting for new users
+                        if (isNewUser && newUserGroupsMap == null && GroupPromptSharedPrefs.getInstance().getPreferences().getAll().size() > 0) {
+                            newUserGroupsMap = GroupPromptSharedPrefs.getInstance().getPreferences().getAll();
+                        }
+                        if (newUserGroupsMap != null) {
+                            newUserGroupsMap.remove(groupData.getId());
+                            if (newUserGroupsMap.size() == 0) {
+                                adapter.sortGroupList();
+                            }
+                        }
                     } else if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
                             && groupData.getMembers().size() > 0) {
                         // non-joined public groups with non-zero members

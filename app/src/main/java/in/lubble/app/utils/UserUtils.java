@@ -23,7 +23,13 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.notifications.GroupMappingSharedPrefs;
+import in.lubble.app.notifications.KeyMappingSharedPrefs;
+import in.lubble.app.notifications.MutedChatsSharedPrefs;
+import in.lubble.app.notifications.UnreadChatsSharedPrefs;
+import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -60,6 +66,12 @@ public class UserUtils {
                                             progressDialog.dismiss();
                                             // user is now signed out
                                             LubbleSharedPrefs.getInstance().clearAll();
+                                            GroupPromptSharedPrefs.getInstance().clearAll();
+                                            UnreadChatsSharedPrefs.getInstance().clearAll();
+                                            MutedChatsSharedPrefs.getInstance().clearAll();
+                                            KeyMappingSharedPrefs.getInstance().clearAll();
+                                            GroupMappingSharedPrefs.getInstance().clearAll();
+                                            AnswerSharedPrefs.getInstance().clearAll();
                                             Branch.getInstance().logout();
                                             Intent intent = new Intent(activity, LoginActivity.class);
                                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -95,6 +107,12 @@ public class UserUtils {
                                         progressDialog.dismiss();
                                         // user is now signed out
                                         LubbleSharedPrefs.getInstance().clearAll();
+                                        GroupPromptSharedPrefs.getInstance().clearAll();
+                                        UnreadChatsSharedPrefs.getInstance().clearAll();
+                                        MutedChatsSharedPrefs.getInstance().clearAll();
+                                        KeyMappingSharedPrefs.getInstance().clearAll();
+                                        GroupMappingSharedPrefs.getInstance().clearAll();
+                                        AnswerSharedPrefs.getInstance().clearAll();
                                         Branch.getInstance().logout();
                                         Intent intent = new Intent(context, LoginActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
