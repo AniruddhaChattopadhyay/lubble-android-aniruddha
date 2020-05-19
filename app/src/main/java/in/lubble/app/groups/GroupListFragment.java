@@ -94,6 +94,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private Trace groupTrace;
     private int queryCounter = 0;
     private boolean isPublicGroupsLoading;
+    private Query publicGroupsQuery;
 
     public GroupListFragment() {
     }
@@ -315,8 +316,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         Log.d(TAG, "onScrolled: last item");
                         isPublicGroupsLoading = true;
                         progressBarPublicGroups.setVisibility(View.VISIBLE);
-                        Query publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
-                        publicGroupsQuery.addListenerForSingleValueEvent(publicGroupListener);
+                        publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
+                        publicGroupsQuery.addValueEventListener(publicGroupListener);
                     }
                 }
             });
@@ -752,9 +753,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        /*if (childEventListener != null) {
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+        if (childEventListener != null) {
             query.removeEventListener(childEventListener);
         }
         if (dmChildEventListener != null) {
@@ -772,15 +774,12 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (sellerDmsListener != null) {
             getSellerDmsRef().removeEventListener(sellerDmsListener);
         }
+        if (publicGroupListener != null && publicGroupsQuery != null) {
+            publicGroupsQuery.removeEventListener(publicGroupListener);
+        }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
-        }*/
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+        }
     }
 
     @Override
