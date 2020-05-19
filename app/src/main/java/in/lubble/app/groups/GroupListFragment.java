@@ -1,7 +1,9 @@
 package in.lubble.app.groups;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -73,6 +76,7 @@ import static in.lubble.app.groups.GroupRecyclerAdapter.TYPE_HEADER;
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
 
     private static final String TAG = "GroupListFragment";
+    public static final String USER_INIT_LOGOUT_ACTION = "USER_INIT_LOGOUT_ACTION";
 
     private OnListFragmentInteractionListener mListener;
     private LinearLayout newGroupContainer;
@@ -162,6 +166,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         });*/
 
         syncAllGroups();
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(getContext());
+        lbm.registerReceiver(userInitiatedLogoutReceiver, new IntentFilter(USER_INIT_LOGOUT_ACTION));
         return view;
     }
 
@@ -775,32 +781,50 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     @Override
     public void onDetach() {
         super.onDetach();
+        removeListeners();
+    }
+
+    private void removeListeners() {
         mListener = null;
         if (childEventListener != null) {
             query.removeEventListener(childEventListener);
+            childEventListener = null;
         }
         if (dmChildEventListener != null) {
             dmQuery.removeEventListener(dmChildEventListener);
+            dmChildEventListener = null;
         }
         if (sellerDmQuery != null && dmChildEventListener != null) {
             sellerDmQuery.removeEventListener(dmChildEventListener);
+            dmChildEventListener = null;
         }
         if (userGroupsListener != null) {
             getUserGroupsRef().removeEventListener(userGroupsListener);
+            userGroupsListener = null;
         }
         if (userDmsListener != null) {
             getUserDmsRef(FirebaseAuth.getInstance().getUid()).removeEventListener(userDmsListener);
+            userDmsListener = null;
         }
         if (sellerDmsListener != null) {
             getSellerDmsRef().removeEventListener(sellerDmsListener);
+            sellerDmsListener = null;
         }
         if (publicGroupListener != null && publicGroupsQuery != null) {
             publicGroupsQuery.removeEventListener(publicGroupListener);
+            publicGroupListener = null;
         }
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
         }
     }
+
+    public BroadcastReceiver userInitiatedLogoutReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            removeListeners();
+        }
+    };
 
     @Override
     public void onListFragmentInteraction(String groupId, boolean isJoining) {

@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
@@ -33,6 +34,7 @@ import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.groups.GroupListFragment.USER_INIT_LOGOUT_ACTION;
 
 /**
  * Created by ishaangarg on 12/11/17.
@@ -50,10 +52,14 @@ public class UserUtils {
 
     public static void logout(@NonNull final FragmentActivity activity) {
         try {
+            Intent intent = new Intent(USER_INIT_LOGOUT_ACTION);
+            LocalBroadcastManager.getInstance(activity).sendBroadcast(intent);
+
             final ProgressDialog progressDialog = new ProgressDialog(activity);
             progressDialog.setMessage(activity.getString(R.string.logging_out));
             progressDialog.setCancelable(false);
             progressDialog.show();
+
             getThisUserRef().child("token").setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
