@@ -329,6 +329,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         });
         //notifyDataSetChanged();
         notifyItemRangeChanged(publicCursorPos, list.size());
+        groupDataListCopy.addAll(list);
+        if (filter != null) {
+            filter.addGroups(list);
+        }
         Log.d("trace", "--------------------\nsorting ended: ");
     }
 

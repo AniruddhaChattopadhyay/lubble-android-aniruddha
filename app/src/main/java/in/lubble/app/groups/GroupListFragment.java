@@ -154,17 +154,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         final SliderData sliderData = new SliderData();
         sliderDataList.add(sliderData);
 
-        /*nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                if (scrollY > oldScrollY) {
-                    UiUtils.animateSlideDownHide(getContext(), newGroupContainer);
-                } else {
-                    UiUtils.animateSlideUpShow(getContext(), newGroupContainer);
-                }
-            }
-        });*/
-
         syncAllGroups();
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(getContext());
         lbm.registerReceiver(userInitiatedLogoutReceiver, new IntentFilter(USER_INIT_LOGOUT_ACTION));
@@ -176,6 +165,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         super.onResume();
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(true);
+        }
+        if (adapter != null && adapter.getItemCount() > 0) {
+            filterGroups("");
         }
         setupSlider();
         fetchHomeBanners();
