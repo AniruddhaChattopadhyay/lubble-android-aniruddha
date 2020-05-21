@@ -407,7 +407,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         notifyDataSetChanged();
     }
 
-    public boolean isFilterNull() {
+    boolean isFilterNull() {
         return filter == null;
     }
 
