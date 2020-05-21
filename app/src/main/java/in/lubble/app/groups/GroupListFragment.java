@@ -167,6 +167,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             ((MainActivity) getActivity()).toggleSearchInToolbar(true);
         }
         if (adapter != null && adapter.getItemCount() > 0 && !adapter.isFilterNull()) {
+            adapter.clearFilter();
             syncAllGroups();
         }
         setupSlider();
@@ -210,7 +211,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         if (newUserGroupsMap != null) {
                             newUserGroupsMap.remove(groupData.getId());
                             if (newUserGroupsMap.size() == 0) {
-                                adapter.sortGroupList();
+                                adapter.sortJoinedGroupsList();
                             }
                         }
                     } else if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
@@ -230,7 +231,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         groupData.setUnreadCount((Long) userMap.get("unreadCount"));
                     }
                     adapter.updateGroup(groupData);
-                    adapter.sortGroupList();
+                    adapter.sortJoinedGroupsList();
                 }
             }
 
@@ -308,7 +309,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (queryCounter == 0) {
             // all groups, DMs, and seller DMs (if applicable) are synced
             adapter.addPublicHeader();
-            adapter.sortGroupList();
+            adapter.sortJoinedGroupsList();
             groupsRecyclerView.setVisibility(View.VISIBLE);
             if (progressBar.getVisibility() == View.VISIBLE) {
                 progressBar.setVisibility(View.GONE);
@@ -449,7 +450,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     }
                 }
                 adapter.updateGroup(groupData);
-                adapter.sortGroupList();
+                adapter.sortJoinedGroupsList();
             }
         }
 

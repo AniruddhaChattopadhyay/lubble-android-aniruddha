@@ -300,12 +300,12 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         Log.d("trace", "updateGroupPos: ");
     }
 
-    void sortGroupList() {
+    void sortJoinedGroupsList() {
         Log.d("trace", "--------------------\nsorting started: ");
         Collections.sort(groupDataList, new Comparator<GroupData>() {
             @Override
             public int compare(GroupData o1, GroupData o2) {
-                if (o1 != null && o2 != null) {
+                if (o1 != null && o2 != null && o1.isJoined() && o2.isJoined()) {
                     if (o1.getIsPinned()) return -1;
                     if (o2.getIsPinned()) return 1;
                     return (o1.getLastMessageTimestamp() < o2.getLastMessageTimestamp()) ? 1 : ((o1.getLastMessageTimestamp() == o2.getLastMessageTimestamp()) ? 0 : -1);
@@ -409,6 +409,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     boolean isFilterNull() {
         return filter == null;
+    }
+
+    void clearFilter() {
+        filter = null;
     }
 
     class GroupViewHolder extends RecyclerView.ViewHolder {
