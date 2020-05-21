@@ -334,6 +334,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     if (lastVisibleItemPosition != NO_POSITION && adapter.getItemViewType(lastVisibleItemPosition) == TYPE_HEADER && !isPublicGroupsLoading) {
                         Log.d(TAG, "onScrolled: last item");
                         isPublicGroupsLoading = true;
+                        groupsRecyclerView.setPadding(0, 0, 0, UiUtils.dpToPx(80));
                         progressBarPublicGroups.setVisibility(View.VISIBLE);
                         publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
                         publicGroupsQuery.addValueEventListener(publicGroupListener);
@@ -370,6 +371,11 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             progressBarPublicGroups.setVisibility(View.GONE);
             adapter.sortPublicGroupList(startingIndex);
             groupsRecyclerView.setPadding(0, 0, 0, 0);
+            if (startingIndex == -1) {
+                // onDataChange was called again with just group updates, no new groups added
+                // remove listener to save bandwidth
+                publicGroupsQuery.removeEventListener(publicGroupListener);
+            }
         }
 
         @Override
