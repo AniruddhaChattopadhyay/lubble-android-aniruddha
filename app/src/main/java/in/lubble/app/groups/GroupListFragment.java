@@ -166,8 +166,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(true);
         }
-        if (adapter != null && adapter.getItemCount() > 0) {
-            filterGroups("");
+        if (adapter != null && adapter.getItemCount() > 0 && !adapter.isFilterNull()) {
+            syncAllGroups();
         }
         setupSlider();
         fetchHomeBanners();

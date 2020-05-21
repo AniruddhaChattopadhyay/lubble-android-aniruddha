@@ -407,6 +407,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         notifyDataSetChanged();
     }
 
+    public boolean isFilterNull() {
+        return filter == null;
+    }
+
     class GroupViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final ImageView iconIv;
