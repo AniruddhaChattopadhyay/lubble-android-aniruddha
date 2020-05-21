@@ -351,19 +351,23 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private ValueEventListener publicGroupListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            int startingIndex = -1;
             for (DataSnapshot snapshotChild : dataSnapshot.getChildren()) {
                 final GroupData groupData = snapshotChild.getValue(GroupData.class);
                 if (groupData != null) {
                     if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
                             && groupData.getMembers().size() > 0) {
                         // non-joined public groups with non-zero members
-                        adapter.addPublicGroupToTop(groupData);
+                        int index = adapter.addPublicGroupToTop(groupData);
+                        if (startingIndex == -1) {
+                            startingIndex = index;
+                        }
                     }
                 }
             }
             // custom sort of just public groups
             progressBarPublicGroups.setVisibility(View.GONE);
-            adapter.sortPublicGroupList();
+            adapter.sortPublicGroupList(startingIndex);
             groupsRecyclerView.setPadding(0, 0, 0, 0);
         }
 

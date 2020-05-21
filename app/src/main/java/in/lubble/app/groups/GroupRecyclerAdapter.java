@@ -232,18 +232,22 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-    public void addPublicGroupToTop(GroupData groupData) {
+    public int addPublicGroupToTop(GroupData groupData) {
         if (getChildIndex(groupData.getId()) == -1) {
             if (publicCursorPos + 1 < groupDataList.size()) {
                 groupDataList.add(publicCursorPos + 1, groupData);
                 notifyItemInserted(publicCursorPos + 1);
+                Log.d("trace", "addPublicGroupToTop: ");
+                return publicCursorPos + 1;
             } else {
                 groupDataList.add(groupData);
                 notifyItemInserted(groupDataList.size() - 1);
+                Log.d("trace", "addPublicGroupToTop: ");
+                return groupDataList.size() - 1;
             }
-            Log.d("trace", "addPublicGroupToTop: ");
         } else {
             updateGroup(groupData);
+            return -1;
         }
     }
 
@@ -313,9 +317,10 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         Log.d("trace", "--------------------\nsorting ended: ");
     }
 
-    void sortPublicGroupList() {
+    void sortPublicGroupList(int startingIndex) {
         Log.d("trace", "--------------------\nsorting started: ");
-        List<GroupData> list = groupDataList.subList(publicCursorPos, groupDataList.size());
+        startingIndex = startingIndex == -1 ? publicCursorPos : startingIndex;
+        List<GroupData> list = groupDataList.subList(startingIndex, groupDataList.size());
         Collections.sort(list, new Comparator<GroupData>() {
             @Override
             public int compare(GroupData o1, GroupData o2) {
@@ -328,7 +333,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
         });
         //notifyDataSetChanged();
-        notifyItemRangeChanged(publicCursorPos, list.size());
+        notifyItemRangeChanged(startingIndex, list.size());
         groupDataListCopy.addAll(list);
         if (filter != null) {
             filter.addGroups(list);
