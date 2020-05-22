@@ -33,6 +33,10 @@ public class NotifData {
     private String timestamp;
     @SerializedName("isImage")
     private String hasImage;
+    @SerializedName("isPdf")
+    private String hasPdf;
+    @SerializedName("pdfFileName")
+    private String pdfFileName;
     @SerializedName("type")
     private String notifType;
     @SerializedName("isSeller")
@@ -91,7 +95,11 @@ public class NotifData {
             return "\uD83D\uDCF7 " + messageBody;
         } else if (this.messageBody.equalsIgnoreCase(LubbleApp.getAppContext().getString(R.string.poll_msg_body))) {
             return "\uD83D\uDCCA POLL";
-        } else {
+        }
+        else if(StringUtils.isValidString(hasPdf) && hasPdf.equalsIgnoreCase("True")){
+            return "\uD83D\uDCC4 " + pdfFileName + ".pdf " + messageBody;
+        }
+        else {
             return messageBody;
         }
     }

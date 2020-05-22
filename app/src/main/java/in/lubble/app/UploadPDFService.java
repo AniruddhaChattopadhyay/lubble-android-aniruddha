@@ -7,15 +7,12 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.transition.Transition;
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -24,12 +21,16 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.shockwave.pdfium.PdfDocument;
 import com.shockwave.pdfium.PdfiumCore;
+
+import java.io.ByteArrayOutputStream;
 
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
@@ -39,16 +40,9 @@ import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
-import static in.lubble.app.utils.FileUtils.getUriFromTempBitmap;
 
-/**
- * Service to handle uploading files to Firebase Storage
- * Created by ishaan on 26/1/18.
- */
-
-public class UploadFileService extends BaseTaskService {
-
-    private static final String TAG = "UploadFileService";
+public class UploadPDFService extends BaseTaskService {
+    private static final String TAG = "UploadPDFService";
     public static final int BUCKET_DEFAULT = 362;
     public static final int BUCKET_CONVO = 491;
     public static final int BUCKET_MARKETPLACE = 839;
@@ -68,11 +62,12 @@ public class UploadFileService extends BaseTaskService {
     public static final String EXTRA_BUCKET = "extra_bucket";
     public static final String EXTRA_UPLOAD_PATH = "extra_upload_path";
     public static final String EXTRA_DOWNLOAD_URL = "extra_download_url";
-    public static final String EXTRA_CAPTION = "extra_caption";
     public static final String EXTRA_CHAT_ID = "extra_chat_id";
     public static final String EXTRA_IS_DM = "EXTRA_IS_DM";
     public static final String EXTRA_AUTHOR_ID = "EXTRA_AUTHOR_ID";
     public static final String EXTRA_IS_AUTHOR_SELLER = "EXTRA_IS_AUTHOR_SELLER";
+    public static final String TRACK_UPLOAD_TIME = "TRACK_UPLOAD_TIME";
+    public static final String TRACK_COMPRESS_TIME = "TRACK_COMPRESS_TIME";
 
     private StorageReference mStorageRef;
 
@@ -84,6 +79,7 @@ public class UploadFileService extends BaseTaskService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("uploadFrom", "Started");
         Log.d(TAG, "onStartCommand:" + intent + ":" + startId);
 
         final int bucketId = intent.getIntExtra(EXTRA_BUCKET, BUCKET_DEFAULT);
@@ -104,11 +100,10 @@ public class UploadFileService extends BaseTaskService {
                         fileUri,
                         intent.getStringExtra(EXTRA_FILE_NAME),
                         intent.getStringExtra(EXTRA_UPLOAD_PATH),
-                        intent.getStringExtra(EXTRA_CAPTION),
                         intent.getStringExtra(EXTRA_CHAT_ID)
                 );
             } else {
-                final DmInfoData dmInfoData = new DmInfoData(
+                final UploadPDFService.DmInfoData dmInfoData = new UploadPDFService.DmInfoData(
                         intent.getStringExtra(EXTRA_AUTHOR_ID),
                         intent.getBooleanExtra(EXTRA_IS_DM, false),
                         intent.getBooleanExtra(EXTRA_IS_AUTHOR_SELLER, false)
@@ -118,7 +113,6 @@ public class UploadFileService extends BaseTaskService {
                         fileUri,
                         intent.getStringExtra(EXTRA_FILE_NAME),
                         intent.getStringExtra(EXTRA_UPLOAD_PATH),
-                        intent.getStringExtra(EXTRA_CAPTION),
                         intent.getStringExtra(EXTRA_CHAT_ID),
                         bucketId == BUCKET_CONVO,
                         null,
@@ -131,7 +125,7 @@ public class UploadFileService extends BaseTaskService {
     }
 
 
-    private void uploadFromUriWithMetadata(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId) {
+    private void uploadFromUriWithMetadata(final Uri fileUri, final String fileName, final String uploadPath, final String groupId) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
@@ -146,7 +140,7 @@ public class UploadFileService extends BaseTaskService {
                             .setCustomMetadata("uid", FirebaseAuth.getInstance().getUid())
                             .setCustomMetadata("token", task.getResult().getToken())
                             .build();
-                    uploadFromUri(fileUri, fileName, uploadPath, caption, groupId, false, metadata, null);
+                    uploadFromUri(fileUri, fileName, uploadPath, groupId, false, metadata, null);
                 } else {
                     taskCompleted();
                 }
@@ -154,56 +148,58 @@ public class UploadFileService extends BaseTaskService {
         });
     }
 
-    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath, final String caption, final String groupId,
-                               final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) {
+
+    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath,  final String groupId,
+                               final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final UploadPDFService.DmInfoData dmInfoData) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
-        final StorageReference photoRef = mStorageRef.child(uploadPath)
-                .child(fileName);
-
-        GlideApp.with(this).asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .load(fileUri)
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        if (resource.getWidth() > 1000 || resource.getHeight() > 1000) {
-                            compressAndUpload(fileUri, fileName, caption, groupId, toTransmit, metadata, dmInfoData, photoRef);
-                        } else {
-                            uploadFile(fileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
-                        }
-                    }
-                });
+        final StorageReference pdfreference = mStorageRef.child(uploadPath)
+                .child(fileName+".pdf");
+        uploadFile(fileUri,pdfreference,fileName,uploadPath,metadata,toTransmit,groupId,dmInfoData);
     }
 
-    private void compressAndUpload(final Uri fileUri, final String fileName, final String caption, final String groupId, final boolean toTransmit,
-                                   @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData, final StorageReference photoRef) {
-        GlideApp.with(this).asBitmap()
-                .override(1000, 1000)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .load(fileUri)
-                .into(new SimpleTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        final Uri compressedFileUri = getUriFromTempBitmap(UploadFileService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
-                        uploadFile(compressedFileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
-                    }
-                });
-    }
-
-
-    private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, @Nullable StorageMetadata metadata, final boolean toTransmit, final String caption, final String groupId, @Nullable final DmInfoData dmInfoData) {
-        // Upload file to Firebase Storage
-        Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
-        final UploadTask uploadTask;
-        if (metadata != null) {
-            uploadTask = photoRef.putFile(compressedFileUri, metadata);
-        } else {
-            uploadTask = photoRef.putFile(compressedFileUri);
+    Bitmap generateImageFromPdf(Uri pdfUri) {
+        int pageNumber = 0;
+        PdfiumCore pdfiumCore = new PdfiumCore(this);
+        try {
+            //http://www.programcreek.com/java-api-examples/index.php?api=android.os.ParcelFileDescriptor
+            ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(pdfUri, "r");
+            PdfDocument pdfDocument = pdfiumCore.newDocument(fd);
+            pdfiumCore.openPage(pdfDocument, pageNumber);
+            int width = pdfiumCore.getPageWidthPoint(pdfDocument, pageNumber);
+            int height = pdfiumCore.getPageHeightPoint(pdfDocument, pageNumber);
+            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            pdfiumCore.renderPageBitmap(pdfDocument, bmp, pageNumber, 0, 0, width, height);
+            pdfiumCore.closeDocument(pdfDocument); // important!
+            return bmp;
+        } catch(Exception e) {
+            Crashlytics.logException(e);
         }
+        return null;
+    }
+
+    private void uploadFile(final Uri FileUri, final StorageReference pdfRef, final String fileName, final String uploadPath, @Nullable StorageMetadata metadata, final boolean toTransmit, final String groupId, @Nullable final UploadPDFService.DmInfoData dmInfoData) {
+        // Upload file to Firebase Storage
+        Log.d(TAG, "uploadFromUri:dst:" + pdfRef.getPath());
+        final UploadTask uploadTask;
+        final UploadTask uploadTaskThumbnail;
+        final Trace uploadTime = FirebasePerformance.getInstance().newTrace(TRACK_UPLOAD_TIME);
+        uploadTime.start();
+        if (metadata != null) {
+            uploadTask = pdfRef.putFile(FileUri, metadata);
+        } else {
+            uploadTask = pdfRef.putFile(FileUri);
+        }
+        Bitmap bitmap = generateImageFromPdf(FileUri);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+
+        final StorageReference pdfRefThumbnail = mStorageRef.child(uploadPath)
+                .child(fileName+" thumbnail");
+
+        uploadTaskThumbnail = pdfRefThumbnail.putBytes(data);
         uploadTask.
                 addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -216,26 +212,74 @@ public class UploadFileService extends BaseTaskService {
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Upload succeeded
-                        Log.d(TAG, "uploadFromUri:onSuccess");
-
-                        // Get the public download URL
-                        photoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        pdfRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                             @Override
                             public void onComplete(@NonNull Task<Uri> task) {
                                 if (task.isSuccessful()) {
                                     final Uri downloadUri = task.getResult();
-                                    // [START_EXCLUDE]
-                                    broadcastUploadFinished(downloadUri, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
-                                    showUploadFinishedNotification(downloadUri, compressedFileUri, toTransmit);
-                                    taskCompleted();
-                                    // [END_EXCLUDE]
+                                    uploadTaskThumbnail.
+                                            addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                                @Override
+                                                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                                    showProgressNotification(getString(R.string.progress_uploading),
+                                                            taskSnapshot.getBytesTransferred(),
+                                                            taskSnapshot.getTotalByteCount());
+                                                }
+                                            })
+                                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                @Override
+                                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                    uploadTime.stop();
+
+                                                    pdfRefThumbnail.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Uri> task) {
+                                                            if (task.isSuccessful()) {
+                                                                final Uri downloadUriThumbnail = task.getResult();
+
+                                                                // [START_EXCLUDE]
+                                                                broadcastUploadFinished(downloadUri,downloadUriThumbnail,fileName,FileUri, toTransmit, groupId, dmInfoData);
+                                                                showUploadFinishedNotification(downloadUri,downloadUriThumbnail, FileUri, toTransmit);
+                                                                taskCompleted();
+                                                                // [END_EXCLUDE]
+                                                            } else {
+                                                                Log.d(TAG, "onComplete: failed");
+
+                                                                // [START_EXCLUDE]
+                                                                broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
+                                                                showUploadFinishedNotification(null,null, FileUri, toTransmit);
+                                                                taskCompleted();
+                                                                // [END_EXCLUDE]
+                                                            }
+                                                        }
+                                                    });
+
+                                                }
+                                            })
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception exception) {
+                                                    // Upload failed
+                                                    Log.w(TAG, "uploadFromUri:onFailure", exception);
+
+                                                    // [START_EXCLUDE]
+                                                    broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
+                                                    showUploadFinishedNotification(null,null, FileUri, toTransmit);
+                                                    taskCompleted();
+                                                    //[END_EXCLUDE]
+                                                }
+                                            });
+//                                    // [START_EXCLUDE]
+//                                    broadcastUploadFinished(downloadUri, FileUri, toTransmit, groupId, dmInfoData);
+//                                    showUploadFinishedNotification(downloadUri, FileUri, toTransmit);
+//                                    taskCompleted();
+//                                    // [END_EXCLUDE]
                                 } else {
                                     Log.d(TAG, "onComplete: failed");
 
                                     // [START_EXCLUDE]
-                                    broadcastUploadFinished(null, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
-                                    showUploadFinishedNotification(null, compressedFileUri, toTransmit);
+                                    broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
+                                    showUploadFinishedNotification(null,null, FileUri, toTransmit);
                                     taskCompleted();
                                     // [END_EXCLUDE]
                                 }
@@ -251,10 +295,10 @@ public class UploadFileService extends BaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
-                        showUploadFinishedNotification(null, compressedFileUri, toTransmit);
+                        broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
+                        showUploadFinishedNotification(null, null, FileUri, toTransmit);
                         taskCompleted();
-                        // [END_EXCLUDE]
+                        //[END_EXCLUDE]
                     }
                 });
     }
@@ -265,8 +309,8 @@ public class UploadFileService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit, String caption,
-                                            String chatId, DmInfoData dmInfoData) {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri downloadUriThumbnail, @Nullable String filename,@Nullable Uri fileUri, boolean toTransmit,
+                                            String chatId, UploadPDFService.DmInfoData dmInfoData) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
@@ -276,14 +320,14 @@ public class UploadFileService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            transmitMedia(downloadUrl, caption, chatId, dmInfoData.isDm, dmInfoData.authorId, dmInfoData.isAuthorSeller);
+            transmitMedia(downloadUrl,downloadUriThumbnail,filename, chatId, dmInfoData.isDm, dmInfoData.authorId, dmInfoData.isAuthorSeller);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())
                 .sendBroadcast(broadcast);
     }
 
-    private void transmitMedia(Uri downloadUrl, String caption, String chatId, boolean isDm, String authorId, boolean isAuthorSeller) {
+    private void transmitMedia(Uri downloadUrl,Uri downloadThumbnailUrl,String filename, String chatId, boolean isDm, String authorId, boolean isAuthorSeller) {
         final DatabaseReference msgReference;
         if (isDm) {
             msgReference = getDmMessagesRef().child(chatId);
@@ -295,8 +339,10 @@ public class UploadFileService extends BaseTaskService {
         chatData.setAuthorUid(authorId);
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
-        chatData.setMessage(caption);
-        chatData.setImgUrl(downloadUrl.toString());
+        chatData.setMessage("");
+        chatData.setPdfFileName(filename);
+        chatData.setPdfUrl(downloadUrl.toString());
+        chatData.setPdfThumbnailUrl(downloadThumbnailUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);
 
@@ -306,7 +352,7 @@ public class UploadFileService extends BaseTaskService {
     /**
      * Show a notification for a finished upload.
      */
-    private void showUploadFinishedNotification(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean isConvo) {
+    private void showUploadFinishedNotification(@Nullable Uri downloadUrl, @Nullable Uri downloadUrlThumbnail, @Nullable Uri fileUri, boolean isConvo) {
         // Hide the progress notification
         dismissProgressNotification();
         if (isConvo) {
@@ -321,7 +367,7 @@ public class UploadFileService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        boolean success = downloadUrl != null;
+        boolean success = downloadUrl != null && downloadUrlThumbnail!=null ;
         String caption = success ? getString(R.string.upload_success) : getString(R.string.upload_failure);
         showFinishedNotification(caption, intent, success);
     }
@@ -346,5 +392,4 @@ public class UploadFileService extends BaseTaskService {
         }
 
     }
-
 }
