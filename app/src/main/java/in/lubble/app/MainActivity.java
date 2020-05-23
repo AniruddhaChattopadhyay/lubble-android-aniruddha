@@ -320,7 +320,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         logUser(FirebaseAuth.getInstance().getCurrentUser());
         Branch.getInstance().setIdentity(FirebaseAuth.getInstance().getUid());
 
-        groupListFragment = GroupListFragment.newInstance();
+        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
         switchFrag(groupListFragment);
 
         bottomNavigation = findViewById(R.id.navigation);
@@ -877,7 +877,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
-                    switchFrag(groupListFragment = GroupListFragment.newInstance());
+                    switchFrag(groupListFragment = GroupListFragment.newInstance(false));
                     return true;
                 case R.id.navigation_explore:
                     switchFrag(ExploreFrag.newInstance());

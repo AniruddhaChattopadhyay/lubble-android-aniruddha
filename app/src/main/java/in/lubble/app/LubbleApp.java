@@ -64,6 +64,7 @@ public class LubbleApp extends MultiDexApplication {
         KeyMappingSharedPrefs.initializeInstance(getApplicationContext());
         AnswerSharedPrefs.initializeInstance(getApplicationContext());
         GroupPromptSharedPrefs.initializeInstance(getApplicationContext());
+        // REMEMBER: Clear the new sharedPrefs file in UserUtils#logout()
 
         Fabric.with(this, new Crashlytics());
         // Create an analytics client with the given context and Segment write key.

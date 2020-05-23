@@ -81,16 +81,16 @@ public class NotificationResultReceiver extends BroadcastReceiver {
     }
 
     private void updateUnreadCounter(NotifData notifData, boolean isDm) {
-        DatabaseReference unreadCountRef = RealtimeDbHelper.getUserGroupsRef().child(notifData.getGroupId()).child("unreadCount");
+        DatabaseReference unreadCountRef = RealtimeDbHelper.getLubbleGroupsRef().child(notifData.getGroupId()).child("members").child(FirebaseAuth.getInstance().getUid()).child("unreadCount");
         if (isDm) {
             if (notifData.getIsSeller()) {
-                unreadCountRef = RealtimeDbHelper.getSellerRef()
-                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
-                        .child("dms")
+                unreadCountRef = RealtimeDbHelper.getDmsRef()
                         .child(notifData.getGroupId())
+                        .child("members")
+                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
                         .child("unreadCount");
             } else {
-                unreadCountRef = RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid()).child(notifData.getGroupId()).child("unreadCount");
+                unreadCountRef = RealtimeDbHelper.getDmsRef().child(notifData.getGroupId()).child("members").child(FirebaseAuth.getInstance().getUid()).child("unreadCount");
             }
         }
         unreadCountRef.addListenerForSingleValueEvent(new ValueEventListener() {

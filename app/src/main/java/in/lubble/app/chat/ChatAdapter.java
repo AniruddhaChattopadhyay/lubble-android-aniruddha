@@ -1700,6 +1700,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         String message = chatDataList.get(highlightedPos).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
+                        Analytics.triggerEvent(AnalyticsEvents.MSG_COPIED, context);
                         break;
                     case R.id.action_info:
                         chatFragment.openChatInfo(chatDataList.get(highlightedPos).getId(), false);

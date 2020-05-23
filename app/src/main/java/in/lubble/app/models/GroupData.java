@@ -32,6 +32,8 @@ public class GroupData {
     private String questionChatId = "101";
     @Exclude
     private Set<String> invitedBy;
+    @Exclude
+    private long unreadCount = 0;
     private boolean isPinned;
     @Exclude
     private boolean isDm;
@@ -186,5 +188,15 @@ public class GroupData {
 
     public void setQuestionChatId(String questionChatId) {
         this.questionChatId = questionChatId;
+    }
+
+    @Exclude
+    public long getUnreadCount() {
+        return unreadCount;
+    }
+
+    @Exclude
+    public void setUnreadCount(long unreadCount) {
+        this.unreadCount = unreadCount;
     }
 }
