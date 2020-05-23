@@ -2,6 +2,7 @@ package in.lubble.app.firebase;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
 import in.lubble.app.BuildConfig;
 
 /**
@@ -22,6 +23,13 @@ public class FirebaseStorageHelper {
             return FirebaseStorage.getInstance("gs://lubble-dev-convo").getReference();
         }
         return FirebaseStorage.getInstance("gs://lubble-in-convo").getReference();
+    }
+
+    public static FirebaseStorage getConvoBucketInstance() {
+        if ("dev".equalsIgnoreCase(BuildConfig.FLAVOR)) {
+            return FirebaseStorage.getInstance("gs://lubble-dev-convo");
+        }
+        return FirebaseStorage.getInstance("gs://lubble-in-convo");
     }
 
     public static StorageReference getMarketplaceBucketRef() {

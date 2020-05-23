@@ -2,14 +2,12 @@ package in.lubble.app.chat;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -62,6 +60,8 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -70,6 +70,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
 
 import org.jsoup.Jsoup;
 
@@ -89,6 +92,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.events.EventInfoActivity;
+import in.lubble.app.firebase.FirebaseStorageHelper;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
@@ -1116,24 +1120,29 @@ public class ChatAdapter extends RecyclerView.Adapter {
         return uri.getLastPathSegment();
     }
 
-    private static File findFilesForId(File dir, final String file_name_to_be_searched) {
+    @Nullable
+    private static File findFilesForId(File dir, final String fileNameToSearch) {
         File[] files = dir.listFiles();
         for (File f : files) {
-            if (f.getName().equals(file_name_to_be_searched))
+            if (f.getName().equals(fileNameToSearch))
                 return f;
         }
         return null;
     }
 
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    @Nullable
-    private File makeGetFileForDownload(String fileName) {
+    private File getLubbleDocsDir() {
         File f = new File(Environment.getExternalStorageDirectory(), lubbleDocumentDirectory);
         if (!f.exists()) {
             f.mkdirs();
         }
-        File lubbleDocumentFile = f;
-        return findFilesForId(lubbleDocumentFile, fileName);
+        return f;
+    }
+
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    @Nullable
+    private File makeGetFileForDownload(String fileName) {
+        File dir = getLubbleDocsDir();
+        return findFilesForId(dir, fileName);
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -1156,62 +1165,34 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
 
         } else {
-            Uri pdfUri = Uri.parse(pdfUrl);
-
-            DownloadManager.Request request = new DownloadManager.Request(pdfUri);
-            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
-            request.setTitle(fileName);
-            request.setDescription("Downloading pdf ...");
-            request.allowScanningByMediaScanner();
-            request.setMimeType("application/pdf");
-            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            request.setDestinationInExternalPublicDir(lubbleDocumentDirectory, fileName);
             mProgressBar.setVisibility(VISIBLE);
             pdfDownloadIv.setVisibility(View.GONE);
 
-            final DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-            final long dmId = manager.enqueue(request);
-
-            new Thread(new Runnable() {
+            StorageReference pdfReference = FirebaseStorageHelper.getConvoBucketInstance().getReferenceFromUrl(pdfUrl);
+            File destinationFile = new File(getLubbleDocsDir(), fileName);
+            pdfReference.getFile(destinationFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
-                public void run() {
-
-                    boolean downloading = true;
-                    while (downloading) {
-                        DownloadManager.Query q = new DownloadManager.Query();
-                        q.setFilterById(dmId);
-                        Cursor cursor = manager.query(q);
-                        cursor.moveToFirst();
-                        int bytes_downloaded = cursor.getInt(cursor
-                                .getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-                        int bytes_total = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-
-                        if (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)) == DownloadManager.STATUS_SUCCESSFUL) {
-                            downloading = false;
-                        }
-
-                        final int dl_progress = (int) ((bytes_downloaded * 100l) / bytes_total);
-                        ((Activity) context).runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mProgressBar.setProgress((int) dl_progress);
-
-                            }
-                        });
-                        cursor.close();
-                    }
-                    ((Activity) context).runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            mProgressBar.setVisibility(View.GONE);
-                            pdfDownloadIv.setVisibility(View.GONE);
-                        }
-                    });
-
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    // Local temp file has been created
+                    mProgressBar.setVisibility(View.GONE);
+                    pdfDownloadIv.setVisibility(View.GONE);
                 }
-            }).start();
-            //Toast.makeText(context, "Download started, Click the pdf after the download completes to open it", Toast.LENGTH_LONG).show();
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                    Log.e(TAG, "onFailure: ", exception);
+                    Crashlytics.logException(exception);
+                }
+            }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(@NonNull FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    //calculating progress percentage
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                    //displaying percentage in progress dialog
+                    mProgressBar.setProgress((int) progress);
+                }
+            });
             Bundle bundle = new Bundle();
             bundle.putString("Pdf name", fileName);
             Analytics.triggerEvent(AnalyticsEvents.DOWNLOAD_PDF, bundle, context);
