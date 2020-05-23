@@ -1167,7 +1167,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
             request.setDestinationInExternalPublicDir(lubbleDocumentDirectory, fileName);
             mProgressBar.setVisibility(VISIBLE);
-            pdfDownloadIv.setVisibility(VISIBLE);
+            pdfDownloadIv.setVisibility(View.GONE);
 
             final DownloadManager manager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
             final long dmId = manager.enqueue(request);
