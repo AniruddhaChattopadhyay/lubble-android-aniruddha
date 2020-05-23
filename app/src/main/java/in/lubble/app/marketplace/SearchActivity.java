@@ -5,20 +5,36 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.EditText;
+
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import in.lubble.app.BaseActivity;
-import in.lubble.app.R;
-import in.lubble.app.analytics.Analytics;
-import in.lubble.app.database.DbSingleton;
+
+import com.algolia.search.saas.AlgoliaException;
+import com.algolia.search.saas.Client;
+import com.algolia.search.saas.CompletionHandler;
+import com.algolia.search.saas.Index;
+import com.algolia.search.saas.Query;
+import com.google.gson.Gson;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import in.lubble.app.BaseActivity;
+import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.models.search.Hit;
+import in.lubble.app.models.search.SearchResultData;
+
 import static in.lubble.app.analytics.AnalyticsEvents.FAILED_SEARCH;
 
-public class SearchActivity extends BaseActivity {
+public class SearchActivity extends BaseActivity implements CompletionHandler {
 
     private static final String TAG = "SearchActivity";
 
@@ -44,6 +60,9 @@ public class SearchActivity extends BaseActivity {
         adapter = new SearchResultsAdapter(this);
         searchResultsRv.setAdapter(adapter);
 
+        Client client = new Client("IIVL0B0EIY", "12ac422e05119422ec03224a9da738a7");
+        final Index index = client.getIndex(BuildConfig.FLAVOR.equalsIgnoreCase("dev") ? "dev_mplace" : "prod_mplace");
+
         searchEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -57,19 +76,38 @@ public class SearchActivity extends BaseActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (s != null && s.length() > 0) {
-                    final ArrayList<ItemSearchData> itemSearchDataList = DbSingleton.getInstance().readAllItemSearchData(s.toString());
-                    adapter.addData(itemSearchDataList);
-                    if (itemSearchDataList.isEmpty()) {
-                        // failed search
-                        final Bundle bundle = new Bundle();
-                        bundle.putString("search_term", s.toString());
-                        Analytics.triggerEvent(FAILED_SEARCH, bundle, SearchActivity.this);
-                    }
+                if (s != null && s.length() >= 3) {
+                    String lubbleId = BuildConfig.DEBUG ? "koramangala" : LubbleSharedPrefs.getInstance().getLubbleId();
+                    index.searchAsync(new Query(s.toString()).setFilters("lubbleID:" + lubbleId), SearchActivity.this);
                 } else {
                     adapter.clearAll();
                 }
             }
         });
+    }
+
+    @Override
+    public void requestCompleted(@Nullable JSONObject jsonObject, @Nullable AlgoliaException e) {
+        if (jsonObject != null) {
+            Log.d(TAG, "requestCompleted: " + jsonObject.toString());
+
+            SearchResultData searchResultData = new Gson().fromJson(jsonObject.toString(), SearchResultData.class);
+            if (searchResultData.getNbHits() > 0) {
+                ArrayList<ItemSearchData> itemSearchDataList = new ArrayList<>();
+                for (Hit hit : searchResultData.getHits()) {
+                    ItemSearchData itemSearchData = new ItemSearchData();
+                    itemSearchData.setId(hit.getId());
+                    itemSearchData.setName(hit.getTitle());
+                    itemSearchData.setEntity(hit.getEntity());
+                    itemSearchDataList.add(itemSearchData);
+                }
+                adapter.addData(itemSearchDataList);
+            } else {
+                // failed search
+                final Bundle bundle = new Bundle();
+                bundle.putString("mplace_search_term", searchResultData.getQuery());
+                Analytics.triggerEvent(FAILED_SEARCH, bundle, SearchActivity.this);
+            }
+        }
     }
 }

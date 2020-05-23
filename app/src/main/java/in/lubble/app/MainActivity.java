@@ -69,8 +69,11 @@ import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.map.MapFragment;
+import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServicesFrag;
@@ -82,8 +85,13 @@ import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import it.sephiroth.android.library.xtooltip.ClosePolicy;
 import it.sephiroth.android.library.xtooltip.Tooltip;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+import static in.lubble.app.Constants.DEFAULT_SHOP_PIC;
 import static in.lubble.app.Constants.DELIVERY_FEE;
+import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
 import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
@@ -93,6 +101,7 @@ import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
 import static in.lubble.app.Constants.MAP_BTN_URL;
 import static in.lubble.app.Constants.MAP_HTML;
 import static in.lubble.app.Constants.MAP_SHARE_TEXT;
+import static in.lubble.app.Constants.MARKET_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.Constants.REWARDS_EXPLAINER;
@@ -214,6 +223,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
         handleExploreActivity();
+        if (isNewUserInThisLubble) {
+            if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
+                try {
+                    String phNum = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().substring(3, 13);
+                    fetchAssociatedSeller(phNum);
+                } catch (IndexOutOfBoundsException e) {
+                    Crashlytics.logException(e);
+                }
+            }
+        }
 
         toolbarSearchTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -315,17 +334,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         logUser(FirebaseAuth.getInstance().getCurrentUser());
         Branch.getInstance().setIdentity(FirebaseAuth.getInstance().getUid());
 
-        groupListFragment = GroupListFragment.newInstance();
+        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
         switchFrag(groupListFragment);
 
         bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
-        if (!FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_QUIZ_SHOWN)) {
-            bottomNavigation.getMenu().clear();
-            bottomNavigation.inflateMenu(R.menu.navigation_market);
-        }
+        bottomNavigation.getMenu().clear();
+        bottomNavigation.inflateMenu(R.menu.navigation_market);
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
@@ -583,8 +600,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MAP_BTN_URL, "https://mplace.typeform.com/to/M1OXzy?name=^^username&uid=^^uid");
         map.put(MAP_SHARE_TEXT, "Check out this map of open grocery stores in Koramangala: https://lubble.in/online-grocery-stores-map-koramangala/");
         map.put(EVENTS_MAINTENANCE_TEXT, "");
+        map.put(EVENTS_MAINTENANCE_IMG, "");
+        map.put(MARKET_MAINTENANCE_TEXT, "");
         map.put(IS_NOTIF_SNOOZE_ON, true);
 
+        map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
             toolbarRewardsTv.setVisibility(View.VISIBLE);
@@ -610,7 +630,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
                 itemView.addView(badge);
             }
-            if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
+            /*if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
                 BottomNavigationMenuView bottomNavigationMenuView =
                         (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
                 View v = bottomNavigationMenuView.getChildAt(3);
@@ -620,7 +640,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
 
                 itemView.addView(badge);
-            }
+            }*/
         }
     }
 
@@ -662,7 +682,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     bottomNavigation.setSelectedItemId(R.id.navigation_map);
                     break;
                 case "services":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_services);
+                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
+                    break;
+                case "mplace":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
                     break;
                 /*case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
@@ -693,14 +716,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     firebaseRemoteConfig.activateFetched();
-                    if (!firebaseRemoteConfig.getBoolean(Constants.IS_QUIZ_SHOWN)) {
-                        bottomNavigation.getMenu().clear();
-                        bottomNavigation.inflateMenu(R.menu.navigation_market);
-                    }/* else if (bottomNavigation.getMenu().findItem(R.id.navigation_fun) == null) {
-                        // change only if new menu wasnt present before
-                        bottomNavigation.getMenu().clear();
-                        bottomNavigation.inflateMenu(R.menu.navigation);
-                    }*/
                     if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
                         toolbarRewardsTv.setVisibility(View.VISIBLE);
                     } else {
@@ -710,6 +725,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
         showRatingsDialog();
+        showBottomNavBadge();
     }
 
     @Override
@@ -829,6 +845,37 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         });
     }
 
+    private void fetchAssociatedSeller(String phoneNumber) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchExistingSellerFromPh(phoneNumber).enqueue(new Callback<Endpoints.ExistingSellerData>() {
+            @Override
+            public void onResponse(Call<Endpoints.ExistingSellerData> call, Response<Endpoints.ExistingSellerData> response) {
+                final Endpoints.ExistingSellerData existingSellerData = response.body();
+                if (existingSellerData != null && existingSellerData.getSellerIdList() != null && !existingSellerData.getSellerIdList().isEmpty()) {
+                    final int sellerId = Integer.parseInt(existingSellerData.getSellerIdList().get(0));
+                    LubbleSharedPrefs.getInstance().setSellerId(sellerId);
+                    UiUtils.showBottomSheetAlertLight(MainActivity.this, getLayoutInflater(),
+                            "Your business is already on Lubble!", "\nWe have found a business associated with your phone number! You can now manage your business profile & start selling locally on Lubble for Free!\n",
+                            R.drawable.ic_open, "Check My Business", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ItemListActiv.open(MainActivity.this, true, sellerId);
+                                    Analytics.triggerEvent(AnalyticsEvents.EXISTING_SELLER_DIALOG_CLICK, MainActivity.this);
+                                }
+                            });
+                    Analytics.triggerEvent(AnalyticsEvents.EXISTING_SELLER_DIALOG_SHOWN, MainActivity.this);
+                } else {
+                    Log.e(TAG, "onResponse failed: " + response.body().toString());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Endpoints.ExistingSellerData> call, Throwable t) {
+                Log.e(TAG, "onFailure: ");
+            }
+        });
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -845,7 +892,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
-                    switchFrag(groupListFragment = GroupListFragment.newInstance());
+                    switchFrag(groupListFragment = GroupListFragment.newInstance(false));
                     return true;
                 case R.id.navigation_explore:
                     switchFrag(ExploreFrag.newInstance());

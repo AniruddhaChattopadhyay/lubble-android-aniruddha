@@ -132,6 +132,10 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("sellers");
     }
 
+    public static DatabaseReference getSellerRef(String uid) {
+        return FirebaseDatabase.getInstance().getReference("sellers").child(uid);
+    }
+
     public static DatabaseReference getSellerDmsRef() {
         return FirebaseDatabase.getInstance().getReference("sellers")
                 .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())).child("dms");
@@ -143,6 +147,14 @@ public class RealtimeDbHelper {
 
     public static DatabaseReference getQuizRefForThisUser(String quizName) {
         return FirebaseDatabase.getInstance().getReference("quiz").child(quizName).child(FirebaseAuth.getInstance().getUid());
+    }
+
+    public static DatabaseReference getSearchQueryRef() {
+        return FirebaseDatabase.getInstance().getReference("search").child("queries");
+    }
+
+    public static DatabaseReference getSearchResultRef() {
+        return FirebaseDatabase.getInstance().getReference("search").child("results");
     }
 
 }

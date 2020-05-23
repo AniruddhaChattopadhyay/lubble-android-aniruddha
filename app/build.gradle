@@ -104,6 +104,7 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.4.0'
     implementation 'com.clevertap.android:clevertap-android-sdk:3.6.4'
     implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.algolia:algoliasearch-android:3.27.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:3.9.0'
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
     implementation 'com.github.freshdesk:freshchat-android:2.7.0'
@@ -118,6 +119,7 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-smoothstreaming:r2.4.0'
     implementation 'com.google.android.exoplayer:exoplayer-ui:r2.4.0'
     implementation 'org.jsoup:jsoup:1.13.1'
+    implementation "com.airbnb.android:lottie:3.4.0"
     implementation('com.github.hotchemi:permissionsdispatcher:3.2.0') {
         // if you don't use android.app.Fragment you can exclude support for them
         exclude module: "support-v13"
@@ -135,7 +137,7 @@ dependencies {
     implementation 'com.squareup.okhttp:okhttp:2.3.0'
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     implementation 'com.iceteck.silicompressorr:silicompressor:2.2.2'
-
+    implementation 'com.github.barteksc:pdfium-android:1.4.0'
     // in app update
     implementation 'com.google.android.play:core:1.6.4'
 

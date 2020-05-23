@@ -242,7 +242,7 @@ public class ProfileFrag extends Fragment {
             @Override
             public void onClick(View v) {
                 if (profileData != null) {
-                    DmIntroBottomSheet.newInstance(userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail()).show(getChildFragmentManager(), null);
+                    DmIntroBottomSheet.newInstance(userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail(), null).show(getChildFragmentManager(), null);
                     Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
                 }
             }

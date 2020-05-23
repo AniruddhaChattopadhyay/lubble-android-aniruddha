@@ -8,10 +8,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -22,8 +26,6 @@ import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.ArrayList;
 
 public class CategoryChooserActiv extends BaseActivity {
 
@@ -63,7 +65,7 @@ public class CategoryChooserActiv extends BaseActivity {
             public void onSelected(Category category) {
                 final Intent intent = new Intent();
                 intent.putExtra("cat_id", category.getId());
-                intent.putExtra("cat_name", category.getName());
+                intent.putExtra("cat_name", category.getHumanReadableName());
                 setResult(RESULT_OK, intent);
                 finish();
             }

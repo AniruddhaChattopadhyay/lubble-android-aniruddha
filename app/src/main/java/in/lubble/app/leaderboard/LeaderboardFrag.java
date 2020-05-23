@@ -122,7 +122,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
         recyclerView.setAdapter(adapter);
 
         titleTv.setText("Most Liked in " + DateTimeUtils.getCurrMonth());
-        subtitleTv.setText(String.format("in %s", LubbleSharedPrefs.getInstance().getLubbleId()));
+        subtitleTv.setText(String.format("in %s", LubbleSharedPrefs.getInstance().getLubbleName()));
 
         fetchAllLubbleUsers();
 
@@ -160,7 +160,8 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
                             explainTv.setVisibility(View.VISIBLE);
                             logoIv.setVisibility(View.VISIBLE);
                             setTop3(profileDataList.subList(0, 3));
-                            adapter.addList(profileDataList.subList(3, 10));
+                            int limit = Math.min(10, profileDataList.size());
+                            adapter.addList(profileDataList.subList(3, limit));
                         }
                     }
 

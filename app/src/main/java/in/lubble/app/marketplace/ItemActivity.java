@@ -8,11 +8,21 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RatingBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -21,6 +31,7 @@ import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
@@ -31,6 +42,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -46,18 +63,17 @@ import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.marketplace.ServiceData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.profile.DmIntroBottomSheet;
 import in.lubble.app.utils.FullScreenImageActivity;
 import okhttp3.RequestBody;
-import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.analytics.AnalyticsEvents.*;
+import static in.lubble.app.analytics.AnalyticsEvents.CALL_BTN_CLICKED;
+import static in.lubble.app.analytics.AnalyticsEvents.MPLACE_CHAT_BTN_CLICKED;
+import static in.lubble.app.analytics.AnalyticsEvents.VISIT_SHOP_CLICK;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.marketplace.Item.ITEM_APPROVED;
 
@@ -456,7 +472,14 @@ public class ItemActivity extends BaseActivity {
 
                         sellerNameTv.setText(sellerData.getName());
                         sellerBioTv.setText(sellerData.getBio());
-                        GlideApp.with(ItemActivity.this).load(sellerData.getPhotoUrl()).circleCrop().into(sellerIv);
+                        if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                            sellerIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                            GlideApp.with(ItemActivity.this).load(sellerData.getPhotoUrl()).error(R.drawable.ic_shop).circleCrop().into(sellerIv);
+                        } else {
+                            sellerIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                            GlideApp.with(ItemActivity.this).load(R.drawable.ic_shop).into(sellerIv);
+                        }
+                        Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
                         sellerItemsRv.setLayoutManager(new GridLayoutManager(ItemActivity.this, 2));
                         final BigItemAdapter itemAdapter = new BigItemAdapter(GlideApp.with(ItemActivity.this), false);
@@ -464,20 +487,16 @@ public class ItemActivity extends BaseActivity {
                         for (Item sellerItem : sellerData.getItemList()) {
                             itemAdapter.addData(sellerItem);
                         }
-                        if (sellerData.getItemList().size() > 1) {
-                            visitShopTv.setVisibility(View.VISIBLE);
-                            visitShopTv.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    final Bundle bundle = new Bundle();
-                                    bundle.putInt("seller_id", sellerData.getId());
-                                    Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
-                                    ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
-                                }
-                            });
-                        } else {
-                            visitShopTv.setVisibility(View.GONE);
-                        }
+                        visitShopTv.setVisibility(View.VISIBLE);
+                        visitShopTv.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                final Bundle bundle = new Bundle();
+                                bundle.putInt("seller_id", sellerData.getId());
+                                Analytics.triggerEvent(VISIT_SHOP_CLICK, bundle, ItemActivity.this);
+                                ItemListActiv.open(ItemActivity.this, true, sellerData.getId());
+                            }
+                        });
                         syncDmId(sellerData);
                         if (sellerData.isCallEnabled()) {
                             ViewCompat.setBackgroundTintList(chatBtn, ColorStateList.valueOf(ContextCompat.getColor(ItemActivity.this, R.color.mb_green)));
@@ -528,13 +547,8 @@ public class ItemActivity extends BaseActivity {
                                         if (!TextUtils.isEmpty(dmId)) {
                                             ChatActivity.openForDm(ItemActivity.this, dmId, null, item.getName());
                                         } else {
-                                            ChatActivity.openForEmptyDm(
-                                                    ItemActivity.this,
-                                                    String.valueOf(sellerData.getId()),
-                                                    sellerData.getName(),
-                                                    sellerData.getPhotoUrl(),
-                                                    item.getName()
-                                            );
+                                            DmIntroBottomSheet.newInstance(String.valueOf(sellerData.getId()), sellerData.getName(), sellerData.getPhotoUrl(), sellerData.getPhone())
+                                                    .show(getSupportFragmentManager(), null);
                                         }
                                     }
                                 }
@@ -719,7 +733,7 @@ public class ItemActivity extends BaseActivity {
             serviceRv.setVisibility(View.VISIBLE);
             serviceRv.setNestedScrollingEnabled(false);
             serviceRv.setLayoutManager(new LinearLayoutManager(this));
-            serviceCatalogAdapter = new ServiceCatalogAdapter(this, item.getSellerData());
+            serviceCatalogAdapter = new ServiceCatalogAdapter(this, item.getSellerData(), getSupportFragmentManager());
             serviceRv.setAdapter(serviceCatalogAdapter);
             for (ServiceData serviceData : serviceDataList) {
                 serviceCatalogAdapter.addData(serviceData);

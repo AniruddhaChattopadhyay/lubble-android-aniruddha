@@ -1,7 +1,10 @@
 
 package in.lubble.app.models.marketplace;
 
+import android.text.TextUtils;
+
 import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -15,6 +18,9 @@ public class Category {
     @SerializedName("name")
     @Expose
     private String name;
+    @SerializedName("display_name")
+    @Expose
+    private String displayName;
     @SerializedName("icon")
     @Expose
     private String icon;
@@ -22,6 +28,9 @@ public class Category {
     @Expose
     @Nullable
     private List<Item> items = null;
+    @SerializedName("sellers")
+    @Nullable
+    private List<SellerData> sellers = null;
     @SerializedName("type")
     @Expose
     private int type = Item.ITEM_PRODUCT;
@@ -32,6 +41,10 @@ public class Category {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getHumanReadableName() {
+        return TextUtils.isEmpty(this.displayName) ? name.replace("_", " ") : this.displayName;
     }
 
     public String getName() {
@@ -65,5 +78,22 @@ public class Category {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    @Nullable
+    public List<SellerData> getSellers() {
+        return sellers;
+    }
+
+    public void setSellers(@Nullable List<SellerData> sellers) {
+        this.sellers = sellers;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 }

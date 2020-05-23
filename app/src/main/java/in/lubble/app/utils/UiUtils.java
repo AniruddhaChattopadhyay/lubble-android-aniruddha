@@ -27,6 +27,7 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.palette.graphics.Palette;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -187,12 +188,27 @@ public class UiUtils {
 
     }
 
-    public static void animateSlideDownHide(Context context, View view) {
-        if (context != null && view.getVisibility() == View.VISIBLE) {
+    public static void animateSlideDownHide(Context context, final View view) {
+        if (context != null && view.getVisibility() == View.VISIBLE && view.getAnimation() == null) {
             Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_down_hide);
-            slideUp.setDuration(500);
+            slideUp.setDuration(300);
+            slideUp.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    view.setVisibility(View.GONE);
+                    view.setAnimation(null);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
             view.startAnimation(slideUp);
-            view.setVisibility(View.GONE);
         }
     }
 
@@ -249,10 +265,26 @@ public class UiUtils {
         }
     }
 
-    public static void animateSlideUpShow(Context context, View view) {
+    public static void animateSlideUpShow(Context context, final View view) {
         if (context != null && view.getVisibility() != View.VISIBLE) {
             Animation slideUp = AnimationUtils.loadAnimation(context, R.anim.slide_up_show);
             slideUp.setDuration(500);
+            slideUp.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    view.setAnimation(null);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
             view.startAnimation(slideUp);
             view.setVisibility(View.VISIBLE);
         }
@@ -289,6 +321,13 @@ public class UiUtils {
                 }
             });
         }
+    }
+
+    public static CircularProgressDrawable getCircularProgressDrawable(Context context) {
+        final CircularProgressDrawable circularProgressDrawable = new CircularProgressDrawable(context);
+        circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
+        circularProgressDrawable.start();
+        return circularProgressDrawable;
     }
 
 }

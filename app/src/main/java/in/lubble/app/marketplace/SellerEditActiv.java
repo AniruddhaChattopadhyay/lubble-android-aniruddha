@@ -12,15 +12,33 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+
 import com.bumptech.glide.signature.ObjectKey;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
-import in.lubble.app.*;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+
+import in.lubble.app.BaseActivity;
+import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.UploadFileService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.marketplace.Item;
@@ -28,21 +46,22 @@ import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import okhttp3.RequestBody;
-import org.json.JSONException;
-import org.json.JSONObject;
-import permissions.dispatcher.*;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.BUCKET_MARKETPLACE;
-import static in.lubble.app.utils.FileUtils.*;
+import static in.lubble.app.utils.FileUtils.createImageFile;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.FileUtils.getPickImageIntent;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.compressImage;
 
@@ -194,11 +213,19 @@ public class SellerEditActiv extends BaseActivity implements View.OnClickListene
                         setShopWebLink(sellerData.getName());
                         syncSellerWebName();
                     }
-
-                    GlideApp.with(SellerEditActiv.this)
-                            .load(sellerData.getPhotoUrl())
-                            .circleCrop()
-                            .into(photoIv);
+                    if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                        photoIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        GlideApp.with(SellerEditActiv.this)
+                                .load(sellerData.getPhotoUrl())
+                                .error(R.drawable.ic_shop)
+                                .circleCrop()
+                                .into(photoIv);
+                    } else {
+                        photoIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                        GlideApp.with(SellerEditActiv.this)
+                                .load(R.drawable.ic_shop)
+                                .into(photoIv);
+                    }
                     setTitle(sellerData.getName());
 
                 } else {

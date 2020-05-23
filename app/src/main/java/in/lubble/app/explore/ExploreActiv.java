@@ -65,7 +65,7 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
                 }
                 final ProgressDialog progressDialog = new ProgressDialog(ExploreActiv.this);
                 progressDialog.setTitle("Joining " + selectedGroupIdMap.size() + " groups");
-                progressDialog.setMessage("You're about to enter a lovely & helpful community, please be respectful & enjoy :)");
+                progressDialog.setMessage("You're about to join a lovely & helpful community, please be respectful & enjoy :)");
                 progressDialog.setCancelable(false);
                 progressDialog.show();
 

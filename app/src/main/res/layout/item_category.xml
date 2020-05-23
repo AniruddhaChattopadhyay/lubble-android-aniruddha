@@ -14,13 +14,14 @@
 
     <ImageView
         android:id="@+id/iv_icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         app:srcCompat="@drawable/ic_category" />
 
     <TextView
         android:id="@+id/tv_label"
         android:layout_width="match_parent"
+        android:textColor="@color/black"
         android:layout_height="wrap_content"
         android:layout_marginLeft="4dp"
         tools:text="@tools:sample/lorem" />

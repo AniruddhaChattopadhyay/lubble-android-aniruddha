@@ -13,7 +13,7 @@
         android:paddingBottom="16dp"
         android:paddingLeft="8dp"
         android:paddingTop="16dp"
-        android:text="Choose your society"
+        android:text="Choose your Neighbourhood of residence"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:textColor="@color/white" />
 

@@ -1,5 +1,7 @@
 package in.lubble.app.models.marketplace;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -43,6 +45,12 @@ public class SellerData {
     @SerializedName("share_link")
     @Expose
     private String shareLink; // this is the complete share URL, like "https://shop...."
+    @SerializedName("subtitle")
+    @Expose
+    private String subtitle;
+    @SerializedName("deal_percent")
+    @Expose
+    private int dealPercent = 0;
 
     public Integer getId() {
         return id;
@@ -117,7 +125,7 @@ public class SellerData {
     }
 
     public boolean isCallEnabled() {
-        return isCallEnabled;
+        return isCallEnabled && !TextUtils.isEmpty(this.phone);
     }
 
     public void setCallEnabled(boolean callEnabled) {
@@ -138,5 +146,21 @@ public class SellerData {
 
     public void setShareLink(String shareLink) {
         this.shareLink = shareLink;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
+    }
+
+    public int getDealPercent() {
+        return dealPercent;
+    }
+
+    public void setDealPercent(int dealPercent) {
+        this.dealPercent = dealPercent;
     }
 }

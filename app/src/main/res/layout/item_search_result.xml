@@ -17,6 +17,15 @@
         android:textColor="@color/black"
         tools:text="@tools:sample/lorem/random" />
 
+    <TextView
+        android:id="@+id/tv_entity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        tools:text="in categories"
+        android:textStyle="italic"
+        android:layout_below="@id/tv_item_name"/>
+
     <ImageView
         android:id="@+id/iv_link"
         android:layout_width="wrap_content"

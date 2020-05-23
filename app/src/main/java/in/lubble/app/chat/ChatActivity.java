@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,9 +15,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -26,8 +29,11 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -42,9 +48,12 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.NotifData;
+import in.lubble.app.models.search.Hit;
+import in.lubble.app.models.search.SearchResultData;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
@@ -53,7 +62,7 @@ import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
-public class ChatActivity extends BaseActivity implements ChatMoreFragment.FlairUpdateListener {
+public class ChatActivity extends BaseActivity implements ChatMoreFragment.FlairUpdateListener, SearchView.OnQueryTextListener {
 
     public static final String EXTRA_GROUP_ID = "chat_activ_group_id";
     public static final String EXTRA_MSG_ID = "chat_activ_msg_id";
@@ -70,13 +79,19 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_RECEIVER_DP_URL = "EXTRA_RECEIVER_DP_URL";
     public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
     private ImageView toolbarIcon, toolbarLockIcon;
+    private Toolbar toolbar;
     private TextView toolbarTv, toolbarInviteHint;
     private LinearLayout inviteContainer;
+    private ImageView searchBackIv, searchUpIv, searchDownIv;
+    private SearchView searchView;
     private ChatFragment targetFrag = null;
     private String groupId;
     private ViewPager viewPager;
     private TabLayout tabLayout;
     private String dmId;
+    private SearchResultData searchResultData = null;
+    private int currSearchCursorPos = 0;
+    private ProgressDialog searchProgressDialog;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -137,7 +152,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        Toolbar toolbar = findViewById(R.id.icon_toolbar);
+        toolbar = findViewById(R.id.icon_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbarIcon = toolbar.findViewById(R.id.iv_toolbar);
@@ -145,6 +160,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         inviteContainer = toolbar.findViewById(R.id.container_invite);
+        searchBackIv = toolbar.findViewById(R.id.iv_search_back);
+        searchView = toolbar.findViewById(R.id.search_view);
+        searchUpIv = toolbar.findViewById(R.id.iv_search_up);
+        searchDownIv = toolbar.findViewById(R.id.iv_search_down);
+        searchView.setOnQueryTextListener(this);
         setTitle("");
 
         viewPager = findViewById(R.id.viewpager_chat);
@@ -239,6 +259,66 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 UserSearchActivity.newInstance(ChatActivity.this, groupId);
             }
         });
+
+        searchBackIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeSearch();
+            }
+        });
+
+        searchUpIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UiUtils.hideKeyboard(ChatActivity.this);
+                if (searchResultData != null && searchResultData.getQuery().equalsIgnoreCase(searchView.getQuery().toString())) {
+                    if (searchResultData.getNbHits() > 0) {
+                        if (currSearchCursorPos < searchResultData.getHits().size() - 1) {
+                            currSearchCursorPos++;
+                        }
+                        Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
+                        String highlightedStr = searchHit.get_highlightResult().getText().getValue();
+                        targetFrag.scrollToChatId(searchHit.getChatId(), highlightedStr.substring(highlightedStr.indexOf("<hem>") + 5, highlightedStr.indexOf("</hem>")));
+                    } else {
+                        Toast.makeText(ChatActivity.this, "No results found", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    onQueryTextSubmit(searchView.getQuery().toString());
+                }
+            }
+        });
+
+        searchDownIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UiUtils.hideKeyboard(ChatActivity.this);
+                if (searchResultData != null && searchResultData.getQuery().equalsIgnoreCase(searchView.getQuery().toString())) {
+                    if (searchResultData.getNbHits() > 0) {
+                        if (currSearchCursorPos > 0) {
+                            currSearchCursorPos--;
+                        }
+                        Hit searchHit = searchResultData.getHits().get(currSearchCursorPos);
+                        String highlightedStr = searchHit.get_highlightResult().getText().getValue();
+                        targetFrag.scrollToChatId(searchHit.getChatId(), highlightedStr.substring(highlightedStr.indexOf("<hem>") + 5, highlightedStr.indexOf("</hem>")));
+                    } else {
+                        Toast.makeText(ChatActivity.this, "No results found", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    onQueryTextSubmit(searchView.getQuery().toString());
+                }
+            }
+        });
+    }
+
+    private void closeSearch() {
+        UiUtils.hideKeyboard(ChatActivity.this);
+        searchView.setQuery("", false);
+        searchView.clearFocus();
+        searchResultData = null;
+        currSearchCursorPos = 0;
+        toolbar.clearFocus();
+        toggleSearchViewVisibility(false);
+        targetFrag.removeSearchHighlights();
     }
 
     private GroupData groupData;
@@ -309,6 +389,57 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
     }
 
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        if (!TextUtils.isEmpty(query)) {
+            HashMap<Object, Object> map = new HashMap<>();
+            map.put("query", query);
+            map.put("lubbleId", LubbleSharedPrefs.getInstance().getLubbleId());
+            map.put("groupId", groupId);
+            DatabaseReference pushQueryRef = RealtimeDbHelper.getSearchQueryRef().push();
+            pushQueryRef.setValue(map);
+            initSearchResultListener(pushQueryRef.getKey());
+        }
+        return false;
+    }
+
+    private void initSearchResultListener(String searchKey) {
+        if (searchProgressDialog == null) {
+            searchProgressDialog = new ProgressDialog(this);
+        }
+        searchProgressDialog.setTitle("Searching");
+        searchProgressDialog.setMessage("Please Wait");
+        searchProgressDialog.setCancelable(false);
+        searchProgressDialog.show();
+        RealtimeDbHelper.getSearchResultRef().child(searchKey).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                searchResultData = dataSnapshot.getValue(SearchResultData.class);
+                if (searchResultData != null) {
+                    searchProgressDialog.dismiss();
+                    if (searchResultData.getNbHits() > 0) {
+                        Hit searchHit = searchResultData.getHits().get(0);
+                        String highlightedStr = searchHit.get_highlightResult().getText().getValue();
+                        targetFrag.scrollToChatId(searchHit.getChatId(), highlightedStr.substring(highlightedStr.indexOf("<hem>") + 5, highlightedStr.indexOf("</hem>")));
+                        currSearchCursorPos = 0;
+                    } else {
+                        Toast.makeText(ChatActivity.this, "No results found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                searchProgressDialog.dismiss();
+            }
+        });
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
+
     public class ChatViewPagerAdapter extends FragmentPagerAdapter {
 
         private String title[] = {"Chats", "Collections"};
@@ -352,6 +483,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         groupData.setId(groupId);
         groupData.setTitle(title);
         groupData.setThumbnail(thumbnailUrl);
+        groupData.setIsPrivate(isPrivate);
 
         if (dmId != null) {
             toolbarInviteHint.setText(getString(R.string.personal_chat));
@@ -362,12 +494,50 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         }
     }
 
+    private void toggleSearchViewVisibility(boolean show) {
+        if (show) {
+            searchView.setVisibility(View.VISIBLE);
+            searchView.setFocusable(true);
+            searchView.requestFocusFromTouch();
+            searchView.setIconifiedByDefault(false);
+            searchView.setIconified(false);
+            searchView.setOnQueryTextListener(this);
+            searchBackIv.setVisibility(View.VISIBLE);
+            searchUpIv.setVisibility(View.VISIBLE);
+            searchDownIv.setVisibility(View.VISIBLE);
+            toolbarIcon.setVisibility(View.GONE);
+            toolbarLockIcon.setVisibility(View.GONE);
+            toolbarTv.setVisibility(View.GONE);
+            toolbarInviteHint.setVisibility(View.GONE);
+            inviteContainer.setVisibility(View.GONE);
+            tabLayout.setVisibility(View.GONE);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+
+        } else {
+            searchView.setOnQueryTextListener(null);
+            searchView.setVisibility(View.GONE);
+            searchBackIv.setVisibility(View.GONE);
+            searchUpIv.setVisibility(View.GONE);
+            searchDownIv.setVisibility(View.GONE);
+            toolbarIcon.setVisibility(View.VISIBLE);
+            toolbarTv.setVisibility(View.VISIBLE);
+            toolbarLockIcon.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
+            inviteContainer.setVisibility(View.VISIBLE);
+            tabLayout.setVisibility(View.VISIBLE);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
     public void showNewBadge() {
         tabLayout.getTabAt(1).setCustomView(R.layout.tab_with_badge);
         final View customView = tabLayout.getTabAt(1).getCustomView();
         if (customView != null) {
             customView.findViewById(R.id.badge).setVisibility(View.VISIBLE);
         }
+    }
+
+    int getTabLayoutHeight() {
+        return tabLayout.getHeight();
     }
 
     private void blockAccount() {
@@ -463,8 +633,20 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     targetFrag.openGroupInfo();
                 }
                 return true;
+            case R.id.group_menu_search:
+                toggleSearchViewVisibility(true);
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (searchView.getVisibility() == View.VISIBLE) {
+            closeSearch();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

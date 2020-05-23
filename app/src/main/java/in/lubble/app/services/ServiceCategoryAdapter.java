@@ -6,18 +6,21 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 
@@ -46,7 +49,7 @@ public class ServiceCategoryAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         final ServiceCategoryAdapter.ViewHolder viewHolder = (ServiceCategoryAdapter.ViewHolder) holder;
         final Category category = categoryList.get(position);
 
-        viewHolder.nameTv.setText(category.getName());
+        viewHolder.nameTv.setText(category.getHumanReadableName());
 
         final String picUrl = category.getIcon();
         viewHolder.itemPicProgressBar.setVisibility(View.GONE);

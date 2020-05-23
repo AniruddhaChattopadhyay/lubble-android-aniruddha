@@ -191,6 +191,7 @@ public class UploadFileService extends BaseTaskService {
                 });
     }
 
+
     private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, @Nullable StorageMetadata metadata, final boolean toTransmit, final String caption, final String groupId, @Nullable final DmInfoData dmInfoData) {
         // Upload file to Firebase Storage
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());

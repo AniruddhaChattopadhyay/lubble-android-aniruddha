@@ -10,6 +10,8 @@ import com.google.firebase.database.Exclude;
 import java.util.HashMap;
 import java.util.Set;
 
+import in.lubble.app.LubbleSharedPrefs;
+
 /**
  * Created by ishaan on 28/1/18.
  */
@@ -30,6 +32,8 @@ public class GroupData {
     private String questionChatId = "101";
     @Exclude
     private Set<String> invitedBy;
+    @Exclude
+    private long unreadCount = 0;
     private boolean isPinned;
     @Exclude
     private boolean isDm;
@@ -82,8 +86,8 @@ public class GroupData {
 
     @Exclude
     public boolean isJoined() {
-        // is a DM if member size is 0
-        return getMembers().get(FirebaseAuth.getInstance().getUid()) != null;
+        return getMembers().get(FirebaseAuth.getInstance().getUid()) != null
+                || getMembers().get(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId())) != null;
     }
 
     public boolean getIsPrivate() {
@@ -184,5 +188,15 @@ public class GroupData {
 
     public void setQuestionChatId(String questionChatId) {
         this.questionChatId = questionChatId;
+    }
+
+    @Exclude
+    public long getUnreadCount() {
+        return unreadCount;
+    }
+
+    @Exclude
+    public void setUnreadCount(long unreadCount) {
+        this.unreadCount = unreadCount;
     }
 }

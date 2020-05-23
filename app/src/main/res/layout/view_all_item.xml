@@ -11,13 +11,15 @@
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:tint="@color/colorAccent"
+        android:background="@drawable/circle"
+        android:padding="8dp"
         app:srcCompat="@drawable/ic_more" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="See More"
+        android:text="View All"
         android:textColor="@color/colorAccent" />
 
 </LinearLayout>

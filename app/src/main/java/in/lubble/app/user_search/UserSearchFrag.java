@@ -20,13 +20,23 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.OrientationHelper;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.database.*;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -39,10 +49,6 @@ import in.lubble.app.models.GroupData;
 import in.lubble.app.models.ProfileData;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrlForGroup;
@@ -121,7 +127,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         fetchAllLubbleUsers();
         fetchGroupUsers();
 
-        selectedUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), OrientationHelper.HORIZONTAL, false));
+        selectedUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
         selectedUserAdapter = new SelectedUserAdapter(mListener, GlideApp.with(getContext()));
         selectedUsersRecyclerView.setAdapter(selectedUserAdapter);
 
@@ -218,7 +224,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                if (groupData != null) {
+                if (groupData != null && getContext() != null) {
                     final ArrayList<String> groupMembersList = new ArrayList<>(groupData.getMembers().keySet());
                     final HashMap<String, Boolean> groupMembersMap = new HashMap<>();
                     for (String uid : groupMembersList) {

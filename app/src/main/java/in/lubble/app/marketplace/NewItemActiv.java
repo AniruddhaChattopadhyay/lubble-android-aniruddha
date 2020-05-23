@@ -311,7 +311,7 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
                         showCatalogue(item.getServiceDataList());
                     }
                     categoryId = item.getCategory().getId();
-                    categoryTil.getEditText().setText(item.getCategory().getName());
+                    categoryTil.getEditText().setText(item.getCategory().getHumanReadableName());
                 } else {
                     if (response.code() == 404) {
                         final Bundle bundle = new Bundle();

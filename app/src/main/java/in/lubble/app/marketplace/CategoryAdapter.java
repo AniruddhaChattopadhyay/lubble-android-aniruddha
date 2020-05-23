@@ -5,14 +5,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import in.lubble.app.GlideRequests;
-import in.lubble.app.R;
-import in.lubble.app.models.marketplace.Category;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import in.lubble.app.GlideRequests;
+import in.lubble.app.R;
+import in.lubble.app.models.marketplace.Category;
 
 public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -42,7 +44,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         final Category category = categoryList.get(position);
 
-        viewHolder.nameTv.setText(category.getName());
+        viewHolder.nameTv.setText(category.getHumanReadableName());
 
         glide.load(category.getIcon()).into(viewHolder.iconIv);
 

@@ -2,31 +2,58 @@ package in.lubble.app.marketplace;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
 import in.lubble.app.BaseActivity;
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.marketplace.Category;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.profile.DmIntroBottomSheet;
+import in.lubble.app.utils.UiUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static in.lubble.app.analytics.AnalyticsEvents.CALL_BTN_CLICKED;
+import static in.lubble.app.analytics.AnalyticsEvents.MPLACE_CHAT_BTN_CLICKED;
 import static in.lubble.app.analytics.AnalyticsEvents.RECOMMEND_BTN_CLICK;
 
 public class ItemListActiv extends BaseActivity {
@@ -38,23 +65,25 @@ public class ItemListActiv extends BaseActivity {
 
     private ImageView sellerPicIv;
     private ProgressBar progressBar;
-    private TextView sellerNameTv;
-    private TextView sellerBioTv;
+    private TextView sellerNameTv, sellerBioTv;
+    private MaterialButton msgBtn, callBtn, sellerEditBtn;
     private boolean isSeller;
     private int sellerId;
     @Nullable
     private String sellerUniqueName = null;
     private RecyclerView recyclerView;
     private TextView noItemsHintTv;
-    private BigItemAdapter adapter;
+    private BigItemAdapter itemAdapter;
+    private BigSellerAdapter sellerAdapter;
     private TextView recommendationCountTv;
     private RelativeLayout sellerActionContainer;
-    private LinearLayout shareContainer;
-    private LinearLayout recommendContainer;
+    private LinearLayout shareContainer, recommendContainer;
     private ImageView recommendIv;
     private TextView recommendHintTV;
     private boolean isRecommended;
     private long recommendationCount = 0;
+    private SellerData sellerData;
+    private DatabaseReference dmRef;
 
     public static void open(Context context, boolean isSeller, int id) {
         final Intent intent = new Intent(context, ItemListActiv.class);
@@ -83,6 +112,9 @@ public class ItemListActiv extends BaseActivity {
         progressBar = findViewById(R.id.progress_bar);
         sellerNameTv = findViewById(R.id.tv_seller_name);
         sellerBioTv = findViewById(R.id.tv_seller_bio);
+        msgBtn = findViewById(R.id.btn_msg);
+        callBtn = findViewById(R.id.btn_call);
+        sellerEditBtn = findViewById(R.id.btn_edit_seller);
         recyclerView = findViewById(R.id.rv_items);
         noItemsHintTv = findViewById(R.id.tv_no_items_hint);
         recommendIv = findViewById(R.id.iv_recommend);
@@ -92,8 +124,8 @@ public class ItemListActiv extends BaseActivity {
         sellerActionContainer = findViewById(R.id.container_action);
         shareContainer = findViewById(R.id.container_seller_share);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        adapter = new BigItemAdapter(GlideApp.with(this), false);
-        recyclerView.setAdapter(adapter);
+        itemAdapter = new BigItemAdapter(GlideApp.with(this), false);
+        sellerAdapter = new BigSellerAdapter(GlideApp.with(this));
 
 
         isSeller = getIntent().getBooleanExtra(PARAM_IS_SELLER, false);
@@ -115,12 +147,16 @@ public class ItemListActiv extends BaseActivity {
     protected void onResume() {
         super.onResume();
         if (!isSeller) {
+            msgBtn.setVisibility(View.GONE);
+            callBtn.setVisibility(View.GONE);
             sellerActionContainer.setVisibility(View.GONE);
             sellerBioTv.setVisibility(View.GONE);
             recommendationCountTv.setVisibility(View.GONE);
             fetchCategoryItems();
         } else {
             fetchSellerItems();
+            msgBtn.setVisibility(View.VISIBLE);
+            callBtn.setVisibility(View.VISIBLE);
             sellerActionContainer.setVisibility(View.VISIBLE);
             recommendationCountTv.setVisibility(View.VISIBLE);
         }
@@ -173,23 +209,42 @@ public class ItemListActiv extends BaseActivity {
                 progressBar.setVisibility(View.GONE);
                 final Category categoryData = response.body();
                 if (categoryData != null) {
-                    sellerNameTv.setText(categoryData.getName());
+                    sellerNameTv.setText(categoryData.getHumanReadableName());
 
-                    GlideApp.with(ItemListActiv.this)
-                            .load(categoryData.getIcon())
-                            .circleCrop()
-                            .into(sellerPicIv);
+                    if (!TextUtils.isEmpty(categoryData.getIcon())) {
+                        GlideApp.with(ItemListActiv.this)
+                                .load(categoryData.getIcon())
+                                .placeholder(UiUtils.getCircularProgressDrawable(ItemListActiv.this))
+                                .circleCrop()
+                                .into(sellerPicIv);
+                    } else {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                        GlideApp.with(ItemListActiv.this)
+                                .load(FirebaseRemoteConfig.getInstance().getString(Constants.DEFAULT_SHOP_PIC))
+                                .centerInside()
+                                .placeholder(UiUtils.getCircularProgressDrawable(ItemListActiv.this))
+                                .into(sellerPicIv);
+                    }
 
                     sellerPicIv.setBackgroundResource(R.drawable.circle);
 
-                    setTitle(categoryData.getName());
+                    setTitle(categoryData.getHumanReadableName());
 
                     if (categoryData.getItems() != null && !categoryData.getItems().isEmpty()) {
                         recyclerView.setVisibility(View.VISIBLE);
                         noItemsHintTv.setVisibility(View.GONE);
-                        adapter.clear();
+                        itemAdapter.clear();
+                        recyclerView.setAdapter(itemAdapter);
                         for (Item item : categoryData.getItems()) {
-                            adapter.addData(item);
+                            itemAdapter.addData(item);
+                        }
+                    } else if (categoryData.getSellers() != null && !categoryData.getSellers().isEmpty()) {
+                        recyclerView.setVisibility(View.VISIBLE);
+                        noItemsHintTv.setVisibility(View.GONE);
+                        sellerAdapter.clear();
+                        recyclerView.setAdapter(sellerAdapter);
+                        for (SellerData sellerData : categoryData.getSellers()) {
+                            sellerAdapter.addData(sellerData);
                         }
                     } else {
                         recyclerView.setVisibility(View.GONE);
@@ -222,29 +277,89 @@ public class ItemListActiv extends BaseActivity {
             @Override
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 progressBar.setVisibility(View.GONE);
-                final SellerData sellerData = response.body();
+                sellerData = response.body();
                 if (sellerData != null) {
                     sellerId = sellerData.getId();
                     sellerNameTv.setText(sellerData.getName());
                     sellerBioTv.setText(sellerData.getBio());
+                    Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
-                    GlideApp.with(ItemListActiv.this)
-                            .load(sellerData.getPhotoUrl())
-                            .circleCrop()
-                            .into(sellerPicIv);
+                    if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        GlideApp.with(ItemListActiv.this)
+                                .load(sellerData.getPhotoUrl())
+                                .circleCrop()
+                                .placeholder(UiUtils.getCircularProgressDrawable(ItemListActiv.this))
+                                .into(sellerPicIv);
+                    } else {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                        GlideApp.with(ItemListActiv.this)
+                                .load(FirebaseRemoteConfig.getInstance().getString(Constants.DEFAULT_SHOP_PIC))
+                                .placeholder(UiUtils.getCircularProgressDrawable(ItemListActiv.this))
+                                .into(sellerPicIv);
+                    }
 
                     setTitle(sellerData.getName());
 
                     if (sellerData.getItemList() != null) {
-                        adapter.clear();
+                        itemAdapter.clear();
+                        recyclerView.setAdapter(itemAdapter);
                         for (Item item : sellerData.getItemList()) {
-                            adapter.addData(item);
+                            itemAdapter.addData(item);
                         }
                     }
                     recommendationCount = sellerData.getRecommendationCount();
                     recommendationCountTv.setText(recommendationCount + " recommendations");
                     isRecommended = sellerData.getIsRecommended();
                     updateRecommendContainer();
+                    syncDms(String.valueOf(sellerId));
+
+                    msgBtn.setEnabled(true);
+                    msgBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (sellerId == LubbleSharedPrefs.getInstance().getSellerId()) {
+                                Toast.makeText(ItemListActiv.this, "You cannot chat with yourself :)", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            DmIntroBottomSheet.newInstance(String.valueOf(sellerId), sellerData.getName(), sellerData.getPhotoUrl(), sellerData.getPhone())
+                                    .show(getSupportFragmentManager(), null);
+                            final Bundle bundle = new Bundle();
+                            bundle.putInt("seller_id", sellerData.getId());
+                            Analytics.triggerEvent(MPLACE_CHAT_BTN_CLICKED, bundle, ItemListActiv.this);
+                        }
+                    });
+                    if (sellerData.isCallEnabled()) {
+                        callBtn.setVisibility(View.VISIBLE);
+                        callBtn.setEnabled(true);
+                        callBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Intent.ACTION_DIAL);
+                                intent.setData(Uri.parse("tel:" + sellerData.getPhone()));
+                                startActivity(intent);
+                                final Bundle bundle = new Bundle();
+                                bundle.putInt("seller_id", sellerId);
+                                bundle.putString("src", "ItemListActiv");
+                                Analytics.triggerEvent(CALL_BTN_CLICKED, bundle, ItemListActiv.this);
+                            }
+                        });
+                    } else {
+                        callBtn.setVisibility(View.GONE);
+                    }
+
+                    if (sellerId == LubbleSharedPrefs.getInstance().getSellerId()) {
+                        sellerEditBtn.setVisibility(View.VISIBLE);
+                        sellerEditBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startActivity(SellerDashActiv.getIntent(ItemListActiv.this, sellerId, false, Item.ITEM_PRODUCT));
+                            }
+                        });
+                    } else {
+                        sellerEditBtn.setVisibility(View.GONE);
+                    }
+
                     recommendContainer.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -281,6 +396,38 @@ public class ItemListActiv extends BaseActivity {
         });
     }
 
+    private void syncDms(String sellerId) {
+        dmRef = RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid());
+        dmRef.orderByChild("profileId").equalTo(sellerId).addValueEventListener(dmValueEventListener);
+    }
+
+    private ValueEventListener dmValueEventListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
+            if (dataSnapshot.getChildrenCount() > 0) {
+                msgBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ChatActivity.openForDm(ItemListActiv.this, dataSnapshot.getChildren().iterator().next().getKey(), null, null);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+        }
+    };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (isSeller) {
+            getMenuInflater().inflate(R.menu.seller_menu, menu);
+        }
+        return true;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -288,6 +435,15 @@ public class ItemListActiv extends BaseActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.action_share:
+                if (!TextUtils.isEmpty(sellerData.getShareLink())) {
+                    Analytics.triggerEvent(AnalyticsEvents.SHARE_CATALOGUE, ItemListActiv.this);
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_TEXT, "Hey! Look at this amazing listing I found: " + sellerData.getShareLink());
+                    startActivity(Intent.createChooser(intent, "Share"));
+                }
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

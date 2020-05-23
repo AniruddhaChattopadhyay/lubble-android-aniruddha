@@ -64,6 +64,8 @@ import java.util.Map;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.UploadPDFService;
+import in.lubble.app.UploadVideoService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
@@ -99,6 +101,7 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
@@ -148,6 +151,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
     private static final String KEY_CHAT_DATA = "KEY_CHAT_DATA";
     private static final int PERMITTED_VIDEO_SIZE = 30;
+    private static final int REQUEST_CODE_FILE_PICK = 999 ;
     private Endpoints endpoints;
     private EventData eventData;
     @Nullable
@@ -211,6 +215,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private boolean isLoadingMoreChats;
     private boolean isLastPage;
     private long endAtTimestamp;
+    private String endAtChatId;
     private final static int PAGE_SIZE = 20;
     //private int unreadCount = 0;
     private String attachedGroupId;
@@ -504,7 +509,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         chatRecyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                if (bottom < oldBottom) {
+                int newBottom = bottom;
+                if ((getActivity()) != null && getActivity() instanceof ChatActivity && ((ChatActivity) getActivity()).getTabLayoutHeight() > 0) {
+                    newBottom += ((ChatActivity) getActivity()).getTabLayoutHeight();
+                }
+                if (newBottom < oldBottom) {
                     int position = chatAdapter.getItemCount() - 1;
                     if (position != -1) {
                         // scrollToPosition() doesn't work here. why?
@@ -525,12 +534,19 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
 
                 if (firstVisibleItemPosition == 0 && !isLoadingMoreChats && !isLastPage && totalItemCount != visibleItemCount) {
-                    paginationProgressBar.setVisibility(View.VISIBLE);
-                    moreMsgListener(messagesReference);
+                    moreMsgListener(null);
                 }
             }
         });
 
+    }
+
+    void scrollToChatId(String targetChatId, String highlightText) {
+        chatAdapter.scrollToChatId(targetChatId, highlightText);
+    }
+
+    void removeSearchHighlights() {
+        chatAdapter.removeSearchHighlights();
     }
 
     @Override
@@ -538,7 +554,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onResume();
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
-        resetUnreadCount();
         syncGroupInfo();
     }
 
@@ -654,7 +669,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 // this person's profile ID, could be a seller or a user
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    isCurrUserSeller = false;
+                                    isCurrUserSeller = sellerId.equalsIgnoreCase(profileId);
                                     authorId = profileId;
                                     chatAdapter.setAuthorId(authorId);
                                     chatAdapter.setDmId(dmId);
@@ -676,11 +691,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 dmOtherUserId = profileId;
                                 final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
                                 if (profileMap != null) {
-                                    final boolean isSeller = false;
-
                                     isOtherUserJoined = profileMap.get("joinedTimestamp") != null;
                                     isDmBlocked = profileMap.get("blocked_status") != null;
-
+                                    boolean isSeller = false;
+                                    if (profileMap.get("isSeller") != null) {
+                                        isSeller = (boolean) profileMap.get("isSeller");
+                                    }
                                     if (isSeller) {
                                         fetchSellerProfileFrom(profileId);
                                     } else {
@@ -930,14 +946,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void resetUnreadCount() {
         if (!TextUtils.isEmpty(groupId) && groupData != null && groupData.isJoined()) {
-            RealtimeDbHelper.getUserGroupsRef().child(groupId)
+            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
                     .child("unreadCount").setValue(0);
         } else if (!TextUtils.isEmpty(dmId)) {
             if (isCurrUserSeller) {
-                RealtimeDbHelper.getSellerDmsRef().child(dmId)
+                RealtimeDbHelper.getDmsRef().child(dmId).child("members")
+                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
                         .child("unreadCount").setValue(0);
             } else {
-                RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid()).child(dmId)
+                RealtimeDbHelper.getDmsRef().child(dmId).child("members").child(FirebaseAuth.getInstance().getUid())
                         .child("unreadCount").setValue(0);
             }
         }
@@ -965,6 +982,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     chatAdapter.addChatData(chatData);
                     if (tempChatList.size() == PAGE_SIZE) {
                         endAtTimestamp = tempChatList.get(0).getServerTimestampInLong();
+                        endAtChatId = tempChatList.get(0).getId();
                         /*for (int i = 0; i < tempChatList.size(); i++) {
                             final ChatData currChatData = tempChatList.get(i);
                         }*/
@@ -1003,10 +1021,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
     }
 
-    private void moreMsgListener(@NonNull DatabaseReference messagesReference) {
+    void moreMsgListener(@Nullable final String targetChatId) {
+        paginationProgressBar.setVisibility(View.VISIBLE);
         isLoadingMoreChats = true;
-        final Query query = messagesReference.orderByChild("serverTimestamp").endAt(endAtTimestamp).limitToLast(PAGE_SIZE);
-
+        final Query query;
+        if (!TextUtils.isEmpty(targetChatId)) {
+            query = messagesReference.orderByKey().startAt(targetChatId).endAt(endAtChatId);
+        } else {
+            query = messagesReference.orderByChild("serverTimestamp").endAt(endAtTimestamp).limitToLast(PAGE_SIZE);
+        }
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             final ArrayList<ChatData> newChatDataList = new ArrayList<>();
 
@@ -1025,7 +1048,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         chatData.setId(childDataSnapshot.getKey());
                         sendReadReceipt(chatData);
                         newChatDataList.add(chatData);
-                        if (newChatDataList.size() == PAGE_SIZE) {
+                        if (chatData.getId().equalsIgnoreCase(endAtChatId) || (targetChatId == null && newChatDataList.size() == PAGE_SIZE)) {
                             endAtTimestamp = newChatDataList.get(0).getServerTimestampInLong();
                             newChatDataList.remove(newChatDataList.size() - 1);
                             Collections.reverse(newChatDataList);
@@ -1037,8 +1060,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             newChatDataList.clear();
                             isLoadingMoreChats = false;
                             paginationProgressBar.setVisibility(View.GONE);
-                            chatRecyclerView.scrollBy(0, -dpToPx(40));
-                        } else if (endAtTimestamp == chatData.getServerTimestampInLong() && newChatDataList.size() >= 1) {
+                            if (targetChatId != null) {
+                                chatAdapter.scrollToChatId(targetChatId, null);
+                            } else {
+                                chatRecyclerView.scrollBy(0, -dpToPx(40));
+                            }
+                        } else if (targetChatId == null && endAtTimestamp == chatData.getServerTimestampInLong() && newChatDataList.size() >= 1) {
                             // last page
                             isLastPage = true;
                             if (newChatDataList.size() == 1) {
@@ -1337,6 +1364,52 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 attachedEventId = chosenEventId;
                 fetchAndShowAttachedEventInfo();
             }
+        } else if (requestCode == REQUEST_CODE_FILE_PICK && resultCode == RESULT_OK) {
+            // Get the Uri of the selected file
+            final boolean isDm = !TextUtils.isEmpty(dmId);
+            String name = FileUtils.getFileNameFromUri(data.getData());
+            name = name.replace(".pdf","");
+            String chat_Id = groupId;
+            if (!TextUtils.isEmpty(dmId)) {
+                chat_Id = dmId;
+            }
+            String uPath = "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + chat_Id;
+            if (isDm) {
+                uPath = "dms/" + chat_Id;
+            }
+            final String uploadPath = uPath;
+            final String chatId = chat_Id;
+            final Intent data1 = data;
+            new AlertDialog.Builder(getContext())
+                    .setIcon(R.mipmap.ic_launcher)
+                    .setTitle("")
+                    .setMessage("Are you sure you want to share this document?")
+                    .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Uri uri = data1.getData();
+                            String name = FileUtils.getFileNameFromUri(uri);
+                            name = name.replace(".pdf","");
+                            Log.d(TAG, "File Uri: " + uri.toString());
+                            getContext().startService(new Intent(getContext(), UploadPDFService.class)
+                                    .putExtra(UploadPDFService.EXTRA_BUCKET, UploadPDFService.BUCKET_CONVO)
+                                    .putExtra(UploadPDFService.EXTRA_FILE_NAME, name)
+                                    .putExtra(EXTRA_FILE_URI, uri)
+                                    .putExtra(UploadVideoService.EXTRA_UPLOAD_PATH, uploadPath)
+                                    .putExtra(UploadVideoService.EXTRA_CHAT_ID, chatId)
+                                    .putExtra(UploadVideoService.EXTRA_IS_DM, isDm)
+                                    .putExtra(UploadVideoService.EXTRA_AUTHOR_ID, authorId)
+                                    .putExtra(UploadVideoService.EXTRA_IS_AUTHOR_SELLER, isCurrUserSeller)
+                                    .setAction(UploadVideoService.ACTION_UPLOAD));
+                        }
+                    })
+                    .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    }).create().show();
+
         }
     }
 
@@ -1433,6 +1506,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             case 4:
                 startActivityForResult(EventPickerActiv.getIntent(getContext()), REQUEST_CODE_EVENT_PICK);
                 break;
+            case 5:
+                startFilePicker();
+                break;
         }
     }
 
@@ -1456,6 +1532,20 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             startActivityForResult(pickImageIntent, REQUEST_CODE_IMG);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    private void startFilePicker(){
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/pdf");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        try {
+            startActivityForResult(
+                    Intent.createChooser(intent, "Select a File to Upload"),
+                    REQUEST_CODE_FILE_PICK);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+            Toast.makeText(getContext(), "Please install a File Manager.", Toast.LENGTH_SHORT).show();
         }
     }
 

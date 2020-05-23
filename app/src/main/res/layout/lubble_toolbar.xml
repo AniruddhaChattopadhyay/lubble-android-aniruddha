@@ -76,6 +76,7 @@
             android:padding="8dp"
             android:text="Rewards"
             android:textColor="@color/black"
+            android:visibility="gone"
             android:textSize="10sp"
             app:drawableTint="@color/colorAccent"
             app:drawableTopCompat="@drawable/ic_premium_badge" />
@@ -88,6 +89,7 @@
             android:layout_centerVertical="true"
             android:gravity="center"
             android:padding="8dp"
+            android:layout_alignWithParentIfMissing="true"
             android:text="Search"
             android:textColor="@color/black"
             android:textSize="10sp"

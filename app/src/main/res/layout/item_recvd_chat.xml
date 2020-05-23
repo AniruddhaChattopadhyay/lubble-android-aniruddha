@@ -48,8 +48,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginRight="16dp"
                     android:layout_marginLeft="8dp"
+                    android:layout_marginRight="16dp"
                     android:gravity="center_vertical">
 
                     <androidx.emoji.widget.EmojiTextView
@@ -125,22 +125,22 @@
                     android:id="@+id/link_meta_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
                     android:background="@drawable/sent_chat_bubble_border"
                     android:orientation="vertical"
                     android:padding="8dp"
                     android:visibility="gone"
-                    android:layout_margin="8dp"
                     tools:visibility="visible">
 
                     <ImageView
                         android:id="@+id/iv_link_pic"
                         android:layout_width="match_parent"
-                        android:scaleType="fitStart"
                         android:layout_height="wrap_content"
-                        android:maxHeight="120dp"
-                        android:visibility="gone"
                         android:adjustViewBounds="true"
-                        tools:src="@tools:sample/backgrounds/scenic"/>
+                        android:maxHeight="120dp"
+                        android:scaleType="fitStart"
+                        android:visibility="gone"
+                        tools:src="@tools:sample/backgrounds/scenic" />
 
                     <ImageView
                         android:id="@+id/iv_attach_pic"
@@ -174,10 +174,10 @@
                 <LinearLayout
                     android:id="@+id/msg_content_container"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
                     android:layout_marginBottom="8dp"
-                    android:layout_height="wrap_content"
                     android:orientation="vertical">
 
                     <include
@@ -252,13 +252,98 @@
                             android:layout_gravity="center" />
 
                         <ImageView
+                            android:id="@+id/iv_play_vid"
                             android:layout_width="48dp"
                             android:layout_height="48dp"
-                            android:background="@drawable/circle_white_trans"
-                            app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp"
                             android:layout_gravity="center"
-                            android:id="@+id/iv_play_vid" />
+                            android:background="@drawable/circle_white_trans"
+                            app:srcCompat="@drawable/ic_play_circle_outline_gray_24dp" />
                     </FrameLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/pdf_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="240dp"
+                        android:layout_marginBottom="8dp"
+                        android:minWidth="240dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <ImageView
+                            android:id="@+id/iv_pdf_img"
+                            android:layout_width="match_parent"
+                            android:layout_height="240dp"
+                            android:layout_above="@id/tv_pdf_title"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginTop="4dp"
+                            android:minWidth="240dp"
+                            android:scaleType="matrix"
+                            tools:src="@tools:sample/avatars" />
+
+                        <ProgressBar
+                            android:id="@+id/progressbar_img_pdf"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_above="@id/tv_pdf_title"
+                            android:layout_alignParentTop="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_gravity="center" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignTop="@id/tv_pdf_title"
+                            android:background="@drawable/half_rounded_rect_grey_bottom" />
+
+                        <TextView
+                            android:id="@+id/tv_pdf_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:layout_alignParentBottom="true"
+                            android:layout_toLeftOf="@id/progressbar_pdf_download"
+                            android:drawablePadding="8dp"
+                            android:ellipsize="end"
+                            android:gravity="center_vertical"
+                            android:maxLines="2"
+                            android:paddingLeft="16dp"
+                            android:paddingTop="16dp"
+                            android:paddingRight="8dp"
+                            android:paddingBottom="16dp"
+                            android:text="MHA Order 007"
+                            android:textColor="@color/black"
+                            android:textSize="15sp"
+                            app:drawableLeftCompat="@drawable/ic_pdf_file" />
+
+                        <ImageView
+                            android:id="@+id/iv_pdf_download"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="16dp"
+                            android:paddingRight="12dp"
+                            android:layout_alignTop="@id/tv_pdf_title"
+                            android:layout_alignBottom="@id/tv_pdf_title"
+                            android:layout_alignParentRight="true"
+                            app:srcCompat="@drawable/ic_file_download_black_24dp" />
+
+                        <ProgressBar
+                            android:id="@+id/progressbar_pdf_download"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignTop="@id/tv_pdf_title"
+                            android:layout_alignBottom="@id/tv_pdf_title"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginRight="4dp"
+                            android:indeterminate="false"
+                            android:max="100"
+                            android:progress="50"
+                            android:progressDrawable="@drawable/progress_ring_dark"
+                            android:secondaryProgress="100"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+
+                    </RelativeLayout>
 
                     <androidx.emoji.widget.EmojiTextView
                         android:id="@+id/tv_message"
@@ -272,14 +357,14 @@
 
                 <TextView
                     android:id="@+id/tv_reply_bottom"
-                    android:text="REPLY"
-                    android:visibility="gone"
-                    android:gravity="center"
-                    android:layout_marginTop="8dp"
-                    android:textColor="@color/white"
-                    android:background="@drawable/half_rounded_rectangle_blue_bottom"
                     android:layout_width="match_parent"
-                    android:layout_height="40dp" />
+                    android:layout_height="40dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/half_rounded_rectangle_blue_bottom"
+                    android:gravity="center"
+                    android:text="REPLY"
+                    android:textColor="@color/white"
+                    android:visibility="gone" />
 
             </LinearLayout>
 

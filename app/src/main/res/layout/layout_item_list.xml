@@ -12,6 +12,7 @@
         android:layout_height="80dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
+        android:background="@drawable/circle"
         app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
     <TextView
@@ -20,6 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/iv_seller_pic"
         android:layout_centerHorizontal="true"
+        android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         tools:text="Seller Name" />
 
@@ -31,13 +33,67 @@
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:gravity="center_horizontal"
+        android:textColor="@color/black"
         tools:text="@tools:sample/lorem" />
+
+    <LinearLayout
+        android:id="@+id/container_cta_btns"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tv_seller_bio"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_edit_seller"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EDIT"
+            android:theme="@style/OutlineButton"
+            android:textColor="@color/dk_colorAccent"
+            app:iconTint="@color/dk_colorAccent"
+            android:layout_marginRight="4dp"
+            android:visibility="gone"
+            app:icon="@drawable/ic_edit_white_24dp"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_call"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Call"
+            android:theme="@style/OutlineButton"
+            android:textColor="@color/dk_colorAccent"
+            app:iconTint="@color/dk_colorAccent"
+            android:visibility="gone"
+            app:icon="@drawable/ic_call_black_24dp"
+            tools:visibility="visible" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_msg"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:layout_marginLeft="4dp"
+            android:text="Message"
+            android:textColor="@color/white"
+            android:theme="@style/MaterialButton"
+            android:visibility="gone"
+            app:backgroundTint="@color/button_color_selector"
+            app:icon="@drawable/ic_send_white_24dp"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/container_action"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_seller_bio"
+        android:layout_below="@id/container_cta_btns"
         android:layout_marginTop="8dp">
 
         <View
@@ -59,8 +115,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_action_hint"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
+            android:layout_marginRight="8dp"
             android:orientation="horizontal"
             android:weightSum="2">
 
@@ -173,8 +229,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/container_action"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
         android:nestedScrollingEnabled="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 

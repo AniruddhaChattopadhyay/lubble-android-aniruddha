@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
-    android:versionCode="224"
-    android:versionName="1.16-1">
+    android:versionCode="232"
+    android:versionName="1.19.1">
 
     <application
         android:name=".LubbleApp"
@@ -15,6 +15,9 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
+        <meta-data
+            android:name="firebase_performance_logcat_enabled"
+            android:value="true" />
         <activity android:name=".chat.BlockedChatsActiv"
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>
@@ -103,6 +106,7 @@
         <activity
             android:name=".chat.ChatActivity"
             android:configChanges="orientation"
+            android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
 
@@ -243,7 +247,6 @@
         <activity
             android:name=".marketplace.ItemListActiv"
             android:configChanges="orientation"
-            android:launchMode="singleInstance"
             android:screenOrientation="portrait" />
         <activity
             android:name=".marketplace.CategoriesActiv"
@@ -480,6 +483,7 @@
         </service>
 
         <service android:name=".UploadVideoService" />
+        <service android:name=".UploadPDFService" />
     </application>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />

@@ -3,8 +3,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:background="@color/very_light_gray"
+    tools:background="@color/white"
     tools:context="in.lubble.app.marketplace.MarketplaceFrag">
+
+    <RelativeLayout
+        android:id="@+id/layout_maintenance_mode"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/tv_maintenance_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            app:drawableTopCompat="@drawable/ic_closed"
+            android:drawablePadding="8dp"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:gravity="center"
+            android:text="Market will be opening soon in your neighbourhood!\n\nOwn a local business?\nStart selling for free now"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srcCompat="@drawable/ic_curved_arrow"
+            android:rotation="110"
+            android:layout_marginLeft="160dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="72dp"
+            android:layout_alignParentBottom="true"
+            android:layout_below="@id/tv_maintenance_text"/>
+
+    </RelativeLayout>
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollview_content"
@@ -19,7 +51,10 @@
                 android:id="@+id/container_search"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginRight="16dp"
                 android:background="@drawable/rect_rounded_border"
                 android:padding="8dp">
 
@@ -37,20 +72,11 @@
 
             </LinearLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_categories"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/container_search"
-                android:layout_marginLeft="8dp"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
             <me.crosswall.lib.coverflow.core.PagerContainer
                 android:id="@+id/pager_container"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:layout_below="@id/rv_categories"
+                android:layout_height="120dp"
+                android:layout_below="@id/container_search"
                 android:layout_marginTop="8dp"
                 android:clickable="true"
                 tools:background="?attr/colorPrimary">
@@ -62,6 +88,18 @@
                     android:layout_gravity="center" />
 
             </me.crosswall.lib.coverflow.core.PagerContainer>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_categories"
+                android:layout_width="match_parent"
+                android:layout_below="@id/pager_container"
+                android:layout_height="wrap_content"
+                android:paddingLeft="12dp"
+                android:clipToPadding="false"
+                android:layout_marginTop="14dp"
+                tools:listitem="@layout/item_chip"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager" />
 
             <ProgressBar
                 android:id="@+id/progress_bar"
@@ -75,9 +113,8 @@
                 layout="@layout/mplace_category_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/pager_container"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp" />
+                android:layout_below="@id/rv_categories"
+                android:layout_marginTop="14dp" />
 
             <include
                 android:id="@+id/layout_cat2"
@@ -85,15 +122,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/layout_cat1"
-                android:layout_marginLeft="8dp"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="14dp" />
+
+            <TextView
+                android:id="@+id/tv_nearby_products"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nearby Products"
+                android:layout_below="@id/layout_cat2"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:layout_marginTop="14dp"
+                android:layout_marginLeft="14dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_all_items"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/layout_cat2"
+                android:layout_below="@id/tv_nearby_products"
                 android:layout_marginLeft="8dp"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="2"
+                tools:listitem="@layout/big_item"
                 android:layout_marginTop="8dp"
                 android:layout_marginRight="8dp" />
 

@@ -9,7 +9,7 @@
         android:id="@+id/iv_item"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:background="@color/very_light_gray"
+        android:background="@drawable/rounded_rect_very_light_gray"
         android:scaleType="centerCrop" />
 
     <TextView
@@ -53,6 +53,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/iv_item"
+        android:textAppearance="@style/FirebaseUI.Text.T08"
         android:layout_marginTop="4dp"
         android:textColor="@color/black"
         tools:text="Agra se Joote" />

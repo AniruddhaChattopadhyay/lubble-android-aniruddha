@@ -4,15 +4,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/rect_rounded_border"
-    android:padding="8dp"
+    android:clipToPadding="false"
     tools:showIn="@layout/fragment_marketplace">
 
     <TextView
         android:id="@+id/tv_category"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
+        android:drawableRight="@drawable/ic_arrow_forward_black_24dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:layout_marginLeft="16dp"
+        android:paddingRight="16dp"
         tools:text="Home &amp; Kitchen" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -20,7 +22,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/tv_category"
+        android:clipToPadding="false"
+        android:paddingLeft="8dp"
         android:layout_marginTop="8dp"
+        tools:listitem="@layout/small_item"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 

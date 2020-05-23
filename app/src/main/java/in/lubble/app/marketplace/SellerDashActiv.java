@@ -6,14 +6,23 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.widget.Toolbar;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -171,16 +180,30 @@ public class SellerDashActiv extends BaseActivity {
                 if (sellerData != null && !isFinishing()) {
                     sellerNameTv.setText(sellerData.getName());
                     sellerBioTv.setText(sellerData.getBio());
+                    Linkify.addLinks(sellerBioTv, Linkify.ALL);
 
-                    GlideApp.with(SellerDashActiv.this)
-                            .load(sellerData.getPhotoUrl())
-                            .circleCrop()
-                            .into(sellerPicIv);
+                    if (!TextUtils.isEmpty(sellerData.getPhotoUrl())) {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                        GlideApp.with(SellerDashActiv.this)
+                                .load(sellerData.getPhotoUrl())
+                                .placeholder(R.drawable.circle)
+                                .error(R.drawable.ic_shop)
+                                .circleCrop()
+                                .into(sellerPicIv);
+                    } else {
+                        sellerPicIv.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                        GlideApp.with(SellerDashActiv.this)
+                                .load(R.drawable.ic_shop)
+                                .centerInside()
+                                .into(sellerPicIv);
+                    }
 
                     setTitle(sellerData.getName());
 
-                    for (Item item : sellerData.getItemList()) {
-                        adapter.addData(item);
+                    if (sellerData.getItemList() != null && !sellerData.getItemList().isEmpty()) {
+                        for (Item item : sellerData.getItemList()) {
+                            adapter.addData(item);
+                        }
                     }
                     recommendationCount.setText(sellerData.getRecommendationCount() + " recommendations");
 
@@ -196,7 +219,7 @@ public class SellerDashActiv extends BaseActivity {
                         }
                     });
 
-                } else  if (!isFinishing()){
+                } else if (!isFinishing()) {
                     Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
                     Toast.makeText(SellerDashActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }

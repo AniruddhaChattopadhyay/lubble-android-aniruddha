@@ -72,6 +72,9 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 ServiceCategoryDetailActiv.open(this, Integer.parseInt(uri.getLastPathSegment()));
                 break;
             case "referrals":
+                ReferralActivity.open(this, true);
+                break;
+            case "rewards":
                 ReferralActivity.open(this);
                 break;
             case "seller_dash":
@@ -102,6 +105,11 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 final Intent serviceIntent = new Intent(this, MainActivity.class);
                 serviceIntent.putExtra(EXTRA_TAB_NAME, "services");
                 startActivity(serviceIntent);
+                break;
+            case "market":
+                final Intent marketIntent = new Intent(this, MainActivity.class);
+                marketIntent.putExtra(EXTRA_TAB_NAME, "mplace");
+                startActivity(marketIntent);
                 break;
             case "events":
                 final String event_id = uri.getQueryParameter("id");

@@ -81,7 +81,7 @@
             android:background="@drawable/half_rounded_rectangle_blue_top"
             android:orientation="vertical"
             android:padding="8dp"
-            android:visibility="gone">
+            android:visibility="visible">
 
             <TextView
                 android:id="@+id/tv_action"
@@ -111,7 +111,7 @@
             android:background="@drawable/half_rounded_rectangle_blue_top"
             android:orientation="vertical"
             android:padding="8dp"
-            android:visibility="visible">
+            android:visibility="gone">
 
             <TextView
                 android:id="@+id/tv_register_phone"

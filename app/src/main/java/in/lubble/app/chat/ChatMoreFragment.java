@@ -273,7 +273,11 @@ public class ChatMoreFragment extends Fragment {
                             }
                         }
                         final List<String> entries1List = chatMoreData.getCollectionList();
-                        fetchEntries(entries1List);
+                        if (entries1List != null && !entries1List.isEmpty()) {
+                            fetchEntries(entries1List);
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                        }
                     } else {
                         noCollectionsContainer.setVisibility(View.VISIBLE);
                         progressBar.setVisibility(View.GONE);

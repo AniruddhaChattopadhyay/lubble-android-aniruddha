@@ -8,18 +8,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.crashlytics.android.Crashlytics;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.marketplace.SellerData;
 import in.lubble.app.models.marketplace.ServiceData;
-
-import java.util.ArrayList;
-import java.util.List;
+import in.lubble.app.profile.DmIntroBottomSheet;
 
 public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -28,11 +33,13 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private final List<ServiceData> serviceDataList;
     private Context context;
     private SellerData sellerData;
+    private FragmentManager supportFragmentManager;
     private String dmId;
 
-    public ServiceCatalogAdapter(Context context, @NonNull SellerData sellerData) {
+    public ServiceCatalogAdapter(Context context, @NonNull SellerData sellerData, FragmentManager supportFragmentManager) {
         this.context = context;
         this.sellerData = sellerData;
+        this.supportFragmentManager = supportFragmentManager;
         serviceDataList = new ArrayList<>();
     }
 
@@ -64,13 +71,8 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                             ChatActivity.openForDm(context, dmId, null, serviceData.getTitle());
                         } else {
                             if (sellerData != null) {
-                                ChatActivity.openForEmptyDm(
-                                        context,
-                                        String.valueOf(sellerData.getId()),
-                                        sellerData.getName(),
-                                        sellerData.getPhotoUrl(),
-                                        serviceData.getTitle()
-                                );
+                                DmIntroBottomSheet.newInstance(String.valueOf(sellerData.getId()), sellerData.getName(), sellerData.getPhotoUrl(), sellerData.getPhone())
+                                        .show(supportFragmentManager, null);
                             } else {
                                 final IllegalArgumentException throwable = new IllegalArgumentException("Service Data is NULL when trying to request service price");
                                 Log.e(TAG, "onClick: ", throwable);
