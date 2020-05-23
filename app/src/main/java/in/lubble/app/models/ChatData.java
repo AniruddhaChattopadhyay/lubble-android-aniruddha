@@ -32,6 +32,9 @@ public class ChatData implements Serializable {
     private String message;
     private String imgUrl;
     private String vidUrl;
+    private String pdfUrl;
+    private String pdfFileName;
+    private String pdfThumbnailUrl;
     private int lubbCount = 0;
     private HashMap<String, Long> lubbReceipts = new HashMap<>();
     private long createdTimestamp;
@@ -84,6 +87,30 @@ public class ChatData implements Serializable {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getPdfUrl() {
+        return pdfUrl;
+    }
+
+    public void setPdfUrl(String pdfUrl) {
+        this.pdfUrl = pdfUrl;
+    }
+
+    public String getPdfThumbnailUrl() {
+        return pdfThumbnailUrl;
+    }
+
+    public void setPdfThumbnailUrl(String pdfThumbnailUrl) {
+        this.pdfThumbnailUrl = pdfThumbnailUrl;
+    }
+
+    public String getPdfFileName() {
+        return pdfFileName;
+    }
+
+    public void setPdfFileName(String pdfFileName) {
+        this.pdfFileName = pdfFileName;
     }
 
     public String getImgUrl() {

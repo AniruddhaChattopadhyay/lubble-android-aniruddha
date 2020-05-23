@@ -66,6 +66,7 @@ public class FullScreenVideoActivity extends BaseActivity {
     private ProgressBar progressBar;
     private String videoname;
     private Uri videourl = null;
+    private Uri videoUrlHttp = null;
     private Long position = C.TIME_UNSET;
     private final String lubble_vid_dir = "Lubble Videos";
     private File lubble_vid_file;
@@ -97,6 +98,7 @@ public class FullScreenVideoActivity extends BaseActivity {
         Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED, this);
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
         videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
+        videoUrlHttp = videourl;
         videoname = getFileName();
         FullScreenVideoActivityPermissionsDispatcher.makeGetFileForDownloadWithPermissionCheck(FullScreenVideoActivity.this);
         Log.d(TAG, "before" + videourl.toString());
@@ -233,7 +235,7 @@ public class FullScreenVideoActivity extends BaseActivity {
                 onBackPressed();
                 return true;
             case R.id.action_download_vid:
-                FullScreenVideoActivityPermissionsDispatcher.download_VideoWithPermissionCheck(FullScreenVideoActivity.this, videourl, videoname);
+                FullScreenVideoActivityPermissionsDispatcher.download_VideoWithPermissionCheck(FullScreenVideoActivity.this, videoUrlHttp, videoname);
         }
         return super.onOptionsItemSelected(item);
     }
