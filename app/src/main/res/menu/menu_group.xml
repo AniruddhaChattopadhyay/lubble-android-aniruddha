@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/action_mute"
+        android:icon="@drawable/ic_mute"
+        android:title="Mute Notifications"
+        app:iconTint="@color/black"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_exit"
+        android:icon="@drawable/ic_delete_grey_24dp"
+        android:title="Leave Group"
+        android:visible="false"
+        app:iconTint="@color/black"
+        app:showAsAction="always"
+        tools:visible="true" />
+
+</menu>

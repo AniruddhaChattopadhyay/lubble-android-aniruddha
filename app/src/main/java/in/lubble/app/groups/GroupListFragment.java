@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.view.ActionMode;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -139,7 +140,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         layoutManager = new LinearLayoutManager(context);
         groupsRecyclerView.setLayoutManager(layoutManager);
-        adapter = new GroupRecyclerAdapter(mListener);
+        adapter = new GroupRecyclerAdapter(mListener, getFragmentManager());
         groupsRecyclerView.setAdapter(adapter);
         DividerItemDecoration itemDecor = new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL);
         groupsRecyclerView.addItemDecoration(itemDecor);
@@ -772,12 +773,22 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         adapter.getFilter().filter(searchString);
     }
 
+
+    @Override
+    public ActionMode onActionModeEnabled(@NonNull ActionMode.Callback callback) {
+        if (getActivity() != null) {
+            return ((MainActivity) getActivity()).toggleActionMode(true, callback);
+        }
+        return null;
+    }
+
     @Override
     public void onPause() {
         super.onPause();
 
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+            ((MainActivity) getActivity()).toggleActionMode(false, null);
         }
     }
 

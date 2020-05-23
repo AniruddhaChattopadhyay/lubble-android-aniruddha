@@ -28,7 +28,7 @@ import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
-import in.lubble.app.notifications.MutedChatsSharedPrefs;
+import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
@@ -74,7 +74,7 @@ public class UserUtils {
                                             LubbleSharedPrefs.getInstance().clearAll();
                                             GroupPromptSharedPrefs.getInstance().clearAll();
                                             UnreadChatsSharedPrefs.getInstance().clearAll();
-                                            MutedChatsSharedPrefs.getInstance().clearAll();
+                                            SnoozedGroupsSharedPrefs.getInstance().clearAll();
                                             KeyMappingSharedPrefs.getInstance().clearAll();
                                             GroupMappingSharedPrefs.getInstance().clearAll();
                                             AnswerSharedPrefs.getInstance().clearAll();
@@ -115,7 +115,7 @@ public class UserUtils {
                                         LubbleSharedPrefs.getInstance().clearAll();
                                         GroupPromptSharedPrefs.getInstance().clearAll();
                                         UnreadChatsSharedPrefs.getInstance().clearAll();
-                                        MutedChatsSharedPrefs.getInstance().clearAll();
+                                        SnoozedGroupsSharedPrefs.getInstance().clearAll();
                                         KeyMappingSharedPrefs.getInstance().clearAll();
                                         GroupMappingSharedPrefs.getInstance().clearAll();
                                         AnswerSharedPrefs.getInstance().clearAll();

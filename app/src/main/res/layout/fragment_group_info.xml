@@ -80,13 +80,14 @@
                 android:background="@color/light_gray" />
 
             <TextView
+                android:id="@+id/tv_snooze_notifs"
                 android:layout_width="match_parent"
                 android:layout_height="32dp"
                 android:layout_below="@id/view1"
                 android:layout_centerVertical="true"
                 android:gravity="left|center_vertical"
                 android:paddingLeft="8dp"
-                android:text="Mute Notifications"
+                android:text="Snooze Notifications"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Subhead" />
 
             <androidx.appcompat.widget.SwitchCompat

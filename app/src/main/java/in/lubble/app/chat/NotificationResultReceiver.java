@@ -22,9 +22,9 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.NotifData;
-import in.lubble.app.notifications.MutedChatsSharedPrefs;
 import in.lubble.app.utils.NotifUtils;
 
+import static in.lubble.app.utils.NotifUtils.isGroupSnoozed;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class NotificationResultReceiver extends BroadcastReceiver {
@@ -54,11 +54,11 @@ public class NotificationResultReceiver extends BroadcastReceiver {
         Gson gson = new Gson();
         JsonElement jsonElement = gson.toJsonTree(dataMap);
         NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
-        // only show notif if that group is not in foreground & the group's notifs are not muted
-        if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
-            NotifUtils.updateChatNotifs(context, notifData);
+        // only show notif if that group is not muted or snoozed
+        if (isGroupSnoozed(notifData.getGroupId())) {
+            sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SNOOZED, dataMap, context);
         } else {
-            sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_MUTED, dataMap, context);
+            NotifUtils.updateChatNotifs(context, notifData);
         }
         updateUnreadCounter(notifData, false);
         pullNewMsgs(notifData);
@@ -70,10 +70,10 @@ public class NotificationResultReceiver extends BroadcastReceiver {
         JsonElement jsonElement = gson.toJsonTree(dataMap);
         NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
         // only show notif if that group is not in foreground & the group's notifs are not muted
-        if (!MutedChatsSharedPrefs.getInstance().getPreferences().getBoolean(notifData.getGroupId(), false)) {
+        if (!isGroupSnoozed(notifData.getGroupId())) {
             NotifUtils.updateChatNotifs(context, notifData);
         } else {
-            sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_MUTED, dataMap, context);
+            sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_SNOOZED, dataMap, context);
         }
         updateUnreadCounter(notifData, true);
         pullNewDmMsgs(notifData);

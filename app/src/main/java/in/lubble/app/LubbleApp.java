@@ -23,7 +23,7 @@ import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.database.DbSingleton;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.KeyMappingSharedPrefs;
-import in.lubble.app.notifications.MutedChatsSharedPrefs;
+import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
@@ -60,10 +60,10 @@ public class LubbleApp extends MultiDexApplication {
         LubbleSharedPrefs.initializeInstance(getApplicationContext());
         GroupMappingSharedPrefs.initializeInstance(getApplicationContext());
         UnreadChatsSharedPrefs.initializeInstance(getApplicationContext());
-        MutedChatsSharedPrefs.initializeInstance(getApplicationContext());
         KeyMappingSharedPrefs.initializeInstance(getApplicationContext());
         AnswerSharedPrefs.initializeInstance(getApplicationContext());
         GroupPromptSharedPrefs.initializeInstance(getApplicationContext());
+        SnoozedGroupsSharedPrefs.initializeInstance(getApplicationContext());
         // REMEMBER: Clear the new sharedPrefs file in UserUtils#logout()
 
         Fabric.with(this, new Crashlytics());
