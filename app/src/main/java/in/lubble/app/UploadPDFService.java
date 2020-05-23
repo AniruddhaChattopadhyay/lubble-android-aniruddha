@@ -339,7 +339,7 @@ public class UploadPDFService extends BaseTaskService {
         chatData.setAuthorUid(authorId);
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
-        chatData.setMessage("");
+        chatData.setMessage("\uD83D\uDCC4 PDF Attached\nPlease update the app from Play Store to view the PDF document");
         chatData.setPdfFileName(filename);
         chatData.setPdfUrl(downloadUrl.toString());
         chatData.setPdfThumbnailUrl(downloadThumbnailUrl.toString());

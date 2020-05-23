@@ -389,7 +389,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null);
         handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.playvidIv, sentChatViewHolder.vidThumbnailIv, chatData, null, position);
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
-        handlePdf(sentChatViewHolder.pdfContainer, sentChatViewHolder.progressBarPdf, sentChatViewHolder.pdfThumbnailIv, chatData, sentChatViewHolder.pdfDownloadIv, sentChatViewHolder.progressBarDownloadPdf, sentChatViewHolder.pdfTitleTv);
+
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
@@ -403,7 +403,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         } else {
             sentChatViewHolder.pollContainer.setVisibility(View.GONE);
+            sentChatViewHolder.messageTv.setVisibility(VISIBLE);
         }
+        handlePdf(sentChatViewHolder.pdfContainer, sentChatViewHolder.progressBarPdf, sentChatViewHolder.pdfThumbnailIv, chatData,
+                sentChatViewHolder.pdfDownloadIv, sentChatViewHolder.progressBarDownloadPdf, sentChatViewHolder.pdfTitleTv, sentChatViewHolder.messageTv);
     }
 
     private void setHighLightedText(TextView tv, String textToHighlight) {
@@ -614,8 +617,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
         handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid, recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv, position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
-        handlePdf(recvdChatViewHolder.pdfContainer, recvdChatViewHolder.progressBarPdf, recvdChatViewHolder.pdfThumbnailIv, chatData, recvdChatViewHolder.pdfDownloadIv, recvdChatViewHolder.progressBarDownloadPdf, recvdChatViewHolder.pdfTitleTv);
-
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
@@ -633,8 +634,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         } else {
             recvdChatViewHolder.pollContainer.setVisibility(View.GONE);
+            recvdChatViewHolder.messageTv.setVisibility(VISIBLE);
         }
 
+        handlePdf(recvdChatViewHolder.pdfContainer, recvdChatViewHolder.progressBarPdf, recvdChatViewHolder.pdfThumbnailIv, chatData,
+                recvdChatViewHolder.pdfDownloadIv, recvdChatViewHolder.progressBarDownloadPdf, recvdChatViewHolder.pdfTitleTv, recvdChatViewHolder.messageTv);
     }
 
     private void showPollButtons(final RecyclerView.ViewHolder baseViewHolder, final ChatData chatData) {
@@ -1241,10 +1245,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void handlePdf(RelativeLayout pdfContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, ProgressBar progressBarDownloadPdf,
-                           TextView pdfTitleTV) {
-        if (isValidString(chatData.getPdfThumbnailUrl())) {
+                           TextView pdfTitleTV, TextView messageTv) {
+        if (isValidString(chatData.getPdfUrl())) {
             pdfContainer.setOnClickListener(null);
             pdfContainer.setVisibility(VISIBLE);
+            messageTv.setVisibility(View.GONE);
             pdfTitleTV.setText(chatData.getPdfFileName() + ".pdf");
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
                 // Permission is not granted
@@ -1289,6 +1294,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             pdfContainer.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
+            messageTv.setVisibility(messageTv.getVisibility());
         }
     }
 
