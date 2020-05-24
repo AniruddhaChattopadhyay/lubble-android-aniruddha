@@ -154,8 +154,12 @@ public class FileUtils {
                 String mimeType = getMimeType(uri);
                 if (mimeType.contains("video"))
                     photoFile = createTemporalVideoFileFrom(context, inputStream);
-                else {
+                else if(mimeType.contains("image")){
                     photoFile = createTemporalFileFrom(context, inputStream, mimeType);
+                }
+                else {
+                    String name = getFileNameFromUri(uri);
+                    photoFile = createTemporalGenericFileFrom(context, inputStream, mimeType,name);
                 }
 
             } catch (FileNotFoundException e) {
@@ -199,6 +203,46 @@ public class FileUtils {
         }
 
         return targetFile;
+    }
+
+    private static File createTemporalGenericFileFrom(Context context, InputStream inputStream, String mimeType,String fileName) throws IOException {
+        File targetFile = null;
+
+        if (inputStream != null) {
+            int read;
+            byte[] buffer = new byte[8 * 1024];
+
+            targetFile = createTemporalGenericFile(context, mimeType,fileName);
+            OutputStream outputStream = new FileOutputStream(targetFile);
+
+            while ((read = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, read);
+            }
+            outputStream.flush();
+
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return targetFile;
+    }
+
+    private static File createTemporalGenericFile(Context context, String mimeType,String fileName) {
+        String extension = "pdf";
+        if (!TextUtils.isEmpty(mimeType)) {
+            try {
+                String calculatedExtension = mimeType.split("/")[1];
+                if (!TextUtils.isEmpty(calculatedExtension)) {
+                    extension = calculatedExtension;
+                }
+            } catch (Exception e) {
+                Crashlytics.logException(e);
+            }
+        }
+        return new File(context.getExternalCacheDir(), fileName + "." + extension); // context needed
     }
 
     private static File createTemporalFileFrom(Context context, InputStream inputStream, String mimeType) throws IOException {
@@ -418,9 +462,13 @@ public class FileUtils {
     public static String getFileNameFromUri (Uri uri){
         Cursor returnCursor =
                 getAppContext().getContentResolver().query(uri, null, null, null, null);
+        if(returnCursor==null)
+            return uri.getLastPathSegment();
         int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+        //int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
         returnCursor.moveToFirst();
-        return returnCursor.getString(nameIndex);
+        String name =  returnCursor.getString(nameIndex);
+        returnCursor.close();
+        return name;
     }
 }
