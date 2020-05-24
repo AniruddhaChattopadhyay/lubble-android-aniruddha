@@ -482,14 +482,17 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 @Override
                 public boolean onLongClick(View v) {
                     if (getAdapterPosition() != highlightedPos) {
-                        selectedGroupId = groupDataList.get(getAdapterPosition()).getId();
-                        actionMode = mListener.onActionModeEnabled(actionModeCallbacks);
-                        itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.very_light_gray));
-                        if (highlightedPos != -1) {
-                            // another item was highlighted, remove its highlight
-                            notifyItemChanged(highlightedPos);
+                        GroupData groupData = groupDataList.get(getAdapterPosition());
+                        if (groupData.isJoined()) {
+                            selectedGroupId = groupData.getId();
+                            actionMode = mListener.onActionModeEnabled(actionModeCallbacks);
+                            itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.very_light_gray));
+                            if (highlightedPos != -1) {
+                                // another item was highlighted, remove its highlight
+                                notifyItemChanged(highlightedPos);
+                            }
+                            highlightedPos = getAdapterPosition();
                         }
-                        highlightedPos = getAdapterPosition();
                     } else {
                         if (actionMode != null) {
                             actionMode.finish();
