@@ -65,7 +65,6 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadPDFService;
-import in.lubble.app.UploadVideoService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.chat_info.MsgInfoActivity;
@@ -311,8 +310,23 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
                         file.delete();
                     }
-                } else {
+                } else if(FileUtils.getMimeType(sharedImageUri).contains("image")) {
                     AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                }
+                else if(FileUtils.getMimeType(sharedImageUri).contains("pdf")){
+                    String name = FileUtils.getFileNameFromUri(sharedImageUri);
+                    name = name.replace(".pdf","");
+                    final String uploadPath = "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + groupId;
+                    getContext().startService(new Intent(getContext(), UploadPDFService.class)
+                            .putExtra(UploadPDFService.EXTRA_BUCKET, UploadPDFService.BUCKET_CONVO)
+                            .putExtra(UploadPDFService.EXTRA_FILE_NAME, name)
+                            .putExtra(EXTRA_FILE_URI, sharedImageUri)
+                            .putExtra(UploadPDFService.EXTRA_UPLOAD_PATH, uploadPath)
+                            .putExtra(UploadPDFService.EXTRA_CHAT_ID, groupId)
+                            .putExtra(UploadPDFService.EXTRA_IS_DM, "false")
+                            .putExtra(UploadPDFService.EXTRA_AUTHOR_ID, authorId)
+                            .putExtra(UploadPDFService.EXTRA_IS_AUTHOR_SELLER, isCurrUserSeller)
+                            .setAction(UploadPDFService.ACTION_UPLOAD));
                 }
                 sharedImageUri = null;
             }
@@ -1367,8 +1381,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         } else if (requestCode == REQUEST_CODE_FILE_PICK && resultCode == RESULT_OK) {
             // Get the Uri of the selected file
             final boolean isDm = !TextUtils.isEmpty(dmId);
-            String name = FileUtils.getFileNameFromUri(data.getData());
-            name = name.replace(".pdf","");
             String chat_Id = groupId;
             if (!TextUtils.isEmpty(dmId)) {
                 chat_Id = dmId;
@@ -1395,12 +1407,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     .putExtra(UploadPDFService.EXTRA_BUCKET, UploadPDFService.BUCKET_CONVO)
                                     .putExtra(UploadPDFService.EXTRA_FILE_NAME, name)
                                     .putExtra(EXTRA_FILE_URI, uri)
-                                    .putExtra(UploadVideoService.EXTRA_UPLOAD_PATH, uploadPath)
-                                    .putExtra(UploadVideoService.EXTRA_CHAT_ID, chatId)
-                                    .putExtra(UploadVideoService.EXTRA_IS_DM, isDm)
-                                    .putExtra(UploadVideoService.EXTRA_AUTHOR_ID, authorId)
-                                    .putExtra(UploadVideoService.EXTRA_IS_AUTHOR_SELLER, isCurrUserSeller)
-                                    .setAction(UploadVideoService.ACTION_UPLOAD));
+                                    .putExtra(UploadPDFService.EXTRA_UPLOAD_PATH, uploadPath)
+                                    .putExtra(UploadPDFService.EXTRA_CHAT_ID, chatId)
+                                    .putExtra(UploadPDFService.EXTRA_IS_DM, isDm)
+                                    .putExtra(UploadPDFService.EXTRA_AUTHOR_ID, authorId)
+                                    .putExtra(UploadPDFService.EXTRA_IS_AUTHOR_SELLER, isCurrUserSeller)
+                                    .setAction(UploadPDFService.ACTION_UPLOAD));
                         }
                     })
                     .setNegativeButton("NO", new DialogInterface.OnClickListener() {

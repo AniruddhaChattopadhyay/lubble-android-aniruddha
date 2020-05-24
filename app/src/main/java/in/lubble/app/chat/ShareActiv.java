@@ -106,6 +106,9 @@ public class ShareActiv extends BaseActivity {
             } else if (type.startsWith("video/")) {
                 handleSendVideo(intent);
             }
+            else if (type.startsWith("application/pdf")) {
+                handleSendPdf(intent);
+            }
         } else {
             // Handle other intents
             shareId = getIntent().getStringExtra(ARG_SHARE_ID);
@@ -144,6 +147,16 @@ public class ShareActiv extends BaseActivity {
         } else {
             File localVidFile = getFileFromInputStreamUri(this, videoUri);
             this.mediaUri = Uri.fromFile(localVidFile);
+        }
+    }
+
+    private void handleSendPdf(Intent intent) {
+        Uri pdfUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+        if (pdfUri != null) {
+            // make a local copy of the img becoz our file upload service will lose auth for this URI
+            // since the service is not part of same context/process
+            File localImgFile = getFileFromInputStreamUri(this, pdfUri);
+            this.mediaUri = Uri.fromFile(localImgFile);
         }
     }
 
