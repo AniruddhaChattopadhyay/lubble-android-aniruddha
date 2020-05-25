@@ -1115,7 +1115,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
         final Bundle bundle = new Bundle();
         bundle.putString("groupid", groupId);
-        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, bundle, requireContext());
+        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, bundle, getContext());
     }
 
     void updateMsgId(String msgId) {

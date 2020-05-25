@@ -1552,7 +1552,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         ChatData emptyReplyChatData = new ChatData();
         emptyReplyChatData.setId(targetChatId);
         int pos = chatDataList.indexOf(emptyReplyChatData);
-        if (pos != -1) {
+        if (targetChatId.equalsIgnoreCase("101")) {
+            Toast.makeText(context, "Unable to find message", Toast.LENGTH_SHORT).show();
+        } else if (pos != -1) {
             recyclerView.scrollToPosition(pos);
             posToFlash = pos;
             notifyItemChanged(pos);
