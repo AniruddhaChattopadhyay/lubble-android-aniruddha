@@ -98,7 +98,7 @@ public class NotifData {
             return "\uD83D\uDCCA POLL";
         }
         else if(StringUtils.isValidString(hasPdf) && hasPdf.equalsIgnoreCase("True")){
-            return "\uD83D\uDCC4 " + pdfFileName + ".pdf " + messageBody;
+            return "\uD83D\uDCC4 " + pdfFileName + ".pdf ";
         }
         else {
             return messageBody;
