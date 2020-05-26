@@ -1237,6 +1237,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 glide.load(chatData.getImgUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
                 downloadIv.setVisibility(VISIBLE);
                 progressBar.setVisibility(View.GONE);
+                progressBarDownloadPdf.setVisibility(View.VISIBLE);
+                progressBarDownloadPdf.setProgress(0);
 
             } else {
                 RequestOptions requestOptions = new RequestOptions();

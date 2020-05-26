@@ -751,7 +751,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             declineIv.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    UiUtils.showBottomSheetAlertLight(requireContext(), getLayoutInflater(), "Decline this personal chat invitation? It will be deleted forever",
+                                    UiUtils.showBottomSheetAlertLight(requireContext(), getLayoutInflater(), "Decline this personal chat invitation? It will be moved to blocked chats",
                                             null, R.drawable.ic_cancel_red_24dp, "DECLINE", new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View v) {

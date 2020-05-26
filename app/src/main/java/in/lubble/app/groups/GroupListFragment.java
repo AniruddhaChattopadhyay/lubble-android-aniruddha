@@ -386,13 +386,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     };
 
     private ChildEventListener dmChildEventListener = new ChildEventListener() {
+        final String sellerIdStr = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
 
         @Override
         public void onChildAdded(@NonNull DataSnapshot dataSnapshot, @Nullable String prevChildKey) {
             try {
                 final GroupData groupData = dataSnapshot.getValue(GroupData.class);
                 if (groupData != null) {
-                    final String sellerIdStr = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
                     if ((groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && ((HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid())).get("blocked_status") == null)
                             || (!sellerIdStr.equalsIgnoreCase("-1") && groupData.getMembers().containsKey(sellerIdStr) && ((HashMap) groupData.getMembers().get(sellerIdStr)).get("blocked_status") == null)) {
                         // joined chat
@@ -432,7 +432,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
             if (groupData != null && groupData.isJoined()
-                    && groupData.getMembers().get("blocked_status") == null) {
+                    && ((groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && ((HashMap) groupData.getMembers().get(FirebaseAuth.getInstance().getUid())).get("blocked_status") == null)
+                    || (!sellerIdStr.equalsIgnoreCase("-1") && groupData.getMembers().containsKey(sellerIdStr) && ((HashMap) groupData.getMembers().get(sellerIdStr)).get("blocked_status") == null))) {
                 final String sellerIdStr = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
                 groupData.setId(dataSnapshot.getKey());
                 groupData.setIsDm(true);
@@ -458,6 +459,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 }
                 adapter.updateGroup(groupData);
                 adapter.sortJoinedGroupsList();
+            } else {
+                adapter.removeGroup(dataSnapshot.getKey());
             }
         }
 
