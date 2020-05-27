@@ -407,7 +407,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         } else {
             sentChatViewHolder.pollContainer.setVisibility(View.GONE);
-            sentChatViewHolder.messageTv.setVisibility(VISIBLE);
         }
         handlePdf(sentChatViewHolder.pdfContainer, sentChatViewHolder.progressBarPdf, sentChatViewHolder.pdfThumbnailIv, chatData,
                 sentChatViewHolder.pdfDownloadIv, sentChatViewHolder.progressBarDownloadPdf, sentChatViewHolder.pdfTitleTv, sentChatViewHolder.messageTv);
@@ -638,7 +637,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         } else {
             recvdChatViewHolder.pollContainer.setVisibility(View.GONE);
-            recvdChatViewHolder.messageTv.setVisibility(VISIBLE);
         }
 
         handlePdf(recvdChatViewHolder.pdfContainer, recvdChatViewHolder.progressBarPdf, recvdChatViewHolder.pdfThumbnailIv, chatData,
