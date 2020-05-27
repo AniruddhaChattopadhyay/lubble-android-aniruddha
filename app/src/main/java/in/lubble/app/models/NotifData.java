@@ -34,6 +34,8 @@ public class NotifData {
     private String timestamp;
     @SerializedName("isImage")
     private String hasImage;
+    @SerializedName("isVideo")
+    private String hasVideo;
     @SerializedName("isPdf")
     private String hasPdf;
     @SerializedName("pdfFileName")
@@ -94,13 +96,13 @@ public class NotifData {
     public String getMessageBody() {
         if (StringUtils.isValidString(hasImage) && hasImage.equalsIgnoreCase("True")) {
             return "\uD83D\uDCF7 " + messageBody;
+        } else if (StringUtils.isValidString(hasVideo) && hasVideo.equalsIgnoreCase("True")) {
+            return "\ud83c\udfa5 " + messageBody;
         } else if (this.messageBody.equalsIgnoreCase(LubbleApp.getAppContext().getString(R.string.poll_msg_body))) {
             return "\uD83D\uDCCA POLL";
-        }
-        else if(StringUtils.isValidString(hasPdf) && hasPdf.equalsIgnoreCase("True")){
+        } else if (StringUtils.isValidString(hasPdf) && hasPdf.equalsIgnoreCase("True")) {
             return "\uD83D\uDCC4 " + pdfFileName + ".pdf ";
-        }
-        else {
+        } else {
             return messageBody;
         }
     }
@@ -155,5 +157,13 @@ public class NotifData {
 
     public void setIsSeller(Boolean seller) {
         isSeller = seller;
+    }
+
+    public String getHasVideo() {
+        return hasVideo;
+    }
+
+    public void setHasVideo(String hasVideo) {
+        this.hasVideo = hasVideo;
     }
 }
