@@ -184,6 +184,7 @@ public class UploadPDFService extends BaseTaskService {
             } catch (Exception ex) {
                 ex.printStackTrace();
                 Log.d(TAG,ex.toString());
+                Crashlytics.logException(ex);
             }
         }
         return bitmap;
