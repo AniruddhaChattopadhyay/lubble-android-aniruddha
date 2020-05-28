@@ -1391,7 +1391,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             }
             final String uploadPath = uPath;
             final String chatId = chat_Id;
-            final Intent data1 = data;
+            File localFile = getFileFromInputStreamUri(getContext(), data.getData());
+            final Uri pdfUri = Uri.fromFile(localFile);
             new AlertDialog.Builder(getContext())
                     .setIcon(R.mipmap.ic_launcher)
                     .setTitle("")
@@ -1399,7 +1400,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     .setPositiveButton("YES", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Uri uri = data1.getData();
+                            Uri uri = pdfUri;
                             String name = FileUtils.getFileNameFromUri(uri);
                             name = name.replace(".pdf","");
                             Log.d(TAG, "File Uri: " + uri.toString());
@@ -1424,7 +1425,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         }
     }
-
     private void fetchAndShowAttachedGroupInfo() {
         if (!TextUtils.isEmpty(attachedGroupId)) {
             RealtimeDbHelper.getLubbleGroupsRef().child(attachedGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
