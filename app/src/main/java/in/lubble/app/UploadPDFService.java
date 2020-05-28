@@ -165,6 +165,7 @@ public class UploadPDFService extends BaseTaskService {
         uploadFile(fileUri, pdfreference, fileName, uploadPath, metadata, toTransmit, groupId, dmInfoData);
     }
 
+    @Nullable
     private Bitmap pdfToBitmap(Uri uri) {
         File pdfFile = new File(uri.getPath());
         Bitmap bitmap = null;
@@ -204,10 +205,9 @@ public class UploadPDFService extends BaseTaskService {
             uploadTask = pdfRef.putFile(FileUri);
         }
         Bitmap bitmap = pdfToBitmap(FileUri);
-        //Bitmap bitmap = null;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         if (bitmap != null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
 
             final StorageReference pdfRefThumbnail = mStorageRef.child(uploadPath)
