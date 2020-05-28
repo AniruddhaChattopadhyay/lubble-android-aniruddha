@@ -3,7 +3,11 @@ package in.lubble.app;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -27,10 +31,11 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.shockwave.pdfium.PdfDocument;
-import com.shockwave.pdfium.PdfiumCore;
-
+//import com.shockwave.pdfium.PdfDocument;
+//import com.shockwave.pdfium.PdfiumCore;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.util.ArrayList;
 
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
@@ -159,24 +164,30 @@ public class UploadPDFService extends BaseTaskService {
         uploadFile(fileUri,pdfreference,fileName,uploadPath,metadata,toTransmit,groupId,dmInfoData);
     }
 
-    Bitmap generateImageFromPdf(Uri pdfUri) {
-        int pageNumber = 0;
-        PdfiumCore pdfiumCore = new PdfiumCore(this);
-        try {
-            //http://www.programcreek.com/java-api-examples/index.php?api=android.os.ParcelFileDescriptor
-            ParcelFileDescriptor fd = getContentResolver().openFileDescriptor(pdfUri, "r");
-            PdfDocument pdfDocument = pdfiumCore.newDocument(fd);
-            pdfiumCore.openPage(pdfDocument, pageNumber);
-            int width = pdfiumCore.getPageWidthPoint(pdfDocument, pageNumber);
-            int height = pdfiumCore.getPageHeightPoint(pdfDocument, pageNumber);
-            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            pdfiumCore.renderPageBitmap(pdfDocument, bmp, pageNumber, 0, 0, width, height);
-            pdfiumCore.closeDocument(pdfDocument); // important!
-            return bmp;
-        } catch(Exception e) {
-            Crashlytics.logException(e);
+    private  Bitmap pdfToBitmap(Uri uri) {
+        File pdfFile = new File(uri.getPath());
+        Bitmap bitmap = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try {
+                PdfRenderer renderer = new PdfRenderer(ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_READ_ONLY));
+                PdfRenderer.Page page = renderer.openPage(0);
+
+                int width = getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
+                int height = getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
+                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                canvas.drawColor(Color.WHITE);
+                canvas.drawBitmap(bitmap, 0, 0, null);
+                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                page.close();
+                renderer.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                Log.d(TAG,ex.toString());
+            }
         }
-        return null;
+        return bitmap;
+
     }
 
     private void uploadFile(final Uri FileUri, final StorageReference pdfRef, final String fileName, final String uploadPath, @Nullable StorageMetadata metadata, final boolean toTransmit, final String groupId, @Nullable final UploadPDFService.DmInfoData dmInfoData) {
@@ -191,118 +202,169 @@ public class UploadPDFService extends BaseTaskService {
         } else {
             uploadTask = pdfRef.putFile(FileUri);
         }
-        Bitmap bitmap = generateImageFromPdf(FileUri);
+        Bitmap bitmap = pdfToBitmap(FileUri);
+        //Bitmap bitmap = null;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
+        if(bitmap!=null) {
+            byte[] data = baos.toByteArray();
 
-        final StorageReference pdfRefThumbnail = mStorageRef.child(uploadPath)
-                .child(fileName+" thumbnail");
+            final StorageReference pdfRefThumbnail = mStorageRef.child(uploadPath)
+                    .child(fileName + " thumbnail");
 
-        uploadTaskThumbnail = pdfRefThumbnail.putBytes(data);
-        uploadTask.
-                addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                        showProgressNotification(getString(R.string.progress_uploading),
-                                taskSnapshot.getBytesTransferred(),
-                                taskSnapshot.getTotalByteCount());
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        pdfRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Uri> task) {
-                                if (task.isSuccessful()) {
-                                    final Uri downloadUri = task.getResult();
-                                    uploadTaskThumbnail.
-                                            addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                                                @Override
-                                                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                                                    showProgressNotification(getString(R.string.progress_uploading),
-                                                            taskSnapshot.getBytesTransferred(),
-                                                            taskSnapshot.getTotalByteCount());
-                                                }
-                                            })
-                                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                                @Override
-                                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                    uploadTime.stop();
+            uploadTaskThumbnail = pdfRefThumbnail.putBytes(data);
+            uploadTask.
+                    addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            showProgressNotification(getString(R.string.progress_uploading),
+                                    taskSnapshot.getBytesTransferred(),
+                                    taskSnapshot.getTotalByteCount());
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            pdfRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    if (task.isSuccessful()) {
+                                        final Uri downloadUri = task.getResult();
+                                        uploadTaskThumbnail.
+                                                addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                                    @Override
+                                                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                                        showProgressNotification(getString(R.string.progress_uploading),
+                                                                taskSnapshot.getBytesTransferred(),
+                                                                taskSnapshot.getTotalByteCount());
+                                                    }
+                                                })
+                                                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                    @Override
+                                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                        uploadTime.stop();
 
-                                                    pdfRefThumbnail.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Uri> task) {
-                                                            if (task.isSuccessful()) {
-                                                                final Uri downloadUriThumbnail = task.getResult();
+                                                        pdfRefThumbnail.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Uri> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    final Uri downloadUriThumbnail = task.getResult();
 
-                                                                // [START_EXCLUDE]
-                                                                broadcastUploadFinished(downloadUri,downloadUriThumbnail,fileName,FileUri, toTransmit, groupId, dmInfoData);
-                                                                showUploadFinishedNotification(downloadUri,downloadUriThumbnail, FileUri, toTransmit);
-                                                                taskCompleted();
-                                                                // [END_EXCLUDE]
-                                                            } else {
-                                                                Log.d(TAG, "onComplete: failed");
+                                                                    // [START_EXCLUDE]
+                                                                    broadcastUploadFinished(downloadUri, downloadUriThumbnail, fileName, FileUri, toTransmit, groupId, dmInfoData);
+                                                                    showUploadFinishedNotification(downloadUri, downloadUriThumbnail, FileUri, toTransmit);
+                                                                    taskCompleted();
+                                                                    // [END_EXCLUDE]
+                                                                } else {
+                                                                    Log.d(TAG, "onComplete: failed");
 
-                                                                // [START_EXCLUDE]
-                                                                broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
-                                                                showUploadFinishedNotification(null,null, FileUri, toTransmit);
-                                                                taskCompleted();
-                                                                // [END_EXCLUDE]
+                                                                    // [START_EXCLUDE]
+                                                                    broadcastUploadFinished(null, null, null, FileUri, toTransmit, groupId, dmInfoData);
+                                                                    showUploadFinishedNotification(null, null, FileUri, toTransmit);
+                                                                    taskCompleted();
+                                                                    // [END_EXCLUDE]
+                                                                }
                                                             }
-                                                        }
-                                                    });
+                                                        });
 
-                                                }
-                                            })
-                                            .addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception exception) {
-                                                    // Upload failed
-                                                    Log.w(TAG, "uploadFromUri:onFailure", exception);
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception exception) {
+                                                        // Upload failed
+                                                        Log.w(TAG, "uploadFromUri:onFailure", exception);
 
-                                                    // [START_EXCLUDE]
-                                                    broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
-                                                    showUploadFinishedNotification(null,null, FileUri, toTransmit);
-                                                    taskCompleted();
-                                                    //[END_EXCLUDE]
-                                                }
-                                            });
-//                                    // [START_EXCLUDE]
-//                                    broadcastUploadFinished(downloadUri, FileUri, toTransmit, groupId, dmInfoData);
-//                                    showUploadFinishedNotification(downloadUri, FileUri, toTransmit);
-//                                    taskCompleted();
-//                                    // [END_EXCLUDE]
-                                } else {
-                                    Log.d(TAG, "onComplete: failed");
+                                                        // [START_EXCLUDE]
+                                                        broadcastUploadFinished(null, null, null, FileUri, toTransmit, groupId, dmInfoData);
+                                                        showUploadFinishedNotification(null, null, FileUri, toTransmit);
+                                                        taskCompleted();
+                                                        //[END_EXCLUDE]
+                                                    }
+                                                });
+                                    } else {
+                                        Log.d(TAG, "onComplete: failed");
 
-                                    // [START_EXCLUDE]
-                                    broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
-                                    showUploadFinishedNotification(null,null, FileUri, toTransmit);
-                                    taskCompleted();
-                                    // [END_EXCLUDE]
+                                        // [START_EXCLUDE]
+                                        broadcastUploadFinished(null, null, null, FileUri, toTransmit, groupId, dmInfoData);
+                                        showUploadFinishedNotification(null, null, FileUri, toTransmit);
+                                        taskCompleted();
+                                        // [END_EXCLUDE]
+                                    }
                                 }
-                            }
-                        });
+                            });
 
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Upload failed
-                        Log.w(TAG, "uploadFromUri:onFailure", exception);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Upload failed
+                            Log.w(TAG, "uploadFromUri:onFailure", exception);
 
-                        // [START_EXCLUDE]
-                        broadcastUploadFinished(null,null,null, FileUri, toTransmit, groupId, dmInfoData);
-                        showUploadFinishedNotification(null, null, FileUri, toTransmit);
-                        taskCompleted();
-                        //[END_EXCLUDE]
-                    }
-                });
+                            // [START_EXCLUDE]
+                            broadcastUploadFinished(null, null, null, FileUri, toTransmit, groupId, dmInfoData);
+                            showUploadFinishedNotification(null, null, FileUri, toTransmit);
+                            taskCompleted();
+                        }
+                    });
+        }
+        else{
+            uploadTask.
+                    addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            showProgressNotification(getString(R.string.progress_uploading),
+                                    taskSnapshot.getBytesTransferred(),
+                                    taskSnapshot.getTotalByteCount());
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            // Upload succeeded
+                            Log.d(TAG, "uploadFromUri:onSuccess");
+
+                            // Get the public download URL
+                            pdfRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    if (task.isSuccessful()) {
+                                        final Uri downloadUri = task.getResult();
+                                        // [START_EXCLUDE]
+                                        broadcastUploadFinished(downloadUri, null, fileName, FileUri, toTransmit, groupId, dmInfoData);
+                                        showUploadFinishedNotification(downloadUri, null, FileUri, toTransmit);
+                                        taskCompleted();
+                                        // [END_EXCLUDE]
+                                    } else {
+                                        Log.d(TAG, "onComplete: failed");
+
+                                        // [START_EXCLUDE]
+                                        broadcastUploadFinished(null, null, fileName, FileUri, toTransmit, groupId, dmInfoData);
+                                        showUploadFinishedNotification(null, null, FileUri, toTransmit);
+                                        taskCompleted();
+                                        // [END_EXCLUDE]
+                                    }
+                                }
+                            });
+
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Upload failed
+                            Log.w(TAG, "uploadFromUri:onFailure", exception);
+
+                            // [START_EXCLUDE]
+                            broadcastUploadFinished(null, null, fileName, FileUri, toTransmit, groupId, dmInfoData);
+                            showUploadFinishedNotification(null, null, FileUri, toTransmit);
+                            taskCompleted();
+                            // [END_EXCLUDE]
+                        }
+                    });
+        }
     }
-    // [END upload_from_uri]
 
     /**
      * Broadcast finished upload (success or failure).
@@ -341,8 +403,12 @@ public class UploadPDFService extends BaseTaskService {
         chatData.setIsDm(isDm);
         chatData.setMessage("\uD83D\uDCC4 PDF Attached\nPlease update the app from Play Store to view the PDF document");
         chatData.setPdfFileName(filename);
+        if(downloadThumbnailUrl == null)
+            chatData.setPdfThumbnailUrl("https://i.imgur.com/ma03D59.png");
+        else
+            chatData.setPdfThumbnailUrl(downloadThumbnailUrl.toString());
+
         chatData.setPdfUrl(downloadUrl.toString());
-        chatData.setPdfThumbnailUrl(downloadThumbnailUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);
 
