@@ -71,10 +71,10 @@
     <string name="loc_perm_rationale_quiz">We need your location to find the nearest restaurant/cafe</string>
     <string name="loc_perm_rationale_addr">We need your location so that our delivery executive can easily reach you</string>
     <string name="all_ok">OK</string>
-    <string name="storage_perm_denied_text">Please grant permission to upload your photos</string>
+    <string name="storage_perm_denied_text">Please grant permission to download chat photos &amp; media</string>
     <string name="storage_perm_never_text">To enable permissions again, go to app settings of Lubble</string>
-    <string name="write_storage_perm_denied_text">Please grant permission to download your photos</string>
-    <string name="write_storage_perm_never_text">To download photos, allow storage permission from app settings of Lubble</string>
+    <string name="write_storage_perm_denied_text">Please grant permission to download chat photos &amp; media</string>
+    <string name="write_storage_perm_never_text">To download chat photos &amp; media, allow storage permission from app settings of Lubble app</string>
     <string name="select_block">Select Block</string>
     <string name="all_updating">Updating</string>
     <string name="all_try_again">Try Again</string>
@@ -114,9 +114,10 @@
     <string name="event_maybe_count">%s%s</string>
     <string name="event_maybe_suffix">%d maybe</string>
     <string name="event_linked_group_hint">Linked Group: %s</string>
-    <string name="muted">MUTED</string>
-    <string name="unmuted">UN-MUTED</string>
+    <string name="muted">Snoozed Notifications</string>
+    <string name="unmuted">Un-Snoozed Notifications</string>
     <string name="all_are_you_sure">Are you sure?</string>
+    <string name="leave_group_ques">Leave Group?</string>
     <string name="leave_group_desc">You will no longer be a part of this group</string>
     <string name="leave_group_title">Leave Group</string>
     <string name="leaving_group_title">Leaving Group</string>

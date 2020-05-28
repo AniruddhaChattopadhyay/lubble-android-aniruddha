@@ -271,8 +271,7 @@
                             android:ellipsize="end"
                             android:layout_alignParentLeft="true"
                             android:layout_toLeftOf="@id/progressbar_pdf_download"
-                            app:drawableLeftCompat="@drawable/ic_pdf_file"
-                            app:drawableTint="@color/white" />
+                            app:drawableLeftCompat="@drawable/ic_pdf_light" />
 
                         <ImageView
                             android:id="@+id/iv_pdf_download"

@@ -40,6 +40,10 @@ public class GroupDataFilter extends Filter {
         return results;
     }
 
+    void addGroups(List<GroupData> list){
+        originalList.addAll(list);
+    }
+
     @Override
     protected void publishResults(CharSequence constraint, FilterResults results) {
         //adapter.clearGroups();

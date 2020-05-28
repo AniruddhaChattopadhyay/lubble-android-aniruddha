@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
@@ -23,10 +24,17 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.notifications.GroupMappingSharedPrefs;
+import in.lubble.app.notifications.KeyMappingSharedPrefs;
+import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
+import in.lubble.app.notifications.UnreadChatsSharedPrefs;
+import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.groups.GroupListFragment.USER_INIT_LOGOUT_ACTION;
 
 /**
  * Created by ishaangarg on 12/11/17.
@@ -44,10 +52,14 @@ public class UserUtils {
 
     public static void logout(@NonNull final FragmentActivity activity) {
         try {
+            Intent intent = new Intent(USER_INIT_LOGOUT_ACTION);
+            LocalBroadcastManager.getInstance(activity).sendBroadcast(intent);
+
             final ProgressDialog progressDialog = new ProgressDialog(activity);
             progressDialog.setMessage(activity.getString(R.string.logging_out));
             progressDialog.setCancelable(false);
             progressDialog.show();
+
             getThisUserRef().child("token").setValue("").addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -60,6 +72,12 @@ public class UserUtils {
                                             progressDialog.dismiss();
                                             // user is now signed out
                                             LubbleSharedPrefs.getInstance().clearAll();
+                                            GroupPromptSharedPrefs.getInstance().clearAll();
+                                            UnreadChatsSharedPrefs.getInstance().clearAll();
+                                            SnoozedGroupsSharedPrefs.getInstance().clearAll();
+                                            KeyMappingSharedPrefs.getInstance().clearAll();
+                                            GroupMappingSharedPrefs.getInstance().clearAll();
+                                            AnswerSharedPrefs.getInstance().clearAll();
                                             Branch.getInstance().logout();
                                             Intent intent = new Intent(activity, LoginActivity.class);
                                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -95,6 +113,12 @@ public class UserUtils {
                                         progressDialog.dismiss();
                                         // user is now signed out
                                         LubbleSharedPrefs.getInstance().clearAll();
+                                        GroupPromptSharedPrefs.getInstance().clearAll();
+                                        UnreadChatsSharedPrefs.getInstance().clearAll();
+                                        SnoozedGroupsSharedPrefs.getInstance().clearAll();
+                                        KeyMappingSharedPrefs.getInstance().clearAll();
+                                        GroupMappingSharedPrefs.getInstance().clearAll();
+                                        AnswerSharedPrefs.getInstance().clearAll();
                                         Branch.getInstance().logout();
                                         Intent intent = new Intent(context, LoginActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

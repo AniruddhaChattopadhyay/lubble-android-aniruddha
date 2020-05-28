@@ -38,7 +38,7 @@ public class GroupMappingSharedPrefs {
     }
 
     /**
-     * Clear all SharedPreferences for RiderInfo
+     * Clear all SharedPreferences
      */
     public void clearAll() {
         preferences.edit().clear().commit();

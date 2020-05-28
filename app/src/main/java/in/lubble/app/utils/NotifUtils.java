@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -42,13 +43,17 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.NotifActionBroadcastRecvr;
+import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 
+import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_MARK_AS_READ;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_REPLY;
+import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_SNOOZE;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.KEY_TEXT_REPLY;
+import static in.lubble.app.notifications.SnoozedGroupsSharedPrefs.DISABLED_NOTIFS_TS;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 
 /**
@@ -152,6 +157,9 @@ public class NotifUtils {
             if (!TextUtils.isEmpty(map.getValue().getConversationTitle())) {
                 // not a DM, add actions
                 addActionReply(context, groupId, builder);
+                if (FirebaseRemoteConfig.getInstance().getBoolean(IS_NOTIF_SNOOZE_ON)) {
+                    addActionSnooze(context, groupId, builder);
+                }
                 addActionMarkAsRead(context, groupId, builder);
             }
 
@@ -212,6 +220,16 @@ public class NotifUtils {
                 PendingIntent.getBroadcast(context, getNotifId(groupId), markReadIntent, 0);
 
         builder.addAction(0, "Mark As Read", markReadPendingIntent);
+    }
+
+    private static void addActionSnooze(Context context, String groupId, NotificationCompat.Builder builder) {
+        Intent snoozeIntent = new Intent(context, NotifActionBroadcastRecvr.class);
+        snoozeIntent.setAction(ACTION_SNOOZE);
+        snoozeIntent.putExtra("snooze.groupId", groupId);
+        PendingIntent snoozePendingIntent =
+                PendingIntent.getBroadcast(context, getNotifId(groupId), snoozeIntent, 0);
+
+        builder.addAction(0, "Snooze", snoozePendingIntent);
     }
 
     @Nullable
@@ -346,7 +364,9 @@ public class NotifUtils {
         final Map<String, String> all = (Map<String, String>) UnreadChatsSharedPrefs.getInstance().getPreferences().getAll();
         for (String jsonStr : all.values()) {
             final NotifData readNotifData = new Gson().fromJson(jsonStr, NotifData.class);
-            notifDataList.add(readNotifData);
+            if (!isGroupSnoozed(readNotifData.getGroupId())) {
+                notifDataList.add(readNotifData);
+            }
         }
         return notifDataList;
     }
@@ -373,6 +393,11 @@ public class NotifUtils {
         if (chatSharedPrefs.getAll().size() == 0) {
             notificationManager.cancel(SUMMARY_ID);
         }
+    }
+
+    public static boolean isGroupSnoozed(String groupId) {
+        long snoozedTill = SnoozedGroupsSharedPrefs.getInstance().getPreferences().getLong(groupId, 0L);
+        return (System.currentTimeMillis() <= snoozedTill) || snoozedTill == DISABLED_NOTIFS_TS;
     }
 
     public static void sendNotifAnalyticEvent(String eventName, Map<String, String> dataMap, Context context) {

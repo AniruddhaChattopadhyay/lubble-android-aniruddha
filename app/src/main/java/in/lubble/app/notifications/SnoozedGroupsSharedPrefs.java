@@ -4,29 +4,31 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /**
- * For mapping notif server key to an int ID to later dismiss such notifs
  * Created by ishaan on 11/3/18.
  */
 
-public class KeyMappingSharedPrefs {
+public class SnoozedGroupsSharedPrefs {
 
-    private static KeyMappingSharedPrefs instance;
+    private static SnoozedGroupsSharedPrefs instance;
     private final SharedPreferences preferences;
-    private final String KEY_MAPPING_SHARED_PREFERENCE_KEY = "in.lubble.KeyMappingSharedPrefs";
+    private final String SNOOZED_GROUPS_SHARED_PREFERENCE_KEY = "in.lubble.SnoozedGroupsSharedPrefs";
 
-    private KeyMappingSharedPrefs(Context context) {
-        preferences = context.getSharedPreferences(KEY_MAPPING_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
+    // if a group is snoozed till this TS then notifs are permanently disabled
+    public static final long DISABLED_NOTIFS_TS = 1337;
+
+    private SnoozedGroupsSharedPrefs(Context context) {
+        preferences = context.getSharedPreferences(SNOOZED_GROUPS_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
     }
 
     public static void initializeInstance(Context context) {
         if (instance == null) {
-            instance = new KeyMappingSharedPrefs(context);
+            instance = new SnoozedGroupsSharedPrefs(context);
         }
     }
 
-    public static KeyMappingSharedPrefs getInstance() {
+    public static SnoozedGroupsSharedPrefs getInstance() {
         if (instance == null) {
-            throw new IllegalStateException(KeyMappingSharedPrefs.class.getCanonicalName() +
+            throw new IllegalStateException(SnoozedGroupsSharedPrefs.class.getCanonicalName() +
                     " is not initialized, call initializeInstance(..) method first.");
         }
         return instance;
@@ -45,5 +47,6 @@ public class KeyMappingSharedPrefs {
 
 
     //******************************************/
+
 
 }

@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
@@ -93,6 +94,7 @@ import static in.lubble.app.Constants.DELIVERY_FEE;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
 import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
 import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
 import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
@@ -144,6 +146,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final int nav_item_leaderboard = 311;
     private Menu navMenu;
     private GroupListFragment groupListFragment;
+    private ActionMode actionMode;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -284,6 +287,17 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toolbarSearchTv.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    public ActionMode toggleActionMode(boolean show, ActionMode.Callback callback) {
+        if (show && callback != null) {
+            return actionMode = startSupportActionMode(callback);
+        } else {
+            if (actionMode != null) {
+                actionMode.finish();
+            }
+        }
+        return null;
+    }
+
     private void toggleSearchViewVisibility(boolean show) {
         if (show) {
             searchView.setVisibility(View.VISIBLE);
@@ -320,7 +334,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         logUser(FirebaseAuth.getInstance().getCurrentUser());
         Branch.getInstance().setIdentity(FirebaseAuth.getInstance().getUid());
 
-        groupListFragment = GroupListFragment.newInstance();
+        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
         switchFrag(groupListFragment);
 
         bottomNavigation = findViewById(R.id.navigation);
@@ -588,6 +602,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(EVENTS_MAINTENANCE_TEXT, "");
         map.put(EVENTS_MAINTENANCE_IMG, "");
         map.put(MARKET_MAINTENANCE_TEXT, "");
+        map.put(IS_NOTIF_SNOOZE_ON, true);
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
@@ -877,7 +892,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
-                    switchFrag(groupListFragment = GroupListFragment.newInstance());
+                    switchFrag(groupListFragment = GroupListFragment.newInstance(false));
                     return true;
                 case R.id.navigation_explore:
                     switchFrag(ExploreFrag.newInstance());

@@ -150,7 +150,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final String KEY_ITEM_TITLE = "KEY_ITEM_TITLE";
     private static final String KEY_CHAT_DATA = "KEY_CHAT_DATA";
     private static final int PERMITTED_VIDEO_SIZE = 30;
-    private static final int REQUEST_CODE_FILE_PICK = 999 ;
+    private static final int REQUEST_CODE_FILE_PICK = 999;
     private Endpoints endpoints;
     private EventData eventData;
     @Nullable
@@ -169,6 +169,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private TextView linkTitle;
     private TextView linkDesc;
     private ImageView linkCancel;
+    @Nullable
+    private DatabaseReference lubbleMainGroupRef;
     @Nullable
     private DatabaseReference groupReference;
     @Nullable
@@ -310,12 +312,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
                         file.delete();
                     }
-                } else if(FileUtils.getMimeType(sharedImageUri).contains("image")) {
+                } else if (FileUtils.getMimeType(sharedImageUri).contains("image")) {
                     AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
-                }
-                else if(FileUtils.getMimeType(sharedImageUri).contains("pdf")){
+                } else if (FileUtils.getMimeType(sharedImageUri).contains("pdf")) {
                     String name = FileUtils.getFileNameFromUri(sharedImageUri);
-                    name = name.replace(".pdf","");
+                    name = name.replace(".pdf", "");
                     final String uploadPath = "lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups/" + groupId;
                     getContext().startService(new Intent(getContext(), UploadPDFService.class)
                             .putExtra(UploadPDFService.EXTRA_BUCKET, UploadPDFService.BUCKET_CONVO)
@@ -568,7 +569,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         super.onResume();
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
-        resetUnreadCount();
         syncGroupInfo();
     }
 
@@ -752,7 +752,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             declineIv.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    UiUtils.showBottomSheetAlertLight(requireContext(), getLayoutInflater(), "Decline this personal chat invitation? It will be deleted forever",
+                                    UiUtils.showBottomSheetAlertLight(requireContext(), getLayoutInflater(), "Decline this personal chat invitation? It will be moved to blocked chats",
                                             null, R.drawable.ic_cancel_red_24dp, "DECLINE", new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View v) {
@@ -931,8 +931,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     private void showPublicGroupWarning(GroupData groupData) {
-        if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupData.getIsPinned()) {
-            RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
+        if (lubbleMainGroupRef == null && !LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupData.getIsPinned()) {
+            lubbleMainGroupRef = RealtimeDbHelper.getLubbleRef();
+            lubbleMainGroupRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (isAdded()) {
@@ -945,6 +946,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                     public void onClick(View v) {
                                         LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
                                         LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
+                                        DatabaseReference unreadCountRef = getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
+                                                .child("unreadCount");
+                                        unreadCountRef.setValue(1);
+                                        unreadCountRef.setValue(0);
                                     }
                                 });
                     }
@@ -961,14 +966,15 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void resetUnreadCount() {
         if (!TextUtils.isEmpty(groupId) && groupData != null && groupData.isJoined()) {
-            RealtimeDbHelper.getUserGroupsRef().child(groupId)
+            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
                     .child("unreadCount").setValue(0);
         } else if (!TextUtils.isEmpty(dmId)) {
             if (isCurrUserSeller) {
-                RealtimeDbHelper.getSellerDmsRef().child(dmId)
+                RealtimeDbHelper.getDmsRef().child(dmId).child("members")
+                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
                         .child("unreadCount").setValue(0);
             } else {
-                RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid()).child(dmId)
+                RealtimeDbHelper.getDmsRef().child(dmId).child("members").child(FirebaseAuth.getInstance().getUid())
                         .child("unreadCount").setValue(0);
             }
         }
@@ -1115,7 +1121,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
         final Bundle bundle = new Bundle();
         bundle.putString("groupid", groupId);
-        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, bundle, requireContext());
+        Analytics.triggerEvent(AnalyticsEvents.CHAT_PAGINATION, bundle, getContext());
     }
 
     void updateMsgId(String msgId) {
@@ -1402,7 +1408,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         public void onClick(DialogInterface dialog, int which) {
                             Uri uri = pdfUri;
                             String name = FileUtils.getFileNameFromUri(uri);
-                            name = name.replace(".pdf","");
+                            name = name.replace(".pdf", "");
                             Log.d(TAG, "File Uri: " + uri.toString());
                             getContext().startService(new Intent(getContext(), UploadPDFService.class)
                                     .putExtra(UploadPDFService.EXTRA_BUCKET, UploadPDFService.BUCKET_CONVO)
@@ -1546,7 +1552,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             e.printStackTrace();
         }
     }
-    private void startFilePicker(){
+
+    private void startFilePicker() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("application/pdf");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
