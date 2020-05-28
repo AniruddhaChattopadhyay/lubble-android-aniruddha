@@ -35,6 +35,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -208,7 +209,7 @@ public class ItemListActiv extends BaseActivity {
             public void onResponse(Call<Category> call, Response<Category> response) {
                 progressBar.setVisibility(View.GONE);
                 final Category categoryData = response.body();
-                if (categoryData != null) {
+                if (categoryData != null && !isFinishing()) {
                     sellerNameTv.setText(categoryData.getHumanReadableName());
 
                     if (!TextUtils.isEmpty(categoryData.getIcon())) {
@@ -250,17 +251,21 @@ public class ItemListActiv extends BaseActivity {
                         recyclerView.setVisibility(View.GONE);
                         noItemsHintTv.setVisibility(View.VISIBLE);
                     }
-                } else {
+                } else if (categoryData == null) {
                     Crashlytics.logException(new IllegalArgumentException("Category null for cat id: " + sellerId));
-                    Toast.makeText(ItemListActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<Category> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(ItemListActiv.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                if (!isFinishing()) {
+                    progressBar.setVisibility(View.GONE);
+                    Toast.makeText(LubbleApp.getAppContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -278,7 +283,7 @@ public class ItemListActiv extends BaseActivity {
             public void onResponse(Call<SellerData> call, Response<SellerData> response) {
                 progressBar.setVisibility(View.GONE);
                 sellerData = response.body();
-                if (sellerData != null) {
+                if (sellerData != null && !isFinishing()) {
                     sellerId = sellerData.getId();
                     sellerNameTv.setText(sellerData.getName());
                     sellerBioTv.setText(sellerData.getBio());
@@ -381,9 +386,11 @@ public class ItemListActiv extends BaseActivity {
                             }
                         }
                     });
-                } else {
+                } else if (sellerData == null) {
                     Crashlytics.logException(new IllegalArgumentException("sellerData null for seller id: " + sellerId));
-                    Toast.makeText(ItemListActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
 
