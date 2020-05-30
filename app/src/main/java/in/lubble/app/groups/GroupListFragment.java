@@ -513,7 +513,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
             @Override
             public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
-
+                adapter.removeGroup(dataSnapshot.getKey());
             }
 
             @Override
