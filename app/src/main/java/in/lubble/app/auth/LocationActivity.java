@@ -20,14 +20,30 @@ import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.ResolvableApiException;
-import com.google.android.gms.location.*;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -36,6 +52,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
@@ -44,21 +67,15 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.utils.LocationUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import okhttp3.RequestBody;
-import org.json.JSONException;
-import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -322,10 +339,6 @@ public class LocationActivity extends BaseActivity {
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
-        if (LocationUtils.isMockLocationsON(this)) {
-            showMockLocationDialog();
-            return;
-        }
         pulseIv.setVisibility(View.VISIBLE);
         locIv.setVisibility(View.VISIBLE);
         startAnims();
@@ -340,44 +353,6 @@ public class LocationActivity extends BaseActivity {
                 validateUserLocation(locationResult.getLastLocation());
             }
         }, null);
-    }
-
-    private void showMockLocationDialog() {
-        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
-        alertDialog.setTitle("Disable Mock Locations");
-        alertDialog.setMessage("We verify your location to ensure only residents get access to their neighbourhood. Please disable fake GPS or Mock Locations");
-        alertDialog.setCancelable(false);
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Open Settings", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                ComponentName componentName = intent.resolveActivity(getPackageManager());
-                if (componentName == null) {
-                    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-                } else {
-                    startActivity(intent);
-                }
-            }
-        });
-        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.all_retry), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                getLocation();
-            }
-        });
-        alertDialog.show();
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                ComponentName componentName = intent.resolveActivity(getPackageManager());
-                if (componentName == null) {
-                    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-                } else {
-                    startActivity(intent);
-                }
-            }
-        });
     }
 
     private void validateUserLocation(final Location location) {
@@ -447,6 +422,44 @@ public class LocationActivity extends BaseActivity {
             public void onFailure(Call<ArrayList<LocationsData>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
                 locationCheckFailed();
+            }
+        });
+    }
+
+    private void showMockLocationDialog() {
+        final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
+        alertDialog.setTitle("Disable Mock Locations");
+        alertDialog.setMessage("We verify your location to ensure only residents get access to their neighbourhood. Please disable fake GPS or Mock Locations");
+        alertDialog.setCancelable(false);
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Open Settings", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                ComponentName componentName = intent.resolveActivity(getPackageManager());
+                if (componentName == null) {
+                    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+                } else {
+                    startActivity(intent);
+                }
+            }
+        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.all_retry), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                getLocation();
+            }
+        });
+        alertDialog.show();
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                ComponentName componentName = intent.resolveActivity(getPackageManager());
+                if (componentName == null) {
+                    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+                } else {
+                    startActivity(intent);
+                }
             }
         });
     }
