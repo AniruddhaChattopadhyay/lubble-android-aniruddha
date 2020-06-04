@@ -892,26 +892,22 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     if (userGroupData != null && userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
                         final HashMap<String, Boolean> invitedBy = userGroupData.getInvitedBy();
                         String inviter = (String) invitedBy.keySet().toArray()[0];
-                        if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
-                            joinDescTv.setText(getString(R.string.ready_to_join));
-                            declineIv.setVisibility(View.GONE);
-                        } else {
-                            RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (isAdded()) {
-                                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                        joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
-                                        declineIv.setVisibility(View.VISIBLE);
-                                    }
-                                }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
+                        RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (isAdded()) {
+                                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                    joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
+                                    declineIv.setVisibility(View.VISIBLE);
                                 }
-                            });
-                        }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                         composeContainer.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
                     } else {
@@ -1431,6 +1427,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         }
     }
+
     private void fetchAndShowAttachedGroupInfo() {
         if (!TextUtils.isEmpty(attachedGroupId)) {
             RealtimeDbHelper.getLubbleGroupsRef().child(attachedGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
