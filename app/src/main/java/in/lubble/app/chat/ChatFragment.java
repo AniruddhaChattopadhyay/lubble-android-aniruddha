@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.text.Editable;
 import android.text.Spannable;
@@ -478,19 +479,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         } else {
                             chatRecyclerView.scrollToPosition(positionStart);
                         }
-                    } else if (msgIdToOpen != null) {
-                        final int indexOfChatMsg = chatAdapter.getIndexOfChatMsg(msgIdToOpen);
-                        if (indexOfChatMsg != -1) {
-                            chatRecyclerView.scrollToPosition(indexOfChatMsg);
-                            chatAdapter.setPosToFlash(indexOfChatMsg);
-                            if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
-                                    lastVisiblePosition == (positionStart - 1))) {
-                                // If the user is at the bottom of the list, scroll to the bottom
-                                // of the list to show the newly added message.
-                                msgIdToOpen = null;
-                                chatRecyclerView.scrollToPosition(positionStart);
-                            }
-                        }
                     } else {
                         // If the recycler view is initially being loaded
                         if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
@@ -596,6 +584,17 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 }
                 if (chatProgressBar != null && chatProgressBar.getVisibility() == View.VISIBLE) {
                     chatProgressBar.setVisibility(View.GONE);
+                }
+                if (!TextUtils.isEmpty(msgIdToOpen)) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isAdded()) {
+                                scrollToChatId(msgIdToOpen, null);
+                                msgIdToOpen = null;
+                            }
+                        }
+                    }, 700);
                 }
                 if (groupId != null && GroupPromptSharedPrefs.getInstance().getGroupId(groupId)) {
                     addGroupJoinPrompt();

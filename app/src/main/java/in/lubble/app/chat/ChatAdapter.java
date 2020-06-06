@@ -1555,9 +1555,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (targetChatId.equalsIgnoreCase("101")) {
             Toast.makeText(context, "Unable to find message", Toast.LENGTH_SHORT).show();
         } else if (pos != -1) {
-            recyclerView.scrollToPosition(pos);
             posToFlash = pos;
-            notifyItemChanged(pos);
+            if (recyclerView.findViewHolderForAdapterPosition(pos) == null) {
+                recyclerView.scrollToPosition(pos);
+            } else {
+                notifyItemChanged(pos);
+            }
         } else {
             // load more paginated chats
             chatFragment.moreMsgListener(targetChatId);
