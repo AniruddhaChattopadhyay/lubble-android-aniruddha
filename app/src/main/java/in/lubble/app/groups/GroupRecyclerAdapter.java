@@ -244,28 +244,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-    private static final String TAG = "GroupRecyclerAdapter";
-
-    public void addGroupWithSortFromBottom(GroupData groupData) {
-        if (getChildIndex(groupData.getId()) == -1) {
-
-            GroupData oldGroup = groupDataList.get(dmCursorPos);
-
-            while (oldGroup != null && groupData.getLastMessageTimestamp() > oldGroup.getLastMessageTimestamp() && dmCursorPos > 0) {
-                dmCursorPos--;
-                oldGroup = groupDataList.get(dmCursorPos);
-            }
-
-            dmCursorPos = dmCursorPos < 1 ? 1 : dmCursorPos + 1; //ensure no negative index; 1 due to pinned group
-            groupDataList.add(dmCursorPos, groupData);
-            notifyItemInserted(dmCursorPos);
-            publicCursorPos++;
-            Log.d("trace", "addGroupWithSortFromBottom: ");
-        } else {
-            updateGroup(groupData);
-        }
-    }
-
     public int addPublicGroupToTop(GroupData groupData) {
         if (getChildIndex(groupData.getId()) == -1) {
             if (publicCursorPos + 1 < groupDataList.size()) {
@@ -301,7 +279,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             if (!oldGroupData.isJoined() && newGroupData.isJoined()) {
                 // move group from public list to joined list
                 removeGroup(newGroupData.getId());
-                addGroupWithSortFromBottom(newGroupData);
+                addGroupToTop(newGroupData);
+                sortJoinedGroupsList();
+                //addGroupWithSortFromBottom(newGroupData);
             } else {
                 groupDataList.set(pos, newGroupData);
                 notifyItemChanged(pos);

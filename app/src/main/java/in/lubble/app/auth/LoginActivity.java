@@ -184,7 +184,7 @@ public class LoginActivity extends BaseActivity {
                     // start registration flow
                     for (UserInfo user : currentUser.getProviderData()) {
                         if (user.getProviderId().equals(FacebookAuthProvider.PROVIDER_ID)) {
-                            registerSocialUser(response, currentUser, "?type=large");
+                            registerSocialUser(response, currentUser, "?width=300&height=300");
                             break;
                         } else if (user.getProviderId().equals(GoogleAuthProvider.PROVIDER_ID)) {
                             registerSocialUser(response, currentUser, "?sz=300");
@@ -283,8 +283,13 @@ public class LoginActivity extends BaseActivity {
         profileInfo.setId(FirebaseAuth.getInstance().getUid());
         profileInfo.setName(StringUtils.getTitleCase(currentUser.getDisplayName()));
         if (currentUser.getPhotoUrl() != null) {
-            profileInfo.setThumbnail(currentUser.getPhotoUrl().toString());
-            profileData.setProfilePic(currentUser.getPhotoUrl().toString().concat(bigPicString));
+            String smallPicUrl = currentUser.getPhotoUrl().toString();
+            profileInfo.setThumbnail(smallPicUrl);
+            if (smallPicUrl.contains("s96-c")) {
+                profileData.setProfilePic(smallPicUrl.replace("s96-c", "s300-c"));
+            } else {
+                profileData.setProfilePic(smallPicUrl.concat(bigPicString));
+            }
         }
         profileData.setInfo(profileInfo);
         profileData.setToken(FirebaseInstanceId.getInstance().getToken());
