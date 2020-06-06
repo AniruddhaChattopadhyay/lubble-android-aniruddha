@@ -1733,7 +1733,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         public boolean onTouch(View v, MotionEvent event) {
             touchedView = v;
             boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
-            isLongTouched = false;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                isLongTouched = false;
+            }
             return b;
         }
 
@@ -1980,7 +1982,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         public boolean onTouch(View v, MotionEvent event) {
             touchedView = v;
             boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
-            isLongTouched = false;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                isLongTouched = false;
+            }
             return b;
         }
 
