@@ -1727,11 +1727,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         };
 
         private View touchedView;
+        private boolean isLongTouched;
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             touchedView = v;
-            return gestureDetector.onTouchEvent(event);
+            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
+            isLongTouched = false;
+            return b;
         }
 
         private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
@@ -1819,6 +1822,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             @Override
             public void onLongPress(MotionEvent e) {
+                isLongTouched = true;
                 if (chatDataList.get(getAdapterPosition()).getType().equalsIgnoreCase(GROUP_PROMPT)) {
                     if (actionMode != null) {
                         actionMode.finish();
@@ -1970,11 +1974,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         };
 
         private View touchedView;
+        private boolean isLongTouched;
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             touchedView = v;
-            return gestureDetector.onTouchEvent(event);
+            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
+            isLongTouched = false;
+            return b;
         }
 
         private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
@@ -2057,6 +2064,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             @Override
             public void onLongPress(MotionEvent e) {
+                isLongTouched = true;
                 if (chatDataList.get(getAdapterPosition()).getType().equalsIgnoreCase(GROUP_PROMPT)) {
                     if (actionMode != null) {
                         actionMode.finish();
