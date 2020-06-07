@@ -60,7 +60,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     static final int TYPE_HEADER = 600;
     private int publicCursorPos = 0;
     private int cursorPos = 0;
-    private int dmCursorPos = 0;
     private final List<GroupData> groupDataList;
     private final List<GroupData> groupDataListCopy;
     // <GroupID, UserGroupData>
@@ -237,7 +236,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             notifyItemInserted(newIndex);
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
             publicCursorPos++;
-            dmCursorPos = publicCursorPos - 1;
             Log.d("trace", "addGroupToTop: ");
         } else {
             updateGroup(groupData);
