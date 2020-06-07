@@ -294,6 +294,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         final int pos = getChildIndex(groupId);
         if (pos != -1) {
             groupDataList.remove(pos);
+            if (pos < publicCursorPos) {
+                publicCursorPos--;
+            }
             notifyItemRemoved(pos);
         }
     }
