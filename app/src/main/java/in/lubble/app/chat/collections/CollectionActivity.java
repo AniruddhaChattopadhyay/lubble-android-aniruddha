@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.crashlytics.android.Crashlytics;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
 
@@ -72,6 +74,12 @@ public class CollectionActivity extends BaseActivity {
 
         collectionsData = (CollectionsData) getIntent().getSerializableExtra(PARAM_COLLECTION);
         Analytics.triggerScreenEvent(this, this.getClass());
+
+        if (collectionsData == null) {
+            Crashlytics.logException(new NullPointerException("collectionData is NULL for uid " + FirebaseAuth.getInstance().getUid()));
+            finish();
+            return;
+        }
 
         setTitle(collectionsData.getTitle());
         titleTv.setText(collectionsData.getTitle());

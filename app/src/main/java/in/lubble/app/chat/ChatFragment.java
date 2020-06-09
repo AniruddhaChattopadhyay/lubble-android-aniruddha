@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcelable;
 import android.text.Editable;
 import android.text.Spannable;
@@ -40,6 +41,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.BaseTransientBottomBar;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -476,19 +479,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         } else {
                             chatRecyclerView.scrollToPosition(positionStart);
                         }
-                    } else if (msgIdToOpen != null) {
-                        final int indexOfChatMsg = chatAdapter.getIndexOfChatMsg(msgIdToOpen);
-                        if (indexOfChatMsg != -1) {
-                            chatRecyclerView.scrollToPosition(indexOfChatMsg);
-                            chatAdapter.setPosToFlash(indexOfChatMsg);
-                            if (lastVisiblePosition != -1 && (positionStart >= (msgCount - 1) &&
-                                    lastVisiblePosition == (positionStart - 1))) {
-                                // If the user is at the bottom of the list, scroll to the bottom
-                                // of the list to show the newly added message.
-                                msgIdToOpen = null;
-                                chatRecyclerView.scrollToPosition(positionStart);
-                            }
-                        }
                     } else {
                         // If the recycler view is initially being loaded
                         if (lastVisiblePosition == -1 && !foundFirstUnreadMsg) {
@@ -594,6 +584,17 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 }
                 if (chatProgressBar != null && chatProgressBar.getVisibility() == View.VISIBLE) {
                     chatProgressBar.setVisibility(View.GONE);
+                }
+                if (!TextUtils.isEmpty(msgIdToOpen)) {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (isAdded()) {
+                                scrollToChatId(msgIdToOpen, null);
+                                msgIdToOpen = null;
+                            }
+                        }
+                    }, 700);
                 }
                 if (groupId != null && GroupPromptSharedPrefs.getInstance().getGroupId(groupId)) {
                     addGroupJoinPrompt();
@@ -892,26 +893,22 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     if (userGroupData != null && userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
                         final HashMap<String, Boolean> invitedBy = userGroupData.getInvitedBy();
                         String inviter = (String) invitedBy.keySet().toArray()[0];
-                        if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
-                            joinDescTv.setText(getString(R.string.ready_to_join));
-                            declineIv.setVisibility(View.GONE);
-                        } else {
-                            RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (isAdded()) {
-                                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                        joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
-                                        declineIv.setVisibility(View.VISIBLE);
-                                    }
-                                }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
+                        RealtimeDbHelper.getUserInfoRef(inviter).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (isAdded()) {
+                                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
+                                    joinDescTv.setText(String.format(getString(R.string.invited_by), profileInfo.getName()));
+                                    declineIv.setVisibility(View.VISIBLE);
                                 }
-                            });
-                        }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
                         composeContainer.setVisibility(View.GONE);
                         joinContainer.setVisibility(View.VISIBLE);
                     } else {
@@ -1289,10 +1286,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 addGroupJoinPrompt();
                 break;
             case R.id.iv_decline_cross:
+                Snackbar.make(view, "Declining invitation...", BaseTransientBottomBar.LENGTH_SHORT).show();
                 RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        getActivity().finish();
+                        if (getActivity() != null) {
+                            getActivity().finish();
+                        }
                     }
                 });
                 break;
@@ -1431,6 +1431,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         }
     }
+
     private void fetchAndShowAttachedGroupInfo() {
         if (!TextUtils.isEmpty(attachedGroupId)) {
             RealtimeDbHelper.getLubbleGroupsRef().child(attachedGroupId).addListenerForSingleValueEvent(new ValueEventListener() {

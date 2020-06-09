@@ -59,10 +59,13 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
             public void onClick(View v) {
                 joinBtn.setEnabled(false);
                 Analytics.triggerEvent(EXPLORE_CONTINUE_CLICKED, ExploreActiv.this);
+                String groupIdList = "";
                 for (String groupId : selectedGroupIdMap.keySet()) {
-                    getCreateOrJoinGroupRef().child(groupId).setValue(true);
+                    groupIdList =groupIdList + ','+ groupId;
                     GroupPromptSharedPrefs.getInstance().putGroupId(groupId);
                 }
+                groupIdList = groupIdList.substring(groupIdList.indexOf(',')+1);
+                getCreateOrJoinGroupRef().child(groupIdList).setValue(true);
                 final ProgressDialog progressDialog = new ProgressDialog(ExploreActiv.this);
                 progressDialog.setTitle("Joining " + selectedGroupIdMap.size() + " groups");
                 progressDialog.setMessage("You're about to join a lovely & helpful community, please be respectful & enjoy :)");

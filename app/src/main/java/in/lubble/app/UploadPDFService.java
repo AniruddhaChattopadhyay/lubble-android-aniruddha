@@ -31,11 +31,9 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-//import com.shockwave.pdfium.PdfDocument;
-//import com.shockwave.pdfium.PdfiumCore;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.ArrayList;
 
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
@@ -45,6 +43,9 @@ import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+
+//import com.shockwave.pdfium.PdfDocument;
+//import com.shockwave.pdfium.PdfiumCore;
 
 public class UploadPDFService extends BaseTaskService {
     private static final String TAG = "UploadPDFService";
@@ -154,17 +155,18 @@ public class UploadPDFService extends BaseTaskService {
     }
 
 
-    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath,  final String groupId,
+    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath, final String groupId,
                                final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final UploadPDFService.DmInfoData dmInfoData) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference pdfreference = mStorageRef.child(uploadPath)
-                .child(fileName+".pdf");
-        uploadFile(fileUri,pdfreference,fileName,uploadPath,metadata,toTransmit,groupId,dmInfoData);
+                .child(fileName + ".pdf");
+        uploadFile(fileUri, pdfreference, fileName, uploadPath, metadata, toTransmit, groupId, dmInfoData);
     }
 
-    private  Bitmap pdfToBitmap(Uri uri) {
+    @Nullable
+    private Bitmap pdfToBitmap(Uri uri) {
         File pdfFile = new File(uri.getPath());
         Bitmap bitmap = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -183,7 +185,6 @@ public class UploadPDFService extends BaseTaskService {
                 renderer.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                Log.d(TAG,ex.toString());
                 Crashlytics.logException(ex);
             }
         }
@@ -204,10 +205,9 @@ public class UploadPDFService extends BaseTaskService {
             uploadTask = pdfRef.putFile(FileUri);
         }
         Bitmap bitmap = pdfToBitmap(FileUri);
-        //Bitmap bitmap = null;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        if(bitmap!=null) {
+        if (bitmap != null) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
 
             final StorageReference pdfRefThumbnail = mStorageRef.child(uploadPath)
@@ -309,8 +309,7 @@ public class UploadPDFService extends BaseTaskService {
                             taskCompleted();
                         }
                     });
-        }
-        else{
+        } else {
             uploadTask.
                     addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                         @Override
@@ -372,7 +371,7 @@ public class UploadPDFService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri downloadUriThumbnail, @Nullable String filename,@Nullable Uri fileUri, boolean toTransmit,
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri downloadUriThumbnail, @Nullable String filename, @Nullable Uri fileUri, boolean toTransmit,
                                             String chatId, UploadPDFService.DmInfoData dmInfoData) {
         boolean success = downloadUrl != null;
 
@@ -383,14 +382,14 @@ public class UploadPDFService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            transmitMedia(downloadUrl,downloadUriThumbnail,filename, chatId, dmInfoData.isDm, dmInfoData.authorId, dmInfoData.isAuthorSeller);
+            transmitMedia(downloadUrl, downloadUriThumbnail, filename, chatId, dmInfoData.isDm, dmInfoData.authorId, dmInfoData.isAuthorSeller);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())
                 .sendBroadcast(broadcast);
     }
 
-    private void transmitMedia(Uri downloadUrl,Uri downloadThumbnailUrl,String filename, String chatId, boolean isDm, String authorId, boolean isAuthorSeller) {
+    private void transmitMedia(Uri downloadUrl, Uri downloadThumbnailUrl, String filename, String chatId, boolean isDm, String authorId, boolean isAuthorSeller) {
         final DatabaseReference msgReference;
         if (isDm) {
             msgReference = getDmMessagesRef().child(chatId);
@@ -404,7 +403,7 @@ public class UploadPDFService extends BaseTaskService {
         chatData.setIsDm(isDm);
         chatData.setMessage("\uD83D\uDCC4 PDF Attached\nPlease update the app from Play Store to view the PDF document");
         chatData.setPdfFileName(filename);
-        if(downloadThumbnailUrl == null)
+        if (downloadThumbnailUrl == null)
             chatData.setPdfThumbnailUrl("https://i.imgur.com/ma03D59.png");
         else
             chatData.setPdfThumbnailUrl(downloadThumbnailUrl.toString());
@@ -434,7 +433,7 @@ public class UploadPDFService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
-        boolean success = downloadUrl != null && downloadUrlThumbnail!=null ;
+        boolean success = downloadUrl != null && downloadUrlThumbnail != null;
         String caption = success ? getString(R.string.upload_success) : getString(R.string.upload_failure);
         showFinishedNotification(caption, intent, success);
     }

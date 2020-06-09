@@ -97,7 +97,15 @@ public class FullScreenVideoActivity extends BaseActivity {
         Analytics.triggerScreenEvent(this, this.getClass());
         Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED, this);
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
+
         videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
+        if (savedInstanceState != null) {
+            if (videourl == null) {
+                videourl = Uri.parse(savedInstanceState.getString(EXTRA_IMG_PATH));
+            }
+            position = savedInstanceState.getLong("SELECTED_POSITION", C.TIME_UNSET);
+        }
+
         videoUrlHttp = videourl;
         videoname = getFileName();
         FullScreenVideoActivityPermissionsDispatcher.makeGetFileForDownloadWithPermissionCheck(FullScreenVideoActivity.this);
@@ -111,9 +119,6 @@ public class FullScreenVideoActivity extends BaseActivity {
         Log.d(TAG, "after" + videourl.toString());
         Log.d(TAG, videoname);
         Log.d(TAG, videourl.toString());
-        if (savedInstanceState != null) {
-            position = savedInstanceState.getLong("SELECTED_POSITION", C.TIME_UNSET);
-        }
         initializePlayer(videourl);
     }
 
@@ -218,6 +223,7 @@ public class FullScreenVideoActivity extends BaseActivity {
     public void onSaveInstanceState(Bundle currentState) {
         super.onSaveInstanceState(currentState);
         currentState.putLong("SELECTED_POSITION", position);
+        currentState.putString(EXTRA_IMG_PATH, getIntent().getStringExtra(EXTRA_IMG_PATH));
     }
 
     @Override

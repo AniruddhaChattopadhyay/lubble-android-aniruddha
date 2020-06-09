@@ -176,7 +176,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
         final ProfileData firstUser = top3List.get(0);
         firstNameTv.setText(StringUtils.getTitleCase(firstUser.getInfo().getName()));
         firstPointsTv.setText(String.valueOf(firstUser.getMonthly_likes()));
-        GlideApp.with(requireContext()).load(firstUser.getInfo().getThumbnail()).circleCrop()
+        GlideApp.with(requireContext()).load(firstUser.getProfilePic()).circleCrop()
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .error(R.drawable.ic_account_circle_black_no_padding)
                 .into(firstIv);
@@ -190,7 +190,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
         final ProfileData secondUser = top3List.get(1);
         secondNameTv.setText(StringUtils.getTitleCase(secondUser.getInfo().getName()));
         secondPointsTv.setText(String.valueOf(secondUser.getMonthly_likes()));
-        GlideApp.with(requireContext()).load(secondUser.getInfo().getThumbnail()).circleCrop()
+        GlideApp.with(requireContext()).load(secondUser.getProfilePic()).circleCrop()
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .error(R.drawable.ic_account_circle_black_no_padding)
                 .into(secondIv);
@@ -204,7 +204,7 @@ public class LeaderboardFrag extends Fragment implements OnListFragmentInteracti
         final ProfileData thirdUser = top3List.get(2);
         thirdNameTv.setText(StringUtils.getTitleCase(thirdUser.getInfo().getName()));
         thirdPointsTv.setText(String.valueOf(thirdUser.getMonthly_likes()));
-        GlideApp.with(requireContext()).load(thirdUser.getInfo().getThumbnail()).circleCrop()
+        GlideApp.with(requireContext()).load(thirdUser.getProfilePic()).circleCrop()
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .error(R.drawable.ic_account_circle_black_no_padding)
                 .into(thirdIv);
