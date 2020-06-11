@@ -23,6 +23,7 @@ import in.lubble.app.utils.FragUtils;
 
 import static in.lubble.app.analytics.AnalyticsEvents.EXPLORE_CONTINUE_CLICKED;
 import static in.lubble.app.analytics.AnalyticsEvents.EXPLORE_DIALOG_SHOWN;
+import static in.lubble.app.firebase.RealtimeDbHelper.bulkJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 
 public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
@@ -65,7 +66,7 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
                     GroupPromptSharedPrefs.getInstance().putGroupId(groupId);
                 }
                 groupIdList = groupIdList.substring(groupIdList.indexOf(',')+1);
-                getCreateOrJoinGroupRef().child(groupIdList).setValue(true);
+                bulkJoinGroupRef().child(groupIdList).setValue(true);
                 final ProgressDialog progressDialog = new ProgressDialog(ExploreActiv.this);
                 progressDialog.setTitle("Joining " + selectedGroupIdMap.size() + " groups");
                 progressDialog.setMessage("You're about to join a lovely & helpful community, please be respectful & enjoy :)");
