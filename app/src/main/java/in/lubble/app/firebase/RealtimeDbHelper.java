@@ -72,6 +72,11 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/blocks");
     }
 
+    public static DatabaseReference bulkJoinGroupRef() {
+        return FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()
+                + "/users/" + FirebaseAuth.getInstance().getUid()+"/bulkJoin");
+    }
+
     public static DatabaseReference getCreateOrJoinGroupRef() {
         return FirebaseDatabase.getInstance().getReference("create_join_group/lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()
                 + "/users/" + FirebaseAuth.getInstance().getUid());
