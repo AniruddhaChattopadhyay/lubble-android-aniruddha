@@ -16,6 +16,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -263,15 +264,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
-            sentChatViewHolder.dateTv.setVisibility(VISIBLE);
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
-            sentChatViewHolder.dateTv.setVisibility(View.INVISIBLE);
         }
 
         if (isValidString(chatData.getMessage())) {
             sentChatViewHolder.messageTv.setVisibility(VISIBLE);
-            sentChatViewHolder.messageTv.setText(chatData.getMessage());
+            sentChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage() + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
         } else {
             sentChatViewHolder.messageTv.setVisibility(View.GONE);
         }
@@ -483,16 +482,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
-            recvdChatViewHolder.dateTv.setVisibility(VISIBLE);
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
-            recvdChatViewHolder.dateTv.setVisibility(View.INVISIBLE);
 
         }
 
         if (isValidString(chatData.getMessage())) {
             recvdChatViewHolder.messageTv.setVisibility(VISIBLE);
-            recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+            recvdChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage() + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
         } else {
             recvdChatViewHolder.messageTv.setVisibility(View.GONE);
         }
@@ -1620,7 +1617,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView youtubeTitleTv;
         private ImageView downloadIv;
         private LinearLayout pollContainer;
-        private LinearLayout lubbContainer;
+        private RelativeLayout lubbContainer;
         private EmojiTextView badgeTextTv;
 
         public RecvdChatViewHolder(final View itemView) {
@@ -1718,7 +1715,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
-                dateTv.setVisibility(View.INVISIBLE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -1832,7 +1828,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                 } else if (getAdapterPosition() != highlightedPos) {
                     actionMode = ((AppCompatActivity) context).startSupportActionMode(actionModeCallbacks);
-                    dateTv.setVisibility(VISIBLE);
                     itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                     if (highlightedPos != -1) {
                         // another item was highlighted, remove its highlight
@@ -1967,7 +1962,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
-                dateTv.setVisibility(View.INVISIBLE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
@@ -2076,7 +2070,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                 } else if (getAdapterPosition() != highlightedPos) {
                     actionMode = ((AppCompatActivity) context).startSupportActionMode(actionModeCallbacks);
-                    dateTv.setVisibility(VISIBLE);
                     itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                     if (highlightedPos != -1) {
                         // another item was highlighted, remove its highlight
