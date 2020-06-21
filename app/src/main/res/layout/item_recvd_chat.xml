@@ -350,7 +350,7 @@
                         android:paddingBottom="4dp"
                         android:textColor="@color/black"
                         android:textSize="15sp"
-                        tools:text="Pikachu! I choose youu! &#160;&#160;&#160;&#160;&#160;&#160;&#160;" />
+                        tools:text="Pikachu! I ! &#160;&#160;&#160;&#160;&#160;&#160;&#160;" />
 
                     <TextView
                         android:id="@+id/tv_date"
@@ -386,7 +386,7 @@
         <RelativeLayout
             android:id="@+id/container_lubb"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_marginRight="8dp">
 
             <ImageView
@@ -407,6 +407,16 @@
                 android:paddingTop="2dp"
                 android:textSize="12sp"
                 tools:text="292" />
+
+            <TextView
+                android:id="@+id/tv_date_hidden"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft="4dp"
+                android:textSize="10sp"
+                android:visibility="gone"
+                tools:text="14:23pm" />
 
         </RelativeLayout>
 

@@ -98,6 +98,7 @@ import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
 import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
 import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
 import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
+import static in.lubble.app.Constants.IS_TIME_SHOWN;
 import static in.lubble.app.Constants.MAP_BTN_URL;
 import static in.lubble.app.Constants.MAP_HTML;
 import static in.lubble.app.Constants.MAP_SHARE_TEXT;
@@ -602,6 +603,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(EVENTS_MAINTENANCE_IMG, "");
         map.put(MARKET_MAINTENANCE_TEXT, "");
         map.put(IS_NOTIF_SNOOZE_ON, true);
+        map.put(IS_TIME_SHOWN, true);
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);

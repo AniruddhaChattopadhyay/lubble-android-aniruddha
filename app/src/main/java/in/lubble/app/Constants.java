@@ -45,6 +45,7 @@ public class Constants {
     public static final String MARKET_MAINTENANCE_TEXT = "MARKET_MAINTENANCE_TEXT";
     public static final String DEFAULT_SHOP_PIC = "DEFAULT_SHOP_PIC";
     public static final String IS_NOTIF_SNOOZE_ON = "IS_NOTIF_SNOOZE_ON";
+    public static final String IS_TIME_SHOWN = "IS_TIME_SHOWN";
 
     public static final double SVR_LATI = 28.696660;
     public static final double SVR_LONGI = 77.124772;

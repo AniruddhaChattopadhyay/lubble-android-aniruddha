@@ -71,6 +71,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -116,7 +117,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
+import static in.lubble.app.Constants.IS_TIME_SHOWN;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
@@ -247,11 +250,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 sentChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
                 sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.white));
             } else {
-                sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+                sentChatViewHolder.badgeTextTv.setVisibility(GONE);
             }
         } else {
-            sentChatViewHolder.senderTv.setVisibility(View.GONE);
-            sentChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+            sentChatViewHolder.senderTv.setVisibility(GONE);
+            sentChatViewHolder.badgeTextTv.setVisibility(GONE);
             updateProfileInfoMap(getUserRef(authorUid), authorUid, position);
         }
 
@@ -264,15 +267,21 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             sentChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+            sentChatViewHolder.hiddenDateTv.setVisibility(VISIBLE);
         } else {
             sentChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            sentChatViewHolder.hiddenDateTv.setVisibility(View.INVISIBLE);
         }
 
         if (isValidString(chatData.getMessage())) {
             sentChatViewHolder.messageTv.setVisibility(VISIBLE);
-            sentChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage() + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+            if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
+                sentChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage() + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+            } else {
+                sentChatViewHolder.messageTv.setText(chatData.getMessage());
+            }
         } else {
-            sentChatViewHolder.messageTv.setVisibility(View.GONE);
+            sentChatViewHolder.messageTv.setVisibility(GONE);
         }
         sentChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.white));
 
@@ -301,7 +310,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         }
         if (chatData.getIsDm()) {
-            sentChatViewHolder.lubbIcon.setVisibility(View.GONE);
+            sentChatViewHolder.lubbIcon.setVisibility(GONE);
         } else {
             sentChatViewHolder.lubbIcon.setVisibility(VISIBLE);
             if (chatData.getLubbReceipts().containsKey(authorId)) {
@@ -311,7 +320,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         }
 
-        sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
+        if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
+            sentChatViewHolder.dateTv.setVisibility(VISIBLE);
+            sentChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
+        } else {
+            sentChatViewHolder.dateTv.setVisibility(GONE);
+            sentChatViewHolder.hiddenDateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
+        }
         if (chatData.getType().equalsIgnoreCase(GROUP) && isValidString(chatData.getAttachedGroupId())) {
             sentChatViewHolder.linkContainer.setVisibility(VISIBLE);
             sentChatViewHolder.linkTitleTv.setText(chatData.getLinkTitle());
@@ -323,7 +338,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .placeholder(R.drawable.ic_circle_group_24dp)
                     .error(R.drawable.ic_circle_group_24dp)
                     .into(sentChatViewHolder.attachPicIv);
-            sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            sentChatViewHolder.linkPicIv.setVisibility(GONE);
             sentChatViewHolder.attachPicIv.setVisibility(VISIBLE);
 
             setBgColor(sentChatViewHolder.linkContainer, chatData);
@@ -339,7 +354,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .placeholder(R.drawable.ic_event)
                     .error(R.drawable.ic_event)
                     .into(sentChatViewHolder.attachPicIv);
-            sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            sentChatViewHolder.linkPicIv.setVisibility(GONE);
             sentChatViewHolder.attachPicIv.setVisibility(VISIBLE);
 
             setBgColor(sentChatViewHolder.linkContainer, chatData);
@@ -352,8 +367,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
             sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             sentChatViewHolder.linkContainer.setBackground(drawable);
-            sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
-            sentChatViewHolder.attachPicIv.setVisibility(View.GONE);
+            sentChatViewHolder.linkPicIv.setVisibility(GONE);
+            sentChatViewHolder.attachPicIv.setVisibility(GONE);
             /*sentChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
@@ -373,20 +388,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
             sentChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
             sentChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
-            sentChatViewHolder.attachPicIv.setVisibility(View.GONE);
+            sentChatViewHolder.attachPicIv.setVisibility(GONE);
             if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
                 glide.load(chatData.getLinkPicUrl())
                         .apply(RequestOptions.bitmapTransform(new RoundedCorners(UiUtils.dpToPx(44))))
                         .into(sentChatViewHolder.linkPicIv);
                 sentChatViewHolder.linkPicIv.setVisibility(VISIBLE);
             } else {
-                sentChatViewHolder.linkPicIv.setVisibility(View.GONE);
+                sentChatViewHolder.linkPicIv.setVisibility(GONE);
             }
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.rect_rounded_trans_white);
             DrawableCompat.setTintList(drawable, null);
             sentChatViewHolder.linkContainer.setBackground(drawable);
         } else {
-            sentChatViewHolder.linkContainer.setVisibility(View.GONE);
+            sentChatViewHolder.linkContainer.setVisibility(GONE);
         }
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null);
@@ -395,7 +410,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
-            sentChatViewHolder.messageTv.setVisibility(View.GONE);
+            sentChatViewHolder.messageTv.setVisibility(GONE);
             sentChatViewHolder.pollContainer.setVisibility(VISIBLE);
             final TextView pollQuesTv = sentChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques);
             ((TextView) sentChatViewHolder.pollContainer.findViewById(R.id.tv_anon_poll_hint)).setTextColor(ContextCompat.getColor(context, R.color.trans_white));
@@ -405,7 +420,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             showPollResults(sentChatViewHolder, chatData);
 
         } else {
-            sentChatViewHolder.pollContainer.setVisibility(View.GONE);
+            sentChatViewHolder.pollContainer.setVisibility(GONE);
         }
         handlePdf(sentChatViewHolder.pdfContainer, sentChatViewHolder.progressBarPdf, sentChatViewHolder.pdfThumbnailIv, chatData,
                 sentChatViewHolder.pdfDownloadIv, sentChatViewHolder.progressBarDownloadPdf, sentChatViewHolder.pdfTitleTv, sentChatViewHolder.messageTv);
@@ -462,8 +477,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         showDpAndName(recvdChatViewHolder, chatData);
 
-        recvdChatViewHolder.visibleToYouTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? VISIBLE : View.GONE);
-        recvdChatViewHolder.replyBottomTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? VISIBLE : View.GONE);
+        recvdChatViewHolder.visibleToYouTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? VISIBLE : GONE);
+        recvdChatViewHolder.replyBottomTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? VISIBLE : GONE);
 
         recvdChatViewHolder.replyBottomTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -482,16 +497,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         if (highlightedPos == position) {
             recvdChatViewHolder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.trans_colorAccent));
+            recvdChatViewHolder.hiddenDateTv.setVisibility(VISIBLE);
         } else {
             recvdChatViewHolder.itemView.setBackgroundColor(Color.TRANSPARENT);
+            recvdChatViewHolder.hiddenDateTv.setVisibility(View.INVISIBLE);
 
         }
 
         if (isValidString(chatData.getMessage())) {
             recvdChatViewHolder.messageTv.setVisibility(VISIBLE);
-            recvdChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage() + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+            if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
+                recvdChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage() + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+            } else {
+                recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+            }
         } else {
-            recvdChatViewHolder.messageTv.setVisibility(View.GONE);
+            recvdChatViewHolder.messageTv.setVisibility(GONE);
         }
         recvdChatViewHolder.messageTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
 
@@ -514,14 +535,20 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             Linkify.addLinks(recvdChatViewHolder.messageTv, atMentionPattern, atMentionScheme, null, transformFilter);
         }
-        recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
+        if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
+            recvdChatViewHolder.dateTv.setVisibility(VISIBLE);
+            recvdChatViewHolder.dateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
+        } else {
+            recvdChatViewHolder.dateTv.setVisibility(GONE);
+            recvdChatViewHolder.hiddenDateTv.setText(DateTimeUtils.getTimeFromLong(chatData.getServerTimestampInLong()));
+        }
         if (chatData.getLubbCount() == 0 || chatData.getIsDm()) {
             recvdChatViewHolder.lubbCount.setText("");
         } else {
             recvdChatViewHolder.lubbCount.setText(String.valueOf(chatData.getLubbCount()));
         }
         if (chatData.getIsDm()) {
-            recvdChatViewHolder.lubbIcon.setVisibility(View.GONE);
+            recvdChatViewHolder.lubbIcon.setVisibility(GONE);
         } else {
             recvdChatViewHolder.lubbIcon.setVisibility(VISIBLE);
             if (chatData.getLubbReceipts().containsKey(authorId)) {
@@ -545,7 +572,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .placeholder(R.drawable.ic_circle_group_24dp)
                     .error(R.drawable.ic_circle_group_24dp)
                     .into(recvdChatViewHolder.attachPicIv);
-            recvdChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            recvdChatViewHolder.linkPicIv.setVisibility(GONE);
             recvdChatViewHolder.attachPicIv.setVisibility(VISIBLE);
             setBgColor(recvdChatViewHolder.linkContainer, chatData);
         } else if (chatData.getType().equalsIgnoreCase(EVENT) && isValidString(chatData.getAttachedGroupId())) {
@@ -559,7 +586,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .placeholder(R.drawable.ic_event)
                     .error(R.drawable.ic_event)
                     .into(recvdChatViewHolder.attachPicIv);
-            recvdChatViewHolder.linkPicIv.setVisibility(View.GONE);
+            recvdChatViewHolder.linkPicIv.setVisibility(GONE);
             recvdChatViewHolder.attachPicIv.setVisibility(VISIBLE);
             setBgColor(recvdChatViewHolder.linkContainer, chatData);
         } else if (chatData.getType().equalsIgnoreCase(REPLY) && isValidString(chatData.getReplyMsgId())) {
@@ -570,8 +597,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.sent_chat_bubble_border);
             DrawableCompat.setTintList(drawable, null);
             recvdChatViewHolder.linkContainer.setBackground(drawable);
-            recvdChatViewHolder.linkPicIv.setVisibility(View.GONE);
-            recvdChatViewHolder.attachPicIv.setVisibility(View.GONE);
+            recvdChatViewHolder.linkPicIv.setVisibility(GONE);
+            recvdChatViewHolder.attachPicIv.setVisibility(GONE);
             /*recvdChatViewHolder.itemView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
@@ -597,7 +624,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkTitleTv.setTextColor(ContextCompat.getColor(context, R.color.black));
             recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
-            recvdChatViewHolder.attachPicIv.setVisibility(View.GONE);
+            recvdChatViewHolder.attachPicIv.setVisibility(GONE);
 
             if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
                 glide.load(chatData.getLinkPicUrl())
@@ -605,13 +632,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         .into(recvdChatViewHolder.linkPicIv);
                 recvdChatViewHolder.linkPicIv.setVisibility(VISIBLE);
             } else {
-                recvdChatViewHolder.linkPicIv.setVisibility(View.GONE);
+                recvdChatViewHolder.linkPicIv.setVisibility(GONE);
             }
             final Drawable drawable = ContextCompat.getDrawable(context, R.drawable.sent_chat_bubble_border);
             DrawableCompat.setTintList(drawable, null);
             recvdChatViewHolder.linkContainer.setBackground(drawable);
         } else {
-            recvdChatViewHolder.linkContainer.setVisibility(View.GONE);
+            recvdChatViewHolder.linkContainer.setVisibility(GONE);
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
@@ -619,7 +646,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
         if (chatData.getType().equalsIgnoreCase(ChatData.POLL) && chatData.getChoiceList() != null && !chatData.getChoiceList().isEmpty()) {
-            recvdChatViewHolder.messageTv.setVisibility(View.GONE);
+            recvdChatViewHolder.messageTv.setVisibility(GONE);
             recvdChatViewHolder.pollContainer.setVisibility(VISIBLE);
             final TextView pollQuesTv = recvdChatViewHolder.pollContainer.findViewById(R.id.tv_poll_ques);
             ((TextView) recvdChatViewHolder.pollContainer.findViewById(R.id.tv_anon_poll_hint)).setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
@@ -633,7 +660,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 showPollButtons(recvdChatViewHolder, chatData);
             }
         } else {
-            recvdChatViewHolder.pollContainer.setVisibility(View.GONE);
+            recvdChatViewHolder.pollContainer.setVisibility(GONE);
         }
 
         handlePdf(recvdChatViewHolder.pdfContainer, recvdChatViewHolder.progressBarPdf, recvdChatViewHolder.pdfThumbnailIv, chatData,
@@ -647,7 +674,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         } else {
             pollContainer = ((SentChatViewHolder) baseViewHolder).pollContainer;
         }
-        pollContainer.findViewById(R.id.container_poll_results).setVisibility(View.GONE);
+        pollContainer.findViewById(R.id.container_poll_results).setVisibility(GONE);
         setPollCount(chatData, pollContainer, ContextCompat.getColor(context, R.color.white));
         final LinearLayout buttonsContainer = pollContainer.findViewById(R.id.container_poll_btns);
         buttonsContainer.setVisibility(VISIBLE);
@@ -720,7 +747,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
         final LinearLayout resultsView = pollContainer.findViewById(R.id.container_poll_results);
         resultsView.setVisibility(VISIBLE);
-        pollContainer.findViewById(R.id.container_poll_btns).setVisibility(View.GONE);
+        pollContainer.findViewById(R.id.container_poll_btns).setVisibility(GONE);
         if (resultsView.getChildCount() > 0) {
             resultsView.removeAllViews();
         }
@@ -766,7 +793,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 } else {
                     choiceTv.setBackground(ContextCompat.getDrawable(context, R.drawable.rounded_rect_white_border));
                 }
-                choiceContainer.findViewById(R.id.iv_choice_background).setVisibility(View.GONE);
+                choiceContainer.findViewById(R.id.iv_choice_background).setVisibility(GONE);
             }
             if (baseViewHolder instanceof RecvdChatViewHolder) {
                 choiceTv.setTextColor(ContextCompat.getColor(context, R.color.black));
@@ -818,7 +845,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeContainer = sentChatViewHolder.youtubeContainer;
             titleTv = sentChatViewHolder.youtubeTitleTv;
         }
-        youtubeProgressBar.setVisibility(View.GONE);
+        youtubeProgressBar.setVisibility(GONE);
         /**
          * logic
          */
@@ -828,7 +855,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             // STOP VIDEO - SHOW THUMBNAIL
             youtubeContainer.setVisibility(VISIBLE);
             youTubeThumbnailIv.setVisibility(VISIBLE);
-            linkContainer.setVisibility(View.GONE);
+            linkContainer.setVisibility(GONE);
             youtubeProgressBar.setVisibility(VISIBLE);
 
             final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
@@ -842,13 +869,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         glide.load(youtubeData.getThumbnailUrl()).listener(new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                youtubeProgressBar.setVisibility(View.GONE);
+                                youtubeProgressBar.setVisibility(GONE);
                                 return false;
                             }
 
                             @Override
                             public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                youtubeProgressBar.setVisibility(View.GONE);
+                                youtubeProgressBar.setVisibility(GONE);
                                 return false;
                             }
                         }).error(R.drawable.rounded_rect_gray)
@@ -860,7 +887,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                     } else if (activity != null && context != null && !activity.isFinishing()) {
                         Crashlytics.log("youtube thumbnail failed to fetch with error code: " + response.code());
-                        youtubeProgressBar.setVisibility(View.GONE);
+                        youtubeProgressBar.setVisibility(GONE);
                         youtubePlayIv.setImageResource(R.drawable.ic_error_outline_black_24dp);
                     }
                 }
@@ -869,7 +896,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 public void onFailure(Call<YoutubeData> call, Throwable t) {
                     if (activity != null && context != null && !activity.isFinishing()) {
                         Log.e(TAG, "onFailure: " + t);
-                        youtubeProgressBar.setVisibility(View.GONE);
+                        youtubeProgressBar.setVisibility(GONE);
                         youtubePlayIv.setImageResource(R.drawable.ic_error_outline_black_24dp);
                     }
                 }
@@ -886,7 +913,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
             });
         } else {
-            youtubeContainer.setVisibility(View.GONE);
+            youtubeContainer.setVisibility(GONE);
         }
     }
 
@@ -1094,14 +1121,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .error(R.drawable.ic_account_circle_black_no_padding)
                     .into(recvdChatViewHolder.dpIv);
             recvdChatViewHolder.authorNameTv.setText(profileInfo.getName().split(" ")[0]);
-            recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+            recvdChatViewHolder.badgeTextTv.setVisibility(GONE);
             if (!TextUtils.isEmpty(profileInfo.getBadge()) || !TextUtils.isEmpty(profileData.getGroupFlair())) {
                 String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                 recvdChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
                 recvdChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
                 recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
             } else {
-                recvdChatViewHolder.badgeTextTv.setVisibility(View.GONE);
+                recvdChatViewHolder.badgeTextTv.setVisibility(GONE);
             }
         } else {
             updateProfileInfoMap(getUserRef(chatData.getAuthorUid()), chatData.getAuthorUid(), recvdChatViewHolder.getAdapterPosition());
@@ -1161,7 +1188,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         } else {
             mProgressBar.setVisibility(VISIBLE);
-            pdfDownloadIv.setVisibility(View.GONE);
+            pdfDownloadIv.setVisibility(GONE);
 
             StorageReference pdfReference = FirebaseStorageHelper.getConvoBucketInstance().getReferenceFromUrl(pdfUrl);
             File destinationFile = new File(getLubbleDocsDir(), fileName);
@@ -1169,8 +1196,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                     // Local temp file has been created
-                    mProgressBar.setVisibility(View.GONE);
-                    pdfDownloadIv.setVisibility(View.GONE);
+                    mProgressBar.setVisibility(GONE);
+                    pdfDownloadIv.setVisibility(GONE);
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -1205,18 +1232,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
             } else {
                 if (downloadIv != null) {
-                    downloadIv.setVisibility(View.GONE);
+                    downloadIv.setVisibility(GONE);
                 }
                 String savedPath = getSavedImageForMsgId(context, chatData.getId());
                 if (savedPath != null) {
-                    progressBar.setVisibility(View.GONE);
+                    progressBar.setVisibility(GONE);
                     glide.load(savedPath).centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
                 } else {
                     downloadAndSavePic(progressBar, imageView, chatData);
                 }
             }
         } else {
-            imgContainer.setVisibility(View.GONE);
+            imgContainer.setVisibility(GONE);
         }
     }
 
@@ -1225,13 +1252,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getPdfUrl())) {
             pdfContainer.setOnClickListener(null);
             pdfContainer.setVisibility(VISIBLE);
-            messageTv.setVisibility(View.GONE);
+            messageTv.setVisibility(GONE);
             pdfTitleTV.setText(chatData.getPdfFileName() + ".pdf");
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
                 // Permission is not granted
                 glide.load(chatData.getImgUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
                 downloadIv.setVisibility(VISIBLE);
-                progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(GONE);
                 progressBarDownloadPdf.setVisibility(View.VISIBLE);
                 progressBarDownloadPdf.setProgress(0);
 
@@ -1244,8 +1271,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 String fileName = getFileName(chatData.getPdfUrl());
                 File pdfFile = makeGetFileForDownload(fileName);
                 if (pdfFile != null) {
-                    downloadIv.setVisibility(View.GONE);
-                    progressBarDownloadPdf.setVisibility(View.GONE);
+                    downloadIv.setVisibility(GONE);
+                    progressBarDownloadPdf.setVisibility(GONE);
                 } else {
                     downloadIv.setVisibility(VISIBLE);
                     progressBarDownloadPdf.setVisibility(VISIBLE);
@@ -1254,14 +1281,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 glide.load(chatData.getPdfThumbnailUrl()).listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        progressBar.setVisibility(View.GONE);
+                        progressBar.setVisibility(GONE);
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                         Log.d(TAG, "progress bar hidden");
-                        progressBar.setVisibility(View.GONE);
+                        progressBar.setVisibility(GONE);
                         return false;
                     }
                 })
@@ -1270,8 +1297,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 Log.d(TAG, "inside lst else");
             }
         } else {
-            pdfContainer.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
+            pdfContainer.setVisibility(GONE);
+            progressBar.setVisibility(GONE);
             messageTv.setVisibility(messageTv.getVisibility());
         }
     }
@@ -1287,7 +1314,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 glide.load(chatData.getVidUrl()).override(18, 18).centerCrop().into(imageView);
                 downloadIv.setVisibility(VISIBLE);
                 playvid.setImageResource(R.drawable.ic_file_download_black_24dp);
-                progressBar.setVisibility(View.GONE);
+                progressBar.setVisibility(GONE);
             } else {
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.placeholder(R.color.black);
@@ -1296,14 +1323,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 glide.load(chatData.getVidUrl()).listener(new RequestListener<Drawable>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                        progressBar.setVisibility(View.GONE);
+                        progressBar.setVisibility(GONE);
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                         Log.d(TAG, "progress bar hidden");
-                        progressBar.setVisibility(View.GONE);
+                        progressBar.setVisibility(GONE);
                         return false;
                     }
                 })
@@ -1312,8 +1339,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 Log.d(TAG, "inside lst else");
             }
         } else {
-            vidContainer.setVisibility(View.GONE);
-            progressBar.setVisibility(View.GONE);
+            vidContainer.setVisibility(GONE);
+            progressBar.setVisibility(GONE);
         }
     }
 
@@ -1322,14 +1349,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 .listener(new RequestListener<File>() {
                     @Override
                     public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<File> target, boolean isFirstResource) {
-                        progressBar.setVisibility(View.GONE);
+                        progressBar.setVisibility(GONE);
                         imageView.setOnClickListener(null);
                         return false;
                     }
 
                     @Override
                     public boolean onResourceReady(File resource, Object model, Target<File> target, DataSource dataSource, boolean isFirstResource) {
-                        progressBar.setVisibility(View.GONE);
+                        progressBar.setVisibility(GONE);
                         glide.load(resource).centerCrop().into(imageView);
                         imageView.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -1602,7 +1629,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView playvidIv;
         private ProgressBar progressBar;
         private ImageView chatIv;
-        private TextView dateTv;
+        private TextView dateTv, hiddenDateTv;
         private ImageView lubbIcon;
         private TextView lubbCount;
         private ImageView dpIv;
@@ -1619,58 +1646,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout pollContainer;
         private RelativeLayout lubbContainer;
         private EmojiTextView badgeTextTv;
-
-        public RecvdChatViewHolder(final View itemView) {
-            super(itemView);
-            rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
-            authorNameTv = itemView.findViewById(R.id.tv_author);
-            visibleToYouTv = itemView.findViewById(R.id.tv_msg_visible_to_you);
-            replyBottomTv = itemView.findViewById(R.id.tv_reply_bottom);
-            messageTv = itemView.findViewById(R.id.tv_message);
-            linkContainer = itemView.findViewById(R.id.link_meta_container);
-            linkPicIv = itemView.findViewById(R.id.iv_link_pic);
-            attachPicIv = itemView.findViewById(R.id.iv_attach_pic);
-            linkTitleTv = itemView.findViewById(R.id.tv_link_title);
-            linkDescTv = itemView.findViewById(R.id.tv_link_desc);
-            imgContainer = itemView.findViewById(R.id.img_container);
-            vidContainer = itemView.findViewById(R.id.vid_container);
-            progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
-            vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
-            playvidIv = itemView.findViewById(R.id.iv_play_vid);
-            pdfContainer = itemView.findViewById(R.id.pdf_container);
-            pdfThumbnailIv = itemView.findViewById(R.id.iv_pdf_img);
-            pdfTitleTv = itemView.findViewById(R.id.tv_pdf_title);
-            pdfDownloadIv = itemView.findViewById(R.id.iv_pdf_download);
-            progressBarDownloadPdf = itemView.findViewById(R.id.progressbar_pdf_download);
-            progressBarPdf = itemView.findViewById(R.id.progressbar_img_pdf);
-            lubbContainer = itemView.findViewById(R.id.container_lubb);
-            progressBar = itemView.findViewById(R.id.progressbar_img);
-            chatIv = itemView.findViewById(R.id.iv_chat_img);
-            dateTv = itemView.findViewById(R.id.tv_date);
-            lubbIcon = itemView.findViewById(R.id.iv_lubb);
-            lubbCount = itemView.findViewById(R.id.tv_lubb_count);
-            dpIv = itemView.findViewById(R.id.iv_dp);
-            youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
-            youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
-            youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
-            youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
-            youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
-            downloadIv = itemView.findViewById(R.id.iv_download);
-            pollContainer = itemView.findViewById(R.id.container_polls);
-
-            badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
-
-            dpIv.setOnTouchListener(this);
-            linkContainer.setOnTouchListener(this);
-            pollContainer.setOnTouchListener(this);
-            messageTv.setOnTouchListener(this);
-            rootLayout.setOnTouchListener(this);
-            chatIv.setOnTouchListener(this);
-            vidThumbnailIv.setOnTouchListener(this);
-            lubbContainer.setOnTouchListener(this);
-            pdfContainer.setOnTouchListener(this);
-        }
-
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -1715,26 +1690,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
+                hiddenDateTv.setVisibility(View.INVISIBLE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
                 }
             }
         };
-
-        private View touchedView;
-        private boolean isLongTouched;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            touchedView = v;
-            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                isLongTouched = false;
-            }
-            return b;
-        }
-
         private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
 
             @Override
@@ -1828,6 +1790,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                 } else if (getAdapterPosition() != highlightedPos) {
                     actionMode = ((AppCompatActivity) context).startSupportActionMode(actionModeCallbacks);
+                    hiddenDateTv.setVisibility(VISIBLE);
                     itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                     if (highlightedPos != -1) {
                         // another item was highlighted, remove its highlight
@@ -1843,6 +1806,71 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 super.onLongPress(e);
             }
         });
+
+        private View touchedView;
+        private boolean isLongTouched;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            touchedView = v;
+            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                isLongTouched = false;
+            }
+            return b;
+        }
+
+        public RecvdChatViewHolder(final View itemView) {
+            super(itemView);
+            rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
+            authorNameTv = itemView.findViewById(R.id.tv_author);
+            visibleToYouTv = itemView.findViewById(R.id.tv_msg_visible_to_you);
+            replyBottomTv = itemView.findViewById(R.id.tv_reply_bottom);
+            messageTv = itemView.findViewById(R.id.tv_message);
+            linkContainer = itemView.findViewById(R.id.link_meta_container);
+            linkPicIv = itemView.findViewById(R.id.iv_link_pic);
+            attachPicIv = itemView.findViewById(R.id.iv_attach_pic);
+            linkTitleTv = itemView.findViewById(R.id.tv_link_title);
+            linkDescTv = itemView.findViewById(R.id.tv_link_desc);
+            imgContainer = itemView.findViewById(R.id.img_container);
+            vidContainer = itemView.findViewById(R.id.vid_container);
+            progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
+            vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
+            playvidIv = itemView.findViewById(R.id.iv_play_vid);
+            pdfContainer = itemView.findViewById(R.id.pdf_container);
+            pdfThumbnailIv = itemView.findViewById(R.id.iv_pdf_img);
+            pdfTitleTv = itemView.findViewById(R.id.tv_pdf_title);
+            pdfDownloadIv = itemView.findViewById(R.id.iv_pdf_download);
+            progressBarDownloadPdf = itemView.findViewById(R.id.progressbar_pdf_download);
+            progressBarPdf = itemView.findViewById(R.id.progressbar_img_pdf);
+            lubbContainer = itemView.findViewById(R.id.container_lubb);
+            progressBar = itemView.findViewById(R.id.progressbar_img);
+            chatIv = itemView.findViewById(R.id.iv_chat_img);
+            dateTv = itemView.findViewById(R.id.tv_date);
+            hiddenDateTv = itemView.findViewById(R.id.tv_date_hidden);
+            lubbIcon = itemView.findViewById(R.id.iv_lubb);
+            lubbCount = itemView.findViewById(R.id.tv_lubb_count);
+            dpIv = itemView.findViewById(R.id.iv_dp);
+            youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
+            youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
+            youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
+            youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
+            youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
+            downloadIv = itemView.findViewById(R.id.iv_download);
+            pollContainer = itemView.findViewById(R.id.container_polls);
+
+            badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
+
+            dpIv.setOnTouchListener(this);
+            linkContainer.setOnTouchListener(this);
+            pollContainer.setOnTouchListener(this);
+            messageTv.setOnTouchListener(this);
+            rootLayout.setOnTouchListener(this);
+            chatIv.setOnTouchListener(this);
+            vidThumbnailIv.setOnTouchListener(this);
+            lubbContainer.setOnTouchListener(this);
+            pdfContainer.setOnTouchListener(this);
+        }
 
     }
 
@@ -1866,7 +1894,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar progressBar_vid;
         private ProgressBar progressBar;
         private ImageView chatIv;
-        private TextView dateTv;
+        private TextView dateTv, hiddenDateTv;
         private ImageView lubbIcon;
         private TextView lubbCount;
         @Nullable
@@ -1880,52 +1908,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout lubbContainer;
         private EmojiTextView badgeTextTv;
         private TextView senderTv;
-
-        SentChatViewHolder(final View itemView) {
-            super(itemView);
-            rootLayout = itemView.findViewById(R.id.root_layout_chat_sent);
-            messageTv = itemView.findViewById(R.id.tv_message);
-            linkContainer = itemView.findViewById(R.id.link_meta_container);
-            linkPicIv = itemView.findViewById(R.id.iv_link_pic);
-            attachPicIv = itemView.findViewById(R.id.iv_attach_pic);
-            linkTitleTv = itemView.findViewById(R.id.tv_link_title);
-            linkDescTv = itemView.findViewById(R.id.tv_link_desc);
-            imgContainer = itemView.findViewById(R.id.img_container);
-            vidContainer = itemView.findViewById(R.id.vid_container);
-            vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
-            pdfContainer = itemView.findViewById(R.id.pdf_container);
-            pdfThumbnailIv = itemView.findViewById(R.id.iv_pdf_img);
-            pdfTitleTv = itemView.findViewById(R.id.tv_pdf_title);
-            pdfDownloadIv = itemView.findViewById(R.id.iv_pdf_download);
-            progressBarPdf = itemView.findViewById(R.id.progressbar_img_pdf);
-            progressBarDownloadPdf = itemView.findViewById(R.id.progressbar_pdf_download);
-            playvidIv = itemView.findViewById(R.id.iv_play_vid);
-            progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
-            progressBar = itemView.findViewById(R.id.progressbar_img);
-            chatIv = itemView.findViewById(R.id.iv_chat_img);
-            dateTv = itemView.findViewById(R.id.tv_date);
-            lubbIcon = itemView.findViewById(R.id.iv_lubb);
-            lubbCount = itemView.findViewById(R.id.tv_lubb_count);
-            lubbContainer = itemView.findViewById(R.id.container_lubb);
-            youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
-            youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
-            youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
-            youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
-            youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
-            pollContainer = itemView.findViewById(R.id.container_polls);
-            senderTv = itemView.findViewById(R.id.tv_sender_name);
-            badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
-
-            linkContainer.setOnTouchListener(this);
-            pollContainer.setOnTouchListener(this);
-            messageTv.setOnTouchListener(this);
-            chatIv.setOnTouchListener(this);
-            vidThumbnailIv.setOnTouchListener(this);
-            rootLayout.setOnTouchListener(this);
-            lubbContainer.setOnTouchListener(this);
-            pdfContainer.setOnTouchListener(this);
-        }
-
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -1962,26 +1944,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
             @Override
             public void onDestroyActionMode(ActionMode mode) {
                 selectedChatId = null;
+                hiddenDateTv.setVisibility(View.INVISIBLE);
                 if (highlightedPos != -1) {
                     notifyItemChanged(highlightedPos);
                     highlightedPos = -1;
                 }
             }
         };
-
-        private View touchedView;
-        private boolean isLongTouched;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            touchedView = v;
-            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                isLongTouched = false;
-            }
-            return b;
-        }
-
         private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
 
             @Override
@@ -2070,6 +2039,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
                 } else if (getAdapterPosition() != highlightedPos) {
                     actionMode = ((AppCompatActivity) context).startSupportActionMode(actionModeCallbacks);
+                    hiddenDateTv.setVisibility(VISIBLE);
                     itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.trans_colorAccent));
                     if (highlightedPos != -1) {
                         // another item was highlighted, remove its highlight
@@ -2085,6 +2055,65 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 super.onLongPress(e);
             }
         });
+
+        private View touchedView;
+        private boolean isLongTouched;
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            touchedView = v;
+            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                isLongTouched = false;
+            }
+            return b;
+        }
+
+        SentChatViewHolder(final View itemView) {
+            super(itemView);
+            rootLayout = itemView.findViewById(R.id.root_layout_chat_sent);
+            messageTv = itemView.findViewById(R.id.tv_message);
+            linkContainer = itemView.findViewById(R.id.link_meta_container);
+            linkPicIv = itemView.findViewById(R.id.iv_link_pic);
+            attachPicIv = itemView.findViewById(R.id.iv_attach_pic);
+            linkTitleTv = itemView.findViewById(R.id.tv_link_title);
+            linkDescTv = itemView.findViewById(R.id.tv_link_desc);
+            imgContainer = itemView.findViewById(R.id.img_container);
+            vidContainer = itemView.findViewById(R.id.vid_container);
+            vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
+            pdfContainer = itemView.findViewById(R.id.pdf_container);
+            pdfThumbnailIv = itemView.findViewById(R.id.iv_pdf_img);
+            pdfTitleTv = itemView.findViewById(R.id.tv_pdf_title);
+            pdfDownloadIv = itemView.findViewById(R.id.iv_pdf_download);
+            progressBarPdf = itemView.findViewById(R.id.progressbar_img_pdf);
+            progressBarDownloadPdf = itemView.findViewById(R.id.progressbar_pdf_download);
+            playvidIv = itemView.findViewById(R.id.iv_play_vid);
+            progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
+            progressBar = itemView.findViewById(R.id.progressbar_img);
+            chatIv = itemView.findViewById(R.id.iv_chat_img);
+            dateTv = itemView.findViewById(R.id.tv_date);
+            hiddenDateTv = itemView.findViewById(R.id.tv_date_hidden);
+            lubbIcon = itemView.findViewById(R.id.iv_lubb);
+            lubbCount = itemView.findViewById(R.id.tv_lubb_count);
+            lubbContainer = itemView.findViewById(R.id.container_lubb);
+            youtubeThumbnailView = itemView.findViewById(R.id.youtube_thumbnail_view);
+            youtubeProgressBar = itemView.findViewById(R.id.progressbar_youtube);
+            youtubePlayIv = itemView.findViewById(R.id.iv_youtube_play);
+            youtubeContainer = itemView.findViewById(R.id.relativelayout_youtube);
+            youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
+            pollContainer = itemView.findViewById(R.id.container_polls);
+            senderTv = itemView.findViewById(R.id.tv_sender_name);
+            badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
+
+            linkContainer.setOnTouchListener(this);
+            pollContainer.setOnTouchListener(this);
+            messageTv.setOnTouchListener(this);
+            chatIv.setOnTouchListener(this);
+            vidThumbnailIv.setOnTouchListener(this);
+            rootLayout.setOnTouchListener(this);
+            lubbContainer.setOnTouchListener(this);
+            pdfContainer.setOnTouchListener(this);
+        }
 
 
     }
