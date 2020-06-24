@@ -145,6 +145,7 @@
     <string name="liked_by">Liked By</string>
     <string name="action_info">Info</string>
     <string name="action_spam">Spam</string>
+    <string name="action_super_like">Super Like</string>
     <string name="action_reply">Reply</string>
     <string name="action_copy">Copy</string>
     <string name="no_likes">No likes till now</string>

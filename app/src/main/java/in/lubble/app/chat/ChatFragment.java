@@ -54,6 +54,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 
 import java.io.File;
@@ -91,6 +92,7 @@ import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.UiUtils;
+import okhttp3.RequestBody;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -103,6 +105,7 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
 import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
@@ -1923,6 +1926,38 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             }
         } else {
             Crashlytics.logException(new NullPointerException("chatId is null when trying to mark it spam"));
+        }
+    }
+
+    public void superLikeMsg(final String selectedChatId) {
+        if (selectedChatId != null) {
+            if (authorId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+                endpoints = ServiceGenerator.createService(Endpoints.class);
+                HashMap<String, Object> params = new HashMap<>();
+                params.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+                params.put("gid", groupId);
+                params.put("chatid", selectedChatId);
+                RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
+
+                Call<Void> call = endpoints.superLikeMsg(body);
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        } else {
+            Crashlytics.logException(new NullPointerException("chatId is null when trying to super like it"));
         }
     }
 

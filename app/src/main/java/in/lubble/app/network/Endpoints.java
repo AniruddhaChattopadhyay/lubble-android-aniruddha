@@ -179,6 +179,9 @@ public interface Endpoints {
     @GET("marketplace/seller/phone_find/")
     Call<ExistingSellerData> fetchExistingSellerFromPh(@Query("phone") String phone);
 
+    @PUT("marketplace/autolike/")
+    Call<Void> superLikeMsg(@Body RequestBody params);
+
     public class ExistingSellerData {
 
         @SerializedName("seller_id")
