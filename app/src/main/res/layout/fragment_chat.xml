@@ -163,6 +163,7 @@
                     android:focusableInTouchMode="true"
                     android:gravity="top|left"
                     android:hint="What's new"
+                    android:inputType="text|textCapSentences|textMultiLine"
                     android:maxLines="5"
                     android:scrollbars="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
