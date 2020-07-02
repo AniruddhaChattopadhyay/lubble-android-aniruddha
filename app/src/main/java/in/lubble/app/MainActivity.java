@@ -603,7 +603,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(EVENTS_MAINTENANCE_IMG, "");
         map.put(MARKET_MAINTENANCE_TEXT, "");
         map.put(IS_NOTIF_SNOOZE_ON, true);
-        map.put(IS_TIME_SHOWN, true);
+        map.put(IS_TIME_SHOWN, false);
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
