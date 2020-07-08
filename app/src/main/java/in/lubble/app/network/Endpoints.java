@@ -164,11 +164,14 @@ public interface Endpoints {
     @POST
     public Call<RewardsAirtableData> uploadInstalledApps(@Url String url, @Body RequestBody params);
 
+    @PUT("marketplace/applist/")
+    public Call<RewardsAirtableData> uploadInstalledApps(@Body RequestBody params);
+
     @GET("marketplace/events/list/")
-    Call<List<EventData>> getEvents(@Query("lubble_id")String lubble_id);
+    Call<List<EventData>> getEvents(@Query("lubble_id") String lubble_id);
 
     @GET("marketplace/events/")
-    Call<List<EventData>> getEvent(@Query("event_id")String event_id);
+    Call<List<EventData>> getEvent(@Query("event_id") String event_id);
 
     @POST("marketplace/events/attendee/")
     Call<Void> uploadattendee(@Body RequestBody params);
