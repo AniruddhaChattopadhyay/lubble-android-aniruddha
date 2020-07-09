@@ -459,7 +459,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             @Override
             public boolean onFling(int velocityX, int velocityY) {
                 recyclerViewState = null;
-                msgIdToOpen = null;
                 return false;
             }
         });
@@ -592,7 +591,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if (isAdded()) {
+                            if (isAdded() && msgIdToOpen != null) {
                                 scrollToChatId(msgIdToOpen, null);
                                 msgIdToOpen = null;
                             }
