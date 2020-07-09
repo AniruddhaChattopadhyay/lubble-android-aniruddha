@@ -50,7 +50,7 @@
             android:text="Hi"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             android:textColor="@color/dk_colorAccent"
-            android:textSize="24sp" />
+            android:textSize="20sp" />
 
         <androidx.emoji.widget.EmojiTextView
             android:id="@+id/tv_title"
@@ -60,7 +60,7 @@
             android:text="We are not open in your\nneighbourhood yet 😢"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
             android:textColor="@color/dk_colorAccent"
-            android:textSize="24sp" />
+            android:textSize="20sp" />
 
         <TextView
             android:id="@+id/tv_desc"
@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_title"
             android:text="We're waiting for your neighbours to join, so you can get useful local help &amp; connections.
-\n\nThink you can get 10 verified neighbours to join?\nApply to be a Lubble Founding Member for your locality!"
+\n\n\nCan you get 10 verified neighbours to join?\nApply to be a Lubble Founding Member for your locality!"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle" />
 
         <TextView
