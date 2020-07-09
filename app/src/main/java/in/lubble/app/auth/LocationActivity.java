@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -31,10 +32,12 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.crashlytics.android.Crashlytics;
+import com.freshchat.consumer.sdk.Freshchat;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -95,6 +98,8 @@ public class LocationActivity extends BaseActivity {
     private ImageView locIv;
     private TextView locHintTv;
     private TextView logoutTv;
+    private TextView supportTv;
+    private TextView foundingMemberCtaTv;
     private TextView hiNameTv;
     private Button shareBtn;
     private EditText phoneEt;
@@ -122,6 +127,8 @@ public class LocationActivity extends BaseActivity {
         phoneEt = findViewById(R.id.et_register_phone);
         phoneBtn = findViewById(R.id.btn_register_phone);
         logoutTv = findViewById(R.id.tv_logout);
+        supportTv = findViewById(R.id.tv_support);
+        foundingMemberCtaTv = findViewById(R.id.tv_founding_member_cta);
         hiNameTv = findViewById(R.id.tv_hi_name);
         phoneProgressBar = findViewById(R.id.progressbar_phone_reg);
 
@@ -190,6 +197,27 @@ public class LocationActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 UserUtils.logout(LocationActivity.this);
+            }
+        });
+
+        supportTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Freshchat.showConversations(LocationActivity.this);
+            }
+        });
+
+        foundingMemberCtaTv.setText(StringUtils.underlineText(foundingMemberCtaTv.getText().toString()));
+        foundingMemberCtaTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                intentBuilder.setToolbarColor(ContextCompat.getColor(LocationActivity.this, R.color.colorAccent));
+                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(LocationActivity.this, R.color.dk_colorAccent));
+                intentBuilder.enableUrlBarHiding();
+                intentBuilder.setShowTitle(true);
+                CustomTabsIntent customTabsIntent = intentBuilder.build();
+                customTabsIntent.launchUrl(LocationActivity.this, Uri.parse("https://mplace.typeform.com/to/mLq7hrC5#name=" + currentUser.getDisplayName() + "&uid=" + currentUser.getUid()));
             }
         });
     }

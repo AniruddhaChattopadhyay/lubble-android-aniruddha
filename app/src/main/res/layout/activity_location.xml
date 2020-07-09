@@ -25,7 +25,20 @@
             android:layout_alignParentRight="true"
             android:padding="8dp"
             android:text="LOGOUT"
-            android:textColor="@color/link_blue" />
+            android:textColor="@color/link_blue"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_support"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/rect_rounded_border_sharper"
+            android:padding="8dp"
+            android:text="Support Chat"
+            android:textAllCaps="true"
+            android:textColor="@color/link_blue"
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/tv_hi_name"
@@ -54,8 +67,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_title"
-            android:text="If you're not at home, please try again from your society.\n\nTo get useful local help &amp; connections, Lubble is waiting for more neighbours in your area to join."
+            android:text="We're waiting for your neighbours to join, so you can get useful local help &amp; connections.
+\n\nThink you can get 10 verified neighbours to join?\nApply to be a Lubble Founding Member for your locality!"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle" />
+
+        <TextView
+            android:id="@+id/tv_founding_member_cta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_desc"
+            android:text="Apply Now"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+            android:textColor="@color/link_blue" />
 
         <ImageView
             android:id="@+id/iv_image"
@@ -63,6 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@id/container_action"
             android:layout_below="@id/tv_desc"
+            android:paddingBottom="40dp"
             app:srcCompat="@drawable/ic_society" />
 
         <ProgressBar

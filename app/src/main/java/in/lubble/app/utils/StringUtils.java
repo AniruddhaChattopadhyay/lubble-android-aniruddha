@@ -1,8 +1,12 @@
 package in.lubble.app.utils;
 
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.UnderlineSpan;
 import android.util.Patterns;
+
 import androidx.annotation.Nullable;
+
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.regex.Matcher;
@@ -26,6 +30,12 @@ public class StringUtils {
 
     public static boolean isValidMobile(String phone) {
         return android.util.Patterns.PHONE.matcher(phone).matches();
+    }
+
+    public static SpannableString underlineText(String strToUnderline) {
+        SpannableString content = new SpannableString(strToUnderline);
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        return content;
     }
 
     public static String getTitleCase(String str) {
