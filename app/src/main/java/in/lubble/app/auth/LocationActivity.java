@@ -50,6 +50,7 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -92,13 +93,14 @@ public class LocationActivity extends BaseActivity {
     private static final int REQUEST_LOCATION_ON = 150;
 
     private static final float LOCATION_ACCURACY_THRESHOLD = 150;
+    private static int RETRY_COUNT = 0;
     private FusedLocationProviderClient fusedLocationClient;
-    private RelativeLayout invalidLocContainer;
+    private RelativeLayout rootview, invalidLocContainer;
     private ImageView pulseIv;
     private ImageView locIv;
     private TextView locHintTv;
     private TextView logoutTv;
-    private TextView supportTv;
+    private TextView supportTv, retryTv;
     private TextView foundingMemberCtaTv;
     private TextView hiNameTv;
     private Button shareBtn;
@@ -117,6 +119,7 @@ public class LocationActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
 
+        rootview = findViewById(R.id.rootview);
         invalidLocContainer = findViewById(R.id.invalid_loc_container);
         pulseIv = findViewById(R.id.iv_pulse);
         locIv = findViewById(R.id.iv_loc);
@@ -128,6 +131,7 @@ public class LocationActivity extends BaseActivity {
         phoneBtn = findViewById(R.id.btn_register_phone);
         logoutTv = findViewById(R.id.tv_logout);
         supportTv = findViewById(R.id.tv_support);
+        retryTv = findViewById(R.id.tv_retry);
         foundingMemberCtaTv = findViewById(R.id.tv_founding_member_cta);
         hiNameTv = findViewById(R.id.tv_hi_name);
         phoneProgressBar = findViewById(R.id.progressbar_phone_reg);
@@ -207,6 +211,13 @@ public class LocationActivity extends BaseActivity {
             }
         });
 
+        retryTv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkSystemLocPerm();
+            }
+        });
+
         foundingMemberCtaTv.setText(StringUtils.underlineText(foundingMemberCtaTv.getText().toString()));
         foundingMemberCtaTv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -264,6 +275,11 @@ public class LocationActivity extends BaseActivity {
     }
 
     private void checkSystemLocPerm() {
+        invalidLocContainer.setVisibility(View.GONE);
+        if (RETRY_COUNT > 5) {
+            retryTv.setVisibility(View.GONE);
+        }
+        RETRY_COUNT++;
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
@@ -443,6 +459,16 @@ public class LocationActivity extends BaseActivity {
                     }
                 } else {
                     locationCheckFailed();
+                    if (!isFinishing()) {
+                        Snackbar snackbar = Snackbar.make(rootview, R.string.all_try_again, Snackbar.LENGTH_INDEFINITE).setAction("RETRY", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                checkSystemLocPerm();
+                            }
+                        });
+                        snackbar.setActionTextColor(getResources().getColor(R.color.light_colorAccent));
+                        snackbar.show();
+                    }
                 }
             }
 
@@ -450,6 +476,14 @@ public class LocationActivity extends BaseActivity {
             public void onFailure(Call<ArrayList<LocationsData>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
                 locationCheckFailed();
+                Snackbar snackbar = Snackbar.make(rootview, R.string.check_internet, Snackbar.LENGTH_INDEFINITE).setAction("RETRY", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        checkSystemLocPerm();
+                    }
+                });
+                snackbar.setActionTextColor(getResources().getColor(R.color.light_colorAccent));
+                snackbar.show();
             }
         });
     }

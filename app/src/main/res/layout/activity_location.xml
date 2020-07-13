@@ -1,4 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rootview"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -63,10 +64,26 @@
             android:textSize="20sp" />
 
         <TextView
+            android:id="@+id/tv_retry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_title"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/rect_rounded_border_blue"
+            android:drawablePadding="4dp"
+            android:gravity="center"
+            android:padding="4dp"
+            android:text="RETRY"
+            android:textColor="@color/colorAccent"
+            app:drawableLeftCompat="@drawable/ic_refresh_black_24dp"
+            app:drawableTint="@color/colorAccent" />
+
+        <TextView
             android:id="@+id/tv_desc"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tv_title"
+            android:layout_below="@id/tv_retry"
             android:text="We're waiting for your neighbours to join, so you can get useful local help &amp; connections.
 \n\n\nCan you get 10 verified neighbours to join?\nApply to be a Lubble Founding Member for your locality!"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Widget.ActionBar.Subtitle" />
