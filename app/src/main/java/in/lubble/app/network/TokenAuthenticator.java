@@ -2,19 +2,21 @@ package in.lubble.app.network;
 
 import android.text.TextUtils;
 import android.util.Log;
+
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
-import okhttp3.Authenticator;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.Route;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import okhttp3.Authenticator;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.Route;
 
 public class TokenAuthenticator implements Authenticator {
 
@@ -78,6 +80,7 @@ public class TokenAuthenticator implements Authenticator {
                 // Task timed out before it could complete.
                 // Drop the API request. Can do nothing.
                 Crashlytics.logException(e);
+                return null;
             }
         }
         // retry the 401 failed call with new token
