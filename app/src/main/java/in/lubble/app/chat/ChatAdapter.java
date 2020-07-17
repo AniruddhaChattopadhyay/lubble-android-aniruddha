@@ -16,7 +16,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -276,7 +275,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getMessage())) {
             sentChatViewHolder.messageTv.setVisibility(VISIBLE);
             if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
-                sentChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage() + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                sentChatViewHolder.messageTv.setText(chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0");
             } else {
                 sentChatViewHolder.messageTv.setText(chatData.getMessage());
             }
@@ -507,7 +506,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getMessage())) {
             recvdChatViewHolder.messageTv.setVisibility(VISIBLE);
             if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
-                recvdChatViewHolder.messageTv.setText(Html.fromHtml(chatData.getMessage() + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                recvdChatViewHolder.messageTv.setText(chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0");
             } else {
                 recvdChatViewHolder.messageTv.setText(chatData.getMessage());
             }
