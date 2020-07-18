@@ -51,6 +51,7 @@ public class LubbleSharedPrefs {
     private final String READ_EVENTS = "READ_EVENTS";
     private final String FLEXI_UPDATE_TS = "FLEXI_UPDATE_TS";
     private final String IS_MAP_DISCLAIMER_CLOSED = "IS_MAP_DISCLAIMER_CLOSED";
+    private final String SHARE_URL = "SHARE_URL";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -320,6 +321,15 @@ public class LubbleSharedPrefs {
 
     public boolean setSupportUid(String supportUid) {
         return preferences.edit().putString(SUPPORT_UID, supportUid).commit();
+    }
+
+    @Nullable
+    public String getShareUrl() {
+        return preferences.getString(SHARE_URL, null);
+    }
+
+    public boolean setShareUrl(String shareUrl) {
+        return preferences.edit().putString(SHARE_URL, shareUrl).commit();
     }
 
     @Nullable

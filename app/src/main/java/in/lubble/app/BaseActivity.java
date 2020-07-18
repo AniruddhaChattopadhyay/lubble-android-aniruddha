@@ -3,7 +3,6 @@ package in.lubble.app;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -44,6 +43,9 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.utils.ReferralUtils;
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
 
 public class BaseActivity extends AppCompatActivity {
 
@@ -55,7 +57,6 @@ public class BaseActivity extends AppCompatActivity {
     private com.google.android.play.core.tasks.Task<AppUpdateInfo> appUpdateInfoTask;
     private final static int IMMEDIATE_REQUEST_CODE = 312, FLEXI_REQUEST_CODE = 313;
     private InstallStateUpdatedListener listener;
-    private SharedPreferences sharedPreferences;
 
     private Button update;
     private ImageView cancelUpdate;
@@ -75,6 +76,16 @@ public class BaseActivity extends AppCompatActivity {
             try {
                 appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
                 checkMinAppVersion();
+
+                ReferralUtils.generateBranchUrl(this, new Branch.BranchLinkCreateListener() {
+                    @Override
+                    public void onLinkCreate(String url, BranchError error) {
+                        if (url != null) {
+                            LubbleSharedPrefs.getInstance().setShareUrl(url);
+                        }
+                    }
+                });
+
             } catch (Throwable e) {
                 Crashlytics.logException(e);
             }

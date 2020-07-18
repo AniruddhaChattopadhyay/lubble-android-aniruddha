@@ -1679,7 +1679,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        String message = chatDataList.get(highlightedPos).getMessage();
+                        ChatData chatData = chatDataList.get(highlightedPos);
+                        String suffix = "";
+                        ProfileData authorProfileData = profileDataMap.get(chatData.getAuthorUid());
+                        if (authorProfileData != null && !TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getShareUrl())) {
+                            suffix = "\n- " + authorProfileData.getInfo().getName() + " on Lubble app for " + LubbleSharedPrefs.getInstance().getLubbleName()
+                                    + "\n\nJoin " + LubbleSharedPrefs.getInstance().getLubbleName() + " on Lubble here: " + LubbleSharedPrefs.getInstance().getShareUrl();
+                        }
+                        String message = chatData.getMessage() + suffix;
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
                         Analytics.triggerEvent(AnalyticsEvents.MSG_COPIED, context);
@@ -1935,7 +1942,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        String message = chatDataList.get(highlightedPos).getMessage();
+                        ChatData chatData = chatDataList.get(highlightedPos);
+                        String suffix = "";
+                        ProfileData authorProfileData = profileDataMap.get(chatData.getAuthorUid());
+                        if (authorProfileData != null && !TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getShareUrl())) {
+                            suffix = "\n- " + authorProfileData.getInfo().getName() + " on Lubble app for " + LubbleSharedPrefs.getInstance().getLubbleName()
+                                    + "\n\nJoin " + LubbleSharedPrefs.getInstance().getLubbleName() + " on Lubble here: " + LubbleSharedPrefs.getInstance().getShareUrl();
+                        }
+                        String message = chatData.getMessage() + suffix;
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
                         break;
