@@ -25,6 +25,10 @@ public class ReferralUtils {
     private static final String TAG = "ReferralUtils";
 
     public static void generateBranchUrl(Context context, Branch.BranchLinkCreateListener callback) {
+        generateBranchUrl(context, null, callback);
+    }
+
+    public static void generateBranchUrl(Context context, @Nullable String campaignName, Branch.BranchLinkCreateListener callback) {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
                 .setCanonicalIdentifier("lbl/referralCode/" + FirebaseAuth.getInstance().getUid())
                 .setTitle("Join your neighbours on Lubble")
@@ -40,6 +44,9 @@ public class ReferralUtils {
                 .addControlParameter("$desktop_url", "https://lubble.in")
                 .addControlParameter("$ios_url", "https://lubble.in");
 
+        if (!TextUtils.isEmpty(campaignName)) {
+            linkProperties.setCampaign(campaignName);
+        }
         branchUniversalObject.generateShortUrl(context, linkProperties, callback);
     }
 

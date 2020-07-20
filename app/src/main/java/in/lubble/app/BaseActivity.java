@@ -77,7 +77,7 @@ public class BaseActivity extends AppCompatActivity {
                 appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
                 checkMinAppVersion();
 
-                ReferralUtils.generateBranchUrl(this, new Branch.BranchLinkCreateListener() {
+                ReferralUtils.generateBranchUrl(this, "msg_copy", new Branch.BranchLinkCreateListener() {
                     @Override
                     public void onLinkCreate(String url, BranchError error) {
                         if (url != null) {
