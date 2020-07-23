@@ -103,6 +103,7 @@ import static in.lubble.app.Constants.MAP_BTN_URL;
 import static in.lubble.app.Constants.MAP_HTML;
 import static in.lubble.app.Constants.MAP_SHARE_TEXT;
 import static in.lubble.app.Constants.MARKET_MAINTENANCE_TEXT;
+import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
 import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.Constants.REWARDS_EXPLAINER;
@@ -604,6 +605,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MARKET_MAINTENANCE_TEXT, "");
         map.put(IS_NOTIF_SNOOZE_ON, true);
         map.put(IS_TIME_SHOWN, false);
+        map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);

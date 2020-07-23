@@ -119,6 +119,7 @@ import retrofit2.Response;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static in.lubble.app.Constants.IS_TIME_SHOWN;
+import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
@@ -1607,6 +1608,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private String replaceSuffixKeys(String suffix, ProfileData authorProfileData) {
+        final String authorNameKey = "{authorname}";
+        final String lubbleNameKey = "{lubble}";
+        if (suffix.contains(authorNameKey)) {
+            if (authorProfileData != null) {
+                suffix = suffix.replace(authorNameKey, authorProfileData.getInfo().getName().split(" ")[0]);
+            } else {
+                suffix = suffix.replace(authorNameKey, "shared");
+            }
+        }
+        if (suffix.contains(lubbleNameKey)) {
+            suffix = suffix.replace(lubbleNameKey, LubbleSharedPrefs.getInstance().getLubbleName());
+        }
+        return suffix;
+    }
+
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
 
         private RelativeLayout rootLayout;
@@ -1682,9 +1699,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         ChatData chatData = chatDataList.get(highlightedPos);
                         String suffix = "";
                         ProfileData authorProfileData = profileDataMap.get(chatData.getAuthorUid());
-                        if (authorProfileData != null && !TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getShareUrl())) {
-                            suffix = "\n- " + authorProfileData.getInfo().getName() + " on Lubble, the neighbourhood app for " + LubbleSharedPrefs.getInstance().getLubbleName()
-                                    + ". Get it now: " + LubbleSharedPrefs.getInstance().getShareUrl();
+                        String msgCopyShareUrl = LubbleSharedPrefs.getInstance().getMsgCopyShareUrl();
+                        if (msgCopyShareUrl != null && !TextUtils.isEmpty(msgCopyShareUrl)) {
+                            suffix = FirebaseRemoteConfig.getInstance().getString(MSG_WATERMARK_TEXT);
+                            msgCopyShareUrl = msgCopyShareUrl.replace("https://", "");
+                            suffix = "\n" + replaceSuffixKeys(suffix, authorProfileData) + msgCopyShareUrl;
                         }
                         String message = chatData.getMessage() + suffix;
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
@@ -1942,14 +1961,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        ChatData chatData = chatDataList.get(highlightedPos);
-                        String suffix = "";
-                        ProfileData authorProfileData = profileDataMap.get(chatData.getAuthorUid());
-                        if (authorProfileData != null && !TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getShareUrl())) {
-                            suffix = "\n- " + authorProfileData.getInfo().getName() + " on Lubble, the neighbourhood app for " + LubbleSharedPrefs.getInstance().getLubbleName()
-                                    + ". Get it now: " + LubbleSharedPrefs.getInstance().getShareUrl();
-                        }
-                        String message = chatData.getMessage() + suffix;
+                        String message = chatDataList.get(highlightedPos).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
                         break;

@@ -25,18 +25,24 @@ public class ReferralUtils {
     private static final String TAG = "ReferralUtils";
 
     public static void generateBranchUrl(Context context, Branch.BranchLinkCreateListener callback) {
-        generateBranchUrl(context, null, callback);
+        generateBranchUrl(context, null, true, callback);
     }
 
-    public static void generateBranchUrl(Context context, @Nullable String campaignName, Branch.BranchLinkCreateListener callback) {
+    public static void generateBranchUrl(Context context, @Nullable String campaignName, boolean showLinkMetaData, Branch.BranchLinkCreateListener callback) {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
                 .setCanonicalIdentifier("lbl/referralCode/" + FirebaseAuth.getInstance().getUid())
-                .setTitle("Join your neighbours on Lubble")
-                .setContentDescription("Connect with your neighbourhood, get advice, help & be a part of the local community")
-                .setContentImageUrl("https://i.imgur.com/JFsrCOs.png")
-                .setContentIndexingMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
-                .setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
                 .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid()));
+
+        if (showLinkMetaData) {
+            branchUniversalObject.setTitle("Join your neighbours on Lubble")
+                    .setContentDescription("Connect with your neighbourhood, get advice, help & be a part of the local community")
+                    .setContentImageUrl("https://i.imgur.com/JFsrCOs.png")
+                    .setContentIndexingMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
+                    .setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC);
+        } else {
+            branchUniversalObject.setContentIndexingMode(BranchUniversalObject.CONTENT_INDEX_MODE.PRIVATE);
+            branchUniversalObject.setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PRIVATE);
+        }
 
         final LinkProperties linkProperties = new LinkProperties()
                 .setChannel("Android")
