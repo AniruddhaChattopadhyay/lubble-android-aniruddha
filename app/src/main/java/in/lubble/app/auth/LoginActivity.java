@@ -12,7 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
-import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
@@ -31,6 +30,7 @@ import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.auth.UserInfo;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -123,7 +123,7 @@ public class LoginActivity extends BaseActivity {
                     .setWhitelistedCountries(whitelistedCountries)
                     .build();
         } catch (IllegalStateException ex) {
-            Crashlytics.logException(ex);
+            FirebaseCrashlytics.getInstance().recordException(ex);
             idpConfig = new AuthUI.IdpConfig.PhoneBuilder()
                     .setWhitelistedCountries(whitelistedCountries)
                     .build();
@@ -211,7 +211,7 @@ public class LoginActivity extends BaseActivity {
                     finish();
                     return;
                 }
-                Crashlytics.logException(response.getError());
+                FirebaseCrashlytics.getInstance().recordException(response.getError());
 
                 if (response.getError() != null && response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Toast.makeText(this, R.string.check_internet, Toast.LENGTH_SHORT).show();
@@ -267,7 +267,7 @@ public class LoginActivity extends BaseActivity {
             public void onCancelled(DatabaseError databaseError) {
                 progressDialog.dismiss();
                 Toast.makeText(LoginActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
+                FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
             }
         });
     }
@@ -320,8 +320,9 @@ public class LoginActivity extends BaseActivity {
                                     // Write failed
                                     if (!isFinishing()) {
                                         progressDialog.dismiss();
-                                        Crashlytics.log("OMG Failed to write FB profile info");
-                                        Crashlytics.logException(e);
+                                        FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
+                                        crashlytics.log("OMG Failed to write FB profile info");
+                                        crashlytics.recordException(e);
                                         if (!isFinishing()) {
                                             Toast.makeText(LoginActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                         }

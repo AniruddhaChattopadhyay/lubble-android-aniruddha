@@ -31,7 +31,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatMessage;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -43,6 +42,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -211,14 +211,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         LubbleSharedPrefs.getInstance().setLubbleId((String) map.keySet().toArray()[0]);
                         initEverything();
                     } else {
-                        Crashlytics.logException(new IllegalAccessException("User has NO lubble ID"));
+                        FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("User has NO lubble ID"));
                         UserUtils.logout(MainActivity.this);
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
                     UserUtils.logout(MainActivity.this);
                 }
             });
@@ -231,7 +231,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     String phNum = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().substring(3, 13);
                     fetchAssociatedSeller(phNum);
                 } catch (IndexOutOfBoundsException e) {
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
         }
@@ -710,7 +710,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             }
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
         }
 
         final FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
@@ -765,7 +765,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         com.segment.analytics.Analytics.with(MainActivity.this).identify(firebaseAuth.getUid(), new Traits().putAvatar(profileInfo.getThumbnail()), null);
                     }
                 } catch (IllegalArgumentException e) {
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
 
@@ -815,8 +815,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void logUser(FirebaseUser currentUser) {
-        Crashlytics.setUserIdentifier(currentUser.getUid());
-        Crashlytics.setUserName(currentUser.getDisplayName());
+        FirebaseCrashlytics.getInstance().setUserId(currentUser.getUid());
     }
 
     private void syncFcmToken() {

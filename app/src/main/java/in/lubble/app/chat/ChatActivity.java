@@ -27,7 +27,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -147,6 +146,76 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         context.startActivity(intent);
     }
 
+    /**
+     * ensures that notifs for this chat do not appear when activity is in foreground
+     */
+    private BroadcastReceiver notificationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Since we will process the message and update the UI, we don't need to show a notif in Status Bar
+            // To do this, we call abortBroadcast()
+            Log.d("NotificationResultRecei", "onReceive: in activity");
+            if (intent != null && intent.hasExtra("remoteMessage")) {
+                final RemoteMessage remoteMessage = intent.getParcelableExtra("remoteMessage");
+                Gson gson = new Gson();
+                final Map<String, String> dataMap = remoteMessage.getData();
+                JsonElement jsonElement = gson.toJsonTree(dataMap);
+                NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
+                String type = dataMap.get("type");
+                if ("chat".equalsIgnoreCase(type)) {
+                    if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                        abortBroadcast();
+                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_ABORTED, dataMap, ChatActivity.this);
+                    }
+                } else if ("dm".equalsIgnoreCase(type)) {
+                    if (notifData.getGroupId().equalsIgnoreCase(dmId)) {
+                        abortBroadcast();
+                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_ABORTED, dataMap, ChatActivity.this);
+                    }
+                } else {
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("chatactiv: notif recvd with illegal type"));
+                }
+            } else {
+                FirebaseCrashlytics.getInstance().recordException(new MissingFormatArgumentException("chatactiv: notif broadcast recvd with no intent data"));
+            }
+        }
+    };
+
+    private void closeSearch() {
+        UiUtils.hideKeyboard(ChatActivity.this);
+        searchView.setQuery("", false);
+        searchView.clearFocus();
+        searchResultData = null;
+        currSearchCursorPos = 0;
+        toolbar.clearFocus();
+        toggleSearchViewVisibility(false);
+        targetFrag.removeSearchHighlights();
+    }
+
+    private GroupData groupData;
+
+    private ChatFragment getTargetChatFrag(String msgId, boolean isJoining) {
+        if (!TextUtils.isEmpty(groupId)) {
+            return targetFrag = ChatFragment.newInstanceForGroup(
+                    groupId, isJoining, msgId, (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
+            );
+        } else if (!TextUtils.isEmpty(dmId)) {
+            return targetFrag = ChatFragment.newInstanceForDm(
+                    dmId, msgId,
+                    getIntent().getStringExtra(EXTRA_ITEM_TITLE), (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
+            );
+        } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
+            return targetFrag = ChatFragment.newInstanceForEmptyDm(
+                    getIntent().getStringExtra(EXTRA_RECEIVER_ID),
+                    getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
+                    getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL),
+                    getIntent().getStringExtra(EXTRA_ITEM_TITLE)
+            );
+        } else {
+            throw new RuntimeException("Invalid Args, see the valid factory methods by searching for this error string");
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -217,7 +286,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 }
             }
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
         }
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -309,76 +378,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             }
         });
     }
-
-    private void closeSearch() {
-        UiUtils.hideKeyboard(ChatActivity.this);
-        searchView.setQuery("", false);
-        searchView.clearFocus();
-        searchResultData = null;
-        currSearchCursorPos = 0;
-        toolbar.clearFocus();
-        toggleSearchViewVisibility(false);
-        targetFrag.removeSearchHighlights();
-    }
-
-    private GroupData groupData;
-
-    private ChatFragment getTargetChatFrag(String msgId, boolean isJoining) {
-        if (!TextUtils.isEmpty(groupId)) {
-            return targetFrag = ChatFragment.newInstanceForGroup(
-                    groupId, isJoining, msgId, (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
-            );
-        } else if (!TextUtils.isEmpty(dmId)) {
-            return targetFrag = ChatFragment.newInstanceForDm(
-                    dmId, msgId,
-                    getIntent().getStringExtra(EXTRA_ITEM_TITLE), (ChatData) getIntent().getSerializableExtra(EXTRA_CHAT_DATA), (Uri) getIntent().getParcelableExtra(EXTRA_IMG_URI_DATA)
-            );
-        } else if (getIntent().hasExtra(EXTRA_RECEIVER_ID) && getIntent().hasExtra(EXTRA_RECEIVER_NAME)) {
-            return targetFrag = ChatFragment.newInstanceForEmptyDm(
-                    getIntent().getStringExtra(EXTRA_RECEIVER_ID),
-                    getIntent().getStringExtra(EXTRA_RECEIVER_NAME),
-                    getIntent().getStringExtra(EXTRA_RECEIVER_DP_URL),
-                    getIntent().getStringExtra(EXTRA_ITEM_TITLE)
-            );
-        } else {
-            throw new RuntimeException("Invalid Args, see the valid factory methods by searching for this error string");
-        }
-    }
-
-    /**
-     * ensures that notifs for this chat do not appear when activity is in foreground
-     */
-    private BroadcastReceiver notificationReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Since we will process the message and update the UI, we don't need to show a notif in Status Bar
-            // To do this, we call abortBroadcast()
-            Log.d("NotificationResultRecei", "onReceive: in activity");
-            if (intent != null && intent.hasExtra("remoteMessage")) {
-                final RemoteMessage remoteMessage = intent.getParcelableExtra("remoteMessage");
-                Gson gson = new Gson();
-                final Map<String, String> dataMap = remoteMessage.getData();
-                JsonElement jsonElement = gson.toJsonTree(dataMap);
-                NotifData notifData = gson.fromJson(jsonElement, NotifData.class);
-                String type = dataMap.get("type");
-                if ("chat".equalsIgnoreCase(type)) {
-                    if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
-                        abortBroadcast();
-                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_ABORTED, dataMap, ChatActivity.this);
-                    }
-                } else if ("dm".equalsIgnoreCase(type)) {
-                    if (notifData.getGroupId().equalsIgnoreCase(dmId)) {
-                        abortBroadcast();
-                        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_ABORTED, dataMap, ChatActivity.this);
-                    }
-                } else {
-                    Crashlytics.logException(new IllegalArgumentException("chatactiv: notif recvd with illegal type"));
-                }
-            } else {
-                Crashlytics.logException(new MissingFormatArgumentException("chatactiv: notif broadcast recvd with no intent data"));
-            }
-        }
-    };
 
     @Override
     protected void onResume() {

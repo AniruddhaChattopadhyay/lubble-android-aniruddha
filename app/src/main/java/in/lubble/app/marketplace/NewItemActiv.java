@@ -29,7 +29,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.signature.ObjectKey;
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatMessage;
 import com.google.android.material.snackbar.Snackbar;
@@ -319,7 +318,7 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
                         Analytics.triggerEvent(AnalyticsEvents.ITEM_NOT_FOUND, bundle, NewItemActiv.this);
                         Toast.makeText(NewItemActiv.this, "Item Not Found", Toast.LENGTH_LONG).show();
                     } else {
-                        Crashlytics.logException(new IllegalArgumentException("Item null for item ID: " + itemId));
+                        FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("Item null for item ID: " + itemId));
                         Toast.makeText(NewItemActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
                     finish();

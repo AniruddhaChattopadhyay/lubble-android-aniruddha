@@ -13,7 +13,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -23,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -135,8 +135,8 @@ public class NameFrag extends Fragment {
                                                                 // Write failed
                                                                 if (isAdded() && isVisible()) {
                                                                     progressDialog.dismiss();
-                                                                    Crashlytics.log("OMG Failed to write profile info inside NameFrag");
-                                                                    Crashlytics.logException(e);
+                                                                    FirebaseCrashlytics.getInstance().log("OMG Failed to write profile info inside NameFrag");
+                                                                    FirebaseCrashlytics.getInstance().recordException(e);
                                                                     if (isAdded() && isVisible()) {
                                                                         Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                                                     }

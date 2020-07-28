@@ -36,7 +36,6 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -252,7 +251,7 @@ public class LocationActivity extends BaseActivity {
                 }
             } else {
                 Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
-                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                FirebaseCrashlytics.getInstance().recordException(new IllegalStateException(error.getMessage()));
                 if (!isFinishing()) {
                     Toast.makeText(LocationActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
                 }

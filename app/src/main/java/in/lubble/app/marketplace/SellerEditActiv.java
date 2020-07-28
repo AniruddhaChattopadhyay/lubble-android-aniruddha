@@ -22,7 +22,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.signature.ObjectKey;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -229,7 +228,7 @@ public class SellerEditActiv extends BaseActivity implements View.OnClickListene
                     setTitle(sellerData.getName());
 
                 } else {
-                    Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
                     Toast.makeText(SellerEditActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }

@@ -18,10 +18,15 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.crashlytics.android.Crashlytics;
+
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
+import java.util.List;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
@@ -34,8 +39,6 @@ import io.branch.referral.BranchError;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.List;
 
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
@@ -100,6 +103,25 @@ public class ReferralHistoryFragment extends Fragment {
         return view;
     }
 
+    final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
+        @Override
+        public void onLinkCreate(String url, BranchError error) {
+            if (url != null) {
+                Log.d(TAG, "got my Branch link to share: " + url);
+                sharingUrl = url;
+                if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
+                    sharingProgressDialog.dismiss();
+                }
+            } else {
+                Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
+                FirebaseCrashlytics.getInstance().recordException(new IllegalStateException(error.getMessage()));
+                if (isAdded() && isVisible()) {
+                    Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
+
     private void fetchReferralHistory() {
         progressBar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
@@ -124,7 +146,7 @@ public class ReferralHistoryFragment extends Fragment {
                     }
 
                 } else if (isAdded() && isVisible()) {
-                    Crashlytics.log("referral history bad response");
+                    FirebaseCrashlytics.getInstance().log("referral history bad response");
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -139,25 +161,6 @@ public class ReferralHistoryFragment extends Fragment {
             }
         });
     }
-
-    final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
-        @Override
-        public void onLinkCreate(String url, BranchError error) {
-            if (url != null) {
-                Log.d(TAG, "got my Branch link to share: " + url);
-                sharingUrl = url;
-                if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
-                    sharingProgressDialog.dismiss();
-                }
-            } else {
-                Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
-                Crashlytics.logException(new IllegalStateException(error.getMessage()));
-                if (isAdded() && isVisible()) {
-                    Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-    };
 
     private void initClickHandlers() {
         copyLinkContainer.setOnClickListener(new View.OnClickListener() {

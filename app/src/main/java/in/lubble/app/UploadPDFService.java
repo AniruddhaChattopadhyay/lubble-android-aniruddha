@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -185,7 +184,7 @@ public class UploadPDFService extends BaseTaskService {
                 renderer.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                Crashlytics.logException(ex);
+                FirebaseCrashlytics.getInstance().recordException(ex);
             }
         }
         return bitmap;

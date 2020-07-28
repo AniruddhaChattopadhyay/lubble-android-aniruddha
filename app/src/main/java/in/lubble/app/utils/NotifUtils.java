@@ -23,7 +23,6 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
 
@@ -410,7 +409,7 @@ public class NotifUtils {
             }
             Analytics.triggerEvent(eventName, bundle, context);
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
 
@@ -420,7 +419,7 @@ public class NotifUtils {
             bundle.putString("groupId", groupId);
             Analytics.triggerEvent(eventName, bundle, context);
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
 

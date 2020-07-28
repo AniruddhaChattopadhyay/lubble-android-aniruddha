@@ -12,7 +12,6 @@ import android.widget.ImageView;
 
 import androidx.appcompat.widget.Toolbar;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -113,7 +112,7 @@ public class AttachVideoActivity extends BaseActivity {
         try {
             fileDataSource.open(dataSpec);
         } catch (FileDataSource.FileDataSourceException e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
 

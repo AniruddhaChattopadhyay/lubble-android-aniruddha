@@ -23,7 +23,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -252,7 +251,7 @@ public class ItemListActiv extends BaseActivity {
                         noItemsHintTv.setVisibility(View.VISIBLE);
                     }
                 } else if (categoryData == null) {
-                    Crashlytics.logException(new IllegalArgumentException("Category null for cat id: " + sellerId));
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("Category null for cat id: " + sellerId));
                     Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
@@ -387,7 +386,7 @@ public class ItemListActiv extends BaseActivity {
                         }
                     });
                 } else if (sellerData == null) {
-                    Crashlytics.logException(new IllegalArgumentException("sellerData null for seller id: " + sellerId));
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("sellerData null for seller id: " + sellerId));
                     Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();

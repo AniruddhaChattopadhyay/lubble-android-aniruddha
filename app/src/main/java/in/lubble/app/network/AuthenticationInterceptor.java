@@ -1,11 +1,11 @@
 package in.lubble.app.network;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -28,14 +28,15 @@ public class AuthenticationInterceptor implements Interceptor {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             Task<GetTokenResult> task = user.getIdToken(false);
+            FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
             try {
                 GetTokenResult tokenResult = Tasks.await(task);
                 authToken = tokenResult.getToken();
             } catch (ExecutionException e) {
-                Crashlytics.logException(e);
+                crashlytics.recordException(e);
                 e.printStackTrace();
             } catch (InterruptedException e) {
-                Crashlytics.logException(e);
+                crashlytics.recordException(e);
                 e.printStackTrace();
             }
         }

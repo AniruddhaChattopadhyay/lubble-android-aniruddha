@@ -19,9 +19,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -187,7 +187,7 @@ public class ChatMoreFragment extends Fragment {
                         for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                             if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
                                 final DataSnapshot userGroupsSnapshot = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups");
-                                Crashlytics.log("groupid: " + groupId);
+                                FirebaseCrashlytics.getInstance().log("groupid: " + groupId);
                                 if (userGroupsSnapshot.hasChild(groupId) && userGroupsSnapshot.child(groupId).hasChild("joined") && (boolean) userGroupsSnapshot.child(groupId).child("joined").getValue()) {
                                     //is joined
                                     flairEt.setEnabled(true);

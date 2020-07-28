@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,10 +42,10 @@ public class NotificationResultReceiver extends BroadcastReceiver {
             } else if ("dm".equalsIgnoreCase(type)) {
                 createDmNotif(context, dataMap);
             } else {
-                Crashlytics.logException(new IllegalArgumentException("NotifResultRecvr: notif recvd with illegal type"));
+                FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("NotifResultRecvr: notif recvd with illegal type"));
             }
         } else {
-            Crashlytics.logException(new MissingFormatArgumentException("NotifResultRecvr: notif broadcast recvd with no intent data"));
+            FirebaseCrashlytics.getInstance().recordException(new MissingFormatArgumentException("NotifResultRecvr: notif broadcast recvd with no intent data"));
         }
     }
 

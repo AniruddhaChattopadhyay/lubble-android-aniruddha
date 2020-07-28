@@ -11,7 +11,6 @@ import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.multidex.MultiDexApplication;
 
 import com.clevertap.android.sdk.ActivityLifecycleCallback;
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -27,7 +26,6 @@ import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
-import io.fabric.sdk.android.Fabric;
 
 import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
 
@@ -66,7 +64,6 @@ public class LubbleApp extends MultiDexApplication {
         SnoozedGroupsSharedPrefs.initializeInstance(getApplicationContext());
         // REMEMBER: Clear the new sharedPrefs file in UserUtils#logout()
 
-        Fabric.with(this, new Crashlytics());
         // Create an analytics client with the given context and Segment write key.
         String writeKey;
         if (BuildConfig.DEBUG) {

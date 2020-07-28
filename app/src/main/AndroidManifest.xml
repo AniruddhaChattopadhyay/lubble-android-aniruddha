@@ -390,9 +390,6 @@
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
         <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="6fd5a7acad385fd4a56944a42c164622f03560ca" />
-        <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
         <meta-data

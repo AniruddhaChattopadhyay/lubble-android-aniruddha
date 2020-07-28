@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.util.ArrayList;
@@ -222,7 +222,7 @@ public class MarketplaceFrag extends Fragment {
                     }
                 } else if (isAdded() && isVisible()) {
                     viewAllTv.setText("View All");
-                    Crashlytics.logException(new IllegalArgumentException("itemArrayList is NULL"));
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("itemArrayList is NULL"));
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -310,7 +310,7 @@ public class MarketplaceFrag extends Fragment {
                         pagerContainer.setVisibility(View.GONE);
                     }
                 } else if (isAdded() && isVisible()) {
-                    Crashlytics.log("Marketplace bad response");
+                    FirebaseCrashlytics.getInstance().log("Marketplace bad response");
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }

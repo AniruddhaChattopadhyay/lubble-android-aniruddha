@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.cepheuen.elegantnumberbutton.view.ElegantNumberButton;
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -153,7 +152,7 @@ public class EventGroupJoinedActivity extends BaseActivity {
                     });
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
         });

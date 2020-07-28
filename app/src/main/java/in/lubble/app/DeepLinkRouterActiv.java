@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
@@ -31,7 +30,7 @@ public class DeepLinkRouterActiv extends BaseActivity {
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             // user is NOT logged in
             finish();
-            Crashlytics.logException(new IllegalAccessException("tried to open deeplink without login"));
+            FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("tried to open deeplink without login"));
             return;
         }
 
@@ -47,7 +46,7 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 openShopWebLink(uri);
             }
         } else {
-            Crashlytics.logException(new IllegalArgumentException("ILLEGAL INTENT for DeepLinkRouterActiv"));
+            FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("ILLEGAL INTENT for DeepLinkRouterActiv"));
         }
     }
 

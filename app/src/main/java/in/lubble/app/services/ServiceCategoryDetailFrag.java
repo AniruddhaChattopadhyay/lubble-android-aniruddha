@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
@@ -94,13 +94,13 @@ public class ServiceCategoryDetailFrag extends Fragment {
                             }
                         }
                     } else {
-                        Crashlytics.logException(new IllegalArgumentException("Category has not services hawww"));
+                        FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("Category has not services hawww"));
                         Toast.makeText(getContext(), "No Services for this category", Toast.LENGTH_SHORT).show();
                         getActivity().finish();
                     }
 
                 } else if (isAdded() && isVisible()) {
-                    Crashlytics.log("categories services list bad response");
+                    FirebaseCrashlytics.getInstance().log("categories services list bad response");
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }

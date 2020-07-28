@@ -5,8 +5,6 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.Nullable;
 
-import com.crashlytics.android.Crashlytics;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -121,7 +119,7 @@ public class LubbleSharedPrefs {
             UserUtils.logout(LubbleApp.getAppContext());
 
             final IllegalArgumentException illegalArgumentException = new IllegalArgumentException("Tried to access Lubble ID but was not found in Shared Prefs");
-            Crashlytics.logException(illegalArgumentException);
+            FirebaseCrashlytics.getInstance().recordException(illegalArgumentException);
             throw illegalArgumentException;
         }
         return preferences.getString(LUBBLE_ID, "");

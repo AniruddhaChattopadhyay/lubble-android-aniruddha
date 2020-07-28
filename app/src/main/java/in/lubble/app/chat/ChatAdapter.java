@@ -59,11 +59,11 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -722,7 +722,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                     showPollResults(baseViewHolder, chatData);
                                 } else {
                                     if (databaseError != null) {
-                                        Crashlytics.logException(new Exception("poll button click error code: " + databaseError.getCode()));
+                                        FirebaseCrashlytics.getInstance().recordException(new Exception("poll button click error code: " + databaseError.getCode()));
                                         Toast.makeText(context, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(context, R.string.all_try_again, Toast.LENGTH_SHORT).show();
@@ -886,7 +886,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
 
                     } else if (activity != null && context != null && !activity.isFinishing()) {
-                        Crashlytics.log("youtube thumbnail failed to fetch with error code: " + response.code());
+                        FirebaseCrashlytics.getInstance().log("youtube thumbnail failed to fetch with error code: " + response.code());
                         youtubeProgressBar.setVisibility(GONE);
                         youtubePlayIv.setImageResource(R.drawable.ic_error_outline_black_24dp);
                     }
@@ -1204,7 +1204,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
                     Log.e(TAG, "onFailure: ", exception);
-                    Crashlytics.logException(exception);
+                    FirebaseCrashlytics.getInstance().recordException(exception);
                 }
             }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
@@ -1450,7 +1450,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void toggleLubb(int pos, boolean isSrcDoubleTap) {
         if (pos == -1) {
             Toast.makeText(activity, "Please try liking again", Toast.LENGTH_SHORT).show();
-            Crashlytics.logException(new ArrayIndexOutOfBoundsException("while lubbing a msg. length = " + chatDataList.size() + " and index = " + pos));
+            FirebaseCrashlytics.getInstance().recordException(new ArrayIndexOutOfBoundsException("while lubbing a msg. length = " + chatDataList.size() + " and index = " + pos));
             return;
         }
         final ChatData chatData = chatDataList.get(pos);
@@ -1746,7 +1746,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 if (getAdapterPosition() == RecyclerView.NO_POSITION) {
                     Toast.makeText(activity, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
-                    Crashlytics.logException(new ArrayIndexOutOfBoundsException("index = -1"));
+                    FirebaseCrashlytics.getInstance().recordException(new ArrayIndexOutOfBoundsException("index = -1"));
                     return true;
                 }
                 switch (touchedView.getId()) {

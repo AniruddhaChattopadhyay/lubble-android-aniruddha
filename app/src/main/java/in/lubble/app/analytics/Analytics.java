@@ -16,6 +16,7 @@ import com.freshchat.consumer.sdk.exception.MethodNotAllowedException;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.segment.analytics.Properties;
 import com.segment.analytics.Traits;
 
@@ -97,7 +98,7 @@ public class Analytics {
         firebaseAnalytics.setUserProperty("uid", userId);
         firebaseAnalytics.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
+        FirebaseCrashlytics.getInstance().setUserId(userId);
         if (currentUser != null) {
             firebaseAnalytics.setUserProperty("name", currentUser.getDisplayName());
         }
@@ -156,6 +157,7 @@ public class Analytics {
         final FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser != null) {
             // user is logged in
+            FirebaseCrashlytics.getInstance().setUserId(currentUser.getUid());
             final Traits traits = new Traits();
             traits.putName(currentUser.getDisplayName());
             traits.putPhone(currentUser.getPhoneNumber());

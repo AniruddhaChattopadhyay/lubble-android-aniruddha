@@ -10,13 +10,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NavUtils;
-import com.crashlytics.android.Crashlytics;
+
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
+
 import in.lubble.app.Constants;
 import in.lubble.app.R;
 import in.lubble.app.utils.TouchableYoutubeFragment;
@@ -207,7 +209,7 @@ public class FullscreenYoutubeActiv extends AppCompatActivity implements YouTube
     @Override
     public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
         Log.e(TAG, "onInitializationFailure: " + youTubeInitializationResult.toString());
-        Crashlytics.logException(new Exception("youtube init failed with error: " + youTubeInitializationResult.toString()));
+        FirebaseCrashlytics.getInstance().recordException(new Exception("youtube init failed with error: " + youTubeInitializationResult.toString()));
         finish();
     }
 
