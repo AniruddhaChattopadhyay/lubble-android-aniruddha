@@ -42,12 +42,12 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.segment.analytics.Traits;
@@ -820,11 +820,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void syncFcmToken() {
-        final String token = FirebaseInstanceId.getInstance().getToken();
-        getThisUserRef().child("token")
-                .setValue(token);
-        CleverTapAPI.getDefaultInstance(this).pushFcmRegistrationId(token, true);
-        Freshchat.getInstance(this).setPushRegistrationToken(token);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            FirebaseAuth.getInstance().getCurrentUser().getIdToken(false).addOnCompleteListener(this, new OnCompleteListener<GetTokenResult>() {
+                @Override
+                public void onComplete(@NonNull Task<GetTokenResult> task) {
+                    if (task.isSuccessful()) {
+                        String token = task.getResult().getToken();
+                        getThisUserRef().child("token")
+                                .setValue(token);
+                        CleverTapAPI.getDefaultInstance(MainActivity.this).pushFcmRegistrationId(token, true);
+                        Freshchat.getInstance(MainActivity.this).setPushRegistrationToken(token);
+                    }
+                }
+            });
+        }
     }
 
     private void updateDefaultGroupId() {

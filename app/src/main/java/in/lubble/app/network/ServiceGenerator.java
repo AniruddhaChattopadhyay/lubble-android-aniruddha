@@ -1,8 +1,5 @@
 package in.lubble.app.network;
 
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.GetTokenResult;
 import in.lubble.app.BuildConfig;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -38,13 +35,8 @@ public class ServiceGenerator {
 
     public static <S> S createService(Class<S> serviceClass) {
 
-        String authToken = "";
-        final Task<GetTokenResult> accessTokenTask = FirebaseAuth.getInstance().getAccessToken(false);
-        if (accessTokenTask.isComplete()) {
-            authToken = accessTokenTask.getResult().getToken();
-        }
         AuthenticationInterceptor interceptor =
-                new AuthenticationInterceptor(authToken);
+                new AuthenticationInterceptor();
 
         httpClient.authenticator(TokenAuthenticator.getInstance());
 

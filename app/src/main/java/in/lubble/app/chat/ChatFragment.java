@@ -605,7 +605,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Crashlytics.logException(databaseError.toException());
             }
         });
     }
@@ -798,7 +798,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-
+                            Crashlytics.logException(databaseError.toException());
                         }
                     });
                 }
@@ -816,7 +816,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                            Crashlytics.logException(databaseError.toException());
                         }
                     });
                 }
@@ -866,7 +866,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    Crashlytics.logException(databaseError.toException());
                 }
             });
         }
@@ -908,7 +908,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
-
+                                Crashlytics.logException(databaseError.toException());
                             }
                         });
                         composeContainer.setVisibility(View.GONE);
@@ -924,7 +924,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Crashlytics.logException(databaseError.toException());
             }
         });
     }
@@ -956,7 +956,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    Crashlytics.logException(databaseError.toException());
                 }
             });
 
@@ -1115,7 +1115,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Crashlytics.logException(databaseError.toException());
             }
         });
         final Bundle bundle = new Bundle();
@@ -1136,7 +1136,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Crashlytics.logException(databaseError.toException());
             }
         });
     }
@@ -1456,7 +1456,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                    Crashlytics.logException(databaseError.toException());
                 }
             });
         } else {
@@ -1724,7 +1724,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                        Crashlytics.logException(databaseError.toException());
                     }
                 });
 
@@ -1806,14 +1806,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
+                        Crashlytics.logException(databaseError.toException());
                     }
                 });
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Crashlytics.logException(databaseError.toException());
             }
         });
     }
@@ -1852,7 +1852,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                Crashlytics.logException(databaseError.toException());
             }
         });
     }

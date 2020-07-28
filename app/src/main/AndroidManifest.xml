@@ -15,15 +15,12 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <meta-data
-            android:name="firebase_performance_logcat_enabled"
-            android:value="true" />
         <activity android:name=".chat.BlockedChatsActiv"
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".utils.FullScreenVideoActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"></activity>
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".leaderboard.LeaderboardActivity"
             android:configChanges="orientation"

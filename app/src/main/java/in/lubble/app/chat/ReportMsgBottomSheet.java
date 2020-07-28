@@ -93,7 +93,7 @@ public class ReportMsgBottomSheet extends BottomSheetDialogFragment {
         final ArrayList<String> reasonList = new ArrayList<>();
         reasonList.add("I just don't like it");
         reasonList.add("Spam");
-        reasonList.add("Unsolicited/Self Promotion");
+        reasonList.add("Unsolicited self promotion");
         reasonList.add("Sale or promotion of drugs");
         reasonList.add("Nudity");
         reasonList.add("Harassment or bullying");
