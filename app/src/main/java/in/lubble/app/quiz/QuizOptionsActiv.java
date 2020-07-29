@@ -11,8 +11,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
+import java.util.ArrayList;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.Constants;
 import in.lubble.app.R;
@@ -24,8 +28,6 @@ import in.lubble.app.widget.NonSwipeableViewPager;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import java.util.ArrayList;
 
 import static in.lubble.app.utils.UiUtils.disableTabLayoutClicks;
 

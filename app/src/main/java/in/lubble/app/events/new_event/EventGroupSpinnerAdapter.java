@@ -7,11 +7,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.util.ArrayList;
+
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
-
-import java.util.ArrayList;
 
 public class EventGroupSpinnerAdapter extends ArrayAdapter<GroupData> {
 

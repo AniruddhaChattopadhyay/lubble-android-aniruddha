@@ -13,10 +13,16 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -25,16 +31,24 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.segment.analytics.Traits;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.FetchAddressIntentService;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileAddress;
-import permissions.dispatcher.*;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
-import static in.lubble.app.FetchAddressIntentService.*;
+import static in.lubble.app.FetchAddressIntentService.LOCATION_DATA_EXTRA;
+import static in.lubble.app.FetchAddressIntentService.RECEIVER;
+import static in.lubble.app.FetchAddressIntentService.RESULT_DATA_KEY;
 import static in.lubble.app.chat.books.AddressChooserActivPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
 
 @RuntimePermissions

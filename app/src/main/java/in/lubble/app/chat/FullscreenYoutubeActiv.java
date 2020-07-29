@@ -18,6 +18,7 @@ import androidx.core.app.NavUtils;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import in.lubble.app.Constants;
 import in.lubble.app.R;

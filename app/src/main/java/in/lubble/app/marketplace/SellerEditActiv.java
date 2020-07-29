@@ -24,6 +24,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.json.JSONException;
 import org.json.JSONObject;

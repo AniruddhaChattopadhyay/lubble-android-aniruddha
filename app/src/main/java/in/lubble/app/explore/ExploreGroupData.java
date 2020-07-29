@@ -1,6 +1,7 @@
 package in.lubble.app.explore;
 
 import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.SerializedName;
 
 public class ExploreGroupData {

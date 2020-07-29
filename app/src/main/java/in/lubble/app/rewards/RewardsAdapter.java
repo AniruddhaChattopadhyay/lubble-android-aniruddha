@@ -6,24 +6,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.rewards.data.RewardsData;
 import in.lubble.app.rewards.data.RewardsRecordData;
 import in.lubble.app.utils.RoundedCornersTransformation;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static in.lubble.app.Constants.REWARDS_EXPLAINER;
 import static in.lubble.app.utils.UiUtils.dpToPx;

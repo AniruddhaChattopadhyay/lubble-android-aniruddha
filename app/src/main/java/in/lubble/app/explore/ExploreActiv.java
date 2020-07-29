@@ -24,7 +24,6 @@ import in.lubble.app.utils.FragUtils;
 import static in.lubble.app.analytics.AnalyticsEvents.EXPLORE_CONTINUE_CLICKED;
 import static in.lubble.app.analytics.AnalyticsEvents.EXPLORE_DIALOG_SHOWN;
 import static in.lubble.app.firebase.RealtimeDbHelper.bulkJoinGroupRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 
 public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 

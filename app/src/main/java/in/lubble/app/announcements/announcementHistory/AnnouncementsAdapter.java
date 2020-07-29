@@ -4,13 +4,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.recyclerview.widget.RecyclerView;
-import in.lubble.app.R;
-import in.lubble.app.models.AnnouncementData;
-import in.lubble.app.utils.DateTimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import in.lubble.app.R;
+import in.lubble.app.models.AnnouncementData;
+import in.lubble.app.utils.DateTimeUtils;
 
 public class AnnouncementsAdapter extends RecyclerView.Adapter<AnnouncementsAdapter.AnnouncementViewHolder> {
 

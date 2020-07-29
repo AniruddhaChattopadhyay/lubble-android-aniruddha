@@ -23,6 +23,7 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
