@@ -79,15 +79,16 @@ public class BaseActivity extends AppCompatActivity {
                 appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
                 checkMinAppVersion();
 
-                ReferralUtils.generateBranchUrl(this, "msg_copy", false, new Branch.BranchLinkCreateListener() {
-                    @Override
-                    public void onLinkCreate(String url, BranchError error) {
-                        if (url != null) {
-                            LubbleSharedPrefs.getInstance().setMsgCopyShareUrl(url);
+                if (TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getMsgCopyShareUrl())) {
+                    ReferralUtils.generateBranchUrl(this, "msg_copy", false, new Branch.BranchLinkCreateListener() {
+                        @Override
+                        public void onLinkCreate(String url, BranchError error) {
+                            if (url != null) {
+                                LubbleSharedPrefs.getInstance().setMsgCopyShareUrl(url);
+                            }
                         }
-                    }
-                });
-
+                    });
+                }
             } catch (Throwable e) {
                 crashlytics.recordException(e);
             }
