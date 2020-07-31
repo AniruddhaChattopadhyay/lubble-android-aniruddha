@@ -26,6 +26,7 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
@@ -130,7 +131,7 @@ public class UiUtils {
 
         final TextView gotItTv = sheetView.findViewById(R.id.tv_got_it);
         final ImageView iconIv = sheetView.findViewById(R.id.iv_bottom_sheet_icon);
-        final TextView titleTv = sheetView.findViewById(R.id.tv_bottom_sheet_title);
+        final EmojiTextView titleTv = sheetView.findViewById(R.id.tv_bottom_sheet_title);
         final TextView subTitleTv = sheetView.findViewById(R.id.tv_bottom_sheet_subtitle);
 
         iconIv.setImageResource(iconId);

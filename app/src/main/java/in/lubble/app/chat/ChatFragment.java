@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -939,9 +940,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     if (isAdded()) {
                         String lubbleName = dataSnapshot.child("title").getValue(String.class);
                         showBottomSheetAlert(getContext(), getLayoutInflater(),
-                                String.format(getString(R.string.lubble_group_warning_title), lubbleName),
+                                "\uD83D\uDC4B " + String.format(getString(R.string.lubble_group_warning_title), lubbleName),
                                 String.format(getString(R.string.lubble_group_warning_subtitle), lubbleName),
-                                R.drawable.ic_public_black_24dp, new View.OnClickListener() {
+                                0, new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
                                         LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
