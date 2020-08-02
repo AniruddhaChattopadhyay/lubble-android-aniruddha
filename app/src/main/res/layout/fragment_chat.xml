@@ -106,9 +106,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginRight="16dp"
-                    android:layout_marginBottom="16dp"
                     android:background="@color/light_gray"
-                    app:layout_constraintBottom_toTopOf="@+id/et_new_message" />
+                    app:layout_constraintBottom_toTopOf="@+id/barrier_link" />
 
                 <ImageView
                     android:id="@+id/iv_send_btn"
@@ -149,9 +148,10 @@
                 <EditText
                     android:id="@+id/et_new_message"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_centerVertical="true"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginBottom="4dp"
                     android:background="@android:color/transparent"
                     android:cursorVisible="true"
                     android:focusable="true"
@@ -159,15 +159,32 @@
                     android:gravity="top|left"
                     android:hint="What's new"
                     android:inputType="text|textCapSentences|textMultiLine"
-                    android:layout_marginTop="4dp"
-                    android:scrollbars="vertical"
-                    android:layout_marginBottom="4dp"
                     android:maxLines="6"
+                    android:scrollbars="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/iv_attach"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:text="iuydsfg" />
+                    app:layout_constraintTop_toTopOf="@id/barrier"
+                    tools:text="iuyds" />
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/barrier"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:barrierAllowsGoneWidgets="false"
+                    app:barrierDirection="top"
+                    app:constraint_referenced_ids="iv_send_btn, view_separator"
+                    tools:layout_editor_absoluteY="55dp" />
+
+
+                <androidx.constraintlayout.widget.Barrier
+                    android:id="@+id/barrier_link"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:barrierAllowsGoneWidgets="false"
+                    app:barrierDirection="top"
+                    app:constraint_referenced_ids="iv_send_btn, et_new_message"
+                    tools:layout_editor_absoluteY="55dp" />
 
                 <androidx.constraintlayout.widget.Group
                     android:id="@+id/group_link_meta"
@@ -175,7 +192,7 @@
                     android:layout_height="wrap_content"
                     android:visibility="gone"
                     app:constraint_referenced_ids="tv_link_desc,view_separator,tv_link_title,iv_link_cancel,iv_link_pic"
-                    tools:visibility="gone" />
+                    tools:visibility="visible" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
