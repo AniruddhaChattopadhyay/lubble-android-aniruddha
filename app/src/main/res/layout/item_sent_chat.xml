@@ -153,10 +153,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <include
-                        layout="@layout/layout_poll"
-                        android:visibility="gone" />
-
                     <FrameLayout
                         android:id="@+id/img_container"
                         android:layout_width="match_parent"
@@ -219,11 +215,18 @@
 
                     </FrameLayout>
 
+                    <include
+                        layout="@layout/layout_poll"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/vid_container"
+                        android:visibility="visible" />
+
                     <RelativeLayout
                         android:id="@+id/pdf_container"
                         android:layout_width="wrap_content"
                         android:layout_height="240dp"
-                        android:layout_below="@id/vid_container"
+                        android:layout_below="@id/container_polls"
                         android:layout_marginBottom="8dp"
                         android:minWidth="240dp"
                         android:visibility="gone"
