@@ -34,6 +34,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import org.json.JSONObject;
 
@@ -294,10 +296,10 @@ public class LoginActivity extends BaseActivity {
             }
         }
         profileData.setInfo(profileInfo);
-        Task<GetTokenResult> resultTask = currentUser.getIdToken(false);
-        resultTask.addOnCompleteListener(this, new OnCompleteListener<GetTokenResult>() {
+        Task<InstanceIdResult> resultTask = FirebaseInstanceId.getInstance().getInstanceId();
+        resultTask.addOnCompleteListener(this, new OnCompleteListener<InstanceIdResult>() {
             @Override
-            public void onComplete(@NonNull Task<GetTokenResult> task) {
+            public void onComplete(@NonNull Task<InstanceIdResult> task) {
                 if (task.isSuccessful()) {
                     profileData.setToken(task.getResult().getToken());
                     profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());

@@ -23,6 +23,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -111,9 +113,9 @@ public class NameFrag extends Fragment {
                                     profileInfo.setName(fullNameStr);
                                     profileData.setInfo(profileInfo);
 
-                                    currentUser.getIdToken(false).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+                                    FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
                                         @Override
-                                        public void onComplete(@NonNull Task<GetTokenResult> task) {
+                                        public void onComplete(@NonNull Task<InstanceIdResult> task) {
                                             if (task.isSuccessful()) {
                                                 profileData.setToken(task.getResult().getToken());
                                                 profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
