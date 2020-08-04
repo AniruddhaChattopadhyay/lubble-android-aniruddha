@@ -1181,7 +1181,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 final ChatData chatData = new ChatData();
                 chatData.setAuthorUid(authorId);
                 chatData.setAuthorIsSeller(isCurrUserSeller);
-                chatData.setMessage(newMessageEt.getText().toString());
+                chatData.setMessage(newMessageEt.getText().toString().trim());
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
                 chatData.setIsDm(TextUtils.isEmpty(groupId));
@@ -1933,33 +1933,53 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public void superLikeMsg(final String selectedChatId) {
         if (selectedChatId != null) {
             if (authorId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
-                endpoints = ServiceGenerator.createService(Endpoints.class);
-                HashMap<String, Object> params = new HashMap<>();
-                params.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
-                params.put("gid", groupId);
-                params.put("chatid", selectedChatId);
-                RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
-
-                Call<Void> call = endpoints.superLikeMsg(body);
-                call.enqueue(new Callback<Void>() {
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("auto like?")
+                        .setMessage("confirm auto likes?")
+                        .setIcon(R.drawable.ic_big_and_small_hearts)
+                        .setPositiveButton("CONFIRM", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendAutoLikes(selectedChatId);
+                            }
+                        }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                        }
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
                     }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                })
+                        .setCancelable(true)
+                        .show();
             }
         } else {
             FirebaseCrashlytics.getInstance().recordException(new NullPointerException("chatId is null when trying to super like it"));
         }
+    }
+
+    private void sendAutoLikes(String selectedChatId) {
+        endpoints = ServiceGenerator.createService(Endpoints.class);
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+        params.put("gid", groupId);
+        params.put("chatid", selectedChatId);
+        RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
+
+        Call<Void> call = endpoints.superLikeMsg(body);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
