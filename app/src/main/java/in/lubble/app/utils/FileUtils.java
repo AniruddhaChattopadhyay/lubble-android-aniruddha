@@ -154,12 +154,11 @@ public class FileUtils {
                 String mimeType = getMimeType(uri);
                 if (mimeType.contains("video"))
                     photoFile = createTemporalVideoFileFrom(context, inputStream);
-                else if(mimeType.contains("image")){
+                else if (mimeType.contains("image")) {
                     photoFile = createTemporalFileFrom(context, inputStream, mimeType);
-                }
-                else {
+                } else {
                     String name = getFileNameFromUri(uri);
-                    photoFile = createTemporalGenericFileFrom(context, inputStream, mimeType,name);
+                    photoFile = createTemporalGenericFileFrom(context, inputStream, mimeType, name);
                 }
 
             } catch (FileNotFoundException e) {
@@ -205,14 +204,14 @@ public class FileUtils {
         return targetFile;
     }
 
-    private static File createTemporalGenericFileFrom(Context context, InputStream inputStream, String mimeType,String fileName) throws IOException {
+    private static File createTemporalGenericFileFrom(Context context, InputStream inputStream, String mimeType, String fileName) throws IOException {
         File targetFile = null;
 
         if (inputStream != null) {
             int read;
             byte[] buffer = new byte[8 * 1024];
 
-            targetFile = createTemporalGenericFile(context, mimeType,fileName);
+            targetFile = createTemporalGenericFile(context, mimeType, fileName);
             OutputStream outputStream = new FileOutputStream(targetFile);
 
             while ((read = inputStream.read(buffer)) != -1) {
@@ -230,7 +229,7 @@ public class FileUtils {
         return targetFile;
     }
 
-    private static File createTemporalGenericFile(Context context, String mimeType,String fileName) {
+    private static File createTemporalGenericFile(Context context, String mimeType, String fileName) {
         String extension = "pdf";
         if (!TextUtils.isEmpty(mimeType)) {
             try {
@@ -314,20 +313,7 @@ public class FileUtils {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && isExternalStorageWritable()) {
             String savedImagePath = null;
-            String extension = "jpg";
-            if (uri != null) {
-                try {
-                    final String mimeType = getMimeType(uri);
-                    if (mimeType != null) {
-                        String calculatedExtension = mimeType.split("/")[1];
-                        if (!TextUtils.isEmpty(calculatedExtension)) {
-                            extension = calculatedExtension;
-                        }
-                    }
-                } catch (Exception e) {
-                    FirebaseCrashlytics.getInstance().recordException(e);
-                }
-            }
+            String extension = getExtensionFromMime(uri);
 
             String imageFileName = "JPEG_" + msgId + "." + extension;
             File storageDir = new File(
@@ -348,11 +334,30 @@ public class FileUtils {
                     galleryAddPic(context, savedImagePath);
                     return savedImagePath;
                 } catch (Exception e) {
+                    FirebaseCrashlytics.getInstance().recordException(e);
                     e.printStackTrace();
                 }
             }
         }
         return null;
+    }
+
+    private static String getExtensionFromMime(@Nullable Uri uri) {
+        String extension = "jpg";
+        if (uri != null) {
+            try {
+                final String mimeType = getMimeType(uri);
+                if (mimeType != null) {
+                    String calculatedExtension = mimeType.split("/")[1];
+                    if (!TextUtils.isEmpty(calculatedExtension)) {
+                        extension = calculatedExtension;
+                    }
+                }
+            } catch (Exception e) {
+                FirebaseCrashlytics.getInstance().recordException(e);
+            }
+        }
+        return extension;
     }
 
     private static void galleryAddPic(Context context, String imagePath) {
@@ -364,11 +369,12 @@ public class FileUtils {
     }
 
     @Nullable
-    public static String getSavedImageForMsgId(Context context, String msgId) {
+    public static String getSavedImageForMsgId(Context context, String msgId, Uri uri) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && isExternalStorageReadable()) {
+            String extension = getExtensionFromMime(uri);
             File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-                    + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + ".*");
+                    + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + "." + extension);
 
             if (imgFile.exists()) {
                 //return BitmapFactory.decodeFile(imgFile.getAbsolutePath());
@@ -459,16 +465,30 @@ public class FileUtils {
         }
     }
 
-    public static String getFileNameFromUri (Uri uri){
+    public static String getFileNameFromUri(Uri uri) {
         Cursor returnCursor =
                 getAppContext().getContentResolver().query(uri, null, null, null, null);
-        if(returnCursor==null)
+        if (returnCursor == null)
             return uri.getLastPathSegment();
         int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
         //int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
         returnCursor.moveToFirst();
-        String name =  returnCursor.getString(nameIndex);
+        String name = returnCursor.getString(nameIndex);
         returnCursor.close();
         return name;
     }
+
+    public static Bitmap.CompressFormat getCompressFormatFrom(Uri uri) {
+        String type = getAppContext().getContentResolver().getType(uri);
+        if (type.equalsIgnoreCase(Bitmap.CompressFormat.PNG.name())) {
+            return Bitmap.CompressFormat.PNG;
+        } else if (type.equalsIgnoreCase(Bitmap.CompressFormat.JPEG.name())) {
+            return Bitmap.CompressFormat.JPEG;
+        } else if (type.equalsIgnoreCase(Bitmap.CompressFormat.WEBP.name())) {
+            return Bitmap.CompressFormat.WEBP;
+        } else {
+            return Bitmap.CompressFormat.JPEG;
+        }
+    }
+
 }

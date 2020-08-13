@@ -135,6 +135,7 @@ import static in.lubble.app.models.ChatData.SYSTEM;
 import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.FileUtils.deleteCache;
 import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId;
+import static in.lubble.app.utils.FileUtils.saveImageInGallery;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -1234,10 +1235,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (downloadIv != null) {
                     downloadIv.setVisibility(GONE);
                 }
-                String savedPath = getSavedImageForMsgId(context, chatData.getId());
+                String savedPath = getSavedImageForMsgId(context, chatData.getId(), Uri.parse(chatData.getImgUrl()));
                 if (savedPath != null) {
                     progressBar.setVisibility(GONE);
-                    glide.load(savedPath).centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
+                    glide.load(savedPath).centerCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
                 } else {
                     downloadAndSavePic(progressBar, imageView, chatData);
                 }
@@ -1345,30 +1346,29 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void downloadAndSavePic(final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
-        glide.download(chatData.getImgUrl())
-                .listener(new RequestListener<File>() {
+
+        glide
+                .asBitmap()
+                .load(chatData.getImgUrl())
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .into(new SimpleTarget<Bitmap>() {
                     @Override
-                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<File> target, boolean isFirstResource) {
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         progressBar.setVisibility(GONE);
-                        imageView.setOnClickListener(null);
-                        return false;
+                        imageView.setImageBitmap(resource);
+                        saveImageInGallery(resource, chatData.getId(), context, Uri.parse(chatData.getImgUrl()));
                     }
 
                     @Override
-                    public boolean onResourceReady(File resource, Object model, Target<File> target, DataSource dataSource, boolean isFirstResource) {
-                        progressBar.setVisibility(GONE);
-                        glide.load(resource).centerCrop().into(imageView);
-                        imageView.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                if (isValidString(chatData.getImgUrl())) {
-                                    FullScreenImageActivity.open(activity, context, chatData.getImgUrl(), imageView, null, R.drawable.ic_cancel_black_24dp);
-                                }
-                            }
-                        });
-                        return false;
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        // this is called when imageView is cleared on lifecycle call or for
+                        // some other reason.
+                        // if you are referencing the bitmap somewhere else too other than this imageView
+                        // clear it here as you can no longer have the bitmap
+                        Log.d(TAG, "onLoadCleared: ");
                     }
-                }).submit();
+                });
     }
 
     public void addChatData(@NonNull ChatData chatData) {
