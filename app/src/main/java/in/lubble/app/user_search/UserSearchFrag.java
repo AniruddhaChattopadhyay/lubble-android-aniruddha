@@ -26,7 +26,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -256,7 +256,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
                 }
             } else {
                 Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
-                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                FirebaseCrashlytics.getInstance().recordException(new IllegalStateException(error.getMessage()));
                 if (isAdded() && isVisible()) {
                     Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                 }

@@ -1,10 +1,11 @@
 package in.lubble.app.rewards.data;
 
 import com.google.gson.annotations.SerializedName;
-import in.lubble.app.utils.DateTimeUtils;
 
 import java.io.Serializable;
 import java.util.List;
+
+import in.lubble.app.utils.DateTimeUtils;
 
 import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
 

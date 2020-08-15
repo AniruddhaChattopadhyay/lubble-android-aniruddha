@@ -12,7 +12,6 @@ import android.widget.ImageView;
 
 import androidx.appcompat.widget.Toolbar;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -24,6 +23,7 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
@@ -113,7 +113,7 @@ public class AttachVideoActivity extends BaseActivity {
         try {
             fileDataSource.open(dataSpec);
         } catch (FileDataSource.FileDataSourceException e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
 

@@ -23,10 +23,10 @@ import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.MutableData;
@@ -134,7 +134,7 @@ public class RewardDetailActiv extends BaseActivity {
         rewardCodesData = (RewardCodesData) getIntent().getSerializableExtra(ARG_REWARD_CODE_DATA);
         if (rewardsData == null && rewardCodesData == null) {
             Toast.makeText(this, "No Data Found", Toast.LENGTH_SHORT).show();
-            Crashlytics.logException(new MissingFormatArgumentException("no rewards data found"));
+            FirebaseCrashlytics.getInstance().recordException(new MissingFormatArgumentException("no rewards data found"));
             finish();
             return;
         }
@@ -204,7 +204,7 @@ public class RewardDetailActiv extends BaseActivity {
                     } else {
                         progressDialog.dismiss();
                         Toast.makeText(RewardDetailActiv.this, "Something went terribly wrong", Toast.LENGTH_SHORT).show();
-                        Crashlytics.logException(new IllegalStateException("More than 1 records for reward code: " + rewardCodesData.getRewardRecordId()));
+                        FirebaseCrashlytics.getInstance().recordException(new IllegalStateException("More than 1 records for reward code: " + rewardCodesData.getRewardRecordId()));
                         finish();
                     }
 
@@ -325,7 +325,7 @@ public class RewardDetailActiv extends BaseActivity {
                     if (airtableData.getRecords().size() > 0) {
                         uploadRewardClaim(airtableData.getRecords().get(0).getFields());
                     } else {
-                        Crashlytics.logException(new IllegalStateException("trying to claim reward with no more codes left, reward id: " + rewardsData.getRecordId()));
+                        FirebaseCrashlytics.getInstance().recordException(new IllegalStateException("trying to claim reward with no more codes left, reward id: " + rewardsData.getRecordId()));
                         Toast.makeText(RewardDetailActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                         finish();
                     }

@@ -32,10 +32,10 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -292,7 +292,7 @@ public class ProfileFrag extends Fragment {
                 }
             } else {
                 Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
-                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                FirebaseCrashlytics.getInstance().recordException(new IllegalStateException(error.getMessage()));
                 if (isAdded() && isVisible()) {
                     Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
@@ -512,7 +512,7 @@ public class ProfileFrag extends Fragment {
                 if (response.isSuccessful() && userProfileData != null && isAdded() && isVisible()) {
                     invitedTv.setText(String.valueOf(userProfileData.getReferrals()));
                 } else if (isAdded() && isVisible()) {
-                    Crashlytics.log("referral leaderboard bad response");
+                    FirebaseCrashlytics.getInstance().log("referral leaderboard bad response");
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }

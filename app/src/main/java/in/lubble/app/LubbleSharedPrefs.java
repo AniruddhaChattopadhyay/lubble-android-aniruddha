@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.Nullable;
 
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -51,7 +51,7 @@ public class LubbleSharedPrefs {
     private final String READ_EVENTS = "READ_EVENTS";
     private final String FLEXI_UPDATE_TS = "FLEXI_UPDATE_TS";
     private final String IS_MAP_DISCLAIMER_CLOSED = "IS_MAP_DISCLAIMER_CLOSED";
-    private final String SHARE_URL = "SHARE_URL";
+    private final String SHARE_MSG_COPY_URL = "SHARE_MSG_COPY_URL";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -121,7 +121,7 @@ public class LubbleSharedPrefs {
             UserUtils.logout(LubbleApp.getAppContext());
 
             final IllegalArgumentException illegalArgumentException = new IllegalArgumentException("Tried to access Lubble ID but was not found in Shared Prefs");
-            Crashlytics.logException(illegalArgumentException);
+            FirebaseCrashlytics.getInstance().recordException(illegalArgumentException);
             throw illegalArgumentException;
         }
         return preferences.getString(LUBBLE_ID, "");
@@ -324,12 +324,12 @@ public class LubbleSharedPrefs {
     }
 
     @Nullable
-    public String getShareUrl() {
-        return preferences.getString(SHARE_URL, null);
+    public String getMsgCopyShareUrl() {
+        return preferences.getString(SHARE_MSG_COPY_URL, null);
     }
 
-    public boolean setShareUrl(String shareUrl) {
-        return preferences.edit().putString(SHARE_URL, shareUrl).commit();
+    public boolean setMsgCopyShareUrl(String shareUrl) {
+        return preferences.edit().putString(SHARE_MSG_COPY_URL, shareUrl).commit();
     }
 
     @Nullable

@@ -6,19 +6,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.firebase.auth.FirebaseAuth;
-import in.lubble.app.GlideRequests;
-import in.lubble.app.R;
-import in.lubble.app.utils.StringUtils;
-import in.lubble.app.utils.mapUtils.MathUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import in.lubble.app.GlideRequests;
+import in.lubble.app.R;
+import in.lubble.app.utils.StringUtils;
+import in.lubble.app.utils.mapUtils.MathUtil;
 
 public class ReferralLeaderboardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 

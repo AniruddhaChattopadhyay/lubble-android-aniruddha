@@ -31,7 +31,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatMessage;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -42,12 +41,15 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.segment.analytics.Traits;
@@ -103,6 +105,7 @@ import static in.lubble.app.Constants.MAP_BTN_URL;
 import static in.lubble.app.Constants.MAP_HTML;
 import static in.lubble.app.Constants.MAP_SHARE_TEXT;
 import static in.lubble.app.Constants.MARKET_MAINTENANCE_TEXT;
+import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
 import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.Constants.REWARDS_EXPLAINER;
@@ -210,14 +213,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         LubbleSharedPrefs.getInstance().setLubbleId((String) map.keySet().toArray()[0]);
                         initEverything();
                     } else {
-                        Crashlytics.logException(new IllegalAccessException("User has NO lubble ID"));
+                        FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("User has NO lubble ID"));
                         UserUtils.logout(MainActivity.this);
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Crashlytics.logException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException(databaseError.getCode() + " " + databaseError.getMessage()));
                     UserUtils.logout(MainActivity.this);
                 }
             });
@@ -230,7 +233,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     String phNum = FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber().substring(3, 13);
                     fetchAssociatedSeller(phNum);
                 } catch (IndexOutOfBoundsException e) {
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
         }
@@ -604,6 +607,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MARKET_MAINTENANCE_TEXT, "");
         map.put(IS_NOTIF_SNOOZE_ON, true);
         map.put(IS_TIME_SHOWN, false);
+        map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
@@ -708,7 +712,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             }
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
         }
 
         final FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
@@ -763,7 +767,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         com.segment.analytics.Analytics.with(MainActivity.this).identify(firebaseAuth.getUid(), new Traits().putAvatar(profileInfo.getThumbnail()), null);
                     }
                 } catch (IllegalArgumentException e) {
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
 
@@ -813,16 +817,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void logUser(FirebaseUser currentUser) {
-        Crashlytics.setUserIdentifier(currentUser.getUid());
-        Crashlytics.setUserName(currentUser.getDisplayName());
+        FirebaseCrashlytics.getInstance().setUserId(currentUser.getUid());
     }
 
     private void syncFcmToken() {
-        final String token = FirebaseInstanceId.getInstance().getToken();
-        getThisUserRef().child("token")
-                .setValue(token);
-        CleverTapAPI.getDefaultInstance(this).pushFcmRegistrationId(token, true);
-        Freshchat.getInstance(this).setPushRegistrationToken(token);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(this, new OnCompleteListener<InstanceIdResult>() {
+                @Override
+                public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                    if (task.isSuccessful()) {
+                        String token = task.getResult().getToken();
+                        getThisUserRef().child("token")
+                                .setValue(token);
+                        CleverTapAPI.getDefaultInstance(MainActivity.this).pushFcmRegistrationId(token, true);
+                        Freshchat.getInstance(MainActivity.this).setPushRegistrationToken(token);
+                    }
+                }
+            });
+        }
     }
 
     private void updateDefaultGroupId() {

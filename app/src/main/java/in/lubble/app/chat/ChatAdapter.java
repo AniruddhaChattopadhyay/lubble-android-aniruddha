@@ -59,11 +59,11 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -119,6 +119,7 @@ import retrofit2.Response;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 import static in.lubble.app.Constants.IS_TIME_SHOWN;
+import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
@@ -721,7 +722,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                     showPollResults(baseViewHolder, chatData);
                                 } else {
                                     if (databaseError != null) {
-                                        Crashlytics.logException(new Exception("poll button click error code: " + databaseError.getCode()));
+                                        FirebaseCrashlytics.getInstance().recordException(new Exception("poll button click error code: " + databaseError.getCode()));
                                         Toast.makeText(context, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
                                     } else {
                                         Toast.makeText(context, R.string.all_try_again, Toast.LENGTH_SHORT).show();
@@ -885,7 +886,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
 
                     } else if (activity != null && context != null && !activity.isFinishing()) {
-                        Crashlytics.log("youtube thumbnail failed to fetch with error code: " + response.code());
+                        FirebaseCrashlytics.getInstance().log("youtube thumbnail failed to fetch with error code: " + response.code());
                         youtubeProgressBar.setVisibility(GONE);
                         youtubePlayIv.setImageResource(R.drawable.ic_error_outline_black_24dp);
                     }
@@ -1203,7 +1204,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 public void onFailure(@NonNull Exception exception) {
                     // Handle any errors
                     Log.e(TAG, "onFailure: ", exception);
-                    Crashlytics.logException(exception);
+                    FirebaseCrashlytics.getInstance().recordException(exception);
                 }
             }).addOnProgressListener(new OnProgressListener<FileDownloadTask.TaskSnapshot>() {
                 @Override
@@ -1449,7 +1450,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void toggleLubb(int pos, boolean isSrcDoubleTap) {
         if (pos == -1) {
             Toast.makeText(activity, "Please try liking again", Toast.LENGTH_SHORT).show();
-            Crashlytics.logException(new ArrayIndexOutOfBoundsException("while lubbing a msg. length = " + chatDataList.size() + " and index = " + pos));
+            FirebaseCrashlytics.getInstance().recordException(new ArrayIndexOutOfBoundsException("while lubbing a msg. length = " + chatDataList.size() + " and index = " + pos));
             return;
         }
         final ChatData chatData = chatDataList.get(pos);
@@ -1607,6 +1608,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private String replaceSuffixKeys(String suffix, ProfileData authorProfileData) {
+        final String authorNameKey = "{authorname}";
+        final String lubbleNameKey = "{lubble}";
+        if (suffix.contains(authorNameKey)) {
+            if (authorProfileData != null) {
+                suffix = suffix.replace(authorNameKey, authorProfileData.getInfo().getName().split(" ")[0]);
+            } else {
+                suffix = suffix.replace(authorNameKey, "shared");
+            }
+        }
+        if (suffix.contains(lubbleNameKey)) {
+            suffix = suffix.replace(lubbleNameKey, LubbleSharedPrefs.getInstance().getLubbleName());
+        }
+        return suffix;
+    }
+
     public class RecvdChatViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
 
         private RelativeLayout rootLayout;
@@ -1682,9 +1699,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         ChatData chatData = chatDataList.get(highlightedPos);
                         String suffix = "";
                         ProfileData authorProfileData = profileDataMap.get(chatData.getAuthorUid());
-                        if (authorProfileData != null && !TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getShareUrl())) {
-                            suffix = "\n- " + authorProfileData.getInfo().getName() + " on Lubble, the neighbourhood app for " + LubbleSharedPrefs.getInstance().getLubbleName()
-                                    + ". Get it now: " + LubbleSharedPrefs.getInstance().getShareUrl();
+                        String msgCopyShareUrl = LubbleSharedPrefs.getInstance().getMsgCopyShareUrl();
+                        if (msgCopyShareUrl != null && !TextUtils.isEmpty(msgCopyShareUrl)) {
+                            suffix = FirebaseRemoteConfig.getInstance().getString(MSG_WATERMARK_TEXT);
+                            msgCopyShareUrl = msgCopyShareUrl.replace("https://", "");
+                            suffix = "\n" + replaceSuffixKeys(suffix, authorProfileData) + msgCopyShareUrl;
                         }
                         String message = chatData.getMessage() + suffix;
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
@@ -1727,7 +1746,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 if (getAdapterPosition() == RecyclerView.NO_POSITION) {
                     Toast.makeText(activity, "Something went wrong, please try again", Toast.LENGTH_SHORT).show();
-                    Crashlytics.logException(new ArrayIndexOutOfBoundsException("index = -1"));
+                    FirebaseCrashlytics.getInstance().recordException(new ArrayIndexOutOfBoundsException("index = -1"));
                     return true;
                 }
                 switch (touchedView.getId()) {
@@ -1942,14 +1961,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                        ChatData chatData = chatDataList.get(highlightedPos);
-                        String suffix = "";
-                        ProfileData authorProfileData = profileDataMap.get(chatData.getAuthorUid());
-                        if (authorProfileData != null && !TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getShareUrl())) {
-                            suffix = "\n- " + authorProfileData.getInfo().getName() + " on Lubble, the neighbourhood app for " + LubbleSharedPrefs.getInstance().getLubbleName()
-                                    + ". Get it now: " + LubbleSharedPrefs.getInstance().getShareUrl();
-                        }
-                        String message = chatData.getMessage() + suffix;
+                        String message = chatDataList.get(highlightedPos).getMessage();
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
                         break;

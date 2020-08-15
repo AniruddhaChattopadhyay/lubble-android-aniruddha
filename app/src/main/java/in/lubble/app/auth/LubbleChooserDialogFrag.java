@@ -5,16 +5,18 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import in.lubble.app.R;
-import in.lubble.app.utils.DialogInterface;
 
 import java.util.ArrayList;
+
+import in.lubble.app.R;
+import in.lubble.app.utils.DialogInterface;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.auth.LubbleChooserFrag.REQUEST_CODE_CHOOSE;

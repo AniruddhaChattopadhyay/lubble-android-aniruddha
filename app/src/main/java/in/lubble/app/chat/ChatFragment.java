@@ -38,12 +38,12 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -605,7 +606,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                FirebaseCrashlytics.getInstance().log(databaseError.toException().toString());
+                FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
             }
         });
     }
@@ -656,13 +658,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         resetUnreadCount();
                         showPublicGroupWarning(groupData);
                     } else {
-                        Crashlytics.logException(new NullPointerException("groupdata is null for group id: " + groupId));
+                        FirebaseCrashlytics.getInstance().recordException(new NullPointerException("groupdata is null for group id: " + groupId));
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-                    Crashlytics.logException(databaseError.toException());
+                    FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                 }
             });
         } else if (!TextUtils.isEmpty(dmId)) {
@@ -775,7 +777,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         }
                         resetUnreadCount();
                     } else {
-                        Crashlytics.logException(new NullPointerException("dmData is null for dm id: " + dmId));
+                        FirebaseCrashlytics.getInstance().recordException(new NullPointerException("dmData is null for dm id: " + dmId));
                     }
                 }
 
@@ -798,7 +800,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-
+                            FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                         }
                     });
                 }
@@ -816,14 +818,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                            FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                         }
                     });
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-                    Crashlytics.logException(databaseError.toException());
+                    FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                 }
             });
         } else if (!TextUtils.isEmpty(receiverId)) {
@@ -841,7 +843,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 dmInfoReference = getDmsRef().child(dmId);
             } else {
                 Toast.makeText(getContext(), "Something went wrong. Please retry", Toast.LENGTH_SHORT).show();
-                Crashlytics.logException(new Exception("tried to block/report user but dmInfoReference & dmId are NULL"));
+                FirebaseCrashlytics.getInstance().recordException(new Exception("tried to block/report user but dmInfoReference & dmId are NULL"));
                 if (getActivity() != null) {
                     getActivity().finish();
                 }
@@ -866,7 +868,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                 }
             });
         }
@@ -908,7 +910,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
-
+                                FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                             }
                         });
                         composeContainer.setVisibility(View.GONE);
@@ -924,7 +926,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
             }
         });
     }
@@ -938,9 +940,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     if (isAdded()) {
                         String lubbleName = dataSnapshot.child("title").getValue(String.class);
                         showBottomSheetAlert(getContext(), getLayoutInflater(),
-                                String.format(getString(R.string.lubble_group_warning_title), lubbleName),
+                                "\uD83D\uDC4B " + String.format(getString(R.string.lubble_group_warning_title), lubbleName),
                                 String.format(getString(R.string.lubble_group_warning_subtitle), lubbleName),
-                                R.drawable.ic_public_black_24dp, new View.OnClickListener() {
+                                0, new View.OnClickListener() {
                                     @Override
                                     public void onClick(View v) {
                                         LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
@@ -956,7 +958,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                 }
             });
 
@@ -1007,7 +1009,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         }*/
                     }
                 } else {
-                    Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey() + " and group ID: " + groupId));
+                    FirebaseCrashlytics.getInstance().recordException(new NullPointerException("chat data is null for chat ID: " + dataSnapshot.getKey() + " and group ID: " + groupId));
                 }
             }
 
@@ -1035,7 +1037,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Crashlytics.logException(databaseError.toException());
+                FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
             }
         });
     }
@@ -1105,7 +1107,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             chatRecyclerView.scrollBy(0, -dpToPx(40));
                         }
                     } else {
-                        Crashlytics.logException(new NullPointerException("chat data is null for chat ID: " + childDataSnapshot.getKey() + " and group ID: " + groupId));
+                        FirebaseCrashlytics.getInstance().recordException(new NullPointerException("chat data is null for chat ID: " + childDataSnapshot.getKey() + " and group ID: " + groupId));
                         isLoadingMoreChats = false;
                         paginationProgressBar.setVisibility(View.GONE);
                         chatRecyclerView.scrollBy(0, -dpToPx(40));
@@ -1115,7 +1117,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
             }
         });
         final Bundle bundle = new Bundle();
@@ -1136,7 +1138,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
             }
         });
     }
@@ -1179,7 +1181,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 final ChatData chatData = new ChatData();
                 chatData.setAuthorUid(authorId);
                 chatData.setAuthorIsSeller(isCurrUserSeller);
-                chatData.setMessage(newMessageEt.getText().toString());
+                chatData.setMessage(newMessageEt.getText().toString().trim());
                 chatData.setCreatedTimestamp(System.currentTimeMillis());
                 chatData.setServerTimestamp(ServerValue.TIMESTAMP);
                 chatData.setIsDm(TextUtils.isEmpty(groupId));
@@ -1456,7 +1458,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                    FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                 }
             });
         } else {
@@ -1724,7 +1726,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                        FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                     }
                 });
 
@@ -1806,14 +1808,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
-
+                        FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                     }
                 });
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
             }
         });
     }
@@ -1852,7 +1854,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
             }
         });
     }
@@ -1873,7 +1875,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 startActivity(MsgInfoActivity.getIntent(getContext(), dmId, chatId, showReadReceipts, true, authorId));
             }
         } else {
-            Crashlytics.logException(new NullPointerException("chatId is null when trying to open msg info"));
+            FirebaseCrashlytics.getInstance().recordException(new NullPointerException("chatId is null when trying to open msg info"));
         }
     }
 
@@ -1924,40 +1926,60 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 ReportMsgBottomSheet.newInstance(authorId, groupId, selectedChatId, dmId != null).show(getFragmentManager(), null);
             }
         } else {
-            Crashlytics.logException(new NullPointerException("chatId is null when trying to mark it spam"));
+            FirebaseCrashlytics.getInstance().recordException(new NullPointerException("chatId is null when trying to mark it spam"));
         }
     }
 
     public void superLikeMsg(final String selectedChatId) {
         if (selectedChatId != null) {
             if (authorId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
-                endpoints = ServiceGenerator.createService(Endpoints.class);
-                HashMap<String, Object> params = new HashMap<>();
-                params.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
-                params.put("gid", groupId);
-                params.put("chatid", selectedChatId);
-                RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
-
-                Call<Void> call = endpoints.superLikeMsg(body);
-                call.enqueue(new Callback<Void>() {
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("auto like?")
+                        .setMessage("confirm auto likes?")
+                        .setIcon(R.drawable.ic_big_and_small_hearts)
+                        .setPositiveButton("CONFIRM", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                sendAutoLikes(selectedChatId);
+                            }
+                        }).setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
                     @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                        }
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
                     }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                    }
-                });
+                })
+                        .setCancelable(true)
+                        .show();
             }
         } else {
-            Crashlytics.logException(new NullPointerException("chatId is null when trying to super like it"));
+            FirebaseCrashlytics.getInstance().recordException(new NullPointerException("chatId is null when trying to super like it"));
         }
+    }
+
+    private void sendAutoLikes(String selectedChatId) {
+        endpoints = ServiceGenerator.createService(Endpoints.class);
+        HashMap<String, Object> params = new HashMap<>();
+        params.put("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+        params.put("gid", groupId);
+        params.put("chatid", selectedChatId);
+        RequestBody body = RequestBody.create(MEDIA_TYPE, new JSONObject(params).toString());
+
+        Call<Void> call = endpoints.superLikeMsg(body);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

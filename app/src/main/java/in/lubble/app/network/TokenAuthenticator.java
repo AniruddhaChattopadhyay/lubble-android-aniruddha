@@ -3,15 +3,14 @@ package in.lubble.app.network;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import okhttp3.Authenticator;
 import okhttp3.Request;
@@ -35,8 +34,9 @@ public class TokenAuthenticator implements Authenticator {
 
     @Override
     public synchronized Request authenticate(Route route, Response response) {
+        FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
         if (responseCount(response) >= 3) {
-            Crashlytics.logException(new IllegalAccessException("3rd time failed to validate token for user: " + FirebaseAuth.getInstance().getUid()));
+            crashlytics.recordException(new IllegalAccessException("3rd time failed to validate token for user: " + FirebaseAuth.getInstance().getUid()));
             return null; // If we've failed 3 times, give up.
         }
         String requestToken = response.request().header("Token");
@@ -52,34 +52,33 @@ public class TokenAuthenticator implements Authenticator {
             Log.d(TAG, "Challenges: " + response.challenges());
 
             String uid = FirebaseAuth.getInstance().getUid();
-            if (uid == null) {
-                Crashlytics.log("Invalid UID during validate token call! Dropping original request and this one too" +
-                        "\n Ph: " + FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber());
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            if (currentUser == null) {
+                crashlytics.log("Firebase currentUser() is NULL during validate token call! Dropping original request and this one too" +
+                        "\n UID: " + FirebaseAuth.getInstance().getUid());
+                return null;
+            } else if (uid == null) {
+                crashlytics.log("Invalid UID during validate token call! Dropping original request and this one too" +
+                        "\n Ph: " + currentUser.getPhoneNumber());
                 return null;
             }
             try {
-                // Block on the task for a maximum of 1000 milliseconds, otherwise time out.
-                final GetTokenResult getTokenResult = Tasks.await(FirebaseAuth.getInstance().getAccessToken(false), 3000, TimeUnit.MILLISECONDS);
+                final GetTokenResult getTokenResult = Tasks.await(currentUser.getIdToken(true));
                 savedToken = getTokenResult.getToken();
 
                 if (TextUtils.isEmpty(savedToken)) {
                     // Unable to renew token
                     // Drop the API request. Can do nothing.
-                    Crashlytics.logException(new IllegalArgumentException("New TOKEN is NULL"));
+                    crashlytics.recordException(new IllegalArgumentException("New TOKEN is NULL"));
                     return null;
                 }
             } catch (ExecutionException e) {
                 // Drop the API request. Can do nothing.
-                Crashlytics.logException(e);
+                crashlytics.recordException(e);
                 return null;
             } catch (InterruptedException e) {
                 // Drop the API request. Can do nothing.
-                Crashlytics.logException(e);
-                return null;
-            } catch (TimeoutException e) {
-                // Task timed out before it could complete.
-                // Drop the API request. Can do nothing.
-                Crashlytics.logException(e);
+                crashlytics.recordException(e);
                 return null;
             }
         }

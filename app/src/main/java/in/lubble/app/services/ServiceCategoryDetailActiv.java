@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
+
 import androidx.appcompat.widget.Toolbar;
-import com.crashlytics.android.Crashlytics;
+
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 
@@ -40,7 +43,7 @@ public class ServiceCategoryDetailActiv extends BaseActivity {
                 catId = Integer.parseInt(data.getQueryParameter("id"));
             } catch (Exception e) {
                 e.printStackTrace();
-                Crashlytics.logException(e);
+                FirebaseCrashlytics.getInstance().recordException(e);
                 finish();
             }
         } else {

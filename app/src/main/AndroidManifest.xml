@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
-    android:versionCode="245"
-    android:versionName="1.23-1">
+    android:versionCode="247"
+    android:versionName="1.24-1">
 
     <application
         android:name=".LubbleApp"
@@ -15,15 +15,12 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <meta-data
-            android:name="firebase_performance_logcat_enabled"
-            android:value="true" />
         <activity android:name=".chat.BlockedChatsActiv"
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>
         <activity
             android:name=".utils.FullScreenVideoActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"></activity>
+            android:configChanges="keyboardHidden|orientation|screenSize" />
         <activity
             android:name=".leaderboard.LeaderboardActivity"
             android:configChanges="orientation"
@@ -392,9 +389,6 @@
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="6fd5a7acad385fd4a56944a42c164622f03560ca" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

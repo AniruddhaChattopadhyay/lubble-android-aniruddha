@@ -9,7 +9,8 @@ import android.os.Bundle;
 import android.support.v4.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Log;
-import com.crashlytics.android.Crashlytics;
+
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,15 +63,15 @@ public class FetchAddressIntentService extends IntentService {
             // Catch network or other I/O problems.
             errorMessage = getString(R.string.check_internet);
             Log.e(TAG, errorMessage, ioException);
-            Crashlytics.logException(ioException);
+            FirebaseCrashlytics.getInstance().recordException(ioException);
         } catch (IllegalArgumentException illegalArgumentException) {
             // Catch invalid latitude or longitude values.
             errorMessage = "INVALID lati/longi";
-            Crashlytics.log(1, TAG, errorMessage + ". " +
+            FirebaseCrashlytics.getInstance().log(TAG + "/" + errorMessage + ". " +
                     "Latitude = " + location.getLatitude() +
                     ", Longitude = " +
                     location.getLongitude());
-            Crashlytics.logException(illegalArgumentException);
+            FirebaseCrashlytics.getInstance().recordException(illegalArgumentException);
         }
 
         // Handle case where no address was found.

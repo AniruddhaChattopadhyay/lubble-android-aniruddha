@@ -14,15 +14,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.crashlytics.android.Crashlytics;
+
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
+
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
@@ -32,8 +41,6 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-
-import java.util.List;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
@@ -143,7 +150,7 @@ public class ReferralsFragment extends Fragment {
                 }
             } else {
                 Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
-                Crashlytics.logException(new IllegalStateException(error.getMessage()));
+                FirebaseCrashlytics.getInstance().recordException(new IllegalStateException(error.getMessage()));
                 if (isAdded() && isVisible()) {
                     Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
                 }

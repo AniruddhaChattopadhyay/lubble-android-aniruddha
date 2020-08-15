@@ -5,22 +5,28 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.*;
-import com.crashlytics.android.Crashlytics;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.MissingFormatArgumentException;
+
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
 import in.lubble.app.models.ProfileInfo;
-
-import java.util.ArrayList;
-import java.util.MissingFormatArgumentException;
 
 import static android.widget.RelativeLayout.ALIGN_BOTTOM;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
@@ -142,7 +148,7 @@ public class NewPollActiv extends BaseActivity {
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(pollDpIv);
                 } catch (IllegalArgumentException e) {
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
 

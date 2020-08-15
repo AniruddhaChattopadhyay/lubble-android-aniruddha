@@ -26,13 +26,14 @@ import android.widget.TextView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -130,7 +131,7 @@ public class UiUtils {
 
         final TextView gotItTv = sheetView.findViewById(R.id.tv_got_it);
         final ImageView iconIv = sheetView.findViewById(R.id.iv_bottom_sheet_icon);
-        final TextView titleTv = sheetView.findViewById(R.id.tv_bottom_sheet_title);
+        final EmojiTextView titleTv = sheetView.findViewById(R.id.tv_bottom_sheet_title);
         final TextView subTitleTv = sheetView.findViewById(R.id.tv_bottom_sheet_subtitle);
 
         iconIv.setImageResource(iconId);
@@ -260,7 +261,7 @@ public class UiUtils {
             return outFile;
         } catch (Exception e) {
             e.printStackTrace();
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
             return new File(ogFilepath);
         }
     }

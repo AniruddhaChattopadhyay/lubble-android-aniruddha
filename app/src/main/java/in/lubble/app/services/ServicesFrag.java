@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.ArrayList;
 
@@ -134,7 +134,7 @@ public class ServicesFrag extends Fragment {
                     }
 
                 } else if (isAdded() && isVisible()) {
-                    Crashlytics.log("categories bad response");
+                    FirebaseCrashlytics.getInstance().log("categories bad response");
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }

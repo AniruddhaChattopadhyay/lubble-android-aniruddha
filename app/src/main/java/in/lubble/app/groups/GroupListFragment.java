@@ -25,9 +25,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -424,7 +424,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 }
             } catch (NullPointerException npe) {
                 npe.printStackTrace();
-                Crashlytics.logException(npe);
+                FirebaseCrashlytics.getInstance().recordException(npe);
             }
         }
 

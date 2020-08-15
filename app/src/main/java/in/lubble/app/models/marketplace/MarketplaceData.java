@@ -3,10 +3,11 @@ package in.lubble.app.models.marketplace;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import in.lubble.app.marketplace.SliderData;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import in.lubble.app.marketplace.SliderData;
 
 public class MarketplaceData {
 

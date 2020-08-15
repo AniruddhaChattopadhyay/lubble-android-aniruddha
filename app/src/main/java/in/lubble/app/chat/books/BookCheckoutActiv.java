@@ -23,10 +23,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatMessage;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.MutableData;
@@ -296,7 +296,7 @@ public class BookCheckoutActiv extends BaseActivity {
                             Analytics.triggerEvent(AnalyticsEvents.BOOK_PLACE_ORDER, BookCheckoutActiv.this);
                             uploadNewOrder(profileData);
                         } catch (JSONException e) {
-                            Crashlytics.logException(e);
+                            FirebaseCrashlytics.getInstance().recordException(e);
                             e.printStackTrace();
                         }
                     } else {
@@ -358,7 +358,7 @@ public class BookCheckoutActiv extends BaseActivity {
                     if (!isFinishing()) {
                         progressDialog.dismiss();
                         Toast.makeText(BookCheckoutActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                        Crashlytics.logException(new Exception("Book Checkout airtable api Issue\nresponse code:" + response.code()
+                        FirebaseCrashlytics.getInstance().recordException(new Exception("Book Checkout airtable api Issue\nresponse code:" + response.code()
                                 + "\nisSuccessful: " + response.isSuccessful()
                                 + "\nerrorBody: " + response.errorBody()
                                 + "\nbody: " + response.body()));
@@ -408,7 +408,7 @@ public class BookCheckoutActiv extends BaseActivity {
                 } else if (!isFinishing()) {
                     progressDialog.dismiss();
                     Toast.makeText(BookCheckoutActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                    Crashlytics.logException(new Exception("Book Checkout coin deduction Issue"));
+                    FirebaseCrashlytics.getInstance().recordException(new Exception("Book Checkout coin deduction Issue"));
                 }
             }
         });

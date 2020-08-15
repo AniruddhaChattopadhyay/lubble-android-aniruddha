@@ -14,13 +14,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.perf.FirebasePerformance;
@@ -176,6 +176,90 @@ public class UploadVideoService extends BaseTaskService {
         }
     }
 
+    private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, @Nullable StorageMetadata metadata, final boolean toTransmit, final String caption, final String groupId, @Nullable final UploadVideoService.DmInfoData dmInfoData) {
+        // Upload file to Firebase Storage
+        Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
+        final UploadTask uploadTask;
+        final Trace uploadTime = FirebasePerformance.getInstance().newTrace(TRACK_UPLOAD_TIME);
+        uploadTime.start();
+        if (metadata != null) {
+            uploadTask = photoRef.putFile(compressedFileUri, metadata);
+        } else {
+            uploadTask = photoRef.putFile(compressedFileUri);
+        }
+        uploadTask.
+                addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                        showProgressNotification(getString(R.string.progress_uploading),
+                                taskSnapshot.getBytesTransferred(),
+                                taskSnapshot.getTotalByteCount());
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Upload succeeded
+                        Log.d(TAG, "uploadFromUri:onSuccess");
+                        uploadTime.stop();
+                        //delete the compressed file which is no longer needed
+                        if (compressedFileUri != null) {
+                            File file = new File(compressedFileUri.getPath());
+                            file.delete();
+                            if (file.exists()) {
+                                try {
+                                    file.getCanonicalFile().delete();
+                                    if (file.exists()) {
+                                        getApplicationContext().deleteFile(file.getName());
+                                    }
+                                } catch (IOException e) {
+                                    FirebaseCrashlytics.getInstance().recordException(e);
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+
+                        // Get the public download URL
+                        photoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+                                    final Uri downloadUri = task.getResult();
+                                    // [START_EXCLUDE]
+                                    broadcastUploadFinished(downloadUri, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
+                                    showUploadFinishedNotification(downloadUri, compressedFileUri, toTransmit);
+                                    taskCompleted();
+                                    // [END_EXCLUDE]
+                                } else {
+                                    Log.d(TAG, "onComplete: failed");
+
+                                    // [START_EXCLUDE]
+                                    broadcastUploadFinished(null, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
+                                    showUploadFinishedNotification(null, compressedFileUri, toTransmit);
+                                    taskCompleted();
+                                    // [END_EXCLUDE]
+                                }
+                            }
+                        });
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Upload failed
+                        Log.w(TAG, "uploadFromUri:onFailure", exception);
+
+                        // [START_EXCLUDE]
+                        broadcastUploadFinished(null, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
+                        showUploadFinishedNotification(null, compressedFileUri, toTransmit);
+                        taskCompleted();
+                        //[END_EXCLUDE]
+                    }
+                });
+    }
+
     class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
         Trace compressTime = FirebasePerformance.getInstance().newTrace(TRACK_COMPRESS_TIME);
         Context mContext;
@@ -230,7 +314,7 @@ public class UploadVideoService extends BaseTaskService {
                 cachevid = Uri.parse(paths[0]);
 
             } catch (URISyntaxException e) {
-                Crashlytics.logException(e);
+                FirebaseCrashlytics.getInstance().recordException(e);
                 e.printStackTrace();
             }
             return filePath;
@@ -262,7 +346,7 @@ public class UploadVideoService extends BaseTaskService {
                                 getApplicationContext().deleteFile(file.getName());
                             }
                         } catch (IOException e) {
-                            Crashlytics.logException(e);
+                            FirebaseCrashlytics.getInstance().recordException(e);
                             e.printStackTrace();
                         }
                     }
@@ -271,90 +355,6 @@ public class UploadVideoService extends BaseTaskService {
             } else
                 uploadVideoService.uploadFile(cachevid, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
         }
-    }
-
-    private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, @Nullable StorageMetadata metadata, final boolean toTransmit, final String caption, final String groupId, @Nullable final UploadVideoService.DmInfoData dmInfoData) {
-        // Upload file to Firebase Storage
-        Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
-        final UploadTask uploadTask;
-        final Trace uploadTime = FirebasePerformance.getInstance().newTrace(TRACK_UPLOAD_TIME);
-        uploadTime.start();
-        if (metadata != null) {
-            uploadTask = photoRef.putFile(compressedFileUri, metadata);
-        } else {
-            uploadTask = photoRef.putFile(compressedFileUri);
-        }
-        uploadTask.
-                addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                        showProgressNotification(getString(R.string.progress_uploading),
-                                taskSnapshot.getBytesTransferred(),
-                                taskSnapshot.getTotalByteCount());
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Upload succeeded
-                        Log.d(TAG, "uploadFromUri:onSuccess");
-                        uploadTime.stop();
-                        //delete the compressed file which is no longer needed
-                        if (compressedFileUri != null) {
-                            File file = new File(compressedFileUri.getPath());
-                            file.delete();
-                            if (file.exists()) {
-                                try {
-                                    file.getCanonicalFile().delete();
-                                    if (file.exists()) {
-                                        getApplicationContext().deleteFile(file.getName());
-                                    }
-                                } catch (IOException e) {
-                                    Crashlytics.logException(e);
-                                    e.printStackTrace();
-                                }
-                            }
-                        }
-
-
-                        // Get the public download URL
-                        photoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Uri> task) {
-                                if (task.isSuccessful()) {
-                                    final Uri downloadUri = task.getResult();
-                                    // [START_EXCLUDE]
-                                    broadcastUploadFinished(downloadUri, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
-                                    showUploadFinishedNotification(downloadUri, compressedFileUri, toTransmit);
-                                    taskCompleted();
-                                    // [END_EXCLUDE]
-                                } else {
-                                    Log.d(TAG, "onComplete: failed");
-
-                                    // [START_EXCLUDE]
-                                    broadcastUploadFinished(null, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
-                                    showUploadFinishedNotification(null, compressedFileUri, toTransmit);
-                                    taskCompleted();
-                                    // [END_EXCLUDE]
-                                }
-                            }
-                        });
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Upload failed
-                        Log.w(TAG, "uploadFromUri:onFailure", exception);
-
-                        // [START_EXCLUDE]
-                        broadcastUploadFinished(null, compressedFileUri, toTransmit, caption, groupId, dmInfoData);
-                        showUploadFinishedNotification(null, compressedFileUri, toTransmit);
-                        taskCompleted();
-                        //[END_EXCLUDE]
-                    }
-                });
     }
     // [END upload_from_uri]
 

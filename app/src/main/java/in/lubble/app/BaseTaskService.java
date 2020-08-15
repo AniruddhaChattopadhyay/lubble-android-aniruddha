@@ -6,9 +6,12 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
 import androidx.core.app.NotificationCompat;
 
-import static in.lubble.app.Constants.*;
+import static in.lubble.app.Constants.FINISHED_NOTIFICATION_ID;
+import static in.lubble.app.Constants.PROGRESS_NOTIFICATION_ID;
+import static in.lubble.app.Constants.SENDING_MEDIA_NOTIF_CHANNEL;
 
 /**
  * Base class for Services that keep track of the number of active jobs and self-stop when the

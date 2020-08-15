@@ -21,7 +21,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
@@ -220,7 +220,7 @@ public class SellerDashActiv extends BaseActivity {
                     });
 
                 } else if (!isFinishing()) {
-                    Crashlytics.logException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("seller profile null for seller id: " + sellerId));
                     Toast.makeText(SellerDashActiv.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }

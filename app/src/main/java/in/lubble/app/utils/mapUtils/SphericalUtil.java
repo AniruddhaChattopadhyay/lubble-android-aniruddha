@@ -4,8 +4,20 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-import static in.lubble.app.utils.mapUtils.MathUtil.*;
-import static java.lang.Math.*;
+import static in.lubble.app.utils.mapUtils.MathUtil.EARTH_RADIUS;
+import static in.lubble.app.utils.mapUtils.MathUtil.arcHav;
+import static in.lubble.app.utils.mapUtils.MathUtil.havDistance;
+import static in.lubble.app.utils.mapUtils.MathUtil.wrap;
+import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.asin;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.tan;
+import static java.lang.Math.toDegrees;
+import static java.lang.Math.toRadians;
 
 /*
  * Copyright 2013 Google Inc.

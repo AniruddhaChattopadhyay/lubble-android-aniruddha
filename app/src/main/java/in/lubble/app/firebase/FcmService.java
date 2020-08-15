@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.clevertap.android.sdk.NotificationInfo;
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -17,6 +19,9 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+
+import java.util.Map;
+
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -26,11 +31,14 @@ import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
 
-import java.util.Map;
-
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
-import static in.lubble.app.firebase.RealtimeDbHelper.*;
-import static in.lubble.app.marketplace.SellerDashActiv.*;
+import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.marketplace.SellerDashActiv.ACTION_IMG_DONE;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_ID;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_TYPE;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_URL;
 
 /**
  * Created by ishaan on 26/1/18.
@@ -118,7 +126,7 @@ public class FcmService extends FirebaseMessagingService {
                     AppNotifData appNotifData = gson.fromJson(jsonElement, AppNotifData.class);
                     AppNotifUtils.showNormalAppNotif(this, appNotifData);
                 } else {
-                    Crashlytics.logException(new IllegalArgumentException("Illegal notif type: " + type));
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("Illegal notif type: " + type));
                 }
             }
         }
@@ -175,7 +183,7 @@ public class FcmService extends FirebaseMessagingService {
         try {
             getThisUserRef().child("token").setValue(token);
         } catch (Exception e) {
-            Crashlytics.logException(e);
+            FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
 

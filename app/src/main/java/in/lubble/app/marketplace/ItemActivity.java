@@ -36,8 +36,8 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
@@ -226,7 +226,7 @@ public class ItemActivity extends BaseActivity {
                 itemId = Integer.parseInt(data.getLastPathSegment());
             } catch (Exception e) {
                 e.printStackTrace();
-                Crashlytics.logException(e);
+                FirebaseCrashlytics.getInstance().recordException(e);
                 finish();
             }
         } else {
@@ -617,7 +617,7 @@ public class ItemActivity extends BaseActivity {
                         Toast.makeText(ItemActivity.this, "Item Not Found", Toast.LENGTH_LONG).show();
                         itemProgressBar.setVisibility(View.GONE);
                     } else {
-                        Crashlytics.logException(new IllegalArgumentException("Item null for item ID: " + itemId));
+                        FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("Item null for item ID: " + itemId));
                         Toast.makeText(ItemActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -757,7 +757,7 @@ public class ItemActivity extends BaseActivity {
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(ratingAccountIv);
                 } catch (IllegalArgumentException e) {
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
 

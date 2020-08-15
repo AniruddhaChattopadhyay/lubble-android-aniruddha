@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,7 +76,7 @@ public class ServiceCatalogAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                             } else {
                                 final IllegalArgumentException throwable = new IllegalArgumentException("Service Data is NULL when trying to request service price");
                                 Log.e(TAG, "onClick: ", throwable);
-                                Crashlytics.logException(throwable);
+                                FirebaseCrashlytics.getInstance().recordException(throwable);
                             }
                         }
                     } else {

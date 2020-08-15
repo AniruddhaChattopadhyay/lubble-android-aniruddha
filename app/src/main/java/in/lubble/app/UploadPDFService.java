@@ -16,13 +16,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GetTokenResult;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.perf.FirebasePerformance;
@@ -185,7 +185,7 @@ public class UploadPDFService extends BaseTaskService {
                 renderer.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                Crashlytics.logException(ex);
+                FirebaseCrashlytics.getInstance().recordException(ex);
             }
         }
         return bitmap;
@@ -401,7 +401,7 @@ public class UploadPDFService extends BaseTaskService {
         chatData.setAuthorUid(authorId);
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
-        chatData.setMessage("\uD83D\uDCC4 PDF Attached\nPlease update the app from Play Store to view the PDF document");
+        chatData.setMessage("\uD83D\uDCC4 PDF Attached");
         chatData.setPdfFileName(filename);
         if (downloadThumbnailUrl == null)
             chatData.setPdfThumbnailUrl("https://i.imgur.com/ma03D59.png");

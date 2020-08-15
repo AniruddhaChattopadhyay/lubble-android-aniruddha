@@ -14,7 +14,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.crashlytics.android.Crashlytics;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatConfig;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -31,6 +30,7 @@ import com.google.android.play.core.install.model.InstallStatus;
 import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.android.play.core.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -71,23 +71,26 @@ public class BaseActivity extends AppCompatActivity {
             finish();
             return;
         }
+        FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
+        crashlytics.setUserId(FirebaseAuth.getInstance().getUid());
         if (FirebaseAuth.getInstance().getCurrentUser() != null && !(this instanceof LoginActivity) && !(this instanceof LocationActivity)) {
             // logged in
             try {
                 appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
                 checkMinAppVersion();
 
-                ReferralUtils.generateBranchUrl(this, "msg_copy", new Branch.BranchLinkCreateListener() {
-                    @Override
-                    public void onLinkCreate(String url, BranchError error) {
-                        if (url != null) {
-                            LubbleSharedPrefs.getInstance().setShareUrl(url);
+                if (TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getMsgCopyShareUrl())) {
+                    ReferralUtils.generateBranchUrl(this, "msg_copy", false, new Branch.BranchLinkCreateListener() {
+                        @Override
+                        public void onLinkCreate(String url, BranchError error) {
+                            if (url != null) {
+                                LubbleSharedPrefs.getInstance().setMsgCopyShareUrl(url);
+                            }
                         }
-                    }
-                });
-
+                    });
+                }
             } catch (Throwable e) {
-                Crashlytics.logException(e);
+                crashlytics.recordException(e);
             }
         }
 
@@ -159,7 +162,7 @@ public class BaseActivity extends AppCompatActivity {
                             Analytics.triggerEvent(AnalyticsEvents.APP_UPDATE_BLOCK, BaseActivity.this);
                             appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.IMMEDIATE, BaseActivity.this, IMMEDIATE_REQUEST_CODE);
                         } catch (IntentSender.SendIntentException e) {
-                            Crashlytics.logException(e);
+                            FirebaseCrashlytics.getInstance().recordException(e);
                         }
                     }
                 }
@@ -190,7 +193,7 @@ public class BaseActivity extends AppCompatActivity {
                                         startFlexiUpdate(appUpdateInfo);
                                     } catch (IntentSender.SendIntentException e) {
                                         e.printStackTrace();
-                                        Crashlytics.logException(e);
+                                        FirebaseCrashlytics.getInstance().recordException(e);
                                     }
                                 }
                             });

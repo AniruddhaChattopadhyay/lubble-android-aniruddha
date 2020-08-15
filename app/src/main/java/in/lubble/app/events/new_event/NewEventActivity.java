@@ -25,7 +25,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.signature.ObjectKey;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -45,6 +44,7 @@ import com.google.android.libraries.places.widget.AutocompleteActivity;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -317,7 +317,7 @@ public class NewEventActivity extends BaseActivity {
                 } catch (ParseException e) {
                     e.printStackTrace();
                     Toast.makeText(NewEventActivity.this, R.string.invalid_date_time, Toast.LENGTH_SHORT).show();
-                    Crashlytics.logException(e);
+                    FirebaseCrashlytics.getInstance().recordException(e);
                 }
             }
         });
@@ -608,8 +608,9 @@ public class NewEventActivity extends BaseActivity {
                 }
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
-                Crashlytics.log(status.getStatusMessage());
-                Crashlytics.logException(new Exception(status.getStatusMessage()));
+                FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
+                crashlytics.log(status.getStatusMessage());
+                crashlytics.recordException(new Exception(status.getStatusMessage()));
             }
         } else if (requestCode == REQUEST_CODE_EVENT_PIC && resultCode == RESULT_OK) {
             File imageFile;
