@@ -16,6 +16,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -86,6 +87,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import in.lubble.app.BuildConfig;
+import in.lubble.app.Constants;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -107,6 +109,7 @@ import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.FullScreenVideoActivity;
+import in.lubble.app.utils.ReferralUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.YoutubeData;
@@ -136,6 +139,7 @@ import static in.lubble.app.models.ChatData.UNREAD;
 import static in.lubble.app.utils.FileUtils.deleteCache;
 import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId;
 import static in.lubble.app.utils.FileUtils.saveImageInGallery;
+import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
@@ -405,7 +409,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.linkContainer.setVisibility(GONE);
         }
 
-        handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null);
+        handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null, null);
         handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.playvidIv, sentChatViewHolder.vidThumbnailIv, chatData, null, position);
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
 
@@ -424,7 +428,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.pollContainer.setVisibility(GONE);
         }
         handlePdf(sentChatViewHolder.pdfContainer, sentChatViewHolder.progressBarPdf, sentChatViewHolder.pdfThumbnailIv, chatData,
-                sentChatViewHolder.pdfDownloadIv, sentChatViewHolder.progressBarDownloadPdf, sentChatViewHolder.pdfTitleTv, sentChatViewHolder.messageTv);
+                sentChatViewHolder.pdfDownloadIv, sentChatViewHolder.progressBarDownloadPdf, sentChatViewHolder.pdfTitleTv, sentChatViewHolder.messageTv, null);
     }
 
     private void setHighLightedText(TextView tv, String textToHighlight) {
@@ -478,6 +482,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         showDpAndName(recvdChatViewHolder, chatData);
 
+        recvdChatViewHolder.shareMsgIv.setVisibility(GONE);
         recvdChatViewHolder.visibleToYouTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? VISIBLE : GONE);
         recvdChatViewHolder.replyBottomTv.setVisibility(chatData.getType().equalsIgnoreCase(GROUP_PROMPT) ? VISIBLE : GONE);
 
@@ -642,7 +647,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkContainer.setVisibility(GONE);
         }
 
-        handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv);
+        handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv, recvdChatViewHolder.shareMsgIv);
         handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid, recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv, position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
@@ -665,7 +670,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handlePdf(recvdChatViewHolder.pdfContainer, recvdChatViewHolder.progressBarPdf, recvdChatViewHolder.pdfThumbnailIv, chatData,
-                recvdChatViewHolder.pdfDownloadIv, recvdChatViewHolder.progressBarDownloadPdf, recvdChatViewHolder.pdfTitleTv, recvdChatViewHolder.messageTv);
+                recvdChatViewHolder.pdfDownloadIv, recvdChatViewHolder.progressBarDownloadPdf, recvdChatViewHolder.pdfTitleTv, recvdChatViewHolder.messageTv, recvdChatViewHolder.shareMsgIv);
     }
 
     private void showPollButtons(final RecyclerView.ViewHolder baseViewHolder, final ChatData chatData) {
@@ -1222,7 +1227,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv) {
+    private void handleImage(FrameLayout imgContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, @Nullable ImageView shareMsgIv) {
         if (isValidString(chatData.getImgUrl())) {
             imageView.setOnClickListener(null);
             imgContainer.setVisibility(VISIBLE);
@@ -1234,6 +1239,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             } else {
                 if (downloadIv != null) {
                     downloadIv.setVisibility(GONE);
+                }
+                if (shareMsgIv != null) {
+                    shareMsgIv.setVisibility(VISIBLE);
                 }
                 String savedPath = getSavedImageForMsgId(context, chatData.getId(), Uri.parse(chatData.getImgUrl()));
                 if (savedPath != null) {
@@ -1249,7 +1257,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void handlePdf(RelativeLayout pdfContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, ProgressBar progressBarDownloadPdf,
-                           TextView pdfTitleTV, TextView messageTv) {
+                           TextView pdfTitleTV, TextView messageTv, @Nullable ImageView shareMsgIv) {
         if (isValidString(chatData.getPdfUrl())) {
             pdfContainer.setOnClickListener(null);
             pdfContainer.setVisibility(VISIBLE);
@@ -1274,6 +1282,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 if (pdfFile != null) {
                     downloadIv.setVisibility(GONE);
                     progressBarDownloadPdf.setVisibility(GONE);
+                    if (shareMsgIv != null) {
+                        shareMsgIv.setVisibility(VISIBLE);
+                    }
                 } else {
                     downloadIv.setVisibility(VISIBLE);
                     progressBarDownloadPdf.setVisibility(VISIBLE);
@@ -1608,6 +1619,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+
+    private String getMsgSuffix(ChatData chatData, String shareUrl) {
+        String suffix = "";
+        ProfileData authorProfileData = profileDataMap.get(chatData.getAuthorUid());
+        if (shareUrl != null && !TextUtils.isEmpty(shareUrl)) {
+            suffix = FirebaseRemoteConfig.getInstance().getString(MSG_WATERMARK_TEXT);
+            shareUrl = shareUrl.replace("https://", "");
+            suffix = "\n" + replaceSuffixKeys(suffix, authorProfileData) + shareUrl;
+        }
+        return suffix;
+    }
+
     private String replaceSuffixKeys(String suffix, ProfileData authorProfileData) {
         final String authorNameKey = "{authorname}";
         final String lubbleNameKey = "{lubble}";
@@ -1658,7 +1681,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView youtubePlayIv;
         private RelativeLayout youtubeContainer;
         private TextView youtubeTitleTv;
-        private ImageView downloadIv;
+        private ImageView downloadIv, shareMsgIv;
         private LinearLayout pollContainer;
         private RelativeLayout lubbContainer;
         private EmojiTextView badgeTextTv;
@@ -1697,14 +1720,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     case R.id.action_copy:
                         ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
                         ChatData chatData = chatDataList.get(highlightedPos);
-                        String suffix = "";
-                        ProfileData authorProfileData = profileDataMap.get(chatData.getAuthorUid());
-                        String msgCopyShareUrl = LubbleSharedPrefs.getInstance().getMsgCopyShareUrl();
-                        if (msgCopyShareUrl != null && !TextUtils.isEmpty(msgCopyShareUrl)) {
-                            suffix = FirebaseRemoteConfig.getInstance().getString(MSG_WATERMARK_TEXT);
-                            msgCopyShareUrl = msgCopyShareUrl.replace("https://", "");
-                            suffix = "\n" + replaceSuffixKeys(suffix, authorProfileData) + msgCopyShareUrl;
-                        }
+                        String suffix = getMsgSuffix(chatData, LubbleSharedPrefs.getInstance().getMsgCopyShareUrl());
                         String message = chatData.getMessage() + suffix;
                         ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
                         clipboard.setPrimaryClip(clip);
@@ -1804,6 +1820,38 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             Log.d(TAG, "pdf here" + pdfChatData.getPdfUrl());
                             openPdf(pdfChatData.getPdfUrl(), progressBarDownloadPdf, pdfDownloadIv);
                         }
+                    case R.id.iv_share_msg:
+                        final String msgShareUrl = LubbleSharedPrefs.getInstance().getMsgShareUrl();
+                        if (!TextUtils.isEmpty(msgShareUrl)) {
+                            Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                            sharingIntent.setType("text/plain");
+                            sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Join your neighbourhood on Lubble");
+                            ChatData msgShareChatData = chatDataList.get(getAdapterPosition());
+                            String message = msgShareChatData.getMessage();
+                            String suffix = getMsgSuffix(msgShareChatData, LubbleSharedPrefs.getInstance().getMsgCopyShareUrl());
+                            sharingIntent.putExtra(Intent.EXTRA_TEXT, message + suffix);
+                            if (!TextUtils.isEmpty(msgShareChatData.getImgUrl())) {
+                                String savedPath = getSavedImageForMsgId(context, msgShareChatData.getId(), Uri.parse(msgShareChatData.getImgUrl()));
+                                if (!TextUtils.isEmpty(savedPath)) {
+                                    sharingIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", new File(savedPath)));
+                                    sharingIntent.setType("image/*");
+                                    sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                }
+                            } else if (!TextUtils.isEmpty(msgShareChatData.getPdfUrl())) {
+                                String fileName = getFileName(msgShareChatData.getPdfUrl());
+                                File matchingFile = makeGetFileForDownload(fileName);
+                                if (matchingFile != null) {
+                                    Uri pdfURI = FileProvider.getUriForFile(
+                                            context,
+                                            BuildConfig.APPLICATION_ID + ".fileprovider", matchingFile);
+                                    sharingIntent.putExtra(Intent.EXTRA_STREAM, pdfURI);
+                                    sharingIntent.setType("application/pdf");
+                                    sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                }
+                            }
+                            context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.refer_share_title)));
+                            //todo Analytics.triggerEvent(AnalyticsEvents., context);
+                        }
                 }
                 if (actionMode != null) {
                     actionMode.finish();
@@ -1889,7 +1937,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
             downloadIv = itemView.findViewById(R.id.iv_download);
             pollContainer = itemView.findViewById(R.id.container_polls);
-
+            shareMsgIv = itemView.findViewById(R.id.iv_share_msg);
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
 
             dpIv.setOnTouchListener(this);
@@ -1901,6 +1949,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             vidThumbnailIv.setOnTouchListener(this);
             lubbContainer.setOnTouchListener(this);
             pdfContainer.setOnTouchListener(this);
+            shareMsgIv.setOnTouchListener(this);
         }
 
     }

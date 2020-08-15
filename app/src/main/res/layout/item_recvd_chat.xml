@@ -350,7 +350,7 @@
                         android:paddingBottom="4dp"
                         android:textColor="@color/black"
                         android:textSize="15sp"
-                        tools:text="Pikachu! I ! &#160;&#160;&#160;&#160;&#160;&#160;&#160;" />
+                        tools:text="Pikachu! Choose thundershock and then iron tail! &#160;&#160;&#160;&#160;&#160;&#160;&#160;" />
 
                     <TextView
                         android:id="@+id/tv_date"
@@ -386,8 +386,9 @@
         <RelativeLayout
             android:id="@+id/container_lubb"
             android:layout_width="wrap_content"
+            android:layout_marginRight="18dp"
             android:layout_height="match_parent"
-            android:layout_marginRight="8dp">
+            android:minWidth="48dp">
 
             <ImageView
                 android:id="@+id/iv_lubb"
@@ -407,6 +408,19 @@
                 android:paddingTop="2dp"
                 android:textSize="12sp"
                 tools:text="292" />
+
+            <ImageView
+                android:id="@+id/iv_share_msg"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="8dp"
+                android:background="@drawable/circle"
+                android:padding="6dp"
+                android:tint="@color/darker_gray"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_share_black_24dp"
+                tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/tv_date_hidden"

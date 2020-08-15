@@ -89,6 +89,17 @@ public class BaseActivity extends AppCompatActivity {
                         }
                     });
                 }
+
+                if (TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getMsgShareUrl())) {
+                    ReferralUtils.generateBranchUrl(this, "msg_share", false, new Branch.BranchLinkCreateListener() {
+                        @Override
+                        public void onLinkCreate(String url, BranchError error) {
+                            if (url != null) {
+                                LubbleSharedPrefs.getInstance().setMsgShareUrl(url);
+                            }
+                        }
+                    });
+                }
             } catch (Throwable e) {
                 crashlytics.recordException(e);
             }

@@ -52,6 +52,7 @@ public class LubbleSharedPrefs {
     private final String FLEXI_UPDATE_TS = "FLEXI_UPDATE_TS";
     private final String IS_MAP_DISCLAIMER_CLOSED = "IS_MAP_DISCLAIMER_CLOSED";
     private final String SHARE_MSG_COPY_URL = "SHARE_MSG_COPY_URL";
+    private final String SHARE_MSG_URL = "SHARE_MSG_URL";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -330,6 +331,15 @@ public class LubbleSharedPrefs {
 
     public boolean setMsgCopyShareUrl(String shareUrl) {
         return preferences.edit().putString(SHARE_MSG_COPY_URL, shareUrl).commit();
+    }
+
+    @Nullable
+    public String getMsgShareUrl() {
+        return preferences.getString(SHARE_MSG_URL, null);
+    }
+
+    public boolean setMsgShareUrl(String shareUrl) {
+        return preferences.edit().putString(SHARE_MSG_URL, shareUrl).commit();
     }
 
     @Nullable
