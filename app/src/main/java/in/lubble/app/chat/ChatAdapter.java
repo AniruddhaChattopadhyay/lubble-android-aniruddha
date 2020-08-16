@@ -2,6 +2,7 @@ package in.lubble.app.chat;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -14,6 +15,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Html;
@@ -105,6 +107,7 @@ import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
@@ -1807,7 +1810,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             ChatFragmentPermissionsDispatcher
                                     .getWritePermWithPermissionCheck(chatFragment);
                         } else if (isValidString(vidChatData.getVidUrl())) {
-                            FullScreenVideoActivity.open(activity, context, vidChatData.getVidUrl());
+                            FullScreenVideoActivity.open(activity, context, vidChatData.getVidUrl(), vidChatData.getMessage(), getMsgSuffix(vidChatData, LubbleSharedPrefs.getInstance().getMsgShareUrl()));
                         }
                         break;
                     case R.id.pdf_container:
@@ -1849,8 +1852,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                     sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                 }
                             }
-                            context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.refer_share_title)));
-                            //todo Analytics.triggerEvent(AnalyticsEvents., context);
+
+                            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                                    context, 21,
+                                    new Intent(context, ShareSheetReceiver.class),
+                                    PendingIntent.FLAG_UPDATE_CURRENT);
+
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                                context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.refer_share_title), pendingIntent.getIntentSender()));
+                            } else {
+                                context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.refer_share_title)));
+                            }
+                            Analytics.triggerEvent(AnalyticsEvents.MSG_SHARED, context);
                         }
                 }
                 if (actionMode != null) {
@@ -2090,7 +2103,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             ChatFragmentPermissionsDispatcher
                                     .getWritePermWithPermissionCheck(chatFragment);
                         } else if (isValidString(vidChatData.getVidUrl())) {
-                            FullScreenVideoActivity.open(activity, context, vidChatData.getVidUrl());
+                            FullScreenVideoActivity.open(activity, context, vidChatData.getVidUrl(), vidChatData.getMessage(), getMsgSuffix(vidChatData, LubbleSharedPrefs.getInstance().getMsgShareUrl()));
                         }
                         break;
                     case R.id.pdf_container:

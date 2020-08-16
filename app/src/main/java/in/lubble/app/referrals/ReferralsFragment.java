@@ -1,5 +1,6 @@
 package in.lubble.app.referrals;
 
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -9,6 +10,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -39,6 +41,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.receivers.ShareSheetReceiver;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
@@ -224,7 +227,17 @@ public class ReferralsFragment extends Fragment {
             public void onClick(View v) {
                 final Intent referralIntent = getReferralIntent(getContext(), sharingUrl, sharingProgressDialog, linkCreateListener);
                 if (referralIntent != null) {
-                    startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
+
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                            getContext(), 21,
+                            new Intent(getContext(), ShareSheetReceiver.class),
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                        startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title), pendingIntent.getIntentSender()));
+                    } else {
+                        startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
+                    }
                     Analytics.triggerEvent(AnalyticsEvents.REFERRAL_MORE_SHARE, getContext());
                 }
             }

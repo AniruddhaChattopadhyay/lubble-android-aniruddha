@@ -3,9 +3,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_download_vid"
+        android:icon="@drawable/ic_file_download_black_24dp"
         android:orderInCategory="100"
-        app:showAsAction="never"
         android:title="Download"
-        android:icon="@drawable/ic_file_download_black_24dp"/>
+        app:iconTint="@color/white"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_share_vid"
+        android:icon="@drawable/ic_share_black_24dp"
+        android:orderInCategory="101"
+        android:title="Download"
+        app:iconTint="@color/white"
+
+        app:showAsAction="ifRoom" />
 
 </menu>
