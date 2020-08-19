@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#ffffff"
+    android:orientation="vertical"
+    android:padding="12dp"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="100dp"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose your status"
+        android:textSize="20dp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This will be visisble along with your name in all the chats"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/recycler_view"
+
+        />
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/custom_status_layout"
+        android:visibility="gone"
+        android:hint="Enter your custom status here"
+        >
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/custom_et"
+            android:hint="Enter your custom status here"
+            />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/custom_btn"
+        android:text="SET STATUS"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textSize="12sp"
+        android:theme="@style/MaterialButton"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/colorAccent"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        />
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/set_status_btn"
+        android:text="SET STATUS"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textSize="12sp"
+        android:theme="@style/MaterialButton"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/colorAccent"
+        android:gravity="center"
+        android:layout_gravity="center"
+        />
+</LinearLayout>

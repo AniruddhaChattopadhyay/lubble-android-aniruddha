@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/status_redirect_tv"
+        android:text="Go to your status"
+        android:textSize="20dp"
+        />
+
+    <com.google.android.material.button.MaterialButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/status_redirect_btn"
+        android:text="SET STATUS"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:textSize="12sp"
+        android:theme="@style/MaterialButton"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/colorAccent"
+        android:gravity="center"
+        android:layout_gravity="center"
+        />
+
+<!--    <Button-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Set Status"-->
+<!--        android:id="@+id/status_redirect_btn"/>-->
+
+</LinearLayout>
