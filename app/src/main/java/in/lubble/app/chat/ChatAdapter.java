@@ -1827,7 +1827,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             @Override
                             public void onClick(View v) {
                                 Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS, context);
-                                StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment();
+                                StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
                                 statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                                 dialog.dismiss();
                             }
@@ -2090,12 +2090,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         break;
                     case R.id.add_status_button :
                         Analytics.triggerEvent(AnalyticsEvents.ADD_STATUS_CLICKED_FROM_CHAT, context);
-                        StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment();
+                        StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
                         statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                         break;
                     case R.id.status_click_layout :
                         Analytics.triggerEvent(AnalyticsEvents.EDIT_STATUS_CLICKED_FROM_CHAT, context);
-                        statusBottomSheetFragment = new StatusBottomSheetFragment();
+                        statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
                         statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                         break;
                 }

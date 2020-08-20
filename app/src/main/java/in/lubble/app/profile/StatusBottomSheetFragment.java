@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -41,8 +42,9 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     private MaterialButton setStatus;
     private TextInputLayout customStatusLayout;
     private int selectedPos = -1;
-    public StatusBottomSheetFragment() {
-
+    private View view_snackbar;
+    public StatusBottomSheetFragment(View v) {
+        view_snackbar = v;
     }
 
     @Override
@@ -92,7 +94,9 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                             }
                             else {
                                 RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusText);
-                                Toast.makeText(getContext(), statusText + " is selected as status!", Toast.LENGTH_SHORT).show();
+                                Snackbar snackbar = Snackbar
+                                        .make(view_snackbar, statusText + " is selected as status!", Snackbar.LENGTH_LONG);
+                                snackbar.show();
                                 dismiss();
                             }
                         }
@@ -114,7 +118,9 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                 }
                 else{
                     RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusList.get(selectedPos));
-                    Toast.makeText(getContext(), statusList.get(selectedPos) + " is selected as status!", Toast.LENGTH_SHORT).show();
+                    Snackbar snackbar = Snackbar
+                            .make(view_snackbar, statusList.get(selectedPos) + " is selected as status!", Snackbar.LENGTH_LONG);
+                    snackbar.show();
                     dismiss();
                 }
             }
