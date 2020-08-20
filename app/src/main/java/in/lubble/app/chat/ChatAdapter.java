@@ -634,6 +634,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.linkDescTv.setTextColor(ContextCompat.getColor(context, R.color.link_text_color));
             recvdChatViewHolder.linkDescTv.setText(chatData.getLinkDesc());
             recvdChatViewHolder.attachPicIv.setVisibility(GONE);
+            recvdChatViewHolder.shareMsgIv.setVisibility(VISIBLE);
 
             if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
                 glide.load(chatData.getLinkPicUrl())
