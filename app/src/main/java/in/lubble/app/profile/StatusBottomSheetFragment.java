@@ -1,6 +1,8 @@
 package in.lubble.app.profile;
 
 import android.os.Bundle;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +28,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 
 public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
@@ -56,13 +60,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
         setStatus = rootview.findViewById(R.id.set_status_btn);
         mAdapter = new StatusBottomSheetAdapter(statusList);
         customStatusLayout = rootview.findViewById(R.id.custom_status_layout);
-        // vertical RecyclerView
-        // keep movie_list_row.xml width to `match_parent`
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
-
-        // horizontal RecyclerView
-        // keep movie_list_row.xml width to `wrap_content`
-        // RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
 
         recyclerView.setLayoutManager(mLayoutManager);
 
@@ -71,16 +69,15 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         recyclerView.setAdapter(mAdapter);
-        String abc = FirebaseAuth.getInstance().getUid();
 
-        // row click listener
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 //Movie movie = statusList.get(position);
                 selectedPos = position;
-                if (statusList.get(position).equals("Custom")) {
+                if (statusList.get(position).equalsIgnoreCase("Custom")) {
                     customStatusLayout.setVisibility(View.VISIBLE);
+                    customEt.setFilters(new InputFilter[]{EMOJI_FILTER});
                     customSetBtn.setVisibility(View.VISIBLE);
                     recyclerView.setVisibility(View.GONE);
                     setStatus.setVisibility(View.GONE);
@@ -89,7 +86,9 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                         public void onClick(View v) {
                             String statusText = customEt.getText().toString();
                             if(statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")){
-                                Toast.makeText(getContext(), "You can not choose "+statusText + " without administrative previledges", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "You can not choose "+statusText + " without administrative privileges", Toast.LENGTH_SHORT).show();
+                                customEt.setText("");
+                                Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_FOR_CUSTOM_STATUS_CLICKED, getContext());
                             }
                             else {
                                 RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusText);
@@ -109,6 +108,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
         setStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_CLICKED, getContext());
                 if(selectedPos == -1){
                     Toast.makeText(getContext(), "Please choose a option for your status", Toast.LENGTH_SHORT).show();
                 }
@@ -142,6 +142,22 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
             }
         });
     }
+
+    public static InputFilter EMOJI_FILTER = new InputFilter() {
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            for (int index = start; index < end; index++) {
+
+                int type = Character.getType(source.charAt(index));
+
+                if (type == Character.SURROGATE) {
+                    return "";
+                }
+            }
+            return null;
+        }
+    };
 
     @Override
     public void dismiss() {

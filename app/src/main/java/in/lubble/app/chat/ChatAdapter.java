@@ -1817,6 +1817,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
                         break;
                     case R.id.status_click_layout:
+                        Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_OTHERS_STATUS, context);
                         View dialogView = activity.getLayoutInflater().inflate(R.layout.bottom_sheet_for_status_redirect, null);
                         final BottomSheetDialog dialog = new BottomSheetDialog(context);
                         TextView tv = dialogView.findViewById(R.id.status_redirect_tv);
@@ -1825,6 +1826,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
+                                Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS, context);
                                 StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment();
                                 statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                                 dialog.dismiss();
@@ -2087,10 +2089,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
                         break;
                     case R.id.add_status_button :
+                        Analytics.triggerEvent(AnalyticsEvents.ADD_STATUS_CLICKED_FROM_CHAT, context);
                         StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment();
                         statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                         break;
                     case R.id.status_click_layout :
+                        Analytics.triggerEvent(AnalyticsEvents.EDIT_STATUS_CLICKED_FROM_CHAT, context);
                         statusBottomSheetFragment = new StatusBottomSheetFragment();
                         statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                         break;
