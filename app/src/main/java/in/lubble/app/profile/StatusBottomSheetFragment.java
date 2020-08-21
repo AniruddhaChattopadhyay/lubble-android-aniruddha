@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -37,7 +38,7 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
 
     private List<String> statusList = new ArrayList<>();
-    private RecyclerView recyclerView;
+    private ShimmerRecyclerView recyclerView;
     private StatusBottomSheetAdapter mAdapter;
     private EditText customEt;
     private MaterialButton customSetBtn;
@@ -79,7 +80,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
 
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        recyclerView.setAdapter(mAdapter);
+        recyclerView.showShimmerAdapter();
 
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
@@ -148,6 +149,8 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                     statusList.add(dataSnapshot.getKey());
                 }
                 statusList.add("Custom");
+                recyclerView.hideShimmerAdapter();
+                recyclerView.setAdapter(mAdapter);
                 mAdapter.notifyDataSetChanged();
             }
 

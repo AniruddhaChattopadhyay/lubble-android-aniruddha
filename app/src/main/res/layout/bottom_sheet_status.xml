@@ -26,7 +26,7 @@
         android:text="This will be visible along with your name in all the chats"
         android:textColor="@color/black" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
