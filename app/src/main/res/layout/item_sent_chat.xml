@@ -53,6 +53,18 @@
 
                     <include layout="@layout/container_msg_badge" />
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/add_status_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="+ add status"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:strokeColor="@color/trans_white"
+                        android:theme="@style/MaterialButton"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:visibility="gone"
+                        />
                 </LinearLayout>
 
                 <RelativeLayout

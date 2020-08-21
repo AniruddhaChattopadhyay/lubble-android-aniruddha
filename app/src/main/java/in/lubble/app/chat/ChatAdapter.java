@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -61,6 +62,8 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -102,6 +105,7 @@ import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.profile.StatusBottomSheetFragment;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
@@ -170,6 +174,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
     private HashMap<String, String> searchHighlightMap = new HashMap<>();
+    private int FLAG_STATUS_STATE=0;
 
 
     public ChatAdapter(Activity activity, Context context, String groupId,
@@ -244,13 +249,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
             final ProfileInfo profileInfo = profileData.getInfo();
             sentChatViewHolder.senderTv.setVisibility(VISIBLE);
             sentChatViewHolder.senderTv.setText(profileInfo.getName());
-            if (!chatData.getIsDm() && (!TextUtils.isEmpty(profileInfo.getBadge()) || !TextUtils.isEmpty(profileData.getGroupFlair()))) {
-                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
+            if (!chatData.getIsDm() && (!TextUtils.isEmpty(profileInfo.getBadge()))) {
+//                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
+                String flair = profileInfo.getBadge();
                 sentChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
                 sentChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
                 sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.white));
+//                sentChatViewHolder.editStatusLayout.setVisibility(VISIBLE);
             } else {
-                sentChatViewHolder.badgeTextTv.setVisibility(GONE);
+                sentChatViewHolder.editStatusLayout.setVisibility(GONE);
+                sentChatViewHolder.addStatusBtn.setVisibility(VISIBLE);
             }
         } else {
             sentChatViewHolder.senderTv.setVisibility(GONE);
@@ -1122,13 +1130,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .into(recvdChatViewHolder.dpIv);
             recvdChatViewHolder.authorNameTv.setText(profileInfo.getName().split(" ")[0]);
             recvdChatViewHolder.badgeTextTv.setVisibility(GONE);
-            if (!TextUtils.isEmpty(profileInfo.getBadge()) || !TextUtils.isEmpty(profileData.getGroupFlair())) {
-                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
+            if (!TextUtils.isEmpty(profileInfo.getBadge()) ) {
+//                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
+                String flair = profileInfo.getBadge();
                 recvdChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
                 recvdChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
                 recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
             } else {
-                recvdChatViewHolder.badgeTextTv.setVisibility(GONE);
+                recvdChatViewHolder.editStatusLayout.setVisibility(GONE);
             }
         } else {
             updateProfileInfoMap(getUserRef(chatData.getAuthorUid()), chatData.getAuthorUid(), recvdChatViewHolder.getAdapterPosition());
@@ -1662,6 +1671,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout pollContainer;
         private RelativeLayout lubbContainer;
         private EmojiTextView badgeTextTv;
+        private LinearLayout editStatusLayout;
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -1713,6 +1723,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     case R.id.action_info:
                         chatFragment.openChatInfo(chatDataList.get(highlightedPos).getId(), false);
                         break;
+
                 }
                 mode.finish();
                 return true;
@@ -1804,6 +1815,26 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             Log.d(TAG, "pdf here" + pdfChatData.getPdfUrl());
                             openPdf(pdfChatData.getPdfUrl(), progressBarDownloadPdf, pdfDownloadIv);
                         }
+                        break;
+                    case R.id.status_click_layout:
+                        Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_OTHERS_STATUS, context);
+                        View dialogView = activity.getLayoutInflater().inflate(R.layout.bottom_sheet_for_status_redirect, null);
+                        final BottomSheetDialog dialog = new BottomSheetDialog(context);
+                        TextView tv = dialogView.findViewById(R.id.status_redirect_tv);
+                        tv.setText("You are viewing "+authorNameTv.getText()+"'s status. You can set your status by clicking the button below");
+                        Button btn = dialogView.findViewById(R.id.status_redirect_btn);
+                        btn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS, context);
+                                StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
+                                statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.setContentView(dialogView);
+                        dialog.show();
+                        break;
                 }
                 if (actionMode != null) {
                     actionMode.finish();
@@ -1889,9 +1920,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             youtubeTitleTv = itemView.findViewById(R.id.tv_yt_title);
             downloadIv = itemView.findViewById(R.id.iv_download);
             pollContainer = itemView.findViewById(R.id.container_polls);
-
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
-
+            editStatusLayout = itemView.findViewById(R.id.status_click_layout);
             dpIv.setOnTouchListener(this);
             linkContainer.setOnTouchListener(this);
             pollContainer.setOnTouchListener(this);
@@ -1901,6 +1931,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             vidThumbnailIv.setOnTouchListener(this);
             lubbContainer.setOnTouchListener(this);
             pdfContainer.setOnTouchListener(this);
+            editStatusLayout.setOnTouchListener(this);
         }
 
     }
@@ -1939,6 +1970,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout lubbContainer;
         private EmojiTextView badgeTextTv;
         private TextView senderTv;
+        private MaterialButton addStatusBtn;
+        private LinearLayout editStatusLayout;
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -2054,6 +2087,17 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             Log.d(TAG, "pdf here" + pdfChatData.getPdfUrl());
                             openPdf(pdfChatData.getPdfUrl(), progressBarDownloadPdf, pdfDownloadIv);
                         }
+                        break;
+                    case R.id.add_status_button :
+                        Analytics.triggerEvent(AnalyticsEvents.ADD_STATUS_CLICKED_FROM_CHAT, context);
+                        StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
+                        statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+                        break;
+                    case R.id.status_click_layout :
+                        Analytics.triggerEvent(AnalyticsEvents.EDIT_STATUS_CLICKED_FROM_CHAT, context);
+                        statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
+                        statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+                        break;
                 }
                 if (actionMode != null) {
                     actionMode.finish();
@@ -2136,6 +2180,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             pollContainer = itemView.findViewById(R.id.container_polls);
             senderTv = itemView.findViewById(R.id.tv_sender_name);
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
+            addStatusBtn = itemView.findViewById(R.id.add_status_button);
+            editStatusLayout = itemView.findViewById(R.id.status_click_layout);
 
             linkContainer.setOnTouchListener(this);
             pollContainer.setOnTouchListener(this);
@@ -2145,6 +2191,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             rootLayout.setOnTouchListener(this);
             lubbContainer.setOnTouchListener(this);
             pdfContainer.setOnTouchListener(this);
+            addStatusBtn.setOnTouchListener(this);
+            editStatusLayout.setOnTouchListener(this);
         }
 
 
