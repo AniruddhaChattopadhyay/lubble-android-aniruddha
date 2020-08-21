@@ -1818,7 +1818,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     case R.id.status_click_layout:
                         Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_OTHERS_STATUS, context);
                         View dialogView = activity.getLayoutInflater().inflate(R.layout.bottom_sheet_for_status_redirect, null);
-                        final BottomSheetDialog dialog = new BottomSheetDialog(context);
+                        final BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.RoundedBottomSheetDialog);
                         TextView tv = dialogView.findViewById(R.id.status_redirect_tv);
                         tv.setText("You are viewing " + authorNameTv.getText() + "'s badge. Set your badge from your profile or here \uD83D\uDC47");
                         Button btn = dialogView.findViewById(R.id.status_redirect_btn);
