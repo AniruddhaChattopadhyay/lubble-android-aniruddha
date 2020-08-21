@@ -177,11 +177,13 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
-        try {
-            flairUpdateListener = (ChatMoreFragment.FlairUpdateListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString()
-                    + " must implement FlairUpdateListener");
+        if (context instanceof ChatMoreFragment.FlairUpdateListener) {
+            try {
+                flairUpdateListener = (ChatMoreFragment.FlairUpdateListener) context;
+            } catch (ClassCastException e) {
+                throw new ClassCastException(context.toString()
+                        + " must implement FlairUpdateListener");
+            }
         }
     }
 
