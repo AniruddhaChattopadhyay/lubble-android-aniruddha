@@ -1,12 +1,12 @@
 package in.lubble.app.profile;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -21,7 +21,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -32,9 +31,11 @@ import java.util.List;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.ChatMoreFragment;
 import in.lubble.app.firebase.RealtimeDbHelper;
 
 public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
+
     private List<String> statusList = new ArrayList<>();
     private RecyclerView recyclerView;
     private StatusBottomSheetAdapter mAdapter;
@@ -44,6 +45,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     private TextInputLayout customStatusLayout;
     private int selectedPos = -1;
     private View view_snackbar;
+    private ChatMoreFragment.FlairUpdateListener flairUpdateListener;
 
     public StatusBottomSheetFragment(View v) {
         view_snackbar = v;
@@ -98,6 +100,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                                 Snackbar snackbar = Snackbar
                                         .make(view_snackbar, statusText + " is selected as badge!", Snackbar.LENGTH_LONG);
                                 snackbar.show();
+                                flairUpdateListener.onFlairUpdated();
                                 dismiss();
                             }
                         }
@@ -121,6 +124,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                     Snackbar snackbar = Snackbar
                             .make(view_snackbar, statusList.get(selectedPos) + " is selected as badge!", Snackbar.LENGTH_LONG);
                     snackbar.show();
+                    flairUpdateListener.onFlairUpdated();
                     dismiss();
                 }
             }
@@ -164,6 +168,17 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
             return null;
         }
     };
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        try {
+            flairUpdateListener = (ChatMoreFragment.FlairUpdateListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString()
+                    + " must implement FlairUpdateListener");
+        }
+    }
 
     @Override
     public void dismiss() {

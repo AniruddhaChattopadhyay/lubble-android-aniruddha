@@ -249,12 +249,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.senderTv.setVisibility(VISIBLE);
             sentChatViewHolder.senderTv.setText(profileInfo.getName());
             if (!chatData.getIsDm() && (!TextUtils.isEmpty(profileInfo.getBadge()))) {
-//                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                 String flair = profileInfo.getBadge();
                 sentChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
                 sentChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
                 sentChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.white));
-//                sentChatViewHolder.editStatusLayout.setVisibility(VISIBLE);
+                sentChatViewHolder.addStatusTv.setVisibility(GONE);
+                sentChatViewHolder.editStatusLayout.setVisibility(VISIBLE);
             } else {
                 sentChatViewHolder.editStatusLayout.setVisibility(GONE);
                 sentChatViewHolder.addStatusTv.setVisibility(VISIBLE);
