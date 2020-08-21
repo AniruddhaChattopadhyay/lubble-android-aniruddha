@@ -53,18 +53,21 @@
 
                     <include layout="@layout/container_msg_badge" />
 
-                    <com.google.android.material.button.MaterialButton
+                    <TextView
                         android:id="@+id/add_status_button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="+ add status"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:strokeColor="@color/trans_white"
-                        android:theme="@style/MaterialButton"
+                        android:layout_marginLeft="4dp"
+                        android:background="@drawable/rounded_rect_white_border"
+                        android:paddingLeft="8dp"
+                        android:paddingTop="2dp"
+                        android:paddingRight="8dp"
+                        android:paddingBottom="2dp"
+                        android:text="+ Add Badge"
                         android:textColor="@color/white"
-                        android:textSize="12sp"
+                        android:textSize="10sp"
                         android:visibility="gone"
-                        />
+                        tools:visibility="visible" />
                 </LinearLayout>
 
                 <RelativeLayout

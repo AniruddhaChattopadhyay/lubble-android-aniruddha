@@ -14,6 +14,8 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        app:drawableLeftCompat="@drawable/ic_star_shine"
         android:text="Choose your badge"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 

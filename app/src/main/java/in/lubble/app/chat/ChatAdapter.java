@@ -63,7 +63,6 @@ import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.youtube.player.YouTubeIntents;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -258,7 +257,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 //                sentChatViewHolder.editStatusLayout.setVisibility(VISIBLE);
             } else {
                 sentChatViewHolder.editStatusLayout.setVisibility(GONE);
-                sentChatViewHolder.addStatusBtn.setVisibility(VISIBLE);
+                sentChatViewHolder.addStatusTv.setVisibility(VISIBLE);
             }
         } else {
             sentChatViewHolder.senderTv.setVisibility(GONE);
@@ -1970,7 +1969,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private LinearLayout lubbContainer;
         private EmojiTextView badgeTextTv;
         private TextView senderTv;
-        private MaterialButton addStatusBtn;
+        private TextView addStatusTv;
         private LinearLayout editStatusLayout;
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
             @Override
@@ -2180,7 +2179,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             pollContainer = itemView.findViewById(R.id.container_polls);
             senderTv = itemView.findViewById(R.id.tv_sender_name);
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
-            addStatusBtn = itemView.findViewById(R.id.add_status_button);
+            addStatusTv = itemView.findViewById(R.id.add_status_button);
             editStatusLayout = itemView.findViewById(R.id.status_click_layout);
 
             linkContainer.setOnTouchListener(this);
@@ -2191,7 +2190,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             rootLayout.setOnTouchListener(this);
             lubbContainer.setOnTouchListener(this);
             pdfContainer.setOnTouchListener(this);
-            addStatusBtn.setOnTouchListener(this);
+            addStatusTv.setOnTouchListener(this);
             editStatusLayout.setOnTouchListener(this);
         }
 
