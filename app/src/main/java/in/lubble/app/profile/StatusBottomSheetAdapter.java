@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -42,17 +43,16 @@ public class StatusBottomSheetAdapter extends RecyclerView.Adapter<StatusBottomS
     @Override
     public void onBindViewHolder(StatusViewHolder holder, final int position) {
         holder.title.setText(statusList.get(position));
-        if(selectedPosition==position)
-            holder.itemView.setBackgroundColor(Color.parseColor("#008CF9"));
+        if (selectedPosition == position)
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.trans_colorAccent));
         else
-            holder.itemView.setBackgroundColor(Color.parseColor("#ffffff"));
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.white));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                selectedPosition=position;
+                selectedPosition = position;
                 notifyDataSetChanged();
-
             }
         });
     }

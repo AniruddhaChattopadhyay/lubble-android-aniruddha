@@ -1,28 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="16dp">
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/anim_other_badge"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
+        app:lottie_rawRes="@raw/id_card_badge_anim"
+        app:tint="@color/orange" />
 
     <TextView
+        android:id="@+id/status_redirect_tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/status_redirect_tv"
-        android:text="Go to your status"
-        android:textSize="20dp"
-        />
+        android:gravity="center"
+        android:text="Go to your badge"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
 
     <com.google.android.material.button.MaterialButton
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/status_redirect_btn"
-        android:text="SET STATUS"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:textSize="12sp"
-        android:theme="@style/MaterialButton"
-        android:textColor="@color/white"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"
         android:backgroundTint="@color/colorAccent"
         android:gravity="center"
-        android:layout_gravity="center"
-        />
+        android:text="set my badge"
+        android:textColor="@color/white"
+        android:theme="@style/MaterialButton"
+        app:icon="@drawable/ic_star_shine"
+        app:iconPadding="0dp"
+        app:iconTintMode="multiply" />
 
 </LinearLayout>

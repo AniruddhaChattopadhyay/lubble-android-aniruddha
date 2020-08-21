@@ -174,7 +174,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
     private HashMap<String, String> searchHighlightMap = new HashMap<>();
-    private int FLAG_STATUS_STATE=0;
+    private int FLAG_STATUS_STATE = 0;
 
 
     public ChatAdapter(Activity activity, Context context, String groupId,
@@ -1130,7 +1130,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     .into(recvdChatViewHolder.dpIv);
             recvdChatViewHolder.authorNameTv.setText(profileInfo.getName().split(" ")[0]);
             recvdChatViewHolder.badgeTextTv.setVisibility(GONE);
-            if (!TextUtils.isEmpty(profileInfo.getBadge()) ) {
+            if (!TextUtils.isEmpty(profileInfo.getBadge())) {
 //                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                 String flair = profileInfo.getBadge();
                 recvdChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
@@ -1821,14 +1821,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         View dialogView = activity.getLayoutInflater().inflate(R.layout.bottom_sheet_for_status_redirect, null);
                         final BottomSheetDialog dialog = new BottomSheetDialog(context);
                         TextView tv = dialogView.findViewById(R.id.status_redirect_tv);
-                        tv.setText("You are viewing "+authorNameTv.getText()+"'s status. You can set your status by clicking the button below");
+                        tv.setText("You are viewing " + authorNameTv.getText() + "'s badge. Set your badge from your profile or here \uD83D\uDC47");
                         Button btn = dialogView.findViewById(R.id.status_redirect_btn);
                         btn.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Analytics.triggerEvent(AnalyticsEvents.CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS, context);
                                 StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
-                                statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+                                statusBottomSheetFragment.show(((AppCompatActivity) context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                                 dialog.dismiss();
                             }
                         });
@@ -2088,15 +2088,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             openPdf(pdfChatData.getPdfUrl(), progressBarDownloadPdf, pdfDownloadIv);
                         }
                         break;
-                    case R.id.add_status_button :
+                    case R.id.add_status_button:
                         Analytics.triggerEvent(AnalyticsEvents.ADD_STATUS_CLICKED_FROM_CHAT, context);
                         StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
-                        statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+                        statusBottomSheetFragment.show(((AppCompatActivity) context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                         break;
-                    case R.id.status_click_layout :
+                    case R.id.status_click_layout:
                         Analytics.triggerEvent(AnalyticsEvents.EDIT_STATUS_CLICKED_FROM_CHAT, context);
                         statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
-                        statusBottomSheetFragment.show(((AppCompatActivity)context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
+                        statusBottomSheetFragment.show(((AppCompatActivity) context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                         break;
                 }
                 if (actionMode != null) {

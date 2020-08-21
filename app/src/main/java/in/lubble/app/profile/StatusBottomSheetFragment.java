@@ -28,6 +28,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -43,6 +44,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     private TextInputLayout customStatusLayout;
     private int selectedPos = -1;
     private View view_snackbar;
+
     public StatusBottomSheetFragment(View v) {
         view_snackbar = v;
     }
@@ -87,15 +89,14 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                         @Override
                         public void onClick(View v) {
                             String statusText = customEt.getText().toString();
-                            if(statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")){
-                                Toast.makeText(getContext(), "You can not choose "+statusText + " without administrative privileges", Toast.LENGTH_SHORT).show();
+                            if (statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")) {
+                                Toast.makeText(getContext(), "You can not choose " + statusText + " without administrative privileges", Toast.LENGTH_SHORT).show();
                                 customEt.setText("");
                                 Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_FOR_CUSTOM_STATUS_CLICKED, getContext());
-                            }
-                            else {
+                            } else {
                                 RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusText);
                                 Snackbar snackbar = Snackbar
-                                        .make(view_snackbar, statusText + " is selected as status!", Snackbar.LENGTH_LONG);
+                                        .make(view_snackbar, statusText + " is selected as badge!", Snackbar.LENGTH_LONG);
                                 snackbar.show();
                                 dismiss();
                             }
@@ -113,13 +114,12 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
             @Override
             public void onClick(View v) {
                 Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_CLICKED, getContext());
-                if(selectedPos == -1){
-                    Toast.makeText(getContext(), "Please choose a option for your status", Toast.LENGTH_SHORT).show();
-                }
-                else{
+                if (selectedPos == -1) {
+                    Toast.makeText(getContext(), "Please choose a badge first", Toast.LENGTH_SHORT).show();
+                } else {
                     RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusList.get(selectedPos));
                     Snackbar snackbar = Snackbar
-                            .make(view_snackbar, statusList.get(selectedPos) + " is selected as status!", Snackbar.LENGTH_LONG);
+                            .make(view_snackbar, statusList.get(selectedPos) + " is selected as badge!", Snackbar.LENGTH_LONG);
                     snackbar.show();
                     dismiss();
                 }
