@@ -27,6 +27,7 @@
         android:layout_marginBottom="8dp"
         android:layout_toRightOf="@id/iv_dp"
         android:clipChildren="false"
+        android:baselineAligned="false"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -387,6 +388,7 @@
             android:id="@+id/container_lubb"
             android:layout_width="wrap_content"
             android:layout_marginRight="18dp"
+            android:layout_marginLeft="-14dp"
             android:layout_height="match_parent"
             android:minWidth="48dp">
 
@@ -394,7 +396,6 @@
                 android:id="@+id/iv_lubb"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginLeft="-14dp"
                 android:background="@drawable/circle_white"
                 android:padding="2dp"
                 app:srcCompat="@drawable/ic_favorite_border_light" />
@@ -414,7 +415,7 @@
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="8dp"
+                android:layout_marginLeft="22dp"
                 android:background="@drawable/circle"
                 android:padding="6dp"
                 android:tint="@color/darker_gray"
@@ -427,7 +428,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_marginLeft="4dp"
+                android:layout_marginLeft="18dp"
                 android:textSize="10sp"
                 android:visibility="gone"
                 tools:text="14:23pm" />

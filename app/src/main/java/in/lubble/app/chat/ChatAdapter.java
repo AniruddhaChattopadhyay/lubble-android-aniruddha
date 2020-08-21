@@ -1773,7 +1773,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     case R.id.iv_dp:
                         ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
                         break;
-                    case R.id.container_lubb:
+                    case R.id.tv_lubb_count:
+                    case R.id.iv_lubb:
                         toggleLubb(getAdapterPosition(), false);
                         break;
                     case R.id.link_meta_container:
@@ -1866,6 +1867,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             }
                             Analytics.triggerEvent(AnalyticsEvents.MSG_SHARED, context);
                         }
+                    case R.id.root_layout_chat_recvd:
+                        if (actionMode != null) {
+                            actionMode.finish();
+                        }
+                        return false;
                 }
                 if (actionMode != null) {
                     actionMode.finish();
@@ -1961,7 +1967,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             rootLayout.setOnTouchListener(this);
             chatIv.setOnTouchListener(this);
             vidThumbnailIv.setOnTouchListener(this);
-            lubbContainer.setOnTouchListener(this);
+            lubbIcon.setOnTouchListener(this);
+            lubbCount.setOnTouchListener(this);
             pdfContainer.setOnTouchListener(this);
             shareMsgIv.setOnTouchListener(this);
         }
