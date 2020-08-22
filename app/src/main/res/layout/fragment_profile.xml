@@ -112,6 +112,7 @@
                     android:text="+ add status"
                     android:textColor="@color/accent"
                     app:strokeColor="@color/accent"
+                    android:visibility="gone"
                     />
 
             </LinearLayout>
