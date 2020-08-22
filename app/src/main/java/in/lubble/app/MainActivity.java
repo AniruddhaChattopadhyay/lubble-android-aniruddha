@@ -356,6 +356,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onClick(View v) {
                 LubbleActivity.open(MainActivity.this);
+                overridePendingTransition(R.anim.slide_in_from_top, R.anim.none);
             }
         });
         //showBottomNavBadge();
