@@ -1895,11 +1895,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             }
                             Analytics.triggerEvent(AnalyticsEvents.MSG_SHARED, context);
                         }
-                    case R.id.root_layout_chat_recvd:
-                        if (actionMode != null) {
-                            actionMode.finish();
-                        }
-                        return false;
                 }
                 if (actionMode != null) {
                     actionMode.finish();

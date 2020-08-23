@@ -478,17 +478,4 @@ public class FileUtils {
         return name;
     }
 
-    public static Bitmap.CompressFormat getCompressFormatFrom(Uri uri) {
-        String type = getAppContext().getContentResolver().getType(uri);
-        if (type.equalsIgnoreCase(Bitmap.CompressFormat.PNG.name())) {
-            return Bitmap.CompressFormat.PNG;
-        } else if (type.equalsIgnoreCase(Bitmap.CompressFormat.JPEG.name())) {
-            return Bitmap.CompressFormat.JPEG;
-        } else if (type.equalsIgnoreCase(Bitmap.CompressFormat.WEBP.name())) {
-            return Bitmap.CompressFormat.WEBP;
-        } else {
-            return Bitmap.CompressFormat.JPEG;
-        }
-    }
-
 }
