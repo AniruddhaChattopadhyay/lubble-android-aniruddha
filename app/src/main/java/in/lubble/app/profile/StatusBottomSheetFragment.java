@@ -38,6 +38,21 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 
 public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
 
+    public static InputFilter EMOJI_FILTER = new InputFilter() {
+
+        @Override
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            for (int index = start; index < end; index++) {
+
+                int type = Character.getType(source.charAt(index));
+
+                if (type == Character.SURROGATE) {
+                    return "";
+                }
+            }
+            return null;
+        }
+    };
     private List<String> statusList = new ArrayList<>();
     private ShimmerRecyclerView recyclerView;
     private StatusBottomSheetAdapter mAdapter;
@@ -167,22 +182,6 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
             }
         });
     }
-
-    public static InputFilter EMOJI_FILTER = new InputFilter() {
-
-        @Override
-        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
-            for (int index = start; index < end; index++) {
-
-                int type = Character.getType(source.charAt(index));
-
-                if (type == Character.SURROGATE) {
-                    return "";
-                }
-            }
-            return null;
-        }
-    };
 
     @Override
     public void onAttach(@NonNull Context context) {

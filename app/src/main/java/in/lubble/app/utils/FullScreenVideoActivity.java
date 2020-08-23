@@ -3,11 +3,14 @@ package in.lubble.app.utils;
 import android.Manifest;
 import android.app.Activity;
 import android.app.DownloadManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.content.FileProvider;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -39,15 +43,19 @@ import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.File;
 import java.net.URLDecoder;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.models.ChatData;
+import in.lubble.app.receivers.ShareSheetReceiver;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
@@ -55,16 +63,19 @@ import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
 
+import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 
 @RuntimePermissions
 public class FullScreenVideoActivity extends BaseActivity {
     private static final String TAG = "FullScreenVideoActivity";
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";
+    private static final String EXTRA_MSG = BuildConfig.APPLICATION_ID + "_EXTRA_MSG";
+    private static final String EXTRA_SHARE_SUFFIX = BuildConfig.APPLICATION_ID + "_EXTRA_SHARE_SUFFIX";
     private SimpleExoPlayerView exoPlayerView;
     private SimpleExoPlayer exoPlayer;
     private ProgressBar progressBar;
-    private String videoname;
+    private String videoname, captionMsg, shareSuffix;
     private Uri videourl = null;
     private Uri videoUrlHttp = null;
     private Long position = C.TIME_UNSET;
@@ -73,9 +84,11 @@ public class FullScreenVideoActivity extends BaseActivity {
     File matchingFile = null;
 
 
-    public static void open(Activity activity, Context context, String vidPath) {
+    public static void open(Activity activity, Context context, String vidPath, String msg, String suffix) {
         Intent intent = new Intent(context, FullScreenVideoActivity.class);
         intent.putExtra(EXTRA_IMG_PATH, vidPath);
+        intent.putExtra(EXTRA_MSG, msg);
+        intent.putExtra(EXTRA_SHARE_SUFFIX, suffix);
         Bundle bundle = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             bundle = ActivityOptionsCompat.makeSceneTransitionAnimation(activity).toBundle();
@@ -99,9 +112,13 @@ public class FullScreenVideoActivity extends BaseActivity {
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
 
         videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
+        captionMsg = getIntent().getStringExtra(EXTRA_MSG);
+        shareSuffix = getIntent().getStringExtra(EXTRA_SHARE_SUFFIX);
         if (savedInstanceState != null) {
             if (videourl == null) {
                 videourl = Uri.parse(savedInstanceState.getString(EXTRA_IMG_PATH));
+                captionMsg = savedInstanceState.getString(EXTRA_MSG);
+                shareSuffix = savedInstanceState.getString(EXTRA_SHARE_SUFFIX);
             }
             position = savedInstanceState.getLong("SELECTED_POSITION", C.TIME_UNSET);
         }
@@ -224,6 +241,8 @@ public class FullScreenVideoActivity extends BaseActivity {
         super.onSaveInstanceState(currentState);
         currentState.putLong("SELECTED_POSITION", position);
         currentState.putString(EXTRA_IMG_PATH, getIntent().getStringExtra(EXTRA_IMG_PATH));
+        currentState.putString(EXTRA_MSG, getIntent().getStringExtra(EXTRA_MSG));
+        currentState.putString(EXTRA_SHARE_SUFFIX, getIntent().getStringExtra(EXTRA_SHARE_SUFFIX));
     }
 
     @Override
@@ -242,6 +261,39 @@ public class FullScreenVideoActivity extends BaseActivity {
                 return true;
             case R.id.action_download_vid:
                 FullScreenVideoActivityPermissionsDispatcher.download_VideoWithPermissionCheck(FullScreenVideoActivity.this, videoUrlHttp, videoname);
+            case R.id.action_share_vid:
+                FullScreenVideoActivityPermissionsDispatcher.makeGetFileForDownloadWithPermissionCheck(FullScreenVideoActivity.this);
+                if (matchingFile == null) {
+                    Snackbar.make(exoPlayerView, "Please Download the video first", Snackbar.LENGTH_SHORT).setAction("Download", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            FullScreenVideoActivityPermissionsDispatcher.download_VideoWithPermissionCheck(FullScreenVideoActivity.this, videoUrlHttp, videoname);
+                        }
+                    }).show();
+                } else {
+                    final String msgShareUrl = LubbleSharedPrefs.getInstance().getMsgShareUrl();
+                    if (!TextUtils.isEmpty(msgShareUrl)) {
+                        Intent sharingIntent = new Intent(Intent.ACTION_SEND);
+                        sharingIntent.setType("text/plain");
+                        sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Join your neighbourhood on Lubble");
+                        sharingIntent.putExtra(Intent.EXTRA_TEXT, captionMsg + shareSuffix);
+                        sharingIntent.putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", matchingFile));
+                        sharingIntent.setType("video/*");
+                        sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                                this, 21,
+                                new Intent(this, ShareSheetReceiver.class),
+                                PendingIntent.FLAG_UPDATE_CURRENT);
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                            this.startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title), pendingIntent.getIntentSender()));
+                        } else {
+                            this.startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
+                        }
+                        Analytics.triggerEvent(AnalyticsEvents.MSG_SHARED, this);
+                    }
+                }
         }
         return super.onOptionsItemSelected(item);
     }

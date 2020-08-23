@@ -1,6 +1,5 @@
 package in.lubble.app.profile;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +16,6 @@ public class StatusBottomSheetAdapter extends RecyclerView.Adapter<StatusBottomS
 
     private List<String> statusList;
     private int selectedPosition = -1;
-
-    public class StatusViewHolder extends RecyclerView.ViewHolder {
-        public TextView title;
-
-        public StatusViewHolder(View view) {
-            super(view);
-            title = view.findViewById(R.id.title);
-        }
-    }
-
 
     public StatusBottomSheetAdapter(List<String> statusList) {
         this.statusList = statusList;
@@ -60,5 +49,14 @@ public class StatusBottomSheetAdapter extends RecyclerView.Adapter<StatusBottomS
     @Override
     public int getItemCount() {
         return statusList.size();
+    }
+
+    public class StatusViewHolder extends RecyclerView.ViewHolder {
+        public TextView title;
+
+        public StatusViewHolder(View view) {
+            super(view);
+            title = view.findViewById(R.id.title);
+        }
     }
 }
