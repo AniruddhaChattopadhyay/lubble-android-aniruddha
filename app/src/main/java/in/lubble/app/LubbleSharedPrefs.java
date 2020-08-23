@@ -141,7 +141,7 @@ public class LubbleSharedPrefs {
     }
 
     public String getLubbleName() {
-        return preferences.getString(LUBBLE_NAME, "the hood");
+        return preferences.getString(LUBBLE_NAME, "The Hood");
     }
 
     public boolean setLubbleName(String lubbleName) {

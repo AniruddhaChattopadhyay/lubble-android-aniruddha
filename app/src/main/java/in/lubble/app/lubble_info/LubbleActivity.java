@@ -5,6 +5,10 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.webkit.GeolocationPermissions;
+import android.webkit.WebChromeClient;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -19,8 +23,10 @@ import com.bumptech.glide.request.target.Target;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import in.lubble.app.BaseActivity;
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -31,9 +37,8 @@ public class LubbleActivity extends BaseActivity {
 
     private static final String TAG = "LubbleActivity";
 
-    private ImageView lubbleIv;
-    private TextView lubbleInfoTv;
     private ProgressBar progressBar;
+    private WebView wikiWebView;
 
     public static void open(Context context) {
         context.startActivity(new Intent(context, LubbleActivity.class));
@@ -43,62 +48,28 @@ public class LubbleActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lubble);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle(LubbleSharedPrefs.getInstance().getLubbleName());
 
-        lubbleIv = findViewById(R.id.iv_lubble_image);
         progressBar = findViewById(R.id.progressBar_lubbleInfo);
-        lubbleInfoTv = findViewById(R.id.tv_lubble_info);
+        wikiWebView = findViewById(R.id.webview_wiki);
 
-        setTitle("");
+        String wikiUrl = FirebaseRemoteConfig.getInstance().getString(Constants.WIKI_URL);
 
-        RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                setTitle(dataSnapshot.child("title").getValue(String.class));
-                lubbleInfoTv.setText(dataSnapshot.child("info").getValue(String.class));
-                LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
-            }
+        wikiWebView.getSettings().setJavaScriptEnabled(true);
+        wikiWebView.loadUrl(wikiUrl);
+        progressBar.setVisibility(View.VISIBLE);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
+        wikiWebView.setWebChromeClient(new WebChromeClient() {
+            public void onProgressChanged(WebView view, int progress) {
+                progressBar.setProgress(progress);
+                if (progress == 100) {
+                    progressBar.setVisibility(View.INVISIBLE);
+                }
             }
         });
-
-        RealtimeDbHelper.getLubbleGroupsRef().child(LubbleSharedPrefs.getInstance().getDefaultGroupId())
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                        if (groupData != null && !isFinishing()) {
-                            GlideApp.with(LubbleActivity.this)
-                                    .load(groupData.getProfilePic())
-                                    .placeholder(R.drawable.city)
-                                    .error(R.drawable.city)
-                                    .listener(new RequestListener<Drawable>() {
-                                        @Override
-                                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
-                                            progressBar.setVisibility(View.GONE);
-                                            return false;
-                                        }
-
-                                        @Override
-                                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
-                                            progressBar.setVisibility(View.GONE);
-                                            return false;
-                                        }
-                                    })
-                                    .into(lubbleIv);
-                            LubbleSharedPrefs.getInstance().setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
     }
 }
