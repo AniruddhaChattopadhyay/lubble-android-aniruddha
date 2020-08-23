@@ -474,46 +474,19 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
         catalogueLinearLayout.addView(linearLayout, pos);
     }
 
-    private ArrayList<ServiceData> updateServiceDataFromUi() {
-        if (serviceDataList == null || serviceDataList.isEmpty()) {
-            // creating new item
-            serviceDataList = new ArrayList<>();
-            int serviceCount = catalogueLinearLayout.getChildCount() - 1;
-            for (int i = 1; i < serviceCount; i++) {
-                final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
-                final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
-                final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
+    private void updateServiceDataFromUi() {
+        if (selectedItemType == ITEM_SERVICE) {
+            if (serviceDataList == null || serviceDataList.isEmpty()) {
+                // creating new item
+                serviceDataList = new ArrayList<>();
+                int serviceCount = catalogueLinearLayout.getChildCount() - 1;
+                for (int i = 1; i < serviceCount; i++) {
+                    final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
+                    final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
+                    final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
 
-                final ServiceData serviceData
-                        = new ServiceData();
-                serviceData.setTitle(nameTil.getEditText().getText().toString());
-                if (selectedPriceOption == ITEM_PRICING_PAID) {
-                    serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
-                } else {
-                    serviceData.setPrice(null);
-                }
-                serviceDataList.add(serviceData);
-            }
-        } else {
-            // editing old item
-            int serviceCount = catalogueLinearLayout.getChildCount() - 1;
-            for (int i = 1; i < serviceCount; i++) {
-                final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
-                final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
-                final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
-
-                ServiceData serviceData;
-                if (i - 1 < serviceDataList.size()) {
-                    serviceData = serviceDataList.get(i - 1);
-                    serviceData.setTitle(nameTil.getEditText().getText().toString());
-                    if (selectedPriceOption == ITEM_PRICING_PAID) {
-                        serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
-                    } else {
-                        serviceData.setPrice(null);
-                    }
-                    serviceDataList.set(i - 1, serviceData);
-                } else {
-                    serviceData = new ServiceData();
+                    final ServiceData serviceData
+                            = new ServiceData();
                     serviceData.setTitle(nameTil.getEditText().getText().toString());
                     if (selectedPriceOption == ITEM_PRICING_PAID) {
                         serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
@@ -522,9 +495,39 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
                     }
                     serviceDataList.add(serviceData);
                 }
+            } else {
+                // editing old item
+                int serviceCount = catalogueLinearLayout.getChildCount() - 1;
+                for (int i = 1; i < serviceCount; i++) {
+                    final LinearLayout serviceLinearLayout = (LinearLayout) catalogueLinearLayout.getChildAt(i);
+                    final TextInputLayout nameTil = (TextInputLayout) serviceLinearLayout.getChildAt(0);
+                    final TextInputLayout priceTil = (TextInputLayout) serviceLinearLayout.getChildAt(1);
+
+                    ServiceData serviceData;
+                    if (i - 1 < serviceDataList.size()) {
+                        serviceData = serviceDataList.get(i - 1);
+                        serviceData.setTitle(nameTil.getEditText().getText().toString());
+                        if (selectedPriceOption == ITEM_PRICING_PAID) {
+                            serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                        } else {
+                            serviceData.setPrice(null);
+                        }
+                        serviceDataList.set(i - 1, serviceData);
+                    } else {
+                        serviceData = new ServiceData();
+                        serviceData.setTitle(nameTil.getEditText().getText().toString());
+                        if (selectedPriceOption == ITEM_PRICING_PAID) {
+                            serviceData.setPrice(Integer.parseInt(priceTil.getEditText().getText().toString()));
+                        } else {
+                            serviceData.setPrice(null);
+                        }
+                        serviceDataList.add(serviceData);
+                    }
+                }
             }
+        } else if (serviceDataList != null) {
+            serviceDataList.clear();
         }
-        return serviceDataList;
     }
 
     @Override
@@ -542,6 +545,7 @@ public class NewItemActiv extends BaseActivity implements View.OnClickListener {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ITEM_PIC && resultCode == RESULT_OK) {
             File imageFile;
             if (data != null && data.getData() != null) {

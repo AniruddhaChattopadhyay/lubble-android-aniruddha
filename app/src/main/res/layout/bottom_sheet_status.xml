@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:theme="@style/RoundedBottomSheetDialog"
+    app:behavior_hideable="false"
+    app:behavior_peekHeight="100dp"
+    app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="8dp"
+        android:text="Choose your badge"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:drawableLeftCompat="@drawable/ic_star_shine" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="This will be visible along with your name in all the chats"
+        android:textColor="@color/black" />
+
+    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/custom_status_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your custom badge"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/custom_et"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/custom_btn"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="set badge"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:theme="@style/MaterialButton"
+        android:visibility="gone"
+        app:backgroundTint="@color/colorAccent"
+        app:icon="@drawable/ic_star_shine"
+        app:iconTint="@null" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/set_status_btn"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="set badge"
+        android:textColor="@color/white"
+        android:theme="@style/MaterialButton"
+        app:backgroundTint="@color/button_color_selector"
+        app:icon="@drawable/ic_star_shine"
+        app:iconPadding="0dp"
+        app:iconTint="@null" />
+
+</LinearLayout>

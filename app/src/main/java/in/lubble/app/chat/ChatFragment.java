@@ -65,7 +65,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -237,6 +236,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private boolean isDmBlocked;
     @Nullable
     private String dmOtherUserId;
+    public static View view_access;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -364,7 +364,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
-
+        view_access = view;
         composeContainer = view.findViewById(R.id.compose_container);
         joinContainer = view.findViewById(R.id.relativeLayout_join_container);
         joinDescTv = view.findViewById(R.id.tv_join_desc);

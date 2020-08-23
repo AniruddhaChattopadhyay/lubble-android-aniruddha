@@ -41,7 +41,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -109,6 +108,7 @@ import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
 import static in.lubble.app.Constants.QUIZ_RESULT_UI;
 import static in.lubble.app.Constants.REFER_MSG;
 import static in.lubble.app.Constants.REWARDS_EXPLAINER;
+import static in.lubble.app.Constants.WIKI_URL;
 import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM;
 import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM_YES;
 import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_SHOWN;
@@ -355,6 +355,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onClick(View v) {
                 LubbleActivity.open(MainActivity.this);
+                overridePendingTransition(R.anim.slide_in_from_top, R.anim.none);
             }
         });
         //showBottomNavBadge();
@@ -608,6 +609,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(IS_NOTIF_SNOOZE_ON, true);
         map.put(IS_TIME_SHOWN, false);
         map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
+        map.put(WIKI_URL, "https://lubble.in");
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);

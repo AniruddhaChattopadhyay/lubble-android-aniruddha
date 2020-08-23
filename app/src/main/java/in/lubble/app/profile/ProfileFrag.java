@@ -87,6 +87,7 @@ public class ProfileFrag extends Fragment {
     private TextView userBio;
     private TextView editProfileTV;
     private MaterialButton msgBtn;
+    private MaterialButton statusBtn;
     private TextView invitedTv;
     private TextView likesTv;
     private LinearLayout coinsContainer;
@@ -112,6 +113,7 @@ public class ProfileFrag extends Fragment {
     private TextView businessTv;
     private ImageView educationIv;
     private TextView educationTv;
+
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -147,6 +149,7 @@ public class ProfileFrag extends Fragment {
         userBio = rootView.findViewById(R.id.tv_bio);
         editProfileTV = rootView.findViewById(R.id.tv_editProfile);
         msgBtn = rootView.findViewById(R.id.btn_msg);
+        statusBtn = rootView.findViewById(R.id.btn_status);
         invitedTv = rootView.findViewById(R.id.tv_invited);
         likesTv = rootView.findViewById(R.id.tv_likes);
         genderIv = rootView.findViewById(R.id.iv_gender);
@@ -198,6 +201,18 @@ public class ProfileFrag extends Fragment {
                 FragUtils.addFrag(getFragmentManager(), R.id.frameLayout_fragContainer, EditProfileFrag.newInstance());
             }
         });
+
+        if (userId.equals(FirebaseAuth.getInstance().getUid())) {
+            statusBtn.setVisibility(View.VISIBLE);
+
+            statusBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(rootView);
+                    statusBottomSheetFragment.show(getFragmentManager(), statusBottomSheetFragment.getTag());
+                }
+            });
+        }
 
         inviteBtn.setOnClickListener(new View.OnClickListener() {
             @Override

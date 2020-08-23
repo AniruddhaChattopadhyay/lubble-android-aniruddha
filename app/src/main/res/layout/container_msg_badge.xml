@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.emoji.widget.EmojiTextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/tv_badge_text"
+    android:id="@+id/status_click_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="4dp"
-    android:ellipsize="end"
-    android:gravity="center_vertical"
-    android:maxLines="1"
-    android:textColor="@color/colorAccent"
-    android:visibility="gone"
-    tools:showIn="@layout/item_recvd_chat"
-    tools:text="\u26ABadmin"
-    tools:visibility="visible">
+    android:gravity="center"
+    tools:showIn="@layout/item_sent_chat"
+    tools:visibility="gone">
 
-</androidx.emoji.widget.EmojiTextView>
+    <androidx.emoji.widget.EmojiTextView
+        android:id="@+id/tv_badge_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:maxLines="1"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        tools:text="\u26ABadmin"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginLeft="4dp"
+        android:tint="@color/white"
+        app:srcCompat="@drawable/ic_edit_white_24dp" />
+</LinearLayout>

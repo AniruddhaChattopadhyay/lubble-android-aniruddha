@@ -129,6 +129,14 @@ public class AnalyticsEvents {
     public static final String DOWNLOAD_VIDEO = "DOWNLOAD_VIDEO";
     public static final String DOWNLOAD_PDF = "DOWNLOAD_PDF";
     public static final String MSG_COPIED = "MSG_COPIED";
+
+    public static final String EDIT_STATUS_CLICKED_FROM_CHAT = "EDIT_STATUS_CLICKED_FROM_CHAT";
+    public static final String ADD_STATUS_CLICKED_FROM_CHAT = "ADD_STATUS_CLICKED_FROM_CHAT";
+    public static final String CLICK_ON_OTHERS_STATUS = "CLICK_ON_OTHERS_STATUS";
+    public static final String SET_STATUS_CLICKED = "SET_STATUS_CLICKED";
+    public static final String SET_STATUS_FOR_CUSTOM_STATUS_CLICKED = "SET_STATUS_FOR_CUSTOM_STATUS_CLICKED";
+    public static final String CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS = "CLICK_ON_SET_STATUS_FROM_OTHERS_STATUS";
+
     public static final String MSG_SHARED = "MSG_SHARED";
     public static final String SHARED_VIA = "SHARED_VIA";
 }

@@ -19,7 +19,8 @@
             android:layout_marginLeft="16dp"
             android:layout_marginTop="8dp"
             android:text="My Group Status"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title" />
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
+            android:visibility="gone" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -27,7 +28,8 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:text="Shown next to your name in this group only."
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:visibility="gone" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -36,7 +38,8 @@
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <EditText
                 android:id="@+id/et_flair"
@@ -91,9 +94,9 @@
             android:layout_marginTop="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginBottom="4dp"
+            android:text="Collections"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-            android:textSize="20sp"
-            android:text="Collections" />
+            android:textSize="20sp" />
 
         <ProgressBar
             android:id="@+id/progressbar_chat_more"
@@ -149,9 +152,9 @@
             android:layout_marginTop="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginBottom="4dp"
+            android:text="Events"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Title"
-            android:textSize="20sp"
-            android:text="Events" />
+            android:textSize="20sp" />
 
         <ProgressBar
             android:id="@+id/progressbar_events"

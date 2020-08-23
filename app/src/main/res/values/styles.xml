@@ -9,6 +9,7 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="android:datePickerStyle">@style/datepicker</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
+        <item name="bottomSheetDialogTheme">@style/RoundedBottomSheetDialog</item>
     </style>
 
     <style name="CustomActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
@@ -25,6 +26,22 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorAccent</item>
         <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="RoundedBottomSheetDialog" parent="@style/ThemeOverlay.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/RoundedBottomSheet</item>
+    </style>
+
+    <style name="RoundedBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="shapeAppearanceOverlay">@style/CustomShapeAppearanceBottomSheetDialog</item>
+    </style>
+
+    <style name="CustomShapeAppearanceBottomSheetDialog" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopRight">16dp</item>
+        <item name="cornerSizeTopLeft">16dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
     </style>
 
     <style name="datepicker" parent="Theme.AppCompat.Light.Dialog">

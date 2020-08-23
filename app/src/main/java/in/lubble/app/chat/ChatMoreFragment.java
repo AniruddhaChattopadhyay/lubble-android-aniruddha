@@ -351,11 +351,11 @@ public class ChatMoreFragment extends Fragment {
             flairUpdateListener = (FlairUpdateListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString()
-                    + " must implement TextClicked");
+                    + " must implement FlairUpdateListener");
         }
     }
 
-    interface FlairUpdateListener {
+    public interface FlairUpdateListener {
         void onFlairUpdated();
     }
 
