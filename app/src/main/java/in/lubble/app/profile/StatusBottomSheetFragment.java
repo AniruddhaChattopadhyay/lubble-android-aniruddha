@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -48,6 +47,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     private TextInputLayout customStatusLayout;
     private int selectedPos = -1;
     private View view_snackbar;
+    @Nullable
     private ChatMoreFragment.FlairUpdateListener flairUpdateListener;
 
     public StatusBottomSheetFragment(View v) {
@@ -109,7 +109,9 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                                 Snackbar snackbar = Snackbar
                                         .make(view_snackbar, statusText + " is selected as badge!", Snackbar.LENGTH_LONG);
                                 snackbar.show();
-                                flairUpdateListener.onFlairUpdated();
+                                if (flairUpdateListener != null) {
+                                    flairUpdateListener.onFlairUpdated();
+                                }
                                 dismiss();
                             }
                         }
@@ -133,7 +135,9 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                     Snackbar snackbar = Snackbar
                             .make(view_snackbar, statusList.get(selectedPos) + " is selected as badge!", Snackbar.LENGTH_LONG);
                     snackbar.show();
-                    flairUpdateListener.onFlairUpdated();
+                    if (flairUpdateListener != null) {
+                        flairUpdateListener.onFlairUpdated();
+                    }
                     dismiss();
                 }
             }
