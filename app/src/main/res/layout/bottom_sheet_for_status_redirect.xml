@@ -42,6 +42,6 @@
         android:theme="@style/MaterialButton"
         app:icon="@drawable/ic_star_shine"
         app:iconPadding="0dp"
-        app:iconTintMode="multiply" />
+        app:iconTint="@null" />
 
 </LinearLayout>

@@ -73,9 +73,9 @@
 
             <LinearLayout
                 android:id="@+id/container_ctas"
-                android:layout_below="@+id/tv_bio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/tv_bio"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -88,34 +88,38 @@
                     android:text="@string/edit_profile"
                     android:theme="@style/AccentButton"
                     android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_msg"
+                    style="@style/Widget.MaterialComponents.Button.Icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/tv_bio"
                     android:layout_centerHorizontal="true"
-                    android:text="Message"
                     android:enabled="false"
-                    style="@style/Widget.MaterialComponents.Button.Icon"
+                    android:text="Message"
+                    android:theme="@style/MaterialButton"
                     app:backgroundTint="@color/button_color_selector"
-                    app:icon="@drawable/ic_send_white_24dp"
-                    android:theme="@style/MaterialButton" />
+                    app:icon="@drawable/ic_send_white_24dp" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_status"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                    android:text="set badge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:theme="@style/AccentButton"
+                    app:icon="@drawable/ic_star_shine"
                     android:textSize="12sp"
-                    android:theme="@style/MaterialButton"
-                    android:text="+ add status"
                     android:textColor="@color/accent"
-                    app:strokeColor="@color/accent"
+                    app:iconTint="@null"
                     android:visibility="gone"
-                    />
+                    app:strokeColor="@color/accent"
+                    tools:visibility="visible" />
 
             </LinearLayout>
+
             <View
                 android:id="@+id/view_hr"
                 android:layout_width="match_parent"

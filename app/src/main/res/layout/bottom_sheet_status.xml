@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="12dp"
-    app:behavior_hideable="false"
     android:theme="@style/RoundedBottomSheetDialog"
+    app:behavior_hideable="false"
     app:behavior_peekHeight="100dp"
     app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
@@ -15,9 +15,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:drawablePadding="8dp"
-        app:drawableLeftCompat="@drawable/ic_star_shine"
         android:text="Choose your badge"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:drawableLeftCompat="@drawable/ic_star_shine" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -60,7 +60,7 @@
         android:visibility="gone"
         app:backgroundTint="@color/colorAccent"
         app:icon="@drawable/ic_star_shine"
-        app:iconTintMode="multiply" />
+        app:iconTint="@null" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/set_status_btn"
@@ -75,6 +75,6 @@
         app:backgroundTint="@color/button_color_selector"
         app:icon="@drawable/ic_star_shine"
         app:iconPadding="0dp"
-        app:iconTintMode="multiply" />
+        app:iconTint="@null" />
 
 </LinearLayout>
