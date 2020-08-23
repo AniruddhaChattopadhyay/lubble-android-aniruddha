@@ -7,6 +7,8 @@ import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -73,6 +75,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
         mAdapter = new StatusBottomSheetAdapter(statusList);
         customStatusLayout = rootview.findViewById(R.id.custom_status_layout);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         recyclerView.setLayoutManager(mLayoutManager);
 

@@ -202,13 +202,17 @@ public class ProfileFrag extends Fragment {
             }
         });
 
-        statusBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(rootView);
-                statusBottomSheetFragment.show(getFragmentManager(), statusBottomSheetFragment.getTag());
-            }
-        });
+        if (userId.equals(FirebaseAuth.getInstance().getUid())) {
+            statusBtn.setVisibility(View.VISIBLE);
+
+            statusBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(rootView);
+                    statusBottomSheetFragment.show(getFragmentManager(), statusBottomSheetFragment.getTag());
+                }
+            });
+        }
 
         inviteBtn.setOnClickListener(new View.OnClickListener() {
             @Override

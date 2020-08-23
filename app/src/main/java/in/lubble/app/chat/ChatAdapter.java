@@ -249,6 +249,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.senderTv.setVisibility(VISIBLE);
             sentChatViewHolder.senderTv.setText(profileInfo.getName());
             if (!chatData.getIsDm() && (!TextUtils.isEmpty(profileInfo.getBadge()))) {
+//                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                 String flair = profileInfo.getBadge();
                 sentChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
                 sentChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
@@ -1132,6 +1133,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             if (!TextUtils.isEmpty(profileInfo.getBadge())) {
 //                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                 String flair = profileInfo.getBadge();
+                recvdChatViewHolder.editStatusLayout.setVisibility(VISIBLE);
                 recvdChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
                 recvdChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
                 recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
