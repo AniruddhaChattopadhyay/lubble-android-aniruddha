@@ -252,7 +252,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             final ProfileInfo profileInfo = profileData.getInfo();
             sentChatViewHolder.senderTv.setVisibility(VISIBLE);
             sentChatViewHolder.senderTv.setText(profileInfo.getName());
-            if (!chatData.getIsDm() && (!TextUtils.isEmpty(profileInfo.getBadge()))) {
+            if ((!TextUtils.isEmpty(profileInfo.getBadge()))) {
 //                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                 String flair = profileInfo.getBadge();
                 sentChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
