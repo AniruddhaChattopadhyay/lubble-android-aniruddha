@@ -261,6 +261,7 @@ public class FullScreenVideoActivity extends BaseActivity {
                 return true;
             case R.id.action_download_vid:
                 FullScreenVideoActivityPermissionsDispatcher.download_VideoWithPermissionCheck(FullScreenVideoActivity.this, videoUrlHttp, videoname);
+                break;
             case R.id.action_share_vid:
                 FullScreenVideoActivityPermissionsDispatcher.makeGetFileForDownloadWithPermissionCheck(FullScreenVideoActivity.this);
                 if (matchingFile == null) {
@@ -294,6 +295,7 @@ public class FullScreenVideoActivity extends BaseActivity {
                         Analytics.triggerEvent(AnalyticsEvents.MSG_SHARED, this);
                     }
                 }
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

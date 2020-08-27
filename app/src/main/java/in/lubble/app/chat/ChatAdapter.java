@@ -253,7 +253,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.senderTv.setVisibility(VISIBLE);
             sentChatViewHolder.senderTv.setText(profileInfo.getName());
             if (!TextUtils.isEmpty(profileInfo.getBadge())) {
-//                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
+                //String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
                 String flair = profileInfo.getBadge();
                 sentChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
                 sentChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
@@ -262,7 +262,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 sentChatViewHolder.editStatusLayout.setVisibility(VISIBLE);
             } else {
                 sentChatViewHolder.editStatusLayout.setVisibility(GONE);
-                sentChatViewHolder.addStatusTv.setVisibility(VISIBLE);
+                sentChatViewHolder.addStatusTv.setVisibility(chatData.isAuthorIsSeller() ? GONE : VISIBLE);
             }
         } else {
             sentChatViewHolder.senderTv.setVisibility(GONE);
@@ -978,15 +978,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
                 if (profileData != null) {
-                    profileData.setId(dataSnapshot.getKey());
-                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles") && groupId != null) {
-                            final String flair = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(groupId).child("flair").getValue(String.class);
-                            profileData.setGroupFlair(flair);
-                            break;
-                        }
-                    }
-
                     profileData.setId(dataSnapshot.getKey());
                     final ProfileInfo profileInfo = profileData.getInfo();
                     if (profileInfo != null) {
