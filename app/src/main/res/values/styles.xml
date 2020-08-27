@@ -30,6 +30,8 @@
 
     <style name="RoundedBottomSheetDialog" parent="@style/ThemeOverlay.MaterialComponents.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/RoundedBottomSheet</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
     <style name="RoundedBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
