@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="This will be visible along with your name in all the chats"
+        android:text="This will be visible next to your name in chats"
         android:textColor="@color/black" />
 
     <com.cooltechworks.views.shimmer.ShimmerRecyclerView
