@@ -36,6 +36,11 @@ public class AttachmentListDialogFrag extends BottomSheetDialogFragment {
         return fragment;
     }
 
+    @Override
+    public int getTheme() {
+        return R.style.RoundedBottomSheetDialog;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,

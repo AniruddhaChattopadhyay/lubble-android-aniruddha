@@ -122,7 +122,7 @@ public class UiUtils {
     }
 
     public static BottomSheetDialog showBottomSheetAlert(Context context, LayoutInflater layoutInflater, String title, String subTitle, @DrawableRes int iconId, final View.OnClickListener listener) {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context, R.style.BlueRoundedBottomSheetDialog);
         View sheetView = layoutInflater.inflate(R.layout.bottom_sheet_info, null);
         bottomSheetDialog.setContentView(sheetView);
         bottomSheetDialog.setCancelable(false);

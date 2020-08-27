@@ -3,9 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorAccent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="16dp"
+    tools:background="@color/light_colorAccent"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <LinearLayout
@@ -18,7 +19,6 @@
             android:id="@+id/iv_bottom_sheet_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:tint="@color/white"
             app:srcCompat="@drawable/ic_public_black_24dp" />
 
         <androidx.emoji.widget.EmojiTextView
@@ -27,19 +27,19 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
             android:text="This is a public group!"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
 
     </LinearLayout>
 
-    <TextView
+    <androidx.emoji.widget.EmojiTextView
         android:id="@+id/tv_bottom_sheet_subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Messages you send here are visible to everyone."
-        android:textColor="@color/white"
+        android:textColor="@color/black"
         android:textSize="16sp" />
 
     <TextView
@@ -50,7 +50,7 @@
         android:padding="14dp"
         android:text="Got It"
         android:textAllCaps="true"
-        android:textColor="@color/white"
+        android:textColor="@color/colorAccent"
         android:textSize="16sp" />
 
 </LinearLayout>
