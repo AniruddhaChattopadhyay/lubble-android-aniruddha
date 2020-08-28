@@ -16,6 +16,7 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.Constants;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 
 public class LubbleActivity extends BaseActivity {
 
@@ -32,6 +33,8 @@ public class LubbleActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lubble);
+
+        Analytics.triggerScreenEvent(this, this.getClass());
 
         Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
