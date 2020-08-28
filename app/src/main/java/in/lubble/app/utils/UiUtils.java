@@ -51,15 +51,17 @@ public class UiUtils {
         new Handler().post(new Runnable() {
             @Override
             public void run() {
-                InputMethodManager inputManager = (InputMethodManager) ctx
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (ctx != null) {
+                    InputMethodManager inputManager = (InputMethodManager) ctx
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
 
-                // check if no view has focus:
-                View v = ((Activity) ctx).getCurrentFocus();
-                if (v == null)
-                    return;
+                    // check if no view has focus:
+                    View v = ((Activity) ctx).getCurrentFocus();
+                    if (v == null)
+                        return;
 
-                inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
             }
         });
     }
@@ -122,7 +124,7 @@ public class UiUtils {
     }
 
     public static BottomSheetDialog showBottomSheetAlert(Context context, LayoutInflater layoutInflater, String title, String subTitle, @DrawableRes int iconId, final View.OnClickListener listener) {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context, R.style.BlueRoundedBottomSheetDialog);
         View sheetView = layoutInflater.inflate(R.layout.bottom_sheet_info, null);
         bottomSheetDialog.setContentView(sheetView);
         bottomSheetDialog.setCancelable(false);

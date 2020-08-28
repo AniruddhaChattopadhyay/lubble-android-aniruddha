@@ -1837,14 +1837,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
                 if (profileData != null) {
                     profileData.setId(dataSnapshot.getKey());
-                    for (DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
-                        if (childSnapshot.getKey().equalsIgnoreCase("lubbles")) {
-                            String Id = groupId==null?dmId:groupId;
-                            final String flair = childSnapshot.child(LubbleSharedPrefs.getInstance().requireLubbleId()).child("groups").child(Id).child("flair").getValue(String.class);
-                            profileData.setGroupFlair(flair);
-                            break;
-                        }
-                    }
                     final ProfileInfo profileInfo = profileData.getInfo();
                     if (profileInfo != null) {
                         profileInfo.setId(dataSnapshot.getKey());

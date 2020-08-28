@@ -3,6 +3,7 @@ package in.lubble.app.marketplace;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -31,6 +32,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.search.Hit;
 import in.lubble.app.models.search.SearchResultData;
+import in.lubble.app.utils.UiUtils;
 
 import static in.lubble.app.analytics.AnalyticsEvents.FAILED_SEARCH;
 
@@ -59,6 +61,8 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
 
         adapter = new SearchResultsAdapter(this);
         searchResultsRv.setAdapter(adapter);
+
+        searchEt.requestFocus();
 
         Client client = new Client("IIVL0B0EIY", "12ac422e05119422ec03224a9da738a7");
         final Index index = client.getIndex(BuildConfig.FLAVOR.equalsIgnoreCase("dev") ? "dev_mplace" : "prod_mplace");

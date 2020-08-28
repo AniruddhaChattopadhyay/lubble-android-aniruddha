@@ -1,7 +1,10 @@
 package in.lubble.app.profile;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.view.LayoutInflater;
@@ -9,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,6 +23,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -35,6 +41,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatMoreFragment;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.utils.UiUtils;
 
 public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
 
@@ -79,6 +86,27 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
         return R.style.RoundedBottomSheetDialog;
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(final DialogInterface dialog) {
+                new Handler().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        FrameLayout bottomSheet = (FrameLayout) ((BottomSheetDialog) dialog).findViewById(R.id.design_bottom_sheet);
+                        BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
+                    }
+                });
+            }
+        });
+        return dialog;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -115,10 +143,11 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                         @Override
                         public void onClick(View v) {
                             String statusText = customEt.getText().toString();
-                            if (statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")) {
+                            if (statusText.length() > 20) {
+                                Toast.makeText(getContext(), "Please set a shorter badge", Toast.LENGTH_SHORT).show();
+                            } else if (statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")) {
                                 Toast.makeText(getContext(), "You can not choose " + statusText + " without administrative privileges", Toast.LENGTH_SHORT).show();
                                 customEt.setText("");
-                                Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_FOR_CUSTOM_STATUS_CLICKED, getContext());
                             } else {
                                 RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusText);
                                 Snackbar snackbar = Snackbar
@@ -127,6 +156,8 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                                 if (flairUpdateListener != null) {
                                     flairUpdateListener.onFlairUpdated();
                                 }
+                                UiUtils.hideKeyboard(requireContext());
+                                Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_FOR_CUSTOM_STATUS_CLICKED, getContext());
                                 dismiss();
                             }
                         }
