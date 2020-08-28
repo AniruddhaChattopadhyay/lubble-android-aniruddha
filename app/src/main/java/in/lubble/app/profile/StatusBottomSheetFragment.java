@@ -41,6 +41,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatMoreFragment;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.utils.UiUtils;
 
 public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
 
@@ -142,10 +143,11 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                         @Override
                         public void onClick(View v) {
                             String statusText = customEt.getText().toString();
-                            if (statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")) {
+                            if (statusText.length() > 20) {
+                                Toast.makeText(getContext(), "Please set a shorter badge", Toast.LENGTH_SHORT).show();
+                            } else if (statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")) {
                                 Toast.makeText(getContext(), "You can not choose " + statusText + " without administrative privileges", Toast.LENGTH_SHORT).show();
                                 customEt.setText("");
-                                Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_FOR_CUSTOM_STATUS_CLICKED, getContext());
                             } else {
                                 RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusText);
                                 Snackbar snackbar = Snackbar
@@ -154,6 +156,8 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                                 if (flairUpdateListener != null) {
                                     flairUpdateListener.onFlairUpdated();
                                 }
+                                UiUtils.hideKeyboard(requireContext());
+                                Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_FOR_CUSTOM_STATUS_CLICKED, getContext());
                                 dismiss();
                             }
                         }

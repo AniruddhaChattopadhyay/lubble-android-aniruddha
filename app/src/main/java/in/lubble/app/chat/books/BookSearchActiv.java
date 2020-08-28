@@ -92,6 +92,7 @@ public class BookSearchActiv extends BaseActivity implements BookSelectedListene
 
         toSelectBook = getIntent().getBooleanExtra(ARG_SELECT_BOOK, false);
 
+        searchEt.requestFocus();
         searchEt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {

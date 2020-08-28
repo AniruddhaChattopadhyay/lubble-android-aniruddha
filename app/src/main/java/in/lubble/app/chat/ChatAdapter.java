@@ -2148,11 +2148,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         }
                         break;
                     case R.id.add_status_button:
+                        UiUtils.hideKeyboard(context);
                         Analytics.triggerEvent(AnalyticsEvents.ADD_STATUS_CLICKED_FROM_CHAT, context);
                         StatusBottomSheetFragment statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
                         statusBottomSheetFragment.show(((AppCompatActivity) context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());
                         break;
                     case R.id.status_click_layout:
+                        UiUtils.hideKeyboard(context);
                         Analytics.triggerEvent(AnalyticsEvents.EDIT_STATUS_CLICKED_FROM_CHAT, context);
                         statusBottomSheetFragment = new StatusBottomSheetFragment(ChatFragment.view_access);
                         statusBottomSheetFragment.show(((AppCompatActivity) context).getSupportFragmentManager(), statusBottomSheetFragment.getTag());

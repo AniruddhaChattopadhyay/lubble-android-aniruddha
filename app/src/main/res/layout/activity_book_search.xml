@@ -116,6 +116,8 @@
                 android:layout_marginTop="1dp"
                 android:layout_marginBottom="1dp"
                 android:layout_weight="1"
+                android:focusable="true"
+                android:focusedByDefault="true"
                 android:background="@color/white"
                 android:gravity="center_vertical"
                 android:hint="Search by Book Title"

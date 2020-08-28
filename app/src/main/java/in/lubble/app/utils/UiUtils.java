@@ -51,15 +51,17 @@ public class UiUtils {
         new Handler().post(new Runnable() {
             @Override
             public void run() {
-                InputMethodManager inputManager = (InputMethodManager) ctx
-                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (ctx != null) {
+                    InputMethodManager inputManager = (InputMethodManager) ctx
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
 
-                // check if no view has focus:
-                View v = ((Activity) ctx).getCurrentFocus();
-                if (v == null)
-                    return;
+                    // check if no view has focus:
+                    View v = ((Activity) ctx).getCurrentFocus();
+                    if (v == null)
+                        return;
 
-                inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                }
             }
         });
     }
