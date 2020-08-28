@@ -1,26 +1,69 @@
 package in.lubble.app;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.firebase.ui.auth.AuthMethodPickerLayout;
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
+import com.firebase.ui.auth.util.ExtraConstants;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.ActionCodeSettings;
+import com.google.firebase.auth.EmailAuthProvider;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.PhoneAuthProvider;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.auth.LocationActivity;
+import in.lubble.app.auth.LocationsData;
+import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.auth.LubbleChooserFrag;
+import in.lubble.app.auth.NameFrag;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.SellerDashActiv;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServiceCategoryDetailActiv;
+import in.lubble.app.utils.StringUtils;
 
 import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
+import static in.lubble.app.auth.LoginActivity.RC_SIGN_IN;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.utils.FragUtils.addFrag;
+import static in.lubble.app.utils.FragUtils.replaceStack;
 
 public class DeepLinkRouterActiv extends BaseActivity {
 
@@ -30,7 +73,17 @@ public class DeepLinkRouterActiv extends BaseActivity {
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             // user is NOT logged in
-            finish();
+            if (AuthUI.canHandleIntent(getIntent())) {
+                if (getIntent().getExtras() == null) {
+                    return;
+                }
+                String link = getIntent().getData().toString();
+                if (link != null) {
+                    Intent intent = new Intent(DeepLinkRouterActiv.this,LoginActivity.class);
+                    intent.putExtra("Link",link);
+                    startActivity(intent);
+                }
+            }
             FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("tried to open deeplink without login"));
             return;
         }
