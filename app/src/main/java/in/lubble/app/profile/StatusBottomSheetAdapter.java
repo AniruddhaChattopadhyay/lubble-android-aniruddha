@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 
 public class StatusBottomSheetAdapter extends RecyclerView.Adapter<StatusBottomSheetAdapter.StatusViewHolder> {
@@ -36,6 +37,13 @@ public class StatusBottomSheetAdapter extends RecyclerView.Adapter<StatusBottomS
             holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.trans_colorAccent));
         else
             holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.white));
+
+        if (position == statusList.size() - 1) {
+            // color last item (custom) to differentiate it from preset options
+            holder.title.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.dk_colorAccent));
+        } else {
+            holder.title.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.black));
+        }
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

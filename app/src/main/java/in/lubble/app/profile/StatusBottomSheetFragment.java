@@ -197,11 +197,10 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
         RealtimeDbHelper.getLubbleBlocksRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                ArrayList<String> arr = new ArrayList<>();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     statusList.add(dataSnapshot.getKey());
                 }
-                statusList.add("Custom");
+                statusList.add("Set Custom Text");
                 recyclerView.hideShimmerAdapter();
                 recyclerView.setAdapter(mAdapter);
                 mAdapter.notifyDataSetChanged();
