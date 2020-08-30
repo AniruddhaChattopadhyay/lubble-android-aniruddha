@@ -12,6 +12,7 @@ import java.util.List;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.leaderboard.LeaderboardActivity;
+import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.SellerDashActiv;
@@ -79,6 +80,9 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 break;
             case "seller_dash":
                 startActivity(SellerDashActiv.getIntent(this, LubbleSharedPrefs.getInstance().getSellerId(), false, Item.ITEM_PRODUCT));
+                break;
+            case "wiki":
+                LubbleActivity.open(this);
                 break;
             case "chats":
                 final String groupId = uri.getQueryParameter("id");
