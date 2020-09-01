@@ -32,7 +32,11 @@
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="8dp"
+        app:shimmer_demo_angle="20"
+        app:shimmer_demo_child_count="5"
+        app:shimmer_demo_layout="@layout/layout_demo_shimmer_simple"
+        app:shimmer_demo_layout_manager_type="linear_vertical" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/custom_status_layout"

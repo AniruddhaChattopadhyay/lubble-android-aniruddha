@@ -71,6 +71,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     private View view_snackbar;
     @Nullable
     private ChatMoreFragment.FlairUpdateListener flairUpdateListener;
+    private ValueEventListener statusEventListener;
 
     public StatusBottomSheetFragment(View v) {
         view_snackbar = v;
@@ -115,7 +116,6 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
         customEt = rootview.findViewById(R.id.custom_et);
         customSetBtn = rootview.findViewById(R.id.custom_btn);
         setStatus = rootview.findViewById(R.id.set_status_btn);
-        mAdapter = new StatusBottomSheetAdapter(statusList);
         customStatusLayout = rootview.findViewById(R.id.custom_status_layout);
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -194,23 +194,28 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     }
 
     private void getBlockList() {
-        RealtimeDbHelper.getLubbleBlocksRef().addListenerForSingleValueEvent(new ValueEventListener() {
+        statusEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                statusList.clear();
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     statusList.add(dataSnapshot.getKey());
                 }
                 statusList.add("Set Custom Text");
                 recyclerView.hideShimmerAdapter();
+                mAdapter = new StatusBottomSheetAdapter(statusList);
                 recyclerView.setAdapter(mAdapter);
-                mAdapter.notifyDataSetChanged();
+                if (statusEventListener != null) {
+                    RealtimeDbHelper.getLubbleBlocksRef().removeEventListener(statusEventListener);
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        });
+        };
+        RealtimeDbHelper.getLubbleBlocksRef().addValueEventListener(statusEventListener);
     }
 
     @Override
