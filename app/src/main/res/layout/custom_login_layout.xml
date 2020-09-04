@@ -52,14 +52,14 @@
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="@+id/imageView2"
             app:layout_constraintTop_toBottomOf="@+id/imageView3"
-            app:srcCompat="@drawable/ic_event_cal" />
+            app:srcCompat="@drawable/ic_news" />
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:text="Local Events"
+            android:text="Local News"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -127,6 +127,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@id/btn_sign_in_fb"
         android:layout_centerHorizontal="true"
+        android:textSize="12sp"
         android:text="We never post on Facebook"
         android:textColor="@color/trans_white" />
 
