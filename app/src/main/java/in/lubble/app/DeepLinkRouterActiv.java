@@ -4,11 +4,13 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.List;
 
+import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.leaderboard.LeaderboardActivity;
@@ -31,7 +33,17 @@ public class DeepLinkRouterActiv extends BaseActivity {
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             // user is NOT logged in
-            finish();
+            if (AuthUI.canHandleIntent(getIntent())) {
+                if (getIntent().getExtras() == null) {
+                    return;
+                }
+                String link = getIntent().getData().toString();
+                if (link != null) {
+                    Intent intent = new Intent(DeepLinkRouterActiv.this, LoginActivity.class);
+                    intent.putExtra("Link", link);
+                    startActivity(intent);
+                }
+            }
             FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("tried to open deeplink without login"));
             return;
         }

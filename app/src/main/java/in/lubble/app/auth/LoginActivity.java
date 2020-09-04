@@ -26,7 +26,6 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.auth.UserInfo;
@@ -69,13 +68,14 @@ public class LoginActivity extends BaseActivity {
     private FirebaseAuth firebaseAuth;
     private View rootLayout;
     private ProgressDialog progressDialog;
+    private String link = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
         rootLayout = findViewById(R.id.root_layout);
+        link = getIntent().getStringExtra("Link");
         firebaseAuth = FirebaseAuth.getInstance();
         Analytics.triggerScreenEvent(this, this.getClass());
 
@@ -112,7 +112,7 @@ public class LoginActivity extends BaseActivity {
         AuthUI.IdpConfig googleIdp = new AuthUI.IdpConfig.GoogleBuilder()
                 .build();
 
-        final AuthUI.IdpConfig emailIdp = new AuthUI.IdpConfig.EmailBuilder()
+        final AuthUI.IdpConfig emailIdp = new AuthUI.IdpConfig.EmailBuilder().enableEmailLinkSignIn()
                 .setActionCodeSettings(actionCodeSettings).build();
 
         List<String> whitelistedCountries = new ArrayList<String>();
@@ -152,7 +152,20 @@ public class LoginActivity extends BaseActivity {
                 .setTosAndPrivacyPolicyUrls("https://lubble.in/policies/terms", "https://lubble.in/policies/privacy")
                 .setIsSmartLockEnabled(false, false)
                 .build();
-        startActivityForResult(intent, RC_SIGN_IN);
+
+
+        if (link != null) {
+            startActivityForResult(
+                    AuthUI.getInstance()
+                            .createSignInIntentBuilder()
+                            .setEmailLink(link)
+                            .setAvailableProviders(selectedProviders)
+                            .build(),
+                    RC_SIGN_IN);
+        } else {
+            startActivityForResult(intent, RC_SIGN_IN);
+        }
+
     }
 
     private void trackReferral() {
