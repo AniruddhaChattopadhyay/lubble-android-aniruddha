@@ -211,7 +211,8 @@ public class LoginActivity extends BaseActivity {
                             addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
                             break;
                         } else if (user.getProviderId().equals(EmailAuthProvider.PROVIDER_ID)) {
-                            registerSocialUser(response, currentUser, "");
+                            NameFrag nameFrag = NameFrag.newInstance();
+                            addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
                             break;
                         }
                     }
