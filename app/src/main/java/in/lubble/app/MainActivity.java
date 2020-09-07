@@ -894,7 +894,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onPause() {
         super.onPause();
-        if (connectedReference != null) {
+        if (connectedReference != null && presenceValueListener != null) {
             connectedReference.removeEventListener(presenceValueListener);
         }
         getUserInfoRef(firebaseAuth.getUid()).removeEventListener(dpEventListener);
