@@ -10,16 +10,18 @@
     android:orientation="vertical"
     android:padding="8dp">
 
-    <ImageView
+    <com.airbnb.lottie.LottieAnimationView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        app:srcCompat="@drawable/ic_phone_verified" />
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
+        app:lottie_rawRes="@raw/tick_circle_anim" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="Thanks for verifying your phone number!"
+        android:text="Thanks for the verification!"
         android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <TextView
