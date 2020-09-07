@@ -50,11 +50,11 @@ import java.net.URLDecoder;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.models.ChatData;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
@@ -63,7 +63,6 @@ import permissions.dispatcher.OnShowRationale;
 import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
 
-import static in.lubble.app.utils.FileUtils.getSavedImageForMsgId;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 
 @RuntimePermissions
@@ -111,7 +110,14 @@ public class FullScreenVideoActivity extends BaseActivity {
         Analytics.triggerEvent(AnalyticsEvents.VIDEO_OPENED, this);
         exoPlayerView = findViewById(R.id.exo_player_full_screen);
 
-        videourl = Uri.parse(getIntent().getStringExtra(EXTRA_IMG_PATH));
+        String uriString = getIntent().getStringExtra(EXTRA_IMG_PATH);
+        if (TextUtils.isEmpty(uriString)) {
+            Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        videourl = Uri.parse(uriString);
         captionMsg = getIntent().getStringExtra(EXTRA_MSG);
         shareSuffix = getIntent().getStringExtra(EXTRA_SHARE_SUFFIX);
         if (savedInstanceState != null) {
