@@ -81,7 +81,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
             holder.mView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (null != mListener) {
+                    if (null != mListener && holder.getAdapterPosition() != RecyclerView.NO_POSITION) {
                         final String uid = membersList.get(holder.getAdapterPosition()).getId();
                         toggleView(uid, userId, holder);
                     }

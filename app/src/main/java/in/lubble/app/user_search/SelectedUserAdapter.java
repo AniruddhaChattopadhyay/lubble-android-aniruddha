@@ -71,7 +71,7 @@ public class SelectedUserAdapter extends RecyclerView.Adapter<SelectedUserAdapte
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (null != mListener) {
+                if (null != mListener && holder.getAdapterPosition() != RecyclerView.NO_POSITION) {
                     mListener.onUserDeSelected(selectedUsersList.get(holder.getAdapterPosition()));
                 }
             }
