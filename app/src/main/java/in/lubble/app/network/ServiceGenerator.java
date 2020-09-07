@@ -1,6 +1,7 @@
 package in.lubble.app.network;
 
 import in.lubble.app.BuildConfig;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -33,16 +34,22 @@ public class ServiceGenerator {
             new OkHttpClient.Builder();
     private static OkHttpClient.Builder airtableHttpClient =
             new OkHttpClient.Builder();
+    private static AuthenticationInterceptor authenticationInterceptor =
+            new AuthenticationInterceptor();
 
     public static <S> S createService(Class<S> serviceClass) {
 
-        AuthenticationInterceptor interceptor =
-                new AuthenticationInterceptor();
+        for (Interceptor mInterceptor : httpClient.interceptors()) {
+            if (mInterceptor == null) {
+                httpClient.interceptors().clear();
+                break;
+            }
+        }
 
         httpClient.authenticator(TokenAuthenticator.getInstance());
 
-        if (!httpClient.interceptors().contains(interceptor)) {
-            httpClient.addInterceptor(interceptor);
+        if (!httpClient.interceptors().contains(authenticationInterceptor)) {
+            httpClient.addInterceptor(authenticationInterceptor);
 
             builder.client(httpClient.build());
             retrofit = builder.build();
