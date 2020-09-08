@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
-    android:versionCode="253"
+    android:versionCode="254"
     android:versionName="1.26-1">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -282,6 +282,17 @@
 
                 <data
                     android:host="lubbledev.page.link"
+                    android:scheme="https" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="lubble.page.link"
                     android:scheme="https" />
             </intent-filter>
 
