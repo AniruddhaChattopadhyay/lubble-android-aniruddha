@@ -103,7 +103,7 @@ public class LoginActivity extends BaseActivity {
         ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
                 .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
                 .setHandleCodeInApp(true)
-                .setUrl("https://google.com") // This URL needs to be whitelisted
+                .setUrl("https://lubble.in/magic-email-link/") // This URL needs to be whitelisted
                 .build();
 
         AuthUI.IdpConfig facebookIdp = new AuthUI.IdpConfig.FacebookBuilder()
