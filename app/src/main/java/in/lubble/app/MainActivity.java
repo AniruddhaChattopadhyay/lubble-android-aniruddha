@@ -609,7 +609,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(IS_NOTIF_SNOOZE_ON, true);
         map.put(IS_TIME_SHOWN, false);
         map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
-        map.put(WIKI_URL, "https://lubble.in");
+        map.put(WIKI_URL, "https://lubble.in/neighbourhoods/");
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
