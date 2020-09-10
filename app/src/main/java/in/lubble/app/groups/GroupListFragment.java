@@ -803,11 +803,11 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void removeListeners() {
         mListener = null;
-        if (childEventListener != null) {
+        if (query != null && childEventListener != null) {
             query.removeEventListener(childEventListener);
             childEventListener = null;
         }
-        if (dmChildEventListener != null) {
+        if (dmQuery != null && dmChildEventListener != null) {
             dmQuery.removeEventListener(dmChildEventListener);
             dmChildEventListener = null;
         }
