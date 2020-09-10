@@ -100,20 +100,13 @@ public class LoginActivity extends BaseActivity {
 
     private void startAuthActivity() {
 
-        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
-                .setAndroidPackageName(BuildConfig.APPLICATION_ID, true, null)
-                .setHandleCodeInApp(true)
-                .setUrl("https://lubble.in/magic-email-link/") // This URL needs to be whitelisted
-                .build();
-
         AuthUI.IdpConfig facebookIdp = new AuthUI.IdpConfig.FacebookBuilder()
                 .build();
 
         AuthUI.IdpConfig googleIdp = new AuthUI.IdpConfig.GoogleBuilder()
                 .build();
 
-        final AuthUI.IdpConfig emailIdp = new AuthUI.IdpConfig.EmailBuilder().enableEmailLinkSignIn()
-                .setActionCodeSettings(actionCodeSettings).build();
+        final AuthUI.IdpConfig emailIdp = new AuthUI.IdpConfig.EmailBuilder().build();
 
         List<String> whitelistedCountries = new ArrayList<String>();
         whitelistedCountries.add("IN");
@@ -211,8 +204,7 @@ public class LoginActivity extends BaseActivity {
                             addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
                             break;
                         } else if (user.getProviderId().equals(EmailAuthProvider.PROVIDER_ID)) {
-                            NameFrag nameFrag = NameFrag.newInstance();
-                            addFrag(getSupportFragmentManager(), R.id.frame_fragContainer, nameFrag);
+                            registerSocialUser(response, currentUser, "");
                             break;
                         }
                     }

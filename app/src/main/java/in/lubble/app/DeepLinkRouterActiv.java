@@ -33,18 +33,9 @@ public class DeepLinkRouterActiv extends BaseActivity {
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null) {
             // user is NOT logged in
-            if (AuthUI.canHandleIntent(getIntent())) {
-                if (getIntent().getExtras() == null) {
-                    return;
-                }
-                String link = getIntent().getData().toString();
-                if (link != null) {
-                    Intent intent = new Intent(DeepLinkRouterActiv.this, LoginActivity.class);
-                    intent.putExtra("Link", link);
-                    startActivity(intent);
-                }
-            }
+            startActivity(new Intent(this, MainActivity.class));
             FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("tried to open deeplink without login"));
+            finish();
             return;
         }
 
