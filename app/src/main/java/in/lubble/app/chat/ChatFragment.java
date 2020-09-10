@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Map;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.UploadPDFService;
@@ -1493,13 +1494,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             }
                         }
                     } else {
-                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<List<EventData>> call, Throwable t) {
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LubbleApp.getAppContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             });
         } else {

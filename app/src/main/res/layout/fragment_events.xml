@@ -54,6 +54,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:layout_width="wrap_content"
         android:layout_above="@id/fab_new_event"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="42dp"
         android:gravity="center"
         android:layout_height="wrap_content"/>
