@@ -445,7 +445,8 @@
         android:background="@drawable/circle_white"
         android:padding="2dp"
         app:srcCompat="@drawable/ic_favorite_border_light"
-        android:layout_toEndOf="@id/iv_dp"/>
+        android:layout_toEndOf="@id/iv_dp"
+        android:visibility="gone" />
     <TextView
         android:id="@+id/hidden_double_click_msg"
         android:layout_width="wrap_content"
@@ -454,7 +455,6 @@
         android:layout_toEndOf="@+id/iv_lubb_msg"
         android:layout_marginLeft="5dp"
         android:text="Double Tap To Like"
-        android:visibility="gone"
-        />
+        android:visibility="gone" />
 
 </RelativeLayout>

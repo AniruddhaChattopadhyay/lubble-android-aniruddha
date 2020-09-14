@@ -492,6 +492,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
         if(position == chatDataList.size()-1) {
+            if(globalDoubleClickLikeTV!=null){
+               globalDoubleClickLikeTV.setVisibility(GONE);
+            }
+            if(globalDoubleClickLikeIV!=null){
+                globalDoubleClickLikeIV.setVisibility(GONE);
+            }
             globalDoubleClickLikeTV = recvdChatViewHolder.doubleClickLikeTV;
             globalDoubleClickLikeIV = recvdChatViewHolder.doubleClickLikeIV;
             recvdChatViewHolder.doubleClickLikeTV.setVisibility(VISIBLE);
