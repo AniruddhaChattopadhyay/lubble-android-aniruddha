@@ -437,4 +437,24 @@
 
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/iv_lubb_msg"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_below="@id/frame_msg"
+        android:background="@drawable/circle_white"
+        android:padding="2dp"
+        app:srcCompat="@drawable/ic_favorite_border_light"
+        android:layout_toEndOf="@id/iv_dp"/>
+    <TextView
+        android:id="@+id/hidden_double_click_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/frame_msg"
+        android:layout_toEndOf="@+id/iv_lubb_msg"
+        android:layout_marginLeft="5dp"
+        android:text="Double Tap To Like"
+        android:visibility="gone"
+        />
+
 </RelativeLayout>
