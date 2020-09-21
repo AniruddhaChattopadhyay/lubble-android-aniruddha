@@ -267,11 +267,34 @@
         android:id="@+id/rv_chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_container"
+        android:layout_above="@id/typing_tv"
         android:layout_below="@id/progressbar_pagination"
         android:layout_marginBottom="4dp"
         android:visibility="invisible"
         tools:listitem="@layout/item_recvd_chat"
         tools:visibility="visible" />
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/anim_typing"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_above="@id/bottom_container"
+        android:scaleType="centerCrop"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="false"
+        app:lottie_rawRes="@raw/typing_animation"
+        app:tint="@color/orange"
+        android:visibility="gone"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/typing_tv"
+        android:visibility="gone"
+        android:layout_above="@id/bottom_container"
+        android:layout_toEndOf="@+id/anim_typing"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="10dp"
+        />
 
 </RelativeLayout>

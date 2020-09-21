@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -235,9 +236,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
     private boolean isDmBlocked;
+    private String name = null;
+    private TextView typingTv;
+    private LottieAnimationView typingAnimationView;
     @Nullable
     private String dmOtherUserId;
     public static View view_access;
+
+    long delay = 1000;
+    long last_text_edit = 0;
+    Handler handler = new Handler();
 
     public ChatFragment() {
         // Required empty public constructor
@@ -387,9 +395,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
         userTagRecyclerView = view.findViewById(R.id.rv_user_tag);
         taggingProgressBar = view.findViewById(R.id.progress_bar_tagging);
+        typingTv = view.findViewById(R.id.typing_tv);
+        typingAnimationView = view.findViewById(R.id.anim_typing);
         userTagRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         userTagRecyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL));
-
         groupMembersMap = new HashMap<>();
 
         if (isJoining) {
@@ -1577,13 +1586,55 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private final TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
+            Log.d("check","beforeTextChanged");
+            FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).setValue(true);
         }
 
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-            if (before > 0) {
-                // deleting
 
+            if (before > 0) {
+                Log.d("check","onTextChanged");
+                handler.removeCallbacks(input_finish_checker);
+                FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if(snapshot.getChildrenCount()>1){
+                            name = "Several People are typing......";
+                        }
+                        else {
+                            for (DataSnapshot data : snapshot.getChildren()) {
+                                //name = RealtimeDbHelper.getUserInfoRef(userId).child();
+                                name = data.getKey();
+                            }
+                        }
+                        if(name!=null){
+                            RealtimeDbHelper.getUserInfoRef(name).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    typingTv.setVisibility(View.VISIBLE);
+                                    typingAnimationView.setVisibility(View.VISIBLE);
+                                    typingTv.setText(snapshot.getValue(String.class)+" is Typing......");
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
+                        }
+                        else{
+                            typingTv.setVisibility(View.GONE);
+                            typingAnimationView.setVisibility(View.GONE);
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
                 int selectionEnd = newMessageEt.getSelectionEnd();
                 String text = newMessageEt.getText().toString();
                 if (selectionEnd >= 0) {
@@ -1612,6 +1663,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         @Override
         public void afterTextChanged(Editable editable) {
+            last_text_edit = System.currentTimeMillis();
+            handler.postDelayed(input_finish_checker, delay);
+
             final String inputString = editable.toString();
             sendBtn.setEnabled(editable.length() > 0 && inputString.trim().length() > 0);
 
@@ -1976,6 +2030,22 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
     }
 
+    private Runnable input_finish_checker = new Runnable() {
+        public void run() {
+            if (System.currentTimeMillis() > (last_text_edit + delay - 500)) {
+                // TODO: do what you need here
+                // ............
+                // ............
+                userTypingSatus();
+            }
+        }
+    };
+
+    public void userTypingSatus(){
+        name = null;
+        FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).removeValue();
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -1993,6 +2063,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (thisUserValueListener != null) {
             getThisUserRef().removeEventListener(thisUserValueListener);
         }
+        name = null;
+        FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).removeValue();
+        handler.removeCallbacks(input_finish_checker);
+
     }
 
     @Override
