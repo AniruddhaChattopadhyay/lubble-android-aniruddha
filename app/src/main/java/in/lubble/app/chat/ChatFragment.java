@@ -352,6 +352,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         bundle.putString("groupid", groupId);
         bundle.putString("dm_id", dmId);
         Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, requireContext());
+        checkTypingstatus();
     }
 
     private void populateChatData(ChatData chatData) {
@@ -1594,47 +1595,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
 
             if (before > 0) {
-                Log.d("check","onTextChanged");
                 handler.removeCallbacks(input_finish_checker);
-                FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(snapshot.getChildrenCount()>1){
-                            name = "Several People are typing......";
-                        }
-                        else {
-                            for (DataSnapshot data : snapshot.getChildren()) {
-                                //name = RealtimeDbHelper.getUserInfoRef(userId).child();
-                                name = data.getKey();
-                            }
-                        }
-                        if(name!=null){
-                            RealtimeDbHelper.getUserInfoRef(name).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    typingTv.setVisibility(View.VISIBLE);
-                                    typingAnimationView.setVisibility(View.VISIBLE);
-                                    typingTv.setText(snapshot.getValue(String.class)+" is Typing......");
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-                        }
-                        else{
-                            typingTv.setVisibility(View.GONE);
-                            typingAnimationView.setVisibility(View.GONE);
-                        }
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
                 int selectionEnd = newMessageEt.getSelectionEnd();
                 String text = newMessageEt.getText().toString();
                 if (selectionEnd >= 0) {
@@ -2033,17 +1994,64 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private Runnable input_finish_checker = new Runnable() {
         public void run() {
             if (System.currentTimeMillis() > (last_text_edit + delay - 500)) {
-                // TODO: do what you need here
-                // ............
-                // ............
                 userTypingSatus();
             }
         }
     };
 
-    public void userTypingSatus(){
+    private void userTypingSatus(){
         name = null;
         FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).removeValue();
+    }
+
+    private void checkTypingstatus(){
+        FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getChildrenCount()>1){
+                    name = "Several People are typing......";
+                    typingTv.setVisibility(View.VISIBLE);
+                    typingAnimationView.setVisibility(View.VISIBLE);
+                    typingTv.setText(name);
+                }
+                else {
+                    name = null;
+                    for (DataSnapshot data : snapshot.getChildren()) {
+                        //name = RealtimeDbHelper.getUserInfoRef(userId).child();
+                        name = data.getKey();
+                    }
+                }
+                if(name!=null){
+                    if(!name.equals("Several People are typing......")){
+                        RealtimeDbHelper.getUserInfoRef(name).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                typingTv.setVisibility(View.VISIBLE);
+                                typingAnimationView.setVisibility(View.VISIBLE);
+                                typingTv.setText(snapshot.getValue(String.class)+" is Typing......");
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }
+                else{
+                    typingTv.setVisibility(View.GONE);
+                    typingAnimationView.setVisibility(View.GONE);
+                    typingTv.setVisibility(View.GONE);
+                    typingAnimationView.setVisibility(View.GONE);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     @Override
