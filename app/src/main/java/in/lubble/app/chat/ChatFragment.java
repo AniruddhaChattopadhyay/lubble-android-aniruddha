@@ -236,7 +236,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
     private boolean isDmBlocked;
-    private String name = null;
+    private ArrayList<String> name=new ArrayList<String>();
+    private static final String severalTypingStatus  = "Several People are typing......";
     private TextView typingTv;
     private LottieAnimationView typingAnimationView;
     @Nullable
@@ -1592,7 +1593,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
             if (before > 0) {
-                FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).setValue(true);
+                String firstname = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
+                FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).setValue(firstname);
                 typingExpiryHandler.removeCallbacks(inputFinishChecker);
                 int selectionEnd = newMessageEt.getSelectionEnd();
                 String text = newMessageEt.getText().toString();
@@ -2006,35 +2008,45 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getChildrenCount()>1){
-                    name = "Several People are typing......";
+                if(snapshot.getChildrenCount()>2){
+                    //name = ;
                     typingTv.setVisibility(View.VISIBLE);
                     typingAnimationView.setVisibility(View.VISIBLE);
-                    typingTv.setText(name);
+                    typingTv.setText(severalTypingStatus);
                 }
                 else {
-                    name = null;
+                    name = new ArrayList<>();
                     for (DataSnapshot data : snapshot.getChildren()) {
                         //name = RealtimeDbHelper.getUserInfoRef(userId).child();
-                        name = data.getKey();
+                        name.add(data.getValue(String.class));
                     }
+                    if(name.size()==0)
+                        name = null;
                 }
                 if(name!=null){
-                    if(!name.equals("Several People are typing......")){
-                        RealtimeDbHelper.getUserInfoRef(name).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                typingTv.setVisibility(View.VISIBLE);
-                                typingAnimationView.setVisibility(View.VISIBLE);
-                                typingTv.setText(snapshot.getValue(String.class)+" is Typing......");
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-
-                            }
-                        });
+                    typingTv.setVisibility(View.VISIBLE);
+                    typingAnimationView.setVisibility(View.VISIBLE);
+                    String status = "";
+                    for(String n:name){
+                        status = status + n + ",";
                     }
+                    status = status.substring(0,status.length()-2);
+                    typingTv.setText(status+" is Typing......");
+//                    if(!name.equals("Several People are typing......")){
+//                        RealtimeDbHelper.getUserInfoRef(name).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+//                            @Override
+//                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                                typingTv.setVisibility(View.VISIBLE);
+//                                typingAnimationView.setVisibility(View.VISIBLE);
+//                                typingTv.setText(snapshot.getValue(String.class)+" is Typing......");
+//                            }
+//
+//                            @Override
+//                            public void onCancelled(@NonNull DatabaseError error) {
+//
+//                            }
+//                        });
+//                    }
                 }
                 else{
                     typingTv.setVisibility(View.GONE);

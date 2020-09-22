@@ -177,7 +177,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
     private HashMap<String, String> searchHighlightMap = new HashMap<>();
-    private int FLAG_STATUS_STATE = 0;
     private TextView globalDoubleClickLikeTV;
     private ImageView globalDoubleClickLikeIV;
 
