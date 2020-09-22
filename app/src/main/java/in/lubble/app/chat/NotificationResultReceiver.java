@@ -81,33 +81,36 @@ public class NotificationResultReceiver extends BroadcastReceiver {
     }
 
     private void updateUnreadCounter(NotifData notifData, boolean isDm) {
-        DatabaseReference unreadCountRef = RealtimeDbHelper.getLubbleGroupsRef().child(notifData.getGroupId()).child("members").child(FirebaseAuth.getInstance().getUid()).child("unreadCount");
-        if (isDm) {
-            if (notifData.getIsSeller()) {
-                unreadCountRef = RealtimeDbHelper.getDmsRef()
-                        .child(notifData.getGroupId())
-                        .child("members")
-                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
-                        .child("unreadCount");
-            } else {
-                unreadCountRef = RealtimeDbHelper.getDmsRef().child(notifData.getGroupId()).child("members").child(FirebaseAuth.getInstance().getUid()).child("unreadCount");
-            }
-        }
-        unreadCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Long oldCount = 0L;
-                if (dataSnapshot.getValue() != null) {
-                    oldCount = dataSnapshot.getValue(Long.class);
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (uid != null) {
+            DatabaseReference unreadCountRef = RealtimeDbHelper.getLubbleGroupsRef().child(notifData.getGroupId()).child("members").child(uid).child("unreadCount");
+            if (isDm) {
+                if (notifData.getIsSeller()) {
+                    unreadCountRef = RealtimeDbHelper.getDmsRef()
+                            .child(notifData.getGroupId())
+                            .child("members")
+                            .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
+                            .child("unreadCount");
+                } else {
+                    unreadCountRef = RealtimeDbHelper.getDmsRef().child(notifData.getGroupId()).child("members").child(uid).child("unreadCount");
                 }
-                dataSnapshot.getRef().setValue(++oldCount);
             }
+            unreadCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Long oldCount = 0L;
+                    if (dataSnapshot.getValue() != null) {
+                        oldCount = dataSnapshot.getValue(Long.class);
+                    }
+                    dataSnapshot.getRef().setValue(++oldCount);
+                }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        }
     }
 
     private void pullNewMsgs(NotifData notifData) {
