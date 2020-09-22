@@ -372,7 +372,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             progressBarPublicGroups.setVisibility(View.GONE);
             adapter.sortPublicGroupList(startingIndex);
             groupsRecyclerView.setPadding(0, 0, 0, 0);
-            if (startingIndex == -1) {
+            if (startingIndex == -1 && publicGroupsQuery != null && publicGroupListener != null) {
                 // onDataChange was called again with just group updates, no new groups added
                 // remove listener to save bandwidth
                 publicGroupsQuery.removeEventListener(publicGroupListener);
