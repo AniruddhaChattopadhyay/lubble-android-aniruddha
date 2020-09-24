@@ -62,6 +62,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.chat.BlockedChatsActiv;
+import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.explore.ExploreFrag;
@@ -851,6 +852,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 prefs.setDefaultGroupId(dataSnapshot.child("defaultGroup").getValue(String.class));
                 prefs.setSupportUid(dataSnapshot.child("supportUid").getValue(String.class));
                 navMenu.findItem(nav_item_leaderboard).setTitle(lubbleName + " Leaderboard");
+                if (isNewUserInThisLubble) {
+                    GroupPromptSharedPrefs.getInstance().putGroupId(dataSnapshot.child("introGroup").getValue(String.class));
+                }
             }
 
             @Override
