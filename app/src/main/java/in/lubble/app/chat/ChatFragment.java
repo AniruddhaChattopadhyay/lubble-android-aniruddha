@@ -244,9 +244,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private String dmOtherUserId;
     public static View view_access;
 
-   private static long DELAY = 1000;
-   private static long lastTextEdit = 0;
-   Handler typingExpiryHandler = new Handler();
+    private static long DELAY = 1000;
+    private static long lastTextEdit = 0;
+    private String firstName;
+    Handler typingExpiryHandler = new Handler();
 
     public ChatFragment() {
         // Required empty public constructor
@@ -353,6 +354,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         bundle.putString("groupid", groupId);
         bundle.putString("dm_id", dmId);
         Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, requireContext());
+        firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
         checkTypingStatus();
     }
 
@@ -630,7 +632,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             personalChatData.setId(groupData.getQuestionChatId());
             personalChatData.setType(ChatData.GROUP_PROMPT);
             personalChatData.setAuthorUid(LubbleSharedPrefs.getInstance().getSupportUid());
-            final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
+//            final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
             personalChatData.setMessage(
                     "Welcome " + firstName + "!" +
                             "\n\nLet's introduce you to everyone in the group with an answer to this:" +
@@ -1593,8 +1595,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
             if (before > 0) {
-                String firstname = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
-                FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).setValue(firstname);
+                FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).setValue(firstName);
                 typingExpiryHandler.removeCallbacks(inputFinishChecker);
                 int selectionEnd = newMessageEt.getSelectionEnd();
                 String text = newMessageEt.getText().toString();
@@ -2008,45 +2009,33 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getChildrenCount()>2){
-                    //name = ;
-                    typingTv.setVisibility(View.VISIBLE);
-                    typingAnimationView.setVisibility(View.VISIBLE);
-                    typingTv.setText(severalTypingStatus);
+                name = new ArrayList<>();
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    //name = RealtimeDbHelper.getUserInfoRef(userId).child();
+                    String n = data.getValue(String.class);
+                    if(n.equals(firstName))
+                        continue;
+                    name.add(n);
                 }
-                else {
-                    name = new ArrayList<>();
-                    for (DataSnapshot data : snapshot.getChildren()) {
-                        //name = RealtimeDbHelper.getUserInfoRef(userId).child();
-                        name.add(data.getValue(String.class));
-                    }
-                    if(name.size()==0)
-                        name = null;
-                }
+                if(name.size()==0)
+                    name = null;
+
                 if(name!=null){
                     typingTv.setVisibility(View.VISIBLE);
                     typingAnimationView.setVisibility(View.VISIBLE);
                     String status = "";
-                    for(String n:name){
-                        status = status + n + ",";
+                    if(name.size()>2){
+                        status = severalTypingStatus;
+                        typingTv.setText(status+" Typing......");
                     }
-                    status = status.substring(0,status.length()-2);
-                    typingTv.setText(status+" is Typing......");
-//                    if(!name.equals("Several People are typing......")){
-//                        RealtimeDbHelper.getUserInfoRef(name).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-//                            @Override
-//                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                                typingTv.setVisibility(View.VISIBLE);
-//                                typingAnimationView.setVisibility(View.VISIBLE);
-//                                typingTv.setText(snapshot.getValue(String.class)+" is Typing......");
-//                            }
-//
-//                            @Override
-//                            public void onCancelled(@NonNull DatabaseError error) {
-//
-//                            }
-//                        });
-//                    }
+                    else{
+                        for(String n:name){
+                            status = status + n + ", ";
+                            status = status.substring(0,status.length()-2);
+                            typingTv.setText(status+" Typing......");
+                        }
+                    }
+
                 }
                 else{
                     typingTv.setVisibility(View.GONE);

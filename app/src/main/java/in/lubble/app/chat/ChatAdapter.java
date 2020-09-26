@@ -247,7 +247,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
         final String authorUid = chatData.getAuthorUid();
-        if(position == chatDataList.size()-1 && globalDoubleClickLikeTV !=null && globalDoubleClickLikeIV !=null ){
+        if(!chatData.getIsDm() && position == chatDataList.size()-1 && globalDoubleClickLikeTV !=null && globalDoubleClickLikeIV !=null ){
             globalDoubleClickLikeTV.setVisibility(GONE);
             globalDoubleClickLikeIV.setVisibility(GONE);
         }
@@ -490,7 +490,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
-        if(position == chatDataList.size()-1) {
+        if(!chatData.getIsDm() && position == chatDataList.size()-1) {
             if(globalDoubleClickLikeTV!=null){
                globalDoubleClickLikeTV.setVisibility(GONE);
             }
