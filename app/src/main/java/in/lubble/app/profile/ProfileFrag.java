@@ -168,6 +168,11 @@ public class ProfileFrag extends Fragment {
         progressBar = rootView.findViewById(R.id.progressBar_profile);
         TextView versionTv = rootView.findViewById(R.id.tv_version_name);
         RelativeLayout feedbackView = rootView.findViewById(R.id.feedback_container);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("profile_uid", userId);
+        Analytics.triggerScreenEvent(getContext(), this.getClass(), bundle);
+
         Log.d("database_uid", RealtimeDbHelper.getThisUserRef().toString());//whole link to the user we are logged in as
         Log.d("uid", userId);//user we are currently on the profile of
         Log.d("uid_this", FirebaseAuth.getInstance().getUid());//the user we are logged in as
