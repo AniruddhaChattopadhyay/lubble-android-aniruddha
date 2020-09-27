@@ -59,7 +59,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -456,7 +456,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void setBgColor(final RelativeLayout linkContainer, ChatData chatData) {
         if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
-            glide.asBitmap().load(chatData.getLinkPicUrl()).into(new SimpleTarget<Bitmap>() {
+            glide.asBitmap().load(chatData.getLinkPicUrl()).into(new CustomTarget<Bitmap>() {
                 @Override
                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                     Palette.from(resource)
@@ -472,6 +472,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                     linkContainer.setBackground(wrapDrawable);
                                 }
                             });
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+
                 }
             });
         } else {
@@ -1369,7 +1374,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 .load(chatData.getImgUrl())
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .into(new SimpleTarget<Bitmap>() {
+                .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         progressBar.setVisibility(GONE);
