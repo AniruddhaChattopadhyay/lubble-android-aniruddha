@@ -72,6 +72,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     @Nullable
     private ChatMoreFragment.FlairUpdateListener flairUpdateListener;
     private ValueEventListener statusEventListener;
+    private final static String SET_CUSTOM_TEXT = "Set Custom Text";
 
     public StatusBottomSheetFragment(View v) {
         view_snackbar = v;
@@ -133,7 +134,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
             public void onClick(View view, int position) {
                 //Movie movie = statusList.get(position);
                 selectedPos = position;
-                if (statusList.get(position).equalsIgnoreCase("Custom")) {
+                if (statusList.get(position).equalsIgnoreCase(SET_CUSTOM_TEXT)) {
                     customStatusLayout.setVisibility(View.VISIBLE);
                     customEt.setFilters(new InputFilter[]{EMOJI_FILTER});
                     customSetBtn.setVisibility(View.VISIBLE);
@@ -201,7 +202,7 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     statusList.add(dataSnapshot.getKey());
                 }
-                statusList.add("Set Custom Text");
+                statusList.add(SET_CUSTOM_TEXT);
                 recyclerView.hideShimmerAdapter();
                 mAdapter = new StatusBottomSheetAdapter(statusList);
                 recyclerView.setAdapter(mAdapter);
