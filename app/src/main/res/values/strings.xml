@@ -78,6 +78,7 @@
     <string name="select_block">Select Block</string>
     <string name="all_updating">Updating</string>
     <string name="all_try_again">Try Again</string>
+    <string name="all_something_wrong_try_again">Something went wrong, please try again</string>
     <string name="joining_group">Joining group</string>
     <string name="pvt_group_msgs_hidden">Messages are hidden in private groups until you join</string>
     <string name="invited_by">Invited by %s</string>

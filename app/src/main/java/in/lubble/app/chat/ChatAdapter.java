@@ -496,8 +496,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
         recvdChatViewHolder.replyBottomTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                chatFragment.addReplyForPrompt(chatData.getId(), profileDataMap.get(chatData.getAuthorUid()).getInfo().getName(), chatData.getPromptQues());
-                Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_REPLIED, context);
+                ProfileData profileData = profileDataMap.get(chatData.getAuthorUid());
+                if (profileData != null) {
+                    chatFragment.addReplyForPrompt(chatData.getId(), profileData.getInfo().getName(), chatData.getPromptQues());
+                    Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_REPLIED, context);
+                } else {
+                    Toast.makeText(LubbleApp.getAppContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
