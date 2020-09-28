@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -235,9 +236,18 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
     private boolean isDmBlocked;
+    private ArrayList<String> name=new ArrayList<String>();
+    private static final String severalTypingStatus  = "Several People are typing......";
+    private TextView typingTv;
+    private LottieAnimationView typingAnimationView;
     @Nullable
     private String dmOtherUserId;
     public static View view_access;
+
+    private static long DELAY = 1000;
+    private static long lastTextEdit = 0;
+    private String firstName;
+    Handler typingExpiryHandler = new Handler();
 
     public ChatFragment() {
         // Required empty public constructor
@@ -344,6 +354,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         bundle.putString("groupid", groupId);
         bundle.putString("dm_id", dmId);
         Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, requireContext());
+        firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
+        checkTypingStatus();
     }
 
     private void populateChatData(ChatData chatData) {
@@ -387,9 +399,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         paginationProgressBar = view.findViewById(R.id.progressbar_pagination);
         userTagRecyclerView = view.findViewById(R.id.rv_user_tag);
         taggingProgressBar = view.findViewById(R.id.progress_bar_tagging);
+        typingTv = view.findViewById(R.id.typing_tv);
+        typingAnimationView = view.findViewById(R.id.anim_typing);
         userTagRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         userTagRecyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), LinearLayoutManager.VERTICAL));
-
         groupMembersMap = new HashMap<>();
 
         if (isJoining) {
@@ -619,7 +632,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             personalChatData.setId(groupData.getQuestionChatId());
             personalChatData.setType(ChatData.GROUP_PROMPT);
             personalChatData.setAuthorUid(LubbleSharedPrefs.getInstance().getSupportUid());
-            final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
+//            final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
             personalChatData.setMessage(
                     "Welcome " + firstName + "!" +
                             "\n\nLet's introduce you to everyone in the group with an answer to this:" +
@@ -1582,8 +1595,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         @Override
         public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
             if (before > 0) {
-                // deleting
-
+                FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).setValue(firstName);
+                typingExpiryHandler.removeCallbacks(inputFinishChecker);
                 int selectionEnd = newMessageEt.getSelectionEnd();
                 String text = newMessageEt.getText().toString();
                 if (selectionEnd >= 0) {
@@ -1612,6 +1625,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         @Override
         public void afterTextChanged(Editable editable) {
+            lastTextEdit = System.currentTimeMillis();
+            typingExpiryHandler.postDelayed(inputFinishChecker, DELAY);
+
             final String inputString = editable.toString();
             sendBtn.setEnabled(editable.length() > 0 && inputString.trim().length() > 0);
 
@@ -1976,6 +1992,65 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
     }
 
+    private Runnable inputFinishChecker = new Runnable() {
+        public void run() {
+            if (System.currentTimeMillis() > (lastTextEdit + DELAY - 500)) {
+                removeTypingStatus();
+            }
+        }
+    };
+
+    private void removeTypingStatus(){
+        name = null;
+        FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).removeValue();
+    }
+
+    private void checkTypingStatus(){
+        FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                name = new ArrayList<>();
+                for (DataSnapshot data : snapshot.getChildren()) {
+                    //name = RealtimeDbHelper.getUserInfoRef(userId).child();
+                    String n = data.getValue(String.class);
+                    if(n.equals(firstName))
+                        continue;
+                    name.add(n);
+                }
+                if(name.size()==0)
+                    name = null;
+
+                if(name!=null){
+                    typingTv.setVisibility(View.VISIBLE);
+                    typingAnimationView.setVisibility(View.VISIBLE);
+                    String status = "";
+                    if(name.size()>2){
+                        status = severalTypingStatus;
+                        typingTv.setText(status+" Typing......");
+                    }
+                    else{
+                        for(String n:name){
+                            status = status + n + ", ";
+                            status = status.substring(0,status.length()-2);
+                            typingTv.setText(status+" Typing......");
+                        }
+                    }
+
+                }
+                else{
+                    typingTv.setVisibility(View.GONE);
+                    typingAnimationView.setVisibility(View.GONE);
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -1993,6 +2068,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (thisUserValueListener != null) {
             getThisUserRef().removeEventListener(thisUserValueListener);
         }
+        name = null;
+        FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath()+"/"+groupId).child("typing").child(FirebaseAuth.getInstance().getUid()).removeValue();
+        typingExpiryHandler.removeCallbacks(inputFinishChecker);
+
     }
 
     @Override

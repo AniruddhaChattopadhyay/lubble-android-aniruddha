@@ -177,7 +177,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
     private HashMap<String, String> searchHighlightMap = new HashMap<>();
-    private int FLAG_STATUS_STATE = 0;
+    private TextView globalDoubleClickLikeTV;
+    private ImageView globalDoubleClickLikeIV;
 
 
     public ChatAdapter(Activity activity, Context context, String groupId,
@@ -245,8 +246,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void bindSentChatViewHolder(RecyclerView.ViewHolder holder, int position) {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
-
         final String authorUid = chatData.getAuthorUid();
+        if(!chatData.getIsDm() && position == chatDataList.size()-1 && globalDoubleClickLikeTV !=null && globalDoubleClickLikeIV !=null ){
+            globalDoubleClickLikeTV.setVisibility(GONE);
+            globalDoubleClickLikeIV.setVisibility(GONE);
+        }
         if (profileDataMap.containsKey(authorUid)) {
             final ProfileData profileData = profileDataMap.get(authorUid);
             final ProfileInfo profileInfo = profileData.getInfo();
@@ -486,7 +490,18 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
-
+        if(!chatData.getIsDm() && position == chatDataList.size()-1) {
+            if(globalDoubleClickLikeTV!=null){
+               globalDoubleClickLikeTV.setVisibility(GONE);
+            }
+            if(globalDoubleClickLikeIV!=null){
+                globalDoubleClickLikeIV.setVisibility(GONE);
+            }
+            globalDoubleClickLikeTV = recvdChatViewHolder.doubleClickLikeTV;
+            globalDoubleClickLikeIV = recvdChatViewHolder.doubleClickLikeIV;
+            recvdChatViewHolder.doubleClickLikeTV.setVisibility(VISIBLE);
+            recvdChatViewHolder.doubleClickLikeIV.setVisibility(VISIBLE);
+        }
         showDpAndName(recvdChatViewHolder, chatData);
 
         recvdChatViewHolder.shareMsgIv.setVisibility(GONE);
@@ -1692,6 +1707,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private RelativeLayout lubbContainer;
         private EmojiTextView badgeTextTv;
         private LinearLayout editStatusLayout;
+        private TextView doubleClickLikeTV;
+        private ImageView doubleClickLikeIV;
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -1979,6 +1996,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             shareMsgIv = itemView.findViewById(R.id.iv_share_msg);
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
             editStatusLayout = itemView.findViewById(R.id.status_click_layout);
+            doubleClickLikeTV = itemView.findViewById(R.id.hidden_double_click_msg);
+            doubleClickLikeIV = itemView.findViewById(R.id.iv_lubb_msg);
             dpIv.setOnTouchListener(this);
             linkContainer.setOnTouchListener(this);
             pollContainer.setOnTouchListener(this);
