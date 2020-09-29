@@ -3,6 +3,7 @@ package in.lubble.app;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
@@ -13,7 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -163,7 +164,7 @@ public class UploadFileService extends BaseTaskService {
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
                 .load(fileUri)
-                .into(new SimpleTarget<Bitmap>() {
+                .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         if (resource.getWidth() > 1000 || resource.getHeight() > 1000) {
@@ -171,6 +172,11 @@ public class UploadFileService extends BaseTaskService {
                         } else {
                             uploadFile(fileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
                         }
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
                     }
                 });
     }
@@ -182,11 +188,16 @@ public class UploadFileService extends BaseTaskService {
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
                 .load(fileUri)
-                .into(new SimpleTarget<Bitmap>() {
+                .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         final Uri compressedFileUri = getUriFromTempBitmap(UploadFileService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
                         uploadFile(compressedFileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+
                     }
                 });
     }
