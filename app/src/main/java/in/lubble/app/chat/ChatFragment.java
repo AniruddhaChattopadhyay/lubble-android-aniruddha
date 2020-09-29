@@ -237,7 +237,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private ValueEventListener thisUserValueListener;
     private HashMap<String, String> taggedMap; //<UID, UserName>
     private boolean isDmBlocked;
-    private ArrayList<String> name = new ArrayList<>();
+    private ArrayList<String> nameList = new ArrayList<>();
     private static final String severalTypingStatus = "Several people are typing...";
     private TextView typingTv;
     private LottieAnimationView typingAnimationView;
@@ -355,8 +355,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         bundle.putString("groupid", groupId);
         bundle.putString("dm_id", dmId);
         Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, requireContext());
-        firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
-        checkTypingStatus();
     }
 
     private void populateChatData(ChatData chatData) {
@@ -578,6 +576,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         syncGroupInfo();
+        firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
+        getGroupTypingRef(groupId).addValueEventListener(typingValueListener);
     }
 
     private void calcUnreadCount() {
@@ -2003,52 +2003,46 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     };
 
     private void removeTypingStatus() {
-        name = null;
+        nameList.clear();
         getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).removeValue();
     }
 
-    private void checkTypingStatus() {
-        getGroupTypingRef(groupId).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                name = new ArrayList<>();
-                for (DataSnapshot data : snapshot.getChildren()) {
-                    //name = RealtimeDbHelper.getUserInfoRef(userId).child();
-                    String n = data.getValue(String.class);
-                    if (firstName.equalsIgnoreCase(n))
-                        continue;
-                    name.add(n);
+    ValueEventListener typingValueListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            nameList = new ArrayList<>();
+            for (DataSnapshot data : snapshot.getChildren()) {
+                //name = RealtimeDbHelper.getUserInfoRef(userId).child();
+                String n = data.getValue(String.class);
+                if (!firstName.equalsIgnoreCase(n)) {
+                    nameList.add(n);
                 }
-                if (name.size() == 0)
-                    name = null;
-
-                if (name != null) {
-                    typingTv.setVisibility(View.VISIBLE);
-                    typingAnimationView.setVisibility(View.VISIBLE);
-                    String status = "";
-                    if (name.size() > 2) {
-                        status = severalTypingStatus;
-                        typingTv.setText(status + " typing...");
-                    } else {
-                        for (String n : name) {
-                            status += n + ", ";
-                        }
-                        status = status.substring(0, status.length() - 2);
-                        typingTv.setText(status + " typing...");
-                    }
+            }
+            if (nameList.size() > 0) {
+                typingTv.setVisibility(View.VISIBLE);
+                typingAnimationView.setVisibility(View.VISIBLE);
+                String status = "";
+                if (nameList.size() > 2) {
+                    status = severalTypingStatus;
                 } else {
-                    typingTv.setVisibility(View.GONE);
-                    typingAnimationView.setVisibility(View.GONE);
+                    for (String n : nameList) {
+                        status += n + ", ";
+                    }
+                    status = status.substring(0, status.length() - 2);
                 }
-
+                typingTv.setText(status + " typing...");
+            } else {
+                typingTv.setVisibility(View.GONE);
+                typingAnimationView.setVisibility(View.GONE);
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+        }
 
-            }
-        });
-    }
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+
+        }
+    };
 
     @Override
     public void onPause() {
@@ -2067,7 +2061,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (thisUserValueListener != null) {
             getThisUserRef().removeEventListener(thisUserValueListener);
         }
-        name = null;
+        if (groupId != null && typingValueListener != null) {
+            getGroupTypingRef(groupId).removeEventListener(typingValueListener);
+        }
+        nameList.clear();
         getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).removeValue();
         typingExpiryHandler.removeCallbacks(inputFinishChecker);
 
