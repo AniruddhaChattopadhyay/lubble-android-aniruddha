@@ -508,6 +508,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
             globalDoubleClickLikeTV = recvdChatViewHolder.doubleClickLikeTV;
             UiUtils.animateSlideDownShow(LubbleApp.getAppContext(), recvdChatViewHolder.doubleClickLikeTV);
+        } else if (!chatData.getIsDm()) {
+            recvdChatViewHolder.doubleClickLikeTV.setVisibility(GONE);
         }
         showDpAndName(recvdChatViewHolder, chatData);
 
