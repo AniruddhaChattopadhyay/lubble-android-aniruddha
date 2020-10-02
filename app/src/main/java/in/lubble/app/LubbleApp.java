@@ -100,7 +100,7 @@ public class LubbleApp extends MultiDexApplication {
 
         Freshchat.getInstance(getApplicationContext()).setNotificationConfig(notificationConfig);
 
-        UXCam.startWithKey("1yo34nnyl85mnzv");
+        UXCam.startWithKey(BuildConfig.DEBUG ? "1yo34nnyl85mnzv" : "6dl8m9y0uc2q0dy");
 
     }
 
