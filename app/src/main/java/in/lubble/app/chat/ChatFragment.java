@@ -238,7 +238,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private HashMap<String, String> taggedMap; //<UID, UserName>
     private boolean isDmBlocked;
     private ArrayList<String> nameList = new ArrayList<>();
-    private static final String severalTypingStatus = "Several people are typing...";
+    private static final String severalTypingStatus = "Several people are ";
     private TextView typingTv;
     private LottieAnimationView typingAnimationView;
     @Nullable
