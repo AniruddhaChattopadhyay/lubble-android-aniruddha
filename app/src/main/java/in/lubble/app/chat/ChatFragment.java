@@ -453,6 +453,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         endAtTimestamp = 0L;
         //syncGroupInfo();
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        //layoutManager.setReverseLayout(true);
+        layoutManager.setStackFromEnd(true);
         chatRecyclerView.setLayoutManager(layoutManager);
         chatAdapter = new ChatAdapter(
                 getActivity(),
@@ -494,7 +496,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             recyclerViewState = null;
                             chatRecyclerView.scrollToPosition(positionStart);
                         } else {
-                            chatRecyclerView.scrollToPosition(positionStart);
+                            //chatRecyclerView.scrollToPosition(positionStart);
                         }
                     } else {
                         // If the recycler view is initially being loaded
@@ -521,7 +523,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(authorId)) {
                             chatRecyclerView.scrollToPosition(positionStart);
                         } else {
-                            chatRecyclerView.scrollToPosition(positionStart);
+                            //chatRecyclerView.scrollToPosition(positionStart);
                         }
                     }
                 }
