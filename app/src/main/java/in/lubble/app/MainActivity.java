@@ -697,6 +697,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case "mplace":
                     bottomNavigation.setSelectedItemId(R.id.navigation_market);
                     break;
+                case "explore":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_explore);
+                    break;
                 /*case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
                     break;*/

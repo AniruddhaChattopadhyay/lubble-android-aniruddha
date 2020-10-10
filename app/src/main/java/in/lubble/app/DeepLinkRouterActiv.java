@@ -4,13 +4,11 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 
-import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.List;
 
-import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.leaderboard.LeaderboardActivity;
@@ -117,6 +115,11 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 final Intent marketIntent = new Intent(this, MainActivity.class);
                 marketIntent.putExtra(EXTRA_TAB_NAME, "mplace");
                 startActivity(marketIntent);
+                break;
+            case "explore":
+                final Intent exploreIntent = new Intent(this, MainActivity.class);
+                exploreIntent.putExtra(EXTRA_TAB_NAME, "explore");
+                startActivity(exploreIntent);
                 break;
             case "events":
                 final String event_id = uri.getQueryParameter("id");
