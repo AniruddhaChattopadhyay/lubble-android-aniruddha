@@ -48,7 +48,7 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
-import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -203,12 +203,11 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                         userAdapter.clear();
                         for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            if (!(child.getValue() instanceof Boolean)) {
-                                final ProfileData profileData = child.getValue(ProfileData.class);
-                                if (profileData != null && profileData.getInfo() != null && !profileData.getIsDeleted()) {
-                                    profileData.setId(child.getKey());
-                                    profileData.getInfo().setId(profileData.getId());
-                                    userAdapter.addMemberProfile(profileData.getInfo());
+                            if (!(child.getValue() instanceof Boolean && child.hasChild("info"))) {
+                                final ProfileInfo profileInfo = child.child("info").getValue(ProfileInfo.class);
+                                if (profileInfo != null) {
+                                    profileInfo.setId(child.getKey());
+                                    userAdapter.addMemberProfile(profileInfo);
                                 }
                             }
                         }
@@ -216,7 +215,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                        FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
                     }
                 });
     }
