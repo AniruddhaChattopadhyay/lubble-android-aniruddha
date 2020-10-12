@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
@@ -36,6 +37,7 @@ import java.util.Map;
 
 import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -86,10 +88,11 @@ public class NotifUtils {
         ArrayList<NotifData> msgList = getAllMsgs();
         sortListByTime(msgList);
         Log.d(TAG, "read notif count: " + msgList.size());
-        if (notifData.getNotifType().equalsIgnoreCase("dm")) {
-            //todo notif titles are missing from group notifs
+        String uid = FirebaseAuth.getInstance().getUid();
+        if (notifData.getNotifType().equalsIgnoreCase("dm")
+                || (uid != null && uid.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid()))) {
             // group notifs must not be sent, send only dm notifs
-            sendAllNotifs(context, msgList, true);
+            sendAllNotifs(context, msgList, notifData.getNotifType().equalsIgnoreCase("dm"));
         }
 
     }
