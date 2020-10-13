@@ -3,6 +3,7 @@ package in.lubble.app.explore;
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,9 +14,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -24,11 +33,14 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.models.GroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 
 public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListFragmentInteractionListener {
 
@@ -42,6 +54,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private ExploreGroupAdapter exploreGroupAdapter;
     private boolean isOnboarding;
     private EditText searchEt;
+    private Query publicGroupsQuery;
 
     public ExploreFrag() {
     }
@@ -105,10 +118,43 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     public void onResume() {
         super.onResume();
         fetchExploreGroups();
+        addGroupsListener();
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
     }
+
+    private void addGroupsListener() {
+        publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
+        publicGroupsQuery.addValueEventListener(publicGroupListener);
+
+    }
+
+    private ValueEventListener publicGroupListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            for (DataSnapshot snapshotChild : dataSnapshot.getChildren()) {
+                final GroupData groupData = snapshotChild.getValue(GroupData.class);
+                if (groupData != null && !groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
+                        && groupData.getMembers().size() > 0) {
+                    // non-joined public groups with non-zero members
+                    ExploreGroupData exploreGroupData = new ExploreGroupData();
+                    exploreGroupData.setFirebaseGroupId(groupData.getId());
+                    exploreGroupData.setTitle(groupData.getTitle());
+                    exploreGroupData.setPhotoUrl(groupData.getProfilePic());
+                    exploreGroupData.setMemberCount(groupData.getMembers().size());
+                    exploreGroupData.setLastMessageTimestamp(groupData.getLastMessageTimestamp());
+                    exploreGroupAdapter.updateGroup(exploreGroupData);
+                }
+            }
+            publicGroupsQuery.removeEventListener(publicGroupListener);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+            FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
+        }
+    };
 
     private void fetchExploreGroups() {
         progressbar.setVisibility(View.VISIBLE);
@@ -117,7 +163,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
             @Override
             public void onResponse(Call<ArrayList<ExploreGroupData>> call, Response<ArrayList<ExploreGroupData>> response) {
                 final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();
-                if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty() && isAdded() && isVisible()) {
+                if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty() && isVisible()) {
                     progressbar.setVisibility(View.GONE);
                     exploreGroupAdapter.updateList(exploreGroupDataList);
                     if (isOnboarding) {

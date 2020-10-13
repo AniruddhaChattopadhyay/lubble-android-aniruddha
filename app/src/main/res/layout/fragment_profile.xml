@@ -30,6 +30,7 @@
                 android:layout_centerHorizontal="true"
                 android:textColor="@color/black"
                 android:textSize="20sp"
+                android:gravity="center"
                 android:textStyle="bold"
                 tools:text="Shivam Gupta" />
 

@@ -24,6 +24,10 @@ public class ExploreGroupData {
     private String photoUrl;
     @SerializedName("firebase_id")
     private String firebaseGroupId;
+    @SerializedName("priority")
+    private int priority;
+    private int memberCount;
+    private long lastMessageTimestamp;
 
     public String getTitle() {
         return title;
@@ -49,4 +53,27 @@ public class ExploreGroupData {
         this.firebaseGroupId = firebaseGroupId;
     }
 
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
+    }
+
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    public long getLastMessageTimestamp() {
+        return this.lastMessageTimestamp;
+    }
+
+    public void setLastMessageTimestamp(long lastMessageTimestamp) {
+        this.lastMessageTimestamp = lastMessageTimestamp;
+    }
 }
