@@ -10,15 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
@@ -46,8 +45,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
 
     private static final String TAG = "ExploreFrag";
     private ExploreGroupAdapter.OnListFragmentInteractionListener mListener;
-    private RecyclerView recyclerView;
-    private ProgressBar progressbar;
+    private ShimmerRecyclerView recyclerView;
     private TextView joinedAllTv;
     private TextView titleTv;
     private TextView descTv;
@@ -80,7 +78,6 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         titleTv = view.findViewById(R.id.tv_title);
         descTv = view.findViewById(R.id.tv_desc);
         recyclerView = view.findViewById(R.id.rv_interest_groups);
-        progressbar = view.findViewById(R.id.progressbar);
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         searchEt = view.findViewById(R.id.et_search);
         searchEt.addTextChangedListener(new TextWatcher() {
@@ -111,6 +108,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         exploreGroupAdapter = new ExploreGroupAdapter(new ArrayList<ExploreGroupData>(), mListener, GlideApp.with(requireContext()), isOnboarding);
         recyclerView.setAdapter(exploreGroupAdapter);
         recyclerView.setItemAnimator(null);
+        recyclerView.showShimmerAdapter();
         return view;
     }
 
@@ -118,53 +116,23 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     public void onResume() {
         super.onResume();
         fetchExploreGroups();
-        addGroupsListener();
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
     }
 
-    private void addGroupsListener() {
-        publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
-        publicGroupsQuery.addValueEventListener(publicGroupListener);
-
-    }
-
-    private ValueEventListener publicGroupListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            for (DataSnapshot snapshotChild : dataSnapshot.getChildren()) {
-                final GroupData groupData = snapshotChild.getValue(GroupData.class);
-                if (groupData != null && !groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
-                        && groupData.getMembers().size() > 0) {
-                    // non-joined public groups with non-zero members
-                    ExploreGroupData exploreGroupData = new ExploreGroupData();
-                    exploreGroupData.setFirebaseGroupId(groupData.getId());
-                    exploreGroupData.setTitle(groupData.getTitle());
-                    exploreGroupData.setPhotoUrl(groupData.getProfilePic());
-                    exploreGroupData.setMemberCount(groupData.getMembers().size());
-                    exploreGroupData.setLastMessageTimestamp(groupData.getLastMessageTimestamp());
-                    exploreGroupAdapter.updateGroup(exploreGroupData);
-                }
-            }
-            publicGroupsQuery.removeEventListener(publicGroupListener);
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
-        }
-    };
-
     private void fetchExploreGroups() {
-        progressbar.setVisibility(View.VISIBLE);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.fetchExploreGroups(LubbleSharedPrefs.getInstance().requireLubbleId()).enqueue(new Callback<ArrayList<ExploreGroupData>>() {
             @Override
             public void onResponse(Call<ArrayList<ExploreGroupData>> call, Response<ArrayList<ExploreGroupData>> response) {
                 final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();
                 if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty() && isVisible()) {
-                    progressbar.setVisibility(View.GONE);
+                    if (recyclerView.getActualAdapter() != recyclerView.getAdapter()) {
+                        // recycler view is currently holding shimmer adapter so hide it
+                        recyclerView.hideShimmerAdapter();
+                    }
+                    addGroupsListener();
                     exploreGroupAdapter.updateList(exploreGroupDataList);
                     if (isOnboarding) {
                         titleTv.setVisibility(View.GONE);
@@ -175,7 +143,10 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
                     }
                 } else {
                     if (isAdded() && isVisible()) {
-                        progressbar.setVisibility(View.GONE);
+                        if (recyclerView.getActualAdapter() != recyclerView.getAdapter()) {
+                            // recycler view is currently holding shimmer adapter so hide it
+                            recyclerView.hideShimmerAdapter();
+                        }
                         if (exploreGroupDataList != null && exploreGroupDataList.isEmpty()) {
                             if (isOnboarding) {
                                 // exit the explore activity if opened during onboarding & there are no unjoined groups to be shown
@@ -199,11 +170,47 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
                 if (isAdded() && isVisible()) {
                     Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "onFailure: ");
-                    progressbar.setVisibility(View.GONE);
+                    if (recyclerView.getActualAdapter() != recyclerView.getAdapter()) {
+                        // recycler view is currently holding shimmer adapter so hide it
+                        recyclerView.hideShimmerAdapter();
+                    }
                 }
             }
         });
     }
+
+    private void addGroupsListener() {
+        publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
+        publicGroupsQuery.addValueEventListener(publicGroupListener);
+    }
+
+    private ValueEventListener publicGroupListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            Log.d(TAG, "onDataChange: ");
+            for (DataSnapshot snapshotChild : dataSnapshot.getChildren()) {
+                final GroupData groupData = snapshotChild.getValue(GroupData.class);
+                if (groupData != null && !groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
+                        && groupData.getMembers().size() > 0) {
+                    // non-joined public groups with non-zero members
+                    ExploreGroupData exploreGroupData = new ExploreGroupData();
+                    exploreGroupData.setFirebaseGroupId(groupData.getId());
+                    exploreGroupData.setTitle(groupData.getTitle());
+                    exploreGroupData.setPhotoUrl(groupData.getProfilePic());
+                    exploreGroupData.setMemberCount(groupData.getMembers().size());
+                    exploreGroupData.setLastMessageTimestamp(groupData.getLastMessageTimestamp());
+                    exploreGroupAdapter.updateGroup(exploreGroupData);
+                }
+            }
+            publicGroupsQuery.removeEventListener(publicGroupListener);
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError databaseError) {
+            Log.e(TAG, "onCancelled: ");
+            FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
+        }
+    };
 
     @Override
     public void onAttach(Context context) {
@@ -215,6 +222,14 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (publicGroupsQuery != null && publicGroupListener != null) {
+            publicGroupsQuery.removeEventListener(publicGroupListener);
+        }
     }
 
     @Override

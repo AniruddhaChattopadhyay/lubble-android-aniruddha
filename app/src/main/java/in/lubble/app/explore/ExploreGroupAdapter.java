@@ -44,6 +44,7 @@ import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 
 public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapter.ViewHolder> implements Filterable {
 
+    private static final String TAG = "ExploreGroupAdapter";
     private List<ExploreGroupData> mValues;
     private List<ExploreGroupData> mValues_copy;
     private final OnListFragmentInteractionListener mListener;
@@ -80,9 +81,12 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     }
 
     public void updateGroup(ExploreGroupData exploreGroupData) {
-        this.mValues.set(mValues.indexOf(exploreGroupData), exploreGroupData);
-        this.mValues_copy.set(mValues_copy.indexOf(exploreGroupData), exploreGroupData);
-        notifyItemChanged(mValues.indexOf(exploreGroupData));
+        int existingGroupIndex = mValues.indexOf(exploreGroupData);
+        if (existingGroupIndex != -1) {
+            this.mValues.set(existingGroupIndex, exploreGroupData);
+            this.mValues_copy.set(mValues_copy.indexOf(exploreGroupData), exploreGroupData);
+            notifyItemChanged(existingGroupIndex);
+        }
     }
 
     @Override
@@ -153,11 +157,13 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     }
 
     private void setLabel(ViewHolder holder, ExploreGroupData exploreGroupData) {
-        holder.labelTv.setVisibility(View.GONE);
+        holder.labelTv.setVisibility(View.INVISIBLE);
 
-        if (exploreGroupData.getPriority() > 0) {
+        if (exploreGroupData.getPriority() > 0 && exploreGroupData.getMemberCount() > 0) {
+            //added check for member count to ensure the priority label isnt applied before the firebase values are fetched
+            // otherwise it looks janky & buggy
             holder.labelTv.setVisibility(View.VISIBLE);
-            holder.labelTv.setText("Recommended");
+            holder.labelTv.setText("Suggested");
             ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.mute_green)));
             holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.darker_green));
             holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stars_green_14dp, 0, 0, 0);
