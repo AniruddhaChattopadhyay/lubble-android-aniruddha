@@ -157,7 +157,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     }
 
     private void setLabel(ViewHolder holder, ExploreGroupData exploreGroupData) {
-        holder.labelTv.setVisibility(View.INVISIBLE);
+        holder.labelTv.setVisibility(View.GONE);
 
         if (exploreGroupData.getPriority() > 0 && exploreGroupData.getMemberCount() > 0) {
             //added check for member count to ensure the priority label isnt applied before the firebase values are fetched
@@ -172,7 +172,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             holder.labelTv.setVisibility(View.VISIBLE);
             holder.labelTv.setText("Popular");
             ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.lt_gold)));
-            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.mute_orange));
+            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.brown));
             holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_whatshot_14, 0, 0, 0);
         }
         if (System.currentTimeMillis() - exploreGroupData.getLastMessageTimestamp() < TimeUnit.HOURS.toMillis(1)) {
