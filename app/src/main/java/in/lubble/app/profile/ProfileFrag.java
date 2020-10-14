@@ -114,6 +114,8 @@ public class ProfileFrag extends Fragment {
     private ImageView educationIv;
     private TextView educationTv;
 
+    private int profileView;
+
 
     public ProfileFrag() {
         // Required empty public constructor
@@ -276,6 +278,26 @@ public class ProfileFrag extends Fragment {
         super.onStart();
         userRef = getUserRef(userId);
         fetchProfileFeed();
+        if(!userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())){
+            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.child("profileViews").exists()){
+                        profileView = snapshot.child("profileViews").getValue(Integer.class);
+                    }
+                    else{
+                        profileView=0;
+                    }
+                    profileView+=1;
+                    userRef.child("profileViews").setValue(profileView);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
     }
 
     private void syncGroups() {
