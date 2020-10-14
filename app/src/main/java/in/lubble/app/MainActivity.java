@@ -101,6 +101,7 @@ import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
 import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
 import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
 import static in.lubble.app.Constants.IS_TIME_SHOWN;
+import static in.lubble.app.Constants.IS_UXCAM_ENABLED;
 import static in.lubble.app.Constants.MAP_BTN_URL;
 import static in.lubble.app.Constants.MAP_HTML;
 import static in.lubble.app.Constants.MAP_SHARE_TEXT;
@@ -611,6 +612,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(IS_TIME_SHOWN, false);
         map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
         map.put(WIKI_URL, "https://lubble.in/neighbourhoods/");
+        map.put(IS_UXCAM_ENABLED, true);
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
@@ -694,6 +696,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     break;
                 case "mplace":
                     bottomNavigation.setSelectedItemId(R.id.navigation_market);
+                    break;
+                case "explore":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_explore);
                     break;
                 /*case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);

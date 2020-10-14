@@ -16,7 +16,9 @@ import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.segment.analytics.Analytics;
+import com.uxcam.UXCam;
 
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.database.DbSingleton;
@@ -98,6 +100,14 @@ public class LubbleApp extends MultiDexApplication {
                 .setPriority(NotificationCompat.PRIORITY_HIGH);
 
         Freshchat.getInstance(getApplicationContext()).setNotificationConfig(notificationConfig);
+
+        UXCam.startWithKey(BuildConfig.DEBUG ? "1yo34nnyl85mnzv" : "6dl8m9y0uc2q0dy");
+
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_UXCAM_ENABLED)) {
+            UXCam.optInOverall();
+        } else {
+            UXCam.optOutOverall();
+        }
 
     }
 

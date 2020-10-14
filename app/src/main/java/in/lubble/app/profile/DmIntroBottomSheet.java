@@ -172,6 +172,13 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
         filteredText = filteredText.replaceAll("yo+", "");
         filteredText = filteredText.replaceAll("hey+", "");
         filteredText = filteredText.replaceAll("hola+", "");
+        filteredText = filteredText.replaceAll("good morning", "");
+        filteredText = filteredText.replaceAll("good evening", "");
+        filteredText = filteredText.replaceAll("gmorning", "");
+        filteredText = filteredText.replaceAll("g'morning", "");
+        filteredText = filteredText.replaceAll("gud morning", "");
+        filteredText = filteredText.replaceAll("gud evening", "");
+        filteredText = filteredText.replaceAll("this is", "");
         filteredText = filteredText.replaceAll(receiverName, "");
         return filteredText.length() >= 10;
     }

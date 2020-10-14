@@ -59,7 +59,7 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -159,10 +159,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private static final int TYPE_SENT = 1;
     private static final int TYPE_SYSTEM = 2;
     private static final int TYPE_UNREAD = 3;
-
+    private final GlideRequests glide;
+    private final String lubbleDocumentDirectory = "Lubble Documents";
     private Activity activity;
     private Context context;
-    private final GlideRequests glide;
     private RecyclerView recyclerView;
     private ArrayList<ChatData> chatDataList;
     private ChatFragment chatFragment;
@@ -171,14 +171,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private String groupId;
     private int highlightedPos = -1;
     private int posToFlash = -1;
-    private final String lubbleDocumentDirectory = "Lubble Documents";
     private HashMap<String, ProfileData> profileDataMap = new HashMap<>();
     private String authorId = FirebaseAuth.getInstance().getUid();
     @Nullable
     private String dmId;// Allows to remember the last item shown on screen
     private HashMap<String, String> searchHighlightMap = new HashMap<>();
     private TextView globalDoubleClickLikeTV;
-    private ImageView globalDoubleClickLikeIV;
 
 
     public ChatAdapter(Activity activity, Context context, String groupId,
@@ -190,6 +188,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
         this.recyclerView = recyclerView;
         this.chatFragment = chatFragment;
         this.glide = glide;
+    }
+
+    @Nullable
+    private static File findFilesForId(File dir, final String fileNameToSearch) {
+        File[] files = dir.listFiles();
+        for (File f : files) {
+            if (f.getName().equals(fileNameToSearch))
+                return f;
+        }
+        return null;
     }
 
     public void setAuthorId(String authorId) {
@@ -247,9 +255,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SentChatViewHolder sentChatViewHolder = (SentChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
         final String authorUid = chatData.getAuthorUid();
-        if(!chatData.getIsDm() && position == chatDataList.size()-1 && globalDoubleClickLikeTV !=null && globalDoubleClickLikeIV !=null ){
+        if (!chatData.getIsDm() && position == chatDataList.size() - 1 && globalDoubleClickLikeTV != null) {
             globalDoubleClickLikeTV.setVisibility(GONE);
-            globalDoubleClickLikeIV.setVisibility(GONE);
         }
         if (profileDataMap.containsKey(authorUid)) {
             final ProfileData profileData = profileDataMap.get(authorUid);
@@ -460,7 +467,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
     private void setBgColor(final RelativeLayout linkContainer, ChatData chatData) {
         if (!TextUtils.isEmpty(chatData.getLinkPicUrl())) {
-            glide.asBitmap().load(chatData.getLinkPicUrl()).into(new SimpleTarget<Bitmap>() {
+            glide.asBitmap().load(chatData.getLinkPicUrl()).into(new CustomTarget<Bitmap>() {
                 @Override
                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                     Palette.from(resource)
@@ -477,6 +484,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
                                 }
                             });
                 }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                }
             });
         } else {
             Drawable normalDrawable = context.getResources().getDrawable(R.drawable.rounded_rect_gray);
@@ -490,17 +502,15 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void bindRecvdChatViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final RecvdChatViewHolder recvdChatViewHolder = (RecvdChatViewHolder) holder;
         final ChatData chatData = chatDataList.get(position);
-        if(!chatData.getIsDm() && position == chatDataList.size()-1) {
-            if(globalDoubleClickLikeTV!=null){
-               globalDoubleClickLikeTV.setVisibility(GONE);
-            }
-            if(globalDoubleClickLikeIV!=null){
-                globalDoubleClickLikeIV.setVisibility(GONE);
+        if (!chatData.getIsDm() && position == chatDataList.size() - 1 && !chatData.getLubbReceipts().containsKey(authorId)
+                && !chatData.getType().equalsIgnoreCase(GROUP_PROMPT)) {
+            if (globalDoubleClickLikeTV != null) {
+                globalDoubleClickLikeTV.setVisibility(GONE);
             }
             globalDoubleClickLikeTV = recvdChatViewHolder.doubleClickLikeTV;
-            globalDoubleClickLikeIV = recvdChatViewHolder.doubleClickLikeIV;
-            recvdChatViewHolder.doubleClickLikeTV.setVisibility(VISIBLE);
-            recvdChatViewHolder.doubleClickLikeIV.setVisibility(VISIBLE);
+            UiUtils.animateSlideDownShow(LubbleApp.getAppContext(), recvdChatViewHolder.doubleClickLikeTV);
+        } else if (!chatData.getIsDm()) {
+            recvdChatViewHolder.doubleClickLikeTV.setVisibility(GONE);
         }
         showDpAndName(recvdChatViewHolder, chatData);
 
@@ -1169,16 +1179,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
         return uri.getLastPathSegment();
     }
 
-    @Nullable
-    private static File findFilesForId(File dir, final String fileNameToSearch) {
-        File[] files = dir.listFiles();
-        for (File f : files) {
-            if (f.getName().equals(fileNameToSearch))
-                return f;
-        }
-        return null;
-    }
-
     private File getLubbleDocsDir() {
         File f = new File(Environment.getExternalStorageDirectory(), lubbleDocumentDirectory);
         if (!f.exists()) {
@@ -1384,7 +1384,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 .load(chatData.getImgUrl())
                 .skipMemoryCache(true)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .into(new SimpleTarget<Bitmap>() {
+                .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         progressBar.setVisibility(GONE);
@@ -1708,7 +1708,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private EmojiTextView badgeTextTv;
         private LinearLayout editStatusLayout;
         private TextView doubleClickLikeTV;
-        private ImageView doubleClickLikeIV;
+
         private ActionMode.Callback actionModeCallbacks = new ActionMode.Callback() {
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -1769,6 +1769,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
             }
         };
+        private View touchedView;
+        private boolean isLongTouched;
         private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
 
             @Override
@@ -1942,19 +1944,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         });
 
-        private View touchedView;
-        private boolean isLongTouched;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            touchedView = v;
-            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                isLongTouched = false;
-            }
-            return b;
-        }
-
         public RecvdChatViewHolder(final View itemView) {
             super(itemView);
             rootLayout = itemView.findViewById(R.id.root_layout_chat_recvd);
@@ -1997,7 +1986,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             badgeTextTv = itemView.findViewById(R.id.tv_badge_text);
             editStatusLayout = itemView.findViewById(R.id.status_click_layout);
             doubleClickLikeTV = itemView.findViewById(R.id.hidden_double_click_msg);
-            doubleClickLikeIV = itemView.findViewById(R.id.iv_lubb_msg);
+
             dpIv.setOnTouchListener(this);
             linkContainer.setOnTouchListener(this);
             pollContainer.setOnTouchListener(this);
@@ -2010,6 +1999,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
             pdfContainer.setOnTouchListener(this);
             editStatusLayout.setOnTouchListener(this);
             shareMsgIv.setOnTouchListener(this);
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            touchedView = v;
+            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                isLongTouched = false;
+            }
+            return b;
         }
 
     }
@@ -2094,6 +2093,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
             }
         };
+        private View touchedView;
+        private boolean isLongTouched;
         private GestureDetector gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
 
             @Override
@@ -2217,19 +2218,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         });
 
-        private View touchedView;
-        private boolean isLongTouched;
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            touchedView = v;
-            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
-            if (event.getAction() == MotionEvent.ACTION_UP) {
-                isLongTouched = false;
-            }
-            return b;
-        }
-
         SentChatViewHolder(final View itemView) {
             super(itemView);
             rootLayout = itemView.findViewById(R.id.root_layout_chat_sent);
@@ -2278,6 +2266,16 @@ public class ChatAdapter extends RecyclerView.Adapter {
             pdfContainer.setOnTouchListener(this);
             addStatusTv.setOnTouchListener(this);
             editStatusLayout.setOnTouchListener(this);
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            touchedView = v;
+            boolean b = gestureDetector.onTouchEvent(event) || isLongTouched;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                isLongTouched = false;
+            }
+            return b;
         }
 
 

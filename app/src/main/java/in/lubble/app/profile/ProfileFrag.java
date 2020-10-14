@@ -308,7 +308,7 @@ public class ProfileFrag extends Fragment {
 
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     final GroupData groupData = child.getValue(GroupData.class);
-                    if (groupData.getMembers().containsKey(userId)) {
+                    if (groupData != null && groupData.getMembers().containsKey(userId) && !groupData.getIsPrivate() && !groupData.getIsDm()) {
                         groupDataList.add(groupData);
                     }
                 }
