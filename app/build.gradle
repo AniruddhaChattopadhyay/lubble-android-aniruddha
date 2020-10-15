@@ -87,7 +87,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:19.1.1'
     implementation 'com.github.drawers:SpinnerDatePicker:2.0.1'
     // Find the latest Facebook SDK releases here: https://goo.gl/Ce5L94
-    implementation 'com.facebook.android:facebook-login:5.5.1'
+    implementation 'com.facebook.android:facebook-login:8.1.0'
     implementation "androidx.drawerlayout:drawerlayout:1.1.0"
     implementation 'com.segment.analytics.android:analytics:4.3.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
