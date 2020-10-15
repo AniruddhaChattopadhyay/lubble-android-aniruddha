@@ -164,22 +164,22 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             // otherwise it looks janky & buggy
             holder.labelTv.setVisibility(View.VISIBLE);
             holder.labelTv.setText("Suggested");
-            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.mute_green)));
-            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.darker_green));
+            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_green_50)));
+            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_grey_900));
             holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stars_green_14dp, 0, 0, 0);
         }
         if (exploreGroupData.getMemberCount() > lubbleMemberCount / 3) {
             holder.labelTv.setVisibility(View.VISIBLE);
             holder.labelTv.setText("Popular");
-            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.lt_gold)));
-            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.brown));
+            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_red_50)));
+            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_brown_900));
             holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_whatshot_14, 0, 0, 0);
         }
         if (System.currentTimeMillis() - exploreGroupData.getLastMessageTimestamp() < TimeUnit.HOURS.toMillis(1)) {
             holder.labelTv.setVisibility(View.VISIBLE);
             holder.labelTv.setText("Active");
-            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.lt_blue)));
-            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.very_dk_blue));
+            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_50)));
+            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_grey_900));
             holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_live_active_14, 0, 0, 0);
         }
     }

@@ -94,10 +94,10 @@
             android:paddingTop="2dp"
             android:paddingRight="6dp"
             android:paddingBottom="2dp"
-            android:textColor="@color/darker_green"
+            android:textColor="@color/md_blue_grey_900"
             android:textSize="12sp"
             android:visibility="gone"
-            app:backgroundTint="@color/mute_green"
+            app:backgroundTint="@color/md_green_50"
             app:drawableLeftCompat="@drawable/ic_stars_green_14dp"
             tools:text="Suggested"
             tools:visibility="visible" />
