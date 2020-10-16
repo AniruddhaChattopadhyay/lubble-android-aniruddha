@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:name="in.lubble.app.explore.ExploreFrag"
@@ -7,84 +7,96 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <TextView
-        android:id="@+id/tv_joined_all"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="8dp"
-        android:gravity="center"
-        android:text="You have joined all groups!\nInvite your friends &amp; neighbours"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:textColor="@color/black"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/tv_title"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginRight="8dp"
-        android:gravity="center"
-        android:text="Join Groups that Interest You"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+        android:background="@color/white">
 
-    <TextView
-        android:id="@+id/tv_desc"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tv_title"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:gravity="center"
-        android:textSize="12sp"
-        android:text="Connect with neighbours who share your interests.\nGroups you join here will appear in your Chats" />
-
-    <LinearLayout
-        android:id="@+id/container_search"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:layout_below="@id/tv_desc"
-        android:background="@drawable/rect_rounded_border"
-        android:orientation="horizontal"
-        android:padding="8dp">
-        <ImageView
-            android:id="@+id/iv_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:tint="@color/dark_gray"
-            app:srcCompat="@drawable/ic_search_gray_24dp" />
-
-        <EditText
-            android:id="@+id/et_search"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="4dp"
-            android:background="@color/white"
-            android:hint="Search for groups"
-            android:inputType="text" />
+            app:layout_scrollFlags="scroll|enterAlways">
 
-    </LinearLayout>
+            <TextView
+                android:id="@+id/tv_joined_all"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_margin="8dp"
+                android:gravity="center"
+                android:text="You have joined all groups!\nInvite your friends &amp; neighbours"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:textColor="@color/black"
+                android:visibility="gone" />
 
-    <androidx.recyclerview.widget.RecyclerView
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:gravity="center"
+                android:text="Join Groups that Interest You"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+            <TextView
+                android:id="@+id/tv_desc"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_title"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:gravity="center"
+                android:text="Connect with neighbours who share your interests.\nGroups you join here will appear in your Chats"
+                android:textSize="12sp" />
+
+            <LinearLayout
+                android:id="@+id/container_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_desc"
+                android:layout_margin="8dp"
+                android:background="@drawable/rect_rounded_border"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <ImageView
+                    android:id="@+id/iv_search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tint="@color/dark_gray"
+                    app:srcCompat="@drawable/ic_search_gray_24dp" />
+
+                <EditText
+                    android:id="@+id/et_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="4dp"
+                    android:background="@color/white"
+                    android:hint="Search for groups"
+                    android:inputType="text" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
         android:id="@+id/rv_interest_groups"
         android:layout_width="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_height="match_parent"
-        android:layout_below="@id/container_search"
-        android:layout_marginTop="8dp"
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
+        app:shimmer_demo_angle="20"
+        app:shimmer_demo_child_count="4"
+        app:shimmer_demo_layout="@layout/layout_shimmer_explore_grid"
+        app:shimmer_demo_layout_manager_type="grid"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="2"
         tools:context="in.lubble.app.explore.ExploreFrag"
         tools:listitem="@layout/item_explore_group" />
 
-    <ProgressBar
-        android:id="@+id/progressbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true" />
-
-</RelativeLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

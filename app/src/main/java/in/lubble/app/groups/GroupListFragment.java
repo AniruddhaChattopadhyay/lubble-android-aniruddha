@@ -354,6 +354,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private ValueEventListener publicGroupListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            //don't need realtime updates for public groups; remove listener
+            publicGroupsQuery.removeEventListener(publicGroupListener);
+
             int startingIndex = -1;
             for (DataSnapshot snapshotChild : dataSnapshot.getChildren()) {
                 final GroupData groupData = snapshotChild.getValue(GroupData.class);
@@ -372,11 +375,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             progressBarPublicGroups.setVisibility(View.GONE);
             adapter.sortPublicGroupList(startingIndex);
             groupsRecyclerView.setPadding(0, 0, 0, 0);
-            if (startingIndex == -1 && publicGroupsQuery != null && publicGroupListener != null) {
-                // onDataChange was called again with just group updates, no new groups added
-                // remove listener to save bandwidth
-                publicGroupsQuery.removeEventListener(publicGroupListener);
-            }
         }
 
         @Override

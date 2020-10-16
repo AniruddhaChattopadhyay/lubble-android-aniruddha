@@ -17,6 +17,7 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.utils.FragUtils;
@@ -61,8 +62,11 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
                 Analytics.triggerEvent(EXPLORE_CONTINUE_CLICKED, ExploreActiv.this);
                 String groupIdList = "";
                 for (String groupId : selectedGroupIdMap.keySet()) {
-                    groupIdList =groupIdList + ','+ groupId;
+                    groupIdList = groupIdList + ',' + groupId;
                     GroupPromptSharedPrefs.getInstance().putGroupId(groupId);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", groupId);
+                    Analytics.triggerEvent(AnalyticsEvents.JOIN_GROUP, bundle, ExploreActiv.this);
                 }
                 groupIdList = groupIdList.substring(groupIdList.indexOf(',') + 1);
                 bulkJoinGroupV2Ref().child(groupIdList).setValue(true);

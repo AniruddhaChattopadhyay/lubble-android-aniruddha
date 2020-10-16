@@ -513,7 +513,7 @@ public class EventInfoActivity extends BaseActivity {
                                 descTv.setVisibility(View.VISIBLE);
                                 descTv.setText(eventData.getDesc());
                             }
-                            if (System.currentTimeMillis() < eventData.getStartTimestamp()) {
+                            if (System.currentTimeMillis() < eventData.getLastTimestamp()) {
                                 finalMarkedStatus.setVisibility(View.GONE);
                             } else {
                                 finalMarkedStatus.setVisibility(View.VISIBLE);
