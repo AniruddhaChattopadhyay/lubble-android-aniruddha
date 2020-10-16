@@ -32,6 +32,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -73,7 +74,6 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_explore, container, false);
-        Context context = view.getContext();
         joinedAllTv = view.findViewById(R.id.tv_joined_all);
         titleTv = view.findViewById(R.id.tv_title);
         descTv = view.findViewById(R.id.tv_desc);
@@ -119,6 +119,41 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
+
+        String defaultGroupId = LubbleSharedPrefs.getInstance().getDefaultGroupId();
+        if (TextUtils.isEmpty(defaultGroupId)) {
+            RealtimeDbHelper.getLubbleRef().child("defaultGroup").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String defaultGroup = snapshot.getValue(String.class);
+                    if (defaultGroup != null) {
+                        fetchLubbleSize(defaultGroup);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
+        } else {
+            fetchLubbleSize(defaultGroupId);
+        }
+    }
+
+    private void fetchLubbleSize(@NonNull String defaultGroup) {
+        RealtimeDbHelper.getLubbleGroupsRef().child(defaultGroup).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                GroupData groupData = snapshot.getValue(GroupData.class);
+                if (groupData != null) {
+                    exploreGroupAdapter.setLubbleMemberCount(groupData.getMembers().size());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
     }
 
     private void fetchExploreGroups() {

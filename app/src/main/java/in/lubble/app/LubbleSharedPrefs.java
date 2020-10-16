@@ -134,7 +134,7 @@ public class LubbleSharedPrefs {
     }
 
     public String getDefaultGroupId() {
-        return preferences.getString(DEFAULT_GROUP_ID, "MYLUBBLE");
+        return preferences.getString(DEFAULT_GROUP_ID, "");
     }
 
     public boolean setDefaultGroupId(String defaultGroupId) {
