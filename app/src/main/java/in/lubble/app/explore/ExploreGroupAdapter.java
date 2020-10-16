@@ -61,11 +61,13 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     }
 
     public void updateGroup(ExploreGroupData exploreGroupData) {
-        int existingGroupIndex = mValues.indexOf(exploreGroupData);
-        if (existingGroupIndex != -1) {
-            this.mValues.set(existingGroupIndex, exploreGroupData);
+        int index = mValues.indexOf(exploreGroupData);
+        if (index != -1) {
+            ExploreGroupData oldExploreGroupData = mValues.get(index);
+            exploreGroupData.setPriority(oldExploreGroupData.getPriority());
+            this.mValues.set(index, exploreGroupData);
             this.mValues_copy.set(mValues_copy.indexOf(exploreGroupData), exploreGroupData);
-            notifyItemChanged(existingGroupIndex);
+            notifyItemChanged(index);
         }
     }
 
