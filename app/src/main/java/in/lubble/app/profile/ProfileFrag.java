@@ -300,24 +300,6 @@ public class ProfileFrag extends Fragment {
 
                 }
             });
-//            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                    if(snapshot.child("profileViews").exists()){
-//                        profileView = snapshot.child("profileViews").getValue(Integer.class);
-//                    }
-//                    else{
-//                        profileView=0;
-//                    }
-//                    profileView+=1;
-//                    userRef.child("profileViews").setValue(profileView);
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError error) {
-//
-//                }
-//            });
         }
     }
 
