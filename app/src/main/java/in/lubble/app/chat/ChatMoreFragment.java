@@ -133,45 +133,52 @@ public class ChatMoreFragment extends Fragment {
     private void syncEvents() {
         eventProgressBar.setVisibility(View.VISIBLE);
         endpoints = ServiceGenerator.createService(Endpoints.class);
-        //endpoints = retrofit.create(Endpoints.class);
-        //Call<List<EventData>> call = endpoints.getEvents("ayush_django_backend_token","ayush_django_backend",LubbleSharedPrefs.getInstance().getLubbleId());
         Call<List<EventData>> call = endpoints.getEvents(LubbleSharedPrefs.getInstance().getLubbleId());
         final ArrayList<EventData> eventDataList = new ArrayList<>();
         call.enqueue(new Callback<List<EventData>>() {
             @Override
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
-                if (!response.isSuccessful()) {
-                    eventsRecyclerView.setVisibility(View.GONE);
-                    noEventsContainer.setVisibility(View.VISIBLE);
-                    eventProgressBar.setVisibility(View.GONE);
-                    return;
-                }
-                List<EventData> data = response.body();
-                if (data != null) {
-                    for (EventData eventData : data) {
-                        if (eventData != null && System.currentTimeMillis() < eventData.getStartTimestamp()) {//&& eventData.getRelatedGroupsList().contains(groupId)) {
-                            eventData.setId(eventData.getEvent_id());
-                            eventDataList.add(eventData);
+                if (response.isSuccessful() && isAdded()) {
+                    List<EventData> data = response.body();
+                    if (data != null) {
+                        for (EventData eventData : data) {
+                            if (eventData != null && (System.currentTimeMillis() < eventData.getLastTimestamp())
+                                    && isRelevantGroup(eventData)) {
+                                eventData.setId(eventData.getEvent_id());
+                                eventDataList.add(eventData);
+                            }
                         }
                     }
-                }
-                if (eventDataList.size() > 0) {
-                    eventProgressBar.setVisibility(View.GONE);
-                    noEventsContainer.setVisibility(View.GONE);
-                    eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
-                } else {
+                    if (eventDataList.size() > 0) {
+                        eventProgressBar.setVisibility(View.GONE);
+                        noEventsContainer.setVisibility(View.GONE);
+                        eventsRecyclerView.setAdapter(new ChatEventsAdapter(requireContext(), eventDataList));
+                    } else {
+                        eventsRecyclerView.setVisibility(View.GONE);
+                        noEventsContainer.setVisibility(View.VISIBLE);
+                        eventProgressBar.setVisibility(View.GONE);
+                    }
+                } else if (isAdded()) {
                     eventsRecyclerView.setVisibility(View.GONE);
                     noEventsContainer.setVisibility(View.VISIBLE);
                     eventProgressBar.setVisibility(View.GONE);
                 }
             }
 
+            private boolean isRelevantGroup(EventData eventData) {
+                return groupId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getDefaultGroupId())
+                        || eventData.getRelatedGroupsList().contains(groupId)
+                        || groupId.equalsIgnoreCase(eventData.getGid());
+            }
+
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
-                eventsRecyclerView.setVisibility(View.GONE);
-                noEventsContainer.setVisibility(View.VISIBLE);
-                eventProgressBar.setVisibility(View.GONE);
-                Log.e(TAG, "failed to get response from django");
+                if (isAdded()) {
+                    eventsRecyclerView.setVisibility(View.GONE);
+                    noEventsContainer.setVisibility(View.VISIBLE);
+                    eventProgressBar.setVisibility(View.GONE);
+                    Log.e(TAG, "failed to get response from api");
+                }
             }
         });
     }

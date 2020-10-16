@@ -140,4 +140,5 @@ public class AnalyticsEvents {
     public static final String MSG_SHARED = "MSG_SHARED";
     public static final String SHARED_VIA = "SHARED_VIA";
     public static final String REFERRAL_WIKI_SHARE = "REFERRAL_WIKI_SHARE";
+    public static final String JOIN_GROUP = "JOIN_GROUP";
 }

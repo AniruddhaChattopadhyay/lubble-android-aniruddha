@@ -99,6 +99,10 @@ public class EventData implements Serializable {
         return startTimestamp;
     }
 
+    public long getLastTimestamp() {
+        return endTimestamp == 0L ? startTimestamp : endTimestamp;
+    }
+
     public void setStartTimestamp(long startTimeTimestamp) {
         this.startTimestamp = startTimeTimestamp;
     }

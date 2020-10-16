@@ -1303,6 +1303,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 isJoining = true;
                 showJoiningDialog();
                 addGroupJoinPrompt();
+                Bundle bundle = new Bundle();
+                bundle.putString("group_id", groupId);
+                Analytics.triggerEvent(AnalyticsEvents.JOIN_GROUP, bundle, getContext());
                 break;
             case R.id.iv_decline_cross:
                 Snackbar.make(view, "Declining invitation...", BaseTransientBottomBar.LENGTH_SHORT).show();
