@@ -39,6 +39,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -279,24 +281,43 @@ public class ProfileFrag extends Fragment {
         userRef = getUserRef(userId);
         fetchProfileFeed();
         if(!userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())){
-            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            userRef.runTransaction(new Transaction.Handler() {
+                @NonNull
                 @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.child("profileViews").exists()){
-                        profileView = snapshot.child("profileViews").getValue(Integer.class);
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    if(currentData.hasChild("profileViews")){
+                        profileView = currentData.child("profileViews").getValue(Integer.class);
                     }
                     else{
-                        profileView=0;
+                        profileView = 0;
                     }
                     profileView+=1;
                     userRef.child("profileViews").setValue(profileView);
+                    return null;
                 }
-
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
 
                 }
             });
+//            userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//                @Override
+//                public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                    if(snapshot.child("profileViews").exists()){
+//                        profileView = snapshot.child("profileViews").getValue(Integer.class);
+//                    }
+//                    else{
+//                        profileView=0;
+//                    }
+//                    profileView+=1;
+//                    userRef.child("profileViews").setValue(profileView);
+//                }
+//
+//                @Override
+//                public void onCancelled(@NonNull DatabaseError error) {
+//
+//                }
+//            });
         }
     }
 
