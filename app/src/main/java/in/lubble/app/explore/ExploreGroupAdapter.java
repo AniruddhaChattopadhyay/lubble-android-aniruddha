@@ -168,7 +168,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_grey_900));
             holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stars_green_14dp, 0, 0, 0);
         }
-        if (exploreGroupData.getMemberCount() > lubbleMemberCount / 3) {
+        if (exploreGroupData.getMemberCount() > lubbleMemberCount / 2) {
             holder.labelTv.setVisibility(View.VISIBLE);
             holder.labelTv.setText("Popular");
             ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_red_50)));
