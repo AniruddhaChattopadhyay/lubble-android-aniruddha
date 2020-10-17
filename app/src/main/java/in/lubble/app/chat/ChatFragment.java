@@ -1628,7 +1628,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         @Override
         public void afterTextChanged(Editable editable) {
-            getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).setValue(firstName);
+            //getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).setValue(firstName);
             typingExpiryHandler.removeCallbacks(inputFinishChecker);
             lastTextEdit = System.currentTimeMillis();
             typingExpiryHandler.postDelayed(inputFinishChecker, DELAY);
