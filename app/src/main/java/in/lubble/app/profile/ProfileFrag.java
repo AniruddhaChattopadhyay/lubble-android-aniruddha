@@ -285,15 +285,20 @@ public class ProfileFrag extends Fragment {
                 @NonNull
                 @Override
                 public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                    if(currentData!= null && currentData.hasChild("profileViews")){
-                        profileView = currentData.child("profileViews").getValue(Integer.class);
+                    if(currentData == null){
+                        return Transaction.success(currentData);
                     }
                     else{
-                        profileView = 0;
+                        if(currentData!= null && currentData.hasChild("profileViews")){
+                            profileView = currentData.child("profileViews").getValue(Integer.class);
+                        }
+                        else{
+                            profileView = 0;
+                        }
                     }
                     profileView+=1;
                     userRef.child("profileViews").setValue(profileView);
-                    return null;
+                    return Transaction.success(currentData);
                 }
                 @Override
                 public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
