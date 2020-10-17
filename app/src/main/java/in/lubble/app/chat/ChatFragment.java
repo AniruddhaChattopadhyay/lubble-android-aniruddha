@@ -520,7 +520,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 chatAdapter.getChatMsgAt(positionStart).getAuthorUid().equalsIgnoreCase(authorId)) {
                             chatRecyclerView.scrollToPosition(positionStart);
                         } else {
-                            //chatRecyclerView.scrollToPosition(positionStart);
+                            chatRecyclerView.scrollToPosition(positionStart);
                         }
                     }
                 }

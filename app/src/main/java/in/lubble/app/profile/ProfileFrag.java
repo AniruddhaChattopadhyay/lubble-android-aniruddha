@@ -285,7 +285,7 @@ public class ProfileFrag extends Fragment {
                 @NonNull
                 @Override
                 public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                    if(currentData.hasChild("profileViews")){
+                    if(currentData!= null && currentData.hasChild("profileViews")){
                         profileView = currentData.child("profileViews").getValue(Integer.class);
                     }
                     else{
