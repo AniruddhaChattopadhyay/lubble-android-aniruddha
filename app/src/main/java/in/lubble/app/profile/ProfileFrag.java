@@ -39,6 +39,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -113,6 +115,8 @@ public class ProfileFrag extends Fragment {
     private TextView businessTv;
     private ImageView educationIv;
     private TextView educationTv;
+
+    private int profileView;
 
 
     public ProfileFrag() {
@@ -276,6 +280,32 @@ public class ProfileFrag extends Fragment {
         super.onStart();
         userRef = getUserRef(userId);
         fetchProfileFeed();
+        if(!userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())){
+            userRef.runTransaction(new Transaction.Handler() {
+                @NonNull
+                @Override
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    if(currentData == null){
+                        return Transaction.success(currentData);
+                    }
+                    else{
+                        if(currentData!= null && currentData.hasChild("profileViews")){
+                            profileView = currentData.child("profileViews").getValue(Integer.class);
+                        }
+                        else{
+                            profileView = 0;
+                        }
+                    }
+                    profileView+=1;
+                    userRef.child("profileViews").setValue(profileView);
+                    return Transaction.success(currentData);
+                }
+                @Override
+                public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+
+                }
+            });
+        }
     }
 
     private void syncGroups() {
