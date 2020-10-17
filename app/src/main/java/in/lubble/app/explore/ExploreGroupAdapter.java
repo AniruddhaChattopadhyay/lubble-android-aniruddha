@@ -12,7 +12,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.emoji.widget.EmojiTextView;
@@ -21,9 +20,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,11 +28,8 @@ import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
-import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.ChatActivity;
-import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.GroupData;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 
@@ -59,19 +52,6 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         mListener = listener;
         this.glide = glide;
         this.isOnboarding = isOnboarding;
-        RealtimeDbHelper.getLubbleGroupsRef().child(LubbleSharedPrefs.getInstance().getDefaultGroupId()).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                GroupData groupData = snapshot.getValue(GroupData.class);
-                if (groupData != null) {
-                    lubbleMemberCount = groupData.getMembers().size();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
     }
 
     public void updateList(List<ExploreGroupData> items) {
@@ -81,11 +61,13 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     }
 
     public void updateGroup(ExploreGroupData exploreGroupData) {
-        int existingGroupIndex = mValues.indexOf(exploreGroupData);
-        if (existingGroupIndex != -1) {
-            this.mValues.set(existingGroupIndex, exploreGroupData);
+        int index = mValues.indexOf(exploreGroupData);
+        if (index != -1) {
+            ExploreGroupData oldExploreGroupData = mValues.get(index);
+            exploreGroupData.setPriority(oldExploreGroupData.getPriority());
+            this.mValues.set(index, exploreGroupData);
             this.mValues_copy.set(mValues_copy.indexOf(exploreGroupData), exploreGroupData);
-            notifyItemChanged(existingGroupIndex);
+            notifyItemChanged(index);
         }
     }
 
@@ -168,7 +150,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_grey_900));
             holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stars_green_14dp, 0, 0, 0);
         }
-        if (exploreGroupData.getMemberCount() > lubbleMemberCount / 2) {
+        if (exploreGroupData.getMemberCount() > lubbleMemberCount / 2.5) {
             holder.labelTv.setVisibility(View.VISIBLE);
             holder.labelTv.setText("Popular");
             ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_red_50)));
@@ -246,6 +228,11 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
 
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(ExploreGroupData item, boolean isAdded);
+    }
+
+    void setLubbleMemberCount(int count) {
+        lubbleMemberCount = count;
+        notifyDataSetChanged();
     }
 
     @Override
