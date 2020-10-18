@@ -280,26 +280,25 @@ public class ProfileFrag extends Fragment {
         super.onStart();
         userRef = getUserRef(userId);
         fetchProfileFeed();
-        if(!userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())){
+        if (!userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
             userRef.runTransaction(new Transaction.Handler() {
                 @NonNull
                 @Override
                 public Transaction.Result doTransaction(@NonNull MutableData currentData) {
-                    if(currentData == null){
+                    if (currentData == null) {
                         return Transaction.success(currentData);
-                    }
-                    else{
-                        if(currentData!= null && currentData.hasChild("profileViews")){
+                    } else {
+                        if (currentData.hasChild("profileViews")) {
                             profileView = currentData.child("profileViews").getValue(Integer.class);
-                        }
-                        else{
+                        } else {
                             profileView = 0;
                         }
                     }
-                    profileView+=1;
+                    profileView += 1;
                     userRef.child("profileViews").setValue(profileView);
                     return Transaction.success(currentData);
                 }
+
                 @Override
                 public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
 

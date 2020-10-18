@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Parcelable;
 import android.text.Editable;
 import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
@@ -247,7 +248,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private static long DELAY = 1000;
     private static long lastTextEdit = 0;
-    private String firstName;
+    private String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
     Handler typingExpiryHandler = new Handler();
 
     public ChatFragment() {
@@ -408,6 +409,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             showJoiningDialog();
         }
         sendBtn.setEnabled(false);
+        String SEND_MSG_AS = "Send message as ";
+        SpannableString spannableString = new SpannableString(SEND_MSG_AS + firstName);
+        spannableString.setSpan(new ForegroundColorSpan(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_300)), SEND_MSG_AS.length(), spannableString.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        newMessageEt.setHint(spannableString);
         newMessageEt.addTextChangedListener(textWatcher);
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
@@ -576,7 +581,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         deleteUnreadMsgsForGroupId(groupId, getContext());
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         syncGroupInfo();
-        firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
         getGroupTypingRef(groupId).addValueEventListener(typingValueListener);
     }
 
@@ -638,6 +642,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     "Welcome " + firstName + "!" +
                             "\n\nLet's introduce you to everyone in the group with an answer to this:" +
                             "\n\n" + groupData.getQuestion()
+                            + "\n\nAnswer by tapping on Reply \uD83D\uDC47"
             );
             personalChatData.setPromptQues(groupData.getQuestion());
             personalChatData.setCreatedTimestamp(System.currentTimeMillis());

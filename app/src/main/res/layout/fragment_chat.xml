@@ -157,7 +157,7 @@
                     android:focusable="true"
                     android:focusableInTouchMode="true"
                     android:gravity="top|left"
-                    android:hint="What's new"
+                    android:hint="Send message as "
                     android:inputType="text|textCapSentences|textMultiLine"
                     android:maxLines="6"
                     android:scrollbars="vertical"
