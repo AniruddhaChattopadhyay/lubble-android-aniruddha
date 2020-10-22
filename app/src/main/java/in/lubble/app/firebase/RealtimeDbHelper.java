@@ -163,7 +163,7 @@ public class RealtimeDbHelper {
     }
 
     public static DatabaseReference getGroupTypingRef(String groupId) {
-        return FirebaseDatabase.getInstance().getReference(RealtimeDbHelper.getLubbleGroupPath() + "/" + groupId).child("typing");
+        return FirebaseDatabase.getInstance().getReference("typing").child(LubbleSharedPrefs.getInstance().getLubbleId()).child(groupId);
     }
 
 }
