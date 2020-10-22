@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
@@ -39,6 +40,7 @@ public class AttachVideoActivity extends BaseActivity {
 
     private static final String EXTRA_VID_PATH = BuildConfig.APPLICATION_ID + "_NEW_IMG_PATH";
     private static final String EXTRA_GROUP_ID = BuildConfig.APPLICATION_ID + "_NEW_IMG_GROUP_ID";
+    private static final String EXTRA_CAPTION = BuildConfig.APPLICATION_ID + "_CAPTION";
     private static final String EXTRA_IS_DM = BuildConfig.APPLICATION_ID + "_IS_DM";
     private static final String EXTRA_AUTHOR_ID = BuildConfig.APPLICATION_ID + "_AUTHOR_ID";
     private static final String EXTRA_IS_AUTHOR_SELLER = BuildConfig.APPLICATION_ID + "_IS_AUTHOR_SELLER";
@@ -48,10 +50,11 @@ public class AttachVideoActivity extends BaseActivity {
     private EditText captionEt;
     private ImageView sendIcon;
 
-    public static void open(Context context, Uri vidUri, String groupId, boolean isDm, boolean isAuthorSeller, String authorId) {
+    public static void open(Context context, Uri vidUri, String groupId, @Nullable String caption, boolean isDm, boolean isAuthorSeller, String authorId) {
         Intent intent = new Intent(context, AttachVideoActivity.class);
         intent.putExtra(EXTRA_VID_PATH, vidUri);
         intent.putExtra(EXTRA_GROUP_ID, groupId);
+        intent.putExtra(EXTRA_CAPTION, caption);
         intent.putExtra(EXTRA_IS_DM, isDm);
         intent.putExtra(EXTRA_AUTHOR_ID, authorId);
         intent.putExtra(EXTRA_IS_AUTHOR_SELLER, isAuthorSeller);
@@ -71,6 +74,9 @@ public class AttachVideoActivity extends BaseActivity {
         sendIcon = findViewById(R.id.iv_send_btn_vid);
         final Uri vidUri = getIntent().getParcelableExtra(EXTRA_VID_PATH);
         final String chatId = getIntent().getStringExtra(EXTRA_GROUP_ID);
+        final String caption = getIntent().getStringExtra(EXTRA_CAPTION);
+
+        captionEt.setText(caption);
 
         exoPlayerView = findViewById(R.id.exo_player);
         prepareExoPlayerFromFileUri(vidUri);

@@ -327,13 +327,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         Toast.makeText(getContext(), "Unsupported file type .mov", Toast.LENGTH_LONG).show();
                         file.delete();
                     } else if (Video_Size < PERMITTED_VIDEO_SIZE) {
-                        AttachVideoActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                        AttachVideoActivity.open(getContext(), sharedImageUri, groupId, null, false, isCurrUserSeller, authorId);
                     } else {
                         Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
                         file.delete();
                     }
                 } else if (FileUtils.getMimeType(sharedImageUri).contains("image")) {
-                    AttachImageActivity.open(getContext(), sharedImageUri, groupId, false, isCurrUserSeller, authorId);
+                    AttachImageActivity.open(getContext(), sharedImageUri, groupId, null, false, isCurrUserSeller, authorId);
                 } else if (FileUtils.getMimeType(sharedImageUri).contains("pdf")) {
                     String name = FileUtils.getFileNameFromUri(sharedImageUri);
                     name = name.replace(".pdf", "");
@@ -722,7 +722,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                         if (!TextUtils.isEmpty(dmId)) {
                                             chatId = dmId;
                                         }
-                                        AttachImageActivity.open(getContext(), sharedImageUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                                        AttachImageActivity.open(getContext(), sharedImageUri, chatId, null, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
                                         sharedImageUri = null;
                                     }
                                 }
@@ -1353,6 +1353,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             File imageFile;
             String type;
             Uri uri;
+            String caption = newMessageEt.getText() == null ? null : newMessageEt.getText().toString();
             if (data != null && data.getData() != null) {
                 uri = data.getData();
                 type = getMimeType(uri);
@@ -1369,7 +1370,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     chatId = dmId;
                 }
                 Log.d("GroupID", "img--->" + fileUri.toString());
-                AttachImageActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                AttachImageActivity.open(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
             } else if (data != null && (type.contains("video") || type.contains("mp4"))) {
                 //handle video from gallery picker
                 uri = data.getData();
@@ -1394,7 +1395,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         if (!TextUtils.isEmpty(dmId)) {
                             chatId = dmId;
                         }
-                        AttachVideoActivity.open(getContext(), fileUri, chatId, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                        AttachVideoActivity.open(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
                     }
                 }
             }

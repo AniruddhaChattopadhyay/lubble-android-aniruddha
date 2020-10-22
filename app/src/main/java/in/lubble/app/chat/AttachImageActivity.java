@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
 import in.lubble.app.BaseActivity;
@@ -27,6 +28,7 @@ public class AttachImageActivity extends BaseActivity {
 
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_NEW_IMG_PATH";
     private static final String EXTRA_GROUP_ID = BuildConfig.APPLICATION_ID + "_NEW_IMG_GROUP_ID";
+    private static final String EXTRA_CAPTION = BuildConfig.APPLICATION_ID + "_CAPTION";
     private static final String EXTRA_IS_DM = BuildConfig.APPLICATION_ID + "_IS_DM";
     private static final String EXTRA_AUTHOR_ID = BuildConfig.APPLICATION_ID + "_AUTHOR_ID";
     private static final String EXTRA_IS_AUTHOR_SELLER = BuildConfig.APPLICATION_ID + "_IS_AUTHOR_SELLER";
@@ -35,10 +37,11 @@ public class AttachImageActivity extends BaseActivity {
     private EditText captionEt;
     private ImageView sendIcon;
 
-    public static void open(Context context, Uri imgUri, String groupId, boolean isDm, boolean isAuthorSeller, String authorId) {
+    public static void open(Context context, Uri imgUri, String groupId, @Nullable String caption, boolean isDm, boolean isAuthorSeller, String authorId) {
         Intent intent = new Intent(context, AttachImageActivity.class);
         intent.putExtra(EXTRA_IMG_PATH, imgUri);
         intent.putExtra(EXTRA_GROUP_ID, groupId);
+        intent.putExtra(EXTRA_CAPTION, caption);
         intent.putExtra(EXTRA_IS_DM, isDm);
         intent.putExtra(EXTRA_AUTHOR_ID, authorId);
         intent.putExtra(EXTRA_IS_AUTHOR_SELLER, isAuthorSeller);
@@ -61,6 +64,9 @@ public class AttachImageActivity extends BaseActivity {
 
         final Uri imgUri = getIntent().getParcelableExtra(EXTRA_IMG_PATH);
         final String chatId = getIntent().getStringExtra(EXTRA_GROUP_ID);
+        final String caption = getIntent().getStringExtra(EXTRA_CAPTION);
+
+        captionEt.setText(caption);
 
         GlideApp.with(this).load(imgUri).fitCenter().into(touchImageView);
 
