@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -164,7 +163,7 @@ public class FullScreenVideoActivity extends BaseActivity {
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void makeGetFileForDownload() {
-        File f = new File(Environment.getExternalStorageDirectory(), lubble_vid_dir);
+        File f = new File(getExternalFilesDir(null), lubble_vid_dir);
         if (!f.exists()) {
             f.mkdirs();
         }
@@ -181,7 +180,7 @@ public class FullScreenVideoActivity extends BaseActivity {
         request.setDescription("Downloading Video ...");
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-        request.setDestinationInExternalPublicDir(lubble_vid_dir, videoname);
+        request.setDestinationInExternalFilesDir(this, null, lubble_vid_dir + File.separator + videoname);
 
         DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
         manager.enqueue(request);

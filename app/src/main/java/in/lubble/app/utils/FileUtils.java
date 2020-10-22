@@ -317,7 +317,7 @@ public class FileUtils {
 
             String imageFileName = "JPEG_" + msgId + "." + extension;
             File storageDir = new File(
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+                    context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                             + File.separator + "Lubble_pics");
             boolean success = true;
             if (!storageDir.exists()) {
@@ -373,7 +373,7 @@ public class FileUtils {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && isExternalStorageReadable()) {
             String extension = getExtensionFromMime(uri);
-            File imgFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            File imgFile = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                     + File.separator + "Lubble_pics" + File.separator + "JPEG_" + msgId + "." + extension);
 
             if (imgFile.exists()) {

@@ -6,7 +6,6 @@ import android.content.IntentFilter;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -168,7 +167,7 @@ public class UploadVideoService extends BaseTaskService {
     }
 
     private void compressAndUpload(Uri fileUri, final String caption, final String groupId, final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData, final StorageReference photoRef) {
-        File f = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
+        File f = new File(getFilesDir().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
         if (f.mkdirs() || f.isDirectory()) {
             //compress and output new video specs
             Log.d(TAG, "inside if to async task");

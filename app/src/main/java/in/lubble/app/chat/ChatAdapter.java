@@ -17,7 +17,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
@@ -1180,7 +1179,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private File getLubbleDocsDir() {
-        File f = new File(Environment.getExternalStorageDirectory(), lubbleDocumentDirectory);
+        File f = new File(context.getExternalFilesDir(null), lubbleDocumentDirectory);
         if (!f.exists()) {
             f.mkdirs();
         }
@@ -1243,7 +1242,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
             });
             Bundle bundle = new Bundle();
-            bundle.putString("Pdf name", fileName);
+            bundle.putString("Pdf_name", fileName);
             Analytics.triggerEvent(AnalyticsEvents.DOWNLOAD_PDF, bundle, context);
         }
     }
