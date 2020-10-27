@@ -2021,7 +2021,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         public void onDataChange(@NonNull DataSnapshot snapshot) {
             nameList = new ArrayList<>();
             for (DataSnapshot data : snapshot.getChildren()) {
-                //name = RealtimeDbHelper.getUserInfoRef(userId).child();
                 String n = data.getValue(String.class);
                 if (!firstName.equalsIgnoreCase(n)) {
                     nameList.add(n);
