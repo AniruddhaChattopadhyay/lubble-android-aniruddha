@@ -11,7 +11,7 @@ import in.lubble.app.utils.NotifUtils;
 public class BootCompleteReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        NotifUtils.showAllPendingChatNotifs(context);
+        NotifUtils.showAllPendingChatNotifs(context, false);
         Analytics.triggerEvent(AnalyticsEvents.PHONE_BOOT_COMPLETE, context);
     }
 }

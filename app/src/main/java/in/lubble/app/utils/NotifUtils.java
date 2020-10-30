@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import in.lubble.app.Constants;
@@ -71,8 +72,12 @@ public class NotifUtils {
 
     private static HashMap<String, NotificationCompat.MessagingStyle> messagingStyleMap;
 
-    public static void showAllPendingChatNotifs(Context context) {
+    public static void showAllPendingChatNotifs(Context context, boolean clearPrevNotif) {
         messagingStyleMap = new HashMap<>();
+
+        final NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(SUMMARY_ID);
 
         ArrayList<NotifData> msgList = getAllMsgs();
         if (!msgList.isEmpty()) {
@@ -157,6 +162,12 @@ public class NotifUtils {
                     .setDeleteIntent(deletePendingIntent)
                     .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                     .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
+
+            List<NotificationCompat.MessagingStyle.Message> messageList = map.getValue().getMessages();
+            if (messageList.size() > 0) {
+                NotificationCompat.MessagingStyle.Message lastMsg = messageList.get(messageList.size() - 1);
+                builder.setWhen(lastMsg.getTimestamp());
+            }
 
             if (!TextUtils.isEmpty(map.getValue().getConversationTitle())) {
                 // not a DM, add actions
