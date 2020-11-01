@@ -3,6 +3,7 @@ package in.lubble.app.firebase;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -27,6 +28,7 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.AppNotifData;
 import in.lubble.app.models.NotifData;
+import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
@@ -110,7 +112,11 @@ public class FcmService extends FirebaseMessagingService {
                     sendOrderedBroadcast(broadcast, null, null, null, Activity.RESULT_OK, null, null);
                 } else if (StringUtils.isValidString(type) && "notif_digest".equalsIgnoreCase(type)) {
                     // show all chat notifs now
-                    NotifUtils.showAllPendingChatNotifs(this);
+                    NotifUtils.showAllPendingChatNotifs(this, false);
+                } else if (StringUtils.isValidString(type) && "delete_chat".equalsIgnoreCase(type) && !TextUtils.isEmpty(dataMap.get("messageId"))) {
+                    // delete this MsgID from SharedPrefs & re-trigger notif_digest
+                    UnreadChatsSharedPrefs.getInstance().getPreferences().edit().remove(dataMap.get("messageId")).commit();
+                    NotifUtils.showAllPendingChatNotifs(this, true);
                 } else if (StringUtils.isValidString(type) && "mplace_img_done".equalsIgnoreCase(type)) {
                     // mplace image uploaded, send broadcast
                     sendMarketplaceImgBroadcast(dataMap);

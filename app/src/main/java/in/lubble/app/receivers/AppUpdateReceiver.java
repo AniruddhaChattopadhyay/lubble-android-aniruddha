@@ -17,7 +17,7 @@ public class AppUpdateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
-        NotifUtils.showAllPendingChatNotifs(context);
+        NotifUtils.showAllPendingChatNotifs(context, false);
         setAnalyticsUser(context);
         final Bundle bundle = new Bundle();
         bundle.putString("new_version_name", BuildConfig.VERSION_NAME);
