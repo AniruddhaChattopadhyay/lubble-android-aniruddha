@@ -75,10 +75,13 @@ public class NotifUtils {
     public static void showAllPendingChatNotifs(Context context, boolean clearPrevNotif) {
         messagingStyleMap = new HashMap<>();
 
-        final NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(SUMMARY_ID);
-
+        if (clearPrevNotif) {
+            final NotificationManager notificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (notificationManager != null) {
+                notificationManager.cancel(SUMMARY_ID);
+            }
+        }
         ArrayList<NotifData> msgList = getAllMsgs();
         if (!msgList.isEmpty()) {
             sortListByTime(msgList);
