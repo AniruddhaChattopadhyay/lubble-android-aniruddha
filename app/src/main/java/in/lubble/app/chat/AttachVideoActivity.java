@@ -51,6 +51,10 @@ public class AttachVideoActivity extends BaseActivity {
     private ImageView sendIcon;
 
     public static void open(Context context, Uri vidUri, String groupId, @Nullable String caption, boolean isDm, boolean isAuthorSeller, String authorId) {
+        context.startActivity(getIntent(context, vidUri, groupId, caption, isDm, isAuthorSeller, authorId));
+    }
+
+    public static Intent getIntent(Context context, Uri vidUri, String groupId, @Nullable String caption, boolean isDm, boolean isAuthorSeller, String authorId) {
         Intent intent = new Intent(context, AttachVideoActivity.class);
         intent.putExtra(EXTRA_VID_PATH, vidUri);
         intent.putExtra(EXTRA_GROUP_ID, groupId);
@@ -58,7 +62,7 @@ public class AttachVideoActivity extends BaseActivity {
         intent.putExtra(EXTRA_IS_DM, isDm);
         intent.putExtra(EXTRA_AUTHOR_ID, authorId);
         intent.putExtra(EXTRA_IS_AUTHOR_SELLER, isAuthorSeller);
-        context.startActivity(intent);
+        return intent;
     }
 
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +95,7 @@ public class AttachVideoActivity extends BaseActivity {
                 if (isDm) {
                     uploadPath = "dms/" + chatId;
                 }
-                Log.d("uploadFromVideo","on click send");
+                Log.d("uploadFromVideo", "on click send");
                 startService(new Intent(AttachVideoActivity.this, UploadVideoService.class)
                         .putExtra(UploadVideoService.EXTRA_BUCKET, UploadVideoService.BUCKET_CONVO)
                         .putExtra(UploadVideoService.EXTRA_FILE_NAME, vidUri.getLastPathSegment())
@@ -106,13 +110,14 @@ public class AttachVideoActivity extends BaseActivity {
                 final Bundle bundle = new Bundle();
                 bundle.putString("group_id", chatId);
                 Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, AttachVideoActivity.this);
+                setResult(RESULT_OK);
                 finish();
             }
         });
 
     }
 
-    private void prepareExoPlayerFromFileUri(Uri uri){
+    private void prepareExoPlayerFromFileUri(Uri uri) {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(null), new DefaultLoadControl());
         DataSpec dataSpec = new DataSpec(uri);
         final FileDataSource fileDataSource = new FileDataSource();
@@ -138,7 +143,6 @@ public class AttachVideoActivity extends BaseActivity {
     }
 
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -153,20 +157,21 @@ public class AttachVideoActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        if(exoPlayer!=null)
+        if (exoPlayer != null)
             exoPlayer.release();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(exoPlayer!=null)
+        if (exoPlayer != null)
             exoPlayer.release();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if(exoPlayer!=null)
+        if (exoPlayer != null)
             exoPlayer.release();
     }
 }

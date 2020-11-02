@@ -148,6 +148,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final int REQUEST_CODE_IMG = 789;
     private static final int REQUEST_CODE_GROUP_PICK = 917;
     private static final int REQUEST_CODE_EVENT_PICK = 922;
+    private static final int REQUEST_CODE_IMG_SENT = 923;
+    private static final int REQUEST_CODE_VIDEO_SENT = 924;
+
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
     private static final String KEY_MSG_ID = "CHAT_MSG_ID";
     private static final String KEY_IS_JOINING = "KEY_IS_JOINING";
@@ -1277,19 +1280,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     bundle.putBoolean("isDm", true);
                     Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
                 }
-                newMessageEt.setText("");
-                linkTitle.setText("");
-                linkDesc.setText("");
-                if (taggedMap != null) {
-                    taggedMap.clear();
-                }
-                linkMetaContainer.setVisibility(View.GONE);
-                replyMsgId = null;
-                attachedGroupId = null;
-                attachedEventId = null;
-                if (linkMetaAsyncTask != null) {
-                    linkMetaAsyncTask.cancel(true);
-                }
+                resetNewMessageEt();
                 break;
             case R.id.iv_attach:
                 if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
@@ -1331,6 +1322,22 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
     }
 
+    private void resetNewMessageEt() {
+        newMessageEt.setText("");
+        linkTitle.setText("");
+        linkDesc.setText("");
+        if (taggedMap != null) {
+            taggedMap.clear();
+        }
+        linkMetaContainer.setVisibility(View.GONE);
+        replyMsgId = null;
+        attachedGroupId = null;
+        attachedEventId = null;
+        if (linkMetaAsyncTask != null) {
+            linkMetaAsyncTask.cancel(true);
+        }
+    }
+
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void showAttachmentBottomSheet() {
         AttachmentListDialogFrag.newInstance(dmId != null).show(getChildFragmentManager(), null);
@@ -1366,7 +1373,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     chatId = dmId;
                 }
                 Log.d("GroupID", "img--->" + fileUri.toString());
-                AttachImageActivity.open(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                startActivityForResult(
+                        AttachImageActivity.getIntent(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId),
+                        REQUEST_CODE_IMG_SENT
+                );
             } else if (data != null && (type.contains("video") || type.contains("mp4"))) {
                 //handle video from gallery picker
                 uri = data.getData();
@@ -1391,7 +1401,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         if (!TextUtils.isEmpty(dmId)) {
                             chatId = dmId;
                         }
-                        AttachVideoActivity.open(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId);
+                        startActivityForResult(
+                                AttachVideoActivity.getIntent(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId),
+                                REQUEST_CODE_VIDEO_SENT
+                        );
                     }
                 }
             }
@@ -1453,6 +1466,9 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         }
                     }).create().show();
 
+        } else if (resultCode == RESULT_OK && (requestCode == REQUEST_CODE_IMG_SENT || requestCode == REQUEST_CODE_VIDEO_SENT)) {
+            // img/video sent; clear caption
+            resetNewMessageEt();
         }
     }
 
