@@ -38,6 +38,10 @@ public class AttachImageActivity extends BaseActivity {
     private ImageView sendIcon;
 
     public static void open(Context context, Uri imgUri, String groupId, @Nullable String caption, boolean isDm, boolean isAuthorSeller, String authorId) {
+        context.startActivity(getIntent(context, imgUri, groupId, caption, isDm, isAuthorSeller, authorId));
+    }
+
+    public static Intent getIntent(Context context, Uri imgUri, String groupId, @Nullable String caption, boolean isDm, boolean isAuthorSeller, String authorId) {
         Intent intent = new Intent(context, AttachImageActivity.class);
         intent.putExtra(EXTRA_IMG_PATH, imgUri);
         intent.putExtra(EXTRA_GROUP_ID, groupId);
@@ -45,7 +49,7 @@ public class AttachImageActivity extends BaseActivity {
         intent.putExtra(EXTRA_IS_DM, isDm);
         intent.putExtra(EXTRA_AUTHOR_ID, authorId);
         intent.putExtra(EXTRA_IS_AUTHOR_SELLER, isAuthorSeller);
-        context.startActivity(intent);
+        return intent;
     }
 
     @Override
@@ -93,6 +97,7 @@ public class AttachImageActivity extends BaseActivity {
                 final Bundle bundle = new Bundle();
                 bundle.putString("group_id", chatId);
                 Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, AttachImageActivity.this);
+                setResult(RESULT_OK);
                 finish();
             }
         });
