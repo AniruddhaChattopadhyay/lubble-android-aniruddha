@@ -4,7 +4,10 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="lubble_android/app" />
       <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" group="lubble_android/libraries" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/ratingdialog/libraries-ratingdialog.iml" filepath="$PROJECT_DIR$/libraries/ratingdialog/libraries-ratingdialog.iml" />
       <module fileurl="file://$PROJECT_DIR$/lubble_android_aniruddha.iml" filepath="$PROJECT_DIR$/lubble_android_aniruddha.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/lubble_android_aniruddha-app.iml" filepath="$PROJECT_DIR$/app/lubble_android_aniruddha-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libraries/lubble_android_aniruddha-libraries.iml" filepath="$PROJECT_DIR$/libraries/lubble_android_aniruddha-libraries.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/ratingdialog/ratingdialog.iml" filepath="$PROJECT_DIR$/libraries/ratingdialog/ratingdialog.iml" group="lubble_android/libraries/ratingdialog" />
     </modules>
   </component>
