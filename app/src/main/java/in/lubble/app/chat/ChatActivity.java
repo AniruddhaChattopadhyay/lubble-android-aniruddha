@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -27,20 +28,26 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
+import java.util.Set;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
@@ -80,7 +87,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
     private ImageView toolbarIcon, toolbarLockIcon;
     private Toolbar toolbar;
-    private TextView toolbarTv, toolbarInviteHint;
+    private TextView toolbarTv, toolbarInviteHint,highlightNamesTv,memberCountTV;
     private LinearLayout inviteContainer;
     private ImageView searchBackIv, searchUpIv, searchDownIv;
     private SearchView searchView;
@@ -92,7 +99,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private SearchResultData searchResultData = null;
     private int currSearchCursorPos = 0;
     private ProgressDialog searchProgressDialog;
-
+    private Set<String> nameSet;
+    private String nameList;
+    private String nameUser = "";
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(EXTRA_GROUP_ID, groupId);
@@ -228,6 +237,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         toolbarIcon = toolbar.findViewById(R.id.iv_toolbar);
         toolbarLockIcon = toolbar.findViewById(R.id.iv_lock_icon);
         toolbarInviteHint = toolbar.findViewById(R.id.tv_invite_hint);
+        highlightNamesTv = toolbar.findViewById(R.id.tv_names);
+        memberCountTV = toolbar.findViewById(R.id.tv_member_count);
         toolbarTv = toolbar.findViewById(R.id.tv_toolbar_title);
         inviteContainer = toolbar.findViewById(R.id.container_invite);
         searchBackIv = toolbar.findViewById(R.id.iv_search_back);
@@ -472,7 +483,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         }
     }
 
-    public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate, int memberCount) {
+    public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate, final int memberCount) {
         toolbarTv.setText(title);
         if (StringUtils.isValidString(thumbnailUrl)) {
             GlideApp.with(this).load(thumbnailUrl).circleCrop().into(toolbarIcon);
@@ -487,11 +498,64 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
         if (dmId != null) {
             toolbarInviteHint.setText(getString(R.string.personal_chat));
-        } else if (memberCount > 10) {
-            toolbarInviteHint.setText(String.format(getString(R.string.members_count), memberCount));
-        } else {
-            toolbarInviteHint.setText(getString(R.string.click_group_info));
         }
+        else{
+            Query query =  RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
+            nameSet = new HashSet<String>();
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for(DataSnapshot childSnapShot: snapshot.getChildren()){
+                        String uid;
+                        uid = childSnapShot.getKey();
+                        RealtimeDbHelper.getUserInfoRef(uid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                nameList += "," + getFirstName(snapshot.getValue(String.class));
+                                nameSet.add(snapshot.getValue(String.class));
+                                if(nameSet.size()==5){
+                                    RealtimeDbHelper.getUserInfoRef(FirebaseAuth.getInstance().getUid()).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        nameUser = getFirstName(snapshot.getValue(String.class));
+                                        nameList = "<b>" + nameUser + "</b> " +","+ nameList;
+                                        highlightNamesTv.setText(Html.fromHtml(nameList));
+                                        String count = "+" + Integer.toString(memberCount-nameSet.size());
+                                        if(memberCount>5)
+                                            memberCountTV.setText(count);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
+    }
+
+    private String getFirstName(String name){
+        if(name == null)
+            return name;
+        if(name.contains(" "))
+            return name.substring(0,name.indexOf(" "));
+        else
+            return name;
     }
 
     private void toggleSearchViewVisibility(boolean show) {
