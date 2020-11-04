@@ -513,23 +513,42 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 nameList += "," + getFirstName(snapshot.getValue(String.class));
                                 nameSet.add(snapshot.getValue(String.class));
-                                if(nameSet.size()==5){
-                                    RealtimeDbHelper.getUserInfoRef(FirebaseAuth.getInstance().getUid()).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        nameUser = getFirstName(snapshot.getValue(String.class));
-                                        nameList = "<b>" + nameUser + "</b> " +","+ nameList;
-                                        highlightNamesTv.setText(Html.fromHtml(nameList));
-                                        String count = "+" + Integer.toString(memberCount-nameSet.size());
-                                        if(memberCount>5)
-                                            memberCountTV.setText(count);
-                                    }
+                                if(nameSet.size()==5 || nameSet.size() == memberCount){
+                                    RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            if(snapshot.hasChild(FirebaseAuth.getInstance().getUid())){
+                                                RealtimeDbHelper.getUserInfoRef(FirebaseAuth.getInstance().getUid()).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                        nameUser = getFirstName(snapshot.getValue(String.class));
+                                                        nameSet.add(nameUser);
+                                                        nameList = "<b>" + nameUser + "</b> " +","+ nameList;
+                                                        highlightNamesTv.setText(Html.fromHtml(nameList));
+                                                        String count = "+" + Integer.toString(memberCount-nameSet.size());
+                                                        if(memberCount>5)
+                                                            memberCountTV.setText(count);
+                                                    }
 
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError error) {
 
-                                    }
-                                });
+                                                    }
+                                                });
+                                            }
+                                            else{
+                                                highlightNamesTv.setText(nameList);
+                                                String count = "+" + Integer.toString(memberCount-nameSet.size());
+                                                if(memberCount>5)
+                                                    memberCountTV.setText(count);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
                                 }
                             }
 
