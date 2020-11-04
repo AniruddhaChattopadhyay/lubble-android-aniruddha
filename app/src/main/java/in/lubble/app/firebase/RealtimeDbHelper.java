@@ -1,5 +1,9 @@
 package in.lubble.app.firebase;
 
+import android.text.TextUtils;
+
+import androidx.annotation.Nullable;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -162,8 +166,15 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("search").child("results");
     }
 
-    public static DatabaseReference getGroupTypingRef(String groupId) {
-        return FirebaseDatabase.getInstance().getReference("typing").child(LubbleSharedPrefs.getInstance().getLubbleId()).child(groupId);
+    @Nullable
+    public static DatabaseReference getGroupTypingRef(String groupId, String dmId) {
+        String chatId;
+        chatId = groupId != null ? groupId : dmId;
+        if (!TextUtils.isEmpty(chatId)) {
+            return FirebaseDatabase.getInstance().getReference("typing").child(LubbleSharedPrefs.getInstance().getLubbleId()).child(chatId);
+        } else {
+            return null;
+        }
     }
 
 }
