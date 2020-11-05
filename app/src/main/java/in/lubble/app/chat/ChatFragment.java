@@ -580,7 +580,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         syncGroupInfo();
         firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
-        getGroupTypingRef(groupId).addValueEventListener(typingValueListener);
+        DatabaseReference groupTypingRef = getGroupTypingRef(groupId, dmId);
+        if (groupTypingRef != null) {
+            groupTypingRef.addValueEventListener(typingValueListener);
+        }
     }
 
     private void calcUnreadCount() {
@@ -1646,7 +1649,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         @Override
         public void afterTextChanged(Editable editable) {
-            getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).setValue(firstName);
+            DatabaseReference groupTypingRef = getGroupTypingRef(groupId, dmId);
+            if (groupTypingRef != null) {
+                groupTypingRef.child(FirebaseAuth.getInstance().getUid()).setValue(firstName);
+            }
             typingExpiryHandler.removeCallbacks(inputFinishChecker);
             lastTextEdit = System.currentTimeMillis();
             typingExpiryHandler.postDelayed(inputFinishChecker, DELAY);
@@ -2025,7 +2031,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void removeTypingStatus() {
         nameList.clear();
-        getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).removeValue();
+        DatabaseReference groupTypingRef = getGroupTypingRef(groupId, dmId);
+        if (groupTypingRef != null) {
+            groupTypingRef.child(FirebaseAuth.getInstance().getUid()).removeValue();
+        }
     }
 
     ValueEventListener typingValueListener = new ValueEventListener() {
@@ -2081,11 +2090,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (thisUserValueListener != null) {
             getThisUserRef().removeEventListener(thisUserValueListener);
         }
-        if (groupId != null && typingValueListener != null) {
-            getGroupTypingRef(groupId).removeEventListener(typingValueListener);
+        if (typingValueListener != null) {
+            DatabaseReference groupTypingRef = getGroupTypingRef(groupId, dmId);
+            if (groupTypingRef != null) {
+                groupTypingRef.removeEventListener(typingValueListener);
+                groupTypingRef.child(FirebaseAuth.getInstance().getUid()).removeValue();
+            }
         }
         nameList.clear();
-        getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).removeValue();
         typingExpiryHandler.removeCallbacks(inputFinishChecker);
 
     }
