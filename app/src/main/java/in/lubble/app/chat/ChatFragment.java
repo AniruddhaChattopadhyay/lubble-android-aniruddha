@@ -675,7 +675,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             chatRecyclerView.setVisibility(View.VISIBLE);
                             pvtSystemMsg.setVisibility(View.GONE);
                         }
-                        ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate(), groupData.getMembers().size());
+                        ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.isJoined(), groupData.getThumbnail(), groupData.getIsPrivate(), groupData.getMembers().size());
                         showBottomBar(groupData);
                         resetUnreadCount();
                         showPublicGroupWarning(groupData);
@@ -812,7 +812,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                                 if (profileInfo != null && getActivity() != null) {
                                     profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                    ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
+                                    ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), false, profileInfo.getThumbnail(), true, 0);
                                     if (!isThisUserJoined) {
                                         joinDescTv.setText(profileInfo.getName() + " wants to message you");
                                     }
@@ -834,7 +834,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                             if (profileInfo != null) {
                                 profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
+                                ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), false, profileInfo.getThumbnail(), true, 0);
                             }
                         }
 
@@ -852,7 +852,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             });
         } else if (!TextUtils.isEmpty(receiverId)) {
             chatRecyclerView.setVisibility(View.VISIBLE);
-            ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true, 0);
+            ((ChatActivity) getActivity()).setGroupMeta(receiverName, false, receiverDpUrl, true, 0);
             bottomContainer.setVisibility(View.VISIBLE);
             composeContainer.setVisibility(View.VISIBLE);
             joinContainer.setVisibility(View.GONE);

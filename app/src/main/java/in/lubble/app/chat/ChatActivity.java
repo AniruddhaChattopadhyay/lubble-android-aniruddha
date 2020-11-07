@@ -28,7 +28,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -44,7 +43,6 @@ import com.google.gson.JsonElement;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
 import java.util.Set;
@@ -71,6 +69,8 @@ import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
 
 public class ChatActivity extends BaseActivity implements ChatMoreFragment.FlairUpdateListener, SearchView.OnQueryTextListener {
 
+    private static final String TAG = "ChatActivity";
+
     public static final String EXTRA_GROUP_ID = "chat_activ_group_id";
     public static final String EXTRA_MSG_ID = "chat_activ_msg_id";
     public static final String EXTRA_CHAT_DATA = "chat_activ_chat_data";
@@ -87,7 +87,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
     private ImageView toolbarIcon, toolbarLockIcon;
     private Toolbar toolbar;
-    private TextView toolbarTv, toolbarInviteHint,highlightNamesTv,memberCountTV;
+    private TextView toolbarTv, toolbarInviteHint, highlightNamesTv, memberCountTV;
     private LinearLayout inviteContainer;
     private ImageView searchBackIv, searchUpIv, searchDownIv;
     private SearchView searchView;
@@ -102,6 +102,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private Set<String> nameSet;
     private String nameList;
     private String nameUser = "";
+
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra(EXTRA_GROUP_ID, groupId);
@@ -483,7 +484,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         }
     }
 
-    public void setGroupMeta(String title, String thumbnailUrl, boolean isPrivate, final int memberCount) {
+    public void setGroupMeta(String title, final boolean isGroupJoined, String thumbnailUrl, boolean isPrivate, final int memberCount) {
         toolbarTv.setText(title);
         if (StringUtils.isValidString(thumbnailUrl)) {
             GlideApp.with(this).load(thumbnailUrl).circleCrop().into(toolbarIcon);
@@ -498,14 +499,13 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
         if (dmId != null) {
             toolbarInviteHint.setText(getString(R.string.personal_chat));
-        }
-        else{
-            Query query =  RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
+        } else {
+            Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
             nameSet = new HashSet<String>();
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for(DataSnapshot childSnapShot: snapshot.getChildren()){
+                    for (DataSnapshot childSnapShot : snapshot.getChildren()) {
                         String uid;
                         uid = childSnapShot.getKey();
                         RealtimeDbHelper.getUserInfoRef(uid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -513,48 +513,27 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 nameList += "," + getFirstName(snapshot.getValue(String.class));
                                 nameSet.add(snapshot.getValue(String.class));
-                                if(nameSet.size()==5 || nameSet.size() == memberCount){
-                                    RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                            if(snapshot.hasChild(FirebaseAuth.getInstance().getUid())){
-                                                RealtimeDbHelper.getUserInfoRef(FirebaseAuth.getInstance().getUid()).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                                        nameUser = getFirstName(snapshot.getValue(String.class));
-                                                        nameSet.add(nameUser);
-                                                        nameList = "<b>" + nameUser + "</b> " +","+ nameList;
-                                                        highlightNamesTv.setText(Html.fromHtml(nameList));
-                                                        String count = "+" + Integer.toString(memberCount-nameSet.size());
-                                                        if(memberCount>5)
-                                                            memberCountTV.setText(count);
-                                                    }
-
-                                                    @Override
-                                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                                    }
-                                                });
-                                            }
-                                            else{
-                                                highlightNamesTv.setText(nameList);
-                                                String count = "+" + Integer.toString(memberCount-nameSet.size());
-                                                if(memberCount>5)
-                                                    memberCountTV.setText(count);
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
+                                if (nameSet.size() == 5 || nameSet.size() == memberCount) {
+                                    if (isGroupJoined) {
+                                        nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+                                        nameSet.add(nameUser);
+                                        nameList = "<b>" + nameUser + "</b> " + "," + nameList;
+                                        highlightNamesTv.setText(Html.fromHtml(nameList));
+                                        String count = "+" + (memberCount - nameSet.size());
+                                        if (memberCount > 5)
+                                            memberCountTV.setText(count);
+                                    } else {
+                                        highlightNamesTv.setText(nameList);
+                                        String count = "+" + (memberCount - nameSet.size());
+                                        if (memberCount > 5)
+                                            memberCountTV.setText(count);
+                                    }
                                 }
                             }
 
                             @Override
                             public void onCancelled(@NonNull DatabaseError error) {
-
+                                FirebaseCrashlytics.getInstance().recordException(error.toException());
                             }
                         });
                     }
@@ -562,17 +541,17 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-
+                    FirebaseCrashlytics.getInstance().recordException(error.toException());
                 }
             });
         }
     }
 
-    private String getFirstName(String name){
-        if(name == null)
+    private String getFirstName(String name) {
+        if (name == null)
             return name;
-        if(name.contains(" "))
-            return name.substring(0,name.indexOf(" "));
+        if (name.contains(" "))
+            return name.substring(0, name.indexOf(" "));
         else
             return name;
     }
