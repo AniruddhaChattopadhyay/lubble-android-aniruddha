@@ -99,9 +99,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private SearchResultData searchResultData = null;
     private int currSearchCursorPos = 0;
     private ProgressDialog searchProgressDialog;
-    private Set<String> nameSet;
     private String nameList;
-    private String nameUser = "";
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -265,9 +263,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             // for DMs
             tabLayout.setVisibility(View.GONE);
             inviteContainer.setVisibility(View.GONE);
+            toolbarInviteHint.setVisibility(View.VISIBLE);
             toolbarInviteHint.setText("Personal Chat");
         } else {
             tabLayout.setVisibility(View.VISIBLE);
+            toolbarInviteHint.setVisibility(View.GONE);
             inviteContainer.setVisibility(View.VISIBLE);
         }
 
@@ -499,9 +499,12 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
         if (dmId != null) {
             toolbarInviteHint.setText(getString(R.string.personal_chat));
+            toolbarInviteHint.setVisibility(View.VISIBLE);
         } else {
+            toolbarInviteHint.setVisibility(View.GONE);
             Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
-            nameSet = new HashSet<String>();
+            final Set<String> nameSet = new HashSet<>();
+            nameList = "";
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -515,7 +518,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                                 nameSet.add(snapshot.getValue(String.class));
                                 if (nameSet.size() == 5 || nameSet.size() == memberCount) {
                                     if (isGroupJoined) {
-                                        nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+                                        String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                                         nameSet.add(nameUser);
                                         nameList = "<b>" + nameUser + "</b> " + "," + nameList;
                                         highlightNamesTv.setText(Html.fromHtml(nameList));
@@ -573,6 +576,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             toolbarInviteHint.setVisibility(View.GONE);
             inviteContainer.setVisibility(View.GONE);
             tabLayout.setVisibility(View.GONE);
+            memberCountTV.setVisibility(View.GONE);
+            highlightNamesTv.setVisibility(View.GONE);
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
 
         } else {
@@ -586,6 +591,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             toolbarLockIcon.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
             inviteContainer.setVisibility(View.VISIBLE);
             tabLayout.setVisibility(View.VISIBLE);
+            highlightNamesTv.setVisibility(View.VISIBLE);
+            memberCountTV.setVisibility(View.VISIBLE);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }

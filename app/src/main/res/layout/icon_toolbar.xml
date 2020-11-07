@@ -48,7 +48,7 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_centerVertical="true"
             android:layout_marginRight="4dp"
             android:layout_toLeftOf="@id/container_invite"
@@ -97,7 +97,7 @@
                 android:marqueeRepeatLimit="1"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
-                android:visibility="visible" />
+                android:visibility="gone" />
 
         </LinearLayout>
 
