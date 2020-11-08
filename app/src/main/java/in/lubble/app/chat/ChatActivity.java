@@ -265,6 +265,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             inviteContainer.setVisibility(View.GONE);
             toolbarInviteHint.setVisibility(View.VISIBLE);
             toolbarInviteHint.setText("Personal Chat");
+            highlightNamesTv.setVisibility(View.GONE);
+            memberCountTV.setVisibility(View.GONE);
         } else {
             tabLayout.setVisibility(View.VISIBLE);
             toolbarInviteHint.setVisibility(View.GONE);
@@ -500,8 +502,12 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         if (dmId != null) {
             toolbarInviteHint.setText(getString(R.string.personal_chat));
             toolbarInviteHint.setVisibility(View.VISIBLE);
+            highlightNamesTv.setVisibility(View.GONE);
+            memberCountTV.setVisibility(View.GONE);
         } else {
             toolbarInviteHint.setVisibility(View.GONE);
+            highlightNamesTv.setVisibility(View.VISIBLE);
+            memberCountTV.setVisibility(View.VISIBLE);
             Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
             final Set<String> nameSet = new HashSet<>();
             nameList = "";
