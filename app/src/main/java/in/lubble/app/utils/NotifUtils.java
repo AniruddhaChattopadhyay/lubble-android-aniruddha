@@ -116,96 +116,99 @@ public class NotifUtils {
     }
 
     private static void sendAllNotifs(final Context context, final ArrayList<NotifData> notifDataList, boolean isDmOnly) {
-        sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DIGEST_CREATED, notifDataList.get(0).getGroupId(), context);
+        if (LubbleSharedPrefs.getInstance().getShowNotifDigest() || isDmOnly) {
+            sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DIGEST_CREATED, notifDataList.get(0).getGroupId(), context);
 
-        final NotificationManager notificationManager =
-                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            final NotificationManager notificationManager =
+                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        for (NotifData notifData : notifDataList) {
-            if (!isDmOnly || notifData.getNotifType().equalsIgnoreCase("dm")) {
-                buildGroupNotification(getMessagingStyle(notifData.getGroupId()), notifData);
-            }
-        }
-
-        for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
-            final String groupId = map.getKey();
-            final Integer notifId = getNotifId(groupId);
-
-            final String groupDpUrl = getGroupDp(notifDataList, groupId);
-
-            Intent intent = new Intent(context, ChatActivity.class);
-            String channel;
-            if (TextUtils.isEmpty(map.getValue().getConversationTitle())) {
-                // it is a DM notif
-                intent.putExtra(EXTRA_DM_ID, groupId);
-                intent.putExtra(TRACK_NOTIF_ID, groupId);
-                channel = Constants.DM_CHAT_NOTIF_CHANNEL;
-            } else {
-                intent.putExtra(EXTRA_GROUP_ID, groupId);
-                intent.putExtra(TRACK_NOTIF_ID, groupId);
-                channel = Constants.NEW_CHAT_NOTIF_CHANNEL;
-            }
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
-            stackBuilder.addNextIntentWithParentStack(intent);
-
-            Intent deleteIntent = new Intent(context, NotifDeleteBroadcastRecvr.class);
-            deleteIntent.putExtra("groupId", groupId);
-            PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), notifId, deleteIntent, 0);
-
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channel)
-                    .setStyle(map.getValue())
-                    .setSmallIcon(R.drawable.ic_lubble_notif)
-                    .setShowWhen(true)
-                    .setGroup(GROUP_KEY)
-                    .setDefaults(0)
-                    .setPriority(NotificationCompat.PRIORITY_LOW)
-                    .setAutoCancel(true)
-                    .setColor(ContextCompat.getColor(context, R.color.colorAccent))
-                    .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
-                    .setDeleteIntent(deletePendingIntent)
-                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                    .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
-
-            List<NotificationCompat.MessagingStyle.Message> messageList = map.getValue().getMessages();
-            if (messageList.size() > 0) {
-                NotificationCompat.MessagingStyle.Message lastMsg = messageList.get(messageList.size() - 1);
-                builder.setWhen(lastMsg.getTimestamp());
-            }
-
-            if (!TextUtils.isEmpty(map.getValue().getConversationTitle())) {
-                // not a DM, add actions
-                addActionReply(context, groupId, builder);
-                if (FirebaseRemoteConfig.getInstance().getBoolean(IS_NOTIF_SNOOZE_ON)) {
-                    addActionSnooze(context, groupId, builder);
+            for (NotifData notifData : notifDataList) {
+                if (!isDmOnly || notifData.getNotifType().equalsIgnoreCase("dm")) {
+                    buildGroupNotification(getMessagingStyle(notifData.getGroupId()), notifData);
                 }
-                addActionMarkAsRead(context, groupId, builder);
             }
 
-            if (StringUtils.isValidString(groupDpUrl)) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                    @Override
-                    public void run() {
-                        GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().into(new CustomTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                builder.setLargeIcon(resource);
-                                notificationManager.notify(notifId, builder.build());
-                                Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
-                                notificationManager.notify(SUMMARY_ID, summary);
-                            }
+            for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
+                final String groupId = map.getKey();
+                final Integer notifId = getNotifId(groupId);
 
-                            @Override
-                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                final String groupDpUrl = getGroupDp(notifDataList, groupId);
 
-                            }
-                        });
+                Intent intent = new Intent(context, ChatActivity.class);
+                String channel;
+                if (TextUtils.isEmpty(map.getValue().getConversationTitle())) {
+                    // it is a DM notif
+                    intent.putExtra(EXTRA_DM_ID, groupId);
+                    intent.putExtra(TRACK_NOTIF_ID, groupId);
+                    channel = Constants.DM_CHAT_NOTIF_CHANNEL;
+                } else {
+                    intent.putExtra(EXTRA_GROUP_ID, groupId);
+                    intent.putExtra(TRACK_NOTIF_ID, groupId);
+                    channel = Constants.NEW_CHAT_NOTIF_CHANNEL;
+                }
+                TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                stackBuilder.addNextIntentWithParentStack(intent);
+
+                Intent deleteIntent = new Intent(context, NotifDeleteBroadcastRecvr.class);
+                deleteIntent.putExtra("groupId", groupId);
+                PendingIntent deletePendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(), notifId, deleteIntent, 0);
+
+                final NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channel)
+                        .setStyle(map.getValue())
+                        .setSmallIcon(R.drawable.ic_lubble_notif)
+                        .setShowWhen(true)
+                        .setGroup(GROUP_KEY)
+                        .setDefaults(0)
+                        .setPriority(NotificationCompat.PRIORITY_LOW)
+                        .setAutoCancel(true)
+                        .setColor(ContextCompat.getColor(context, R.color.colorAccent))
+                        .setContentIntent(stackBuilder.getPendingIntent(notifId, PendingIntent.FLAG_UPDATE_CURRENT))
+                        .setDeleteIntent(deletePendingIntent)
+                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                        .setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY);
+
+                List<NotificationCompat.MessagingStyle.Message> messageList = map.getValue().getMessages();
+                if (messageList.size() > 0) {
+                    NotificationCompat.MessagingStyle.Message lastMsg = messageList.get(messageList.size() - 1);
+                    builder.setWhen(lastMsg.getTimestamp());
+                }
+
+                if (!TextUtils.isEmpty(map.getValue().getConversationTitle())) {
+                    // not a DM, add actions
+                    addActionReply(context, groupId, builder);
+                    if (FirebaseRemoteConfig.getInstance().getBoolean(IS_NOTIF_SNOOZE_ON)) {
+                        addActionSnooze(context, groupId, builder);
                     }
-                });
-            } else {
-                builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
-                notificationManager.notify(notifId, builder.build());
-                Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
-                notificationManager.notify(SUMMARY_ID, summary);
+                    addActionMarkAsRead(context, groupId, builder);
+                }
+
+                if (StringUtils.isValidString(groupDpUrl)) {
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            GlideApp.with(context).asBitmap().load(groupDpUrl).circleCrop().into(new CustomTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    builder.setLargeIcon(resource);
+                                    notificationManager.notify(notifId, builder.build());
+                                    Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
+                                    notificationManager.notify(SUMMARY_ID, summary);
+                                }
+
+                                @Override
+                                public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_group));
+                    notificationManager.notify(notifId, builder.build());
+                    Notification summary = buildSummary(context, GROUP_KEY, notifDataList);
+                    notificationManager.notify(SUMMARY_ID, summary);
+                }
+                LubbleSharedPrefs.getInstance().setShowNotifDigest(false);
             }
         }
     }
@@ -364,6 +367,7 @@ public class NotifUtils {
         UnreadChatsSharedPrefs.getInstance().getPreferences().edit().putString(notifData.getMessageId(), new Gson().toJson(notifData)).commit();
         Log.d(TAG, "persistNewMessage: DONE: " + notifData.getMessageBody());
         addGroupIdMapping(notifData);
+        LubbleSharedPrefs.getInstance().setShowNotifDigest(true);
     }
 
     private static void addGroupIdMapping(NotifData notifData) {
