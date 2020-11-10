@@ -46,5 +46,3 @@
 -dontwarn com.clevertap.android.sdk.**
 # please KEEP ALL THE NAMES
 -keepnames class ** { *; }
--keep class com.uxcam.** { *; }
--dontwarn com.uxcam.**
