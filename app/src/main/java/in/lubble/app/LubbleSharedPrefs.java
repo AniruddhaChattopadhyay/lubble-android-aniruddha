@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -52,6 +53,8 @@ public class LubbleSharedPrefs {
     private final String FLEXI_UPDATE_TS = "FLEXI_UPDATE_TS";
     private final String IS_MAP_DISCLAIMER_CLOSED = "IS_MAP_DISCLAIMER_CLOSED";
     private final String SHARE_MSG_COPY_URL = "SHARE_MSG_COPY_URL";
+
+
     private final String SHARE_MSG_URL = "SHARE_MSG_URL";
 
     private LubbleSharedPrefs(Context context) {
@@ -358,5 +361,4 @@ public class LubbleSharedPrefs {
     public boolean setEventSet(Set<String> set) {
         return preferences.edit().putStringSet(READ_EVENTS, set).commit();
     }
-
 }
