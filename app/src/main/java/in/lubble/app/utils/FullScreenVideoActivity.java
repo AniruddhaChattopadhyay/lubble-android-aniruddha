@@ -43,6 +43,7 @@ import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.File;
 import java.net.URLDecoder;
@@ -220,6 +221,7 @@ public class FullScreenVideoActivity extends BaseActivity {
 
                 @Override
                 public void onPlayerError(ExoPlaybackException error) {
+                    FirebaseCrashlytics.getInstance().recordException(error);
                 }
 
                 @Override

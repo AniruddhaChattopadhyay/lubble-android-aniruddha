@@ -580,7 +580,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         AppNotifUtils.deleteAppNotif(getContext(), groupId);
         syncGroupInfo();
         firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
-        getGroupTypingRef(groupId).addValueEventListener(typingValueListener);
+        DatabaseReference groupTypingRef = getGroupTypingRef(groupId, dmId);
+        if (groupTypingRef != null) {
+            groupTypingRef.addValueEventListener(typingValueListener);
+        }
     }
 
     private void calcUnreadCount() {
@@ -672,7 +675,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             chatRecyclerView.setVisibility(View.VISIBLE);
                             pvtSystemMsg.setVisibility(View.GONE);
                         }
-                        ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.getThumbnail(), groupData.getIsPrivate(), groupData.getMembers().size());
+                        ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.isJoined(), groupData.getThumbnail(), groupData.getIsPrivate(), groupData.getMembers().size());
                         showBottomBar(groupData);
                         resetUnreadCount();
                         showPublicGroupWarning(groupData);
@@ -809,7 +812,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                                 final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                                 if (profileInfo != null && getActivity() != null) {
                                     profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                    ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
+                                    ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), false, profileInfo.getThumbnail(), true, 0);
                                     if (!isThisUserJoined) {
                                         joinDescTv.setText(profileInfo.getName() + " wants to message you");
                                     }
@@ -831,7 +834,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                             if (profileInfo != null) {
                                 profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), profileInfo.getThumbnail(), true, 0);
+                                ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), false, profileInfo.getThumbnail(), true, 0);
                             }
                         }
 
@@ -849,7 +852,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             });
         } else if (!TextUtils.isEmpty(receiverId)) {
             chatRecyclerView.setVisibility(View.VISIBLE);
-            ((ChatActivity) getActivity()).setGroupMeta(receiverName, receiverDpUrl, true, 0);
+            ((ChatActivity) getActivity()).setGroupMeta(receiverName, false, receiverDpUrl, true, 0);
             bottomContainer.setVisibility(View.VISIBLE);
             composeContainer.setVisibility(View.VISIBLE);
             joinContainer.setVisibility(View.GONE);
@@ -1646,7 +1649,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
         @Override
         public void afterTextChanged(Editable editable) {
-            getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).setValue(firstName);
+            DatabaseReference groupTypingRef = getGroupTypingRef(groupId, dmId);
+            if (groupTypingRef != null) {
+                groupTypingRef.child(FirebaseAuth.getInstance().getUid()).setValue(firstName);
+            }
             typingExpiryHandler.removeCallbacks(inputFinishChecker);
             lastTextEdit = System.currentTimeMillis();
             typingExpiryHandler.postDelayed(inputFinishChecker, DELAY);
@@ -2025,7 +2031,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
     private void removeTypingStatus() {
         nameList.clear();
-        getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).removeValue();
+        DatabaseReference groupTypingRef = getGroupTypingRef(groupId, dmId);
+        if (groupTypingRef != null) {
+            groupTypingRef.child(FirebaseAuth.getInstance().getUid()).removeValue();
+        }
     }
 
     ValueEventListener typingValueListener = new ValueEventListener() {
@@ -2081,11 +2090,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (thisUserValueListener != null) {
             getThisUserRef().removeEventListener(thisUserValueListener);
         }
-        if (groupId != null && typingValueListener != null) {
-            getGroupTypingRef(groupId).removeEventListener(typingValueListener);
+        if (typingValueListener != null) {
+            DatabaseReference groupTypingRef = getGroupTypingRef(groupId, dmId);
+            if (groupTypingRef != null) {
+                groupTypingRef.removeEventListener(typingValueListener);
+                groupTypingRef.child(FirebaseAuth.getInstance().getUid()).removeValue();
+            }
         }
         nameList.clear();
-        getGroupTypingRef(groupId).child(FirebaseAuth.getInstance().getUid()).removeValue();
         typingExpiryHandler.removeCallbacks(inputFinishChecker);
 
     }
