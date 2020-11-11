@@ -22,6 +22,8 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
+        <activity android:name=".chat.PinnedMessageBottomSheet"></activity>
+
         <receiver
             android:name=".receivers.ShareSheetReceiver"
             android:enabled="true"
@@ -276,50 +278,66 @@
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="lubbledev.page.link"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="lubble.page.link"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="shop.lubble.in"
                     android:pathPattern="/.*"
                     android:scheme="https" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="*"
                     android:scheme="lubble" />
             </intent-filter>
-
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="lubbl.in" />
-                <data android:scheme="https" android:host="lubble.app.link" />
-                <data android:scheme="https" android:host="lubble-alternate.app.link" />
-                <data android:scheme="https" android:host="lubble.test-app.link" />
-                <data android:scheme="https" android:host="lubble-alternate.test-app.link" />
+
+                <data
+                    android:host="lubbl.in"
+                    android:scheme="https" />
+                <data
+                    android:host="lubble.app.link"
+                    android:scheme="https" />
+                <data
+                    android:host="lubble-alternate.app.link"
+                    android:scheme="https" />
+                <data
+                    android:host="lubble.test-app.link"
+                    android:scheme="https" />
+                <data
+                    android:host="lubble-alternate.test-app.link"
+                    android:scheme="https" />
             </intent-filter>
         </activity>
         <activity

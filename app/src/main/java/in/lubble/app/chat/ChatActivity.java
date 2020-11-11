@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -87,9 +89,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
     private ImageView toolbarIcon, toolbarLockIcon;
     private Toolbar toolbar;
-    private TextView toolbarTv, toolbarInviteHint, highlightNamesTv, memberCountTV;
+    private TextView toolbarTv, toolbarInviteHint,highlightNamesTv,memberCountTV,pinnedMessageDescription;
     private LinearLayout inviteContainer;
-    private ImageView searchBackIv, searchUpIv, searchDownIv;
+    private RelativeLayout pinnedMessageContainer;
+    private ImageView searchBackIv, searchUpIv, searchDownIv, pinnedMessageCancel;
     private SearchView searchView;
     private ChatFragment targetFrag = null;
     private String groupId;
@@ -100,6 +103,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private int currSearchCursorPos = 0;
     private ProgressDialog searchProgressDialog;
     private String nameList;
+    private String nameUser = "";
+    private SharedPreferences sharedPreferences;
+    private final String MyPrefs = "ChatActivity";
+    Set<String> groupList;
+    private final String pinnedMessageDontShowGroupList = "PINNED_MESSAGE_DONT_SHOW_GROUPLIST";
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -244,6 +252,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         searchView = toolbar.findViewById(R.id.search_view);
         searchUpIv = toolbar.findViewById(R.id.iv_search_up);
         searchDownIv = toolbar.findViewById(R.id.iv_search_down);
+        pinnedMessageContainer = findViewById(R.id.pinned_message_container);
+        pinnedMessageDescription = findViewById(R.id.pinned_message_content);
+        pinnedMessageCancel = findViewById(R.id.pinned_message_cross);
         searchView.setOnQueryTextListener(this);
         setTitle("");
 
@@ -392,6 +403,51 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 }
             }
         });
+        sharedPreferences = ChatActivity.this.getSharedPreferences(MyPrefs, Context.MODE_PRIVATE);
+        groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList,null);
+        if(groupList==null || !(groupList.contains(groupId))){
+            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("pinned_message").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if(snapshot.exists()){
+                        String message = snapshot.getValue(String.class);
+                        pinnedMessageContainer.setVisibility(View.VISIBLE);
+                        pinnedMessageDescription.setText(message);
+                        pinnedMessageCancel.setVisibility(View.VISIBLE);
+                        pinnedMessageDescription.setMaxLines(2);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+            pinnedMessageContainer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    PinnedMessageBottomSheet pinnedMessageBottomSheet = new PinnedMessageBottomSheet(groupId);
+                    pinnedMessageBottomSheet.show(getSupportFragmentManager(),pinnedMessageBottomSheet.getTag());
+                }
+            });
+            pinnedMessageCancel.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    pinnedMessageContainer.setVisibility(View.GONE);
+//                    Set<String> groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList,null);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    if(groupList!=null)
+                        groupList.add(groupId);
+                    else {
+                        groupList = new HashSet<>();
+                        groupList.add(groupId);
+                    }
+                    editor.putStringSet(pinnedMessageDontShowGroupList,groupList);
+                    editor.apply();
+                }
+            });
+        }
     }
 
     @Override

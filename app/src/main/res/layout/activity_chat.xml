@@ -37,4 +37,55 @@
         android:layout_height="2dp"
         android:layout_below="@id/tablayout_chat" />
 
+    <include
+        layout="@layout/pinned_message_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tablayout_chat"
+        />
+
+<!--    <RelativeLayout-->
+<!--        android:id="@+id/pinned_message_container"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="@drawable/rect_rounded_white"-->
+<!--        android:layout_below="@+id/tablayout_chat"-->
+<!--        android:visibility="invisible">-->
+<!--        <ImageView-->
+<!--            android:id="@+id/pinned_icon"-->
+<!--            android:layout_width="16dp"-->
+<!--            android:layout_height="16dp"-->
+<!--            android:layout_margin="8dp"-->
+<!--            app:srcCompat="@drawable/ic_pin"/>-->
+<!--        <TextView-->
+<!--            android:id="@+id/pinned_message_heading"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_margin="8dp"-->
+<!--            android:text="PINNED MESSAGE"-->
+<!--            android:textColor="@color/com_facebook_blue"-->
+<!--            android:textSize="16sp"-->
+<!--            android:layout_toRightOf="@+id/pinned_icon"/>-->
+
+<!--        <ImageView-->
+<!--            android:id="@+id/pinned_message_cross"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:srcCompat="@drawable/ic_cancel_black_24dp"-->
+<!--            android:layout_alignParentRight="true"-->
+<!--            android:padding="4dp" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/pinned_message_content"-->
+<!--            android:layout_marginLeft="10dp"-->
+<!--            android:layout_marginRight="10dp"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_below="@+id/pinned_message_heading"-->
+<!--            android:text="@string/loc_perm_rationale"-->
+<!--            android:maxLines="3"-->
+<!--            android:background="@color/grey_200"/>-->
+
+<!--    </RelativeLayout>-->
+
 </RelativeLayout>
