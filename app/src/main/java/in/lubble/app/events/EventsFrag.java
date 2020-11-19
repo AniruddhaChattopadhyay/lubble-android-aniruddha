@@ -5,17 +5,17 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
@@ -29,6 +29,7 @@ import in.lubble.app.events.new_event.NewEventActivity;
 import in.lubble.app.models.EventData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.UiUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -41,8 +42,7 @@ public class EventsFrag extends Fragment {
     private RecyclerView recyclerView;
     private TextView maintenanceTv;
     private LottieAnimationView maintenanceAnim;
-    private FloatingActionButton fab;
-    private LinearLayout emptyEventContainer;
+    private ExtendedFloatingActionButton fab;
     private EventsAdapter adapter;
     private ChildEventListener childEventListener;
     private ProgressBar progressBar;
@@ -67,7 +67,6 @@ public class EventsFrag extends Fragment {
         maintenanceAnim = view.findViewById(R.id.anim_maintenance);
         recyclerView = view.findViewById(R.id.rv_events);
         fab = view.findViewById(R.id.fab_new_event);
-        emptyEventContainer = view.findViewById(R.id.container_empty_events);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new EventsAdapter(getContext());
@@ -83,6 +82,19 @@ public class EventsFrag extends Fragment {
 
         LubbleSharedPrefs.getInstance().setEventSet(null);
         adapter.clear();
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0) {
+                    UiUtils.animateSlideDownHide(getContext(), fab);
+                } else {
+                    UiUtils.animateSlideUpShow(getContext(), fab);
+                }
+            }
+        });
 
         return view;
     }
@@ -142,7 +154,6 @@ public class EventsFrag extends Fragment {
             maintenanceTv.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
-            emptyEventContainer.setVisibility(View.GONE);
 
             getEvents();
         }
