@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Browser;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -387,6 +388,21 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         filter.setPriority(1);
         registerReceiver(notificationReceiver, filter);
 
+    }
+
+    @Override
+    public void startActivity(Intent intent) {
+        // for appending linkify links with extra params to let branch open links correctly
+        // ref: https://github.com/BranchMetrics/android-branch-deep-linking-attribution/issues/617
+
+        if (TextUtils.equals(intent.getAction(), Intent.ACTION_VIEW)) {
+            String app_id = intent.getStringExtra(Browser.EXTRA_APPLICATION_ID);
+            if (TextUtils.equals(getApplicationContext().getPackageName(), app_id)) {
+                // This intent is a view coming from Linkify; handle internally
+                intent.putExtra("branch_force_new_session", true);
+            }
+        }
+        super.startActivity(intent);
     }
 
     @Override
