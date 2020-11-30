@@ -30,6 +30,7 @@ import in.lubble.app.models.ChatData;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.utils.NotifUtils;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.utils.NotifUtils.deleteUnreadMsgsForGroupId;
 
@@ -38,10 +39,12 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
     private static final String TAG = "NotifActionBroadcastRec";
 
     public static String ACTION_MARK_AS_READ = BuildConfig.APPLICATION_ID + ".notif.action.mark_as_read";
+    public static String ACTION_BLOCK = BuildConfig.APPLICATION_ID + ".notif.action.block";
     public static String ACTION_REPLY = BuildConfig.APPLICATION_ID + ".notif.action.reply";
     public static String ACTION_SNOOZE = BuildConfig.APPLICATION_ID + ".notif.action.snooze";
     // Key for the string that's delivered in the action's intent.
     public static final String KEY_TEXT_REPLY = "key_text_reply";
+    private DatabaseReference dmInfoReference;
 
     public static String uid = FirebaseAuth.getInstance().getUid();
 
@@ -119,6 +122,16 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
                 bundle.putString("src", "notif");
                 bundle.putString("group_id", groupId);
                 Analytics.triggerEvent(AnalyticsEvents.GROUP_SNOOZED, bundle, context);
+            }
+        }
+
+        else if((intent != null && intent.getAction().equalsIgnoreCase(ACTION_BLOCK) && intent.hasExtra("markBlock.groupId"))){
+            final String groupId = intent.getStringExtra("markBlock.groupId");
+            final String authorId = intent.getStringExtra("markBlock.authorId");
+            if (groupId != null && authorId != null) {
+                dmInfoReference = getDmsRef().child(groupId);
+                dmInfoReference.child("members").child(authorId).child("blocked_status").setValue("BLOCKED");
+                dmInfoReference.child("members").child(authorId).child("blocked_timestamp").setValue(System.currentTimeMillis());
             }
         }
     }
