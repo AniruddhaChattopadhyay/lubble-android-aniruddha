@@ -1,47 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/pinned_message_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/rect_rounded_white"
     android:layout_below="@+id/tablayout_chat"
-    android:visibility="gone">
+    android:background="@color/super_light_gray"
+    android:orientation="vertical"
+    android:paddingBottom="8dp"
+    android:visibility="gone"
+    tools:visibility="visible">
 
     <ImageView
         android:id="@+id/pinned_icon"
         android:layout_width="16dp"
         android:layout_height="16dp"
-        android:layout_margin="8dp"
-        app:srcCompat="@drawable/ic_pin"/>
+        android:layout_alignTop="@id/pinned_message_heading"
+        android:layout_alignBottom="@id/pinned_message_heading"
+        android:layout_marginLeft="12dp"
+        app:srcCompat="@drawable/ic_pin" />
+
     <TextView
         android:id="@+id/pinned_message_heading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="PINNED MESSAGE"
+        android:layout_toRightOf="@+id/pinned_icon"
+        android:text="Group Info"
         android:textColor="@color/com_facebook_blue"
-        android:textSize="16sp"
-        android:layout_toRightOf="@+id/pinned_icon"/>
+        android:textSize="16sp" />
 
     <ImageView
         android:id="@+id/pinned_message_cross"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_cancel_black_24dp"
         android:layout_alignParentRight="true"
+        android:padding="4dp"
         android:visibility="invisible"
-        android:padding="4dp" />
+        app:srcCompat="@drawable/ic_close_black_24dp"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/pinned_message_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/pinned_message_heading"
-        android:text="@string/loc_perm_rationale"
-        android:background="@color/grey_200"/>
+        android:layout_marginLeft="10dp"
+        android:maxLines="3"
+        android:layout_marginRight="10dp"
+        android:ellipsize="end"
+        tools:text="@string/loc_perm_rationale"
+        android:textColor="@color/black" />
 
 </RelativeLayout>

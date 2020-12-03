@@ -10,11 +10,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -52,6 +56,7 @@ import java.util.Set;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -90,7 +95,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
     private ImageView toolbarIcon, toolbarLockIcon;
     private Toolbar toolbar;
-    private TextView toolbarTv, toolbarInviteHint,highlightNamesTv,memberCountTV,pinnedMessageDescription;
+    private TextView toolbarTv, toolbarInviteHint, highlightNamesTv, memberCountTV, pinnedMsgTv;
     private LinearLayout inviteContainer;
     private RelativeLayout pinnedMessageContainer;
     private ImageView searchBackIv, searchUpIv, searchDownIv, pinnedMessageCancel;
@@ -254,7 +259,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         searchUpIv = toolbar.findViewById(R.id.iv_search_up);
         searchDownIv = toolbar.findViewById(R.id.iv_search_down);
         pinnedMessageContainer = findViewById(R.id.pinned_message_container);
-        pinnedMessageDescription = findViewById(R.id.pinned_message_content);
+        pinnedMsgTv = findViewById(R.id.pinned_message_content);
         pinnedMessageCancel = findViewById(R.id.pinned_message_cross);
         searchView.setOnQueryTextListener(this);
         setTitle("");
@@ -405,17 +410,45 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             }
         });
         sharedPreferences = ChatActivity.this.getSharedPreferences(MyPrefs, Context.MODE_PRIVATE);
-        groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList,null);
-        if(dmId==null && (groupList==null || !(groupList.contains(groupId)))){
+        groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList, null);
+        if (dmId == null && (groupList == null || !(groupList.contains(groupId)))) {
             RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("pinned_message").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.exists()){
-                        String message = snapshot.getValue(String.class);
-                        pinnedMessageContainer.setVisibility(View.VISIBLE);
-                        pinnedMessageDescription.setText(message);
-                        pinnedMessageCancel.setVisibility(View.VISIBLE);
-                        pinnedMessageDescription.setMaxLines(2);
+                    if (snapshot.exists()) {
+                        final String message = snapshot.getValue(String.class);
+                        if (!TextUtils.isEmpty(message)) {
+                            pinnedMessageContainer.setVisibility(View.VISIBLE);
+                            pinnedMsgTv.setText(message);
+                            pinnedMessageCancel.setVisibility(View.VISIBLE);
+
+                            pinnedMsgTv.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                                @Override
+                                public void onGlobalLayout() {
+                                    // Past the maximum number of lines we want to display.
+                                    pinnedMsgTv.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                                    if (pinnedMsgTv.getLineCount() > 2) {
+                                        int lastCharShown = pinnedMsgTv.getLayout().getLineVisibleEnd(2 - 1);
+
+                                        pinnedMsgTv.setMaxLines(2);
+
+                                        String moreString = "read more";
+                                        String suffix = "  " + moreString;
+
+                                        // 3 is a "magic number" but it's just basically the length of the ellipsis we're going to insert
+                                        String actionDisplayText = message.substring(0, lastCharShown - suffix.length() - 3) + "..." + suffix;
+
+                                        SpannableString truncatedSpannableString = new SpannableString(actionDisplayText);
+                                        int startIndex = actionDisplayText.indexOf(moreString);
+                                        truncatedSpannableString.setSpan(
+                                                new ForegroundColorSpan(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.colorAccent)),
+                                                startIndex, startIndex + moreString.length(),
+                                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        pinnedMsgTv.setText(truncatedSpannableString);
+                                    }
+                                }
+                            });
+                        }
                     }
                 }
 
@@ -429,7 +462,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 @Override
                 public void onClick(View v) {
                     PinnedMessageBottomSheet pinnedMessageBottomSheet = new PinnedMessageBottomSheet(groupId);
-                    pinnedMessageBottomSheet.show(getSupportFragmentManager(),pinnedMessageBottomSheet.getTag());
+                    pinnedMessageBottomSheet.show(getSupportFragmentManager(), pinnedMessageBottomSheet.getTag());
                 }
             });
             pinnedMessageCancel.setOnClickListener(new View.OnClickListener() {
@@ -438,13 +471,13 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     pinnedMessageContainer.setVisibility(View.GONE);
 //                    Set<String> groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList,null);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    if(groupList!=null)
+                    if (groupList != null)
                         groupList.add(groupId);
                     else {
                         groupList = new HashSet<>();
                         groupList.add(groupId);
                     }
-                    editor.putStringSet(pinnedMessageDontShowGroupList,groupList);
+                    editor.putStringSet(pinnedMessageDontShowGroupList, groupList);
                     editor.apply();
                 }
             });
