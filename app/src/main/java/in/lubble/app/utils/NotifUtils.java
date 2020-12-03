@@ -138,11 +138,11 @@ public class NotifUtils {
             for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
                 final String groupId = map.getKey();
                 final Integer notifId = getNotifId(groupId);
-                String[] info = new String[3];
-                getInfo(notifDataList,groupId,info);
-                final String authorId = info[0];
-                final String groupDpUrl = info[1];
-                final boolean isBlockNeeded = Boolean.parseBoolean(info[2]);
+                //String[] info = new String[3];
+                NotifData notifData = getInfo(notifDataList,groupId);
+                final String authorId = notifData.getAuthorId();
+                final String groupDpUrl = notifData.getGroupDpUrl();
+                final boolean isBlockNeeded = notifData.getBlockNeeded();
 
                 Intent intent = new Intent(context, ChatActivity.class);
                 String channel;
@@ -304,14 +304,17 @@ public class NotifUtils {
         return null;
     }
 
-    private static void getInfo(ArrayList<NotifData> notifDataList, String groupId, String[] info){
+    @Nullable
+    private static NotifData getInfo(ArrayList<NotifData> notifDataList, String groupId){
         for (NotifData notifData : notifDataList) {
             if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
-                info[0] = notifData.getAuthorId();
-                info[1] = notifData.getGroupDpUrl();
-                info[2] = Boolean.toString(notifData.getBlockNeeded());
+                return notifData;
+//                info[0] = notifData.getAuthorId();
+//                info[1] = notifData.getGroupDpUrl();
+//                info[2] = Boolean.toString(notifData.getBlockNeeded());
             }
         }
+        return null;
     }
 
     @Nullable
