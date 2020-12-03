@@ -138,7 +138,6 @@ public class NotifUtils {
             for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
                 final String groupId = map.getKey();
                 final Integer notifId = getNotifId(groupId);
-                //String[] info = new String[3];
                 NotifData notifData = getInfo(notifDataList,groupId);
                 final String authorId = notifData.getAuthorId();
                 final String groupDpUrl = notifData.getGroupDpUrl();
@@ -309,9 +308,6 @@ public class NotifUtils {
         for (NotifData notifData : notifDataList) {
             if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
                 return notifData;
-//                info[0] = notifData.getAuthorId();
-//                info[1] = notifData.getGroupDpUrl();
-//                info[2] = Boolean.toString(notifData.getBlockNeeded());
             }
         }
         return null;
