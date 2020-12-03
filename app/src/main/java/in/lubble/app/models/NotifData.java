@@ -44,6 +44,8 @@ public class NotifData {
     private String notifType;
     @SerializedName("isSeller")
     private Boolean isSeller;
+    @SerializedName("isBlockNeeded")
+    private Boolean isBlockNeeded = false;
 
     public String getMessageId() {
         return messageId;
@@ -91,6 +93,14 @@ public class NotifData {
 
     public void setGroupName(String groupName) {
         this.groupName = groupName;
+    }
+
+    public Boolean getBlockNeeded() {
+        return isBlockNeeded;
+    }
+
+    public void setBlockNeeded(Boolean blockNeeded) {
+        isBlockNeeded = blockNeeded;
     }
 
     public String getMessageBody() {
