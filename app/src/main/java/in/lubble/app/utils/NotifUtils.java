@@ -138,9 +138,11 @@ public class NotifUtils {
             for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
                 final String groupId = map.getKey();
                 final Integer notifId = getNotifId(groupId);
-                final String groupDpUrl = getGroupDp(notifDataList, groupId);
-                final String authorId = getAuthorId(notifDataList, groupId);
-                final boolean isBlockNeeded = getIsBlockNeeded(notifDataList, groupId);
+                String[] info = new String[3];
+                getInfo(notifDataList,groupId,info);
+                final String authorId = info[0];
+                final String groupDpUrl = info[1];
+                final boolean isBlockNeeded = Boolean.parseBoolean(info[2]);
 
                 Intent intent = new Intent(context, ChatActivity.class);
                 String channel;
@@ -190,7 +192,7 @@ public class NotifUtils {
                     addActionMarkAsRead(context, groupId, builder);
                 }
                 //for dms
-               if(TextUtils.isEmpty(map.getValue().getConversationTitle())){
+               else{
                    if (groupId != null ) {
                         if(isBlockNeeded)
                             addActionBlock(context,groupId,authorId ,builder);
@@ -300,6 +302,16 @@ public class NotifUtils {
             }
         }
         return null;
+    }
+
+    private static void getInfo(ArrayList<NotifData> notifDataList, String groupId, String[] info){
+        for (NotifData notifData : notifDataList) {
+            if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                info[0] = notifData.getAuthorId();
+                info[1] = notifData.getGroupDpUrl();
+                info[2] = Boolean.toString(notifData.getBlockNeeded());
+            }
+        }
     }
 
     @Nullable
