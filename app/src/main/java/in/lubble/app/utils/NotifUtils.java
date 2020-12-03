@@ -26,6 +26,10 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.gson.Gson;
 
@@ -44,6 +48,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.NotifData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
 import in.lubble.app.notifications.NotifActionBroadcastRecvr;
@@ -53,6 +58,8 @@ import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
 import static in.lubble.app.chat.ChatActivity.EXTRA_DM_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
+import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_BLOCK;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_MARK_AS_READ;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_REPLY;
 import static in.lubble.app.notifications.NotifActionBroadcastRecvr.ACTION_SNOOZE;
@@ -131,8 +138,11 @@ public class NotifUtils {
             for (Map.Entry<String, NotificationCompat.MessagingStyle> map : messagingStyleMap.entrySet()) {
                 final String groupId = map.getKey();
                 final Integer notifId = getNotifId(groupId);
-
-                final String groupDpUrl = getGroupDp(notifDataList, groupId);
+                String[] info = new String[3];
+                getInfo(notifDataList,groupId,info);
+                final String authorId = info[0];
+                final String groupDpUrl = info[1];
+                final boolean isBlockNeeded = Boolean.parseBoolean(info[2]);
 
                 Intent intent = new Intent(context, ChatActivity.class);
                 String channel;
@@ -181,6 +191,13 @@ public class NotifUtils {
                     }
                     addActionMarkAsRead(context, groupId, builder);
                 }
+                //for dms
+               else{
+                   if (groupId != null ) {
+                        if(isBlockNeeded)
+                            addActionBlock(context,groupId,authorId ,builder);
+                   }
+               }
 
                 if (StringUtils.isValidString(groupDpUrl)) {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -213,6 +230,16 @@ public class NotifUtils {
         }
     }
 
+    private static void addActionBlock(Context context, String groupId, String authorId, NotificationCompat.Builder builder) {
+        Intent markBlockIntent = new Intent(context, NotifActionBroadcastRecvr.class);
+        markBlockIntent.setAction(ACTION_BLOCK);
+        markBlockIntent.putExtra("markBlock.groupId", groupId);
+        markBlockIntent.putExtra("markBlock.authorId", authorId); // put author id here
+        PendingIntent markBlockPendingIntent =
+                PendingIntent.getBroadcast(context, getNotifId(groupId), markBlockIntent, 0);
+
+        builder.addAction(0, "Block", markBlockPendingIntent);
+    }
     private static void addActionReply(Context context, String groupId, NotificationCompat.Builder builder) {
         RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY)
                 .setLabel("Reply")
@@ -256,6 +283,35 @@ public class NotifUtils {
                 PendingIntent.getBroadcast(context, getNotifId(groupId), snoozeIntent, 0);
 
         builder.addAction(0, "Snooze", snoozePendingIntent);
+    }
+
+    private static boolean getIsBlockNeeded(ArrayList<NotifData> notifDataList, String groupId) {
+        for (NotifData notifData : notifDataList) {
+            if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                return notifData.getBlockNeeded();
+            }
+        }
+        return false;
+    }
+
+    @Nullable
+    private static String getAuthorId(ArrayList<NotifData> notifDataList, String groupId) {
+        for (NotifData notifData : notifDataList) {
+            if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                return notifData.getAuthorId();
+            }
+        }
+        return null;
+    }
+
+    private static void getInfo(ArrayList<NotifData> notifDataList, String groupId, String[] info){
+        for (NotifData notifData : notifDataList) {
+            if (notifData.getGroupId().equalsIgnoreCase(groupId)) {
+                info[0] = notifData.getAuthorId();
+                info[1] = notifData.getGroupDpUrl();
+                info[2] = Boolean.toString(notifData.getBlockNeeded());
+            }
+        }
     }
 
     @Nullable
