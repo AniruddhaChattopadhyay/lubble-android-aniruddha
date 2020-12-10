@@ -137,7 +137,6 @@ import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.getTitleCase;
 import static in.lubble.app.utils.StringUtils.isValidString;
 import static in.lubble.app.utils.UiUtils.dpToPx;
-import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.UiUtils.showKeyboard;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
@@ -181,8 +180,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private TextView linkTitle;
     private TextView linkDesc;
     private ImageView linkCancel;
-    @Nullable
-    private DatabaseReference lubbleMainGroupRef;
     @Nullable
     private DatabaseReference groupReference;
     @Nullable
@@ -954,36 +951,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     private void showPublicGroupWarning(GroupData groupData) {
-        if (lubbleMainGroupRef == null && !LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupData.getIsPinned()) {
-            lubbleMainGroupRef = RealtimeDbHelper.getLubbleRef();
-            lubbleMainGroupRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (isAdded()) {
-                        String lubbleName = dataSnapshot.child("title").getValue(String.class);
-                        showBottomSheetAlert(getContext(), getLayoutInflater(),
-                                "\uD83D\uDC4B " + String.format(getString(R.string.lubble_group_warning_title), lubbleName),
-                                String.format(getString(R.string.lubble_group_warning_subtitle), lubbleName),
-                                0, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
-                                        LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
-                                        DatabaseReference unreadCountRef = getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
-                                                .child("unreadCount");
-                                        unreadCountRef.setValue(1);
-                                        unreadCountRef.setValue(0);
-                                    }
-                                });
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
-                }
-            });
-
+        if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened() && groupData.getIsPinned()) {
+            LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
+            LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
+            DatabaseReference unreadCountRef = getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
+                    .child("unreadCount");
+            unreadCountRef.setValue(1);
+            unreadCountRef.setValue(0);
         }
     }
 

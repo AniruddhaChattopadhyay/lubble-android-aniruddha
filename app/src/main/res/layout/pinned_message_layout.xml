@@ -8,6 +8,7 @@
     android:layout_below="@+id/tablayout_chat"
     android:background="@color/md_blue_50"
     android:orientation="vertical"
+    android:foreground="?attr/selectableItemBackground"
     android:paddingBottom="16dp"
     android:visibility="gone"
     tools:visibility="visible">
@@ -49,7 +50,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/pinned_message_heading"
         android:layout_marginLeft="10dp"
-        android:maxLines="3"
+        android:maxLines="4"
         android:layout_marginRight="10dp"
         android:ellipsize="end"
         tools:text="@string/loc_perm_rationale"

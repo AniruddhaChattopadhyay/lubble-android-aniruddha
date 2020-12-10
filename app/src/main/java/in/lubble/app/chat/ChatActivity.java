@@ -427,10 +427,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                                 public void onGlobalLayout() {
                                     // Past the maximum number of lines we want to display.
                                     pinnedMsgTv.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                                    if (pinnedMsgTv.getLineCount() > 2) {
-                                        int lastCharShown = pinnedMsgTv.getLayout().getLineVisibleEnd(2 - 1);
+                                    if (pinnedMsgTv.getLineCount() > 3) {
+                                        int lastCharShown = pinnedMsgTv.getLayout().getLineVisibleEnd(3 - 1);
 
-                                        pinnedMsgTv.setMaxLines(2);
+                                        pinnedMsgTv.setMaxLines(3);
 
                                         String moreString = "read more";
                                         String suffix = "  " + moreString;
