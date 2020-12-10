@@ -8,7 +8,6 @@
     android:layout_below="@+id/tablayout_chat"
     android:background="@color/md_blue_50"
     android:orientation="vertical"
-    android:foreground="?attr/selectableItemBackground"
     android:paddingBottom="16dp"
     android:visibility="gone"
     tools:visibility="visible">
