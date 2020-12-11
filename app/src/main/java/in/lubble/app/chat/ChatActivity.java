@@ -619,52 +619,57 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         } else {
             toolbarInviteHint.setVisibility(View.GONE);
             highlightNamesTv.setVisibility(View.VISIBLE);
-            memberCountTV.setVisibility(View.VISIBLE);
-            Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
-            final Set<String> nameSet = new HashSet<>();
-            nameList = "";
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot childSnapShot : snapshot.getChildren()) {
-                        String uid;
-                        uid = childSnapShot.getKey();
-                        RealtimeDbHelper.getUserInfoRef(uid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                nameList += "," + getFirstName(snapshot.getValue(String.class));
-                                nameSet.add(snapshot.getValue(String.class));
-                                if (nameSet.size() == 5 || nameSet.size() == memberCount) {
-                                    if (isGroupJoined) {
-                                        String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-                                        nameSet.add(nameUser);
-                                        nameList = "<b>" + nameUser + "</b> " + "," + nameList;
-                                        highlightNamesTv.setText(Html.fromHtml(nameList));
-                                        String count = "+" + (memberCount - nameSet.size());
-                                        if (memberCount > 5)
-                                            memberCountTV.setText(count);
-                                    } else {
-                                        highlightNamesTv.setText(nameList);
-                                        String count = "+" + (memberCount - nameSet.size());
-                                        if (memberCount > 5)
-                                            memberCountTV.setText(count);
+            if (memberCount < 5) {
+                memberCountTV.setVisibility(View.GONE);
+                highlightNamesTv.setText(R.string.click_group_info);
+            } else {
+                memberCountTV.setVisibility(View.VISIBLE);
+                Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
+                final Set<String> nameSet = new HashSet<>();
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        nameList = "";
+                        for (DataSnapshot childSnapShot : snapshot.getChildren()) {
+                            String uid;
+                            uid = childSnapShot.getKey();
+                            RealtimeDbHelper.getUserInfoRef(uid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    nameList += getFirstName(snapshot.getValue(String.class)) + ", ";
+                                    nameSet.add(snapshot.getValue(String.class));
+                                    if (nameSet.size() == 5 || nameSet.size() == memberCount) {
+                                        if (isGroupJoined) {
+                                            String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+                                            nameSet.add(nameUser);
+                                            nameList = "<b>" + nameUser + "</b>, " + nameList;
+                                            highlightNamesTv.setText(Html.fromHtml(nameList));
+                                            String count = "+" + (memberCount - nameSet.size());
+                                            if (memberCount > 5)
+                                                memberCountTV.setText(count);
+                                        } else {
+                                            highlightNamesTv.setText(nameList);
+                                            String count = "+" + (memberCount - nameSet.size());
+                                            if (memberCount > 5)
+                                                memberCountTV.setText(count);
+                                        }
                                     }
                                 }
-                            }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                FirebaseCrashlytics.getInstance().recordException(error.toException());
-                            }
-                        });
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    FirebaseCrashlytics.getInstance().recordException(error.toException());
+                                }
+                            });
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    FirebaseCrashlytics.getInstance().recordException(error.toException());
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        FirebaseCrashlytics.getInstance().recordException(error.toException());
+                    }
+                });
+            }
         }
     }
 
