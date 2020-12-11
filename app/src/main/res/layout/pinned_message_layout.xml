@@ -27,8 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:layout_toRightOf="@+id/pinned_icon"
-        android:text="Group Info"
-        android:textStyle="bold"
+        android:text="Group Rules &amp; Info"
         android:textColor="@color/com_facebook_blue"
         android:textSize="16sp" />
 

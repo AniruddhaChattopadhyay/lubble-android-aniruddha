@@ -25,23 +25,24 @@
         app:tabSelectedTextColor="@color/black"
         android:background="@color/white" />
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewpager_chat"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/tablayout_chat" />
-
-    <include
-        layout="@layout/layout_shadow"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_below="@id/tablayout_chat" />
-
     <include
         layout="@layout/pinned_message_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/tablayout_chat"
         />
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewpager_chat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/pinned_message_container" />
+
+    <include
+        layout="@layout/layout_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/tablayout_chat" />
 
 </RelativeLayout>

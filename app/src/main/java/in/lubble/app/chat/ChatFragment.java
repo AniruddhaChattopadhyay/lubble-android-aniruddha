@@ -1904,7 +1904,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             public void onClick(DialogInterface dialog, int which) {
                                 Map<String, Object> childUpdates = new HashMap<>();
                                 childUpdates.put("type", SYSTEM);
-                                childUpdates.put("message", "Marked as spam");
+                                childUpdates.put("message", "Sorry, message removed by moderators");
                                 childUpdates.put("ogMessage", ogMsg);
                                 messagesReference.child(selectedChatId).updateChildren(childUpdates);
 
@@ -1920,7 +1920,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                             public void onClick(DialogInterface dialog, int which) {
                                 Map<String, Object> childUpdates = new HashMap<>();
                                 childUpdates.put("type", SYSTEM);
-                                childUpdates.put("message", "Marked as spam");
+                                childUpdates.put("message", "Sorry, message removed by moderators");
                                 childUpdates.put("ogMessage", ogMsg);
                                 messagesReference.child(selectedChatId).updateChildren(childUpdates);
                                 Analytics.triggerEvent(AnalyticsEvents.MARKED_SPAM, getContext());
