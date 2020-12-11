@@ -463,6 +463,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 public void onClick(View v) {
                     PinnedMessageBottomSheet pinnedMessageBottomSheet = new PinnedMessageBottomSheet(groupId);
                     pinnedMessageBottomSheet.show(getSupportFragmentManager(), pinnedMessageBottomSheet.getTag());
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", groupId);
+                    Analytics.triggerEvent(AnalyticsEvents.EXPAND_PIN_MSG, bundle, ChatActivity.this);
                 }
             });
             pinnedMessageCancel.setOnClickListener(new View.OnClickListener() {
@@ -479,6 +483,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     }
                     editor.putStringSet(pinnedMessageDontShowGroupList, groupList);
                     editor.apply();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", groupId);
+                    Analytics.triggerEvent(AnalyticsEvents.DISMISS_PIN_MSG, bundle, ChatActivity.this);
                 }
             });
         }

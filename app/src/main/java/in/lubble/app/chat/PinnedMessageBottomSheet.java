@@ -17,21 +17,26 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 
 
 public class PinnedMessageBottomSheet extends BottomSheetDialogFragment {
-    TextView pinnedMessageContent;
-    RelativeLayout pinnedMessageContainer;
+    private TextView pinnedMessageContent;
+    private RelativeLayout pinnedMessageContainer;
+    private final String groupId;
 
-    String groupId;
-    public PinnedMessageBottomSheet(String gid){
+    public PinnedMessageBottomSheet(String gid) {
         this.groupId = gid;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("group_id", groupId);
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
     }
 
     @Override
@@ -44,7 +49,7 @@ public class PinnedMessageBottomSheet extends BottomSheetDialogFragment {
         RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("pinned_message").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()){
+                if (snapshot.exists()) {
                     String message = snapshot.getValue(String.class);
                     pinnedMessageContainer.setVisibility(View.VISIBLE);
                     pinnedMessageContent.setText(message);
