@@ -636,7 +636,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                             RealtimeDbHelper.getUserInfoRef(uid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    nameList += getFirstName(snapshot.getValue(String.class)) + ", ";
+                                    String firstName = getFirstName(snapshot.getValue(String.class));
+                                    if (firstName != null) {
+                                        nameList += firstName + ", ";
+                                    }
                                     nameSet.add(snapshot.getValue(String.class));
                                     if (nameSet.size() == 5 || nameSet.size() == memberCount) {
                                         if (isGroupJoined) {

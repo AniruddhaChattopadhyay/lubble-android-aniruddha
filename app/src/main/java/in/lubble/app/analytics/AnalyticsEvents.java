@@ -34,6 +34,7 @@ public class AnalyticsEvents {
     public static final String NOTIF_DISMISSED = "NOTIF_DISMISSED";
     public static final String NOTIF_MARKED_READ = "NOTIF_MARKED_READ";
     public static final String NOTIF_REPLIED = "NOTIF_REPLIED";
+    public static final String NOTIF_DM_BLOCKED = "NOTIF_DM_BLOCKED";
     public static final String GROUP_SNOOZED = "GROUP_SNOOZED";
 
     public static final String REFERRAL_FB_SHARE = "REFERRAL_FB_SHARE";
