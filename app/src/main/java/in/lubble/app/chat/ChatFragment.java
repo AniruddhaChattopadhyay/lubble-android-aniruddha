@@ -532,7 +532,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 int newBottom = bottom;
                 if ((getActivity()) != null && getActivity() instanceof ChatActivity && ((ChatActivity) getActivity()).getTabLayoutHeight() > 0) {
-                    newBottom += UiUtils.dpToPx(22);
+                    newBottom += UiUtils.dpToPx(32);
                 }
                 if (newBottom < oldBottom) {
                     int position = chatAdapter.getItemCount() - 1;
