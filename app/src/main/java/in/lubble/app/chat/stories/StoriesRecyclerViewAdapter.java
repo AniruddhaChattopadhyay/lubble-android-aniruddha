@@ -61,7 +61,7 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
             public void onClick(View view) {
 
 //                Toast.makeText(mContext, mNames.get(position), Toast.LENGTH_SHORT).show();
-                showStories(storyDataList.get(position).getStory(),storyDataList.get(position).getStoryName());
+                showStories(storyDataList.get(position).getStory(),storyDataList.get(position).getStoryName(),storyDataList.get(position).getStoryPic());
             }
         });
     }
@@ -71,7 +71,7 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
         return storyDataList.size();
     }
 
-    public void showStories(ArrayList<HashMap<String, Object>> storyList, String storyTitle) {
+    public void showStories(ArrayList<HashMap<String, Object>> storyList, String storyTitle, String storyLogo) {
 
         final ArrayList<MyStory> myStories = new ArrayList<>();
 
@@ -92,36 +92,11 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
             }
         }
 
-//        try {
-//            MyStory story1 = new MyStory(
-//                    "https://media.pri.org/s3fs-public/styles/story_main/public/images/2019/09/092419-germany-climate.jpg?itok=P3FbPOp-",
-//                    simpleDateFormat.parse("20-10-2019 10:00:00")
-//            );
-//            myStories.add(story1);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-//
-//        try {
-//            MyStory story2 = new MyStory(
-//                    "http://i.imgur.com/0BfsmUd.jpg",
-//                    simpleDateFormat.parse("26-10-2019 15:00:00"),
-//                    "#TEAM_STANNIS"
-//            );
-//            myStories.add(story2);
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
-//
-//        MyStory story3 = new MyStory(
-//                "https://mfiles.alphacoders.com/681/681242.jpg"
-//        );
-//        myStories.add(story3);
-
         new StoryView.Builder(((AppCompatActivity) mContext).getSupportFragmentManager())
                 .setStoriesList(myStories)
                 .setStoryDuration(5000)
                 .setTitleText(storyTitle)
+                .setTitleLogoUrl(storyLogo)
 //                .setSubtitleText("Damascus")
                 .setStoryClickListeners(new StoryClickListeners() {
                     @Override

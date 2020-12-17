@@ -123,15 +123,17 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
                 bundle.putString("group_id", groupId);
                 Analytics.triggerEvent(AnalyticsEvents.GROUP_SNOOZED, bundle, context);
             }
-        }
+        } else if ((intent != null && intent.getAction().equalsIgnoreCase(ACTION_BLOCK) && intent.hasExtra("markBlock.groupId"))) {
+            // ONLY FOR DMs
+            final String dmId = intent.getStringExtra("markBlock.groupId");
+            final String userId = FirebaseAuth.getInstance().getUid();
+            if (dmId != null && userId != null) {
+                dmInfoReference = getDmsRef().child(dmId);
+                dmInfoReference.child("members").child(userId).child("blocked_status").setValue("BLOCKED");
+                dmInfoReference.child("members").child(userId).child("blocked_timestamp").setValue(System.currentTimeMillis());
 
-        else if((intent != null && intent.getAction().equalsIgnoreCase(ACTION_BLOCK) && intent.hasExtra("markBlock.groupId"))){
-            final String groupId = intent.getStringExtra("markBlock.groupId");
-            final String authorId = intent.getStringExtra("markBlock.authorId");
-            if (groupId != null && authorId != null) {
-                dmInfoReference = getDmsRef().child(groupId);
-                dmInfoReference.child("members").child(authorId).child("blocked_status").setValue("BLOCKED");
-                dmInfoReference.child("members").child(authorId).child("blocked_timestamp").setValue(System.currentTimeMillis());
+                deleteUnreadMsgsForGroupId(dmId, context);
+                NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_DM_BLOCKED, dmId, context);
             }
         }
     }

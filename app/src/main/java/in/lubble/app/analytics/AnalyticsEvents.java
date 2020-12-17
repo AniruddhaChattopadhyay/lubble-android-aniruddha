@@ -34,6 +34,7 @@ public class AnalyticsEvents {
     public static final String NOTIF_DISMISSED = "NOTIF_DISMISSED";
     public static final String NOTIF_MARKED_READ = "NOTIF_MARKED_READ";
     public static final String NOTIF_REPLIED = "NOTIF_REPLIED";
+    public static final String NOTIF_DM_BLOCKED = "NOTIF_DM_BLOCKED";
     public static final String GROUP_SNOOZED = "GROUP_SNOOZED";
 
     public static final String REFERRAL_FB_SHARE = "REFERRAL_FB_SHARE";
@@ -141,4 +142,7 @@ public class AnalyticsEvents {
     public static final String SHARED_VIA = "SHARED_VIA";
     public static final String REFERRAL_WIKI_SHARE = "REFERRAL_WIKI_SHARE";
     public static final String JOIN_GROUP = "JOIN_GROUP";
+
+    public static final String EXPAND_PIN_MSG = "EXPAND_PIN_MSG";
+    public static final String DISMISS_PIN_MSG = "DISMISS_PIN_MSG";
 }

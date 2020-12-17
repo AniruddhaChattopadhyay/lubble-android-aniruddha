@@ -10,11 +10,15 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -55,6 +59,7 @@ import java.util.Set;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -95,7 +100,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
     private ImageView toolbarIcon, toolbarLockIcon;
     private Toolbar toolbar;
-    private TextView toolbarTv, toolbarInviteHint,highlightNamesTv,memberCountTV,pinnedMessageDescription;
+    private TextView toolbarTv, toolbarInviteHint, highlightNamesTv, memberCountTV, pinnedMsgTv;
     private LinearLayout inviteContainer;
     private RelativeLayout pinnedMessageContainer;
     private ImageView searchBackIv, searchUpIv, searchDownIv, pinnedMessageCancel;
@@ -115,6 +120,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     Set<String> groupList;
     private final String pinnedMessageDontShowGroupList = "PINNED_MESSAGE_DONT_SHOW_GROUPLIST";
     private ArrayList<StoryData> storyDataList = new ArrayList<>();
+    private int heightOfLayout = 0;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -260,7 +266,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         searchUpIv = toolbar.findViewById(R.id.iv_search_up);
         searchDownIv = toolbar.findViewById(R.id.iv_search_down);
         pinnedMessageContainer = findViewById(R.id.pinned_message_container);
-        pinnedMessageDescription = findViewById(R.id.pinned_message_content);
+        pinnedMsgTv = findViewById(R.id.pinned_message_content);
         pinnedMessageCancel = findViewById(R.id.pinned_message_cross);
         searchView.setOnQueryTextListener(this);
         setTitle("");
@@ -411,17 +417,46 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             }
         });
         sharedPreferences = ChatActivity.this.getSharedPreferences(MyPrefs, Context.MODE_PRIVATE);
-        groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList,null);
-        if(dmId==null && (groupList==null || !(groupList.contains(groupId)))){
+        groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList, null);
+        if (dmId == null && (groupList == null || !(groupList.contains(groupId)))) {
             RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("pinned_message").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.exists()){
-                        String message = snapshot.getValue(String.class);
-                        pinnedMessageContainer.setVisibility(View.VISIBLE);
-                        pinnedMessageDescription.setText(message);
-                        pinnedMessageCancel.setVisibility(View.VISIBLE);
-                        pinnedMessageDescription.setMaxLines(2);
+                    if (snapshot.exists()) {
+                        final String message = snapshot.getValue(String.class);
+                        if (!TextUtils.isEmpty(message)) {
+                            pinnedMessageContainer.setVisibility(View.VISIBLE);
+                            heightOfLayout = pinnedMessageContainer.getHeight();
+                            pinnedMsgTv.setText(message);
+                            pinnedMessageCancel.setVisibility(View.VISIBLE);
+
+                            pinnedMsgTv.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                                @Override
+                                public void onGlobalLayout() {
+                                    // Past the maximum number of lines we want to display.
+                                    pinnedMsgTv.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                                    if (pinnedMsgTv.getLineCount() > 3) {
+                                        int lastCharShown = pinnedMsgTv.getLayout().getLineVisibleEnd(3 - 1);
+
+                                        pinnedMsgTv.setMaxLines(3);
+
+                                        String moreString = "read more";
+                                        String suffix = "  " + moreString;
+
+                                        // 3 is a "magic number" but it's just basically the length of the ellipsis we're going to insert
+                                        String actionDisplayText = message.substring(0, lastCharShown - suffix.length() - 3) + "..." + suffix;
+
+                                        SpannableString truncatedSpannableString = new SpannableString(actionDisplayText);
+                                        int startIndex = actionDisplayText.indexOf(moreString);
+                                        truncatedSpannableString.setSpan(
+                                                new ForegroundColorSpan(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.colorAccent)),
+                                                startIndex, startIndex + moreString.length(),
+                                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                                        pinnedMsgTv.setText(truncatedSpannableString);
+                                    }
+                                }
+                            });
+                        }
                     }
                     else{
                         showStories();
@@ -438,7 +473,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 @Override
                 public void onClick(View v) {
                     PinnedMessageBottomSheet pinnedMessageBottomSheet = new PinnedMessageBottomSheet(groupId);
-                    pinnedMessageBottomSheet.show(getSupportFragmentManager(),pinnedMessageBottomSheet.getTag());
+                    pinnedMessageBottomSheet.show(getSupportFragmentManager(), pinnedMessageBottomSheet.getTag());
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", groupId);
+                    Analytics.triggerEvent(AnalyticsEvents.EXPAND_PIN_MSG, bundle, ChatActivity.this);
                 }
             });
             pinnedMessageCancel.setOnClickListener(new View.OnClickListener() {
@@ -447,15 +486,18 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     pinnedMessageContainer.setVisibility(View.GONE);
 //                    Set<String> groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList,null);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    if(groupList!=null)
+                    if (groupList != null)
                         groupList.add(groupId);
                     else {
                         groupList = new HashSet<>();
                         groupList.add(groupId);
                     }
-                    editor.putStringSet(pinnedMessageDontShowGroupList,groupList);
+                    editor.putStringSet(pinnedMessageDontShowGroupList, groupList);
                     editor.apply();
                     showStories();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", groupId);
+                    Analytics.triggerEvent(AnalyticsEvents.DISMISS_PIN_MSG, bundle, ChatActivity.this);
                 }
             });
         }
@@ -508,11 +550,13 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         RealtimeDbHelper.getStoriesRef(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot:snapshot.getChildren()){
-                    StoryData storyData = dataSnapshot.getValue(StoryData.class);
-                    storyDataList.add(storyData);
+                if(snapshot.exists()) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        StoryData storyData = dataSnapshot.getValue(StoryData.class);
+                        storyDataList.add(storyData);
+                    }
+                    initStoriesRecyclerView();
                 }
-                initStoriesRecyclerView();
             }
 
             @Override
@@ -523,9 +567,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     }
 
     private void initStoriesRecyclerView(){
-
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         RecyclerView recyclerView = findViewById(R.id.stories_recycler_view);
+        recyclerView.setVisibility(View.VISIBLE);
+        heightOfLayout = recyclerView.getHeight();
         recyclerView.setLayoutManager(layoutManager);
         StoriesRecyclerViewAdapter adapter = new StoriesRecyclerViewAdapter(this, storyDataList);
         recyclerView.setAdapter(adapter);
@@ -621,52 +666,60 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         } else {
             toolbarInviteHint.setVisibility(View.GONE);
             highlightNamesTv.setVisibility(View.VISIBLE);
-            memberCountTV.setVisibility(View.VISIBLE);
-            Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
-            final Set<String> nameSet = new HashSet<>();
-            nameList = "";
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for (DataSnapshot childSnapShot : snapshot.getChildren()) {
-                        String uid;
-                        uid = childSnapShot.getKey();
-                        RealtimeDbHelper.getUserInfoRef(uid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                nameList += "," + getFirstName(snapshot.getValue(String.class));
-                                nameSet.add(snapshot.getValue(String.class));
-                                if (nameSet.size() == 5 || nameSet.size() == memberCount) {
-                                    if (isGroupJoined) {
-                                        String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-                                        nameSet.add(nameUser);
-                                        nameList = "<b>" + nameUser + "</b> " + "," + nameList;
-                                        highlightNamesTv.setText(Html.fromHtml(nameList));
-                                        String count = "+" + (memberCount - nameSet.size());
-                                        if (memberCount > 5)
-                                            memberCountTV.setText(count);
-                                    } else {
-                                        highlightNamesTv.setText(nameList);
-                                        String count = "+" + (memberCount - nameSet.size());
-                                        if (memberCount > 5)
-                                            memberCountTV.setText(count);
+            if (memberCount < 5) {
+                memberCountTV.setVisibility(View.GONE);
+                highlightNamesTv.setText(R.string.click_group_info);
+            } else {
+                memberCountTV.setVisibility(View.VISIBLE);
+                Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
+                final Set<String> nameSet = new HashSet<>();
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        nameList = "";
+                        for (DataSnapshot childSnapShot : snapshot.getChildren()) {
+                            String uid;
+                            uid = childSnapShot.getKey();
+                            RealtimeDbHelper.getUserInfoRef(uid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String firstName = getFirstName(snapshot.getValue(String.class));
+                                    if (firstName != null) {
+                                        nameList += firstName + ", ";
+                                    }
+                                    nameSet.add(snapshot.getValue(String.class));
+                                    if (nameSet.size() == 5 || nameSet.size() == memberCount) {
+                                        if (isGroupJoined) {
+                                            String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+                                            nameSet.add(nameUser);
+                                            nameList = "<b>" + nameUser + "</b>, " + nameList;
+                                            highlightNamesTv.setText(Html.fromHtml(nameList));
+                                            String count = "+" + (memberCount - nameSet.size());
+                                            if (memberCount > 5)
+                                                memberCountTV.setText(count);
+                                        } else {
+                                            highlightNamesTv.setText(nameList);
+                                            String count = "+" + (memberCount - nameSet.size());
+                                            if (memberCount > 5)
+                                                memberCountTV.setText(count);
+                                        }
                                     }
                                 }
-                            }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                FirebaseCrashlytics.getInstance().recordException(error.toException());
-                            }
-                        });
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    FirebaseCrashlytics.getInstance().recordException(error.toException());
+                                }
+                            });
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    FirebaseCrashlytics.getInstance().recordException(error.toException());
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        FirebaseCrashlytics.getInstance().recordException(error.toException());
+                    }
+                });
+            }
         }
     }
 
@@ -724,10 +777,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 //            customView.findViewById(R.id.badge).setVisibility(View.VISIBLE);
 //        }
 //    }
-
-//    int getTabLayoutHeight() {
-//        return tabLayout.getHeight();
-//    }
+//
+    int getTopLayoutHeight() {
+        return heightOfLayout;
+    }
 
     private void blockAccount() {
         String title = "Block this person?";
@@ -848,4 +901,5 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private static String makeFragmentName(int viewPagerId, int index) {
         return "android:switcher:" + viewPagerId + ":" + index;
     }
+
 }

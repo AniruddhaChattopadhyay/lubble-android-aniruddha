@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
-    android:versionCode="267"
-    android:versionName="1.29.1-1">
+    android:versionCode="270"
+    android:versionName="1.30-3">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -22,10 +22,6 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <activity
-            android:name=".chat.PinnedMessageBottomSheet"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait" />
 
         <receiver
             android:name=".receivers.ShareSheetReceiver"

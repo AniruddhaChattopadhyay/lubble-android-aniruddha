@@ -29,13 +29,16 @@
         android:id="@+id/viewpager_chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/icon_toolbar"/>
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/stories_recycler_view" />
 
     <include
         layout="@layout/layout_shadow"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:layout_below="@id/icon_toolbar" />
+        android:layout_alignWithParentIfMissing="true"
+        android:layout_below="@id/pinned_message_container" />
+
 
     <include
         layout="@layout/pinned_message_layout"
@@ -49,6 +52,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/stories_recycler_view"
         android:orientation="horizontal"
-        android:layout_below="@id/icon_toolbar"/>
+        android:layout_below="@id/icon_toolbar"
+        android:visibility="gone"/>
 
 </RelativeLayout>
