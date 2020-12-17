@@ -106,6 +106,10 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("backdoor");
     }
 
+    public static DatabaseReference getStoriesRef(String groupId) {
+        return FirebaseDatabase.getInstance().getReference("stories/" + LubbleSharedPrefs.getInstance().requireLubbleId()).child(groupId);
+    }
+
     public static DatabaseReference getAppInfoRef() {
         return FirebaseDatabase.getInstance().getReference("appInfo");
     }

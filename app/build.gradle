@@ -29,6 +29,12 @@ android {
             }
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     flavorDimensions("type")
     productFlavors {
         dev {
@@ -144,6 +150,13 @@ dependencies {
     //chrome custom tab
 
     implementation 'com.android.support:customtabs:28.0.0'
+
+    //Lubble stories
+    implementation 'com.github.OMARIHAMZA:StoryView:1.0.6-alpha'
+
+    //circle imageview
+    implementation 'de.hdodenhof:circleimageview:3.1.0'
+
 }
 
 
