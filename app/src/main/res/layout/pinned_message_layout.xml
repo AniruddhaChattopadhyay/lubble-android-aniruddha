@@ -50,6 +50,7 @@
         android:layout_marginLeft="10dp"
         android:maxLines="4"
         android:layout_marginRight="10dp"
+        android:lineHeight="20dp"
         android:ellipsize="end"
         tools:text="@string/loc_perm_rationale"
         android:textColor="@color/black" />
