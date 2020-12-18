@@ -52,6 +52,7 @@ public class PinnedMessageBottomSheet extends BottomSheetDialogFragment {
                 if (snapshot.exists()) {
                     String message = snapshot.getValue(String.class);
                     pinnedMessageContainer.setVisibility(View.VISIBLE);
+                    pinnedMessageContent.setMaxLines(Integer.MAX_VALUE);
                     pinnedMessageContent.setText(message);
                 }
             }
