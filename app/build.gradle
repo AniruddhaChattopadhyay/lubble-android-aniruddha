@@ -154,9 +154,6 @@ dependencies {
     //Lubble stories
     implementation 'com.github.OMARIHAMZA:StoryView:1.0.6-alpha'
 
-    //circle imageview
-    implementation 'de.hdodenhof:circleimageview:3.1.0'
-
 }
 
 

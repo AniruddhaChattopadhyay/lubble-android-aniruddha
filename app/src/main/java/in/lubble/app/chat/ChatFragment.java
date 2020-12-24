@@ -1069,6 +1069,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         isLoadingMoreChats = true;
         final Query query;
         if (!TextUtils.isEmpty(targetChatId)) {
+            if (endAtChatId == null) {
+                isLoadingMoreChats = false;
+                paginationProgressBar.setVisibility(View.GONE);
+                chatRecyclerView.scrollBy(0, -dpToPx(40));
+                Toast.makeText(getContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                return;
+            }
             query = messagesReference.orderByKey().startAt(targetChatId).endAt(endAtChatId);
         } else {
             query = messagesReference.orderByChild("serverTimestamp").endAt(endAtTimestamp).limitToLast(PAGE_SIZE);

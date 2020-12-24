@@ -1,6 +1,7 @@
 package in.lubble.app.chat;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,8 +52,11 @@ public class PinnedMessageBottomSheet extends BottomSheetDialogFragment {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     String message = snapshot.getValue(String.class);
-                    pinnedMessageContainer.setVisibility(View.VISIBLE);
-                    pinnedMessageContent.setText(message);
+                    if (!TextUtils.isEmpty(message)) {
+                        pinnedMessageContainer.setVisibility(View.VISIBLE);
+                        pinnedMessageContent.setMaxLines(Integer.MAX_VALUE);
+                        pinnedMessageContent.setText(message.replaceAll("\\\\n", "\n"));
+                    }
                 }
             }
 

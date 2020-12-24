@@ -425,7 +425,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     if (snapshot.exists()) {
                         final String message = snapshot.getValue(String.class);
                         if (!TextUtils.isEmpty(message)) {
+                            final String escapedMessage = message.replaceAll("\\\\n", "\n");
                             pinnedMessageContainer.setVisibility(View.VISIBLE);
+                            pinnedMsgTv.setText(escapedMessage);
                             heightOfLayout = pinnedMessageContainer.getHeight();
                             pinnedMsgTv.setText(message);
                             pinnedMessageCancel.setVisibility(View.VISIBLE);
@@ -444,7 +446,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                                         String suffix = "  " + moreString;
 
                                         // 3 is a "magic number" but it's just basically the length of the ellipsis we're going to insert
-                                        String actionDisplayText = message.substring(0, lastCharShown - suffix.length() - 3) + "..." + suffix;
+                                        String actionDisplayText = escapedMessage.substring(0, lastCharShown - suffix.length() - 3) + "..." + suffix;
 
                                         SpannableString truncatedSpannableString = new SpannableString(actionDisplayText);
                                         int startIndex = actionDisplayText.indexOf(moreString);
