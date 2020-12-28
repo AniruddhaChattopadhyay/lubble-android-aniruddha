@@ -19,8 +19,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.CharacterStyle;
+import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -298,9 +301,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getMessage())) {
             sentChatViewHolder.messageTv.setVisibility(VISIBLE);
             if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
-                sentChatViewHolder.messageTv.setText(chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0");
+                String message = chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
+                sentChatViewHolder.messageTv.setText(boldAndItalics(message));
             } else {
-                sentChatViewHolder.messageTv.setText(chatData.getMessage());
+                String message = chatData.getMessage();
+                sentChatViewHolder.messageTv.setText(boldAndItalics(message));
             }
         } else {
             sentChatViewHolder.messageTv.setVisibility(GONE);
@@ -448,6 +453,54 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 sentChatViewHolder.pdfDownloadIv, sentChatViewHolder.progressBarDownloadPdf, sentChatViewHolder.pdfTitleTv, sentChatViewHolder.messageTv, null);
     }
 
+    public static CharSequence boldAndItalics(CharSequence text) {
+
+        try {
+            Pattern pattern = Pattern.compile("\\*(.*?)\\*");
+
+            SpannableStringBuilder ssb = new SpannableStringBuilder( text );
+
+            if( pattern != null )
+            {
+                Matcher matcher = pattern.matcher( text );
+                int matchesSoFar = 0;
+                while( matcher.find() )
+                {
+                    int start = matcher.start() - (matchesSoFar * 2);
+                    int end = matcher.end() - (matchesSoFar * 2);
+                    CharacterStyle span = new StyleSpan(android.graphics.Typeface.BOLD);
+                    ssb.setSpan( span, start + 1, end - 1, 0 );
+                    //ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), index_start,index_end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.delete(start, start + 1);
+                    ssb.delete(end - 2, end -1);
+                    matchesSoFar++;
+                }
+            }
+            pattern = Pattern.compile("_(.*?)_");
+            if( pattern != null )
+            {
+                Matcher matcher = pattern.matcher( text );
+                int matchesSoFar = 0;
+                while( matcher.find() )
+                {
+                    int start = matcher.start() - (matchesSoFar * 2);
+                    int end = matcher.end() - (matchesSoFar * 2);
+                    CharacterStyle span = new StyleSpan(Typeface.ITALIC);
+                    ssb.setSpan( span, start + 1, end - 1, 0 );
+                    //ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), index_start,index_end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    ssb.delete(start, start + 1);
+                    ssb.delete(end - 2, end -1);
+                    matchesSoFar++;
+                }
+            }
+            return ssb;
+        }
+        catch (Exception e){
+            FirebaseCrashlytics.getInstance().recordException(e);
+            return text;
+        }
+    }
+
     private void setHighLightedText(TextView tv, String textToHighlight) {
         String tvt = tv.getText().toString().toLowerCase();
         int ofe = tvt.indexOf(textToHighlight.toLowerCase(), 0);
@@ -549,9 +602,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getMessage())) {
             recvdChatViewHolder.messageTv.setVisibility(VISIBLE);
             if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
-                recvdChatViewHolder.messageTv.setText(chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0");
+                String message = chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
+                recvdChatViewHolder.messageTv.setText(boldAndItalics(message));
             } else {
-                recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+                String message = chatData.getMessage();
+                recvdChatViewHolder.messageTv.setText(boldAndItalics(message));
             }
         } else {
             recvdChatViewHolder.messageTv.setVisibility(GONE);
@@ -1122,7 +1177,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SystemChatViewHolder systemChatViewHolder = (SystemChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
         if (chatData.getType().equalsIgnoreCase(SYSTEM)) {
-            systemChatViewHolder.messageTv.setText(chatData.getMessage());
+            String message = chatData.getMessage();
+            systemChatViewHolder.messageTv.setText(boldAndItalics(message));
         }
     }
 
