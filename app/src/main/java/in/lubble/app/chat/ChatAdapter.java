@@ -64,6 +64,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.curios.textformatter.FormatText;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -302,10 +303,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             sentChatViewHolder.messageTv.setVisibility(VISIBLE);
             if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
                 String message = chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
-                sentChatViewHolder.messageTv.setText(boldAndItalics(message));
+                sentChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
             } else {
                 String message = chatData.getMessage();
-                sentChatViewHolder.messageTv.setText(boldAndItalics(message));
+                sentChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
             }
         } else {
             sentChatViewHolder.messageTv.setVisibility(GONE);
@@ -453,54 +454,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 sentChatViewHolder.pdfDownloadIv, sentChatViewHolder.progressBarDownloadPdf, sentChatViewHolder.pdfTitleTv, sentChatViewHolder.messageTv, null);
     }
 
-    public static CharSequence boldAndItalics(CharSequence text) {
-
-        try {
-            Pattern pattern = Pattern.compile("\\*(.*?)\\*");
-
-            SpannableStringBuilder ssb = new SpannableStringBuilder( text );
-
-            if( pattern != null )
-            {
-                Matcher matcher = pattern.matcher( text );
-                int matchesSoFar = 0;
-                while( matcher.find() )
-                {
-                    int start = matcher.start() - (matchesSoFar * 2);
-                    int end = matcher.end() - (matchesSoFar * 2);
-                    CharacterStyle span = new StyleSpan(android.graphics.Typeface.BOLD);
-                    ssb.setSpan( span, start + 1, end - 1, 0 );
-                    //ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), index_start,index_end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    ssb.delete(start, start + 1);
-                    ssb.delete(end - 2, end -1);
-                    matchesSoFar++;
-                }
-            }
-            pattern = Pattern.compile("_(.*?)_");
-            if( pattern != null )
-            {
-                Matcher matcher = pattern.matcher( text );
-                int matchesSoFar = 0;
-                while( matcher.find() )
-                {
-                    int start = matcher.start() - (matchesSoFar * 2);
-                    int end = matcher.end() - (matchesSoFar * 2);
-                    CharacterStyle span = new StyleSpan(Typeface.ITALIC);
-                    ssb.setSpan( span, start + 1, end - 1, 0 );
-                    //ssb.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), index_start,index_end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    ssb.delete(start, start + 1);
-                    ssb.delete(end - 2, end -1);
-                    matchesSoFar++;
-                }
-            }
-            return ssb;
-        }
-        catch (Exception e){
-            FirebaseCrashlytics.getInstance().recordException(e);
-            return text;
-        }
-    }
-
     private void setHighLightedText(TextView tv, String textToHighlight) {
         String tvt = tv.getText().toString().toLowerCase();
         int ofe = tvt.indexOf(textToHighlight.toLowerCase(), 0);
@@ -603,10 +556,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.messageTv.setVisibility(VISIBLE);
             if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
                 String message = chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
-                recvdChatViewHolder.messageTv.setText(boldAndItalics(message));
+                recvdChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
             } else {
                 String message = chatData.getMessage();
-                recvdChatViewHolder.messageTv.setText(boldAndItalics(message));
+                recvdChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
             }
         } else {
             recvdChatViewHolder.messageTv.setVisibility(GONE);
@@ -1178,7 +1131,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         ChatData chatData = chatDataList.get(position);
         if (chatData.getType().equalsIgnoreCase(SYSTEM)) {
             String message = chatData.getMessage();
-            systemChatViewHolder.messageTv.setText(boldAndItalics(message));
+            systemChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
         }
     }
 
