@@ -153,9 +153,8 @@ dependencies {
 
     //Lubble stories
     implementation 'com.github.OMARIHAMZA:StoryView:1.0.6-alpha'
-
+    implementation 'com.github.AniruddhaChattopadhyay:TextFormatter:1.0.1'
     //TextFormatting - bold and italics library
-    implementation 'com.github.AniruddhaChattopadhyay:TextFormatter:1.0.0'
 }
 
 
