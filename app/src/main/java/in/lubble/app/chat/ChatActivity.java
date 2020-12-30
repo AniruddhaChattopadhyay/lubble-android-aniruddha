@@ -488,8 +488,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     pinnedMessageContainer.setVisibility(View.GONE);
 //                    Set<String> groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList,null);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    if (groupList != null)
+                    if (groupList != null) {
+                        groupList = new HashSet<>(groupList);
                         groupList.add(groupId);
+                    }
                     else {
                         groupList = new HashSet<>();
                         groupList.add(groupId);
