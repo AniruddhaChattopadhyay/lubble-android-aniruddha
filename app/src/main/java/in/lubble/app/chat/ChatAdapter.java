@@ -53,7 +53,6 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;

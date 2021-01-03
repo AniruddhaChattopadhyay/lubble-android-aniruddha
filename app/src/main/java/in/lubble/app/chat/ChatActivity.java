@@ -551,7 +551,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     }
 
     private void showStories(){
-        RealtimeDbHelper.getStoriesRef(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+        RealtimeDbHelper.getStoriesRef(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()) {

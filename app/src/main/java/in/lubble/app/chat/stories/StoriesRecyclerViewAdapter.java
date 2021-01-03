@@ -1,6 +1,9 @@
 package in.lubble.app.chat.stories;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.LongDef;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import omari.hamza.storyview.StoryView;
 import omari.hamza.storyview.callback.OnStoryChangedCallback;
@@ -80,6 +85,7 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
 
         for (HashMap<String, Object> storylist : storyList) {
+                String captions = storylist.get("caption").toString();
                 MyStory story1 = new MyStory(
                         (String) storylist.get("url"),
                         null,                        //simpleDateFormat.parse("20-10-2019 10:00:00")
@@ -97,6 +103,13 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
                 .setStoryClickListeners(new StoryClickListeners() {
                     @Override
                     public void onDescriptionClickListener(int position) {
+                        Log.d("testing","clicked"+ storyList.get(position).get("link"));
+                        if(storyList.get(position).get("link")!=null){
+                            String link = storyList.get(position).get("link").toString();
+                            Intent intent = new Intent(mContext, StoryRedirectLink.class);
+                            intent.putExtra("link",link);
+                            mContext.startActivity(intent);
+                        }
                     }
 
                     @Override
