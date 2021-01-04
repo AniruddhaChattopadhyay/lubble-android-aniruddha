@@ -5,7 +5,7 @@
     android:id="@+id/pinned_message_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_below="@+id/tablayout_chat"
+    android:layout_below="@+id/icon_toolbar"
     android:background="@color/md_blue_50"
     android:orientation="vertical"
     android:paddingBottom="16dp"

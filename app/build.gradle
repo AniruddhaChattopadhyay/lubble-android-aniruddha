@@ -29,6 +29,12 @@ android {
             }
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     flavorDimensions("type")
     productFlavors {
         dev {
@@ -144,6 +150,12 @@ dependencies {
     //chrome custom tab
 
     implementation 'com.android.support:customtabs:28.0.0'
+
+    //Lubble stories
+    implementation 'com.github.OMARIHAMZA:StoryView:1.0.6-alpha'
+
+    //TextFormatting - bold and italics library
+    implementation 'com.github.AniruddhaChattopadhyay:TextFormatter:1.0.1'
 }
 
 

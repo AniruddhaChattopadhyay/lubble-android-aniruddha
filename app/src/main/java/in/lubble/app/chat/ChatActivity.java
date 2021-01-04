@@ -33,6 +33,8 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
@@ -48,6 +50,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -61,6 +64,8 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.stories.StoriesRecyclerViewAdapter;
+import in.lubble.app.chat.stories.StoryData;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
@@ -103,7 +108,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private ChatFragment targetFrag = null;
     private String groupId;
     private ViewPager viewPager;
-    private TabLayout tabLayout;
+//    private TabLayout tabLayout;
     private String dmId;
     private SearchResultData searchResultData = null;
     private int currSearchCursorPos = 0;
@@ -114,6 +119,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private final String MyPrefs = "ChatActivity";
     Set<String> groupList;
     private final String pinnedMessageDontShowGroupList = "PINNED_MESSAGE_DONT_SHOW_GROUPLIST";
+    private ArrayList<StoryData> storyDataList = new ArrayList<>();
+    private int heightOfLayout = 0;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -265,8 +272,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         setTitle("");
 
         viewPager = findViewById(R.id.viewpager_chat);
-        tabLayout = findViewById(R.id.tablayout_chat);
-        tabLayout.setupWithViewPager(viewPager);
+//        tabLayout = findViewById(R.id.tablayout_chat);
+//        tabLayout.setupWithViewPager(viewPager);
 
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
@@ -278,14 +285,14 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
         if (!TextUtils.isEmpty(dmId)) {
             // for DMs
-            tabLayout.setVisibility(View.GONE);
+            //tabLayout.setVisibility(View.GONE);
             inviteContainer.setVisibility(View.GONE);
             toolbarInviteHint.setVisibility(View.VISIBLE);
             toolbarInviteHint.setText("Personal Chat");
             highlightNamesTv.setVisibility(View.GONE);
             memberCountTV.setVisibility(View.GONE);
         } else {
-            tabLayout.setVisibility(View.VISIBLE);
+            //tabLayout.setVisibility(View.VISIBLE);
             toolbarInviteHint.setVisibility(View.GONE);
             inviteContainer.setVisibility(View.VISIBLE);
         }
@@ -320,39 +327,39 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
         }
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                final Bundle bundle = new Bundle();
-                bundle.putString("groupid", groupId);
-                if (tab.getPosition() == 0) {
-                    Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, ChatActivity.this);
-                } else if (tab.getPosition() == 1) {
-                    Analytics.triggerEvent(AnalyticsEvents.GROUP_MORE_FRAG, bundle, ChatActivity.this);
-                    final View customView = tab.getCustomView();
-                    if (customView != null) {
-                        ((TextView) customView.findViewById(android.R.id.text1)).setTextColor(ContextCompat.getColor(ChatActivity.this, R.color.black));
-                        customView.findViewById(R.id.badge).setVisibility(View.GONE);
-                        LubbleSharedPrefs.getInstance().setIsBookExchangeOpened(true);
-                    }
-                }
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                if (tab.getPosition() == 1) {
-                    final View customView = tab.getCustomView();
-                    if (customView != null) {
-                        ((TextView) customView.findViewById(android.R.id.text1)).setTextColor(ContextCompat.getColor(ChatActivity.this, R.color.default_text_color));
-                    }
-                }
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
+//        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+//            @Override
+//            public void onTabSelected(TabLayout.Tab tab) {
+//                final Bundle bundle = new Bundle();
+//                bundle.putString("groupid", groupId);
+//                if (tab.getPosition() == 0) {
+//                    Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, ChatActivity.this);
+//                } else if (tab.getPosition() == 1) {
+//                    Analytics.triggerEvent(AnalyticsEvents.GROUP_MORE_FRAG, bundle, ChatActivity.this);
+//                    final View customView = tab.getCustomView();
+//                    if (customView != null) {
+//                        ((TextView) customView.findViewById(android.R.id.text1)).setTextColor(ContextCompat.getColor(ChatActivity.this, R.color.black));
+//                        customView.findViewById(R.id.badge).setVisibility(View.GONE);
+//                        LubbleSharedPrefs.getInstance().setIsBookExchangeOpened(true);
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onTabUnselected(TabLayout.Tab tab) {
+//                if (tab.getPosition() == 1) {
+//                    final View customView = tab.getCustomView();
+//                    if (customView != null) {
+//                        ((TextView) customView.findViewById(android.R.id.text1)).setTextColor(ContextCompat.getColor(ChatActivity.this, R.color.default_text_color));
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onTabReselected(TabLayout.Tab tab) {
+//
+//            }
+//        });
 
         inviteContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -421,6 +428,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                             final String escapedMessage = message.replaceAll("\\\\n", "\n");
                             pinnedMessageContainer.setVisibility(View.VISIBLE);
                             pinnedMsgTv.setText(escapedMessage);
+                            heightOfLayout = pinnedMessageContainer.getHeight();
+                            pinnedMsgTv.setText(message);
                             pinnedMessageCancel.setVisibility(View.VISIBLE);
 
                             pinnedMsgTv.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -451,6 +460,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                             });
                         }
                     }
+                    else{
+                        showStories();
+                    }
                 }
 
                 @Override
@@ -476,19 +488,27 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     pinnedMessageContainer.setVisibility(View.GONE);
 //                    Set<String> groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList,null);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
-                    if (groupList != null)
+                    if (groupList != null) {
+                        groupList = new HashSet<>(groupList);
                         groupList.add(groupId);
+                    }
                     else {
                         groupList = new HashSet<>();
                         groupList.add(groupId);
                     }
                     editor.putStringSet(pinnedMessageDontShowGroupList, groupList);
                     editor.apply();
+                    showStories();
                     Bundle bundle = new Bundle();
                     bundle.putString("group_id", groupId);
                     Analytics.triggerEvent(AnalyticsEvents.DISMISS_PIN_MSG, bundle, ChatActivity.this);
                 }
             });
+        }
+
+        if(dmId==null && groupList!=null ){
+            if(groupList.contains(groupId))
+                showStories();
         }
     }
 
@@ -528,6 +548,36 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             initSearchResultListener(pushQueryRef.getKey());
         }
         return false;
+    }
+
+    private void showStories(){
+        RealtimeDbHelper.getStoriesRef(groupId).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.exists()) {
+                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                        StoryData storyData = dataSnapshot.getValue(StoryData.class);
+                        storyDataList.add(storyData);
+                    }
+                    initStoriesRecyclerView();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+    private void initStoriesRecyclerView(){
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView recyclerView = findViewById(R.id.stories_recycler_view);
+        recyclerView.setVisibility(View.VISIBLE);
+        heightOfLayout = recyclerView.getHeight();
+        recyclerView.setLayoutManager(layoutManager);
+        StoriesRecyclerViewAdapter adapter = new StoriesRecyclerViewAdapter(this, storyDataList);
+        recyclerView.setAdapter(adapter);
     }
 
     private void initSearchResultListener(String searchKey) {
@@ -702,7 +752,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             toolbarTv.setVisibility(View.GONE);
             toolbarInviteHint.setVisibility(View.GONE);
             inviteContainer.setVisibility(View.GONE);
-            tabLayout.setVisibility(View.GONE);
+            //tabLayout.setVisibility(View.GONE);
             memberCountTV.setVisibility(View.GONE);
             highlightNamesTv.setVisibility(View.GONE);
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
@@ -717,23 +767,23 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             toolbarTv.setVisibility(View.VISIBLE);
             toolbarLockIcon.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
             inviteContainer.setVisibility(View.VISIBLE);
-            tabLayout.setVisibility(View.VISIBLE);
+            //tabLayout.setVisibility(View.VISIBLE);
             highlightNamesTv.setVisibility(View.VISIBLE);
             memberCountTV.setVisibility(View.VISIBLE);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 
-    public void showNewBadge() {
-        tabLayout.getTabAt(1).setCustomView(R.layout.tab_with_badge);
-        final View customView = tabLayout.getTabAt(1).getCustomView();
-        if (customView != null) {
-            customView.findViewById(R.id.badge).setVisibility(View.VISIBLE);
-        }
-    }
-
-    int getTabLayoutHeight() {
-        return tabLayout.getHeight();
+//    public void showNewBadge() {
+//        tabLayout.getTabAt(1).setCustomView(R.layout.tab_with_badge);
+//        final View customView = tabLayout.getTabAt(1).getCustomView();
+//        if (customView != null) {
+//            customView.findViewById(R.id.badge).setVisibility(View.VISIBLE);
+//        }
+//    }
+//
+    int getTopLayoutHeight() {
+        return heightOfLayout;
     }
 
     private void blockAccount() {

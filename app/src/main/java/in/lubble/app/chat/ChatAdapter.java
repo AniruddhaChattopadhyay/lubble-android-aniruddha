@@ -19,8 +19,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.BackgroundColorSpan;
+import android.text.style.CharacterStyle;
+import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -50,7 +53,6 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -61,6 +63,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.curios.textformatter.FormatText;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -298,9 +301,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getMessage())) {
             sentChatViewHolder.messageTv.setVisibility(VISIBLE);
             if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
-                sentChatViewHolder.messageTv.setText(chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0");
+                String message = chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
+                sentChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
             } else {
-                sentChatViewHolder.messageTv.setText(chatData.getMessage());
+                String message = chatData.getMessage();
+                sentChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
             }
         } else {
             sentChatViewHolder.messageTv.setVisibility(GONE);
@@ -549,9 +554,11 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getMessage())) {
             recvdChatViewHolder.messageTv.setVisibility(VISIBLE);
             if (FirebaseRemoteConfig.getInstance().getBoolean(IS_TIME_SHOWN)) {
-                recvdChatViewHolder.messageTv.setText(chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0");
+                String message = chatData.getMessage() + " \u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0";
+                recvdChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
             } else {
-                recvdChatViewHolder.messageTv.setText(chatData.getMessage());
+                String message = chatData.getMessage();
+                recvdChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
             }
         } else {
             recvdChatViewHolder.messageTv.setVisibility(GONE);
@@ -1122,7 +1129,8 @@ public class ChatAdapter extends RecyclerView.Adapter {
         final SystemChatViewHolder systemChatViewHolder = (SystemChatViewHolder) holder;
         ChatData chatData = chatDataList.get(position);
         if (chatData.getType().equalsIgnoreCase(SYSTEM)) {
-            systemChatViewHolder.messageTv.setText(chatData.getMessage());
+            String message = chatData.getMessage();
+            systemChatViewHolder.messageTv.setText(FormatText.boldAndItalics(message));
         }
     }
 
