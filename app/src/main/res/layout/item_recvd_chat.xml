@@ -378,7 +378,7 @@
                 android:layout_marginTop="8dp"
                 android:background="@drawable/half_rounded_rectangle_blue_bottom"
                 android:gravity="center"
-                android:text="REPLY"
+                android:text="💬 REPLY"
                 android:textColor="@color/white"
                 android:visibility="gone" />
 

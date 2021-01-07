@@ -641,7 +641,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             personalChatData.setAuthorUid(LubbleSharedPrefs.getInstance().getSupportUid());
 //            final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
             personalChatData.setMessage(
-                    "Welcome " + firstName + "!" +
+                    "👋 Welcome " + firstName + "!" +
                             "\n\nLet's introduce you to everyone in the group with an answer to this:" +
                             "\n\n" + groupData.getQuestion()
                             + "\n\nAnswer by tapping on Reply \uD83D\uDC47"
