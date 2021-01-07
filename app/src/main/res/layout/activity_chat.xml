@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context="in.lubble.app.chat.ChatActivity">
 
@@ -11,19 +11,19 @@
         android:id="@+id/icon_toolbar"
         layout="@layout/icon_toolbar" />
 
+    <View
+        android:id="@+id/sep_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/icon_toolbar"
+        android:layout_marginTop="2dp"
+        android:background="@color/light_gray"/>
+
     <FrameLayout
         android:id="@+id/frame_fragContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/icon_toolbar" />
-
-<!--    <com.google.android.material.tabs.TabLayout-->
-<!--        android:id="@+id/tablayout_chat"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_below="@id/icon_toolbar"-->
-<!--        app:tabSelectedTextColor="@color/black"-->
-<!--        android:background="@color/white" />-->
+        android:layout_below="@id/sep_toolbar" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewpager_chat"
@@ -33,26 +33,30 @@
         android:layout_below="@id/stories_recycler_view" />
 
     <include
+        layout="@layout/pinned_message_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sep_toolbar" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/stories_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sep_toolbar"
+        android:background="@color/white"
+        android:paddingTop="4dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="5"
+        tools:listitem="@layout/story_layout"
+        tools:visibility="visible" />
+
+    <include
         layout="@layout/layout_shadow"
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_below="@id/pinned_message_container" />
-
-
-    <include
-        layout="@layout/pinned_message_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/icon_toolbar"
-        />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/stories_recycler_view"
-        android:orientation="horizontal"
-        android:layout_below="@id/icon_toolbar"
-        android:visibility="gone"/>
+        android:layout_below="@id/stories_recycler_view" />
 
 </RelativeLayout>
