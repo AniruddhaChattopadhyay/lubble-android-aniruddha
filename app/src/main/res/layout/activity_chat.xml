@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@id/icon_toolbar"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="4dp"
         android:background="@color/light_gray" />
 
     <androidx.viewpager.widget.ViewPager
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:background="@color/white"
             android:orientation="horizontal"
-            android:paddingTop="4dp"
+            android:paddingTop="8dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:itemCount="5"
             tools:listitem="@layout/story_layout" />
