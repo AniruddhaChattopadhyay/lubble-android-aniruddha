@@ -106,6 +106,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
@@ -534,7 +535,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             @Override
             public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 int newBottom = bottom;
-                if ((getActivity()) != null && getActivity() instanceof ChatActivity  && ((ChatActivity) getActivity()).getTopLayoutHeight() > 0) {
+                if ((getActivity()) != null && getActivity() instanceof ChatActivity && ((ChatActivity) getActivity()).getTopLayoutHeight() > 0) {
                     newBottom += UiUtils.dpToPx(32);
                 }
                 if (newBottom < oldBottom) {
@@ -549,9 +550,21 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         });
 
         chatRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            int state = SCROLL_STATE_IDLE;
+
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                state = newState;
+            }
+
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
+
+                if (getActivity() != null && getActivity() instanceof ChatActivity) {
+                    ((ChatActivity) getActivity()).scrollStories(dy, state);
+                }
 
                 int visibleItemCount = layoutManager.getChildCount();
                 int totalItemCount = layoutManager.getItemCount();

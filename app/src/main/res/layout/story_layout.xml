@@ -8,8 +8,8 @@
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_centerHorizontal="true"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/ic_launcher_background" />
@@ -24,7 +24,7 @@
         android:ellipsize="end"
         android:gravity="center"
         android:maxLines="2"
-        android:text="Canada is a thankful country"
+        android:text="Best Cafe's"
         android:textColor="@color/black" />
 
 </RelativeLayout>

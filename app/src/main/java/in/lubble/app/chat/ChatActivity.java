@@ -19,6 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -37,7 +39,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
-import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
@@ -58,6 +59,7 @@ import java.util.MissingFormatArgumentException;
 import java.util.Set;
 
 import in.lubble.app.BaseActivity;
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -76,6 +78,9 @@ import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING;
 import static in.lubble.app.Constants.NEW_CHAT_ACTION;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.NotifUtils.sendNotifAnalyticEvent;
@@ -108,7 +113,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private ChatFragment targetFrag = null;
     private String groupId;
     private ViewPager viewPager;
-//    private TabLayout tabLayout;
+    //    private TabLayout tabLayout;
     private String dmId;
     private SearchResultData searchResultData = null;
     private int currSearchCursorPos = 0;
@@ -121,6 +126,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private final String pinnedMessageDontShowGroupList = "PINNED_MESSAGE_DONT_SHOW_GROUPLIST";
     private ArrayList<StoryData> storyDataList = new ArrayList<>();
     private int heightOfLayout = 0;
+    private RecyclerView storiesRv;
+    private LinearLayout storiesLayout;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -268,6 +275,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         pinnedMessageContainer = findViewById(R.id.pinned_message_container);
         pinnedMsgTv = findViewById(R.id.pinned_message_content);
         pinnedMessageCancel = findViewById(R.id.pinned_message_cross);
+        storiesRv = findViewById(R.id.stories_recycler_view);
+        storiesLayout = findViewById(R.id.ll_stories);
         searchView.setOnQueryTextListener(this);
         setTitle("");
 
@@ -428,15 +437,15 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                             final String escapedMessage = message.replaceAll("\\\\n", "\n");
                             pinnedMessageContainer.setVisibility(View.VISIBLE);
                             pinnedMsgTv.setText(escapedMessage);
-                            heightOfLayout = pinnedMessageContainer.getHeight();
                             pinnedMsgTv.setText(message);
                             pinnedMessageCancel.setVisibility(View.VISIBLE);
 
-                            pinnedMsgTv.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                            final ViewTreeObserver viewTreeObserver = pinnedMsgTv.getViewTreeObserver();
+                            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                                 @Override
                                 public void onGlobalLayout() {
                                     // Past the maximum number of lines we want to display.
-                                    pinnedMsgTv.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                                    viewTreeObserver.removeOnGlobalLayoutListener(this);
                                     if (pinnedMsgTv.getLineCount() > 3) {
                                         int lastCharShown = pinnedMsgTv.getLayout().getLineVisibleEnd(3 - 1);
 
@@ -456,11 +465,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                                         pinnedMsgTv.setText(truncatedSpannableString);
                                     }
+                                    heightOfLayout = pinnedMessageContainer.getHeight();
                                 }
                             });
                         }
-                    }
-                    else{
+                    } else {
                         showStories();
                     }
                 }
@@ -491,8 +500,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                     if (groupList != null) {
                         groupList = new HashSet<>(groupList);
                         groupList.add(groupId);
-                    }
-                    else {
+                    } else {
                         groupList = new HashSet<>();
                         groupList.add(groupId);
                     }
@@ -506,8 +514,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             });
         }
 
-        if(dmId==null && groupList!=null ){
-            if(groupList.contains(groupId))
+        if (dmId == null && groupList != null) {
+            if (groupList.contains(groupId))
                 showStories();
         }
     }
@@ -550,16 +558,20 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         return false;
     }
 
-    private void showStories(){
+    private void showStories() {
         RealtimeDbHelper.getStoriesRef(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.exists()) {
+                if (snapshot.exists()) {
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                         StoryData storyData = dataSnapshot.getValue(StoryData.class);
                         storyDataList.add(storyData);
                     }
-                    initStoriesRecyclerView();
+                    if (BuildConfig.DEBUG || !storyDataList.isEmpty()) {
+                        initStoriesRecyclerView();
+                    } else {
+                        storiesLayout.setVisibility(GONE);
+                    }
                 }
             }
 
@@ -570,14 +582,20 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         });
     }
 
-    private void initStoriesRecyclerView(){
+    private void initStoriesRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        RecyclerView recyclerView = findViewById(R.id.stories_recycler_view);
-        recyclerView.setVisibility(View.VISIBLE);
-        heightOfLayout = recyclerView.getHeight();
-        recyclerView.setLayoutManager(layoutManager);
+        storiesLayout.setVisibility(View.VISIBLE);
+        final ViewTreeObserver observer = storiesLayout.getViewTreeObserver();
+        observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                heightOfLayout = storiesLayout.getHeight();
+                observer.removeOnGlobalLayoutListener(this);
+            }
+        });
+        storiesRv.setLayoutManager(layoutManager);
         StoriesRecyclerViewAdapter adapter = new StoriesRecyclerViewAdapter(this, storyDataList);
-        recyclerView.setAdapter(adapter);
+        storiesRv.setAdapter(adapter);
     }
 
     private void initSearchResultListener(String searchKey) {
@@ -646,6 +664,51 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         @Override
         public CharSequence getPageTitle(int position) {
             return title[position];
+        }
+    }
+
+    void scrollStories(int dy, int state) {
+        if (storyDataList != null && !storyDataList.isEmpty()) {
+            if (dy < 0 && state == SCROLL_STATE_DRAGGING && storiesLayout.getVisibility() == VISIBLE && storiesLayout.getAnimation() == null) {
+                //scrolling up
+                Animation hideAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_up_hide);
+                hideAnimation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        storiesLayout.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                storiesLayout.startAnimation(hideAnimation);
+            } else if (dy > 0 && state == SCROLL_STATE_DRAGGING && storiesLayout.getVisibility() == GONE && storiesLayout.getAnimation() == null) {
+                Animation showAnimation = AnimationUtils.loadAnimation(this, R.anim.slide_down_show);
+                showAnimation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        storiesLayout.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                storiesLayout.startAnimation(showAnimation);
+            }
         }
     }
 
@@ -774,7 +837,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         }
     }
 
-//    public void showNewBadge() {
+    //    public void showNewBadge() {
 //        tabLayout.getTabAt(1).setCustomView(R.layout.tab_with_badge);
 //        final View customView = tabLayout.getTabAt(1).getCustomView();
 //        if (customView != null) {

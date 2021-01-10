@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,56 +7,57 @@
     android:orientation="vertical"
     tools:context="in.lubble.app.chat.ChatActivity">
 
-
-    <com.google.android.material.appbar.AppBarLayout
+    <View
+        android:id="@+id/sep_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:elevation="0dp">
-
-        <com.google.android.material.appbar.CollapsingToolbarLayout
-            android:id="@+id/main.collapsing"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed|enterAlways">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/stories_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="?attr/actionBarSize"
-                android:background="@color/white"
-                android:orientation="horizontal"
-                android:paddingTop="4dp"
-                android:visibility="gone"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="5"
-                tools:listitem="@layout/story_layout"
-                tools:visibility="visible" />
-
-            <include
-                android:id="@+id/icon_toolbar"
-                layout="@layout/icon_toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_collapseMode="pin" />
-
-        </com.google.android.material.appbar.CollapsingToolbarLayout>
-
-        <include
-            layout="@layout/layout_shadow"
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_alignWithParentIfMissing="true" />
-
-    </com.google.android.material.appbar.AppBarLayout>
+        android:layout_height="1dp"
+        android:layout_below="@id/icon_toolbar"
+        android:layout_marginTop="2dp"
+        android:background="@color/light_gray" />
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewpager_chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_below="@id/stories_recycler_view"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:layout_below="@id/pinned_message_container" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <include
+        layout="@layout/pinned_message_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sep_toolbar" />
+
+    <LinearLayout
+        android:id="@+id/ll_stories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sep_toolbar"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:orientation="vertical">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/stories_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="horizontal"
+            android:paddingTop="4dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="5"
+            tools:listitem="@layout/story_layout" />
+
+        <include
+            android:id="@+id/container_shadow"
+            layout="@layout/layout_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="2dp" />
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/icon_toolbar"
+        layout="@layout/icon_toolbar" />
+
+</RelativeLayout>
