@@ -15,12 +15,12 @@
         android:layout_marginTop="4dp"
         android:background="@color/light_gray" />
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewpager_chat"
+    <FrameLayout
+        android:id="@+id/frame_frag"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_below="@id/pinned_message_container" />
+        android:layout_below="@id/pinned_message_container"/>
 
     <include
         layout="@layout/pinned_message_layout"

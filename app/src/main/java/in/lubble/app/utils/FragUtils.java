@@ -20,6 +20,12 @@ public class FragUtils {
                 .replace(viewId, targetFrag)
                 .commitAllowingStateLoss();
     }
+    public static void replaceFrag(FragmentManager fragmentManager, Fragment targetFrag, int viewId, String tag) {
+        fragmentManager
+                .beginTransaction()
+                .replace(viewId, targetFrag, tag)
+                .commitAllowingStateLoss();
+    }
 
     public static void replaceStack(Context context, Fragment fragment, int viewId) {
         if (context != null) {

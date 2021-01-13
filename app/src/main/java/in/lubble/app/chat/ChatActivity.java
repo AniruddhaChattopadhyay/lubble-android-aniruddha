@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -33,11 +34,8 @@ import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager.widget.ViewPager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -75,6 +73,7 @@ import in.lubble.app.models.NotifData;
 import in.lubble.app.models.search.Hit;
 import in.lubble.app.models.search.SearchResultData;
 import in.lubble.app.user_search.UserSearchActivity;
+import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
 
@@ -103,6 +102,8 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     public static final String EXTRA_RECEIVER_NAME = "EXTRA_RECEIVER_NAME";
     public static final String EXTRA_RECEIVER_DP_URL = "EXTRA_RECEIVER_DP_URL";
     public static final String EXTRA_ITEM_TITLE = "EXTRA_ITEM_TITLE";
+    public static final String TAG_CHAT_FAG = "TAG_CHAT_FAG";
+
     private ImageView toolbarIcon, toolbarLockIcon;
     private Toolbar toolbar;
     private TextView toolbarTv, toolbarInviteHint, highlightNamesTv, memberCountTV, pinnedMsgTv;
@@ -112,7 +113,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private SearchView searchView;
     private ChatFragment targetFrag = null;
     private String groupId;
-    private ViewPager viewPager;
     //    private TabLayout tabLayout;
     private String dmId;
     private SearchResultData searchResultData = null;
@@ -128,6 +128,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private int heightOfLayout = 0;
     private RecyclerView storiesRv;
     private LinearLayout storiesLayout;
+    private FrameLayout fragContainer;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -277,12 +278,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         pinnedMessageCancel = findViewById(R.id.pinned_message_cross);
         storiesRv = findViewById(R.id.stories_recycler_view);
         storiesLayout = findViewById(R.id.ll_stories);
+        fragContainer = findViewById(R.id.frame_frag);
         searchView.setOnQueryTextListener(this);
         setTitle("");
-
-        viewPager = findViewById(R.id.viewpager_chat);
-//        tabLayout = findViewById(R.id.tablayout_chat);
-//        tabLayout.setupWithViewPager(viewPager);
 
         toolbarIcon.setImageResource(R.drawable.ic_circle_group_24dp);
 
@@ -306,9 +304,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             inviteContainer.setVisibility(View.VISIBLE);
         }
 
-        ChatViewPagerAdapter adapter = new ChatViewPagerAdapter(getSupportFragmentManager(), msgId, isJoining);
-        viewPager.setAdapter(adapter);
-        viewPager.setCurrentItem(tabPosition, true);
+        FragUtils.replaceFrag(getSupportFragmentManager(), getTargetChatFrag(msgId, isJoining), fragContainer.getId(), TAG_CHAT_FAG);
+        final Bundle groupBundle = new Bundle();
+        groupBundle.putString("groupid", groupId);
+        Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, groupBundle, ChatActivity.this);
 
         toolbar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -336,39 +335,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
         }
-//        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-//            @Override
-//            public void onTabSelected(TabLayout.Tab tab) {
-//                final Bundle bundle = new Bundle();
-//                bundle.putString("groupid", groupId);
-//                if (tab.getPosition() == 0) {
-//                    Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, bundle, ChatActivity.this);
-//                } else if (tab.getPosition() == 1) {
-//                    Analytics.triggerEvent(AnalyticsEvents.GROUP_MORE_FRAG, bundle, ChatActivity.this);
-//                    final View customView = tab.getCustomView();
-//                    if (customView != null) {
-//                        ((TextView) customView.findViewById(android.R.id.text1)).setTextColor(ContextCompat.getColor(ChatActivity.this, R.color.black));
-//                        customView.findViewById(R.id.badge).setVisibility(View.GONE);
-//                        LubbleSharedPrefs.getInstance().setIsBookExchangeOpened(true);
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onTabUnselected(TabLayout.Tab tab) {
-//                if (tab.getPosition() == 1) {
-//                    final View customView = tab.getCustomView();
-//                    if (customView != null) {
-//                        ((TextView) customView.findViewById(android.R.id.text1)).setTextColor(ContextCompat.getColor(ChatActivity.this, R.color.default_text_color));
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onTabReselected(TabLayout.Tab tab) {
-//
-//            }
-//        });
 
         inviteContainer.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -559,10 +525,12 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     }
 
     private void showStories() {
-        RealtimeDbHelper.getStoriesRef(groupId).addValueEventListener(new ValueEventListener() {
+        DatabaseReference storiesRef = RealtimeDbHelper.getStoriesRef(groupId);
+        storiesRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
+                    storyDataList.clear();
                     for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                         StoryData storyData = dataSnapshot.getValue(StoryData.class);
                         storyDataList.add(storyData);
@@ -573,11 +541,12 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                         storiesLayout.setVisibility(GONE);
                     }
                 }
+                storiesRef.removeEventListener(this);
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-
+                storiesRef.removeEventListener(this);
             }
         });
     }
@@ -633,38 +602,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     @Override
     public boolean onQueryTextChange(String newText) {
         return false;
-    }
-
-    public class ChatViewPagerAdapter extends FragmentPagerAdapter {
-
-        private String title[] = {"Chats", "Collections"};
-        private String msgId;
-        private boolean isJoining;
-
-        public ChatViewPagerAdapter(FragmentManager manager, String msgId, boolean isJoining) {
-            super(manager);
-            this.msgId = msgId;
-            this.isJoining = isJoining;
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            if (position == 0) {
-                return getTargetChatFrag(msgId, isJoining);
-            } else {
-                return ChatMoreFragment.newInstance(groupId);
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return dmId == null ? title.length : 1;
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return title[position];
-        }
     }
 
     void scrollStories(int dy, int state) {
@@ -837,14 +774,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         }
     }
 
-    //    public void showNewBadge() {
-//        tabLayout.getTabAt(1).setCustomView(R.layout.tab_with_badge);
-//        final View customView = tabLayout.getTabAt(1).getCustomView();
-//        if (customView != null) {
-//            customView.findViewById(R.id.badge).setVisibility(View.VISIBLE);
-//        }
-//    }
-//
     int getTopLayoutHeight() {
         return heightOfLayout;
     }
@@ -960,13 +889,10 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
     @Override
     public void onFlairUpdated() {
-        ChatFragment frag = (ChatFragment)
-                getSupportFragmentManager().findFragmentByTag(makeFragmentName(viewPager.getId(), 0));
-        frag.updateThisUserFlair();
-    }
-
-    private static String makeFragmentName(int viewPagerId, int index) {
-        return "android:switcher:" + viewPagerId + ":" + index;
+        Fragment chatFrag = getSupportFragmentManager().findFragmentByTag(TAG_CHAT_FAG);
+        if (chatFrag instanceof ChatFragment) {
+            ((ChatFragment) chatFrag).updateThisUserFlair();
+        }
     }
 
 }
