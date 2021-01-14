@@ -57,7 +57,6 @@ import java.util.MissingFormatArgumentException;
 import java.util.Set;
 
 import in.lubble.app.BaseActivity;
-import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -535,7 +534,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                         StoryData storyData = dataSnapshot.getValue(StoryData.class);
                         storyDataList.add(storyData);
                     }
-                    if (BuildConfig.DEBUG || !storyDataList.isEmpty()) {
+                    if (!storyDataList.isEmpty()) {
                         initStoriesRecyclerView();
                     } else {
                         storiesLayout.setVisibility(GONE);
