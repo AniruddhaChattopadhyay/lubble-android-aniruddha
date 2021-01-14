@@ -133,10 +133,14 @@
 
                 <ImageView
                     android:id="@+id/iv_attach"
-                    android:layout_width="36dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="38dp"
+                    android:layout_height="0dp"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/iv_media_attach"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
+                    android:tint="@color/md_grey_800"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/iv_media_attach"
                     app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
@@ -144,15 +148,19 @@
 
                 <ImageView
                     android:id="@+id/iv_media_attach"
-                    android:layout_width="36dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="38dp"
+                    android:layout_height="0dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginRight="8dp"
                     android:layout_toStartOf="@id/iv_send_btn"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="12dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/iv_send_btn"
                     app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
-                    app:srcCompat="@drawable/ic_image_gallery" />
+                    android:tint="@color/md_grey_800"
+                    app:srcCompat="@drawable/ic_image_white_24dp" />
 
                 <EditText
                     android:id="@+id/et_new_message"
@@ -288,26 +296,25 @@
         android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:layout_above="@id/bottom_container"
-        android:scaleType="centerCrop"
-        android:layout_marginLeft="8dp"
         android:layout_alignTop="@id/typing_tv"
+        android:layout_marginLeft="8dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
         app:lottie_rawRes="@raw/typing_anim_grey"
         app:tint="@color/orange"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+        tools:visibility="visible" />
 
     <TextView
+        android:id="@+id/typing_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/typing_tv"
-        android:visibility="gone"
-        tools:visibility="visible"
-        tools:text="Pika, Bulba typing"
         android:layout_above="@id/bottom_container"
-        android:layout_toEndOf="@+id/anim_typing"
         android:layout_marginTop="2dp"
-        />
+        android:layout_toEndOf="@+id/anim_typing"
+        android:visibility="gone"
+        tools:text="Pika, Bulba typing"
+        tools:visibility="visible" />
 
 </RelativeLayout>
