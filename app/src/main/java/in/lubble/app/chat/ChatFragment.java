@@ -66,12 +66,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import gun0912.tedbottompicker.TedBottomPicker;
-import gun0912.tedbottompicker.TedBottomPicker;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.UploadPDFService;
 import in.lubble.app.analytics.Analytics;
@@ -145,6 +142,8 @@ import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.UiUtils.showKeyboard;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
+//import gun0912.tedbottompicker.TedBottomPicker;
+
 @RuntimePermissions
 public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener, ChatUserTagsAdapter.OnUserTagClick {
 
@@ -181,7 +180,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private EditText newMessageEt;
     private ImageView sendBtn;
     private ImageView attachMediaBtn;
-    private ImageView mediaAttachBtn;
     private ImageView linkPicIv;
     private TextView linkTitle;
     private TextView linkDesc;
@@ -395,7 +393,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.iv_send_btn);
         attachMediaBtn = view.findViewById(R.id.iv_attach);
-        mediaAttachBtn = view.findViewById(R.id.iv_media_attach);
         linkMetaContainer = view.findViewById(R.id.group_link_meta);
         linkPicIv = view.findViewById(R.id.iv_link_pic);
         linkTitle = view.findViewById(R.id.tv_link_title);
@@ -421,7 +418,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         newMessageEt.addTextChangedListener(textWatcher);
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
-        mediaAttachBtn.setOnClickListener(this);
         joinBtn.setOnClickListener(this);
         declineIv.setOnClickListener(this);
         linkCancel.setOnClickListener(this);
@@ -1320,9 +1316,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 ChatFragmentPermissionsDispatcher
                         .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
                 break;
-            case R.id.iv_media_attach:
-                ChatFragmentPermissionsDispatcher.showMediaAttachBottomSheetWithPermissionCheck(ChatFragment.this);
-                break;
             case R.id.btn_join:
                 getCreateOrJoinGroupRef().child(groupId).setValue(true);
                 isJoining = true;
@@ -1371,17 +1364,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
     }
 
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    public void showMediaAttachBottomSheet(){
-        TedBottomPicker.with(getActivity())
-                //.setPeekHeight(getResources().getDisplayMetrics().heightPixels/2)
-                .setSelectedUri(selectedImageUriFromMediaAttach)
-                //.showVideoMedia()
-                .setPeekHeight(1200)
-                .show(uri -> {
-                    AttachImageActivity.open(getContext(), uri, groupId, null, (dmId != null), isCurrUserSeller, authorId);
-                });
-    }
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void showAttachmentBottomSheet() {
         AttachmentListDialogFrag.newInstance(dmId != null).show(getChildFragmentManager(), null);
