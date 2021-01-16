@@ -123,11 +123,6 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
                                 mContext.startActivity(intent);
                             }
                             Analytics.triggerEvent(AnalyticsEvents.COLLECTION_PLACE_CTA_CLICK, bundle, mContext);
-
-                            //String link = storyList.get(position).get("link").toString();
-                            //Intent intent = new Intent(mContext, StoryRedirectLink.class);
-                            //intent.putExtra("link",link);
-                            //mContext.startActivity(intent);
                         }
                     }
 

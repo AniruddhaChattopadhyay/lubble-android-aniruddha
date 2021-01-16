@@ -410,7 +410,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                                 @Override
                                 public void onGlobalLayout() {
                                     // Past the maximum number of lines we want to display.
-                                    viewTreeObserver.removeOnGlobalLayoutListener(this);
+                                    if (viewTreeObserver.isAlive()) {
+                                        viewTreeObserver.removeOnGlobalLayoutListener(this);
+                                    }
                                     if (pinnedMsgTv.getLineCount() > 3) {
                                         int lastCharShown = pinnedMsgTv.getLayout().getLineVisibleEnd(3 - 1);
 
@@ -558,7 +560,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             @Override
             public void onGlobalLayout() {
                 heightOfLayout = storiesLayout.getHeight();
-                observer.removeOnGlobalLayoutListener(this);
+                if (observer.isAlive()) {
+                    observer.removeOnGlobalLayoutListener(this);
+                }
             }
         });
         storiesRv.setLayoutManager(layoutManager);
