@@ -402,7 +402,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                             final String escapedMessage = message.replaceAll("\\\\n", "\n");
                             pinnedMessageContainer.setVisibility(View.VISIBLE);
                             pinnedMsgTv.setText(escapedMessage);
-                            pinnedMsgTv.setText(message);
                             pinnedMessageCancel.setVisibility(View.VISIBLE);
 
                             final ViewTreeObserver viewTreeObserver = pinnedMsgTv.getViewTreeObserver();
