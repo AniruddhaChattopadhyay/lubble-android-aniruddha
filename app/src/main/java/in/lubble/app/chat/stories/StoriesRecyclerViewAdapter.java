@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -39,12 +40,14 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
     //private ArrayList<String> mImageUrls = new ArrayList<>();
     private ArrayList<StoryData> storyDataList;
     private Context mContext;
+    private String groupId;
 
-    public StoriesRecyclerViewAdapter(Context context, ArrayList<StoryData> storyDataList) {
+    public StoriesRecyclerViewAdapter(Context context, ArrayList<StoryData> storyDataList, String groupId) {
 //        mNames = names;
 //        mImageUrls = imageUrls;
         mContext = context;
         this.storyDataList = storyDataList;
+        this.groupId = groupId;
     }
 
     @Override
@@ -98,7 +101,7 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
 
         new StoryView.Builder(((AppCompatActivity) mContext).getSupportFragmentManager())
                 .setStoriesList(myStories)
-                .setStoryDuration(5000)
+                .setStoryDuration(7000)
                 .setTitleText(storyTitle)
                 .setTitleLogoUrl(storyLogo)
                 .setSubtitleText(LubbleSharedPrefs.getInstance().getLubbleName())
@@ -133,6 +136,12 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
                 .setOnStoryChangedCallback(new OnStoryChangedCallback() {
                     @Override
                     public void storyChanged(int position) {
+                        Bundle bundle = new Bundle();
+                        bundle.putString("groupId", groupId);
+                        bundle.putString("storyTitle", storyTitle);
+                        bundle.putInt("storyPos", position);
+                        bundle.putInt("storyTotalPages", myStories.size());
+                        Analytics.triggerEvent(AnalyticsEvents.STORY_CHANGED, bundle, LubbleApp.getAppContext());
                     }
                 })
                 .setStartingIndex(0)
@@ -140,6 +149,10 @@ public class StoriesRecyclerViewAdapter extends RecyclerView.Adapter<StoriesRecy
                 .build()
                 .show();
 
+        Bundle bundle = new Bundle();
+        bundle.putString("groupId", groupId);
+        bundle.putString("storyTitle", storyTitle);
+        Analytics.triggerEvent(AnalyticsEvents.STORY_VIEWED, bundle, LubbleApp.getAppContext());
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

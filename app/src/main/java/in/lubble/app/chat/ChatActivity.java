@@ -565,7 +565,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             }
         });
         storiesRv.setLayoutManager(layoutManager);
-        StoriesRecyclerViewAdapter adapter = new StoriesRecyclerViewAdapter(this, storyDataList);
+        StoriesRecyclerViewAdapter adapter = new StoriesRecyclerViewAdapter(this, storyDataList, groupId);
         storiesRv.setAdapter(adapter);
     }
 
