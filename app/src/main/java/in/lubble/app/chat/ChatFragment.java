@@ -71,7 +71,6 @@ import gun0912.tedbottompicker.TedBottomPicker;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.UploadPDFService;
 import in.lubble.app.analytics.Analytics;
@@ -252,11 +251,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     @Nullable
     private String dmOtherUserId;
     public static View view_access;
-
     private static long DELAY = 1000;
     private static long lastTextEdit = 0;
     private String firstName;
     private Uri selectedImageUriFromMediaAttach;
+    private boolean sendMesasgeGoAhead = true;
     Handler typingExpiryHandler = new Handler();
 
     public ChatFragment() {
@@ -1223,94 +1222,126 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
     }
 
+    private void sendMessage(){
+        final ChatData chatData = new ChatData();
+        chatData.setAuthorUid(authorId);
+        chatData.setAuthorIsSeller(isCurrUserSeller);
+        chatData.setMessage(newMessageEt.getText().toString().trim());
+        chatData.setCreatedTimestamp(System.currentTimeMillis());
+        chatData.setServerTimestamp(ServerValue.TIMESTAMP);
+        chatData.setIsDm(TextUtils.isEmpty(groupId));
+        if (taggedMap != null && !taggedMap.isEmpty()) {
+            chatData.setTagged(taggedMap);
+        }
+        if (isValidString(attachedGroupId)) {
+            chatData.setType(GROUP);
+            chatData.setAttachedGroupId(attachedGroupId);
+            chatData.setLinkTitle(linkTitle.getText().toString());
+            chatData.setLinkDesc(linkDesc.getText().toString());
+            chatData.setLinkPicUrl(attachedGroupPicUrl);
+        } else if (isValidString(attachedEventId)) {
+            chatData.setType(EVENT);
+            chatData.setAttachedGroupId(attachedEventId);
+            chatData.setLinkTitle(linkTitle.getText().toString());
+            chatData.setLinkDesc(linkDesc.getText().toString());
+            chatData.setLinkPicUrl(attachedEventPicUrl);
+        } else if (isValidString(replyMsgId)) {
+            chatData.setType(REPLY);
+            chatData.setReplyMsgId(replyMsgId);
+        } else if (isValidString(linkTitle.getText().toString())) {
+            chatData.setType(LINK);
+            chatData.setLinkTitle(linkTitle.getText().toString());
+            chatData.setLinkDesc(linkDesc.getText().toString());
+            chatData.setLinkPicUrl(attachedLinkPicUrl);
+        }
+
+        if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
+            // first msg in a new DM, create new DM chat
+            sendBtnProgressBtn.setVisibility(View.VISIBLE);
+            final DatabaseReference pushRef = RealtimeDbHelper.getCreateDmRef().push();
+
+            final HashMap<String, Object> userMap = new HashMap<>();
+            final HashMap<Object, Object> map2 = new HashMap<>();
+            map2.put("joinedTimestamp", System.currentTimeMillis());
+            map2.put("isSeller", false);
+            map2.put("otherUser", authorId);
+            userMap.put(receiverId, map2);
+
+            HashMap<String, Object> authorMap = new HashMap<>();
+            authorMap.put("otherUser", receiverId);
+            authorMap.put("joinedTimestamp", System.currentTimeMillis());
+            authorMap.put("isSeller", false);
+            userMap.put(authorId, authorMap);
+
+            final HashMap<String, Object> map = new HashMap<>();
+            map.put("members", userMap);
+            map.put("message", chatData);
+            pushRef.setValue(map);
+            dmId = pushRef.getKey();
+            // new DM chat created with dmId. Start listeners.
+            dmInfoReference = getDmsRef().child(dmId);
+            messagesReference = getDmMessagesRef().child(dmId);
+            msgChildListener = msgListener(messagesReference);
+            syncGroupInfo();
+
+        } else if (!TextUtils.isEmpty(groupId)) {
+            messagesReference.push().setValue(chatData);
+            final Bundle bundle = new Bundle();
+            bundle.putString("group_id", groupId);
+            bundle.putString("type", chatData.getType());
+            bundle.putBoolean("isDm", false);
+            Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
+            if (chatData.getType().equalsIgnoreCase(REPLY)) {
+                LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
+            }
+        } else if (!TextUtils.isEmpty(dmId)) {
+            if (isDmBlocked) {
+                chatData.setSendNotif(false);
+                chatData.setType(HIDDEN);
+            }
+            messagesReference.push().setValue(chatData);
+            final Bundle bundle = new Bundle();
+            bundle.putString("dm_id", dmId);
+            bundle.putString("type", chatData.getType());
+            bundle.putBoolean("isDm", true);
+            Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
+        }
+        resetNewMessageEt();
+    }
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_send_btn:
-                final ChatData chatData = new ChatData();
-                chatData.setAuthorUid(authorId);
-                chatData.setAuthorIsSeller(isCurrUserSeller);
-                chatData.setMessage(newMessageEt.getText().toString().trim());
-                chatData.setCreatedTimestamp(System.currentTimeMillis());
-                chatData.setServerTimestamp(ServerValue.TIMESTAMP);
-                chatData.setIsDm(TextUtils.isEmpty(groupId));
-                if (taggedMap != null && !taggedMap.isEmpty()) {
-                    chatData.setTagged(taggedMap);
+                final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
+                String a = prefs.getLAST_USER_MESSAGE();
+                if(prefs.getLAST_USER_MESSAGE().equals(newMessageEt.getText().toString().trim())){
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
+                    builder1.setMessage("You are sharing the same message you shared last time. Please refrain from spamming.");
+                    builder1.setCancelable(false);
+                    builder1.setPositiveButton(
+                            "Proceed",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                    sendMessage();
+                                }
+                            });
+
+                    builder1.setNegativeButton(
+                            "Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert11 = builder1.create();
+                    alert11.show();
                 }
-                if (isValidString(attachedGroupId)) {
-                    chatData.setType(GROUP);
-                    chatData.setAttachedGroupId(attachedGroupId);
-                    chatData.setLinkTitle(linkTitle.getText().toString());
-                    chatData.setLinkDesc(linkDesc.getText().toString());
-                    chatData.setLinkPicUrl(attachedGroupPicUrl);
-                } else if (isValidString(attachedEventId)) {
-                    chatData.setType(EVENT);
-                    chatData.setAttachedGroupId(attachedEventId);
-                    chatData.setLinkTitle(linkTitle.getText().toString());
-                    chatData.setLinkDesc(linkDesc.getText().toString());
-                    chatData.setLinkPicUrl(attachedEventPicUrl);
-                } else if (isValidString(replyMsgId)) {
-                    chatData.setType(REPLY);
-                    chatData.setReplyMsgId(replyMsgId);
-                } else if (isValidString(linkTitle.getText().toString())) {
-                    chatData.setType(LINK);
-                    chatData.setLinkTitle(linkTitle.getText().toString());
-                    chatData.setLinkDesc(linkDesc.getText().toString());
-                    chatData.setLinkPicUrl(attachedLinkPicUrl);
+                else{
+                    prefs.setLAST_USER_MESSAGE(newMessageEt.getText().toString());
+                    sendMessage();
                 }
-
-                if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
-                    // first msg in a new DM, create new DM chat
-                    sendBtnProgressBtn.setVisibility(View.VISIBLE);
-                    final DatabaseReference pushRef = RealtimeDbHelper.getCreateDmRef().push();
-
-                    final HashMap<String, Object> userMap = new HashMap<>();
-                    final HashMap<Object, Object> map2 = new HashMap<>();
-                    map2.put("joinedTimestamp", System.currentTimeMillis());
-                    map2.put("isSeller", false);
-                    map2.put("otherUser", authorId);
-                    userMap.put(receiverId, map2);
-
-                    HashMap<String, Object> authorMap = new HashMap<>();
-                    authorMap.put("otherUser", receiverId);
-                    authorMap.put("joinedTimestamp", System.currentTimeMillis());
-                    authorMap.put("isSeller", false);
-                    userMap.put(authorId, authorMap);
-
-                    final HashMap<String, Object> map = new HashMap<>();
-                    map.put("members", userMap);
-                    map.put("message", chatData);
-                    pushRef.setValue(map);
-                    dmId = pushRef.getKey();
-                    // new DM chat created with dmId. Start listeners.
-                    dmInfoReference = getDmsRef().child(dmId);
-                    messagesReference = getDmMessagesRef().child(dmId);
-                    msgChildListener = msgListener(messagesReference);
-                    syncGroupInfo();
-
-                } else if (!TextUtils.isEmpty(groupId)) {
-                    messagesReference.push().setValue(chatData);
-                    final Bundle bundle = new Bundle();
-                    bundle.putString("group_id", groupId);
-                    bundle.putString("type", chatData.getType());
-                    bundle.putBoolean("isDm", false);
-                    Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
-                    if (chatData.getType().equalsIgnoreCase(REPLY)) {
-                        LubbleSharedPrefs.getInstance().setShowRatingDialog(true);
-                    }
-                } else if (!TextUtils.isEmpty(dmId)) {
-                    if (isDmBlocked) {
-                        chatData.setSendNotif(false);
-                        chatData.setType(HIDDEN);
-                    }
-                    messagesReference.push().setValue(chatData);
-                    final Bundle bundle = new Bundle();
-                    bundle.putString("dm_id", dmId);
-                    bundle.putString("type", chatData.getType());
-                    bundle.putBoolean("isDm", true);
-                    Analytics.triggerEvent(AnalyticsEvents.SEND_GROUP_CHAT, bundle, getContext());
-                }
-                resetNewMessageEt();
                 break;
             case R.id.iv_attach:
                 if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
