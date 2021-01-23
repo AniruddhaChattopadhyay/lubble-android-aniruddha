@@ -128,6 +128,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private RecyclerView storiesRv;
     private LinearLayout storiesLayout;
     private FrameLayout fragContainer;
+    private DatabaseReference storiesRef;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -525,31 +526,31 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     }
 
     private void showStories() {
-        DatabaseReference storiesRef = RealtimeDbHelper.getStoriesRef(groupId);
-        storiesRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    storyDataList.clear();
-                    for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                        StoryData storyData = dataSnapshot.getValue(StoryData.class);
-                        storyDataList.add(storyData);
-                    }
-                    if (!storyDataList.isEmpty()) {
-                        initStoriesRecyclerView();
-                    } else {
-                        storiesLayout.setVisibility(GONE);
-                    }
-                }
-                storiesRef.removeEventListener(this);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                storiesRef.removeEventListener(this);
-            }
-        });
+        storiesRef = RealtimeDbHelper.getStoriesRef(groupId);
+        storiesRef.addValueEventListener(storiesListener);
     }
+
+    ValueEventListener storiesListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+            if (snapshot.exists()) {
+                storyDataList.clear();
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    StoryData storyData = dataSnapshot.getValue(StoryData.class);
+                    storyDataList.add(storyData);
+                }
+                if (!storyDataList.isEmpty()) {
+                    initStoriesRecyclerView();
+                } else {
+                    storiesLayout.setVisibility(GONE);
+                }
+            }
+        }
+
+        @Override
+        public void onCancelled(@NonNull DatabaseError error) {
+        }
+    };
 
     private void initStoriesRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -823,6 +824,9 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     protected void onPause() {
         super.onPause();
         unregisterReceiver(notificationReceiver);
+        if (storiesRef != null && storiesListener != null) {
+            storiesRef.removeEventListener(storiesListener);
+        }
     }
 
     @Override
