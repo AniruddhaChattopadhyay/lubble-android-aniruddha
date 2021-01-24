@@ -1,5 +1,6 @@
 package in.lubble.app.user_search;
 
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -17,7 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.models.ProfileInfo;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> implements Filterable {
@@ -28,10 +32,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
     private HashMap<String, Boolean> groupMembersMap;
     private final GlideRequests glide;
     private UserFilter filter;
+    private String groupId;
 
-    UserAdapter(OnUserSelectedListener listener, GlideRequests glide) {
+    UserAdapter(OnUserSelectedListener listener, GlideRequests glide, String groupId) {
         membersList = new ArrayList<>();
         mListener = listener;
+        this.groupId = groupId;
         checkedMap = new HashMap<>();
         groupMembersMap = new HashMap<>();
         this.glide = glide;
@@ -106,7 +112,19 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
         if (checkedMap.get(userId) != null && checkedMap.get(userId)) {
             deselectUser(uid, holder);
         } else {
-            selectUser(uid, holder);
+            if (checkedMap.size() < 10) {
+                selectUser(uid, holder);
+            } else {
+                final AlertDialog alertDialog = new AlertDialog.Builder(holder.itemView.getContext()).create();
+                alertDialog.setTitle("Want everyone to see your group?");
+                alertDialog.setMessage("Share the group in " + LubbleSharedPrefs.getInstance().getDefaultGroupId() + " group. All Lubble members are part of that group.\n\nOnly 10 neighbours can be personally invited.");
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Share now", (dialog, which) -> {
+                    ShareActiv.open(holder.itemView.getContext(), groupId, ShareActiv.ShareType.GROUP);
+                    dialog.dismiss();
+                });
+                alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "OK", (dialog, which) -> dialog.dismiss());
+                alertDialog.show();
+            }
         }
     }
 
