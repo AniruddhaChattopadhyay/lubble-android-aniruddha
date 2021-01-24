@@ -73,6 +73,7 @@ import gun0912.tedbottompicker.TedBottomPicker;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.UploadPDFService;
 import in.lubble.app.analytics.Analytics;
@@ -145,6 +146,8 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.UiUtils.showKeyboard;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
+
+//import gun0912.tedbottompicker.TedBottomPicker;
 
 @RuntimePermissions
 public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener, ChatUserTagsAdapter.OnUserTagClick {
@@ -254,6 +257,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     @Nullable
     private String dmOtherUserId;
     public static View view_access;
+
     private static long DELAY = 1000;
     private static long lastTextEdit = 0;
     private String firstName;
@@ -330,6 +334,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             sharedImageUri = getArguments().getParcelable(KEY_IMG_URI);
             if (TextUtils.isEmpty(dmId)) {
                 // not a DM
+                String caption = null;
+                ChatData chatData = (ChatData) getArguments().getSerializable(KEY_CHAT_DATA);
+                if (chatData != null) {
+                    caption = chatData.getMessage();
+                }
                 if (FileUtils.getMimeType(sharedImageUri).contains("video")) {
                     File file = new File(sharedImageUri.getPath());
                     Video_Size = file.length() / (1024 * 1024);
@@ -337,13 +346,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         Toast.makeText(getContext(), "Unsupported file type .mov", Toast.LENGTH_LONG).show();
                         file.delete();
                     } else if (Video_Size < PERMITTED_VIDEO_SIZE) {
-                        AttachVideoActivity.open(getContext(), sharedImageUri, groupId, null, false, isCurrUserSeller, authorId);
+                        startActivityForResult(AttachVideoActivity.getIntent(getContext(), sharedImageUri, groupId, caption, false, isCurrUserSeller, authorId), REQUEST_CODE_IMG_SENT);
                     } else {
                         Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
                         file.delete();
                     }
                 } else if (FileUtils.getMimeType(sharedImageUri).contains("image")) {
-                    AttachImageActivity.open(getContext(), sharedImageUri, groupId, null, false, isCurrUserSeller, authorId);
+                    startActivityForResult(AttachImageActivity.getIntent(getContext(), sharedImageUri, groupId, caption, false, isCurrUserSeller, authorId), REQUEST_CODE_IMG_SENT);
                 } else if (FileUtils.getMimeType(sharedImageUri).contains("pdf")) {
                     String name = FileUtils.getFileNameFromUri(sharedImageUri);
                     name = name.replace(".pdf", "");
@@ -397,7 +406,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.iv_send_btn);
         attachMediaBtn = view.findViewById(R.id.iv_attach);
-        mediaAttachBtn = view.findViewById(R.id.iv_media_attach);
+        attachMediaBtn =view.findViewById(R.id.iv_media_attach);
         linkMetaContainer = view.findViewById(R.id.group_link_meta);
         linkPicIv = view.findViewById(R.id.iv_link_pic);
         linkTitle = view.findViewById(R.id.tv_link_title);

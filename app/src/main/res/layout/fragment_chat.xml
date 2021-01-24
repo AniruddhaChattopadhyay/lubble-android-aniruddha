@@ -288,26 +288,25 @@
         android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:layout_above="@id/bottom_container"
-        android:scaleType="centerCrop"
-        android:layout_marginLeft="8dp"
         android:layout_alignTop="@id/typing_tv"
+        android:layout_marginLeft="8dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
         app:lottie_rawRes="@raw/typing_anim_grey"
         app:tint="@color/orange"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+        tools:visibility="visible" />
 
     <TextView
+        android:id="@+id/typing_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/typing_tv"
-        android:visibility="gone"
-        tools:visibility="visible"
-        tools:text="Pika, Bulba typing"
         android:layout_above="@id/bottom_container"
-        android:layout_toEndOf="@+id/anim_typing"
         android:layout_marginTop="2dp"
-        />
+        android:layout_toEndOf="@+id/anim_typing"
+        android:visibility="gone"
+        tools:text="Pika, Bulba typing"
+        tools:visibility="visible" />
 
 </RelativeLayout>

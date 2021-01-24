@@ -145,4 +145,7 @@ public class AnalyticsEvents {
 
     public static final String EXPAND_PIN_MSG = "EXPAND_PIN_MSG";
     public static final String DISMISS_PIN_MSG = "DISMISS_PIN_MSG";
+
+    public static final String STORY_VIEWED = "STORY_VIEWED";
+    public static final String STORY_CHANGED = "STORY_CHANGED";
 }
