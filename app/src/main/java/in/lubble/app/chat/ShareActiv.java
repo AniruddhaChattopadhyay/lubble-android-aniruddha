@@ -134,6 +134,11 @@ public class ShareActiv extends BaseActivity {
             // since the service is not part of same context/process
             File localImgFile = getFileFromInputStreamUri(this, imageUri);
             this.mediaUri = Uri.fromFile(localImgFile);
+            // look for any attached text caption
+            String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if (!TextUtils.isEmpty(sharedText)) {
+                chatDataToSend.setMessage(sharedText);
+            }
         }
     }
 
@@ -147,6 +152,11 @@ public class ShareActiv extends BaseActivity {
         } else {
             File localVidFile = getFileFromInputStreamUri(this, videoUri);
             this.mediaUri = Uri.fromFile(localVidFile);
+            // look for any attached text caption
+            String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+            if (!TextUtils.isEmpty(sharedText)) {
+                chatDataToSend.setMessage(sharedText);
+            }
         }
     }
 

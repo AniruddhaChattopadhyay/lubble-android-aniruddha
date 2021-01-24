@@ -326,6 +326,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             sharedImageUri = getArguments().getParcelable(KEY_IMG_URI);
             if (TextUtils.isEmpty(dmId)) {
                 // not a DM
+                String caption = null;
+                ChatData chatData = (ChatData) getArguments().getSerializable(KEY_CHAT_DATA);
+                if (chatData != null) {
+                    caption = chatData.getMessage();
+                }
                 if (FileUtils.getMimeType(sharedImageUri).contains("video")) {
                     File file = new File(sharedImageUri.getPath());
                     Video_Size = file.length() / (1024 * 1024);
@@ -333,13 +338,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         Toast.makeText(getContext(), "Unsupported file type .mov", Toast.LENGTH_LONG).show();
                         file.delete();
                     } else if (Video_Size < PERMITTED_VIDEO_SIZE) {
-                        AttachVideoActivity.open(getContext(), sharedImageUri, groupId, null, false, isCurrUserSeller, authorId);
+                        startActivityForResult(AttachVideoActivity.getIntent(getContext(), sharedImageUri, groupId, caption, false, isCurrUserSeller, authorId), REQUEST_CODE_IMG_SENT);
                     } else {
                         Toast.makeText(getContext(), "Choose a video under 30 MB", Toast.LENGTH_LONG).show();
                         file.delete();
                     }
                 } else if (FileUtils.getMimeType(sharedImageUri).contains("image")) {
-                    AttachImageActivity.open(getContext(), sharedImageUri, groupId, null, false, isCurrUserSeller, authorId);
+                    startActivityForResult(AttachImageActivity.getIntent(getContext(), sharedImageUri, groupId, caption, false, isCurrUserSeller, authorId), REQUEST_CODE_IMG_SENT);
                 } else if (FileUtils.getMimeType(sharedImageUri).contains("pdf")) {
                     String name = FileUtils.getFileNameFromUri(sharedImageUri);
                     name = name.replace(".pdf", "");
