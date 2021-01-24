@@ -39,6 +39,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.fxn.pix.Options;
+import com.fxn.pix.Pix;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.BaseTransientBottomBar;
@@ -153,6 +155,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static final int REQUEST_CODE_EVENT_PICK = 922;
     private static final int REQUEST_CODE_IMG_SENT = 923;
     private static final int REQUEST_CODE_VIDEO_SENT = 924;
+    private static final int REQUEST_CODE_MEDIA_ATTACH = 100;
 
     private static final String KEY_GROUP_ID = "CHAT_GROUP_ID";
     private static final String KEY_MSG_ID = "CHAT_MSG_ID";
@@ -1352,7 +1355,8 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
                 break;
             case R.id.iv_media_attach:
-                ChatFragmentPermissionsDispatcher.showMediaAttachBottomSheetWithPermissionCheck(ChatFragment.this);
+                //ChatFragmentPermissionsDispatcher.showMediaAttachBottomSheetWithPermissionCheck(ChatFragment.this);
+                Pix.start(this, Options.init().setRequestCode(100));
                 break;
             case R.id.btn_join:
                 getCreateOrJoinGroupRef().child(groupId).setValue(true);
@@ -1544,6 +1548,13 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         } else if (resultCode == RESULT_OK && (requestCode == REQUEST_CODE_IMG_SENT || requestCode == REQUEST_CODE_VIDEO_SENT)) {
             // img/video sent; clear caption
             resetNewMessageEt();
+        }
+        else if(resultCode == RESULT_OK && requestCode == REQUEST_CODE_MEDIA_ATTACH){
+            ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
+            Uri uri = Uri.fromFile(new File(returnValue.get(0)));
+            File imageFile = getFileFromInputStreamUri(getContext(), uri);
+            uri = Uri.fromFile(imageFile);
+            AttachImageActivity.open(getContext(), uri, groupId, null, (dmId != null), isCurrUserSeller, authorId);
         }
     }
 

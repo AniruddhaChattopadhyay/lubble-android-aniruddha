@@ -159,6 +159,7 @@ dependencies {
 
     //media picker like telegram
     implementation 'gun0912.ted:tedbottompicker:2.0.1'
+    implementation  'com.fxn769:pix:1.5.4'
 }
 
 
