@@ -552,6 +552,10 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         // scrollToPosition() doesn't work here. why?
                         // opening keyboard will now shift recyclerview above
                         chatRecyclerView.smoothScrollToPosition(position);
+
+                        if (getActivity() != null && getActivity() instanceof ChatActivity) {
+                            ((ChatActivity) getActivity()).toggleStoriesVisibility(false);
+                        }
                     }
                 }
             }
