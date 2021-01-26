@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.constraintlayout.widget.Group;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -68,12 +69,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-//import gun0912.tedbottompicker.TedBottomPicker;
 import gun0912.tedbottompicker.TedBottomPicker;
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.UploadPDFService;
 import in.lubble.app.analytics.Analytics;
@@ -146,6 +146,8 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.UiUtils.showKeyboard;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
+
+//import gun0912.tedbottompicker.TedBottomPicker;
 
 //import gun0912.tedbottompicker.TedBottomPicker;
 
@@ -406,7 +408,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.iv_send_btn);
         attachMediaBtn = view.findViewById(R.id.iv_attach);
-        attachMediaBtn =view.findViewById(R.id.iv_media_attach);
+        mediaAttachBtn = view.findViewById(R.id.iv_media_attach);
         linkMetaContainer = view.findViewById(R.id.group_link_meta);
         linkPicIv = view.findViewById(R.id.iv_link_pic);
         linkTitle = view.findViewById(R.id.tv_link_title);
@@ -1234,7 +1236,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
     }
 
-    private void sendMessage(){
+    private void sendMessage() {
         final ChatData chatData = new ChatData();
         chatData.setAuthorUid(authorId);
         chatData.setAuthorIsSeller(isCurrUserSeller);
@@ -1320,13 +1322,14 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
         resetNewMessageEt();
     }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_send_btn:
                 final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
                 String a = prefs.getLAST_USER_MESSAGE();
-                if(prefs.getLAST_USER_MESSAGE().equals(newMessageEt.getText().toString().trim())){
+                if (prefs.getLAST_USER_MESSAGE().equals(newMessageEt.getText().toString().trim())) {
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
                     builder1.setMessage("You are sharing the same message you shared last time. Please refrain from spamming.");
                     builder1.setCancelable(false);
@@ -1349,8 +1352,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
 
                     AlertDialog alert11 = builder1.create();
                     alert11.show();
-                }
-                else{
+                } else {
                     prefs.setLAST_USER_MESSAGE(newMessageEt.getText().toString());
                     sendMessage();
                 }
@@ -1365,7 +1367,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 break;
             case R.id.iv_media_attach:
                 //ChatFragmentPermissionsDispatcher.showMediaAttachBottomSheetWithPermissionCheck(ChatFragment.this);
-                Pix.start(this, Options.init().setRequestCode(100));
+                Pix.start(this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH));
                 break;
             case R.id.btn_join:
                 getCreateOrJoinGroupRef().child(groupId).setValue(true);
@@ -1416,7 +1418,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    public void showMediaAttachBottomSheet(){
+    public void showMediaAttachBottomSheet() {
         TedBottomPicker.with(getActivity())
                 //.setPeekHeight(getResources().getDisplayMetrics().heightPixels/2)
                 .setSelectedUri(selectedImageUriFromMediaAttach)
@@ -1426,6 +1428,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                     AttachImageActivity.open(getContext(), uri, groupId, null, (dmId != null), isCurrUserSeller, authorId);
                 });
     }
+
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     public void showAttachmentBottomSheet() {
         AttachmentListDialogFrag.newInstance(dmId != null).show(getChildFragmentManager(), null);
@@ -1557,13 +1560,16 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         } else if (resultCode == RESULT_OK && (requestCode == REQUEST_CODE_IMG_SENT || requestCode == REQUEST_CODE_VIDEO_SENT)) {
             // img/video sent; clear caption
             resetNewMessageEt();
-        }
-        else if(resultCode == RESULT_OK && requestCode == REQUEST_CODE_MEDIA_ATTACH){
+        } else if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_MEDIA_ATTACH) {
             ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
-            Uri uri = Uri.fromFile(new File(returnValue.get(0)));
-            File imageFile = getFileFromInputStreamUri(getContext(), uri);
-            uri = Uri.fromFile(imageFile);
-            AttachImageActivity.open(getContext(), uri, groupId, null, (dmId != null), isCurrUserSeller, authorId);
+            if (returnValue != null && !returnValue.isEmpty()) {
+                Uri uri = FileProvider.getUriForFile(requireContext(), BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
+                File imageFile = getFileFromInputStreamUri(getContext(), uri);
+                uri = Uri.fromFile(imageFile);
+                AttachImageActivity.open(requireContext(), uri, groupId, null, (dmId != null), isCurrUserSeller, authorId);
+            } else {
+                Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
