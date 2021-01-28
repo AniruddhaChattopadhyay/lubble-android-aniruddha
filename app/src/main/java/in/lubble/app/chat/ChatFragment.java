@@ -258,8 +258,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private static long DELAY = 1000;
     private static long lastTextEdit = 0;
     private String firstName;
-    private Uri selectedImageUriFromMediaAttach;
-    private boolean sendMesasgeGoAhead = true;
     Handler typingExpiryHandler = new Handler();
 
     public ChatFragment() {
@@ -1323,27 +1321,20 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         switch (view.getId()) {
             case R.id.iv_send_btn:
                 final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
-                String a = prefs.getLAST_USER_MESSAGE();
                 if (prefs.getLAST_USER_MESSAGE().equals(newMessageEt.getText().toString().trim())) {
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(getContext());
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
                     builder1.setMessage("You are sharing the same message you shared last time. Please refrain from spamming.");
                     builder1.setCancelable(false);
                     builder1.setPositiveButton(
                             "Proceed",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                    sendMessage();
-                                }
+                            (dialog, id) -> {
+                                dialog.cancel();
+                                sendMessage();
                             });
 
                     builder1.setNegativeButton(
                             "Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
+                            (dialog, id) -> dialog.cancel());
 
                     AlertDialog alert11 = builder1.create();
                     alert11.show();
@@ -1548,7 +1539,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 Uri uri = FileProvider.getUriForFile(requireContext(), BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
                 File imageFile = getFileFromInputStreamUri(getContext(), uri);
                 uri = Uri.fromFile(imageFile);
-                AttachImageActivity.open(requireContext(), uri, groupId, null, (dmId != null), isCurrUserSeller, authorId);
+                AttachImageActivity.open(requireContext(), uri, groupId, newMessageEt.getText().toString(), (dmId != null), isCurrUserSeller, authorId);
             } else {
                 Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
             }
