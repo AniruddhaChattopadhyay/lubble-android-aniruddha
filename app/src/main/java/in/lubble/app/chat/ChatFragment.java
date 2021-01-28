@@ -69,7 +69,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import gun0912.tedbottompicker.TedBottomPicker;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
@@ -146,10 +145,6 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.UiUtils.showBottomSheetAlert;
 import static in.lubble.app.utils.UiUtils.showKeyboard;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
-
-//import gun0912.tedbottompicker.TedBottomPicker;
-
-//import gun0912.tedbottompicker.TedBottomPicker;
 
 @RuntimePermissions
 public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener, ChatUserTagsAdapter.OnUserTagClick {
@@ -1366,7 +1361,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                         .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
                 break;
             case R.id.iv_media_attach:
-                //ChatFragmentPermissionsDispatcher.showMediaAttachBottomSheetWithPermissionCheck(ChatFragment.this);
                 Pix.start(this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH));
                 break;
             case R.id.btn_join:
@@ -1415,18 +1409,6 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (linkMetaAsyncTask != null) {
             linkMetaAsyncTask.cancel(true);
         }
-    }
-
-    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    public void showMediaAttachBottomSheet() {
-        TedBottomPicker.with(getActivity())
-                //.setPeekHeight(getResources().getDisplayMetrics().heightPixels/2)
-                .setSelectedUri(selectedImageUriFromMediaAttach)
-                //.showVideoMedia()
-                .setPeekHeight(1200)
-                .show(uri -> {
-                    AttachImageActivity.open(getContext(), uri, groupId, null, (dmId != null), isCurrUserSeller, authorId);
-                });
     }
 
     @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
