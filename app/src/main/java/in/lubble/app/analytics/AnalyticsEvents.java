@@ -148,4 +148,8 @@ public class AnalyticsEvents {
 
     public static final String STORY_VIEWED = "STORY_VIEWED";
     public static final String STORY_CHANGED = "STORY_CHANGED";
+
+    public static final String DUPLICATE_MSG_WARN_SHOWN = "DUPLICATE_MSG_WARN_SHOWN";
+    public static final String DUPLICATE_MSG_WARN_DISMISSED = "DUPLICATE_MSG_WARN_DISMISSED";
+    public static final String DUPLICATE_MSG_WARN_HELP = "DUPLICATE_MSG_WARN_HELP";
 }

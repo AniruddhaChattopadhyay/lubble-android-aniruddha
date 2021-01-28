@@ -40,6 +40,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.freshchat.consumer.sdk.Freshchat;
 import com.fxn.pix.Options;
 import com.fxn.pix.Pix;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -1326,22 +1327,39 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             case R.id.iv_send_btn:
                 final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
                 if (prefs.getLAST_USER_MESSAGE().equals(newMessageEt.getText().toString().trim())) {
+                    Bundle analyticsBundle = new Bundle();
+                    analyticsBundle.putString("group_id", groupId);
+                    analyticsBundle.putString("msg_content", prefs.getLAST_USER_MESSAGE());
+
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
-                    builder1.setMessage("You are sharing the same message you shared last time. Please refrain from spamming.");
-                    builder1.setCancelable(false);
+                    builder1.setIcon(R.drawable.ic_warning_yellow_24dp);
+                    builder1.setTitle("Please avoid sending multiple messages");
+                    builder1.setMessage("You have already sent this msg in other groups.\n\n" +
+                            "Sending message in " +
+                            LubbleSharedPrefs.getInstance().getDefaultGroupId() +
+                            " group is enough as all residents are already added there." +
+                            "\n\n Spamming/promotional messages are not allowed. Kindly contact us for help or doubts.");
                     builder1.setPositiveButton(
-                            "Proceed",
+                            R.string.all_ok,
                             (dialog, id) -> {
                                 dialog.cancel();
-                                sendMessage();
+                                prefs.setLAST_USER_MESSAGE("");
+                                resetNewMessageEt();
+                                Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_DISMISSED, analyticsBundle, getContext());
                             });
 
-                    builder1.setNegativeButton(
-                            "Cancel",
-                            (dialog, id) -> dialog.cancel());
+                    builder1.setNeutralButton(
+                            "Open Help Chat",
+                            (dialog, id) -> {
+                                dialog.cancel();
+                                Freshchat.trackEvent(requireContext(), "duplicate_msgs", null);
+                                Freshchat.showConversations(requireContext());
+                                Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_HELP, analyticsBundle, getContext());
+                            });
 
                     AlertDialog alert11 = builder1.create();
                     alert11.show();
+                    Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_SHOWN, analyticsBundle, getContext());
                 } else {
                     prefs.setLAST_USER_MESSAGE(newMessageEt.getText().toString());
                     sendMessage();
