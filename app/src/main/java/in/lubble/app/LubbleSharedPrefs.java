@@ -54,6 +54,7 @@ public class LubbleSharedPrefs {
     private final String SHARE_MSG_COPY_URL = "SHARE_MSG_COPY_URL";
     private final String SHARE_MSG_URL = "SHARE_MSG_URL";
     private final String SHOW_NOTIF_DIGEST = "SHOW_NOTIF_DIGEST";
+    private final String LAST_USER_MESSAGE = "LAST_MESSAGE_USER";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -86,6 +87,14 @@ public class LubbleSharedPrefs {
     }
 
     //******************************************/
+
+    public String getLAST_USER_MESSAGE() {
+        return preferences.getString(LAST_USER_MESSAGE, "");
+    }
+
+    public boolean setLAST_USER_MESSAGE(String message){
+        return preferences.edit().putString(LAST_USER_MESSAGE, message).commit();
+    }
 
     public boolean getIsAppIntroShown() {
         return preferences.getBoolean(IS_APP_INTRO_SHOWN, false);
