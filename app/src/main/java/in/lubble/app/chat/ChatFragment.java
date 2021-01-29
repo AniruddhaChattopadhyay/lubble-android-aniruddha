@@ -559,7 +559,8 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                         // opening keyboard will now shift recyclerview above
                         chatRecyclerView.smoothScrollToPosition(position);
 
-                        if (getActivity() != null && getActivity() instanceof ChatActivity) {
+                        if (newBottom < oldBottom - UiUtils.dpToPx(56) && getActivity() != null && getActivity() instanceof ChatActivity) {
+                            // minus 56dp to account for the toolbar
                             ((ChatActivity) getActivity()).toggleStoriesVisibility(false);
                         }
                     }
