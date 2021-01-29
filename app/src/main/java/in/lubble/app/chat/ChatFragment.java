@@ -148,7 +148,7 @@ import static in.lubble.app.utils.UiUtils.showKeyboard;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
 @RuntimePermissions
-public class ChatFragment extends Fragment implements View.OnClickListener, AttachmentClickListener, ChatUserTagsAdapter.OnUserTagClick {
+public class ChatFragment extends Fragment implements AttachmentClickListener, ChatUserTagsAdapter.OnUserTagClick {
 
     private static final String TAG = "ChatFragment";
     private static final int REQUEST_CODE_IMG = 789;
@@ -426,12 +426,12 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         }
         sendBtn.setEnabled(false);
         newMessageEt.addTextChangedListener(textWatcher);
-        sendBtn.setOnClickListener(this);
-        attachMediaBtn.setOnClickListener(this);
-        mediaAttachBtn.setOnClickListener(this);
-        joinBtn.setOnClickListener(this);
-        declineIv.setOnClickListener(this);
-        linkCancel.setOnClickListener(this);
+        sendBtn.setOnClickListener(v -> sendMsgBtnClick());
+        attachMediaBtn.setOnClickListener(v -> openAttachmentSheet());
+        mediaAttachBtn.setOnClickListener(v -> Pix.start(ChatFragment.this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH)));
+        joinBtn.setOnClickListener(v -> joinBtnClick());
+        declineIv.setOnClickListener(v -> declineInvite(v));
+        linkCancel.setOnClickListener(v -> cancelLink());
 
         if (!TextUtils.isEmpty(itemTitle)) {
             // new DM chat, pre-fill help text in editText
@@ -1321,91 +1321,87 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         resetNewMessageEt();
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.iv_send_btn:
-                final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
-                if (prefs.getLAST_USER_MESSAGE().equals(newMessageEt.getText().toString().trim())) {
-                    Bundle analyticsBundle = new Bundle();
-                    analyticsBundle.putString("group_id", groupId);
-                    analyticsBundle.putString("msg_content", prefs.getLAST_USER_MESSAGE());
+    public void sendMsgBtnClick() {
+        final LubbleSharedPrefs prefs = LubbleSharedPrefs.getInstance();
+        if (prefs.getLAST_USER_MESSAGE().equals(newMessageEt.getText().toString().trim())) {
+            Bundle analyticsBundle = new Bundle();
+            analyticsBundle.putString("group_id", groupId);
+            analyticsBundle.putString("msg_content", prefs.getLAST_USER_MESSAGE());
 
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
-                    builder1.setIcon(R.drawable.ic_warning_yellow_24dp);
-                    builder1.setTitle("Please avoid sending multiple messages");
-                    builder1.setMessage("You have already sent this msg in other groups.\n\n" +
-                            "Sending message in " +
-                            LubbleSharedPrefs.getInstance().getDefaultGroupId() +
-                            " group is enough as all residents are already added there." +
-                            "\n\n Spamming/promotional messages are not allowed. Kindly contact us for help or doubts.");
-                    builder1.setPositiveButton(
-                            R.string.all_ok,
-                            (dialog, id) -> {
-                                dialog.cancel();
-                                prefs.setLAST_USER_MESSAGE("");
-                                resetNewMessageEt();
-                                Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_DISMISSED, analyticsBundle, getContext());
-                            });
+            AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
+            builder1.setIcon(R.drawable.ic_warning_yellow_24dp);
+            builder1.setTitle("Please avoid duplicate messages");
+            builder1.setMessage("You have already sent this msg in other groups.\n\n" +
+                    "Sending one message in MY " +
+                    LubbleSharedPrefs.getInstance().getLubbleName() +
+                    " group is enough as all residents are already added there." +
+                    "\n\nSpamming/promotional messages are not allowed. Kindly contact us for help or doubts.");
+            builder1.setPositiveButton(
+                    R.string.all_ok,
+                    (dialog, id) -> {
+                        dialog.cancel();
+                        Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_DISMISSED, analyticsBundle, getContext());
+                    });
 
-                    builder1.setNeutralButton(
-                            "Open Help Chat",
-                            (dialog, id) -> {
-                                dialog.cancel();
-                                Freshchat.trackEvent(requireContext(), "duplicate_msgs", null);
-                                Freshchat.showConversations(requireContext());
-                                Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_HELP, analyticsBundle, getContext());
-                            });
+            builder1.setNeutralButton(
+                    "Open Help Chat",
+                    (dialog, id) -> {
+                        dialog.cancel();
+                        Freshchat.trackEvent(requireContext(), "duplicate_msgs", null);
+                        Freshchat.showConversations(requireContext());
+                        Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_HELP, analyticsBundle, getContext());
+                    });
 
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
-                    Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_SHOWN, analyticsBundle, getContext());
-                } else {
-                    prefs.setLAST_USER_MESSAGE(newMessageEt.getText().toString());
-                    sendMessage();
-                }
-                break;
-            case R.id.iv_attach:
-                if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
-                    Toast.makeText(getContext(), "Please send a text message first", Toast.LENGTH_SHORT).show();
-                    break;
-                }
-                ChatFragmentPermissionsDispatcher
-                        .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
-                break;
-            case R.id.iv_media_attach:
-                Pix.start(this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH));
-                break;
-            case R.id.btn_join:
-                getCreateOrJoinGroupRef().child(groupId).setValue(true);
-                isJoining = true;
-                showJoiningDialog();
-                addGroupJoinPrompt();
-                Bundle bundle = new Bundle();
-                bundle.putString("group_id", groupId);
-                Analytics.triggerEvent(AnalyticsEvents.JOIN_GROUP, bundle, getContext());
-                break;
-            case R.id.iv_decline_cross:
-                Snackbar.make(view, "Declining invitation...", BaseTransientBottomBar.LENGTH_SHORT).show();
-                RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (getActivity() != null) {
-                            getActivity().finish();
-                        }
-                    }
-                });
-                break;
-            case R.id.iv_link_cancel:
-                linkTitle.setText("");
-                linkDesc.setText("");
-                prevUrl = "";
-                linkMetaContainer.setVisibility(View.GONE);
-                replyMsgId = null;
-                attachedGroupId = null;
-                attachedEventId = null;
-                break;
+            AlertDialog alert11 = builder1.create();
+            alert11.show();
+            resetNewMessageEt();
+            prefs.setLAST_USER_MESSAGE("");
+            Analytics.triggerEvent(AnalyticsEvents.DUPLICATE_MSG_WARN_SHOWN, analyticsBundle, getContext());
+        } else {
+            prefs.setLAST_USER_MESSAGE(newMessageEt.getText().toString());
+            sendMessage();
         }
+    }
+
+    private void openAttachmentSheet() {
+        if (TextUtils.isEmpty(groupId) && TextUtils.isEmpty(dmId)) {
+            Toast.makeText(getContext(), "Please send a text message first", Toast.LENGTH_SHORT).show();
+        } else {
+            ChatFragmentPermissionsDispatcher
+                    .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
+        }
+    }
+
+    private void joinBtnClick() {
+        getCreateOrJoinGroupRef().child(groupId).setValue(true);
+        isJoining = true;
+        showJoiningDialog();
+        addGroupJoinPrompt();
+        Bundle bundle = new Bundle();
+        bundle.putString("group_id", groupId);
+        Analytics.triggerEvent(AnalyticsEvents.JOIN_GROUP, bundle, getContext());
+    }
+
+    private void declineInvite(View view) {
+        Snackbar.make(view, "Declining invitation...", BaseTransientBottomBar.LENGTH_SHORT).show();
+        RealtimeDbHelper.getUserGroupsRef().child(groupId).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
+            }
+        });
+    }
+
+    private void cancelLink() {
+        linkTitle.setText("");
+        linkDesc.setText("");
+        prevUrl = "";
+        linkMetaContainer.setVisibility(View.GONE);
+        replyMsgId = null;
+        attachedGroupId = null;
+        attachedEventId = null;
     }
 
     private void resetNewMessageEt() {
