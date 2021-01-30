@@ -19,11 +19,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.BackgroundColorSpan;
-import android.text.style.CharacterStyle;
-import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -53,6 +50,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -317,6 +315,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         Linkify.addLinks(sentChatViewHolder.messageTv, Linkify.ALL);
+        CustomURLSpan.clickifyTextView(sentChatViewHolder.messageTv, () -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("group_id", groupId);
+            bundle.putString("msg_id", chatData.getId());
+            bundle.putString("author_uid", chatData.getAuthorUid());
+            Analytics.triggerEvent(AnalyticsEvents.MSG_LINK_CLICKED, bundle, context);
+        });
+
         if (chatData.getTagged() != null && !chatData.getTagged().isEmpty()) {
             Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
             String atMentionScheme = "lubble://profile/";
@@ -570,6 +576,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         Linkify.addLinks(recvdChatViewHolder.messageTv, Linkify.ALL);
+
+        CustomURLSpan.clickifyTextView(recvdChatViewHolder.messageTv, () -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("group_id", groupId);
+            bundle.putString("msg_id", chatData.getId());
+            bundle.putString("author_uid", chatData.getAuthorUid());
+            Analytics.triggerEvent(AnalyticsEvents.MSG_LINK_CLICKED, bundle, context);
+        });
 
         if (chatData.getTagged() != null && !chatData.getTagged().isEmpty()) {
             Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
@@ -2125,7 +2139,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
                 switch (touchedView.getId()) {
                     case R.id.iv_dp:
+                        ChatData dpChatData = chatDataList.get(getAdapterPosition());
                         ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
+                        Bundle bundle = new Bundle();
+                        bundle.putString("group_id", groupId);
+                        bundle.putString("msg_id", dpChatData.getId());
+                        bundle.putString("author_uid", dpChatData.getAuthorUid());
+                        Analytics.triggerEvent(AnalyticsEvents.MSG_DP_CLICKED, bundle, context);
                         break;
                     case R.id.container_lubb:
                         toggleLubb(getAdapterPosition(), false);
