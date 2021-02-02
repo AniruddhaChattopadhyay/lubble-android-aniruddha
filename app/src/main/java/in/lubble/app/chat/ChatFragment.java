@@ -1333,7 +1333,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
             builder1.setIcon(R.drawable.ic_warning_yellow_24dp);
             builder1.setTitle("Please avoid duplicate messages");
             builder1.setMessage("You have already sent this msg in other groups.\n\n" +
-                    "Sending one message in MY " +
+                    "Sending one message in My " +
                     LubbleSharedPrefs.getInstance().getLubbleName() +
                     " group is enough as all residents are already added there." +
                     "\n\nSpamming/promotional messages are not allowed. Kindly contact us for help or doubts.");
@@ -1558,7 +1558,11 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                 Uri uri = FileProvider.getUriForFile(requireContext(), BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
                 File imageFile = getFileFromInputStreamUri(getContext(), uri);
                 uri = Uri.fromFile(imageFile);
-                AttachImageActivity.open(requireContext(), uri, groupId, newMessageEt.getText().toString(), (dmId != null), isCurrUserSeller, authorId);
+                String chatId = groupId;
+                if (!TextUtils.isEmpty(dmId)) {
+                    chatId = dmId;
+                }
+                AttachImageActivity.open(requireContext(), uri, chatId, newMessageEt.getText().toString(), (dmId != null), isCurrUserSeller, authorId);
             } else {
                 Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
             }
