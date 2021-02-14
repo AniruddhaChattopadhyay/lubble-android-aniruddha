@@ -129,6 +129,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private LinearLayout storiesLayout;
     private FrameLayout fragContainer;
     private DatabaseReference storiesRef;
+    private GroupData groupData;
 
     public static void openForGroup(@NonNull Context context, @NonNull String groupId, boolean isJoining, @Nullable String msgId) {
         final Intent intent = new Intent(context, ChatActivity.class);
@@ -230,8 +231,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         targetFrag.removeSearchHighlights();
     }
 
-    private GroupData groupData;
-
     private ChatFragment getTargetChatFrag(String msgId, boolean isJoining) {
         if (!TextUtils.isEmpty(groupId)) {
             return targetFrag = ChatFragment.newInstanceForGroup(
@@ -309,14 +308,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         groupBundle.putString("groupid", groupId);
         Analytics.triggerEvent(AnalyticsEvents.GROUP_CHAT_FRAG, groupBundle, ChatActivity.this);
 
-        toolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (targetFrag != null) {
-                    targetFrag.openGroupInfo();
-                }
-            }
-        });
         try {
             Intent intent = this.getIntent();
             if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(TRACK_NOTIF_ID)
@@ -666,6 +657,11 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
             GlideApp.with(this).load(thumbnailUrl).circleCrop().into(toolbarIcon);
         }
         toolbarLockIcon.setVisibility(isPrivate ? View.VISIBLE : View.GONE);
+        toolbar.setOnClickListener(v -> {
+            if (targetFrag != null) {
+                targetFrag.openGroupInfo();
+            }
+        });
 
         groupData = new GroupData();
         groupData.setId(groupId);
@@ -881,7 +877,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 reportAccount();
                 return true;
             case R.id.group_info:
-                if (targetFrag != null) {
+                if (targetFrag != null && groupData != null) {
                     targetFrag.openGroupInfo();
                 }
                 return true;

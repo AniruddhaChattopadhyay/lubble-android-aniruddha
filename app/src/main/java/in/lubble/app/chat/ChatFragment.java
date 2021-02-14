@@ -82,6 +82,7 @@ import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.events.EventPickerActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
+import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.DmData;
 import in.lubble.app.models.EventData;
@@ -259,7 +260,8 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     private static long DELAY = 1000;
     private static long lastTextEdit = 0;
     private String firstName;
-    Handler typingExpiryHandler = new Handler();
+    private Handler typingExpiryHandler = new Handler();
+    private boolean isSellerProfile = false;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -767,11 +769,10 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                                 if (profileMap != null) {
                                     isOtherUserJoined = profileMap.get("joinedTimestamp") != null;
                                     isDmBlocked = profileMap.get("blocked_status") != null;
-                                    boolean isSeller = false;
                                     if (profileMap.get("isSeller") != null) {
-                                        isSeller = (boolean) profileMap.get("isSeller");
+                                        isSellerProfile = (boolean) profileMap.get("isSeller");
                                     }
-                                    if (isSeller) {
+                                    if (isSellerProfile) {
                                         fetchSellerProfileFrom(profileId);
                                     } else {
                                         fetchProfileFrom(profileId);
@@ -1996,7 +1997,12 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         if (groupData != null && (groupData.isJoined() || !groupData.getIsPrivate())) {
             ScrollingGroupInfoActivity.open(getContext(), groupId);
         } else if (dmOtherUserId != null) {
-            ProfileActivity.open(requireContext(), dmOtherUserId);
+            if (isSellerProfile) {
+                //open seller profile
+                ItemListActiv.open(requireContext(), true, dmOtherUserId);
+            } else {
+                ProfileActivity.open(requireContext(), dmOtherUserId);
+            }
         }
     }
 
