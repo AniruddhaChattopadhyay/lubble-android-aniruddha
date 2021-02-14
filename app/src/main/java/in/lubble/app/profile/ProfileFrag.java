@@ -49,6 +49,7 @@ import java.util.Collections;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -262,16 +263,6 @@ public class ProfileFrag extends Fragment {
             }
         });
 
-        msgBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (profileData != null) {
-                    DmIntroBottomSheet.newInstance(userId, profileData.getInfo().getName(), profileData.getInfo().getThumbnail(), null).show(getChildFragmentManager(), null);
-                    Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
-                }
-            }
-        });
-
         return rootView;
     }
 
@@ -411,11 +402,12 @@ public class ProfileFrag extends Fragment {
     }
 
     private void fetchProfileFeed() {
+        progressBar.setVisibility(View.VISIBLE);
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null) {
+                if (profileData != null && profileData.getInfo() != null) {
                     userName.setText(profileData.getInfo().getName());
                     if (!TextUtils.isEmpty(profileData.getInfo().getBadge())) {
                         badgeTv.setVisibility(View.VISIBLE);
@@ -442,6 +434,8 @@ public class ProfileFrag extends Fragment {
                         userBio.setText(R.string.no_bio_text);
                     }
                     populateProfileDetails();
+                    msgBtn.setEnabled(false);
+                    msgBtn.setText("LOADING...");
                     syncDms();
                     if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
                         editProfileTV.setVisibility(View.VISIBLE);
@@ -454,7 +448,6 @@ public class ProfileFrag extends Fragment {
                     }
                     likesTv.setText(String.valueOf(profileData.getLikes()));
                     coinsTv.setText(String.valueOf(profileData.getCoins()));
-                    msgBtn.setEnabled(profileData.getIsDmEnabled());
                     GlideApp.with(getContext())
                             .load(profileData.getProfilePic())
                             .error(R.drawable.ic_account_circle_black_no_padding)
@@ -476,6 +469,9 @@ public class ProfileFrag extends Fragment {
                             })
                             .circleCrop()
                             .into(profilePicIv);
+                } else {
+                    Toast.makeText(LubbleApp.getAppContext(), "Error loading profile, plz retry", Toast.LENGTH_SHORT).show();
+                    getActivity().finish();
                 }
             }
 
@@ -492,20 +488,16 @@ public class ProfileFrag extends Fragment {
         dmRef.orderByChild("profileId").equalTo(FirebaseAuth.getInstance().getUid()).addValueEventListener(dmValueEventListener);
     }
 
-    private ValueEventListener dmValueEventListener = new ValueEventListener() {
+    private final ValueEventListener dmValueEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
             boolean dmExists = false;
             if (dataSnapshot.getChildrenCount() > 0) {
                 dmExists = true;
-                msgBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ChatActivity.openForDm(requireContext(), dataSnapshot.getChildren().iterator().next().getKey(), null, null);
-                    }
-                });
             }
-            msgBtn.setEnabled(dmExists || profileData.getIsDmEnabled());
+            msgBtn.setText("MESSAGE");
+            msgBtn.setEnabled(true);
+            setMsgBtnClickListener(dmExists, dataSnapshot);
         }
 
         @Override
@@ -513,6 +505,29 @@ public class ProfileFrag extends Fragment {
 
         }
     };
+
+    public void setMsgBtnClickListener(boolean dmExists, @NonNull DataSnapshot dataSnapshot) {
+        msgBtn.setOnClickListener(v -> {
+            if (dmExists) {
+                ChatActivity.openForDm(requireContext(), dataSnapshot.getChildren().iterator().next().getKey(), null, null);
+            } else if (profileData != null && profileData.getInfo() != null) {
+                String userName = profileData.getInfo().getName();
+                if (!profileData.getIsDmEnabled()) {
+                    UiUtils.showBottomSheetAlertLight(requireContext(), getLayoutInflater(),
+                            userName + " has disabled message requests",
+                            "Nobody can start private chats with " + userName + " as they have disabled new message requests.\n\nOnly they can start new chats with others.",
+                            R.drawable.ic_baseline_privacy_tip_24, getString(R.string.all_ok), null
+                    );
+                } else {
+                    DmIntroBottomSheet.newInstance(userId, userName, profileData.getInfo().getThumbnail(), null).show(getChildFragmentManager(), null);
+                    Analytics.triggerEvent(NEW_DM_CLICKED, getContext());
+                }
+            } else {
+                Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                fetchProfileFeed();
+            }
+        });
+    }
 
     private void populateProfileDetails() {
         if (!TextUtils.isEmpty(profileData.getGenderText())) {
@@ -587,7 +602,12 @@ public class ProfileFrag extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        userRef.removeEventListener(valueEventListener);
+        if (userRef != null && valueEventListener != null) {
+            userRef.removeEventListener(valueEventListener);
+        }
+        if (dmRef != null && dmValueEventListener != null) {
+            dmRef.removeEventListener(dmValueEventListener);
+        }
     }
 
 }
