@@ -1645,7 +1645,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     public void onAttachmentClicked(int position) {
         switch (position) {
             case 0:
-                startCameraIntent();
+                ChatFragmentPermissionsDispatcher.startCameraIntentWithPermissionCheck(this);
                 break;
             case 1:
                 if (dmId == null) {
@@ -1669,7 +1669,8 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         }
     }
 
-    private void startCameraIntent() {
+    @NeedsPermission(Manifest.permission.CAMERA)
+    void startCameraIntent() {
         try {
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
@@ -2214,13 +2215,27 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         showStoragePermRationale(getContext(), request);
     }
 
+    @OnShowRationale(Manifest.permission.CAMERA)
+    void showRationaleForCamera(final PermissionRequest request) {
+        Toast.makeText(getContext(), "Need camera permission to start taking photos", Toast.LENGTH_SHORT).show();
+    }
+
     @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showDeniedForExtStorage() {
         Toast.makeText(getContext(), getString(R.string.write_storage_perm_denied_text), Toast.LENGTH_SHORT).show();
     }
 
+    @OnPermissionDenied(Manifest.permission.CAMERA)
+    void showDeniedForCamera() {
+        Toast.makeText(getContext(), "Please grant camera permission to open the camera", Toast.LENGTH_SHORT).show();
+    }
+
     @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showNeverAskForExtStorage() {
         Toast.makeText(getContext(), R.string.write_storage_perm_never_text, Toast.LENGTH_LONG).show();
+    }
+    @OnNeverAskAgain(Manifest.permission.CAMERA)
+    void showNeverAskForCamera() {
+        Toast.makeText(getContext(), "To open camera, allow camera permission from app settings of Lubble app", Toast.LENGTH_LONG).show();
     }
 }
