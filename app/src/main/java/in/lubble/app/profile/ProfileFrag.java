@@ -470,8 +470,10 @@ public class ProfileFrag extends Fragment {
                             .circleCrop()
                             .into(profilePicIv);
                 } else {
-                    Toast.makeText(LubbleApp.getAppContext(), "Error loading profile, plz retry", Toast.LENGTH_SHORT).show();
-                    getActivity().finish();
+                    if (getActivity() != null) {
+                        Toast.makeText(LubbleApp.getAppContext(), "Error loading profile, plz retry", Toast.LENGTH_SHORT).show();
+                        getActivity().finish();
+                    }
                 }
             }
 
