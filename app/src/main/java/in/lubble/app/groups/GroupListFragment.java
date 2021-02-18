@@ -492,6 +492,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                 if (userGroupData != null) {
                     //adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
+                    FirebaseCrashlytics.getInstance().log("syncing usergroup: " + dataSnapshot.getKey());
                     if (!userGroupData.isJoined() && userGroupData.getInvitedBy() != null) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
                         syncInvitedGroups(dataSnapshot.getKey());

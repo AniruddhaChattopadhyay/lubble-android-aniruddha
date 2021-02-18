@@ -82,6 +82,7 @@ import in.lubble.app.chat.chat_info.MsgInfoActivity;
 import in.lubble.app.events.EventPickerActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
+import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.DmData;
 import in.lubble.app.models.EventData;
@@ -254,12 +255,12 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     private LottieAnimationView typingAnimationView;
     @Nullable
     private String dmOtherUserId;
-    public static View view_access;
 
     private static long DELAY = 1000;
     private static long lastTextEdit = 0;
     private String firstName;
-    Handler typingExpiryHandler = new Handler();
+    private Handler typingExpiryHandler = new Handler();
+    private boolean isSellerProfile = false;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -392,7 +393,6 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
-        view_access = view;
         composeContainer = view.findViewById(R.id.compose_container);
         joinContainer = view.findViewById(R.id.relativeLayout_join_container);
         joinDescTv = view.findViewById(R.id.tv_join_desc);
@@ -682,7 +682,9 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
             personalChatData.setCreatedTimestamp(System.currentTimeMillis());
             personalChatData.setServerTimestamp(System.currentTimeMillis());
             chatAdapter.addPersonalChatData(personalChatData);
-            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, getContext());
+            Bundle bundle = new Bundle();
+            bundle.putString("groupId", groupId);
+            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, bundle, getContext());
             GroupPromptSharedPrefs.getInstance().removeGroupId(groupId);
         }
     }
@@ -767,11 +769,10 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                                 if (profileMap != null) {
                                     isOtherUserJoined = profileMap.get("joinedTimestamp") != null;
                                     isDmBlocked = profileMap.get("blocked_status") != null;
-                                    boolean isSeller = false;
                                     if (profileMap.get("isSeller") != null) {
-                                        isSeller = (boolean) profileMap.get("isSeller");
+                                        isSellerProfile = (boolean) profileMap.get("isSeller");
                                     }
-                                    if (isSeller) {
+                                    if (isSellerProfile) {
                                         fetchSellerProfileFrom(profileId);
                                     } else {
                                         fetchProfileFrom(profileId);
@@ -1644,7 +1645,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     public void onAttachmentClicked(int position) {
         switch (position) {
             case 0:
-                startCameraIntent();
+                ChatFragmentPermissionsDispatcher.startCameraIntentWithPermissionCheck(this);
                 break;
             case 1:
                 if (dmId == null) {
@@ -1668,7 +1669,8 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         }
     }
 
-    private void startCameraIntent() {
+    @NeedsPermission(Manifest.permission.CAMERA)
+    void startCameraIntent() {
         try {
             File cameraPic = createImageFile(getContext());
             currentPhotoPath = cameraPic.getAbsolutePath();
@@ -1996,7 +1998,12 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         if (groupData != null && (groupData.isJoined() || !groupData.getIsPrivate())) {
             ScrollingGroupInfoActivity.open(getContext(), groupId);
         } else if (dmOtherUserId != null) {
-            ProfileActivity.open(requireContext(), dmOtherUserId);
+            if (isSellerProfile) {
+                //open seller profile
+                ItemListActiv.open(requireContext(), true, dmOtherUserId);
+            } else {
+                ProfileActivity.open(requireContext(), dmOtherUserId);
+            }
         }
     }
 
@@ -2208,13 +2215,27 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         showStoragePermRationale(getContext(), request);
     }
 
+    @OnShowRationale(Manifest.permission.CAMERA)
+    void showRationaleForCamera(final PermissionRequest request) {
+        Toast.makeText(getContext(), "Need camera permission to start taking photos", Toast.LENGTH_SHORT).show();
+    }
+
     @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showDeniedForExtStorage() {
         Toast.makeText(getContext(), getString(R.string.write_storage_perm_denied_text), Toast.LENGTH_SHORT).show();
     }
 
+    @OnPermissionDenied(Manifest.permission.CAMERA)
+    void showDeniedForCamera() {
+        Toast.makeText(getContext(), "Please grant camera permission to open the camera", Toast.LENGTH_SHORT).show();
+    }
+
     @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     void showNeverAskForExtStorage() {
         Toast.makeText(getContext(), R.string.write_storage_perm_never_text, Toast.LENGTH_LONG).show();
+    }
+    @OnNeverAskAgain(Manifest.permission.CAMERA)
+    void showNeverAskForCamera() {
+        Toast.makeText(getContext(), "To open camera, allow camera permission from app settings of Lubble app", Toast.LENGTH_LONG).show();
     }
 }
