@@ -682,7 +682,9 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
             personalChatData.setCreatedTimestamp(System.currentTimeMillis());
             personalChatData.setServerTimestamp(System.currentTimeMillis());
             chatAdapter.addPersonalChatData(personalChatData);
-            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, getContext());
+            Bundle bundle = new Bundle();
+            bundle.putString("groupId", groupId);
+            Analytics.triggerEvent(AnalyticsEvents.GROUP_PROMPT_SHOWN, bundle, getContext());
             GroupPromptSharedPrefs.getInstance().removeGroupId(groupId);
         }
     }

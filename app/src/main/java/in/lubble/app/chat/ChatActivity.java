@@ -787,7 +787,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
     private void blockAccount() {
         String title = "Block this person?";
-        if (!TextUtils.isEmpty(groupData.getTitle())) {
+        if (groupData != null && !TextUtils.isEmpty(groupData.getTitle())) {
             title = "Block " + groupData.getTitle() + "?";
         }
         UiUtils.showBottomSheetAlertLight(ChatActivity.this, getLayoutInflater(), title,
@@ -804,7 +804,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
 
     private void reportAccount() {
         String title = "Report this person to Lubble?";
-        if (!TextUtils.isEmpty(groupData.getTitle())) {
+        if (groupData != null && !TextUtils.isEmpty(groupData.getTitle())) {
             title = "Report " + groupData.getTitle() + " to Lubble?";
         }
         UiUtils.showBottomSheetAlertLight(ChatActivity.this, getLayoutInflater(), title,
