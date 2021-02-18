@@ -125,10 +125,10 @@ public class EventsFrag extends Fragment {
 
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
-                if (progressBar != null) {
+                if (progressBar != null && getContext() != null) {
                     progressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Please check your internet connection & try again.", Toast.LENGTH_SHORT).show();
                 }
-                Toast.makeText(getContext(), "Please check your internet connection & try again.", Toast.LENGTH_SHORT).show();
             }
         });
         if (getActivity() != null && getActivity() instanceof MainActivity) {

@@ -255,7 +255,6 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     private LottieAnimationView typingAnimationView;
     @Nullable
     private String dmOtherUserId;
-    public static View view_access;
 
     private static long DELAY = 1000;
     private static long lastTextEdit = 0;
@@ -394,7 +393,6 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
-        view_access = view;
         composeContainer = view.findViewById(R.id.compose_container);
         joinContainer = view.findViewById(R.id.relativeLayout_join_container);
         joinDescTv = view.findViewById(R.id.tv_join_desc);
