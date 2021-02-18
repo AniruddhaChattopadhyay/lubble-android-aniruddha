@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 
 /**
@@ -21,6 +22,15 @@ public class StringUtils {
 
     public static boolean isValidString(String string) {
         return !TextUtils.isEmpty(string);
+    }
+
+    public static boolean isValidStringList(ArrayList<String> string) {
+        if(string == null)
+            return false;
+        for(String str: string)
+            if(TextUtils.isEmpty(str))
+                return false;
+        return true;
     }
 
     @Nullable

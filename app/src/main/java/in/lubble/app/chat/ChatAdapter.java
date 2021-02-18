@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -19,11 +20,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.BackgroundColorSpan;
-import android.text.style.CharacterStyle;
-import android.text.style.StyleSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
 import android.util.Log;
@@ -52,7 +50,11 @@ import androidx.core.content.FileProvider;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -92,12 +94,19 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import in.lubble.app.BuildConfig;
+import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.ChatFragment;
+import in.lubble.app.chat.CustomURLSpan;
+import in.lubble.app.chat.horizontalImageRecyclerView.MultiImageAttachmentAdapter;
+import in.lubble.app.chat.horizontalImageRecyclerView.MyDividerItemDecoration;
+import in.lubble.app.chat.horizontalImageRecyclerView.RecyclerTouchListener;
+import in.lubble.app.chat.multi_image_chat_gridview.MultiImageGridViewAdapter;
 import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.firebase.FirebaseStorageHelper;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -114,6 +123,7 @@ import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.FullScreenMultiImageActivity;
 import in.lubble.app.utils.FullScreenVideoActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
@@ -147,6 +157,7 @@ import static in.lubble.app.utils.FileUtils.saveImageInGallery;
 import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.StringUtils.isValidString;
+import static in.lubble.app.utils.StringUtils.isValidStringList;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 import static in.lubble.app.utils.YoutubeUtils.extractYoutubeId;
 
@@ -317,6 +328,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         Linkify.addLinks(sentChatViewHolder.messageTv, Linkify.ALL);
+        CustomURLSpan.clickifyTextView(sentChatViewHolder.messageTv, () -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("group_id", groupId);
+            bundle.putString("msg_id", chatData.getId());
+            bundle.putString("author_uid", chatData.getAuthorUid());
+            Analytics.triggerEvent(AnalyticsEvents.MSG_LINK_CLICKED, bundle, context);
+        });
+
         if (chatData.getTagged() != null && !chatData.getTagged().isEmpty()) {
             Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
             String atMentionScheme = "lubble://profile/";
@@ -432,6 +451,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(sentChatViewHolder.imgContainer, sentChatViewHolder.progressBar, sentChatViewHolder.chatIv, chatData, null, null);
+        handleMultiImage(sentChatViewHolder.multiImgContainer,sentChatViewHolder.progressBarMultiImage, sentChatViewHolder.multiImageGridRecyclerView, chatData, null, null);
         handleVideo(sentChatViewHolder.vidContainer, sentChatViewHolder.progressBar_vid, sentChatViewHolder.playvidIv, sentChatViewHolder.vidThumbnailIv, chatData, null, position);
         handleYoutube(sentChatViewHolder, chatData.getMessage(), position);
 
@@ -571,6 +591,14 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         Linkify.addLinks(recvdChatViewHolder.messageTv, Linkify.ALL);
 
+        CustomURLSpan.clickifyTextView(recvdChatViewHolder.messageTv, () -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("group_id", groupId);
+            bundle.putString("msg_id", chatData.getId());
+            bundle.putString("author_uid", chatData.getAuthorUid());
+            Analytics.triggerEvent(AnalyticsEvents.MSG_LINK_CLICKED, bundle, context);
+        });
+
         if (chatData.getTagged() != null && !chatData.getTagged().isEmpty()) {
             Pattern atMentionPattern = Pattern.compile("@([A-Za-z0-9_]+)");
             String atMentionScheme = "lubble://profile/";
@@ -692,6 +720,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
 
         handleImage(recvdChatViewHolder.imgContainer, recvdChatViewHolder.progressBar, recvdChatViewHolder.chatIv, chatData, recvdChatViewHolder.downloadIv, recvdChatViewHolder.shareMsgIv);
+        handleMultiImage(recvdChatViewHolder.multiImgContainer,recvdChatViewHolder.progressBarMultiImage, recvdChatViewHolder.multiImageGridRecyclerView, chatData, null, null);
         handleVideo(recvdChatViewHolder.vidContainer, recvdChatViewHolder.progressBar_vid, recvdChatViewHolder.playvidIv, recvdChatViewHolder.vidThumbnailIv, chatData, recvdChatViewHolder.downloadIv, position);
         handleYoutube(recvdChatViewHolder, chatData.getMessage(), position);
 
@@ -1284,6 +1313,77 @@ public class ChatAdapter extends RecyclerView.Adapter {
         }
     }
 
+    private void handleMultiImage(FrameLayout multiImgContainer, final ProgressBar progressBar, final RecyclerView recyclerView, final ChatData chatData, @Nullable ImageView downloadIv, @Nullable ImageView shareMsgIv) {
+        if (isValidStringList(chatData.getMultipleImagesUrl())) {
+            ArrayList<String> multiImageList = chatData.getMultipleImagesUrl();
+            MultiImageGridViewAdapter mAdapter = new MultiImageGridViewAdapter(context,multiImageList,true);
+            multiImgContainer.setVisibility(VISIBLE);
+            progressBar.setVisibility(GONE);
+            int numberOfColumns =multiImageList.size();
+            recyclerView.setHasFixedSize(true);
+            GridLayoutManager manager = new GridLayoutManager(context, 2, GridLayoutManager.VERTICAL, false);
+//            manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+//                @Override
+//                public int getSpanSize(int position) {
+//                    // 7 is the sum of items in one repeated section
+//                        if(position==2){
+//                            return 2;
+//                        }
+//                        return 1;
+//                    //throw new IllegalStateException("internal error");
+//                }
+//            });
+            recyclerView.setLayoutManager(manager);
+            recyclerView.addItemDecoration(new MyDividerItemDecoration(context, GridLayoutManager.HORIZONTAL,0));
+            recyclerView.addItemDecoration(new MyDividerItemDecoration(context, GridLayoutManager.VERTICAL,0));
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            //recyclerView.addItemDecoration(new SpacesItemDecoration(0));
+            recyclerView.setAdapter(mAdapter);
+
+            recyclerView.addOnItemTouchListener(new RecyclerTouchListener(context, this.recyclerView, new RecyclerTouchListener.ClickListener() {
+                @Override
+                public void onClick(View view, int position) {
+                    //TODO
+                    FullScreenMultiImageActivity.open(activity,context,multiImageList, null, R.drawable.ic_cancel_black_24dp);
+                }
+
+                @Override
+                public void onLongClick(View view, int position) {
+
+                }
+            }));
+        }
+        else{
+            multiImgContainer.setVisibility(GONE);
+        }
+
+//        if (isValidStringList(chatData.getMultipleImagesUrl())) {
+//            multiImgContainer.setVisibility(VISIBLE);
+//            if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
+//                // Permission is not granted
+//                glide.load(chatData.getImgUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
+//                downloadIv.setVisibility(VISIBLE);
+//
+//            } else {
+//                if (downloadIv != null) {
+//                    downloadIv.setVisibility(GONE);
+//                }
+//                if (shareMsgIv != null) {
+//                    shareMsgIv.setVisibility(VISIBLE);
+//                }
+//                String savedPath = getSavedImageForMsgId(context, chatData.getId(), Uri.parse(chatData.getImgUrl()));
+//                if (savedPath != null) {
+//                    progressBar.setVisibility(GONE);
+//                    glide.load(savedPath).centerCrop().skipMemoryCache(true).diskCacheStrategy(DiskCacheStrategy.NONE).into(imageView);
+//                } else {
+//                    downloadAndSavePic(progressBar, imageView, chatData);
+//                }
+//            }
+//        } else {
+//            multiImgContainer.setVisibility(GONE);
+//        }
+    }
+
     private void handlePdf(RelativeLayout pdfContainer, final ProgressBar progressBar, final ImageView imageView, final ChatData chatData, @Nullable ImageView downloadIv, ProgressBar progressBarDownloadPdf,
                            TextView pdfTitleTV, TextView messageTv, @Nullable ImageView shareMsgIv) {
         if (isValidString(chatData.getPdfUrl())) {
@@ -1685,6 +1785,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
+        private FrameLayout multiImgContainer;
         private FrameLayout vidContainer;
         private RelativeLayout pdfContainer;
         private TextView pdfTitleTv;
@@ -1695,7 +1796,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ImageView vidThumbnailIv;
         private ImageView playvidIv;
         private ProgressBar progressBar;
+        private ProgressBar progressBarMultiImage;
         private ImageView chatIv;
+        private RecyclerView multiImageGridRecyclerView;
         private TextView dateTv, hiddenDateTv;
         private ImageView lubbIcon;
         private TextView lubbCount;
@@ -1835,6 +1938,10 @@ public class ChatAdapter extends RecyclerView.Adapter {
                             FullScreenImageActivity.open(activity, context, imgChatData.getImgUrl(), chatIv, null, R.drawable.ic_cancel_black_24dp);
                         }
                         break;
+                    case R.id.multi_img_chat_view:
+                        //ChatData multiImgChatData = chatDataList.get(getAdapterPosition());
+                        //FullScreenMultiImageActivity.open(activity,context,multiImgChatData.getMultipleImagesUrl(), null, R.drawable.ic_cancel_black_24dp);
+                        break;
                     case R.id.iv_vid_img:
                         ChatData vidChatData = chatDataList.get(getAdapterPosition());
                         if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
@@ -1964,6 +2071,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);
+            multiImgContainer = itemView.findViewById(R.id.multi_img_container);
             vidContainer = itemView.findViewById(R.id.vid_container);
             progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
             vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
@@ -1976,7 +2084,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             progressBarPdf = itemView.findViewById(R.id.progressbar_img_pdf);
             lubbContainer = itemView.findViewById(R.id.container_lubb);
             progressBar = itemView.findViewById(R.id.progressbar_img);
+            progressBarMultiImage = itemView.findViewById(R.id.progressbar_multi_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
+            multiImageGridRecyclerView = itemView.findViewById(R.id.recycler_view_multi_img);
             dateTv = itemView.findViewById(R.id.tv_date);
             hiddenDateTv = itemView.findViewById(R.id.tv_date_hidden);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
@@ -2029,6 +2139,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private TextView linkTitleTv;
         private EmojiTextView linkDescTv;
         private FrameLayout imgContainer;
+        private FrameLayout multiImgContainer;
         private FrameLayout vidContainer;
         private ImageView vidThumbnailIv;
         private ImageView playvidIv;
@@ -2039,7 +2150,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
         private ProgressBar progressBarDownloadPdf;
         private ProgressBar progressBar_vid;
         private ProgressBar progressBar;
+        private ProgressBar progressBarMultiImage;
         private ImageView chatIv;
+        private RecyclerView multiImageGridRecyclerView;
         private TextView dateTv, hiddenDateTv;
         private ImageView lubbIcon;
         private TextView lubbCount;
@@ -2125,7 +2238,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
                 }
                 switch (touchedView.getId()) {
                     case R.id.iv_dp:
+                        ChatData dpChatData = chatDataList.get(getAdapterPosition());
                         ProfileActivity.open(context, chatDataList.get(getAdapterPosition()).getAuthorUid());
+                        Bundle bundle = new Bundle();
+                        bundle.putString("group_id", groupId);
+                        bundle.putString("msg_id", dpChatData.getId());
+                        bundle.putString("author_uid", dpChatData.getAuthorUid());
+                        Analytics.triggerEvent(AnalyticsEvents.MSG_DP_CLICKED, bundle, context);
                         break;
                     case R.id.container_lubb:
                         toggleLubb(getAdapterPosition(), false);
@@ -2235,6 +2354,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             linkTitleTv = itemView.findViewById(R.id.tv_link_title);
             linkDescTv = itemView.findViewById(R.id.tv_link_desc);
             imgContainer = itemView.findViewById(R.id.img_container);
+            multiImgContainer = itemView.findViewById(R.id.multi_img_container);
             vidContainer = itemView.findViewById(R.id.vid_container);
             vidThumbnailIv = itemView.findViewById(R.id.iv_vid_img);
             pdfContainer = itemView.findViewById(R.id.pdf_container);
@@ -2246,7 +2366,9 @@ public class ChatAdapter extends RecyclerView.Adapter {
             playvidIv = itemView.findViewById(R.id.iv_play_vid);
             progressBar_vid = itemView.findViewById(R.id.progressbar_img_vid);
             progressBar = itemView.findViewById(R.id.progressbar_img);
+            progressBarMultiImage = itemView.findViewById(R.id.progressbar_multi_img);
             chatIv = itemView.findViewById(R.id.iv_chat_img);
+            multiImageGridRecyclerView = itemView.findViewById(R.id.recycler_view_multi_img);
             dateTv = itemView.findViewById(R.id.tv_date);
             hiddenDateTv = itemView.findViewById(R.id.tv_date_hidden);
             lubbIcon = itemView.findViewById(R.id.iv_lubb);
@@ -2302,6 +2424,29 @@ public class ChatAdapter extends RecyclerView.Adapter {
 
         UnreadChatViewHolder(View itemView) {
             super(itemView);
+        }
+    }
+
+    public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
+        private int space;
+
+        public SpacesItemDecoration(int space) {
+            this.space = space;
+        }
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view,
+                                   RecyclerView parent, RecyclerView.State state) {
+            outRect.left = space;
+            outRect.right = space;
+            outRect.bottom = space;
+
+            // Add top margin only for the first item to avoid double space between items
+            if (parent.getChildLayoutPosition(view) == 0) {
+                outRect.top = space;
+            } else {
+                outRect.top = 0;
+            }
         }
     }
 

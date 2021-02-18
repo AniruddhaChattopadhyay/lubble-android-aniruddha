@@ -607,6 +607,14 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         return false;
     }
 
+    void toggleStoriesVisibility(boolean show) {
+        if (show) {
+            storiesLayout.setVisibility(VISIBLE);
+        } else {
+            storiesLayout.setVisibility(GONE);
+        }
+    }
+
     void scrollStories(int dy, int state) {
         if (storyDataList != null && !storyDataList.isEmpty()) {
             if (dy < 0 && state == SCROLL_STATE_DRAGGING && storiesLayout.getVisibility() == VISIBLE && storiesLayout.getAnimation() == null) {

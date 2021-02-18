@@ -57,6 +57,15 @@ public class ChatData implements Serializable {
     private String attachedGroupId; // or attached event ID
     private HashMap<String, String> tagged; // <UID, UserName>
     private HashMap<String, Object> reporters; // <UID, Timestamp>
+    private ArrayList<String> multipleImagesUrl;
+
+    public ArrayList<String> getMultipleImagesUrl() {
+        return multipleImagesUrl;
+    }
+
+    public void setMultipleImagesUrl(ArrayList<String> multipleImagesUrl) {
+        this.multipleImagesUrl = multipleImagesUrl;
+    }
 
     @Override
     public boolean equals(Object obj) {

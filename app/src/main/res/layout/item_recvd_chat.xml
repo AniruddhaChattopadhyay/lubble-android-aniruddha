@@ -220,6 +220,26 @@
                 </FrameLayout>
 
                 <FrameLayout
+                    android:id="@+id/multi_img_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="240dp"
+                    android:layout_marginBottom="8dp"
+                    android:minWidth="240dp"
+                    android:visibility="gone"
+                    tools:visibility="gone">
+
+                    <ProgressBar
+                        android:id="@+id/progressbar_multi_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center" />
+
+                    <include layout="@layout/multi_img_chat_recyclerview_layout"
+                        android:id="@+id/multi_img_chat_view"/>
+
+                </FrameLayout>
+
+                <FrameLayout
                     android:id="@+id/vid_container"
                     android:layout_width="wrap_content"
                     android:layout_height="240dp"

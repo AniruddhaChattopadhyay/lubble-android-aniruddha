@@ -133,26 +133,33 @@
 
                 <ImageView
                     android:id="@+id/iv_attach"
-                    android:layout_width="36dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="40dp"
+                    android:layout_height="0dp"
                     android:layout_centerVertical="true"
                     android:layout_toStartOf="@id/iv_media_attach"
+                    android:padding="8dp"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintEnd_toStartOf="@+id/iv_media_attach"
+                    app:tint="@color/md_grey_600"
                     app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
                     app:srcCompat="@drawable/ic_attach_file_black_24dp" />
 
                 <ImageView
                     android:id="@+id/iv_media_attach"
-                    android:layout_width="36dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="40dp"
+                    android:layout_height="0dp"
+                    android:layout_marginLeft="4dp"
+                    android:padding="8dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginRight="8dp"
                     android:layout_toStartOf="@id/iv_send_btn"
+                    android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/iv_send_btn"
                     app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
-                    app:srcCompat="@drawable/ic_image_gallery" />
+                    app:tint="@color/md_grey_600"
+                    app:srcCompat="@drawable/ic_camera_alt_white_24dp" />
 
                 <EditText
                     android:id="@+id/et_new_message"
@@ -219,7 +226,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:paddingLeft="4dp"
-                android:tint="@color/white"
+                app:tint="@color/white"
                 app:srcCompat="@drawable/ic_close_black_24dp" />
 
             <Button

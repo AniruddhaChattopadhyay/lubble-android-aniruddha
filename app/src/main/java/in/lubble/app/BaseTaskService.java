@@ -75,7 +75,7 @@ public abstract class BaseTaskService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* requestCode */, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        int icon = success ? R.drawable.ic_upload : R.drawable.ic_upload;
+        int icon = success ? R.drawable.ic_upload : R.drawable.ic_cancel_red_24dp;
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, SENDING_MEDIA_NOTIF_CHANNEL)
                 .setSmallIcon(icon)
@@ -89,6 +89,31 @@ public abstract class BaseTaskService extends Service {
 
         manager.notify(FINISHED_NOTIFICATION_ID, builder.build());
     }
+
+    /**
+     * Show notification that the activity has finished with error.
+     */
+    protected void showErrorNotification(String caption, Intent intent, boolean success) {
+        // Make PendingIntent for notification
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* requestCode */, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        int icon = success ? R.drawable.ic_upload : R.drawable.ic_cancel_red_24dp;
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, SENDING_MEDIA_NOTIF_CHANNEL)
+                .setSmallIcon(icon)
+                .setContentTitle(getString(R.string.app_name))
+                .setChannelId(SENDING_MEDIA_NOTIF_CHANNEL)
+                .setContentText(caption)
+                .setAutoCancel(true);
+
+        NotificationManager manager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        manager.notify(FINISHED_NOTIFICATION_ID, builder.build());
+    }
+
+    //show error notification
 
     /**
      * Dismiss the progress notification.

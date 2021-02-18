@@ -117,7 +117,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> im
             } else {
                 final AlertDialog alertDialog = new AlertDialog.Builder(holder.itemView.getContext()).create();
                 alertDialog.setTitle("Want everyone to see your group?");
-                alertDialog.setMessage("Share the group in " + LubbleSharedPrefs.getInstance().getDefaultGroupId() + " group. All Lubble members are part of that group.\n\nOnly 10 neighbours can be personally invited.");
+                alertDialog.setMessage("Share the group in My " + LubbleSharedPrefs.getInstance().getLubbleName() + " group. All Lubble members are part of that group.\n\nOnly 10 neighbours can be personally invited from here.");
                 alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Share now", (dialog, which) -> {
                     ShareActiv.open(holder.itemView.getContext(), groupId, ShareActiv.ShareType.GROUP);
                     dialog.dismiss();
