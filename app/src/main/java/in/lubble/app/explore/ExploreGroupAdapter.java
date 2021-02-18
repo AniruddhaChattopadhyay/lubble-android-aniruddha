@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +45,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     private final GlideRequests glide;
     private final boolean isOnboarding;
     private int lubbleMemberCount = 500;
-    private HashMap<Integer, Boolean> selectedMap = new HashMap<>();
+    private HashMap<String, Boolean> selectedMap = new HashMap<>();
 
     public ExploreGroupAdapter(List<ExploreGroupData> items, OnListFragmentInteractionListener listener, GlideRequests glide, boolean isOnboarding) {
         mValues = items;
@@ -95,7 +96,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         if (isOnboarding) {
             holder.joinTv.setText("SELECT");
             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
-            if (selectedMap.containsKey(position)) {
+            if (selectedMap.containsKey(mValues.get(position).getFirebaseGroupId())) {
                 holder.selectedContainer.setVisibility(View.VISIBLE);
                 holder.joinTv.setText("REMOVE");
                 holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
@@ -167,18 +168,18 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     }
 
     private void initCardClickListener(final ViewHolder holder, final ExploreGroupData exploreGroupData) {
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    if (isOnboarding) {
+        holder.mView.setOnClickListener(v -> {
+            if (null != mListener) {
+                if (isOnboarding) {
+                    try {
+                        String touchedGroupId = mValues.get(holder.getAdapterPosition()).getFirebaseGroupId();
                         if (holder.selectedContainer.getVisibility() == View.GONE) {
                             if (selectedMap.size() < 10) {
                                 mListener.onListFragmentInteraction(holder.groupItem, true);
                                 UiUtils.animateFadeShow(holder.mView.getContext(), holder.selectedContainer);
                                 holder.joinTv.setText("REMOVE");
                                 holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
-                                selectedMap.put(holder.getAdapterPosition(), true);
+                                selectedMap.put(touchedGroupId, true);
                             } else {
                                 Toast.makeText(v.getContext(), "You can join more groups later", Toast.LENGTH_SHORT).show();
                             }
@@ -187,12 +188,16 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                             UiUtils.animateFadeHide(holder.mView.getContext(), holder.selectedContainer);
                             holder.joinTv.setText("SELECT");
                             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
-                            selectedMap.remove(holder.getAdapterPosition());
+                            selectedMap.remove(touchedGroupId);
                         }
-                    } else {
-                        // for explore bottom tab
-                        ChatActivity.openForGroup(holder.mView.getContext(), exploreGroupData.getFirebaseGroupId(), false, null);
+                    } catch (IndexOutOfBoundsException e) {
+                        Toast.makeText(v.getContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                        FirebaseCrashlytics.getInstance().log("IndexOutOfBoundsException in onboarding group selection");
+                        FirebaseCrashlytics.getInstance().recordException(e);
                     }
+                } else {
+                    // for explore bottom tab
+                    ChatActivity.openForGroup(holder.mView.getContext(), exploreGroupData.getFirebaseGroupId(), false, null);
                 }
             }
         });
@@ -237,25 +242,25 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
 
     @Override
     public Filter getFilter() {
-        return explorefilter;
+        return exploreFilter;
     }
 
-    private Filter explorefilter = new Filter() {
+    private final Filter exploreFilter = new Filter() {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
             List<ExploreGroupData> filteredList = new ArrayList<>();
-            if(constraint == null || constraint.length()==0)
+            if (constraint == null || constraint.length() == 0)
                 filteredList.addAll(mValues_copy);
-            else{
+            else {
                 String filterString = constraint.toString().toLowerCase().trim();
-                for( ExploreGroupData item: mValues_copy){
-                    if(item.getTitle().toLowerCase().contains(filterString)){
+                for (ExploreGroupData item : mValues_copy) {
+                    if (item.getTitle().toLowerCase().contains(filterString)) {
                         filteredList.add(item);
                     }
                 }
             }
             FilterResults results = new FilterResults();
-            results.values = filteredList ;
+            results.values = filteredList;
             return results;
         }
 
