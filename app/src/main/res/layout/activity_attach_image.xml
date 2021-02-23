@@ -5,10 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include layout="@layout/text_toolbar" />
+    <include layout="@layout/text_toolbar"
+        />
 
     <include layout="@layout/multi_img_attach_recyclerview_layout"
-        android:id="@+id/top_multi_img_view"/>
+        android:id="@+id/top_multi_img_view"
+        />
+<!--    -->
 
     <in.lubble.app.utils.TouchImageView
         android:id="@+id/tiv_new_img"

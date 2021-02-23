@@ -49,6 +49,7 @@ public class AttachImageActivity extends BaseActivity {
     private ImageView sendIcon;
     private RecyclerView recyclerView;
     private MultiImageAttachmentAdapter mAdapter;
+    private ArrayList<Uri> imageUriList = null;
 
     public static void open(Context context, Uri imgUri, String groupId, @Nullable String caption, boolean isDm, boolean isAuthorSeller, String authorId) {
         context.startActivity(getIntent(context, imgUri, groupId, caption, isDm, isAuthorSeller, authorId));
@@ -93,11 +94,13 @@ public class AttachImageActivity extends BaseActivity {
         touchImageView = findViewById(R.id.tiv_new_img);
         captionEt = findViewById(R.id.et_img_caption);
         sendIcon = findViewById(R.id.iv_send_btn);
-        Bundle args = getIntent().getBundleExtra("BUNDLE");
-        final ArrayList<Uri> imageUriList = (ArrayList<Uri>) args.getSerializable(EXTRA_MULTI_IMG_PATH);
         final Uri imgUri = getIntent().getParcelableExtra(EXTRA_IMG_PATH);
         final String chatId = getIntent().getStringExtra(EXTRA_GROUP_ID);
         final String caption = getIntent().getStringExtra(EXTRA_CAPTION);
+
+        Bundle args = getIntent().getBundleExtra("BUNDLE");
+        if(args!=null)
+            imageUriList = (ArrayList<Uri>) args.getSerializable(EXTRA_MULTI_IMG_PATH);
 
         captionEt.setText(caption);
 

@@ -15,7 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -32,6 +34,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.models.ChatData;
 import in.lubble.app.utils.FileUtils;
@@ -122,16 +125,22 @@ public class UploadMultipleFileService extends BaseTaskService {
                 Bundle bundle = intent.getBundleExtra("BUNDLE");
                 final ArrayList<Uri> imageUriList = (ArrayList<Uri>) bundle.getSerializable(EXTRA_MULTI_FILE_URI);
                 final ArrayList<String> fileNameList = (ArrayList<String>) bundle.getSerializable(EXTRA_MULTI_FILE_NAME);
-                uploadFromUri(
-                        imageUriList,
-                        fileNameList,
-                        intent.getStringExtra(EXTRA_UPLOAD_PATH),
-                        intent.getStringExtra(EXTRA_CAPTION),
-                        intent.getStringExtra(EXTRA_CHAT_ID),
-                        bucketId == BUCKET_CONVO,
-                        null,
-                        dmInfoData
-                );
+                try {
+                    uploadFromUri(
+                            imageUriList,
+                            fileNameList,
+                            intent.getStringExtra(EXTRA_UPLOAD_PATH),
+                            intent.getStringExtra(EXTRA_CAPTION),
+                            intent.getStringExtra(EXTRA_CHAT_ID),
+                            bucketId == BUCKET_CONVO,
+                            null,
+                            dmInfoData
+                    );
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -154,7 +163,13 @@ public class UploadMultipleFileService extends BaseTaskService {
                             .setCustomMetadata("uid", FirebaseAuth.getInstance().getUid())
                             .setCustomMetadata("token", task.getResult().getToken())
                             .build();
-                    uploadFromUri(fileUri, fileName, uploadPath, caption, groupId, false, metadata, null);
+                    try {
+                        uploadFromUri(fileUri, fileName, uploadPath, caption, groupId, false, metadata, null);
+                    } catch (ExecutionException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                     taskCompleted();
                 }
@@ -163,55 +178,52 @@ public class UploadMultipleFileService extends BaseTaskService {
     }
 
     private void uploadFromUri(final ArrayList<Uri> fileUri, final ArrayList<String> fileName, final String uploadPath, final String caption, final String groupId,
-                               final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) {
+                               final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) throws ExecutionException, InterruptedException {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
-        uploadFile(fileUri,fileName, uploadPath,metadata, toTransmit, caption, groupId, dmInfoData);
+        //compressAndUpload(fileUri,fileName, caption,uploadPath, groupId,toTransmit,metadata,dmInfoData);
+        uploadFile(fileUri,fileName, uploadPath,metadata,toTransmit,caption,groupId,dmInfoData);
     }
-    private Uri getCompressedImage(Uri fileUri, String fileName){
-        GlideApp.with(this).asBitmap()
-                .override(1000, 1000)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .load(fileUri)
-                .into(new CustomTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        final Uri compressedFileUri = getUriFromTempBitmap(UploadMultipleFileService.this, resource, fileName,
-                                MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
-                        compressedUri = compressedFileUri;
-                    }
-
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                    }
-                });
-        return compressedUri;
-    }
-    private void uploadFile(final ArrayList<Uri> fileUriList,ArrayList<String> fileNameList, final String uploadPath, @Nullable StorageMetadata metadata, final boolean toTransmit, final String caption, final String groupId, @Nullable final DmInfoData dmInfoData) {
-        ArrayList<Uri> downLoadUriList = new ArrayList<>();
-        final Context context =this;
+    private void compressAndUpload(final ArrayList<Uri> fileUriList, final ArrayList<String> fileNameList, final String caption,final String uploadPath, final String groupId, final boolean toTransmit,
+                                   @Nullable final StorageMetadata metadata, @Nullable final UploadMultipleFileService.DmInfoData dmInfoData) {
+        final ArrayList<Uri> compressedUriList = new ArrayList<>();
         for(i=0;i<fileUriList.size();i++){
-            final StorageReference photoRef = mStorageRef.child(uploadPath)
-                    .child(fileNameList.get(i));
-            Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
-            final UploadTask uploadTask;
-            if (metadata != null) {
-                uploadTask = photoRef.putFile(fileUriList.get(i), metadata);
-            } else {
-                uploadTask = photoRef.putFile(fileUriList.get(i));
-            }
+            final Uri fileUri = fileUriList.get(i);
+            final String fileName = fileNameList.get(i);
             GlideApp.with(this).asBitmap()
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .skipMemoryCache(true)
-                    .load(fileUriList.get(i))
+                    .load(fileUriList.get(0))
                     .into(new CustomTarget<Bitmap>() {
                         @Override
                         public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                             if (resource.getWidth() > 1000 || resource.getHeight() > 1000) {
-                                fileUriList.set(i,getCompressedImage(fileUriList.get(i),fileNameList.get(i)));
+                                GlideApp.with(UploadMultipleFileService.this).asBitmap()
+                                        .override(1000, 1000)
+                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                        .skipMemoryCache(true)
+                                        .load(fileUri)
+                                        .into(new CustomTarget<Bitmap>() {
+                                            @Override
+                                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                                final Uri compressedFileUri = getUriFromTempBitmap(UploadMultipleFileService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
+                                                compressedUriList.add(compressedFileUri);
+                                                if(compressedUriList.size()==fileUriList.size()){
+                                                    uploadFile(compressedUriList,fileNameList, uploadPath,metadata, toTransmit, caption, groupId, dmInfoData);
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                                            }
+                                        });
+                            } else {
+                                compressedUriList.add(fileUri);
+                                if(compressedUriList.size()==fileUriList.size()){
+                                    uploadFile(compressedUriList,fileNameList, uploadPath,metadata, toTransmit, caption, groupId, dmInfoData);
+                                }
                             }
                         }
 
@@ -220,58 +232,179 @@ public class UploadMultipleFileService extends BaseTaskService {
 
                         }
                     });
-            // Upload file to Firebase Storage
-            uploadTask.
-                    addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                            showProgressNotification(getString(R.string.progress_uploading),
-                                    taskSnapshot.getBytesTransferred(),
-                                    taskSnapshot.getTotalByteCount());
-                        }
-                    })
-                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            // Upload succeeded
-                            Log.d(TAG, "uploadFromUri:onSuccess");
+        }
 
-                            // Get the public download URL
-                            photoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Uri> task) {
-                                    if (task.isSuccessful()) {
-                                        final Uri downloadUri = task.getResult();
-                                        downLoadUriList.add(downloadUri);
-                                        if(downLoadUriList.size()==fileUriList.size()){
-                                            broadcastUploadFinished(downLoadUriList, fileUriList, toTransmit, caption, groupId, dmInfoData);
-                                            showUploadFinishedNotification(downLoadUriList, fileUriList, toTransmit);
-                                            taskCompleted();
-                                        }
-                                    } else {
-                                        Log.d(TAG, "onComplete: failed");
-                                        // [START_EXCLUDE]
-                                        broadcastUploadFinished(null, fileUriList, toTransmit, caption, groupId, dmInfoData);
-                                        showUploadFinishedNotification(null, fileUriList, toTransmit);
-                                        taskCompleted();
-                                        // [END_EXCLUDE]
-                                    }
+    }
+    private void uploadFile(final ArrayList<Uri> fileUriList,ArrayList<String> fileNameList, final String uploadPath, @Nullable StorageMetadata metadata, final boolean toTransmit, final String caption, final String groupId, @Nullable final DmInfoData dmInfoData){
+        ArrayList<Uri> downLoadUriList = new ArrayList<>();
+        final Context context =this;
+        for(i=0;i<fileUriList.size();i++){
+            final Uri fileUri = fileUriList.get(i);
+            final String fileName = fileNameList.get(i);
+//            final StorageReference photoRef = mStorageRef.child(uploadPath)
+//                    .child(fileNameList.get(i));
+//            Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
+//            final UploadTask uploadTask;
+//            if (metadata != null) {
+//                uploadTask = photoRef.putFile(fileUriList.get(i), metadata);
+//            } else {
+//                uploadTask = photoRef.putFile(fileUriList.get(i));
+//            }
+            GlideApp.with(this).asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .load(fileUriList.get(i))
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            if (resource.getWidth() > 1000 || resource.getHeight() > 1000) {
+                                GlideApp.with(UploadMultipleFileService.this).asBitmap()
+                                        .override(1000, 1000)
+                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                        .skipMemoryCache(true)
+                                        .load(fileUri)
+                                        .into(new CustomTarget<Bitmap>() {
+                                            @Override
+                                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                                final Uri compressedFileUri = getUriFromTempBitmap(UploadMultipleFileService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
+                                                final StorageReference photoRef = mStorageRef.child(uploadPath)
+                                                        .child(fileName);
+                                                final UploadTask uploadTask;
+                                                if (metadata != null) {
+                                                    uploadTask = photoRef.putFile(compressedFileUri, metadata);
+                                                } else {
+                                                    uploadTask = photoRef.putFile(compressedFileUri);
+                                                }
+                                                uploadTask.
+                                                        addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                                            @Override
+                                                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                                                showProgressNotification(getString(R.string.progress_uploading),
+                                                                        taskSnapshot.getBytesTransferred(),
+                                                                        taskSnapshot.getTotalByteCount());
+                                                            }
+                                                        })
+                                                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                            @Override
+                                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                                // Upload succeeded
+                                                                Log.d(TAG, "uploadFromUri:onSuccess");
+
+                                                                // Get the public download URL
+                                                                photoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Uri> task) {
+                                                                        if (task.isSuccessful()) {
+                                                                            final Uri downloadUri = task.getResult();
+                                                                            downLoadUriList.add(downloadUri);
+                                                                            if(downLoadUriList.size()==fileUriList.size()){
+                                                                                broadcastUploadFinished(downLoadUriList, fileUriList, toTransmit, caption, groupId, dmInfoData);
+                                                                                showUploadFinishedNotification(downLoadUriList, fileUriList, toTransmit);
+                                                                                taskCompleted();
+                                                                            }
+                                                                        } else {
+                                                                            Log.d(TAG, "onComplete: failed");
+                                                                            // [START_EXCLUDE]
+                                                                            broadcastUploadFinished(null, fileUriList, toTransmit, caption, groupId, dmInfoData);
+                                                                            showUploadFinishedNotification(null, fileUriList, toTransmit);
+                                                                            taskCompleted();
+                                                                            // [END_EXCLUDE]
+                                                                        }
+                                                                    }
+                                                                });
+
+                                                            }
+                                                        })
+                                                        .addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception exception) {
+                                                                // Upload failed
+                                                                Log.w(TAG, "uploadFromUri:onFailure", exception);
+
+                                                                // [START_EXCLUDE]
+                                                                broadcastUploadFinished(null, fileUriList, toTransmit, caption, groupId, dmInfoData);
+                                                                showUploadFinishedNotification(null, fileUriList, toTransmit);
+                                                                taskCompleted();
+                                                                // [END_EXCLUDE]
+                                                            }
+                                                        });
+                                            }
+
+                                            @Override
+                                            public void onLoadCleared(@Nullable Drawable placeholder) {
+
+                                            }
+                                        });
+                            } else {
+                                final StorageReference photoRef = mStorageRef.child(uploadPath)
+                                        .child(fileName);
+                                final UploadTask uploadTask;
+                                if (metadata != null) {
+                                    uploadTask = photoRef.putFile(fileUri, metadata);
+                                } else {
+                                    uploadTask = photoRef.putFile(fileUri);
                                 }
-                            });
+                                uploadTask.
+                                        addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                                showProgressNotification(getString(R.string.progress_uploading),
+                                                        taskSnapshot.getBytesTransferred(),
+                                                        taskSnapshot.getTotalByteCount());
+                                            }
+                                        })
+                                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                // Upload succeeded
+                                                Log.d(TAG, "uploadFromUri:onSuccess");
+
+                                                // Get the public download URL
+                                                photoRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Uri> task) {
+                                                        if (task.isSuccessful()) {
+                                                            final Uri downloadUri = task.getResult();
+                                                            downLoadUriList.add(downloadUri);
+                                                            if(downLoadUriList.size()==fileUriList.size()){
+                                                                broadcastUploadFinished(downLoadUriList, fileUriList, toTransmit, caption, groupId, dmInfoData);
+                                                                showUploadFinishedNotification(downLoadUriList, fileUriList, toTransmit);
+                                                                taskCompleted();
+                                                            }
+                                                        } else {
+                                                            Log.d(TAG, "onComplete: failed");
+                                                            // [START_EXCLUDE]
+                                                            broadcastUploadFinished(null, fileUriList, toTransmit, caption, groupId, dmInfoData);
+                                                            showUploadFinishedNotification(null, fileUriList, toTransmit);
+                                                            taskCompleted();
+                                                            // [END_EXCLUDE]
+                                                        }
+                                                    }
+                                                });
+
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception exception) {
+                                                // Upload failed
+                                                Log.w(TAG, "uploadFromUri:onFailure", exception);
+
+                                                // [START_EXCLUDE]
+                                                broadcastUploadFinished(null, fileUriList, toTransmit, caption, groupId, dmInfoData);
+                                                showUploadFinishedNotification(null, fileUriList, toTransmit);
+                                                taskCompleted();
+                                                // [END_EXCLUDE]
+                                            }
+                                        });
+                            }
+                            // Upload file to Firebase Storage
 
                         }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Upload failed
-                            Log.w(TAG, "uploadFromUri:onFailure", exception);
 
-                            // [START_EXCLUDE]
-                            broadcastUploadFinished(null, fileUriList, toTransmit, caption, groupId, dmInfoData);
-                            showUploadFinishedNotification(null, fileUriList, toTransmit);
-                            taskCompleted();
-                            // [END_EXCLUDE]
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+
                         }
                     });
         }

@@ -1447,60 +1447,85 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         Log.d("GroupID", "onActivityFinished");
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_IMG && resultCode == RESULT_OK) {
+            ArrayList<Uri> imageUriList = new ArrayList<>();
             File imageFile;
             String type;
             Uri uri;
-            String caption = newMessageEt.getText() == null ? null : newMessageEt.getText().toString();
-            if (data != null && data.getData() != null) {
-                uri = data.getData();
-                type = getMimeType(uri);
-                imageFile = getFileFromInputStreamUri(getContext(), uri);
-            } else {
-                // from camera
-                imageFile = new File(currentPhotoPath);
-                type = getMimeType(Uri.fromFile(imageFile));
-            }
-            if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
-                final Uri fileUri = Uri.fromFile(imageFile);
+            if(data.getClipData() != null) {
+                String caption = newMessageEt.getText() == null ? null : newMessageEt.getText().toString();
                 String chatId = groupId;
                 if (!TextUtils.isEmpty(dmId)) {
                     chatId = dmId;
                 }
-                Log.d("GroupID", "img--->" + fileUri.toString());
-                startActivityForResult(
-                        AttachImageActivity.getIntent(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId),
-                        REQUEST_CODE_IMG_SENT
-                );
-            } else if (data != null && (type.contains("video") || type.contains("mp4"))) {
-                //handle video from gallery picker
-                uri = data.getData();
-                String extension = FileUtils.getFileExtension(requireContext(), uri);
-                if (!TextUtils.isEmpty(extension) && extension.contains("mov")) {
-                    Toast.makeText(getContext(), "Unsupported File type", Toast.LENGTH_LONG).show();
-                } else {
-                    File videoFile;
-                    if (data.getData() != null) {
-                        videoFile = getFileFromInputStreamUri(getContext(), uri);
-                    } else {
-                        //from camera
-                        videoFile = new File(currentPhotoPath);
-                    }
-                    Video_Size = videoFile.length() / (1024f * 1024f);
-                    if (Video_Size > PERMITTED_VIDEO_SIZE) {
-                        Toast.makeText(getContext(), "Choose a video size less than 30 MB", Toast.LENGTH_LONG).show();
-                        videoFile.delete();
-                    } else {
-                        final Uri fileUri = Uri.fromFile(videoFile);
-                        String chatId = groupId;
-                        if (!TextUtils.isEmpty(dmId)) {
-                            chatId = dmId;
-                        }
-                        startActivityForResult(
-                                AttachVideoActivity.getIntent(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId),
-                                REQUEST_CODE_VIDEO_SENT
-                        );
+                int count = data.getClipData().getItemCount();
+                for(int i = 0; i < count; i++) {
+                    uri = data.getClipData().getItemAt(i).getUri();
+                    type = getMimeType(uri);
+                    imageFile = getFileFromInputStreamUri(getContext(), uri);
+                    if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
+                        final Uri fileUri = Uri.fromFile(imageFile);
+                        imageUriList.add(fileUri);
                     }
                 }
+                startActivityForResult(
+                        AttachImageActivity.getIntent(getContext(), imageUriList, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId),
+                        REQUEST_CODE_IMG_SENT
+                );
+            }
+            else{
+                String caption = newMessageEt.getText() == null ? null : newMessageEt.getText().toString();
+                if (data != null && data.getData() != null) {
+                    uri = data.getData();
+                    type = getMimeType(uri);
+                    imageFile = getFileFromInputStreamUri(getContext(), uri);
+                } else {
+                    // from camera
+                    imageFile = new File(currentPhotoPath);
+                    type = getMimeType(Uri.fromFile(imageFile));
+                }
+                if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
+                    final Uri fileUri = Uri.fromFile(imageFile);
+                    String chatId = groupId;
+                    if (!TextUtils.isEmpty(dmId)) {
+                        chatId = dmId;
+                    }
+                    Log.d("GroupID", "img--->" + fileUri.toString());
+                    startActivityForResult(
+                            AttachImageActivity.getIntent(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId),
+                            REQUEST_CODE_IMG_SENT
+                    );
+                } else if (data != null && (type.contains("video") || type.contains("mp4"))) {
+                    //handle video from gallery picker
+                    uri = data.getData();
+                    String extension = FileUtils.getFileExtension(requireContext(), uri);
+                    if (!TextUtils.isEmpty(extension) && extension.contains("mov")) {
+                        Toast.makeText(getContext(), "Unsupported File type", Toast.LENGTH_LONG).show();
+                    } else {
+                        File videoFile;
+                        if (data.getData() != null) {
+                            videoFile = getFileFromInputStreamUri(getContext(), uri);
+                        } else {
+                            //from camera
+                            videoFile = new File(currentPhotoPath);
+                        }
+                        Video_Size = videoFile.length() / (1024f * 1024f);
+                        if (Video_Size > PERMITTED_VIDEO_SIZE) {
+                            Toast.makeText(getContext(), "Choose a video size less than 30 MB", Toast.LENGTH_LONG).show();
+                            videoFile.delete();
+                        } else {
+                            final Uri fileUri = Uri.fromFile(videoFile);
+                            String chatId = groupId;
+                            if (!TextUtils.isEmpty(dmId)) {
+                                chatId = dmId;
+                            }
+                            startActivityForResult(
+                                    AttachVideoActivity.getIntent(getContext(), fileUri, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId),
+                                    REQUEST_CODE_VIDEO_SENT
+                            );
+                        }
+                    }
+                }
+
             }
 
         } else if (requestCode == REQUEST_CODE_GROUP_PICK && resultCode == RESULT_OK) {

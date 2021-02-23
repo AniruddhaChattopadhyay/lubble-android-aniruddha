@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".utils.FullScreenMultiImageActivity">
     <include layout="@layout/text_toolbar"
-        android:id="@+id/toolbar_mulltiImage"
        />
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/multi_img_recylerview_fullscreen"
+        android:layout_below="@+id/text_toolbar"
         />
 <!--    <TextView-->
 <!--        android:layout_width="match_parent"-->

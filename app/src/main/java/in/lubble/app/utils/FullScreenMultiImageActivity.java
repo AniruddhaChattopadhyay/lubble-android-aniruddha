@@ -3,6 +3,7 @@ package in.lubble.app.utils;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -14,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -57,6 +59,10 @@ public class FullScreenMultiImageActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_screen_multi_image);
+        Toolbar toolbar = findViewById(R.id.text_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("");
         recyclerView = findViewById(R.id.multi_img_recylerview_fullscreen);
         Bundle args = getIntent().getBundleExtra("BUNDLE");
         final ArrayList<String> multiImageList = (ArrayList<String>) args.getSerializable(EXTRA_MULTI_IMG_PATH);
@@ -80,5 +86,16 @@ public class FullScreenMultiImageActivity extends AppCompatActivity {
 
             }
         }));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

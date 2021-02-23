@@ -98,6 +98,7 @@ public class FileUtils {
         Intent photoPickerIntent = new Intent(Intent.ACTION_GET_CONTENT);
         photoPickerIntent.setType("*/*");
         photoPickerIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"image/*", "video/*"});
+        photoPickerIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         Log.d("GroupID", Intent.EXTRA_MIME_TYPES);
         return photoPickerIntent;
     }
