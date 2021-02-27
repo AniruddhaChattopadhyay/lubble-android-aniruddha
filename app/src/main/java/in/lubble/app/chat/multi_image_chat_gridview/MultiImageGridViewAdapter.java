@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
+import java.util.Locale;
 
 import in.lubble.app.R;
 
@@ -65,8 +66,11 @@ public class MultiImageGridViewAdapter extends RecyclerView.Adapter<MultiImageGr
 
         }
         if (isFromChat && position==3) {
-            holder.countViewRl.setVisibility(View.VISIBLE);
-            holder.countViewTv.setText("+3");
+            int plusImageNumber = ImageUrlList.size()-4;
+            if(plusImageNumber>=0){
+                holder.countViewRl.setVisibility(View.VISIBLE);
+                holder.countViewTv.setText(String.format(Locale.getDefault(), "%d", plusImageNumber));
+            }
         }
     }
 

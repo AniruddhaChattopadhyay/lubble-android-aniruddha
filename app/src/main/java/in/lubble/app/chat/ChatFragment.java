@@ -1458,19 +1458,26 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                     chatId = dmId;
                 }
                 int count = data.getClipData().getItemCount();
-                for(int i = 0; i < count; i++) {
-                    uri = data.getClipData().getItemAt(i).getUri();
-                    type = getMimeType(uri);
-                    imageFile = getFileFromInputStreamUri(getContext(), uri);
-                    if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
-                        final Uri fileUri = Uri.fromFile(imageFile);
-                        imageUriList.add(fileUri);
-                    }
+                if(count>6){
+                    Toast.makeText(getContext(),"more than 6 photos not supported!",Toast.LENGTH_LONG).show();
                 }
-                startActivityForResult(
+                else {
+                    for(int i = 0; i < count; i++) {
+                        uri = data.getClipData().getItemAt(i).getUri();
+                        type = getMimeType(uri);
+                        imageFile = getFileFromInputStreamUri(getContext(), uri);
+                        if(type.contains("video") || type.contains("mp4")){
+                            Toast.makeText(getContext(),"multi share of videos is not supported yet!",Toast.LENGTH_LONG).show();
+                        }
+                        else if (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) {
+                            final Uri fileUri = Uri.fromFile(imageFile);
+                            imageUriList.add(fileUri);
+                        }
+                    }
+                    startActivityForResult(
                         AttachImageActivity.getIntent(getContext(), imageUriList, chatId, caption, !TextUtils.isEmpty(dmId), isCurrUserSeller, authorId),
-                        REQUEST_CODE_IMG_SENT
-                );
+                        REQUEST_CODE_IMG_SENT);
+                }
             }
             else{
                 String caption = newMessageEt.getText() == null ? null : newMessageEt.getText().toString();

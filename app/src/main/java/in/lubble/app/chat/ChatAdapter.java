@@ -1316,17 +1316,22 @@ public class ChatAdapter extends RecyclerView.Adapter {
     private void handleMultiImage(FrameLayout multiImgContainer, final ProgressBar progressBar, final RecyclerView recyclerView, final ChatData chatData, @Nullable ImageView downloadIv, @Nullable ImageView shareMsgIv) {
         if (isValidStringList(chatData.getMultipleImagesUrl())) {
             ArrayList<String> multiImageList = chatData.getMultipleImagesUrl();
-            MultiImageGridViewAdapter mAdapter = new MultiImageGridViewAdapter(context,multiImageList,true);
+            ArrayList<String> multiImageListTruncated = null;
+            if(multiImageList.size()>=4){
+                multiImageListTruncated = new ArrayList<>(multiImageList.subList(0,4));
+            }
+            else{
+                multiImageListTruncated = multiImageList;
+            }
+            MultiImageGridViewAdapter mAdapter = new MultiImageGridViewAdapter(context,multiImageListTruncated,true);
             multiImgContainer.setVisibility(VISIBLE);
             progressBar.setVisibility(GONE);
-            int numberOfColumns =multiImageList.size();
             recyclerView.setHasFixedSize(true);
             GridLayoutManager manager = new GridLayoutManager(context, 2, GridLayoutManager.VERTICAL, false);
 //            manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
 //                @Override
 //                public int getSpanSize(int position) {
-//                    // 7 is the sum of items in one repeated section
-//                        if(position==2){
+//                        if(multiImageList.size()== 3 && position==3){
 //                            return 2;
 //                        }
 //                        return 1;
