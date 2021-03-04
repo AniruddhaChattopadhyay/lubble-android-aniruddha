@@ -125,22 +125,16 @@ public class UploadMultipleFileService extends BaseTaskService {
                 Bundle bundle = intent.getBundleExtra("BUNDLE");
                 final ArrayList<Uri> imageUriList = (ArrayList<Uri>) bundle.getSerializable(EXTRA_MULTI_FILE_URI);
                 final ArrayList<String> fileNameList = (ArrayList<String>) bundle.getSerializable(EXTRA_MULTI_FILE_NAME);
-                try {
-                    uploadFromUri(
-                            imageUriList,
-                            fileNameList,
-                            intent.getStringExtra(EXTRA_UPLOAD_PATH),
-                            intent.getStringExtra(EXTRA_CAPTION),
-                            intent.getStringExtra(EXTRA_CHAT_ID),
-                            bucketId == BUCKET_CONVO,
-                            null,
-                            dmInfoData
-                    );
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                uploadFromUri(
+                        imageUriList,
+                        fileNameList,
+                        intent.getStringExtra(EXTRA_UPLOAD_PATH),
+                        intent.getStringExtra(EXTRA_CAPTION),
+                        intent.getStringExtra(EXTRA_CHAT_ID),
+                        bucketId == BUCKET_CONVO,
+                        null,
+                        dmInfoData
+                );
             }
         }
 
@@ -163,13 +157,9 @@ public class UploadMultipleFileService extends BaseTaskService {
                             .setCustomMetadata("uid", FirebaseAuth.getInstance().getUid())
                             .setCustomMetadata("token", task.getResult().getToken())
                             .build();
-                    try {
-                        uploadFromUri(fileUri, fileName, uploadPath, caption, groupId, false, metadata, null);
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
+                    uploadFromUri(fileUri, fileName, uploadPath, caption, groupId, false, metadata, null);
+
                 } else {
                     taskCompleted();
                 }
@@ -178,62 +168,12 @@ public class UploadMultipleFileService extends BaseTaskService {
     }
 
     private void uploadFromUri(final ArrayList<Uri> fileUri, final ArrayList<String> fileName, final String uploadPath, final String caption, final String groupId,
-                               final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) throws ExecutionException, InterruptedException {
+                               final boolean toTransmit, @Nullable final StorageMetadata metadata, @Nullable final DmInfoData dmInfoData) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         //compressAndUpload(fileUri,fileName, caption,uploadPath, groupId,toTransmit,metadata,dmInfoData);
         uploadFile(fileUri,fileName, uploadPath,metadata,toTransmit,caption,groupId,dmInfoData);
-    }
-    private void compressAndUpload(final ArrayList<Uri> fileUriList, final ArrayList<String> fileNameList, final String caption,final String uploadPath, final String groupId, final boolean toTransmit,
-                                   @Nullable final StorageMetadata metadata, @Nullable final UploadMultipleFileService.DmInfoData dmInfoData) {
-        final ArrayList<Uri> compressedUriList = new ArrayList<>();
-        for(i=0;i<fileUriList.size();i++){
-            final Uri fileUri = fileUriList.get(i);
-            final String fileName = fileNameList.get(i);
-            GlideApp.with(this).asBitmap()
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .load(fileUriList.get(0))
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            if (resource.getWidth() > 1000 || resource.getHeight() > 1000) {
-                                GlideApp.with(UploadMultipleFileService.this).asBitmap()
-                                        .override(1000, 1000)
-                                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                        .skipMemoryCache(true)
-                                        .load(fileUri)
-                                        .into(new CustomTarget<Bitmap>() {
-                                            @Override
-                                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                                                final Uri compressedFileUri = getUriFromTempBitmap(UploadMultipleFileService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
-                                                compressedUriList.add(compressedFileUri);
-                                                if(compressedUriList.size()==fileUriList.size()){
-                                                    uploadFile(compressedUriList,fileNameList, uploadPath,metadata, toTransmit, caption, groupId, dmInfoData);
-                                                }
-                                            }
-
-                                            @Override
-                                            public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                                            }
-                                        });
-                            } else {
-                                compressedUriList.add(fileUri);
-                                if(compressedUriList.size()==fileUriList.size()){
-                                    uploadFile(compressedUriList,fileNameList, uploadPath,metadata, toTransmit, caption, groupId, dmInfoData);
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                        }
-                    });
-        }
-
     }
     private void uploadFile(final ArrayList<Uri> fileUriList,ArrayList<String> fileNameList, final String uploadPath, @Nullable StorageMetadata metadata, final boolean toTransmit, final String caption, final String groupId, @Nullable final DmInfoData dmInfoData){
         ArrayList<Uri> downLoadUriList = new ArrayList<>();
@@ -241,15 +181,6 @@ public class UploadMultipleFileService extends BaseTaskService {
         for(i=0;i<fileUriList.size();i++){
             final Uri fileUri = fileUriList.get(i);
             final String fileName = fileNameList.get(i);
-//            final StorageReference photoRef = mStorageRef.child(uploadPath)
-//                    .child(fileNameList.get(i));
-//            Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
-//            final UploadTask uploadTask;
-//            if (metadata != null) {
-//                uploadTask = photoRef.putFile(fileUriList.get(i), metadata);
-//            } else {
-//                uploadTask = photoRef.putFile(fileUriList.get(i));
-//            }
             GlideApp.with(this).asBitmap()
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .skipMemoryCache(true)

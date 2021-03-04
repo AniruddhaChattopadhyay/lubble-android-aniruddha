@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 import java.util.Locale;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 
 public class MultiImageGridViewAdapter extends RecyclerView.Adapter<MultiImageGridViewAdapter.MyViewHolder> {
@@ -56,7 +57,7 @@ public class MultiImageGridViewAdapter extends RecyclerView.Adapter<MultiImageGr
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         String imgUrl = ImageUrlList.get(position);
-        Glide.with(mContext).load(imgUrl).into(holder.iv);
+        GlideApp.with(mContext).load(imgUrl).into(holder.iv);
         if(!isFromChat){
 //            RelativeLayout.LayoutParams layoutParams = new
 //                    RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
@@ -67,9 +68,9 @@ public class MultiImageGridViewAdapter extends RecyclerView.Adapter<MultiImageGr
         }
         if (isFromChat && position==3) {
             int plusImageNumber = ImageUrlList.size()-4;
-            if(plusImageNumber>=0){
+            if(plusImageNumber>0){
                 holder.countViewRl.setVisibility(View.VISIBLE);
-                holder.countViewTv.setText(String.format(Locale.getDefault(), "%d", plusImageNumber));
+                holder.countViewTv.setText(String.format(Locale.getDefault(), "%s,%d", '+',plusImageNumber));
             }
         }
     }

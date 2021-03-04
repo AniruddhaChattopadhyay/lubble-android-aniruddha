@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import java.io.File;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 
 public class MultiImageAttachmentAdapter extends RecyclerView.Adapter<MultiImageAttachmentAdapter.MyViewHolder> {
@@ -47,7 +48,7 @@ public class MultiImageAttachmentAdapter extends RecyclerView.Adapter<MultiImage
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Uri uri = moviesList.get(position);
-        Glide.with(mContext).load(new File(uri.getPath())).into(holder.iv);
+        GlideApp.with(mContext).load(new File(uri.getPath())).into(holder.iv);
     }
 
     @Override

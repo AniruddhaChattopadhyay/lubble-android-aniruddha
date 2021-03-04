@@ -12,22 +12,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="10dp">
 
-<!--    <androidx.cardview.widget.CardView-->
-<!--        android:layout_width="150dp"-->
-<!--        android:layout_height="200dp"-->
-<!--        app:cardCornerRadius="8dp"-->
-<!--        android:layout_margin="0dp"-->
-<!--        app:cardBackgroundColor="@color/dk_blue"-->
-<!--        android:elevation="10dp">-->
-
-<!--        <ImageView-->
-<!--            android:id="@+id/multi_imgView"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent">-->
-<!--        </ImageView>-->
-
-<!--    </androidx.cardview.widget.CardView>-->
-
     <ImageView
         android:id="@+id/multi_imgView"
         android:layout_width="100dp"

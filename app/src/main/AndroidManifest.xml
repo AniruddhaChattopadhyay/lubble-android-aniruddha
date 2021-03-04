@@ -23,7 +23,8 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <activity android:name=".utils.FullScreenMultiImageActivity"/>
+        <activity android:name=".utils.FullScreenMultiImageActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize" />
 
         <receiver
             android:name=".receivers.ShareSheetReceiver"

@@ -13,8 +13,4 @@
         android:id="@+id/multi_img_recylerview_fullscreen"
         android:layout_below="@+id/text_toolbar"
         />
-<!--    <TextView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:text="Hell"/>-->
 </RelativeLayout>

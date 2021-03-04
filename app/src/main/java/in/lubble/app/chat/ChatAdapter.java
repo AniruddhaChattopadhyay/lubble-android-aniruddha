@@ -1326,7 +1326,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             MultiImageGridViewAdapter mAdapter = new MultiImageGridViewAdapter(context,multiImageListTruncated,true);
             multiImgContainer.setVisibility(VISIBLE);
             progressBar.setVisibility(GONE);
-            recyclerView.setHasFixedSize(true);
+//            recyclerView.setHasFixedSize(true);
             GridLayoutManager manager = new GridLayoutManager(context, 2, GridLayoutManager.VERTICAL, false);
 //            manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
 //                @Override
@@ -1942,10 +1942,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         } else if (isValidString(imgChatData.getImgUrl())) {
                             FullScreenImageActivity.open(activity, context, imgChatData.getImgUrl(), chatIv, null, R.drawable.ic_cancel_black_24dp);
                         }
-                        break;
-                    case R.id.multi_img_chat_view:
-                        //ChatData multiImgChatData = chatDataList.get(getAdapterPosition());
-                        //FullScreenMultiImageActivity.open(activity,context,multiImgChatData.getMultipleImagesUrl(), null, R.drawable.ic_cancel_black_24dp);
                         break;
                     case R.id.iv_vid_img:
                         ChatData vidChatData = chatDataList.get(getAdapterPosition());

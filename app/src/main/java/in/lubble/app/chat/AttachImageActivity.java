@@ -109,9 +109,9 @@ public class AttachImageActivity extends BaseActivity {
 
         mAdapter = new MultiImageAttachmentAdapter(this,imageUriList);
 
-        recyclerView.setHasFixedSize(true);
+//        recyclerView.setHasFixedSize(true);
 
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
 
         recyclerView.setLayoutManager(mLayoutManager);
 
@@ -130,7 +130,7 @@ public class AttachImageActivity extends BaseActivity {
             @Override
             public void onClick(View view, int position) {
                 Uri uri = imageUriList.get(position);
-                GlideApp.with(getApplicationContext()).load(uri).fitCenter().into(touchImageView);
+                GlideApp.with(AttachImageActivity.this).load(uri).fitCenter().into(touchImageView);
             }
 
             @Override
@@ -138,10 +138,6 @@ public class AttachImageActivity extends BaseActivity {
 
             }
         }));
-//        if(imageUriList!=null)
-//            GlideApp.with(this).load(imageUriList.get(0)).fitCenter().into(touchImageView);
-//        else
-//            GlideApp.with(this).load(imgUri).fitCenter().into(touchImageView);
 
         sendIcon.setOnClickListener(new View.OnClickListener() {
             @Override

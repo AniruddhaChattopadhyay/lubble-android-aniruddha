@@ -22,6 +22,7 @@ import android.widget.ImageView;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import in.lubble.app.BaseActivity;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.R;
 import in.lubble.app.chat.horizontalImageRecyclerView.MyDividerItemDecoration;
@@ -31,7 +32,7 @@ import in.lubble.app.chat.multi_image_chat_gridview.MultiImageGridViewAdapter;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class FullScreenMultiImageActivity extends AppCompatActivity {
+public class FullScreenMultiImageActivity extends BaseActivity {
 
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";
     private static final String EXTRA_UPLOAD_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_UPLOAD_PATH";
@@ -65,27 +66,29 @@ public class FullScreenMultiImageActivity extends AppCompatActivity {
         setTitle("");
         recyclerView = findViewById(R.id.multi_img_recylerview_fullscreen);
         Bundle args = getIntent().getBundleExtra("BUNDLE");
-        final ArrayList<String> multiImageList = (ArrayList<String>) args.getSerializable(EXTRA_MULTI_IMG_PATH);
-        MultiImageGridViewAdapter mAdapter = new MultiImageGridViewAdapter(this,multiImageList,false);
-        recyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.addItemDecoration(new MyDividerItemDecoration(this, LinearLayoutManager.VERTICAL,10));
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(mAdapter);
+        if(args!=null){
+            final ArrayList<String> multiImageList = (ArrayList<String>) args.getSerializable(EXTRA_MULTI_IMG_PATH);
+            MultiImageGridViewAdapter mAdapter = new MultiImageGridViewAdapter(this,multiImageList,false);
+            recyclerView.setHasFixedSize(true);
+            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+            recyclerView.setLayoutManager(mLayoutManager);
+            recyclerView.addItemDecoration(new MyDividerItemDecoration(this, LinearLayoutManager.VERTICAL,10));
+            recyclerView.setItemAnimator(new DefaultItemAnimator());
+            recyclerView.setAdapter(mAdapter);
 
-        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, this.recyclerView, new RecyclerTouchListener.ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                //TODO
+            recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, this.recyclerView, new RecyclerTouchListener.ClickListener() {
+                @Override
+                public void onClick(View view, int position) {
+                    //TODO
 
-            }
+                }
 
-            @Override
-            public void onLongClick(View view, int position) {
+                @Override
+                public void onLongClick(View view, int position) {
 
-            }
-        }));
+                }
+            }));
+        }
     }
 
     @Override
