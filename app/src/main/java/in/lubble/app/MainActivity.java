@@ -70,13 +70,13 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
-import in.lubble.app.map.MapFragment;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.MainUtils;
@@ -686,9 +686,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case "events":
                     bottomNavigation.setSelectedItemId(R.id.navigation_events);
                     break;
-                case "map":
+                /*case "map":
                     bottomNavigation.setSelectedItemId(R.id.navigation_map);
-                    break;
+                    break;*/
                 case "services":
                     bottomNavigation.setSelectedItemId(R.id.navigation_market);
                     break;
@@ -698,9 +698,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case "explore":
                     bottomNavigation.setSelectedItemId(R.id.navigation_explore);
                     break;
-                /*case "games":
+                case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
-                    break;*/
+                    break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
         }
@@ -919,15 +919,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case R.id.navigation_explore:
                     switchFrag(ExploreFrag.newInstance());
                     return true;
-                case R.id.navigation_map:
+                /*case R.id.navigation_map:
                     switchFrag(MapFragment.newInstance());
-                    return true;
+                    return true;*/
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
                     return true;
-                /*case R.id.navigation_fun:
+                case R.id.navigation_fun:
                     switchFrag(GamesFrag.newInstance());
-                    return true;*/
+                    return true;
                 case R.id.navigation_market:
                     switchFrag(MarketplaceFrag.newInstance());
                     return true;
