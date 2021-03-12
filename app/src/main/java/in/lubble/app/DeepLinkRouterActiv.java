@@ -9,6 +9,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
@@ -44,6 +45,13 @@ public class DeepLinkRouterActiv extends BaseActivity {
             startActivity(new Intent(this, MainActivity.class));
             FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("tried to open deeplink without login"));
             finish();
+        }
+        //Before you initialize in your Application `#onCreate`
+        Branch branch = Branch.getInstance();
+        CleverTapAPI clevertapInstance = CleverTapAPI.getDefaultInstance(this);
+        if (clevertapInstance != null) {
+            branch.setRequestMetadata("$clevertap_attribution_id",
+                    clevertapInstance.getCleverTapAttributionIdentifier());
         }
     }
 
