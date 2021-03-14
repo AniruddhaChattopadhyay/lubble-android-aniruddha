@@ -24,12 +24,16 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <activity android:name=".map.LubbleMapActivity"></activity>
 
         <receiver
             android:name=".receivers.ShareSheetReceiver"
             android:enabled="true"
             android:exported="false" />
+
+        <activity
+            android:name=".map.LubbleMapActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".chat.BlockedChatsActiv"
