@@ -46,7 +46,6 @@ public class DeepLinkRouterActiv extends BaseActivity {
             FirebaseCrashlytics.getInstance().recordException(new IllegalAccessException("tried to open deeplink without login"));
             finish();
         }
-        //Before you initialize in your Application `#onCreate`
         Branch branch = Branch.getInstance();
         CleverTapAPI clevertapInstance = CleverTapAPI.getDefaultInstance(this);
         if (clevertapInstance != null) {

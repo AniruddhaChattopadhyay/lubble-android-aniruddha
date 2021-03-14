@@ -336,7 +336,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void initEverything() {
         syncFcmToken();
         logUser(FirebaseAuth.getInstance().getCurrentUser());
-        //Before you initialize in your Application `#onCreate`
+
         Branch branch = Branch.getInstance();
         CleverTapAPI clevertapInstance = CleverTapAPI.getDefaultInstance(this);
         if (clevertapInstance != null) {
