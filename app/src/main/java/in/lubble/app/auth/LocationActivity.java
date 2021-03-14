@@ -113,6 +113,7 @@ public class LocationActivity extends BaseActivity {
     private int retryCount = 0;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -151,7 +152,7 @@ public class LocationActivity extends BaseActivity {
         sharingProgressDialog = new ProgressDialog(this);
         generateBranchUrl(this, linkCreateListener);
 
-        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         hiNameTv.setText("Hi " + StringUtils.getTitleCase(currentUser.getDisplayName().split(" ")[0]));
 
         if (!TextUtils.isEmpty(currentUser.getPhoneNumber())) {
@@ -436,7 +437,7 @@ public class LocationActivity extends BaseActivity {
                 params.put("referral", referralObject);
             }
             final JSONObject userInfoObject = new JSONObject();
-            userInfoObject.put("name", FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+            userInfoObject.put("name", currentUser.getDisplayName());
             params.put("user_info", userInfoObject);
         } catch (JSONException e) {
             e.printStackTrace();
