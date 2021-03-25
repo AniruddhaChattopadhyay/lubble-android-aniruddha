@@ -51,14 +51,13 @@ public class LubbleApp extends MultiDexApplication {
 
         appContext = this;
         //Before you initialize in your Application `#onCreate`
-        Branch branch = Branch.getInstance();
         CleverTapAPI clevertapInstance = CleverTapAPI.getDefaultInstance(this);
+        // Initialize the Branch object
+        Branch branch = Branch.getAutoInstance(this);
         if (clevertapInstance != null) {
             branch.setRequestMetadata("$clevertap_attribution_id",
                     clevertapInstance.getCleverTapAttributionIdentifier());
         }
-        // Initialize the Branch object
-        Branch.getAutoInstance(this);
         // Branch logging for debugging
         Branch.enableLogging();
 
