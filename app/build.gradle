@@ -156,6 +156,7 @@ dependencies {
 
     //TextFormatting - bold and italics library
     implementation 'com.github.AniruddhaChattopadhyay:TextFormatter:1.0.1'
+
 }
 
 

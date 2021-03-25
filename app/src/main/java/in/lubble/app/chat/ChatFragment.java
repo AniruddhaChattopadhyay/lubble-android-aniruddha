@@ -1,11 +1,14 @@
 package in.lubble.app.chat;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -20,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.webkit.PermissionRequest;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,10 +34,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.Group;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -99,7 +102,6 @@ import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.OnNeverAskAgain;
 import permissions.dispatcher.OnPermissionDenied;
 import permissions.dispatcher.OnShowRationale;
-import permissions.dispatcher.PermissionRequest;
 import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -177,6 +179,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
     private EditText newMessageEt;
     private ImageView sendBtn;
     private ImageView attachMediaBtn;
+    private ImageView mediaAttachBtn;
     private ImageView linkPicIv;
     private TextView linkTitle;
     private TextView linkDesc;
@@ -389,6 +392,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         newMessageEt = view.findViewById(R.id.et_new_message);
         sendBtn = view.findViewById(R.id.iv_send_btn);
         attachMediaBtn = view.findViewById(R.id.iv_attach);
+        mediaAttachBtn = view.findViewById(R.id.iv_media_attach);
         linkMetaContainer = view.findViewById(R.id.group_link_meta);
         linkPicIv = view.findViewById(R.id.iv_link_pic);
         linkTitle = view.findViewById(R.id.tv_link_title);
@@ -414,6 +418,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         newMessageEt.addTextChangedListener(textWatcher);
         sendBtn.setOnClickListener(this);
         attachMediaBtn.setOnClickListener(this);
+        mediaAttachBtn.setOnClickListener(this);
         joinBtn.setOnClickListener(this);
         declineIv.setOnClickListener(this);
         linkCancel.setOnClickListener(this);
@@ -1300,6 +1305,11 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
                 ChatFragmentPermissionsDispatcher
                         .showAttachmentBottomSheetWithPermissionCheck(ChatFragment.this);
                 break;
+
+            case R.id.iv_media_attach:
+                int a =10;
+                break;
+
             case R.id.btn_join:
                 getCreateOrJoinGroupRef().child(groupId).setValue(true);
                 isJoining = true;
@@ -1358,6 +1368,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         chatAdapter.writePermGranted();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d("GroupID", "onActivityFinished");
@@ -1446,7 +1457,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
             final String chatId = chat_Id;
             File localFile = getFileFromInputStreamUri(getContext(), data.getData());
             final Uri pdfUri = Uri.fromFile(localFile);
-            new AlertDialog.Builder(getContext())
+            new android.app.AlertDialog.Builder(getContext())
                     .setIcon(R.mipmap.ic_launcher)
                     .setTitle("")
                     .setMessage("Are you sure you want to share this document?")
@@ -1929,7 +1940,7 @@ public class ChatFragment extends Fragment implements View.OnClickListener, Atta
         if (selectedChatId != null) {
             if (authorId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
                 final CharSequence[] items = {"Delete last msg too", "Delete msg", "Cancel"};
-                new AlertDialog.Builder(requireContext())
+                new android.app.AlertDialog.Builder(requireContext())
                         .setTitle(R.string.msg_spam_confirm_title)
                         .setMessage(R.string.msg_spam_confirm_msg)
                         .setPositiveButton(R.string.msg_spam_confirm_reset_lastmsg, new DialogInterface.OnClickListener() {
