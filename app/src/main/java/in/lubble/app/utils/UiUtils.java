@@ -150,7 +150,7 @@ public class UiUtils {
         return bottomSheetDialog;
     }
 
-    public static BottomSheetDialog showBottomSheetAlertLight(Context context, LayoutInflater layoutInflater, String title, @Nullable String subtitle, @DrawableRes int iconId, String btnText, final View.OnClickListener listener) {
+    public static BottomSheetDialog showBottomSheetAlertLight(Context context, LayoutInflater layoutInflater, String title, @Nullable String subtitle, @DrawableRes int iconId, String btnText, @Nullable final View.OnClickListener listener) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(context);
         View sheetView = layoutInflater.inflate(R.layout.bottom_sheet_alert_light, null);
         bottomSheetDialog.setContentView(sheetView);
@@ -175,7 +175,9 @@ public class UiUtils {
             @Override
             public void onClick(View v) {
                 bottomSheetDialog.dismiss();
-                listener.onClick(v);
+                if (listener != null) {
+                    listener.onClick(v);
+                }
             }
         });
         return bottomSheetDialog;

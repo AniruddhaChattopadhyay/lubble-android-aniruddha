@@ -24,6 +24,7 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.map.LubbleMapActivity;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
@@ -40,6 +41,7 @@ public class GamesFrag extends Fragment {
     private boolean isFreePlayEnabled = true;
     private boolean isClicked;
     private RelativeLayout whereTonightContainer;
+    private RelativeLayout mapContainer;
     private ValueEventListener coinsListener;
     private long currentCoins = 0;
 
@@ -66,23 +68,16 @@ public class GamesFrag extends Fragment {
         playContainer = view.findViewById(R.id.container_quiz_play);
         ImageView whereTonightPicIv = view.findViewById(R.id.iv_wheretonight_pic);
         earnCoinsTv = view.findViewById(R.id.tv_earn_more);
+        mapContainer = view.findViewById(R.id.container_map);
         final LinearLayout currentCoinsContainer = view.findViewById(R.id.container_current_coins);
 
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
-        currentCoinsContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ReferralActivity.open(requireContext(), true);
-            }
-        });
+        currentCoinsContainer.setOnClickListener(v -> ReferralActivity.open(requireContext(), true));
 
-        earnCoinsTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, getContext());
-                ReferralActivity.open(requireContext(), true);
-            }
+        earnCoinsTv.setOnClickListener(v -> {
+            Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, getContext());
+            ReferralActivity.open(requireContext(), true);
         });
 
         GlideApp.with(requireContext())
@@ -100,6 +95,8 @@ public class GamesFrag extends Fragment {
                 ((MainActivity) getActivity()).removeQuizBadge();
             }
         }
+
+        mapContainer.setOnClickListener(v -> LubbleMapActivity.open(requireContext()));
 
         return view;
     }

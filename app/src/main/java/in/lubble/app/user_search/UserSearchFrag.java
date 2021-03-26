@@ -125,7 +125,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
-        userAdapter = new UserAdapter(mListener, GlideApp.with(getContext()));
+        userAdapter = new UserAdapter(mListener, GlideApp.with(getContext()), groupId);
         usersRecyclerView.setAdapter(userAdapter);
         fetchAllLubbleUsers();
         fetchGroupUsers();

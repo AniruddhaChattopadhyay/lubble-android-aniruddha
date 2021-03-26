@@ -68,13 +68,14 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
     private MaterialButton setStatus;
     private TextInputLayout customStatusLayout;
     private int selectedPos = -1;
-    private View view_snackbar;
+    @Nullable
+    private final View view_snackbar;
     @Nullable
     private ChatMoreFragment.FlairUpdateListener flairUpdateListener;
     private ValueEventListener statusEventListener;
     private final static String SET_CUSTOM_TEXT = "Set Custom Text";
 
-    public StatusBottomSheetFragment(View v) {
+    public StatusBottomSheetFragment(@Nullable View v) {
         view_snackbar = v;
     }
 
@@ -140,27 +141,24 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                     customSetBtn.setVisibility(View.VISIBLE);
                     recyclerView.setVisibility(View.GONE);
                     setStatus.setVisibility(View.GONE);
-                    customSetBtn.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            String statusText = customEt.getText().toString();
-                            if (statusText.length() > 20) {
-                                Toast.makeText(getContext(), "Please set a shorter badge", Toast.LENGTH_SHORT).show();
-                            } else if (statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")) {
-                                Toast.makeText(getContext(), "You can not choose " + statusText + " without administrative privileges", Toast.LENGTH_SHORT).show();
-                                customEt.setText("");
-                            } else {
-                                RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusText);
-                                Snackbar snackbar = Snackbar
-                                        .make(view_snackbar, statusText + " is selected as badge!", Snackbar.LENGTH_LONG);
-                                snackbar.show();
-                                if (flairUpdateListener != null) {
-                                    flairUpdateListener.onFlairUpdated();
-                                }
-                                UiUtils.hideKeyboard(requireContext());
-                                Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_FOR_CUSTOM_STATUS_CLICKED, getContext());
-                                dismiss();
+                    customSetBtn.setOnClickListener(v -> {
+                        String statusText = customEt.getText().toString();
+                        if (statusText.length() > 20) {
+                            Toast.makeText(getContext(), "Please set a shorter badge", Toast.LENGTH_SHORT).show();
+                        } else if (statusText.toLowerCase().contains("admin") || statusText.toLowerCase().contains("moderator")) {
+                            Toast.makeText(getContext(), "You can not choose " + statusText + " without administrative privileges", Toast.LENGTH_SHORT).show();
+                            customEt.setText("");
+                        } else {
+                            RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusText);
+                            if (view_snackbar != null) {
+                                Snackbar.make(view_snackbar, statusText + " is selected as badge!", Snackbar.LENGTH_LONG).show();
                             }
+                            if (flairUpdateListener != null) {
+                                flairUpdateListener.onFlairUpdated();
+                            }
+                            UiUtils.hideKeyboard(requireContext());
+                            Analytics.triggerEvent(AnalyticsEvents.SET_STATUS_FOR_CUSTOM_STATUS_CLICKED, getContext());
+                            dismiss();
                         }
                     });
                 }
@@ -179,9 +177,9 @@ public class StatusBottomSheetFragment extends BottomSheetDialogFragment {
                     Toast.makeText(getContext(), "Please choose a badge first", Toast.LENGTH_SHORT).show();
                 } else {
                     RealtimeDbHelper.getThisUserRef().child("info").child("badge").setValue(statusList.get(selectedPos));
-                    Snackbar snackbar = Snackbar
-                            .make(view_snackbar, statusList.get(selectedPos) + " is selected as badge!", Snackbar.LENGTH_LONG);
-                    snackbar.show();
+                    if (view_snackbar != null) {
+                        Snackbar.make(view_snackbar, statusList.get(selectedPos) + " is selected as badge!", Snackbar.LENGTH_LONG).show();
+                    }
                     if (flairUpdateListener != null) {
                         flairUpdateListener.onFlairUpdated();
                     }

@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:foreground="?attr/selectableItemBackground"
     android:paddingLeft="4dp"
     android:paddingRight="4dp">
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_centerHorizontal="true"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/ic_launcher_background" />
@@ -23,8 +24,9 @@
         android:layout_marginBottom="4dp"
         android:ellipsize="end"
         android:gravity="center"
+        android:textSize="12sp"
         android:maxLines="2"
-        android:text="Canada is a thankful country"
+        android:text="Best Cafe's"
         android:textColor="@color/black" />
 
 </RelativeLayout>

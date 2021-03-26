@@ -105,7 +105,7 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
             descTv.setVisibility(View.VISIBLE);
         }
 
-        exploreGroupAdapter = new ExploreGroupAdapter(new ArrayList<ExploreGroupData>(), mListener, GlideApp.with(requireContext()), isOnboarding);
+        exploreGroupAdapter = new ExploreGroupAdapter(new ArrayList<>(), mListener, GlideApp.with(requireContext()), isOnboarding);
         recyclerView.setAdapter(exploreGroupAdapter);
         recyclerView.setItemAnimator(null);
         recyclerView.showShimmerAdapter();

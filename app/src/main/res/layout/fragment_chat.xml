@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/rl_chat_frag"
     android:background="#fff"
     android:orientation="vertical">
 
@@ -134,16 +135,32 @@
                 <ImageView
                     android:id="@+id/iv_attach"
                     android:layout_width="40dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
                     android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
+                    android:layout_toStartOf="@id/iv_media_attach"
+                    android:padding="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:layout_constraintEnd_toStartOf="@+id/iv_media_attach"
+                    app:tint="@color/md_grey_600"
+                    app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
+                    app:srcCompat="@drawable/ic_attach_file_black_24dp" />
+
+                <ImageView
+                    android:id="@+id/iv_media_attach"
+                    android:layout_width="40dp"
+                    android:layout_height="0dp"
+                    android:layout_marginLeft="4dp"
+                    android:padding="8dp"
+                    android:layout_centerVertical="true"
                     android:layout_marginRight="8dp"
-                    android:layout_toLeftOf="@id/iv_send_btn"
-                    android:padding="10dp"
+                    android:layout_toStartOf="@id/iv_send_btn"
+                    android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/iv_media_attach"
                     app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
-                    app:srcCompat="@drawable/ic_attach_file_black_24dp" />
+                    app:tint="@color/md_grey_600"
+                    app:srcCompat="@drawable/ic_camera_alt_white_24dp" />
 
                 <ImageView
                     android:id="@+id/iv_media_attach"
@@ -224,7 +241,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:paddingLeft="4dp"
-                android:tint="@color/white"
+                app:tint="@color/white"
                 app:srcCompat="@drawable/ic_close_black_24dp" />
 
             <Button
@@ -293,26 +310,25 @@
         android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:layout_above="@id/bottom_container"
-        android:scaleType="centerCrop"
-        android:layout_marginLeft="8dp"
         android:layout_alignTop="@id/typing_tv"
+        android:layout_marginLeft="8dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
         app:lottie_autoPlay="true"
         app:lottie_loop="true"
         app:lottie_rawRes="@raw/typing_anim_grey"
         app:tint="@color/orange"
-        android:visibility="gone"
-        tools:visibility="visible"/>
+        tools:visibility="visible" />
 
     <TextView
+        android:id="@+id/typing_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/typing_tv"
-        android:visibility="gone"
-        tools:visibility="visible"
-        tools:text="Pika, Bulba typing"
         android:layout_above="@id/bottom_container"
-        android:layout_toEndOf="@+id/anim_typing"
         android:layout_marginTop="2dp"
-        />
+        android:layout_toEndOf="@+id/anim_typing"
+        android:visibility="gone"
+        tools:text="Pika, Bulba typing"
+        tools:visibility="visible" />
 
 </RelativeLayout>

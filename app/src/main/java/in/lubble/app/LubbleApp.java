@@ -11,6 +11,7 @@ import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.multidex.MultiDexApplication;
 
 import com.clevertap.android.sdk.ActivityLifecycleCallback;
+import com.clevertap.android.sdk.CleverTapAPI;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
@@ -49,7 +50,13 @@ public class LubbleApp extends MultiDexApplication {
         DbSingleton.initializeInstance(getApplicationContext());
 
         appContext = this;
-
+        //Before you initialize in your Application `#onCreate`
+//        Branch branch = Branch.getInstance();
+//        CleverTapAPI clevertapInstance = CleverTapAPI.getDefaultInstance(this);
+//        if (clevertapInstance != null) {
+//            branch.setRequestMetadata("$clevertap_attribution_id",
+//                    clevertapInstance.getCleverTapAttributionIdentifier());
+//        }
         // Initialize the Branch object
         Branch.getAutoInstance(this);
         // Branch logging for debugging

@@ -232,8 +232,15 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void addGroupToTop(GroupData groupData) {
         if (getChildIndex(groupData.getId()) == -1) {
             int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
-            groupDataList.add(newIndex, groupData);
-            notifyItemInserted(newIndex);
+            if (newIndex > groupDataList.size()) {
+                // happens while groupDataList is cleared (user searched something) & a new group invite is added
+                // then add new group to groupDataListCopy so that when user closes search, the new groups are added properly
+                groupDataListCopy.add(newIndex, groupData);
+                publicCursorPos++;
+            } else {
+                groupDataList.add(newIndex, groupData);
+                notifyItemInserted(newIndex);
+            }
             cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
             publicCursorPos++;
             Log.d("trace", "addGroupToTop: ");

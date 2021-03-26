@@ -3,6 +3,7 @@ package in.lubble.app.chat;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,15 +36,18 @@ public class NotificationResultReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive: creating notif");
         if (intent != null && intent.hasExtra("remoteMessage")) {
-            final RemoteMessage remoteMessage = intent.getParcelableExtra("remoteMessage");
-            final Map<String, String> dataMap = remoteMessage.getData();
-            String type = dataMap.get("type");
-            if ("chat".equalsIgnoreCase(type)) {
-                createChatNotif(context, dataMap);
-            } else if ("dm".equalsIgnoreCase(type)) {
-                createDmNotif(context, dataMap);
-            } else {
-                FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("NotifResultRecvr: notif recvd with illegal type"));
+            if (FirebaseAuth.getInstance().getCurrentUser() != null && !TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
+                //user is logged in
+                final RemoteMessage remoteMessage = intent.getParcelableExtra("remoteMessage");
+                final Map<String, String> dataMap = remoteMessage.getData();
+                String type = dataMap.get("type");
+                if ("chat".equalsIgnoreCase(type)) {
+                    createChatNotif(context, dataMap);
+                } else if ("dm".equalsIgnoreCase(type)) {
+                    createDmNotif(context, dataMap);
+                } else {
+                    FirebaseCrashlytics.getInstance().recordException(new IllegalArgumentException("NotifResultRecvr: notif recvd with illegal type"));
+                }
             }
         } else {
             FirebaseCrashlytics.getInstance().recordException(new MissingFormatArgumentException("NotifResultRecvr: notif broadcast recvd with no intent data"));
