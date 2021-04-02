@@ -5,6 +5,8 @@
     android:versionCode="278"
     android:versionName="1.34-1">
 
+    <uses-sdk tools:overrideLibrary="com.fxn.pix" />
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- Recommended so that CleverTap knows when to attempt a network call -->
@@ -24,6 +26,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
+        <activity android:name=".feed.AddPostForFeed"></activity>
 
         <receiver
             android:name=".receivers.ShareSheetReceiver"
@@ -33,8 +36,7 @@
         <activity
             android:name=".map.LubbleMapActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".chat.BlockedChatsActiv"
             android:configChanges="orientation"

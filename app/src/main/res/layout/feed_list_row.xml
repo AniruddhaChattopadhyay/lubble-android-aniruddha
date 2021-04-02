@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical"
+    android:paddingBottom="10dp"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="10dp">
+
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="50dp"
+        android:id="@+id/feed_author_photo"
+        app:srcCompat="@drawable/com_facebook_profile_picture_blank_square"
+        />
+    <TextView
+        android:id="@+id/feed_author_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/feed_author_photo"
+        android:layout_marginStart="4dp"
+        android:textSize="16dp"
+        android:text="Ramesh Singh"
+        android:textStyle="bold" />
+    <TextView
+        android:id="@+id/feed_post_timestamp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_below="@+id/feed_author_name"
+        android:textSize="16dp"
+        android:text="1hr ago"
+        android:textStyle="italic" />
+
+
+    <TextView
+        android:id="@+id/feed_text_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+
+        android:layout_below="@+id/feed_post_timestamp"
+        android:textSize="16dp"
+        android:text="What a beuatiful picture clicked by me!!"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:layout_width="500dp"
+        android:layout_height="500dp"
+        android:id="@+id/feed_photo_content"
+        android:visibility="gone"
+        tools:src="@tools:sample/backgrounds/scenic"
+        android:layout_below="@+id/feed_text_content"
+        />
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_big_and_small_hearts"
+        android:layout_below="@+id/feed_photo_content"
+        android:layout_centerInParent="true"
+        />
+</RelativeLayout>

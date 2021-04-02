@@ -66,6 +66,7 @@ import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.explore.ExploreFrag;
+import in.lubble.app.feed.FeedFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.leaderboard.LeaderboardActivity;
@@ -924,7 +925,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     switchFrag(groupListFragment = GroupListFragment.newInstance(false));
                     return true;
                 case R.id.navigation_explore:
-                    switchFrag(ExploreFrag.newInstance());
+                    switchFrag(FeedFrag.newInstance());
+//                    switchFrag(ExploreFrag.newInstance());
                     return true;
                 /*case R.id.navigation_map:
                     switchFrag(MapFragment.newInstance());

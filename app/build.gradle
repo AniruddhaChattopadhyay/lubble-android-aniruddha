@@ -158,7 +158,17 @@ dependencies {
     implementation 'com.github.AniruddhaChattopadhyay:TextFormatter:1.0.1'
 
     //media picker like telegram
-    implementation  'com.fxn769:pix:1.5.4'
+    implementation  'com.fxn769:pix:1.5.6'
+
+    //getstream for lubble feed
+    implementation 'io.getstream.client:stream-java:3.2.4'
+
+    implementation 'com.google.guava:guava:27.0.1-android'
+
+
+    //to solve the Duplicate class com.google.common.util.concurrent.ListenableFuture found in modules jetified-guava-20.0
+//    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
+
 }
 
 
