@@ -21,11 +21,19 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enter the group name of the post"
+            android:layout_below="@+id/post_edt_txt"
+            android:id="@+id/group_name_add_post"
+            />
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/post_btn"
-            android:layout_below="@+id/post_edt_txt"
+            android:layout_below="@+id/group_name_add_post"
             android:layout_centerInParent="true"
             android:text="post"/>
 
