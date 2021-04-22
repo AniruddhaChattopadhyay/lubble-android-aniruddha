@@ -8,9 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import in.lubble.app.feed.services.FeedServices;
-import io.getstream.core.options.Limit;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -19,17 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.net.MalformedURLException;
 import java.util.List;
 
-import javax.xml.transform.Result;
-
 import in.lubble.app.R;
+import in.lubble.app.feed.services.FeedServices;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.Activity;
-import io.getstream.cloud.CloudClient;
+import io.getstream.core.options.Limit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -78,14 +73,14 @@ public class FeedFrag extends Fragment {
                     //Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
                     assert response.body() != null;
                     final Endpoints.StreamCredentials credentials = response.body();
-                    try {
-                        FeedServices.init(credentials.getApi_key(), credentials.getUser_token());
+                    /*try {
+                        //FeedServices.init(credentials.getApi_key(), credentials.getUser_token());
 
                         initRecyclerView();
 
                     } catch (MalformedURLException | StreamException e) {
                         e.printStackTrace();
-                    }
+                    }*/
 
                 } else {
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();

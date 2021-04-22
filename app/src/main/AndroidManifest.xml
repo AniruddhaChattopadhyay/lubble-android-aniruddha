@@ -26,7 +26,8 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <activity android:name=".feed.AddPostForFeed"></activity>
+        <activity android:name=".feed.GroupSelectionActiv"></activity>
+        <activity android:name=".feed.AddPostForFeed" />
 
         <receiver
             android:name=".receivers.ShareSheetReceiver"

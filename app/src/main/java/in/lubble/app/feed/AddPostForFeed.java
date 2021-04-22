@@ -1,5 +1,6 @@
 package in.lubble.app.feed;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
 
@@ -8,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.button.MaterialButton;
 
 import in.lubble.app.R;
-import in.lubble.app.feed.services.FeedServices;
 
 public class AddPostForFeed extends AppCompatActivity {
 
@@ -24,7 +24,7 @@ public class AddPostForFeed extends AppCompatActivity {
 
         postSubmitBtn.setOnClickListener(v->{
             String text = postText.getText().toString();
-            boolean result = true;
+            /*boolean result = true;
             if(text!=null) {
 //                if (FeedServices.client != null) {
 //                    CloudFlatFeed feed = FeedServices.client.flatFeed("user");
@@ -47,7 +47,16 @@ public class AddPostForFeed extends AppCompatActivity {
                 }
                 if(result)
                     setResult(RESULT_OK);
-                finish();
+                finish();*/
+            openGroupSelectionActivity();
         });
+
+    }
+
+    private void openGroupSelectionActivity() {
+        Intent groupSelectionActivIntent = GroupSelectionActiv.getIntent(this);
+        groupSelectionActivIntent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        startActivity(groupSelectionActivIntent);
+        finish();
     }
 }
