@@ -57,6 +57,6 @@ public class AddPostForFeed extends AppCompatActivity {
         Intent groupSelectionActivIntent = GroupSelectionActiv.getIntent(this);
         groupSelectionActivIntent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
         startActivity(groupSelectionActivIntent);
-        finish();
+        //finish();
     }
 }

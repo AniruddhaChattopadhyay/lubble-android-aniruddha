@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.R;
@@ -17,10 +18,13 @@ import in.lubble.app.R;
 public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAdapter.GroupSelectionViewHolder> {
 
     private int lastCheckedPos = 0;
-    private List<String> stringList;
+    private final List<String> stringList;
+    private final List<String> stringListCopy;
 
     public GroupSelectionAdapter(List<String> stringList) {
         this.stringList = stringList;
+        stringListCopy = new ArrayList<>();
+        stringListCopy.addAll(stringList);
     }
 
     @NonNull
@@ -45,7 +49,21 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
             notifyItemChanged(copyOfLastCheckedPosition);
             notifyItemChanged(lastCheckedPos);
         });
+    }
 
+    public void filter(String text) {
+        stringList.clear();
+        if (text.isEmpty()) {
+            stringList.addAll(stringListCopy);
+        } else {
+            text = text.toLowerCase();
+            for (String item : stringListCopy) {
+                if (item.toLowerCase().contains(text) || item.toLowerCase().contains(text)) {
+                    stringList.add(item);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     @Override
