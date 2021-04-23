@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="horizontal">
+
+    <TextView
+        android:id="@+id/tv_group_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:clickable="false"
+        android:drawablePadding="8dp"
+        android:focusable="false"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:textColor="@color/black"
+        app:drawableLeftCompat="@drawable/ic_group"
+        tools:text="Pikachu Group" />
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/rb_group_selection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:focusable="false"
+        android:foreground="?attr/selectableItemBackground"
+        android:padding="0dp"
+        android:text="" />
+
+</LinearLayout>

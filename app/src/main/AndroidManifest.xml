@@ -26,7 +26,15 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <activity android:name=".feed_user.AddPostForFeed"></activity>
+
+        <activity
+            android:name=".feed_user.AddPostForFeed"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".feed_user.GroupSelectionActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
 
         <receiver
             android:name=".receivers.ShareSheetReceiver"

@@ -17,7 +17,10 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.R;
+import in.lubble.app.utils.RoundedCornersTransformation;
 import io.getstream.core.models.Activity;
+
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> {
 
@@ -64,11 +67,10 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         }
         if(extras.containsKey("photoLink")){
             holder.photoContentIv.setVisibility(View.VISIBLE);
-                Glide.with(context)
-                .asBitmap()
-                .load(extras.get("photoLink").toString())
-                .circleCrop()
-                .into(holder.photoContentIv);
+            Glide.with(context)
+                    .load(extras.get("photoLink").toString())
+                    .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                    .into(holder.photoContentIv);
         }
 
         if(extras.containsKey("authorName")){

@@ -1,70 +1,195 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="?android:attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical"
-    android:paddingBottom="10dp"
     android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingTop="10dp"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="10dp">
+    android:paddingBottom="10dp">
 
     <ImageView
-        android:layout_width="30dp"
-        android:layout_height="50dp"
         android:id="@+id/feed_author_photo"
-        app:srcCompat="@drawable/com_facebook_profile_picture_blank_square"
-        />
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginRight="8dp"
+        app:srcCompat="@drawable/com_facebook_profile_picture_blank_square" />
+
     <TextView
         android:id="@+id/feed_author_name"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
         android:layout_toRightOf="@+id/feed_author_photo"
-        android:layout_marginStart="4dp"
-        android:textSize="16dp"
-        android:text="Ramesh Singh"
-        android:textStyle="bold" />
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        tools:text="Ramesh Singh" />
+
+    <TextView
+        android:id="@+id/tv_group_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_toRightOf="@+id/feed_author_name"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        app:drawableLeftCompat="@drawable/ic_baseline_arrow_right_alt_24"
+        tools:text="QnAs" />
+
     <TextView
         android:id="@+id/feed_post_timestamp"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
         android:layout_below="@+id/feed_author_name"
-        android:textSize="16dp"
-        android:text="1hr ago"
-        android:textStyle="italic" />
+        android:layout_toRightOf="@+id/feed_author_photo"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textSize="12sp"
+        tools:text="1hr ago" />
 
+    <ImageView
+        android:id="@+id/iv_more_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="-8dp"
+        app:srcCompat="@drawable/ic_baseline_more_vert_24" />
 
     <TextView
         android:id="@+id/feed_text_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/feed_author_photo"
+        android:layout_marginTop="8dp"
+        android:ellipsize="end"
+        android:maxLines="9"
+        android:textColor="@color/black"
+        android:textSize="16sp"
         android:visibility="gone"
-
-        android:layout_below="@+id/feed_post_timestamp"
-        android:textSize="16dp"
-        android:text="What a beuatiful picture clicked by me!!"
-        android:textStyle="bold" />
+        tools:text="@tools:sample/lorem/random"
+        tools:visibility="visible" />
 
     <ImageView
-        android:layout_width="500dp"
-        android:layout_height="500dp"
         android:id="@+id/feed_photo_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/feed_text_content"
+        android:layout_marginTop="8dp"
+        android:adjustViewBounds="true"
+        android:maxHeight="400dp"
+        android:scaleType="center"
         android:visibility="gone"
         tools:src="@tools:sample/backgrounds/scenic"
-        android:layout_below="@+id/feed_text_content"
-        />
+        tools:visibility="visible" />
 
-
-    <ImageView
+    <TextView
+        android:id="@+id/tv_like_stats"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@drawable/ic_big_and_small_hearts"
-        android:layout_below="@+id/feed_photo_content"
-        android:layout_centerInParent="true"
-        />
+        tools:text="23 Likes"
+        app:drawableLeftCompat="@drawable/ic_favorite_16dp"
+        android:layout_below="@id/feed_photo_content"
+        android:drawablePadding="4dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/black"/>
+
+    <ImageView
+        android:id="@+id/separator_social"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/tv_like_stats"
+        app:srcCompat="@color/md_grey_300"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/separator_social"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/cont_like"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_favorite_border_24dp"
+                app:tint="@color/md_grey_600" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:gravity="center"
+                android:text="Like"
+                android:textColor="@color/black" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cont_reply"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_reply_black_24dp"
+                app:tint="@color/md_grey_600" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:gravity="center"
+                android:text="Reply"
+                android:textColor="@color/black" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cont_share"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_share_black_24dp"
+                app:tint="@color/md_grey_600" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:gravity="center"
+                android:text="Share"
+                android:textColor="@color/black" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
 </RelativeLayout>

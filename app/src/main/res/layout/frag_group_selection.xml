@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/group_selection"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingRight="16dp">
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select a Group"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/sv_group_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:queryHint="Search"
+        android:background="@drawable/rounded_rect_very_light_gray"
+        app:iconifiedByDefault="false"
+        app:queryBackground="@null"
+        app:closeIcon="@drawable/ic_close_black_24dp"
+        android:paddingLeft="-12dp"
+        android:focusableInTouchMode="true"
+        android:focusable="true"
+        android:paddingStart="-12dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_groups"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        tools:itemCount="12"
+        tools:listitem="@layout/item_group_selection" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_post"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:minWidth="120dp"
+        android:text="Post"
+        android:theme="@style/MaterialButton"
+        app:backgroundTint="@color/colorAccent"
+        app:icon="@drawable/ic_send_white_24dp" />
+
+</LinearLayout>

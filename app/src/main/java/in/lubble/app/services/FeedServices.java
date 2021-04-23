@@ -1,9 +1,5 @@
 package in.lubble.app.services;
 
-import android.view.View;
-import android.widget.Toast;
-
-import com.google.common.collect.Lists;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
@@ -12,15 +8,10 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.events.EventGroupJoinedActivity;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import io.getstream.cloud.CloudClient;
-import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
-import io.getstream.core.models.Activity;
-import io.getstream.core.models.FeedID;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
