@@ -1,4 +1,4 @@
-package in.lubble.app.feed;
+package in.lubble.app.feed_groups.SingleGroupFeed;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -17,12 +17,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.R;
-import in.lubble.app.utils.RoundedCornersTransformation;
 import io.getstream.core.models.Activity;
 
-import static in.lubble.app.utils.UiUtils.dpToPx;
-
-public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> {
+public class SingleGroupFeedAdaptor extends RecyclerView.Adapter<SingleGroupFeedAdaptor.MyViewHolder> {
 
     private List<Activity> activityList;
     private Context context;
@@ -43,7 +40,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
 
-    public FeedAdaptor(Context context,List<Activity> moviesList) {
+    public SingleGroupFeedAdaptor(Context context, List<Activity> moviesList) {
         this.activityList = moviesList;
         this.context = context;
     }
@@ -67,10 +64,11 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         }
         if(extras.containsKey("photoLink")){
             holder.photoContentIv.setVisibility(View.VISIBLE);
-            Glide.with(context)
-                    .load(extras.get("photoLink").toString())
-                    .transform(new RoundedCornersTransformation(dpToPx(8), 0))
-                    .into(holder.photoContentIv);
+                Glide.with(context)
+                .asBitmap()
+                .load(extras.get("photoLink").toString())
+                .circleCrop()
+                .into(holder.photoContentIv);
         }
 
         if(extras.containsKey("authorName")){

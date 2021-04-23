@@ -15,6 +15,7 @@ import in.lubble.app.models.AirtablePlacesData;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.EventIdData;
 import in.lubble.app.models.FeatureData;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.models.marketplace.Category;
@@ -186,7 +187,14 @@ public interface Endpoints {
     Call<Void> superLikeMsg(@Body RequestBody params);
 
     @GET("marketplace/getFeedUserToken/")
-    Call<StreamCredentials> getStreamCredentials();
+    Call<StreamCredentials> getStreamCredentials(@Query("feed_id")String feed_id);
+
+    @GET("marketplace/getFeedGroupList/")
+    Call<List<FeedGroupData>> getFeedGroupList();
+
+    @POST("marketplace/addToUserLocalityAndGroupFeed/")
+    Call<Void> addFeedPost(@Body RequestBody params);
+
 
     public class StreamCredentials{
         private String api_key;

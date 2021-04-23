@@ -1,4 +1,4 @@
-package in.lubble.app.feed;
+package in.lubble.app.feed_user;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,13 +15,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 
+import java.net.MalformedURLException;
 import java.util.List;
 
 import in.lubble.app.R;
-import in.lubble.app.feed.services.FeedServices;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.services.FeedServices;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.Activity;
 import io.getstream.core.options.Limit;
@@ -33,7 +35,6 @@ import static android.app.Activity.RESULT_OK;
 
 public class FeedFrag extends Fragment {
     private static final String TAG = "FeedFrag";
-    private static final String user = "c4ZIgCriHdcU5avx70AgY0000jj1";
     private FloatingActionButton postBtn;
     private RecyclerView feedRV;
     private List<Activity> activities = null;
@@ -50,22 +51,27 @@ public class FeedFrag extends Fragment {
         return fragment;
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_feed, container, false);
         postBtn = view.findViewById(R.id.btn_new_post);
-        feedRV =  view.findViewById(R.id.feed_recyclerview);
+        feedRV = view.findViewById(R.id.feed_recyclerview);
         postBtn.setOnClickListener(v -> {
-                startActivityForResult(new Intent(getContext(),AddPostForFeed.class), REQUEST_CODE_POST);
+            startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
         });
         getCredentials();
         return view;
     }
 
-    void getCredentials(){
+    void getCredentials() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials();
+        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(FirebaseAuth.getInstance().getUid());
         call.enqueue(new Callback<Endpoints.StreamCredentials>() {
             @Override
             public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
@@ -73,14 +79,14 @@ public class FeedFrag extends Fragment {
                     //Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
                     assert response.body() != null;
                     final Endpoints.StreamCredentials credentials = response.body();
-                    /*try {
-                        //FeedServices.init(credentials.getApi_key(), credentials.getUser_token());
+                    try {
+                        FeedServices.init(credentials.getApi_key(), credentials.getUser_token());
 
                         initRecyclerView();
 
                     } catch (MalformedURLException | StreamException e) {
                         e.printStackTrace();
-                    }*/
+                    }
 
                 } else {
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
@@ -89,27 +95,29 @@ public class FeedFrag extends Fragment {
 
             @Override
             public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
-                Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                if (isAdded()) {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
 
     private void initRecyclerView() throws StreamException {
-        activities = FeedServices.client.flatFeed("user")
+        activities = FeedServices.client.flatFeed("user", FeedServices.uid)
                 .getActivities(new Limit(25))
                 .join();
-        Log.d("hey","hey");
+        Log.d("hey", "hey");
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         feedRV.setVisibility(View.VISIBLE);
         feedRV.setLayoutManager(layoutManager);
-        FeedAdaptor adapter = new FeedAdaptor(getContext(),activities);
+        FeedAdaptor adapter = new FeedAdaptor(getContext(), activities);
         feedRV.setAdapter(adapter);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == REQUEST_CODE_POST && resultCode == RESULT_OK){
+        if (requestCode == REQUEST_CODE_POST && resultCode == RESULT_OK) {
             try {
                 initRecyclerView();
             } catch (StreamException e) {

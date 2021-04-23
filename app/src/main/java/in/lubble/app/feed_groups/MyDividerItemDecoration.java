@@ -1,4 +1,4 @@
-package in.lubble.app.feed;
+package in.lubble.app.feed_groups;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -6,12 +6,12 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-
 import android.util.TypedValue;
 import android.view.View;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 
 public class MyDividerItemDecoration extends RecyclerView.ItemDecoration {
 

@@ -1,4 +1,4 @@
-package in.lubble.app.feed;
+package in.lubble.app.feed_user;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,14 +14,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.R;
+import in.lubble.app.models.FeedGroupData;
 
 public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAdapter.GroupSelectionViewHolder> {
 
     private int lastCheckedPos = 0;
-    private final List<String> stringList;
-    private final List<String> stringListCopy;
+    private final List<FeedGroupData> stringList;
+    private final List<FeedGroupData> stringListCopy;
 
-    public GroupSelectionAdapter(List<String> stringList) {
+    public GroupSelectionAdapter(List<FeedGroupData> stringList) {
         this.stringList = stringList;
         stringListCopy = new ArrayList<>();
         stringListCopy.addAll(stringList);
@@ -37,9 +38,9 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
 
     @Override
     public void onBindViewHolder(@NonNull GroupSelectionViewHolder holder, int position) {
-        String s = stringList.get(position);
+        FeedGroupData feedGroupData = stringList.get(position);
 
-        holder.titleTv.setText(s);
+        holder.titleTv.setText(feedGroupData.getName());
 
         holder.selectionRb.setChecked(position == lastCheckedPos);
         holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
@@ -51,15 +52,19 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         });
     }
 
+    int getLastCheckedPos() {
+        return lastCheckedPos;
+    }
+
     public void filter(String text) {
         stringList.clear();
         if (text.isEmpty()) {
             stringList.addAll(stringListCopy);
         } else {
             text = text.toLowerCase();
-            for (String item : stringListCopy) {
-                if (item.toLowerCase().contains(text) || item.toLowerCase().contains(text)) {
-                    stringList.add(item);
+            for (FeedGroupData groupData : stringListCopy) {
+                if (groupData.getName().toLowerCase().contains(text) || groupData.getName().toLowerCase().contains(text)) {
+                    stringList.add(groupData);
                 }
             }
         }
