@@ -65,8 +65,8 @@ import in.lubble.app.chat.BlockedChatsActiv;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
-import in.lubble.app.explore.ExploreFrag;
-import in.lubble.app.feed.FeedFrag;
+import in.lubble.app.feed_user.FeedFrag;
+import in.lubble.app.feed_groups.FeedGroupsFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.leaderboard.LeaderboardActivity;
@@ -79,7 +79,6 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
-import in.lubble.app.services.ServicesFrag;
 import in.lubble.app.utils.MainUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
@@ -346,8 +345,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
-        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
-        switchFrag(groupListFragment);
+//        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
+//        switchFrag(groupListFragment);
+
+        switchFrag(FeedGroupsFrag.newInstance());
 
         bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -922,7 +923,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
-                    switchFrag(groupListFragment = GroupListFragment.newInstance(false));
+                    //switchFrag(groupListFragment = GroupListFragment.newInstance(false));
+                    switchFrag(FeedGroupsFrag.newInstance());
                     return true;
                 case R.id.navigation_explore:
                     switchFrag(FeedFrag.newInstance());

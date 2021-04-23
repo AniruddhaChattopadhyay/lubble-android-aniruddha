@@ -1,4 +1,4 @@
-package in.lubble.app.feed;
+package in.lubble.app.feed_user;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import in.lubble.app.feed.services.FeedServices;
+import in.lubble.app.services.FeedServices;
 import io.getstream.core.options.Limit;
 
 import androidx.annotation.NonNull;
@@ -18,18 +18,16 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.net.MalformedURLException;
 import java.util.List;
-
-import javax.xml.transform.Result;
 
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.Activity;
-import io.getstream.cloud.CloudClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -38,7 +36,6 @@ import static android.app.Activity.RESULT_OK;
 
 public class FeedFrag extends Fragment {
     private static final String TAG = "FeedFrag";
-    private static final String user = "c4ZIgCriHdcU5avx70AgY0000jj1";
     private FloatingActionButton postBtn;
     private RecyclerView feedRV;
     private List<Activity> activities = null;
@@ -53,6 +50,11 @@ public class FeedFrag extends Fragment {
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
     }
 
     @Nullable
@@ -70,7 +72,7 @@ public class FeedFrag extends Fragment {
 
     void getCredentials(){
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials();
+        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(FirebaseAuth.getInstance().getUid());
         call.enqueue(new Callback<Endpoints.StreamCredentials>() {
             @Override
             public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
@@ -100,7 +102,7 @@ public class FeedFrag extends Fragment {
     }
 
     private void initRecyclerView() throws StreamException {
-        activities = FeedServices.client.flatFeed("user")
+        activities = FeedServices.client.flatFeed("user",FeedServices.uid)
                 .getActivities(new Limit(25))
                 .join();
         Log.d("hey","hey");
