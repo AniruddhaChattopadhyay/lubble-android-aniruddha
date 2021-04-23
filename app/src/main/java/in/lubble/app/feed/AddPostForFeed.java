@@ -3,17 +3,21 @@ package in.lubble.app.feed;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 
 public class AddPostForFeed extends AppCompatActivity {
 
     private MaterialButton postSubmitBtn;
     private EditText postText;
+    private ImageView dpIv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +25,7 @@ public class AddPostForFeed extends AppCompatActivity {
         setContentView(R.layout.activity_add_post_for_feed);
         postSubmitBtn = findViewById(R.id.post_btn);
         postText = findViewById(R.id.post_edt_txt);
+        dpIv = findViewById(R.id.iv_profile_pic);
 
         postSubmitBtn.setOnClickListener(v->{
             String text = postText.getText().toString();
@@ -50,6 +55,13 @@ public class AddPostForFeed extends AppCompatActivity {
                 finish();*/
             openGroupSelectionActivity();
         });
+
+        GlideApp.with(this)
+                .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
+                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                .error(R.drawable.ic_account_circle_black_no_padding)
+                .circleCrop()
+                .into(dpIv);
 
     }
 
