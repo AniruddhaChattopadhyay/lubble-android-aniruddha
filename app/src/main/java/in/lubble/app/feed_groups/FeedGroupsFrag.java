@@ -32,7 +32,6 @@ import retrofit2.Response;
 
 public class FeedGroupsFrag extends Fragment {
 
-    public ArrayList<String> groupNamesList;
     private RecyclerView groupRecycleView;
     public List<FeedGroupData> feedGroupData;
 
@@ -57,16 +56,8 @@ public class FeedGroupsFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_feed_groups, container, false);
-        groupNamesList = new ArrayList<>();
-        groupNamesList.add("Badminton");
-        groupNamesList.add("Cricket");
-        groupNamesList.add("Balls");
-        groupRecycleView = rootView.findViewById(R.id.feed_group_recyclerview);
-        //initRecyclerView();
-//        for(String groupName:groupNames){e
-//            CloudFlatFeed feed = FeedServices.client.flatFeed("groups",groupName+ LubbleSharedPrefs.getInstance().getLubbleName());
 //
-//        }
+        groupRecycleView = rootView.findViewById(R.id.feed_group_recyclerview);
         getFeedGroups();
 
         return rootView;
@@ -79,7 +70,7 @@ public class FeedGroupsFrag extends Fragment {
             @Override
             public void onResponse(Call<List<FeedGroupData>> call, Response<List<FeedGroupData>> response) {
                 if (response.isSuccessful() ) {
-                    feedGroupData= response.body();
+                    feedGroupData = response.body();
                     initRecyclerView();
                 }
             }
@@ -102,7 +93,7 @@ public class FeedGroupsFrag extends Fragment {
         groupRecycleView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), groupRecycleView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                Fragment fragment = SingleGroupFeed.newInstance();
+                Fragment fragment = SingleGroupFeed.newInstance(feedGroupData.get(position).getFeedName());
                 FragmentManager fm = getActivity().getSupportFragmentManager();
                 fm.beginTransaction().replace(R.id.tv_book_author, fragment).commitAllowingStateLoss();
             }

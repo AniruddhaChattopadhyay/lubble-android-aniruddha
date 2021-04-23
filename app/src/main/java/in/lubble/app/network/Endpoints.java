@@ -192,6 +192,10 @@ public interface Endpoints {
     @GET("marketplace/getFeedGroupList/")
     Call<List<FeedGroupData>> getFeedGroupList();
 
+    @POST("marketplace/addToUserLocalityAndGroupFeed/")
+    Call<Void> addFeedPost(@Body RequestBody params);
+
+
     public class StreamCredentials{
         private String api_key;
         private String user_token;

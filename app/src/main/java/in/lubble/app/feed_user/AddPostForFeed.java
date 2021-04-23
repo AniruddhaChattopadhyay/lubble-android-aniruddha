@@ -1,4 +1,4 @@
-package in.lubble.app.feed;
+package in.lubble.app.feed_user;
 
 import androidx.appcompat.app.AppCompatActivity;
 

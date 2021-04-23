@@ -15,15 +15,14 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.net.MalformedURLException;
 import java.util.List;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
-import in.lubble.app.feed.AddPostForFeed;
-import in.lubble.app.feed.FeedAdaptor;
+import in.lubble.app.feed_user.AddPostForFeed;
+import in.lubble.app.feed_user.FeedAdaptor;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
@@ -42,13 +41,16 @@ public class SingleGroupFeed extends Fragment {
     private RecyclerView feedRV;
     private List<Activity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
+    private static final String FEED_NAME_BUNDLE = "FEED_NAME";
+    private String feedName = null;
     public SingleGroupFeed() {
         // Required empty public constructor
     }
 
-    public static SingleGroupFeed newInstance() {
+    public static SingleGroupFeed newInstance(String feedName) {
         SingleGroupFeed fragment = new SingleGroupFeed();
         Bundle args = new Bundle();
+        args.putString(FEED_NAME_BUNDLE,feedName);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,6 +58,9 @@ public class SingleGroupFeed extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            feedName = getArguments().getString(FEED_NAME_BUNDLE);
+        }
     }
 
     @Override
@@ -74,7 +79,7 @@ public class SingleGroupFeed extends Fragment {
 
     void getCredentials(){
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials("Badminton_" + LubbleSharedPrefs.getInstance().getLubbleName());
+        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(feedName);//feedName
         call.enqueue(new Callback<Endpoints.StreamCredentials>() {
             @Override
             public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
@@ -104,7 +109,7 @@ public class SingleGroupFeed extends Fragment {
     }
 
     private void initRecyclerView() throws StreamException {
-        activities = FeedServices.client.flatFeed("group","Badminton_"+ LubbleSharedPrefs.getInstance().getLubbleName())
+        activities = FeedServices.client.flatFeed("group",feedName)
                 .getActivities(new Limit(25))
                 .join();
         Log.d("hey","hey");

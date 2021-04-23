@@ -1,4 +1,4 @@
-package in.lubble.app.feed;
+package in.lubble.app.feed_user;
 
 import android.content.Context;
 import android.content.res.Resources;
