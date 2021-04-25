@@ -348,7 +348,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 //        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
 //        switchFrag(groupListFragment);
 
-        switchFrag(FeedGroupsFrag.newInstance());
+        switchFrag(FeedFrag.newInstance());
 
         bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -924,10 +924,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
                     //switchFrag(groupListFragment = GroupListFragment.newInstance(false));
-                    switchFrag(FeedGroupsFrag.newInstance());
+                    switchFrag(FeedFrag.newInstance());
                     return true;
                 case R.id.navigation_explore:
-                    switchFrag(FeedFrag.newInstance());
+                    switchFrag(FeedGroupsFrag.newInstance());
 //                    switchFrag(ExploreFrag.newInstance());
                     return true;
                 /*case R.id.navigation_map:
