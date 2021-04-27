@@ -103,9 +103,11 @@ public class GroupSelectionFrag extends Fragment {
                     e.printStackTrace();
                 }
             }
-            if (result)
+            if (result) {
                 requireActivity().setResult(RESULT_OK);
-            requireActivity().finish();
+                requireActivity().finish();
+                getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
+            }
         });
 
         return view;

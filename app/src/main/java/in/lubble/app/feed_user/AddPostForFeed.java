@@ -2,7 +2,10 @@ package in.lubble.app.feed_user;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -10,6 +13,7 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
 import in.lubble.app.BaseActivity;
@@ -25,6 +29,7 @@ public class AddPostForFeed extends BaseActivity {
     private Button postSubmitBtn;
     private EditText postText;
     private ImageView dpIv;
+    private View parentLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,15 +42,23 @@ public class AddPostForFeed extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("Post to " + LubbleSharedPrefs.getInstance().getLubbleName());
 
+        parentLayout = findViewById(android.R.id.content);
         postSubmitBtn = findViewById(R.id.post_btn);
         postText = findViewById(R.id.post_edt_txt);
         dpIv = findViewById(R.id.iv_profile_pic);
 
-        postSubmitBtn.setOnClickListener(v -> {
-            FeedPostData feedPostData = new FeedPostData();
-            feedPostData.setText(postText.getText().toString());
+        addTextChangeListener();
 
-            openGroupSelectionActivity(feedPostData);
+        postSubmitBtn.setOnClickListener(v -> {
+            if (postText.getText().toString().trim().length() > 0) {
+                //todo add check for img path
+                FeedPostData feedPostData = new FeedPostData();
+                feedPostData.setText(postText.getText().toString());
+
+                openGroupSelectionActivity(feedPostData);
+            } else {
+                Snackbar.make(parentLayout, "Can't publish an empty post", Snackbar.LENGTH_SHORT).show();
+            }
         });
 
         GlideApp.with(this)
@@ -56,9 +69,29 @@ public class AddPostForFeed extends BaseActivity {
                 .into(dpIv);
     }
 
+    private void addTextChangeListener() {
+        postText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() > 0 && s.toString().trim().length() > 0 && !postSubmitBtn.isEnabled()) {
+                    postSubmitBtn.setEnabled(true);
+                }
+            }
+        });
+    }
+
     private void openGroupSelectionActivity(FeedPostData feedPostData) {
         Intent groupSelectionActivIntent = GroupSelectionActiv.getIntent(this, feedPostData);
-        //groupSelectionActivIntent.setFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
         startActivityForResult(groupSelectionActivIntent, REQ_CODE_GROUPS_SELECT);
     }
 
@@ -81,4 +114,11 @@ public class AddPostForFeed extends BaseActivity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
+    }
+
 }

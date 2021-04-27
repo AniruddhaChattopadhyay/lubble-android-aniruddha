@@ -1,28 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_height="match_parent">
 
     <com.cooltechworks.views.shimmer.ShimmerRecyclerView
         android:id="@+id/feed_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="64dp"
+        android:scrollbars="vertical"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:shimmer_demo_angle="20"
         app:shimmer_demo_child_count="5"
-        tools:listitem="@layout/feed_list_row"
         app:shimmer_demo_layout="@layout/item_shimmer_feed_post"
         app:shimmer_demo_layout_manager_type="linear_vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        android:scrollbars="vertical" />
+        tools:listitem="@layout/feed_list_row" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btn_new_post"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
+        android:text="Add Post"
+        android:textColor="@color/white"
+        app:backgroundTint="@color/colorAccent"
+        app:icon="@drawable/ic_add_black_24dp"
+        app:iconTint="@color/white"
         app:srcCompat="@drawable/ic_add_white_24dp" />
 
 </FrameLayout>

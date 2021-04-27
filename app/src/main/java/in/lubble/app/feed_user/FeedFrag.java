@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.net.MalformedURLException;
@@ -36,7 +36,7 @@ public class FeedFrag extends Fragment {
 
     private static final String TAG = "FeedFrag";
 
-    private FloatingActionButton postBtn;
+    private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
     private List<Activity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
@@ -70,6 +70,7 @@ public class FeedFrag extends Fragment {
 
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
+            getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
         getCredentials();
         return view;

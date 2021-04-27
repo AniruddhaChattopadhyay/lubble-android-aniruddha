@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -35,7 +35,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class SingleGroupFeed extends Fragment {
 
-    private FloatingActionButton postBtn;
+    private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
     private List<Activity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
