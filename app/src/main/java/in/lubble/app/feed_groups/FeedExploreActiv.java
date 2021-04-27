@@ -56,50 +56,44 @@ public class FeedExploreActiv extends BaseActivity implements FeedGroupAdapter.O
 
         FragUtils.replaceFrag(getSupportFragmentManager(), FeedGroupsFrag.newInstance(), R.id.frag_container);
 
-        joinBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                joinBtn.setEnabled(false);
-                Analytics.triggerEvent(EXPLORE_CONTINUE_CLICKED, FeedExploreActiv.this);
-                String groupIdList = "";
-                for (String groupId : selectedGroupIdMap.keySet()) {
-                    groupIdList = groupIdList + ',' + groupId;
-                    GroupPromptSharedPrefs.getInstance().putGroupId(groupId);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("group_id", groupId);
-                    Analytics.triggerEvent(AnalyticsEvents.JOIN_GROUP, bundle, FeedExploreActiv.this);
-                }
-                groupIdList = groupIdList.substring(groupIdList.indexOf(',') + 1);
-                bulkJoinGroupV2Ref().child(groupIdList).setValue(true);
-                final ProgressDialog progressDialog = new ProgressDialog(FeedExploreActiv.this);
-                progressDialog.setTitle("Joining " + selectedGroupIdMap.size() + " groups");
-                progressDialog.setMessage("You're about to join a lovely & helpful community, please be respectful & enjoy :)");
-                progressDialog.setCancelable(false);
-                progressDialog.show();
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!isFinishing()) {
-                            progressDialog.dismiss();
-                            finish();
-                            overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
-                        }
-                    }
-                }, 4000);
+        joinBtn.setOnClickListener(v -> {
+            joinBtn.setEnabled(false);
+            Analytics.triggerEvent(EXPLORE_CONTINUE_CLICKED, FeedExploreActiv.this);
+            String groupIdList = "";
+            for (String groupId : selectedGroupIdMap.keySet()) {
+                groupIdList = groupIdList + ',' + groupId;
+                GroupPromptSharedPrefs.getInstance().putGroupId(groupId);
+                Bundle bundle = new Bundle();
+                bundle.putString("group_id", groupId);
+                Analytics.triggerEvent(AnalyticsEvents.JOIN_GROUP, bundle, FeedExploreActiv.this);
             }
+            groupIdList = groupIdList.substring(groupIdList.indexOf(',') + 1);
+            bulkJoinGroupV2Ref().child(groupIdList).setValue(true);
+            final ProgressDialog progressDialog = new ProgressDialog(FeedExploreActiv.this);
+            progressDialog.setTitle("Joining " + selectedGroupIdMap.size() + " groups");
+            progressDialog.setMessage("You're about to join a lovely & helpful community, please be respectful & enjoy :)");
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isFinishing()) {
+                        progressDialog.dismiss();
+                        finish();
+                        overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
+                    }
+                }
+            }, 4000);
         });
 
         if (!isNewUser) {
             crossIv.setColorFilter(ContextCompat.getColor(this, R.color.black), android.graphics.PorterDuff.Mode.SRC_IN);
         }
 
-        crossIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-                overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
-            }
+        crossIv.setOnClickListener(v -> {
+            finish();
+            overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
         });
 
         LubbleSharedPrefs.getInstance().setIsExploreShown(true);

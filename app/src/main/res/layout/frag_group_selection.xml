@@ -37,12 +37,14 @@
         android:focusable="true"
         android:paddingStart="-12dp" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
         android:id="@+id/rv_groups"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
         android:layout_weight="1"
+        app:shimmer_demo_layout="@layout/layout_demo_shimmer_simple"
+        app:shimmer_demo_grid_child_count="7"
         tools:itemCount="12"
         tools:listitem="@layout/item_group_selection" />
 

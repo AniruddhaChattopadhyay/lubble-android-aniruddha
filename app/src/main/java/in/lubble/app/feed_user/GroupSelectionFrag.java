@@ -4,26 +4,32 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.button.MaterialButton;
 
-import java.util.ArrayList;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.MissingFormatArgumentException;
 
-import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.models.FeedPostData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import io.getstream.core.exceptions.StreamException;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -32,11 +38,13 @@ public class GroupSelectionFrag extends Fragment {
     private static final String ARG_POST_DATA = "LBL_ARG_POST_DATA";
     private static final String TAG = "GroupSelectionFrag";
 
-    private RecyclerView groupsRv;
+    private ShimmerRecyclerView groupsRv;
     private SearchView groupSv;
     private MaterialButton postSubmitBtn;
     private FeedPostData feedPostData;
-    private List<FeedGroupData> dummyGroupList;
+    @Nullable
+    private GroupSelectionAdapter groupSelectionAdapter;
+    private List<FeedGroupData> feedGroupDataList;
 
     public static GroupSelectionFrag newInstance(FeedPostData feedPostData) {
         GroupSelectionFrag groupSelectionFrag = new GroupSelectionFrag();
@@ -57,33 +65,35 @@ public class GroupSelectionFrag extends Fragment {
         postSubmitBtn = view.findViewById(R.id.btn_post);
 
         groupsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
-
-        dummyGroupList = getDummyGroupList();
-        GroupSelectionAdapter groupSelectionAdapter = new GroupSelectionAdapter(dummyGroupList);
-        groupsRv.setAdapter(groupSelectionAdapter);
+        getFeedGroups();
 
         if (getArguments() != null && getArguments().containsKey(ARG_POST_DATA)) {
             feedPostData = (FeedPostData) getArguments().getSerializable(ARG_POST_DATA);
         } else {
             throw new MissingFormatArgumentException("no ARG_POST_DATA passed while opening GroupSelectionFrag");
         }
+
         groupSv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                groupSelectionAdapter.filter(query);
+                if (groupSelectionAdapter != null) {
+                    groupSelectionAdapter.filter(query);
+                }
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                groupSelectionAdapter.filter(newText);
+                if (groupSelectionAdapter != null) {
+                    groupSelectionAdapter.filter(newText);
+                }
                 return true;
             }
         });
 
         postSubmitBtn.setOnClickListener(v -> {
             String text = feedPostData.getText();
-            FeedGroupData selectedGroupData = dummyGroupList.get(groupSelectionAdapter.getLastCheckedPos());
+            FeedGroupData selectedGroupData = feedGroupDataList.get(groupSelectionAdapter.getLastCheckedPos());
             String groupNameText = selectedGroupData.getName();
             boolean result = true;
             if (text != null) {
@@ -101,29 +111,40 @@ public class GroupSelectionFrag extends Fragment {
         return view;
     }
 
-    private List<FeedGroupData> getDummyGroupList() {
-        List<FeedGroupData> stringList = new ArrayList<>();
-        FeedGroupData feedGroupData = new FeedGroupData();
+    private void getFeedGroups() {
+        postSubmitBtn.setEnabled(false);
+        groupsRv.showShimmerAdapter();
 
-        feedGroupData.setId(0);
-        feedGroupData.setName("Pikachu");
-        feedGroupData.setFeedName("Pikachu");
-        feedGroupData.setLubble(LubbleSharedPrefs.getInstance().getLubbleId());
-        stringList.add(feedGroupData);
+        Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        Call<List<FeedGroupData>> call = endpoints.getFeedGroupList();
+        call.enqueue(new Callback<List<FeedGroupData>>() {
+            @Override
+            public void onResponse(@NotNull Call<List<FeedGroupData>> call, @NotNull Response<List<FeedGroupData>> response) {
+                feedGroupDataList = response.body();
+                if (groupsRv.getActualAdapter() != groupsRv.getAdapter()) {
+                    // recycler view is currently holding shimmer adapter so hide it
+                    groupsRv.hideShimmerAdapter();
+                }
+                if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
+                    groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList);
+                    groupsRv.setAdapter(groupSelectionAdapter);
+                    postSubmitBtn.setEnabled(true);
+                } else if (isAdded()) {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
 
-        for (int i = 1; i < 15; i++) {
-            FeedGroupData groupData = new FeedGroupData();
-            groupData.setId(i);
-            groupData.setName(String.valueOf(i));
-            stringList.add(groupData);
-        }
-        return stringList;
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
+            @Override
+            public void onFailure(Call<List<FeedGroupData>> call, Throwable t) {
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                    if (groupsRv.getActualAdapter() != groupsRv.getAdapter()) {
+                        // recycler view is currently holding shimmer adapter so hide it
+                        groupsRv.hideShimmerAdapter();
+                    }
+                }
+            }
+        });
     }
 
 }
