@@ -9,11 +9,13 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -24,6 +26,7 @@ import in.lubble.app.feed_user.FeedAdaptor;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.Activity;
 import io.getstream.core.options.Limit;
@@ -37,6 +40,7 @@ public class SingleGroupFeed extends Fragment {
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
+    private EmojiTextView joinGroupTv;
     private List<Activity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
@@ -67,8 +71,13 @@ public class SingleGroupFeed extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_single_group_feed, container, false);
+        joinGroupTv = rootView.findViewById(R.id.tv_join_group);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
+
+        //todo hide joinGroupTv btn if group is already followed by user
+        joinGroupTv.setVisibility(View.VISIBLE);
+
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
         });
@@ -111,7 +120,8 @@ public class SingleGroupFeed extends Fragment {
     }
 
     private void initRecyclerView() throws StreamException {
-        activities = FeedServices.client.flatFeed("group", feedName)
+        CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
+        activities = groupFeed
                 .getActivities(new Limit(25))
                 .join();
         Log.d("hey", "hey");
@@ -121,6 +131,17 @@ public class SingleGroupFeed extends Fragment {
         }
         FeedAdaptor adapter = new FeedAdaptor(getContext(), activities);
         feedRV.setAdapter(adapter);
+
+        joinGroupTv.setOnClickListener(v -> {
+            CloudFlatFeed timeline = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
+            try {
+                timeline.follow(groupFeed).join();
+                Toast.makeText(requireContext(), "Followed", Toast.LENGTH_SHORT).show();
+            } catch (StreamException e) {
+                FirebaseCrashlytics.getInstance().recordException(e);
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override

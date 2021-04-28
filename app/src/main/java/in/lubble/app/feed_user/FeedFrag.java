@@ -87,7 +87,7 @@ public class FeedFrag extends Fragment {
                     assert response.body() != null;
                     final Endpoints.StreamCredentials credentials = response.body();
                     try {
-                        FeedServices.init(credentials.getApi_key(), credentials.getUser_token());
+                        FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
                         initRecyclerView();
                     } catch (MalformedURLException | StreamException e) {
                         e.printStackTrace();
@@ -107,7 +107,7 @@ public class FeedFrag extends Fragment {
     }
 
     private void initRecyclerView() throws StreamException {
-        activities = FeedServices.client.flatFeed("user", FeedServices.uid)
+        activities = FeedServices.timelineClient.flatFeed("timeline", FeedServices.uid)
                 .getActivities(new Limit(25))
                 .join();
         if (feedRV.getActualAdapter() != feedRV.getAdapter()) {

@@ -1,5 +1,7 @@
 package in.lubble.app.services;
 
+import android.text.TextUtils;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
@@ -8,6 +10,7 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import io.getstream.cloud.CloudClient;
@@ -22,6 +25,7 @@ import static in.lubble.app.Constants.MEDIA_TYPE;
 public class FeedServices {
     private static final String user = FirebaseAuth.getInstance().getUid();// "c4ZIgCriHdcU5avx70AgY0000jj1";
     public static CloudClient client = null;
+    public static CloudClient timelineClient = null;
     public static final String userName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
     public static final String uid = FirebaseAuth.getInstance().getUid();
 
@@ -29,6 +33,36 @@ public class FeedServices {
         client = CloudClient
                 .builder(apiKey, userToken, user)
                 .build();
+    }
+
+    public static CloudClient initTimelineClient(String apiKey, String userToken) throws MalformedURLException {
+        timelineClient = CloudClient
+                .builder(apiKey, userToken, user)
+                .build();
+        LubbleSharedPrefs.getInstance().setFeedApiKey(apiKey);
+        LubbleSharedPrefs.getInstance().setFeedUserToken(userToken);
+        return timelineClient;
+    }
+
+    public static CloudClient getTimelineClient() {
+        if (timelineClient == null) {
+            String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
+            String feedApiKey = LubbleSharedPrefs.getInstance().getFeedApiKey();
+            if (!TextUtils.isEmpty(feedUserToken) && !TextUtils.isEmpty(feedApiKey)) {
+                try {
+                    timelineClient = CloudClient
+                            .builder(feedApiKey, feedUserToken, user)
+                            .build();
+                } catch (MalformedURLException e) {
+                    FirebaseCrashlytics.getInstance().recordException(e);
+                    e.printStackTrace();
+                }
+            } else {
+                throw new IllegalStateException(FeedServices.class.getCanonicalName() +
+                        ":timelineClient is not initialized, call initTimelineClient(..) method first.");
+            }
+        }
+        return timelineClient;
     }
 
     public static boolean post(String postText, String groupName) throws StreamException {
@@ -62,7 +96,6 @@ public class FeedServices {
         return true;
     }
 }
-
 
 
 //        if (client != null) {
