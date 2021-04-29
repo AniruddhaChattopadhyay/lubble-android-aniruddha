@@ -1,11 +1,13 @@
 package in.lubble.app.feed_user;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -67,6 +69,10 @@ public class AddPostForFeed extends BaseActivity {
                 .error(R.drawable.ic_account_circle_black_no_padding)
                 .circleCrop()
                 .into(dpIv);
+
+        postText.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(postText, InputMethodManager.SHOW_IMPLICIT);
     }
 
     private void addTextChangeListener() {
