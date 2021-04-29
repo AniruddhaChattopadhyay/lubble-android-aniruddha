@@ -111,6 +111,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/social_layout"
         android:layout_below="@id/separator_social"
         android:layout_marginTop="8dp"
         android:orientation="horizontal">
@@ -127,6 +128,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:id="@+id/like_imageview"
                 app:srcCompat="@drawable/ic_favorite_border_24dp"
                 app:tint="@color/md_grey_600" />
 
@@ -191,5 +193,35 @@
         </LinearLayout>
 
     </LinearLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/comment_section_layout"
+        android:orientation="vertical"
+        android:layout_below="@+id/social_layout"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/comment_post_btn"
+            style="@style/Widget.MaterialComponents.Button.Icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentRight="true"
+            android:theme="@style/MaterialButton"
+            app:backgroundTint="@color/colorAccent"
+            app:icon="@drawable/ic_send_white_24dp" />
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/comment_post_btn"
+            android:id="@+id/comment_edit_text"
+            android:hint="write your comments here"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/comment_edit_text"
+            android:id="@+id/comment_recycler_view"
+            />
+    </RelativeLayout>
 
 </RelativeLayout>
