@@ -24,7 +24,7 @@ import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import io.getstream.core.exceptions.StreamException;
-import io.getstream.core.models.Activity;
+import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.options.Limit;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,7 +38,7 @@ public class FeedFrag extends Fragment {
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
-    private List<Activity> activities = null;
+    private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
 
     public FeedFrag() {
@@ -109,7 +109,7 @@ public class FeedFrag extends Fragment {
 
     private void initRecyclerView() throws StreamException {
         activities = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
-                .getActivities(new Limit(25))
+                .getEnrichedActivities(new Limit(25))
                 .join();
         if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
             // recycler view is currently holding shimmer adapter so hide it

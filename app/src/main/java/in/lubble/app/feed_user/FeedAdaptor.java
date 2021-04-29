@@ -18,13 +18,13 @@ import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.R;
 import in.lubble.app.utils.RoundedCornersTransformation;
-import io.getstream.core.models.Activity;
+import io.getstream.core.models.EnrichedActivity;
 
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> {
 
-    private List<Activity> activityList;
+    private List<EnrichedActivity> activityList;
     private Context context;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -43,7 +43,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
 
-    public FeedAdaptor(Context context,List<Activity> moviesList) {
+    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList) {
         this.activityList = moviesList;
         this.context = context;
     }
@@ -58,46 +58,54 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        Activity activity = activityList.get(position);
+        EnrichedActivity activity = activityList.get(position);
         String postDateDisplay = getPostDateDisplay(activity.getTime());
-        Map<String,Object> extras = activity.getExtra();
-        if(extras.containsKey("message")){
-            holder.textContentTv.setVisibility(View.VISIBLE);
-            holder.textContentTv.setText(extras.get("message").toString());
+        Map<String, Object> extras = activity.getExtra();
+        if (extras != null) {
+            if (extras.containsKey("message")) {
+                holder.textContentTv.setVisibility(View.VISIBLE);
+                holder.textContentTv.setText(extras.get("message").toString());
+            }
+            if (extras.containsKey("photoLink")) {
+                holder.photoContentIv.setVisibility(View.VISIBLE);
+                Glide.with(context)
+                        .load(extras.get("photoLink").toString())
+                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                        .into(holder.photoContentIv);
+            }
+            if (extras.containsKey("authorName")) {
+                holder.authorNameTv.setText(extras.get("authorName").toString());
+            }
         }
-        if(extras.containsKey("photoLink")){
-            holder.photoContentIv.setVisibility(View.VISIBLE);
-            Glide.with(context)
-                    .load(extras.get("photoLink").toString())
-                    .transform(new RoundedCornersTransformation(dpToPx(8), 0))
-                    .into(holder.photoContentIv);
-        }
-
-        if(extras.containsKey("authorName")){
-            holder.authorNameTv.setText(extras.get("authorName").toString());
+        Map<String, Object> actorMap = activity.getActor().getData();
+        if (actorMap.containsKey("name")) {
+            holder.authorNameTv.setText(String.valueOf(actorMap.get("name")));
+            if (actorMap.containsKey("profile_picture")) {
+                Glide.with(context)
+                        .load(actorMap.get("profile_picture").toString())
+                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                        .into(holder.photoContentIv);
+            }
         }
         holder.timePostedTv.setText(postDateDisplay);
     }
 
-    private String getPostDateDisplay(Date timePosted){
+    private String getPostDateDisplay(Date timePosted) {
         Date timeNow = new Date(System.currentTimeMillis());
-        long duration  = timeNow.getTime() - timePosted.getTime();
+        long duration = timeNow.getTime() - timePosted.getTime();
 
         long diffInSeconds = TimeUnit.MILLISECONDS.toSeconds(duration);
         long diffInMinutes = TimeUnit.MILLISECONDS.toMinutes(duration);
         long diffInHours = TimeUnit.MILLISECONDS.toHours(duration);
         long diffInDays = TimeUnit.MILLISECONDS.toDays(duration);
 
-        if(diffInDays>0){
+        if (diffInDays > 0) {
             return diffInDays + "D";
-        }
-        else if(diffInHours>0){
+        } else if (diffInHours > 0) {
             return diffInHours + "Hr";
-        }
-        else if(diffInMinutes>0){
+        } else if (diffInMinutes > 0) {
             return diffInMinutes + "Min";
-        }
-        else if(diffInSeconds>0){
+        } else if (diffInSeconds > 0) {
             return "Just Now";
         }
         return "some time ago";

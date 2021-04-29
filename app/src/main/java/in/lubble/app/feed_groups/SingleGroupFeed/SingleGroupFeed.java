@@ -30,7 +30,7 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
-import io.getstream.core.models.Activity;
+import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FollowRelation;
 import io.getstream.core.options.Limit;
 import io.getstream.core.options.Offset;
@@ -45,7 +45,7 @@ public class SingleGroupFeed extends Fragment {
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
     private EmojiTextView joinGroupTv;
-    private List<Activity> activities = null;
+    private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
     private String feedName = null;
@@ -124,7 +124,7 @@ public class SingleGroupFeed extends Fragment {
     private void initRecyclerView() throws StreamException {
         CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
         activities = groupFeed
-                .getActivities(new Limit(25))
+                .getEnrichedActivities(new Limit(25))
                 .join();
         Log.d("hey", "hey");
         if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
