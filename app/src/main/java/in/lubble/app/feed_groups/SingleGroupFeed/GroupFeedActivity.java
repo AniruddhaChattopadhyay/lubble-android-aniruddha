@@ -11,14 +11,15 @@ import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
+import in.lubble.app.models.FeedGroupData;
 
 public class GroupFeedActivity extends BaseActivity {
 
-    private static final String EXTRA_FEED_NAME = "LBL_EXTRA_FEED_NAME";
+    private static final String EXTRA_FEED_GROUP_DATA = "LBL_EXTRA_FEED_GROUP_DATA";
 
-    public static void open(Context context, String groupName) {
+    public static void open(Context context, FeedGroupData feedGroupData) {
         Intent intent = new Intent(context, GroupFeedActivity.class);
-        intent.putExtra(EXTRA_FEED_NAME, groupName);
+        intent.putExtra(EXTRA_FEED_GROUP_DATA, feedGroupData);
         context.startActivity(intent);
     }
 
@@ -31,11 +32,11 @@ public class GroupFeedActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        if (getIntent().hasExtra(EXTRA_FEED_NAME)) {
-            String groupName = getIntent().getStringExtra(EXTRA_FEED_NAME);
-            setTitle(groupName);
+        if (getIntent().hasExtra(EXTRA_FEED_GROUP_DATA)) {
+            FeedGroupData feedGroupData = (FeedGroupData) getIntent().getSerializableExtra(EXTRA_FEED_GROUP_DATA);
+            setTitle(feedGroupData.getName());
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, SingleGroupFeed.newInstance(groupName))
+                    .replace(R.id.container, SingleGroupFeed.newInstance(feedGroupData.getFeedName()))
                     .commitNow();
         } else {
             throw new MissingFormatArgumentException("no EXTRA_FEED_NAME passed while opening GroupFeedActivity");

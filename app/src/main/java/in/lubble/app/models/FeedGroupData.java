@@ -2,7 +2,11 @@ package in.lubble.app.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class FeedGroupData {
+import java.io.Serializable;
+
+public class FeedGroupData implements Serializable {
+
+    private static final long serialVersionUID = 474117089511355909L;
 
     @SerializedName("id")
     private Integer id;

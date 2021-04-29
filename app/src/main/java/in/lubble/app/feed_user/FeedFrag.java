@@ -64,6 +64,7 @@ public class FeedFrag extends Fragment {
         postBtn = view.findViewById(R.id.btn_new_post);
         feedRV = view.findViewById(R.id.feed_recyclerview);
 
+        postBtn.setVisibility(View.VISIBLE);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         feedRV.setLayoutManager(layoutManager);
         feedRV.showShimmerAdapter();
@@ -107,7 +108,7 @@ public class FeedFrag extends Fragment {
     }
 
     private void initRecyclerView() throws StreamException {
-        activities = FeedServices.timelineClient.flatFeed("timeline", FeedServices.uid)
+        activities = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
                 .getActivities(new Limit(25))
                 .join();
         if (feedRV.getActualAdapter() != feedRV.getAdapter()) {

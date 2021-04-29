@@ -15,10 +15,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.R;
 import in.lubble.app.feed_user.AddPostForFeed;
@@ -29,7 +31,9 @@ import in.lubble.app.services.FeedServices;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.Activity;
+import io.getstream.core.models.FollowRelation;
 import io.getstream.core.options.Limit;
+import io.getstream.core.options.Offset;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -45,6 +49,7 @@ public class SingleGroupFeed extends Fragment {
     private static final int REQUEST_CODE_POST = 800;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
     private String feedName = null;
+    private View rootView;
 
     public SingleGroupFeed() {
         // Required empty public constructor
@@ -69,18 +74,15 @@ public class SingleGroupFeed extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
-        View rootView = inflater.inflate(R.layout.fragment_single_group_feed, container, false);
+        rootView = inflater.inflate(R.layout.fragment_single_group_feed, container, false);
         joinGroupTv = rootView.findViewById(R.id.tv_join_group);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
 
-        //todo hide joinGroupTv btn if group is already followed by user
-        joinGroupTv.setVisibility(View.VISIBLE);
-
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
         });
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         feedRV.setLayoutManager(layoutManager);
         feedRV.showShimmerAdapter();
@@ -132,16 +134,42 @@ public class SingleGroupFeed extends Fragment {
         FeedAdaptor adapter = new FeedAdaptor(getContext(), activities);
         feedRV.setAdapter(adapter);
 
-        joinGroupTv.setOnClickListener(v -> {
-            CloudFlatFeed timeline = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
-            try {
-                timeline.follow(groupFeed).join();
-                Toast.makeText(requireContext(), "Followed", Toast.LENGTH_SHORT).show();
-            } catch (StreamException e) {
-                FirebaseCrashlytics.getInstance().recordException(e);
-                e.printStackTrace();
+        CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
+        // Check if user follows this group feed
+        try {
+            List<FollowRelation> followed = userTimelineFeed.getFollowed(new Limit(1), new Offset(0), groupFeed.getID()).get();
+            if (!followed.isEmpty()) {
+                // joined
+                joinGroupTv.setVisibility(View.GONE);
+                postBtn.setVisibility(View.VISIBLE);
+            } else {
+                // not joined
+                joinGroupTv.setVisibility(View.VISIBLE);
+                postBtn.setVisibility(View.GONE);
+
+                joinGroupTv.setOnClickListener(v -> {
+                    joinGroup(groupFeed, userTimelineFeed);
+                });
             }
-        });
+        } catch (InterruptedException | ExecutionException e) {
+            if (getActivity() != null) {
+                Toast.makeText(getActivity(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                getActivity().finish();
+            }
+            e.printStackTrace();
+        }
+    }
+
+    private void joinGroup(CloudFlatFeed groupFeed, CloudFlatFeed userTimelineFeed) {
+        try {
+            userTimelineFeed.follow(groupFeed).join();
+            Snackbar.make(rootView, "Joined", Snackbar.LENGTH_SHORT).show();
+            joinGroupTv.setVisibility(View.GONE);
+            postBtn.setVisibility(View.VISIBLE);
+        } catch (StreamException e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
     }
 
     @Override

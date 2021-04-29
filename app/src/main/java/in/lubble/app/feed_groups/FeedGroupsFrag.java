@@ -200,7 +200,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
 
     @Override
     public void openGroup(FeedGroupData feedGroupData) {
-        GroupFeedActivity.open(requireContext(), feedGroupData.getFeedName());
+        GroupFeedActivity.open(requireContext(), feedGroupData);
     }
 
 }

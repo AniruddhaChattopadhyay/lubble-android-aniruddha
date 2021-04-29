@@ -25,7 +25,7 @@ import static in.lubble.app.Constants.MEDIA_TYPE;
 public class FeedServices {
     private static final String user = FirebaseAuth.getInstance().getUid();// "c4ZIgCriHdcU5avx70AgY0000jj1";
     public static CloudClient client = null;
-    public static CloudClient timelineClient = null;
+    private static CloudClient timelineClient = null;
     public static final String userName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
     public static final String uid = FirebaseAuth.getInstance().getUid();
 
@@ -49,20 +49,24 @@ public class FeedServices {
             String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
             String feedApiKey = LubbleSharedPrefs.getInstance().getFeedApiKey();
             if (!TextUtils.isEmpty(feedUserToken) && !TextUtils.isEmpty(feedApiKey)) {
-                try {
-                    timelineClient = CloudClient
-                            .builder(feedApiKey, feedUserToken, user)
-                            .build();
-                } catch (MalformedURLException e) {
-                    FirebaseCrashlytics.getInstance().recordException(e);
-                    e.printStackTrace();
-                }
+                recreateTimelineClient(feedUserToken, feedApiKey);
             } else {
                 throw new IllegalStateException(FeedServices.class.getCanonicalName() +
                         ":timelineClient is not initialized, call initTimelineClient(..) method first.");
             }
         }
         return timelineClient;
+    }
+
+    public static void recreateTimelineClient(String feedUserToken, String feedApiKey) {
+        try {
+            timelineClient = CloudClient
+                    .builder(feedApiKey, feedUserToken, user)
+                    .build();
+        } catch (MalformedURLException e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
     }
 
     public static boolean post(String postText, String groupName) throws StreamException {

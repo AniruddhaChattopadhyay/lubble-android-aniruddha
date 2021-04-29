@@ -27,9 +27,11 @@
         android:layout_margin="16dp"
         android:text="Add Post"
         android:textColor="@color/white"
+        android:visibility="gone"
         app:backgroundTint="@color/colorAccent"
         app:icon="@drawable/ic_add_black_24dp"
         app:iconTint="@color/white"
-        app:srcCompat="@drawable/ic_add_white_24dp" />
+        app:srcCompat="@drawable/ic_add_white_24dp"
+        tools:visibility="visible" />
 
 </FrameLayout>
