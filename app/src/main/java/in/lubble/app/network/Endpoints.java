@@ -195,6 +195,9 @@ public interface Endpoints {
     @POST("marketplace/addToUserLocalityAndGroupFeed/")
     Call<Void> addFeedPost(@Body RequestBody params);
 
+    @POST("marketplace/likePostToFeed/")
+    Call<Void> addLikeToFeed(@Body RequestBody params);
+
 
     public class StreamCredentials{
         private String api_key;
