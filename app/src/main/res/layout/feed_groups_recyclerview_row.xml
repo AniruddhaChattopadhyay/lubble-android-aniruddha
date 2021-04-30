@@ -1,12 +1,135 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginRight="8dp"
+    android:layout_marginBottom="8dp"
+    android:animateLayoutChanges="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:background="@drawable/rect_rounded_border">
+
+    <ImageView
+        android:id="@+id/iv_wheretonight_pic"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        tools:src="@tools:sample/backgrounds/scenic" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:alpha="0.5"
+        android:background="@drawable/gradient_black_trans_dark"
+        android:rotation="180" />
+
+    <RelativeLayout
+        android:id="@+id/container_selected"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:animateLayoutChanges="true"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.4"
+            android:background="@color/mb_green" />
+
+        <ImageView
+            android:id="@+id/iv_selected"
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:layout_margin="20dp"
+            app:srcCompat="@drawable/ic_check_circle_outline_white" />
+
+    </RelativeLayout>
+
+    <androidx.emoji.widget.EmojiTextView
+        android:id="@+id/tv_group_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/iv_wheretonight_pic"
+        android:layout_margin="8dp"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        tools:text="@tools:sample/lorem/random" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:id="@+id/feed_group_name_row"
-        />
+        android:id="@+id/tv_join"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_group_title"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/rect_rounded_border_blue"
+        android:padding="8dp"
+        android:text="SELECT"
+        android:textColor="@color/colorAccent" />
+
+    <!--<LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_group_title"
+        android:foregroundGravity="center_vertical"
+        android:gravity="center_vertical"
+        android:minHeight="40dp"
+        android:orientation="vertical"
+        android:weightSum="2">
+
+        <TextView
+            android:id="@+id/tv_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:background="@drawable/rect_rounded_blue"
+            android:drawablePadding="2dp"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center"
+            android:paddingLeft="4dp"
+            android:paddingTop="2dp"
+            android:paddingRight="6dp"
+            android:paddingBottom="2dp"
+            android:textColor="@color/md_blue_grey_900"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:backgroundTint="@color/md_green_50"
+            app:drawableLeftCompat="@drawable/ic_stars_green_14dp"
+            tools:text="Suggested"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_member_count"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="2"
+            android:drawableLeft="@drawable/ic_group_black_14dp"
+            android:drawablePadding="2dp"
+            android:drawableTint="@color/grey_400"
+            android:fontFamily="sans-serif-condensed"
+            android:gravity="center"
+            android:textSize="12sp"
+            tools:text="420" />
+
+    </LinearLayout>-->
+
+    <ProgressBar
+        android:id="@+id/progressbar_join"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_below="@id/tv_group_title"
+        android:layout_alignTop="@id/tv_join"
+        android:layout_alignBottom="@id/tv_join"
+        android:layout_margin="8dp"
+        android:visibility="gone" />
 
 </RelativeLayout>

@@ -4,29 +4,17 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.google.android.material.button.MaterialButton;
-
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.R;
-import in.lubble.app.utils.RoundedCornersTransformation;
-import io.getstream.core.exceptions.StreamException;
-import io.getstream.core.models.Activity;
 import io.getstream.core.models.Reaction;
-
-import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.MyViewHolder>{
 

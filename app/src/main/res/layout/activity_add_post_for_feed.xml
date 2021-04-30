@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/white">
 
-    <include layout="@layout/text_toolbar" />
+    <include layout="@layout/text_toolbar_no_shadow" />
 
     <ImageView
         android:id="@+id/iv_profile_pic"
@@ -64,9 +64,10 @@
         android:layout_alignParentBottom="true"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="8dp"
+        android:enabled="false"
         android:text="post"
         android:theme="@style/MaterialButton"
-        app:backgroundTint="@color/colorAccent"
+        app:backgroundTint="@color/button_color_selector"
         app:icon="@drawable/ic_send_white_24dp" />
 
     <TextView

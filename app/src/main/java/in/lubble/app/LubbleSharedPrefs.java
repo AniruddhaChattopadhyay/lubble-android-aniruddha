@@ -55,6 +55,8 @@ public class LubbleSharedPrefs {
     private final String SHARE_MSG_URL = "SHARE_MSG_URL";
     private final String SHOW_NOTIF_DIGEST = "SHOW_NOTIF_DIGEST";
     private final String LAST_USER_MESSAGE = "LAST_MESSAGE_USER";
+    private final String FEED_API_KEY = "FEED_API_KEY";
+    private final String FEED_USER_TOKEN = "FEED_USER_TOKEN";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -92,7 +94,7 @@ public class LubbleSharedPrefs {
         return preferences.getString(LAST_USER_MESSAGE, "");
     }
 
-    public boolean setLAST_USER_MESSAGE(String message){
+    public boolean setLAST_USER_MESSAGE(String message) {
         return preferences.edit().putString(LAST_USER_MESSAGE, message).commit();
     }
 
@@ -375,6 +377,24 @@ public class LubbleSharedPrefs {
 
     public boolean setShowNotifDigest(boolean shouldShow) {
         return preferences.edit().putBoolean(SHOW_NOTIF_DIGEST, shouldShow).commit();
+    }
+
+    @Nullable
+    public String getFeedApiKey() {
+        return preferences.getString(FEED_API_KEY, null);
+    }
+
+    public boolean setFeedApiKey(String key) {
+        return preferences.edit().putString(FEED_API_KEY, key).commit();
+    }
+
+    @Nullable
+    public String getFeedUserToken() {
+        return preferences.getString(FEED_USER_TOKEN, null);
+    }
+
+    public boolean setFeedUserToken(String userToken) {
+        return preferences.edit().putString(FEED_USER_TOKEN, userToken).commit();
     }
 
 }
