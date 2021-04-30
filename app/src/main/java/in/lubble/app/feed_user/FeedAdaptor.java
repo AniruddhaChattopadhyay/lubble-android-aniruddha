@@ -163,7 +163,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                                 .extraField("userId", FirebaseAuth.getInstance().getUid())
                                 .build();
                         try {
-                            comment = FeedServices.client.reactions().add(comment).get();
+                            comment = FeedServices.getTimelineClient().reactions().add(comment).get();
                             Toast.makeText(context, "Comment posted!", Toast.LENGTH_LONG).show();
                             holder.commentEdtText.setText("");
                             //holder.postCommentBtn.setOnClickListener(null);
@@ -189,7 +189,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) throws StreamException, ExecutionException, InterruptedException {
-        List<Reaction> reactions = FeedServices.client.reactions().filter(LookupKind.ACTIVITY, activity.getID(), "comment").get();
+        List<Reaction> reactions = FeedServices.getTimelineClient().reactions().filter(LookupKind.ACTIVITY, activity.getID(), "comment").get();
         if (reactions.size() > 0) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
             holder.commentRecyclerView.setVisibility(View.VISIBLE);
@@ -202,7 +202,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
     private void handleLikes(EnrichedActivity activity, MyViewHolder holder, int position) throws StreamException, ExecutionException, InterruptedException {
 
-        List<Reaction> reactions = FeedServices.client.reactions().filter(LookupKind.ACTIVITY, activity.getID(), "like").get();
+        List<Reaction> reactions = FeedServices.getTimelineClient().reactions().filter(LookupKind.ACTIVITY, activity.getID(), "like").get();
         holder.likeCount = reactions.size();
         holder.likeStatsTv.setText(Integer.toString(holder.likeCount));
         Reaction currUserReaction = null;
@@ -222,7 +222,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                         .activityID(activity.getID())
                         .build();
                 try {
-                    like = FeedServices.client.reactions().add(like).get();
+                    like = FeedServices.getTimelineClient().reactions().add(like).get();
                     holder.likeStatsTv.setText(Integer.toString(holder.likeCount + 1));
                     holder.likeCount += 1;
                     holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
@@ -236,7 +236,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 }
             } else {
                 try {
-                    FeedServices.client.reactions().delete(currUserReactionList.get(position).getId()).join();
+                    FeedServices.getTimelineClient().reactions().delete(currUserReactionList.get(position).getId()).join();
                     holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
                     holder.likeStatsTv.setText(Integer.toString(holder.likeCount - 1));
                     holder.likeCount -= 1;
