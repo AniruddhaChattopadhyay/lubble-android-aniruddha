@@ -138,6 +138,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             if (actorMap.containsKey("profile_picture")) {
                 Glide.with(context)
                         .load(actorMap.get("profile_picture").toString())
+                        .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                        .error(R.drawable.ic_account_circle_black_no_padding)
                         .circleCrop()
                         .into(holder.authorPhotoIv);
             }
