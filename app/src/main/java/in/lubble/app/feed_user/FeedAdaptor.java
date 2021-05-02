@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
@@ -118,7 +119,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         if (extras != null) {
             if (extras.containsKey("message")) {
                 holder.textContentTv.setVisibility(View.VISIBLE);
-                holder.textContentTv.setText(extras.get("message").toString());
+                holder.textContentTv.setText(String.valueOf(extras.get("message")));
             }
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
@@ -223,7 +224,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             holder.commentRecyclerView.setLayoutManager(layoutManager);
             holder.commentRecyclerView.setNestedScrollingEnabled(false);
             holder.viewAllRepliesTv.setOnClickListener(v -> {
-                //todo open new page for this post
+                FeedPostActivity.open(context, activity.getID());
             });
             FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, reactions);
             holder.commentRecyclerView.setAdapter(adapter);

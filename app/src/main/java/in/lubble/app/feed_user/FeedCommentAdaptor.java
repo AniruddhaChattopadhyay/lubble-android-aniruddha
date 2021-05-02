@@ -21,7 +21,7 @@ public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.
     private Context context;
     private List<Reaction> reactionList;
 
-    FeedCommentAdaptor(Context context, List<Reaction> reactionList) {
+    public FeedCommentAdaptor(Context context, List<Reaction> reactionList) {
         this.reactionList = reactionList;
         this.context = context;
     }
