@@ -17,16 +17,16 @@
 
     <ImageView
         android:id="@+id/feed_author_photo"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginRight="8dp"
-        app:srcCompat="@drawable/com_facebook_profile_picture_blank_square" />
+        app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
     <TextView
         android:id="@+id/feed_author_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="2dp"
         android:layout_toRightOf="@+id/feed_author_photo"
         android:ellipsize="end"
         android:maxLines="1"
@@ -37,7 +37,7 @@
         android:id="@+id/tv_group_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="2dp"
         android:layout_toRightOf="@+id/feed_author_name"
         android:ellipsize="end"
         android:maxLines="1"
