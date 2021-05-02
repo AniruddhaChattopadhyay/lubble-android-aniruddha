@@ -1,6 +1,7 @@
 package in.lubble.app.feed_user;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,11 +13,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.material.button.MaterialButton;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -26,9 +31,11 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.RoundedCornersTransformation;
+import in.lubble.app.utils.UiUtils;
 import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
@@ -46,15 +53,15 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView textContentTv;
         private ImageView photoContentIv;
-        private TextView authorNameTv;
-        private TextView timePostedTv;
+        private ImageView authorPhotoIv;
+        private TextView viewAllRepliesTv, authorNameTv, timePostedTv;
         private LinearLayout likeLayout;
         private TextView likeStatsTv;
         private ImageView likeIv;
         private int likeCount = 0;
         private LinearLayout commentLayout;
         private RelativeLayout commentViewLayout;
-        private MaterialButton postCommentBtn;
+        private ImageView postCommentBtn;
         private EditText commentEdtText;
         private RecyclerView commentRecyclerView;
 
@@ -63,6 +70,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             textContentTv = view.findViewById(R.id.feed_text_content);
             photoContentIv = view.findViewById(R.id.feed_photo_content);
             authorNameTv = view.findViewById(R.id.feed_author_name);
+            authorPhotoIv = view.findViewById(R.id.feed_author_photo);
+            viewAllRepliesTv = view.findViewById(R.id.tv_view_all_replies);
             timePostedTv = view.findViewById(R.id.feed_post_timestamp);
             likeLayout = view.findViewById(R.id.cont_like);
             likeStatsTv = view.findViewById(R.id.tv_like_stats);
@@ -129,8 +138,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             if (actorMap.containsKey("profile_picture")) {
                 Glide.with(context)
                         .load(actorMap.get("profile_picture").toString())
-                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
-                        .into(holder.photoContentIv);
+                        .circleCrop()
+                        .into(holder.authorPhotoIv);
             }
         }
         holder.timePostedTv.setText(postDateDisplay);
@@ -154,6 +163,21 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 } catch (StreamException e) {
                     e.printStackTrace();
                 }
+                GlideApp.with(context)
+                        .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
+                        .apply(new RequestOptions().override(UiUtils.dpToPx(24), UiUtils.dpToPx(24)))
+                        .circleCrop()
+                        .into(new CustomTarget<Drawable>() {
+                            @Override
+                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                                holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
+                            }
+
+                            @Override
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                                holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
+                            }
+                        });
                 holder.postCommentBtn.setOnClickListener(view -> {
                     if (!TextUtils.isEmpty(holder.commentEdtText.getText().toString())) {
                         Reaction comment = new Reaction.Builder()
@@ -164,7 +188,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                                 .build();
                         try {
                             comment = FeedServices.getTimelineClient().reactions().add(comment).get();
-                            Toast.makeText(context, "Comment posted!", Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Reply posted", Toast.LENGTH_LONG).show();
                             holder.commentEdtText.setText("");
                             //holder.postCommentBtn.setOnClickListener(null);
                             //holder.commentViewLayout.setVisibility(View.GONE);
@@ -177,7 +201,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                             e.printStackTrace();
                         }
                     } else {
-                        Toast.makeText(context, "Comment can't be empty. Please write something!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "Reply can't be empty", Toast.LENGTH_LONG).show();
                     }
 
                 });
@@ -193,9 +217,17 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         if (reactions.size() > 0) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
             holder.commentRecyclerView.setVisibility(View.VISIBLE);
+            holder.viewAllRepliesTv.setVisibility(View.VISIBLE);
             holder.commentRecyclerView.setLayoutManager(layoutManager);
+            holder.commentRecyclerView.setNestedScrollingEnabled(false);
+            holder.viewAllRepliesTv.setOnClickListener(v -> {
+                //todo open new page for this post
+            });
             FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, reactions);
             holder.commentRecyclerView.setAdapter(adapter);
+        } else {
+            holder.commentRecyclerView.setVisibility(View.GONE);
+            holder.viewAllRepliesTv.setVisibility(View.GONE);
         }
     }
 
@@ -210,6 +242,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             if (reaction.getUserID().equals(FirebaseAuth.getInstance().getUid())) {
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 currUserReaction = reaction;
+                break;
             }
         }
         currUserReactionList.add(currUserReaction);

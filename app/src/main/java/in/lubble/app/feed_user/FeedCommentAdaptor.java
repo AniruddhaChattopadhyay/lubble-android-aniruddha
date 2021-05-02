@@ -4,7 +4,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,23 +15,25 @@ import java.util.Map;
 import in.lubble.app.R;
 import io.getstream.core.models.Reaction;
 
-public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.MyViewHolder>{
+public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.MyViewHolder> {
 
+    private static final int MAX_LIST_COUNT = 2;
     private Context context;
     private List<Reaction> reactionList;
-    FeedCommentAdaptor(Context context, List<Reaction> reactionList){
+
+    FeedCommentAdaptor(Context context, List<Reaction> reactionList) {
         this.reactionList = reactionList;
         this.context = context;
     }
+
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView commentTV;
         private TextView commentUserNameTv;
-        private ImageView commentUserPicIv;
+
         public MyViewHolder(@NonNull View view) {
             super(view);
             commentTV = view.findViewById(R.id.comment_textView);
             commentUserNameTv = view.findViewById(R.id.comment_user_display_name);
-            commentUserPicIv = view.findViewById(R.id.comment_user_display_pic);
         }
     }
 
@@ -47,14 +48,16 @@ public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.
 
     @Override
     public void onBindViewHolder(@NonNull FeedCommentAdaptor.MyViewHolder holder, int position) {
-        Map<String,Object> map = reactionList.get(position).getActivityData();
-        holder.commentTV.setText(map.get("text").toString());
-        holder.commentUserNameTv.setText(map.get("userId").toString());
+        Reaction reaction = reactionList.get(position);
+        Map<String, Object> activityMap = reaction.getActivityData();
+
+        holder.commentTV.setText(activityMap.get("text").toString());
+        holder.commentUserNameTv.setText(String.valueOf(reaction.getUserData().getData().get("name")));
     }
 
     @Override
     public int getItemCount() {
-        return reactionList.size();
+        return Math.min(reactionList.size(), MAX_LIST_COUNT);
     }
 
 }
