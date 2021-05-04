@@ -8,7 +8,6 @@
     android:background="@color/white"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
     android:orientation="vertical"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingTop="10dp"
@@ -91,40 +90,46 @@
         tools:src="@tools:sample/backgrounds/scenic"
         tools:visibility="visible" />
 
-    <TextView
-        android:id="@+id/tv_like_stats"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:id="@+id/container_reaction_stats"
+        android:layout_width="match_parent"
         android:layout_below="@id/feed_photo_content"
-        android:layout_marginTop="8dp"
-        android:drawablePadding="4dp"
-        android:textColor="@color/black"
-        android:visibility="gone"
-        app:drawableLeftCompat="@drawable/ic_favorite_16dp"
-        tools:text="23 Likes"
-        tools:visibility="visible" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/tv_reply_stats"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/feed_photo_content"
-        android:layout_marginLeft="12dp"
-        android:layout_marginTop="8dp"
-        android:layout_toRightOf="@id/tv_like_stats"
-        android:drawablePadding="4dp"
-        android:textColor="@color/black"
-        android:visibility="gone"
-        app:drawableLeftCompat="@drawable/ic_reply_black_16dp"
-        app:drawableTint="@color/md_grey_600"
-        tools:text="9 replies"
-        tools:visibility="visible" />
+        <TextView
+            android:id="@+id/tv_like_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:drawablePadding="4dp"
+            android:textColor="@color/black"
+            android:visibility="gone"
+            app:drawableLeftCompat="@drawable/ic_favorite_16dp"
+            tools:text="23 Likes"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_reply_stats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="8dp"
+            android:drawablePadding="4dp"
+            android:textColor="@color/black"
+            android:visibility="gone"
+            app:drawableLeftCompat="@drawable/ic_reply_black_16dp"
+            app:drawableTint="@color/md_grey_600"
+            tools:text="9 replies"
+            tools:visibility="visible" />
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/separator_social"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_below="@id/tv_like_stats"
+        android:layout_below="@id/container_reaction_stats"
         android:layout_marginTop="8dp"
         app:srcCompat="@color/md_grey_300" />
 
@@ -242,12 +247,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:paddingTop="8dp"
         android:layout_marginTop="4dp"
         android:layout_toLeftOf="@+id/comment_post_btn"
         android:background="@color/white"
         android:drawablePadding="4dp"
         android:hint="Add a reply..."
+        android:paddingTop="8dp"
         app:drawableLeftCompat="@drawable/ic_account_circle_grey_24dp" />
 
     <ImageView
@@ -255,9 +260,9 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_alignTop="@id/comment_edit_text"
+        android:layout_alignBottom="@id/comment_edit_text"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_alignBottom="@id/comment_edit_text"
         android:background="@color/white"
         android:paddingTop="8dp"
         app:srcCompat="@drawable/ic_send_white_24dp"

@@ -17,10 +17,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -50,7 +48,6 @@ public class FeedPostFrag extends Fragment {
     private LinearLayout likeLayout;
     private TextView likeStatsTv, replyStatsTv;
     private ImageView likeIv;
-    private int likeCount = 0;
     private LinearLayout commentLayout;
     private ImageView postCommentBtn;
     private EditText commentEdtText;
@@ -125,27 +122,16 @@ public class FeedPostFrag extends Fragment {
                 }
                 timePostedTv.setText(DateTimeUtils.getHumanTimestampWithTime(enrichedActivity.getTime().getTime()));
                 initCommentRecyclerView(enrichedActivity);
+                handleLikes(enrichedActivity);
 
                 List<Reaction> userLikes = enrichedActivity.getOwnReactions().get("like");
                 if (userLikes != null && userLikes.size() > 0) {
-                    likeIv.setImageResource(R.drawable.ic_favorite_border_light);
-                } else {
                     likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                } else {
+                    likeIv.setImageResource(R.drawable.ic_favorite_border_light);
                 }
-                if (enrichedActivity.getReactionCounts().containsKey("like")) {
-                    int likeCount = enrichedActivity.getReactionCounts().get("like").intValue();
-                    if (likeCount > 0) {
-                        likeStatsTv.setVisibility(View.VISIBLE);
-                        likeStatsTv.setText(likeCount + " " + getResources().getQuantityString(R.plurals.likes, likeCount));
-                    }
-                }
-                if (enrichedActivity.getReactionCounts().containsKey("comment")) {
-                    int replyCount = enrichedActivity.getReactionCounts().get("comment").intValue();
-                    if (replyCount > 0) {
-                        replyStatsTv.setVisibility(View.VISIBLE);
-                        replyStatsTv.setText(replyCount + " " + getResources().getQuantityString(R.plurals.replies, replyCount));
-                    }
-                }
+
+                handleReactionStats(enrichedActivity);
             } else {
                 Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
                 getActivity().finish();
@@ -153,6 +139,23 @@ public class FeedPostFrag extends Fragment {
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
+        }
+    }
+
+    private void handleReactionStats(EnrichedActivity enrichedActivity) {
+        if (enrichedActivity.getReactionCounts().containsKey("like")) {
+            int likeCount = enrichedActivity.getReactionCounts().get("like").intValue();
+            if (likeCount > 0) {
+                likeStatsTv.setVisibility(View.VISIBLE);
+                likeStatsTv.setText(likeCount + " " + getResources().getQuantityString(R.plurals.likes, likeCount));
+            }
+        }
+        if (enrichedActivity.getReactionCounts().containsKey("comment")) {
+            int replyCount = enrichedActivity.getReactionCounts().get("comment").intValue();
+            if (replyCount > 0) {
+                replyStatsTv.setVisibility(View.VISIBLE);
+                replyStatsTv.setText(replyCount + " " + getResources().getQuantityString(R.plurals.replies, replyCount));
+            }
         }
     }
 
@@ -181,49 +184,32 @@ public class FeedPostFrag extends Fragment {
         }
     }
 
-    private ArrayList<Reaction> currUserReactionList = new ArrayList<>();
-
-    private void handleLikes(EnrichedActivity activity, int position) throws StreamException, ExecutionException, InterruptedException {
-
-        List<Reaction> reactions = FeedServices.getTimelineClient().reactions().filter(LookupKind.ACTIVITY, activity.getID(), "like").get();
-        likeCount = reactions.size();
-        likeStatsTv.setText(Integer.toString(likeCount));
-        Reaction currUserReaction = null;
-        for (Reaction reaction : reactions) {
-            if (reaction.getUserID().equals(FirebaseAuth.getInstance().getUid())) {
-                likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                currUserReaction = reaction;
-                break;
-            }
-        }
-        currUserReactionList.add(currUserReaction);
-
+    private void handleLikes(EnrichedActivity activity) {
         likeLayout.setOnClickListener(v -> {
-            if (currUserReactionList.get(position) == null) {
+            List<Reaction> userLikes = activity.getOwnReactions().get("like");
+            if (userLikes != null && userLikes.size() > 0) {
+                try {
+                    FeedServices.getTimelineClient().reactions().delete(userLikes.get(0).getId()).join();
+                    likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
+                    handleReactionStats(activity);
+                    //likeStatsTv.setText(Integer.toString(likeCount - 1));
+                } catch (StreamException e) {
+                    e.printStackTrace();
+                }
+            } else {
                 Reaction like = new Reaction.Builder()
                         .kind("like")
                         .activityID(activity.getID())
                         .build();
                 try {
                     like = FeedServices.getTimelineClient().reactions().add(like).get();
-                    likeStatsTv.setText(Integer.toString(likeCount + 1));
-                    likeCount += 1;
+                    handleReactionStats(activity);
+                    //likeStatsTv.setText(Integer.toString(likeCount + 1));
                     likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                    currUserReactionList.set(position, like);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
                     e.printStackTrace();
-                } catch (StreamException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                try {
-                    FeedServices.getTimelineClient().reactions().delete(currUserReactionList.get(position).getId()).join();
-                    likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
-                    likeStatsTv.setText(Integer.toString(likeCount - 1));
-                    likeCount -= 1;
-                    currUserReactionList.set(position, null);
                 } catch (StreamException e) {
                     e.printStackTrace();
                 }
