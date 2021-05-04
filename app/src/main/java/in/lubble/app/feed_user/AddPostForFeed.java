@@ -2,8 +2,11 @@ package in.lubble.app.feed_user;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,18 +14,34 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.FileProvider;
 
+import com.fxn.pix.Options;
+import com.fxn.pix.Pix;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.File;
+import java.util.ArrayList;
+
 import in.lubble.app.BaseActivity;
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.UploadFileService;
+import in.lubble.app.UploadImageFeedService;
+import in.lubble.app.chat.AttachImageActivity;
+import in.lubble.app.chat.ChatFragment;
 import in.lubble.app.models.FeedPostData;
+
+import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+
 
 public class AddPostForFeed extends BaseActivity {
 
@@ -32,6 +51,10 @@ public class AddPostForFeed extends BaseActivity {
     private EditText postText;
     private ImageView dpIv;
     private View parentLayout;
+    private TextView addPhotoToFeedTv;
+    private static final int REQUEST_CODE_MEDIA_ATTACH = 100;
+    private Uri imageUri = null;
+    private String uploadPath = "feed_photos/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +71,7 @@ public class AddPostForFeed extends BaseActivity {
         postSubmitBtn = findViewById(R.id.post_btn);
         postText = findViewById(R.id.post_edt_txt);
         dpIv = findViewById(R.id.iv_profile_pic);
+        addPhotoToFeedTv = findViewById(R.id.add_photo_feed_tv);
 
         addTextChangeListener();
 
@@ -56,7 +80,9 @@ public class AddPostForFeed extends BaseActivity {
                 //todo add check for img path
                 FeedPostData feedPostData = new FeedPostData();
                 feedPostData.setText(postText.getText().toString());
-
+                if (imageUri!=null){
+                    feedPostData.setImgUri(imageUri.toString());
+                }
                 openGroupSelectionActivity(feedPostData);
             } else {
                 Snackbar.make(parentLayout, "Can't publish an empty post", Snackbar.LENGTH_SHORT).show();
@@ -71,6 +97,10 @@ public class AddPostForFeed extends BaseActivity {
                 .into(dpIv);
 
         postText.requestFocus();
+
+        addPhotoToFeedTv.setOnClickListener(v -> {
+            Pix.start(this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH));
+        });
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(postText, InputMethodManager.SHOW_IMPLICIT);
     }
@@ -107,6 +137,15 @@ public class AddPostForFeed extends BaseActivity {
         if (requestCode == REQ_CODE_GROUPS_SELECT && resultCode == RESULT_OK) {
             setResult(RESULT_OK);
             finish();
+        } else if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_MEDIA_ATTACH) {
+            ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
+            if (returnValue != null && !returnValue.isEmpty()) {
+                Uri uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
+                File imageFile = getFileFromInputStreamUri(this, uri);
+                uri = Uri.fromFile(imageFile);
+                addPhotoToFeedTv.setText("Photo added");
+                imageUri = uri;
+            }
         }
     }
 
