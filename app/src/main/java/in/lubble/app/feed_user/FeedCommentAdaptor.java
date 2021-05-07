@@ -9,10 +9,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.List;
 import java.util.Map;
 
 import in.lubble.app.R;
+import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.models.ProfileInfo;
+import io.getstream.core.models.Data;
 import io.getstream.core.models.Reaction;
 
 public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.MyViewHolder> {
@@ -52,7 +59,27 @@ public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.
         Map<String, Object> activityMap = reaction.getActivityData();
 
         holder.commentTV.setText(activityMap.get("text").toString());
-        holder.commentUserNameTv.setText(String.valueOf(reaction.getUserData().getData().get("name")));
+        Data userData = reaction.getUserData();
+        if (userData != null) {
+            holder.commentUserNameTv.setText(String.valueOf(userData.getData().get("name")));
+        } else {
+            String userId = reaction.getUserID();
+            if (userId == null && reaction.getExtra() != null) {
+                userId = String.valueOf(reaction.getExtra().get("userId"));
+            }
+            RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    final ProfileInfo profileInfo = snapshot.getValue(ProfileInfo.class);
+                    holder.commentUserNameTv.setText(profileInfo.getName());
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
     }
 
     @Override

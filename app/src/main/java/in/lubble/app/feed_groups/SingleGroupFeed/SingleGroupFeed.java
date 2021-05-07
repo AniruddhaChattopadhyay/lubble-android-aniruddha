@@ -2,20 +2,27 @@ package in.lubble.app.feed_groups.SingleGroupFeed;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.net.MalformedURLException;
@@ -28,10 +35,12 @@ import in.lubble.app.feed_user.FeedAdaptor;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.UiUtils;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FollowRelation;
+import io.getstream.core.models.Reaction;
 import io.getstream.core.options.Limit;
 import io.getstream.core.options.Offset;
 import retrofit2.Call;
@@ -39,17 +48,21 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.utils.UiUtils.getCircularProgressDrawable;
 
-public class SingleGroupFeed extends Fragment {
+public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickListener {
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
     private EmojiTextView joinGroupTv;
+    private EditText replyEt;
+    private ImageView replyIv;
     private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
     private String feedName = null;
     private View rootView;
+    private final String userId = FirebaseAuth.getInstance().getUid();
 
     public SingleGroupFeed() {
         // Required empty public constructor
@@ -131,7 +144,7 @@ public class SingleGroupFeed extends Fragment {
             // recycler view is currently holding shimmer adapter so hide it
             feedRV.hideShimmerAdapter();
         }
-        FeedAdaptor adapter = new FeedAdaptor(getContext(), activities);
+        FeedAdaptor adapter = new FeedAdaptor(getContext(), activities, this);
         feedRV.setAdapter(adapter);
 
         CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
@@ -169,6 +182,72 @@ public class SingleGroupFeed extends Fragment {
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onReplyClicked(String activityId) {
+        postBtn.setVisibility(View.GONE);
+        replyEt.setVisibility(View.VISIBLE);
+        replyIv.setVisibility(View.VISIBLE);
+
+        UiUtils.showKeyboard(requireContext(), replyEt);
+
+        replyEt.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                final String inputString = editable.toString();
+                replyIv.setEnabled(editable.length() > 0 && inputString.trim().length() > 0);
+            }
+        });
+
+        replyIv.setOnClickListener(v -> {
+            if (!TextUtils.isEmpty(replyEt.getText().toString())) {
+                postComment(activityId);
+            } else {
+                Toast.makeText(getContext(), "Reply can't be empty", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void postComment(String activityId) {
+        try {
+            CircularProgressDrawable circularProgressDrawable = getCircularProgressDrawable(getContext());
+            replyIv.setImageDrawable(circularProgressDrawable);
+            Reaction comment = new Reaction.Builder()
+                    .kind("comment")
+                    .userID(userId)
+                    .activityID(activityId)
+                    .extraField("text", replyEt.getText().toString().trim())
+                    .build();
+            FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
+                if (isAdded() && getActivity() != null) {
+                    if (throwable != null) {
+                        replyIv.setImageResource(R.drawable.ic_send_white_24dp);
+                        Toast.makeText(getContext(), "Reply Failed!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        getActivity().runOnUiThread(() -> {
+                            replyEt.clearFocus();
+                            replyEt.setText("");
+                            postBtn.setVisibility(View.VISIBLE);
+                            replyEt.setVisibility(View.GONE);
+                            replyIv.setVisibility(View.GONE);
+                            //todo update item initCommentRecyclerView(holder, activity);
+                        });
+                    }
+                }
+            });
+        } catch (StreamException e) {
+            e.printStackTrace();
+            //todo
         }
     }
 

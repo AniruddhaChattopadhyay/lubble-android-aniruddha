@@ -17,14 +17,13 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.net.MalformedURLException;
-import java.util.List;
 
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import io.getstream.core.exceptions.StreamException;
-import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Limit;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,14 +31,15 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
-public class FeedFrag extends Fragment {
+public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener {
 
     private static final String TAG = "FeedFrag";
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
-    private List<EnrichedActivity> activities = null;
+    //private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
+    private final String userId = FirebaseAuth.getInstance().getUid();
 
     public FeedFrag() {
         // Required empty public constructor
@@ -79,7 +79,7 @@ public class FeedFrag extends Fragment {
 
     void getCredentials() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(FirebaseAuth.getInstance().getUid());
+        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(userId);
         call.enqueue(new Callback<Endpoints.StreamCredentials>() {
             @Override
             public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
@@ -108,15 +108,36 @@ public class FeedFrag extends Fragment {
     }
 
     private void initRecyclerView() throws StreamException {
-        activities = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
-                .getEnrichedActivities(new Limit(25))
-                .join();
-        if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
-            // recycler view is currently holding shimmer adapter so hide it
-            feedRV.hideShimmerAdapter();
-        }
-        FeedAdaptor adapter = new FeedAdaptor(getContext(), activities);
-        feedRV.setAdapter(adapter);
+        FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
+                .getEnrichedActivities(new Limit(25),
+                        new EnrichmentFlags()
+                                .withReactionCounts()
+                                .withOwnReactions()
+                                .withRecentReactions()
+                )
+                .whenComplete((enrichedActivities, throwable) -> {
+                    if (getActivity() != null && !getActivity().isFinishing()) {
+                        getActivity().runOnUiThread(() -> {
+                            if (throwable != null) {
+                                //todo show retry option with error msg
+                            }
+                            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
+                                // recycler view is currently holding shimmer adapter so hide it
+                                feedRV.hideShimmerAdapter();
+                            }
+
+                            FeedAdaptor adapter = new FeedAdaptor(getContext(), enrichedActivities, this);
+                            feedRV.setAdapter(adapter);
+                        });
+                    }
+                });
+    }
+
+    @Override
+    public void onReplyClicked(String activityId) {
+        postBtn.setVisibility(View.GONE);
+        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId);
+        replyBottomSheetDialogFrag.show(getFragmentManager(), null);
     }
 
     @Override

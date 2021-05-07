@@ -2,14 +2,11 @@ package in.lubble.app.feed_user;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,16 +16,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.auth.FirebaseAuth;
 
-import java.util.ArrayList;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.GlideApp;
@@ -37,11 +36,11 @@ import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
-import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.Reaction;
 
+import static android.view.View.GONE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> {
@@ -49,46 +48,14 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     private static final String TAG = "FeedAdaptor";
     private List<EnrichedActivity> activityList;
     private Context context;
-    private ArrayList<Reaction> currUserReactionList = new ArrayList<>();
+    private ReplyClickListener replyClickListener;
+    private HashMap<Integer, String> likedMap = new HashMap<>();
+    private String userId = FirebaseAuth.getInstance().getUid();
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView textContentTv;
-        private ImageView photoContentIv;
-        private ImageView authorPhotoIv;
-        private TextView viewAllRepliesTv, authorNameTv, timePostedTv;
-        private LinearLayout likeLayout;
-        private TextView likeStatsTv;
-        private ImageView likeIv;
-        private int likeCount = 0;
-        private LinearLayout commentLayout;
-        private RelativeLayout commentViewLayout;
-        private ImageView postCommentBtn;
-        private EditText commentEdtText;
-        private RecyclerView commentRecyclerView;
-
-        public MyViewHolder(View view) {
-            super(view);
-            textContentTv = view.findViewById(R.id.feed_text_content);
-            photoContentIv = view.findViewById(R.id.feed_photo_content);
-            authorNameTv = view.findViewById(R.id.feed_author_name);
-            authorPhotoIv = view.findViewById(R.id.feed_author_photo);
-            viewAllRepliesTv = view.findViewById(R.id.tv_view_all_replies);
-            timePostedTv = view.findViewById(R.id.feed_post_timestamp);
-            likeLayout = view.findViewById(R.id.cont_like);
-            likeStatsTv = view.findViewById(R.id.tv_like_stats);
-            likeIv = view.findViewById(R.id.like_imageview);
-            commentLayout = view.findViewById(R.id.cont_reply);
-            commentViewLayout = view.findViewById(R.id.comment_section_layout);
-            postCommentBtn = view.findViewById(R.id.comment_post_btn);
-            commentEdtText = view.findViewById(R.id.comment_edit_text);
-            commentRecyclerView = view.findViewById(R.id.comment_recycler_view);
-        }
-    }
-
-
-    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList) {
+    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, ReplyClickListener replyClickListener) {
         this.activityList = moviesList;
         this.context = context;
+        this.replyClickListener = replyClickListener;
     }
 
     @Override
@@ -104,17 +71,6 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         EnrichedActivity activity = activityList.get(position);
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
-
-        try {
-            handleLikes(activity, holder, position);
-            handleComments(activity, holder, position);
-        } catch (StreamException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         if (extras != null) {
             if (extras.containsKey("message")) {
@@ -146,78 +102,76 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             }
         }
         holder.timePostedTv.setText(postDateDisplay);
-    }
 
-    private void handleComments(EnrichedActivity activity, MyViewHolder holder, int position) {
-        toogleCommentVisibility(activity, holder, position);
+        List<Reaction> userLikes = activity.getOwnReactions().get("like");
+        if (userLikes != null && userLikes.size() > 0) {
+            holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+            likedMap.put(position, userLikes.get(0).getId());
+        } else {
+            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+            likedMap.remove(position);
+        }
 
-    }
+        handleReactionStats(activity, holder);
+        initCommentRecyclerView(holder, activity);
+        handleCommentEditText(activity, holder);
 
-    private void toogleCommentVisibility(EnrichedActivity activity, MyViewHolder holder, int position) {
+        holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
-            if (holder.commentViewLayout.getVisibility() == View.GONE) {
-                holder.commentViewLayout.setVisibility(View.VISIBLE);
-                try {
-                    initCommentRecyclerView(holder, activity);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (StreamException e) {
-                    e.printStackTrace();
-                }
-                GlideApp.with(context)
-                        .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
-                        .apply(new RequestOptions().override(UiUtils.dpToPx(24), UiUtils.dpToPx(24)))
-                        .circleCrop()
-                        .into(new CustomTarget<Drawable>() {
-                            @Override
-                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                                holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
-                            }
-
-                            @Override
-                            public void onLoadCleared(@Nullable Drawable placeholder) {
-                                holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
-                            }
-                        });
-                holder.postCommentBtn.setOnClickListener(view -> {
-                    if (!TextUtils.isEmpty(holder.commentEdtText.getText().toString())) {
-                        Reaction comment = new Reaction.Builder()
-                                .kind("comment")
-                                .activityID(activity.getID())
-                                .extraField("text", holder.commentEdtText.getText().toString())
-                                .extraField("userId", FirebaseAuth.getInstance().getUid())
-                                .build();
-                        try {
-                            comment = FeedServices.getTimelineClient().reactions().add(comment).get();
-                            Toast.makeText(context, "Reply posted", Toast.LENGTH_LONG).show();
-                            holder.commentEdtText.setText("");
-                            //holder.postCommentBtn.setOnClickListener(null);
-                            //holder.commentViewLayout.setVisibility(View.GONE);
-                            initCommentRecyclerView(holder, activity);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        } catch (StreamException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        Toast.makeText(context, "Reply can't be empty", Toast.LENGTH_LONG).show();
-                    }
-
-                });
-            } else {
-                holder.postCommentBtn.setOnClickListener(null);
-                holder.commentViewLayout.setVisibility(View.GONE);
-            }
+            //todo open IME
         });
     }
 
-    private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) throws StreamException, ExecutionException, InterruptedException {
-        List<Reaction> reactions = FeedServices.getTimelineClient().reactions().filter(LookupKind.ACTIVITY, activity.getID(), "comment").get();
-        if (reactions.size() > 0) {
+    private void handleCommentEditText(EnrichedActivity activity, MyViewHolder holder) {
+        GlideApp.with(context)
+                .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
+                .apply(new RequestOptions().override(UiUtils.dpToPx(24), UiUtils.dpToPx(24)))
+                .circleCrop()
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //caches final image after transformations
+                .into(new CustomTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
+                    }
+                });
+        holder.commentEdtText.setOnClickListener(v -> replyClickListener.onReplyClicked(activity.getID()));
+    }
+
+    public interface ReplyClickListener {
+        void onReplyClicked(String activityId);
+    }
+
+    private void postComment(EnrichedActivity activity, MyViewHolder holder) {
+        try {
+            Reaction comment = new Reaction.Builder()
+                    .kind("comment")
+                    .userID(userId)
+                    .activityID(activity.getID())
+                    .extraField("text", holder.commentEdtText.getText().toString())
+                    .extraField("userId", userId)
+                    .build();
+            FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
+                if (throwable != null) {
+                    //todo
+                }
+            });
+            Toast.makeText(context, "Reply posted", Toast.LENGTH_LONG).show();
+            holder.commentEdtText.setText("");
+            initCommentRecyclerView(holder, activity);
+        } catch (StreamException e) {
+            e.printStackTrace();
+            //todo
+        }
+    }
+
+    private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
+        List<Reaction> commentList = activity.getLatestReactions().get("comment");
+        if (commentList != null && commentList.size() > 0) {
             LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
             holder.commentRecyclerView.setVisibility(View.VISIBLE);
             holder.viewAllRepliesTv.setVisibility(View.VISIBLE);
@@ -226,64 +180,76 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             holder.viewAllRepliesTv.setOnClickListener(v -> {
                 FeedPostActivity.open(context, activity.getID());
             });
-            FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, reactions);
+            FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
             holder.commentRecyclerView.setAdapter(adapter);
         } else {
-            holder.commentRecyclerView.setVisibility(View.GONE);
-            holder.viewAllRepliesTv.setVisibility(View.GONE);
+            holder.commentRecyclerView.setVisibility(GONE);
+            holder.viewAllRepliesTv.setVisibility(GONE);
         }
     }
 
+    private void handleReactionStats(EnrichedActivity enrichedActivity, MyViewHolder holder) {
+        extractReactionCount(enrichedActivity, "like", holder.likeStatsTv, R.plurals.likes, 0);
+        extractReactionCount(enrichedActivity, "comment", holder.replyStatsTv, R.plurals.replies, 0);
+    }
 
-    private void handleLikes(EnrichedActivity activity, MyViewHolder holder, int position) throws StreamException, ExecutionException, InterruptedException {
-
-        List<Reaction> reactions = FeedServices.getTimelineClient().reactions().filter(LookupKind.ACTIVITY, activity.getID(), "like").get();
-        holder.likeCount = reactions.size();
-        holder.likeStatsTv.setText(Integer.toString(holder.likeCount));
-        Reaction currUserReaction = null;
-        for (Reaction reaction : reactions) {
-            if (reaction.getUserID().equals(FirebaseAuth.getInstance().getUid())) {
-                holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                currUserReaction = reaction;
-                break;
+    private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int stringRes, int change) {
+        if (enrichedActivity.getReactionCounts().containsKey(reaction)) {
+            int reactionCount = enrichedActivity.getReactionCounts().get(reaction).intValue();
+            if (change != 0) {
+                reactionCount += change;
+                enrichedActivity.getReactionCounts().put(reaction, reactionCount);
             }
-        }
-        currUserReactionList.add(currUserReaction);
-
-
-        holder.likeLayout.setOnClickListener(v -> {
-            if (currUserReactionList.get(position) == null) {
-                Reaction like = new Reaction.Builder()
-                        .kind("like")
-                        .activityID(activity.getID())
-                        .build();
-                try {
-                    like = FeedServices.getTimelineClient().reactions().add(like).get();
-                    holder.likeStatsTv.setText(Integer.toString(holder.likeCount + 1));
-                    holder.likeCount += 1;
-                    holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                    currUserReactionList.set(position, like);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (StreamException e) {
-                    e.printStackTrace();
-                }
+            if (reactionCount > 0) {
+                statsTv.setVisibility(View.VISIBLE);
+                statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
             } else {
-                try {
-                    FeedServices.getTimelineClient().reactions().delete(currUserReactionList.get(position).getId()).join();
-                    holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
-                    holder.likeStatsTv.setText(Integer.toString(holder.likeCount - 1));
-                    holder.likeCount -= 1;
-                    currUserReactionList.set(position, null);
-                } catch (StreamException e) {
-                    e.printStackTrace();
-                }
+                statsTv.setVisibility(GONE);
             }
-        });
+        } else {
+            statsTv.setVisibility(GONE);
+        }
     }
 
+    private void toggleLike(MyViewHolder holder, int position) {
+        EnrichedActivity activity = activityList.get(position);
+        if (!likedMap.containsKey(position)) {
+            // like
+            Reaction like = new Reaction.Builder()
+                    .kind("like")
+                    .id(userId)
+                    .activityID(activity.getID())
+                    .build();
+            try {
+                FeedServices.getTimelineClient().reactions().add(like).whenComplete((reaction, throwable) -> {
+                    if (throwable != null) {
+                        //todo
+                    }
+                });
+                holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                likedMap.put(position, like.getId());
+                extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, 1);
+            } catch (StreamException e) {
+                e.printStackTrace();
+                //todo
+            }
+        } else {
+            // unlike
+            try {
+                FeedServices.getTimelineClient().reactions().delete(likedMap.get(position)).whenComplete((aVoid, throwable) -> {
+                    if (throwable != null) {
+                        //todo
+                    }
+                });
+                holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
+                likedMap.remove(position);
+                extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, -1);
+            } catch (StreamException e) {
+                e.printStackTrace();
+                //todo
+            }
+        }
+    }
 
     private String getPostDateDisplay(Date timePosted) {
         Date timeNow = new Date(System.currentTimeMillis());
@@ -310,4 +276,36 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     public int getItemCount() {
         return activityList.size();
     }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+        private TextView textContentTv;
+        private ImageView photoContentIv;
+        private ImageView authorPhotoIv;
+        private TextView viewAllRepliesTv, authorNameTv, timePostedTv;
+        private LinearLayout likeLayout;
+        private TextView likeStatsTv, replyStatsTv;
+        private ImageView likeIv;
+        private int likeCount = 0;
+        private LinearLayout commentLayout;
+        private TextView commentEdtText;
+        private RecyclerView commentRecyclerView;
+
+        public MyViewHolder(View view) {
+            super(view);
+            textContentTv = view.findViewById(R.id.feed_text_content);
+            photoContentIv = view.findViewById(R.id.feed_photo_content);
+            authorNameTv = view.findViewById(R.id.feed_author_name);
+            authorPhotoIv = view.findViewById(R.id.feed_author_photo);
+            viewAllRepliesTv = view.findViewById(R.id.tv_view_all_replies);
+            timePostedTv = view.findViewById(R.id.feed_post_timestamp);
+            likeLayout = view.findViewById(R.id.cont_like);
+            likeStatsTv = view.findViewById(R.id.tv_like_stats);
+            replyStatsTv = view.findViewById(R.id.tv_reply_stats);
+            likeIv = view.findViewById(R.id.like_imageview);
+            commentLayout = view.findViewById(R.id.cont_reply);
+            commentEdtText = view.findViewById(R.id.comment_edit_text);
+            commentRecyclerView = view.findViewById(R.id.comment_recycler_view);
+        }
+    }
+
 }
