@@ -149,6 +149,7 @@ public class AddPostForFeed extends BaseActivity {
 
                 feedPostData.setImgUri(uri.toString());
 
+                attachedPicIv.setVisibility(View.VISIBLE);
                 GlideApp.with(this)
                         .load(uri)
                         .transform(new RoundedCornersTransformation(dpToPx(8), 0))
