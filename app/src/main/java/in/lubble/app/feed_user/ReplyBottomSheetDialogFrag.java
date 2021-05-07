@@ -1,5 +1,6 @@
 package in.lubble.app.feed_user;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -17,11 +18,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.MissingFormatArgumentException;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.UiUtils;
@@ -66,10 +72,6 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
             throw new MissingFormatArgumentException("Activity ID missing");
         }
 
-        new Handler().postDelayed(() -> {
-            UiUtils.showKeyboard(requireContext(), replyEt);
-        }, 200);
-
         replyEt.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -99,6 +101,32 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        new Handler().postDelayed(() -> {
+            UiUtils.showKeyboard(requireContext(), replyEt);
+        }, 400);
+
+        GlideApp.with(getContext())
+                .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
+                .apply(new RequestOptions().override(UiUtils.dpToPx(24), UiUtils.dpToPx(24)))
+                .circleCrop()
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //caches final image after transformations
+                .into(new CustomTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        replyEt.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        replyEt.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
+                    }
+                });
     }
 
     private void postComment(String activityId) {

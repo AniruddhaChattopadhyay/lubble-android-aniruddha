@@ -85,10 +85,9 @@
         android:layout_below="@+id/feed_text_content"
         android:layout_marginTop="8dp"
         android:adjustViewBounds="true"
-        android:maxHeight="400dp"
-        android:scaleType="center"
+        android:maxHeight="500dp"
         android:visibility="gone"
-        tools:src="@tools:sample/backgrounds/scenic"
+        tools:src="@drawable/explore_default"
         tools:visibility="visible" />
 
     <LinearLayout

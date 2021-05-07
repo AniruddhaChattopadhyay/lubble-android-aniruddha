@@ -71,14 +71,14 @@ public class FeedServices {
         }
     }
 
-    public static boolean post(String postText, String groupName, @Nullable  String imgUrl) throws StreamException {
+    public static boolean post(String postText, String groupName, @Nullable String imgUrl) throws StreamException {
         Endpoints endpoints;
         endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("message", postText);
             jsonObject.put("groupName", groupName);
-            if(imgUrl !=null){
+            if (imgUrl != null) {
                 jsonObject.put("photoLink", imgUrl);
             }
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
@@ -87,7 +87,7 @@ public class FeedServices {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
-                        
+
                     }
                 }
 
