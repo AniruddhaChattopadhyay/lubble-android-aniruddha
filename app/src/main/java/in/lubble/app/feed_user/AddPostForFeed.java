@@ -40,6 +40,7 @@ import in.lubble.app.utils.RoundedCornersTransformation;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
+
 public class AddPostForFeed extends BaseActivity {
 
     private static final int REQ_CODE_GROUPS_SELECT = 853;
@@ -49,8 +50,10 @@ public class AddPostForFeed extends BaseActivity {
     private EditText postText;
     private ImageView dpIv, attachedPicIv;
     private View parentLayout;
-    private TextView addPicTv;
     private FeedPostData feedPostData;
+    private TextView addPhotoToFeedTv;
+    private Uri imageUri = null;
+    private String uploadPath = "feed_photos/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,23 +71,22 @@ public class AddPostForFeed extends BaseActivity {
         postText = findViewById(R.id.post_edt_txt);
         dpIv = findViewById(R.id.iv_profile_pic);
         attachedPicIv = findViewById(R.id.iv_attached_pic);
-        addPicTv = findViewById(R.id.tv_add_pic);
+        addPhotoToFeedTv = findViewById(R.id.add_photo_feed_tv);
 
         feedPostData = new FeedPostData();
         addTextChangeListener();
 
         postSubmitBtn.setOnClickListener(v -> {
             if (postText.getText().toString().trim().length() > 0) {
-                //todo add check for img path
                 feedPostData.setText(postText.getText().toString());
-
+                if (imageUri != null) {
+                    feedPostData.setImgUri(imageUri.toString());
+                }
                 openGroupSelectionActivity(feedPostData);
             } else {
                 Snackbar.make(parentLayout, "Can't publish an empty post", Snackbar.LENGTH_SHORT).show();
             }
         });
-
-        addPicTv.setOnClickListener(v -> Pix.start(AddPostForFeed.this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH)));
 
         GlideApp.with(this)
                 .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
@@ -94,6 +96,11 @@ public class AddPostForFeed extends BaseActivity {
                 .into(dpIv);
 
         postText.requestFocus();
+
+        addPhotoToFeedTv.setOnClickListener(v -> {
+            Pix.start(this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH));
+        });
+
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(postText, InputMethodManager.SHOW_IMPLICIT);
     }
@@ -137,7 +144,10 @@ public class AddPostForFeed extends BaseActivity {
                 File imageFile = getFileFromInputStreamUri(this, uri);
                 uri = Uri.fromFile(imageFile);
 
-                feedPostData.setAttachedImgUri(uri.toString());
+                addPhotoToFeedTv.setText("Photo added");
+                imageUri = uri;
+
+                feedPostData.setImgUri(uri.toString());
 
                 GlideApp.with(this)
                         .load(uri)

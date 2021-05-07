@@ -2,6 +2,7 @@ package in.lubble.app.feed_user;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.net.MalformedURLException;
 
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -73,38 +75,49 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
-        getCredentials();
+        try {
+            getCredentials();
+        } catch (StreamException e) {
+            e.printStackTrace();
+        }
         return view;
     }
 
-    void getCredentials() {
+    void getCredentials() throws StreamException {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(userId);
-        call.enqueue(new Callback<Endpoints.StreamCredentials>() {
-            @Override
-            public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
-                if (response.isSuccessful()) {
-                    //Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
-                    assert response.body() != null;
-                    final Endpoints.StreamCredentials credentials = response.body();
-                    try {
-                        FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
-                        initRecyclerView();
-                    } catch (MalformedURLException | StreamException e) {
-                        e.printStackTrace();
+        String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
+        String feedApiKey = LubbleSharedPrefs.getInstance().getFeedApiKey();
+        if (TextUtils.isEmpty(feedApiKey) || TextUtils.isEmpty(feedUserToken)) {
+            Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(userId);
+            call.enqueue(new Callback<Endpoints.StreamCredentials>() {
+                @Override
+                public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
+                    if (response.isSuccessful()) {
+                        //Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
+                        assert response.body() != null;
+                        final Endpoints.StreamCredentials credentials = response.body();
+                        try {
+                            FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
+                            initRecyclerView();
+                        } catch (MalformedURLException | StreamException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
-            }
 
-            @Override
-            public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
-                if (isAdded()) {
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                @Override
+                public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
+                    if (isAdded()) {
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            initRecyclerView();
+        }
+
     }
 
     private void initRecyclerView() throws StreamException {

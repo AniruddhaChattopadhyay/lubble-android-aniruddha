@@ -2,6 +2,8 @@ package in.lubble.app.services;
 
 import android.text.TextUtils;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
@@ -69,13 +71,16 @@ public class FeedServices {
         }
     }
 
-    public static boolean post(String postText, String groupName) throws StreamException {
+    public static boolean post(String postText, String groupName, @Nullable  String imgUrl) throws StreamException {
         Endpoints endpoints;
         endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("message", postText);
             jsonObject.put("groupName", groupName);
+            if(imgUrl !=null){
+                jsonObject.put("photoLink", imgUrl);
+            }
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
             Call<Void> call = endpoints.addFeedPost(body);
             call.enqueue(new Callback<Void>() {

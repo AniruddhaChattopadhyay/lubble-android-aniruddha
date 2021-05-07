@@ -1,5 +1,7 @@
 package in.lubble.app.feed_user;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +11,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -21,6 +24,7 @@ import java.util.List;
 import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.R;
+import in.lubble.app.UploadImageFeedService;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.Endpoints;
@@ -96,11 +100,25 @@ public class GroupSelectionFrag extends Fragment {
             FeedGroupData selectedGroupData = feedGroupDataList.get(groupSelectionAdapter.getLastCheckedPos());
             String groupNameText = selectedGroupData.getName();
             boolean result = true;
+            String uploadPath = "feed_photos";
             if (text != null) {
-                try {
-                    result = FeedServices.post(text, groupNameText);
-                } catch (StreamException e) {
-                    e.printStackTrace();
+                if (feedPostData.getImgUri() != null) {
+                    Uri imgUri = Uri.parse(feedPostData.getImgUri());
+                    Intent serviceIntent = new Intent(getContext(), UploadImageFeedService.class)
+                            .putExtra(UploadImageFeedService.EXTRA_BUCKET, UploadImageFeedService.BUCKET_CONVO)
+                            .putExtra(UploadImageFeedService.EXTRA_FILE_NAME, imgUri.getLastPathSegment())
+                            .putExtra(UploadImageFeedService.EXTRA_FILE_URI, imgUri)
+                            .putExtra(UploadImageFeedService.EXTRA_UPLOAD_PATH, uploadPath)
+                            .putExtra(UploadImageFeedService.EXTRA_FEED_GROUP_NAME, groupNameText)
+                            .putExtra(UploadImageFeedService.EXTRA_FEED_TEXT, feedPostData.getText())
+                            .setAction(UploadImageFeedService.ACTION_UPLOAD);
+                    ContextCompat.startForegroundService(getContext(), serviceIntent);
+                } else {
+                    try {
+                        result = FeedServices.post(text, groupNameText, null);
+                    } catch (StreamException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             if (result) {
