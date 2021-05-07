@@ -33,7 +33,7 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
-public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener {
+public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener, ReplyListener {
 
     private static final String TAG = "FeedFrag";
 
@@ -150,7 +150,17 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
     public void onReplyClicked(String activityId) {
         postBtn.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId);
-        replyBottomSheetDialogFrag.show(getFragmentManager(), null);
+        replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
+    }
+
+    @Override
+    public void onReplied() {
+        postBtn.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onDismissed() {
+        postBtn.setVisibility(View.VISIBLE);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package in.lubble.app.feed_user;
 
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,13 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
@@ -31,18 +31,19 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.UiUtils;
+import in.lubble.app.widget.ReplyEditText;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.Reaction;
-
-import static in.lubble.app.utils.UiUtils.getCircularProgressDrawable;
 
 public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
 
     private static final String ARG_ACT_ID = "LBL_REPLY_ARG_ACT_ID";
 
-    private EditText replyEt;
+    private ReplyEditText replyEt;
     private ImageView replyIv;
+    private ProgressBar progressBar;
     private final String userId = FirebaseAuth.getInstance().getUid();
+    private ReplyListener replyListener;
 
     public static ReplyBottomSheetDialogFrag newInstance(String activityId) {
         Bundle args = new Bundle();
@@ -53,18 +54,36 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        getDialog().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        try {
+            replyListener = (ReplyListener) getParentFragment();
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Calling fragment must implement ReplyListener interface");
+        }
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.frag_reply_bottom_sheet, container, false);
+        return inflater.inflate(R.layout.frag_reply_bottom_sheet, container, false);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        getDialog().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         replyEt = view.findViewById(R.id.et_reply);
         replyIv = view.findViewById(R.id.iv_reply);
+        progressBar = view.findViewById(R.id.progressbar_reply);
+
+        replyEt.setFrag(this);
 
         if (getArguments() != null) {
             getArguments().getString(ARG_ACT_ID);
@@ -100,18 +119,13 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
             }
         });
 
-        return view;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
         new Handler().postDelayed(() -> {
-            UiUtils.showKeyboard(requireContext(), replyEt);
-        }, 400);
+            if (getActivity() != null) {
+                UiUtils.showKeyboard(getActivity(), replyEt);
+            }
+        }, 600);
 
-        GlideApp.with(getContext())
+        GlideApp.with(requireContext())
                 .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
                 .apply(new RequestOptions().override(UiUtils.dpToPx(24), UiUtils.dpToPx(24)))
                 .circleCrop()
@@ -131,8 +145,8 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
 
     private void postComment(String activityId) {
         try {
-            CircularProgressDrawable circularProgressDrawable = getCircularProgressDrawable(getContext());
-            replyIv.setImageDrawable(circularProgressDrawable);
+            replyIv.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
             Reaction comment = new Reaction.Builder()
                     .kind("comment")
                     .userID(userId)
@@ -141,23 +155,45 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                     .build();
             FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
-                    if (throwable != null) {
-                        replyIv.setImageResource(R.drawable.ic_send_white_24dp);
-                        Toast.makeText(getContext(), "Reply Failed!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        getActivity().runOnUiThread(() -> {
+                    getActivity().runOnUiThread(() -> {
+                        if (throwable != null) {
+                            Toast.makeText(getContext(), "Reply Failed!", Toast.LENGTH_SHORT).show();
+                            replyIv.setVisibility(View.VISIBLE);
+                            progressBar.setVisibility(View.GONE);
+                        } else {
                             replyEt.clearFocus();
                             replyEt.setText("");
+                            replyListener.onReplied();
                             dismiss();
-                            //todo update item initCommentRecyclerView(holder, activity);
-                        });
-                    }
+                        }
+                    });
                 }
             });
         } catch (StreamException e) {
             e.printStackTrace();
-            //todo
+            Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            replyIv.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
         }
     }
 
+    public void onBackPressed() {
+        dismiss();
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (replyListener != null) {
+            replyListener.onDismissed();
+        }
+    }
+
+    @Override
+    public void onCancel(@NonNull DialogInterface dialog) {
+        super.onCancel(dialog);
+        if (replyListener != null) {
+            replyListener.onDismissed();
+        }
+    }
 }

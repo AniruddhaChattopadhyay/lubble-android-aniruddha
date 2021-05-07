@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <EditText
+    <in.lubble.app.widget.ReplyEditText
         android:id="@+id/et_reply"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -29,6 +29,20 @@
         android:paddingTop="8dp"
         android:paddingRight="16dp"
         android:paddingBottom="8dp"
+        app:srcCompat="@drawable/ic_send_white_24dp"
+        app:tint="@color/colorAccent" />
+
+    <ProgressBar
+        android:id="@+id/progressbar_reply"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:paddingLeft="8dp"
+        android:paddingTop="8dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="8dp"
+        android:visibility="gone"
         app:srcCompat="@drawable/ic_send_white_24dp"
         app:tint="@color/colorAccent" />
 
