@@ -247,4 +247,14 @@
         <item>Paid</item>
         <item>Request Price</item>
     </string-array>
+
+    <plurals name="likes">
+        <item quantity="one">like</item>
+        <item quantity="other">likes</item>
+    </plurals>
+
+    <plurals name="replies">
+        <item quantity="one">reply</item>
+        <item quantity="other">replies</item>
+    </plurals>
 </resources>

@@ -2,11 +2,10 @@ package in.lubble.app.feed_user;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.FileUtils;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -22,6 +22,7 @@ import androidx.core.content.FileProvider;
 
 import com.fxn.pix.Options;
 import com.fxn.pix.Pix;
+import com.fxn.utility.PermUtil;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -33,26 +34,24 @@ import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
-import in.lubble.app.UploadFileService;
-import in.lubble.app.UploadImageFeedService;
-import in.lubble.app.chat.AttachImageActivity;
-import in.lubble.app.chat.ChatFragment;
 import in.lubble.app.models.FeedPostData;
+import in.lubble.app.utils.RoundedCornersTransformation;
 
-import static in.lubble.app.UploadFileService.EXTRA_FILE_URI;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.UiUtils.dpToPx;
 
 
 public class AddPostForFeed extends BaseActivity {
 
     private static final int REQ_CODE_GROUPS_SELECT = 853;
+    private static final int REQUEST_CODE_MEDIA_ATTACH = 820;
 
     private Button postSubmitBtn;
     private EditText postText;
-    private ImageView dpIv;
+    private ImageView dpIv, attachedPicIv;
     private View parentLayout;
+    private FeedPostData feedPostData;
     private TextView addPhotoToFeedTv;
-    private static final int REQUEST_CODE_MEDIA_ATTACH = 100;
     private Uri imageUri = null;
     private String uploadPath = "feed_photos/";
 
@@ -71,16 +70,16 @@ public class AddPostForFeed extends BaseActivity {
         postSubmitBtn = findViewById(R.id.post_btn);
         postText = findViewById(R.id.post_edt_txt);
         dpIv = findViewById(R.id.iv_profile_pic);
+        attachedPicIv = findViewById(R.id.iv_attached_pic);
         addPhotoToFeedTv = findViewById(R.id.add_photo_feed_tv);
 
+        feedPostData = new FeedPostData();
         addTextChangeListener();
 
         postSubmitBtn.setOnClickListener(v -> {
             if (postText.getText().toString().trim().length() > 0) {
-                //todo add check for img path
-                FeedPostData feedPostData = new FeedPostData();
                 feedPostData.setText(postText.getText().toString());
-                if (imageUri!=null){
+                if (imageUri != null) {
                     feedPostData.setImgUri(imageUri.toString());
                 }
                 openGroupSelectionActivity(feedPostData);
@@ -101,6 +100,7 @@ public class AddPostForFeed extends BaseActivity {
         addPhotoToFeedTv.setOnClickListener(v -> {
             Pix.start(this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH));
         });
+
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(postText, InputMethodManager.SHOW_IMPLICIT);
     }
@@ -143,8 +143,33 @@ public class AddPostForFeed extends BaseActivity {
                 Uri uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
                 File imageFile = getFileFromInputStreamUri(this, uri);
                 uri = Uri.fromFile(imageFile);
+
                 addPhotoToFeedTv.setText("Photo added");
                 imageUri = uri;
+
+                feedPostData.setImgUri(uri.toString());
+
+                GlideApp.with(this)
+                        .load(uri)
+                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                        .into(attachedPicIv);
+            } else {
+                Toast.makeText(this, R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PermUtil.REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Pix.start(this, Options.init().setRequestCode(100));
+                } else {
+                    Toast.makeText(this, "Approve permissions to open Pix ImagePicker", Toast.LENGTH_LONG).show();
+                }
+                return;
             }
         }
     }

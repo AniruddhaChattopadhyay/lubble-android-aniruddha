@@ -108,14 +108,14 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadImageFeedService.EXTRA_BUCKET, UploadImageFeedService.BUCKET_CONVO)
                             .putExtra(UploadImageFeedService.EXTRA_FILE_NAME, imgUri.getLastPathSegment())
                             .putExtra(UploadImageFeedService.EXTRA_FILE_URI, imgUri)
-                            .putExtra(UploadImageFeedService.EXTRA_UPLOAD_PATH,uploadPath)
-                            .putExtra(UploadImageFeedService.EXTRA_FEED_GROUP_NAME,groupNameText)
-                            .putExtra(UploadImageFeedService.EXTRA_FEED_TEXT,feedPostData.getText())
+                            .putExtra(UploadImageFeedService.EXTRA_UPLOAD_PATH, uploadPath)
+                            .putExtra(UploadImageFeedService.EXTRA_FEED_GROUP_NAME, groupNameText)
+                            .putExtra(UploadImageFeedService.EXTRA_FEED_TEXT, feedPostData.getText())
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(getContext(), serviceIntent);
                 } else {
                     try {
-                        result = FeedServices.post(text, groupNameText,null);
+                        result = FeedServices.post(text, groupNameText, null);
                     } catch (StreamException e) {
                         e.printStackTrace();
                     }

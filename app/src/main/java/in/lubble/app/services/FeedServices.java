@@ -1,6 +1,5 @@
 package in.lubble.app.services;
 
-import android.net.Uri;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;

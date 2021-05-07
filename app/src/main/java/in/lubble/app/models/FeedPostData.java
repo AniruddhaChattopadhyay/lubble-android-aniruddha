@@ -1,7 +1,5 @@
 package in.lubble.app.models;
 
-import android.net.Uri;
-
 import java.io.Serializable;
 
 public class FeedPostData implements Serializable {
