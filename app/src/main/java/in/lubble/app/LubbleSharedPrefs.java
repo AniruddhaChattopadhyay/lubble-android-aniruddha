@@ -57,6 +57,7 @@ public class LubbleSharedPrefs {
     private final String LAST_USER_MESSAGE = "LAST_MESSAGE_USER";
     private final String FEED_API_KEY = "FEED_API_KEY";
     private final String FEED_USER_TOKEN = "FEED_USER_TOKEN";
+    private final String REPLY_BOTTOM_SHEET = "REPLY_BOTTOM_SHEET";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -395,6 +396,14 @@ public class LubbleSharedPrefs {
 
     public boolean setFeedUserToken(String userToken) {
         return preferences.edit().putString(FEED_USER_TOKEN, userToken).commit();
+    }
+    @Nullable
+    public String getReplyBottomSheet() {
+        return preferences.getString(REPLY_BOTTOM_SHEET, null);
+    }
+
+    public boolean setReplyBottomSheet(String reply) {
+        return preferences.edit().putString(REPLY_BOTTOM_SHEET, reply).commit();
     }
 
 }

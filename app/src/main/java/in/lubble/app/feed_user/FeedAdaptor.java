@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -118,7 +117,10 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
         holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
-            //todo open IME
+            replyClickListener.onReplyClicked(activity.getID());
+        });
+        holder.replyStatsTv.setOnClickListener(v -> {
+            FeedPostActivity.open(context, activity.getID());
         });
     }
 
@@ -144,29 +146,6 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
     public interface ReplyClickListener {
         void onReplyClicked(String activityId);
-    }
-
-    private void postComment(EnrichedActivity activity, MyViewHolder holder) {
-        try {
-            Reaction comment = new Reaction.Builder()
-                    .kind("comment")
-                    .userID(userId)
-                    .activityID(activity.getID())
-                    .extraField("text", holder.commentEdtText.getText().toString())
-                    .extraField("userId", userId)
-                    .build();
-            FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
-                if (throwable != null) {
-                    //todo
-                }
-            });
-            Toast.makeText(context, "Reply posted", Toast.LENGTH_LONG).show();
-            holder.commentEdtText.setText("");
-            initCommentRecyclerView(holder, activity);
-        } catch (StreamException e) {
-            e.printStackTrace();
-            //todo
-        }
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {

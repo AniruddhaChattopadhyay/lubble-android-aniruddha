@@ -28,6 +28,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.UiUtils;
@@ -84,6 +85,11 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
         progressBar = view.findViewById(R.id.progressbar_reply);
 
         replyEt.setFrag(this);
+
+        String replyText = LubbleSharedPrefs.getInstance().getReplyBottomSheet();
+        if (!TextUtils.isEmpty(replyText)) {
+            replyEt.append(replyText);
+        }
 
         if (getArguments() != null) {
             getArguments().getString(ARG_ACT_ID);
@@ -163,6 +169,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                         } else {
                             replyEt.clearFocus();
                             replyEt.setText("");
+                            LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
                             replyListener.onReplied();
                             dismiss();
                         }
@@ -182,18 +189,22 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
     }
 
     @Override
-    public void onDismiss(@NonNull DialogInterface dialog) {
-        super.onDismiss(dialog);
-        if (replyListener != null) {
-            replyListener.onDismissed();
-        }
-    }
-
-    @Override
     public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
         if (replyListener != null) {
             replyListener.onDismissed();
         }
     }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (replyEt.getText() != null && replyEt.getText().length() > 0) {
+            LubbleSharedPrefs.getInstance().setReplyBottomSheet(replyEt.getText().toString());
+        }
+        if (replyListener != null) {
+            replyListener.onDismissed();
+        }
+    }
+
 }

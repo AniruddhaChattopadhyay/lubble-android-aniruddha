@@ -174,4 +174,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
             }
         }
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
+    }
+
 }
