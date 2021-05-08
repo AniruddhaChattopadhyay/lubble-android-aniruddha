@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -24,6 +25,7 @@ import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Limit;
@@ -147,10 +149,13 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
     }
 
     @Override
-    public void onReplyClicked(String activityId) {
+    public void onReplyClicked(String activityId, int position) {
         postBtn.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
+        RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
+        smoothScroller.setTargetPosition(position);
+        feedRV.getLayoutManager().startSmoothScroll(smoothScroller);
     }
 
     @Override
