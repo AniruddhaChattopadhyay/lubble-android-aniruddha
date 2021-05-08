@@ -73,6 +73,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         Map<String, Object> extras = activity.getExtra();
 
         holder.photoContentIv.setVisibility(View.GONE);
+        holder.groupNameTv.setVisibility(View.GONE);
+        holder.lubbleNameTv.setVisibility(View.GONE);
         if (extras != null) {
             if (extras.containsKey("message")) {
                 holder.textContentTv.setVisibility(View.VISIBLE);
@@ -88,6 +90,14 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
             if (extras.containsKey("authorName")) {
                 holder.authorNameTv.setText(extras.get("authorName").toString());
+            }
+            if (extras.containsKey("group")) {
+                holder.groupNameTv.setVisibility(View.VISIBLE);
+                holder.groupNameTv.setText(extras.get("group").toString());
+            }
+            if (extras.containsKey("lubble_id")) {
+                holder.lubbleNameTv.setVisibility(View.VISIBLE);
+                holder.lubbleNameTv.setText(extras.get("lubble_id").toString());
             }
         }
         Map<String, Object> actorMap = activity.getActor().getData();
@@ -242,15 +252,15 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         long diffInDays = TimeUnit.MILLISECONDS.toDays(duration);
 
         if (diffInDays > 0) {
-            return diffInDays + "D";
+            return diffInDays + "d";
         } else if (diffInHours > 0) {
-            return diffInHours + "Hr";
+            return diffInHours + "hr";
         } else if (diffInMinutes > 0) {
-            return diffInMinutes + "Min";
+            return diffInMinutes + "min";
         } else if (diffInSeconds > 0) {
-            return "Just Now";
+            return "just now";
         }
-        return "some time ago";
+        return "Just Now";
     }
 
     public void addUserReply(String activityId, Reaction reaction) {
@@ -282,7 +292,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         private TextView textContentTv;
         private ImageView photoContentIv;
         private ImageView authorPhotoIv;
-        private TextView viewAllRepliesTv, authorNameTv, timePostedTv;
+        private TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
         private LinearLayout likeLayout;
         private TextView likeStatsTv, replyStatsTv;
         private ImageView likeIv;
@@ -296,6 +306,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             textContentTv = view.findViewById(R.id.feed_text_content);
             photoContentIv = view.findViewById(R.id.feed_photo_content);
             authorNameTv = view.findViewById(R.id.feed_author_name);
+            groupNameTv = view.findViewById(R.id.tv_group_name);
+            lubbleNameTv = view.findViewById(R.id.tv_lubble_name);
             authorPhotoIv = view.findViewById(R.id.feed_author_photo);
             viewAllRepliesTv = view.findViewById(R.id.tv_view_all_replies);
             timePostedTv = view.findViewById(R.id.feed_post_timestamp);

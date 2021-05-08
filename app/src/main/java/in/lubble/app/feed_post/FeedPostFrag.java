@@ -34,6 +34,7 @@ import io.getstream.core.models.Reaction;
 import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Filter;
 import io.getstream.core.options.Limit;
+import java8.util.function.BiConsumer;
 
 public class FeedPostFrag extends Fragment {
 
@@ -94,48 +95,60 @@ public class FeedPostFrag extends Fragment {
 
     private void fetchPost() {
         try {
-            List<EnrichedActivity> postList = FeedServices.getTimelineClient().flatFeed("timeline")
+            FeedServices.getTimelineClient().flatFeed("timeline")
                     .getEnrichedActivities(
                             new Limit(1), new Filter().idLessThanEqual(postId),
                             new EnrichmentFlags()
                                     .withReactionCounts()
                                     .withOwnReactions()
-                    ).join();
-            if (!postList.isEmpty()) {
-                EnrichedActivity enrichedActivity = postList.get(0);
-                Map<String, Object> extrasMap = enrichedActivity.getExtra();
-                if (extrasMap != null && extrasMap.containsKey("message")) {
-                    textContentTv.setVisibility(View.VISIBLE);
-                    textContentTv.setText(String.valueOf(extrasMap.get("message")));
-                }
-                Map<String, Object> actorMap = enrichedActivity.getActor().getData();
-                if (actorMap.containsKey("name")) {
-                    authorNameTv.setText(String.valueOf(actorMap.get("name")));
-                    if (actorMap.containsKey("profile_picture")) {
-                        Glide.with(getContext())
-                                .load(actorMap.get("profile_picture").toString())
-                                .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                                .error(R.drawable.ic_account_circle_black_no_padding)
-                                .circleCrop()
-                                .into(authorPhotoIv);
+                    ).whenComplete(new BiConsumer<List<EnrichedActivity>, Throwable>() {
+                @Override
+                public void accept(List<EnrichedActivity> postList, Throwable throwable) {
+                    if (isAdded() && getActivity() != null) {
+                        if (throwable == null) {
+                            if (!postList.isEmpty()) {
+                                EnrichedActivity enrichedActivity = postList.get(0);
+                                Map<String, Object> extrasMap = enrichedActivity.getExtra();
+                                if (extrasMap != null && extrasMap.containsKey("message")) {
+                                    textContentTv.setVisibility(View.VISIBLE);
+                                    textContentTv.setText(String.valueOf(extrasMap.get("message")));
+                                }
+                                Map<String, Object> actorMap = enrichedActivity.getActor().getData();
+                                if (actorMap.containsKey("name")) {
+                                    authorNameTv.setText(String.valueOf(actorMap.get("name")));
+                                    if (actorMap.containsKey("profile_picture")) {
+                                        Glide.with(getContext())
+                                                .load(actorMap.get("profile_picture").toString())
+                                                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                                                .error(R.drawable.ic_account_circle_black_no_padding)
+                                                .circleCrop()
+                                                .into(authorPhotoIv);
+                                    }
+                                }
+                                timePostedTv.setText(DateTimeUtils.getHumanTimestampWithTime(enrichedActivity.getTime().getTime()));
+                                initCommentRecyclerView(enrichedActivity);
+                                handleLikes(enrichedActivity);
+
+                                List<Reaction> userLikes = enrichedActivity.getOwnReactions().get("like");
+                                if (userLikes != null && userLikes.size() > 0) {
+                                    likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                                } else {
+                                    likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+                                }
+
+                                handleReactionStats(enrichedActivity);
+                            } else {
+                                Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
+                                getActivity().finish();
+                            }
+                        } else {
+                            Toast.makeText(getContext(), "Error: " + throwable.getCause(), Toast.LENGTH_SHORT).show();
+                            getActivity().finish();
+                        }
                     }
                 }
-                timePostedTv.setText(DateTimeUtils.getHumanTimestampWithTime(enrichedActivity.getTime().getTime()));
-                initCommentRecyclerView(enrichedActivity);
-                handleLikes(enrichedActivity);
+            });
 
-                List<Reaction> userLikes = enrichedActivity.getOwnReactions().get("like");
-                if (userLikes != null && userLikes.size() > 0) {
-                    likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                } else {
-                    likeIv.setImageResource(R.drawable.ic_favorite_border_light);
-                }
-
-                handleReactionStats(enrichedActivity);
-            } else {
-                Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
-                getActivity().finish();
-            }
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
