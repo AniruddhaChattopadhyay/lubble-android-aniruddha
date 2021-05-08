@@ -19,6 +19,7 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.net.MalformedURLException;
+import java.util.List;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -27,6 +28,8 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.models.Reaction;
 import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Limit;
 import retrofit2.Call;
@@ -44,6 +47,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
     //private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
     private final String userId = FirebaseAuth.getInstance().getUid();
+    private FeedAdaptor adapter;
 
     public FeedFrag() {
         // Required empty public constructor
@@ -122,6 +126,8 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
 
     }
 
+    private List<EnrichedActivity> activityList;
+
     private void initRecyclerView() throws StreamException {
         FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
                 .getEnrichedActivities(new Limit(25),
@@ -140,8 +146,8 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
                                 // recycler view is currently holding shimmer adapter so hide it
                                 feedRV.hideShimmerAdapter();
                             }
-
-                            FeedAdaptor adapter = new FeedAdaptor(getContext(), enrichedActivities, this);
+                            activityList = enrichedActivities;
+                            adapter = new FeedAdaptor(getContext(), enrichedActivities, this);
                             feedRV.setAdapter(adapter);
                         });
                     }
@@ -159,8 +165,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
     }
 
     @Override
-    public void onReplied() {
+    public void onReplied(String activityId, Reaction reaction) {
         postBtn.setVisibility(View.VISIBLE);
+        adapter.addUserReply(activityId, reaction);
     }
 
     @Override

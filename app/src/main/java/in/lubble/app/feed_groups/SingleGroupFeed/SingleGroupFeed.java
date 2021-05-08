@@ -38,6 +38,7 @@ import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FollowRelation;
+import io.getstream.core.models.Reaction;
 import io.getstream.core.options.Limit;
 import io.getstream.core.options.Offset;
 import retrofit2.Call;
@@ -59,6 +60,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
     private String feedName = null;
     private View rootView;
     private final String userId = FirebaseAuth.getInstance().getUid();
+    private FeedAdaptor adapter;
 
     public SingleGroupFeed() {
         // Required empty public constructor
@@ -140,7 +142,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
             // recycler view is currently holding shimmer adapter so hide it
             feedRV.hideShimmerAdapter();
         }
-        FeedAdaptor adapter = new FeedAdaptor(getContext(), activities, this);
+        adapter = new FeedAdaptor(getContext(), activities, this);
         feedRV.setAdapter(adapter);
 
         CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
@@ -189,8 +191,9 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
     }
 
     @Override
-    public void onReplied() {
+    public void onReplied(String activityId, Reaction reaction) {
         postBtn.setVisibility(View.VISIBLE);
+        adapter.addUserReply(activityId, reaction);
     }
 
     @Override

@@ -86,11 +86,6 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
 
         replyEt.setFrag(this);
 
-        String replyText = LubbleSharedPrefs.getInstance().getReplyBottomSheet();
-        if (!TextUtils.isEmpty(replyText)) {
-            replyEt.append(replyText);
-        }
-
         if (getArguments() != null) {
             getArguments().getString(ARG_ACT_ID);
         } else {
@@ -116,6 +111,12 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                 }
             }
         });
+
+        String replyText = LubbleSharedPrefs.getInstance().getReplyBottomSheet();
+        if (!TextUtils.isEmpty(replyText)) {
+            replyEt.append(replyText);
+            replyIv.setAlpha(1f);
+        }
 
         replyIv.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(replyEt.getText().toString())) {
@@ -153,11 +154,12 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
         try {
             replyIv.setVisibility(View.GONE);
             progressBar.setVisibility(View.VISIBLE);
+            String replyText = replyEt.getText().toString().trim();
             Reaction comment = new Reaction.Builder()
                     .kind("comment")
                     .userID(userId)
                     .activityID(activityId)
-                    .extraField("text", replyEt.getText().toString().trim())
+                    .extraField("text", replyText)
                     .build();
             FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
@@ -170,7 +172,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                             replyEt.clearFocus();
                             replyEt.setText("");
                             LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
-                            replyListener.onReplied();
+                            replyListener.onReplied(activityId, reaction);
                             dismiss();
                         }
                     });

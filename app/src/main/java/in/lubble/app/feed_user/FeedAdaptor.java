@@ -23,6 +23,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -45,11 +46,11 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> {
 
     private static final String TAG = "FeedAdaptor";
-    private List<EnrichedActivity> activityList;
-    private Context context;
-    private ReplyClickListener replyClickListener;
-    private HashMap<Integer, String> likedMap = new HashMap<>();
-    private String userId = FirebaseAuth.getInstance().getUid();
+    private final List<EnrichedActivity> activityList;
+    private final Context context;
+    private final ReplyClickListener replyClickListener;
+    private final HashMap<Integer, String> likedMap = new HashMap<>();
+    private final String userId = FirebaseAuth.getInstance().getUid();
 
     public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, ReplyClickListener replyClickListener) {
         this.activityList = moviesList;
@@ -71,6 +72,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
 
+        holder.photoContentIv.setVisibility(View.GONE);
         if (extras != null) {
             if (extras.containsKey("message")) {
                 holder.textContentTv.setVisibility(View.VISIBLE);
@@ -249,6 +251,26 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             return "Just Now";
         }
         return "some time ago";
+    }
+
+    public void addUserReply(String activityId, Reaction reaction) {
+        int pos = getActivityPosById(activityId);
+        if (pos >= 0) {
+            EnrichedActivity updatedActivity = activityList.get(pos);
+            List<Reaction> latestCommentList = updatedActivity.getLatestReactions().get("comment");
+            if (latestCommentList == null)
+                latestCommentList = new ArrayList<>();
+            latestCommentList.add(0, reaction);
+            updatedActivity.getLatestReactions().put("comment", latestCommentList);
+            notifyItemChanged(pos);
+        }
+    }
+
+    private int getActivityPosById(String activityId) {
+        for (int i = 0; i < activityList.size(); i++)
+            if (activityId.equalsIgnoreCase(activityList.get(i).getID()))
+                return i;
+        return -1;
     }
 
     @Override

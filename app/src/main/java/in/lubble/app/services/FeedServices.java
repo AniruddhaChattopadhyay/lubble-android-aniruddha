@@ -93,7 +93,7 @@ public class FeedServices {
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-
+                    FirebaseCrashlytics.getInstance().recordException(t);
                 }
             });
 
