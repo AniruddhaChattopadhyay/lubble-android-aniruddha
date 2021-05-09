@@ -134,6 +134,9 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         holder.replyStatsTv.setOnClickListener(v -> {
             FeedPostActivity.open(context, activity.getID());
         });
+        holder.itemView.setOnClickListener(v -> {
+            FeedPostActivity.open(context, activity.getID());
+        });
     }
 
     private void handleCommentEditText(EnrichedActivity activity, MyViewHolder holder) {
@@ -185,18 +188,18 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int stringRes, int change) {
-        if (enrichedActivity.getReactionCounts().containsKey(reaction)) {
-            int reactionCount = enrichedActivity.getReactionCounts().get(reaction).intValue();
-            if (change != 0) {
-                reactionCount += change;
-                enrichedActivity.getReactionCounts().put(reaction, reactionCount);
-            }
-            if (reactionCount > 0) {
-                statsTv.setVisibility(View.VISIBLE);
-                statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
-            } else {
-                statsTv.setVisibility(GONE);
-            }
+        Number reactionNumber = enrichedActivity.getReactionCounts().get(reaction);
+        if (reactionNumber == null) {
+            reactionNumber = 0;
+        }
+        int reactionCount = reactionNumber.intValue();
+        if (change != 0) {
+            reactionCount += change;
+            enrichedActivity.getReactionCounts().put(reaction, reactionCount);
+        }
+        if (reactionCount > 0) {
+            statsTv.setVisibility(View.VISIBLE);
+            statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
         } else {
             statsTv.setVisibility(GONE);
         }
