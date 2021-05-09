@@ -2,6 +2,7 @@ package in.lubble.app.feed_groups.SingleGroupFeed;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -142,7 +143,12 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
             // recycler view is currently holding shimmer adapter so hide it
             feedRV.hideShimmerAdapter();
         }
-        adapter = new FeedAdaptor(getContext(), activities, this);
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int width = displayMetrics.widthPixels;
+
+        adapter = new FeedAdaptor(getContext(), activities, width, this);
         feedRV.setAdapter(adapter);
 
         CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);

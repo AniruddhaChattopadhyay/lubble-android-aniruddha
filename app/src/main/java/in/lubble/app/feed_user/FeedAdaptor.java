@@ -11,14 +11,19 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -50,14 +55,16 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     private static final String TAG = "FeedAdaptor";
     private final List<EnrichedActivity> activityList;
     private final Context context;
+    private int itemWidth;
     private final ReplyClickListener replyClickListener;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
 
-    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, ReplyClickListener replyClickListener) {
+    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, ReplyClickListener replyClickListener) {
         this.activityList = moviesList;
         this.context = context;
         this.replyClickListener = replyClickListener;
+        this.itemWidth = displayWidth - UiUtils.dpToPx(32);
     }
 
     @Override
@@ -82,10 +89,33 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 holder.textContentTv.setVisibility(View.VISIBLE);
                 holder.textContentTv.setText(String.valueOf(extras.get("message")));
             }
+            if (extras.containsKey("aspectRatio")) {
+                float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
+                if (aspectRatio > 0) {
+                    holder.photoContentIv.setVisibility(View.VISIBLE);
+                    float targetHeight = itemWidth / aspectRatio;
+                    ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
+                    lp.height = Math.round(targetHeight);
+                    holder.photoContentIv.setLayoutParams(lp);
+                    holder.photoContentIv.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
+                }
+            }
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
                 Glide.with(context)
                         .load(extras.get("photoLink").toString())
+                        .listener(new RequestListener<Drawable>() {
+                            @Override
+                            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                                holder.photoContentIv.setBackgroundResource(0);//removes bg
+                                return false;
+                            }
+                        })
                         .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .into(holder.photoContentIv);
             }
@@ -147,7 +177,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     private void handleCommentEditText(EnrichedActivity activity, MyViewHolder holder) {
         GlideApp.with(context)
                 .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
-                .apply(new RequestOptions().override(UiUtils.dpToPx(24), UiUtils.dpToPx(24)))
+                .apply(new RequestOptions().override(dpToPx(24), dpToPx(24)))
                 .circleCrop()
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //caches final image after transformations
                 .into(new CustomTarget<Drawable>() {
@@ -304,7 +334,6 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         private LinearLayout likeLayout;
         private TextView likeStatsTv, replyStatsTv;
         private ImageView likeIv;
-        private int likeCount = 0;
         private LinearLayout commentLayout;
         private TextView commentEdtText;
         private RecyclerView commentRecyclerView;

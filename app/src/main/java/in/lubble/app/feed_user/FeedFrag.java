@@ -3,6 +3,7 @@ package in.lubble.app.feed_user;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -147,7 +148,12 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
                                 feedRV.hideShimmerAdapter();
                             }
                             activityList = enrichedActivities;
-                            adapter = new FeedAdaptor(getContext(), enrichedActivities, this);
+
+                            DisplayMetrics displayMetrics = new DisplayMetrics();
+                            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                            int width = displayMetrics.widthPixels;
+
+                            adapter = new FeedAdaptor(getContext(), enrichedActivities, width, this);
                             feedRV.setAdapter(adapter);
                         });
                     }
