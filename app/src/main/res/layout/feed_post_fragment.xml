@@ -1,82 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_marginBottom="8dp"
     android:background="@color/white"
     android:clickable="true"
     android:focusable="true"
-    android:orientation="vertical"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingTop="10dp"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingBottom="10dp">
+    android:orientation="vertical">
 
-    <RelativeLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progressbar_post"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
-
-        <include layout="@layout/layout_post" />
-
-        <com.cooltechworks.views.shimmer.ShimmerRecyclerView
-            android:id="@+id/comment_recycler_view"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/separator_social_bottom"
-            android:clipToPadding="false"
-            android:nestedScrollingEnabled="false"
-            android:paddingBottom="32dp"
-            app:shimmer_demo_angle="20"
-            app:shimmer_demo_child_count="3"
-            app:shimmer_demo_layout="@layout/layout_demo_shimmer_simple"
-            app:shimmer_demo_layout_manager_type="linear_vertical"
-            tools:itemCount="2"
-            tools:listitem="@layout/post_expanded_comment_row" />
+            android:layout_height="match_parent"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingTop="10dp"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingBottom="10dp">
 
-        <TextView
-            android:id="@+id/tv_no_replies_help_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/comment_recycler_view"
-            android:layout_marginTop="12dp"
-            android:gravity="center"
-            android:text="Be the first to reply!"
-            android:visibility="gone" />
+            <ProgressBar
+                android:id="@+id/progressbar_post"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true" />
 
-        <EditText
-            android:id="@+id/comment_edit_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginTop="4dp"
-            android:layout_toLeftOf="@+id/comment_post_btn"
-            android:background="@color/white"
-            android:drawablePadding="4dp"
-            android:hint="Add a reply..."
-            android:paddingTop="8dp"
-            app:drawableLeftCompat="@drawable/ic_account_circle_grey_24dp" />
+            <include layout="@layout/layout_post" />
 
-        <ImageView
-            android:id="@+id/comment_post_btn"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_alignTop="@id/comment_edit_text"
-            android:layout_alignBottom="@id/comment_edit_text"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentBottom="true"
-            android:background="@color/white"
-            android:paddingTop="8dp"
-            app:srcCompat="@drawable/ic_send_white_24dp"
-            app:tint="@color/colorAccent" />
+            <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+                android:id="@+id/comment_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/separator_social_bottom"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="32dp"
+                app:shimmer_demo_angle="20"
+                app:shimmer_demo_child_count="3"
+                app:shimmer_demo_layout="@layout/layout_demo_shimmer_simple"
+                app:shimmer_demo_layout_manager_type="linear_vertical"
+                tools:itemCount="2"
+                tools:listitem="@layout/post_expanded_comment_row" />
 
-    </RelativeLayout>
+            <TextView
+                android:id="@+id/tv_no_replies_help_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/comment_recycler_view"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:text="Be the first to reply!"
+                android:visibility="gone" />
 
-</androidx.core.widget.NestedScrollView>
+        </RelativeLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <include layout="@layout/frag_reply_bottom_sheet" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

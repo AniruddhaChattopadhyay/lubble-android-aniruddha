@@ -4,6 +4,7 @@ package in.lubble.app.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.Fragment;
@@ -39,6 +40,11 @@ public class ReplyEditText extends AppCompatEditText {
             return true;
         }
         return super.onKeyPreIme(keyCode, event);
+    }
+
+    public void hideIme() {
+        InputMethodManager inputManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow(getWindowToken(), 0);
     }
 
 }

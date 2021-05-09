@@ -164,10 +164,10 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
             FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
+                        progressBar.setVisibility(View.GONE);
                         if (throwable != null) {
                             Toast.makeText(getContext(), "Reply Failed!", Toast.LENGTH_SHORT).show();
                             replyIv.setVisibility(View.VISIBLE);
-                            progressBar.setVisibility(View.GONE);
                         } else {
                             replyEt.clearFocus();
                             replyEt.setText("");
