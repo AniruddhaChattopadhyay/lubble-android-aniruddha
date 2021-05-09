@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -33,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.feed_post.FeedPostActivity;
+import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
@@ -136,6 +138,9 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         });
         holder.itemView.setOnClickListener(v -> {
             FeedPostActivity.open(context, activity.getID());
+        });
+        holder.authorPhotoIv.setOnClickListener(v -> {
+            ProfileActivity.open(context, activity.getActor().getID());
         });
     }
 
@@ -292,7 +297,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView textContentTv;
+        private EmojiTextView textContentTv;
         private ImageView photoContentIv;
         private ImageView authorPhotoIv;
         private TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;

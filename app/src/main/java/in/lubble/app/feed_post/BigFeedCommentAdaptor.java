@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -38,7 +39,8 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView commentTv, commentTimestampTv, commentUserNameTv;
+        private EmojiTextView commentTv;
+        private TextView commentTimestampTv, commentUserNameTv;
         private ImageView commentProfilePicIv;
 
         public MyViewHolder(@NonNull View view) {

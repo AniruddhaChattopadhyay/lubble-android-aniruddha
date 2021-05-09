@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -34,7 +35,7 @@ public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        private TextView commentTV;
+        private EmojiTextView commentTV;
         private TextView commentUserNameTv;
 
         public MyViewHolder(@NonNull View view) {

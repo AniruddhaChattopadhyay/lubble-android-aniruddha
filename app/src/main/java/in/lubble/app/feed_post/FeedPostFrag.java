@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -38,6 +39,7 @@ import java.util.Map;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
@@ -61,7 +63,7 @@ public class FeedPostFrag extends Fragment {
     private String postId;
 
     private ProgressBar progressBar, replyProgressBar;
-    private TextView textContentTv;
+    private EmojiTextView textContentTv;
     private ImageView photoContentIv;
     private ImageView authorPhotoIv;
     private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
@@ -197,6 +199,9 @@ public class FeedPostFrag extends Fragment {
                                 commentLayout.setOnClickListener(v -> {
                                     replyEt.requestFocus();
                                     UiUtils.showKeyboard(requireContext(), replyEt);
+                                });
+                                authorPhotoIv.setOnClickListener(v -> {
+                                    ProfileActivity.open(requireContext(), enrichedActivity.getActor().getID());
                                 });
                                 handleReactionStats(enrichedActivity);
                                 handleReplyBottomSheet(enrichedActivity);

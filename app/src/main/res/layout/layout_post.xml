@@ -65,7 +65,7 @@
         android:textSize="12sp"
         tools:text="1hr ago" />
 
-    <TextView
+    <androidx.emoji.widget.EmojiTextView
         android:id="@+id/feed_text_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -84,7 +84,7 @@
         android:id="@+id/feed_photo_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/feed_text_content"
+        android:layout_below="@id/feed_text_content"
         android:layout_marginTop="8dp"
         android:adjustViewBounds="true"
         android:maxHeight="500dp"
