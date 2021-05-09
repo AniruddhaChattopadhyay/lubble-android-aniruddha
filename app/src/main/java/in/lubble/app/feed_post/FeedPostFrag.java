@@ -38,8 +38,6 @@ import java.util.Map;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
-import in.lubble.app.feed_user.FeedCommentAdaptor;
-import in.lubble.app.feed_user.ReplyBottomSheetDialogFrag;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
@@ -76,7 +74,6 @@ public class FeedPostFrag extends Fragment {
     @Nullable
     private String likeReactionId = null;
     private final String userId = FirebaseAuth.getInstance().getUid();
-    private ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag;
     private BottomSheetBehavior sheetBehavior;
 
     public static FeedPostFrag newInstance(String postId) {
@@ -174,7 +171,7 @@ public class FeedPostFrag extends Fragment {
                                 if (actorMap.containsKey("name")) {
                                     authorNameTv.setText(String.valueOf(actorMap.get("name")));
                                     if (actorMap.containsKey("profile_picture")) {
-                                        Glide.with(getContext())
+                                        Glide.with(requireContext())
                                                 .load(actorMap.get("profile_picture").toString())
                                                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                                                 .error(R.drawable.ic_account_circle_black_no_padding)
@@ -286,6 +283,7 @@ public class FeedPostFrag extends Fragment {
                     .userID(userId)
                     .activityID(activityId)
                     .extraField("text", replyText)
+                    .extraField("timestamp", System.currentTimeMillis())
                     .build();
             FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
@@ -353,7 +351,7 @@ public class FeedPostFrag extends Fragment {
                                     }
                                     if (reactions.size() > 0) {
                                         commentRecyclerView.setNestedScrollingEnabled(false);
-                                        FeedCommentAdaptor adapter = new FeedCommentAdaptor(getContext(), reactions);
+                                        BigFeedCommentAdaptor adapter = new BigFeedCommentAdaptor(getContext(), GlideApp.with(requireContext()), reactions);
                                         commentRecyclerView.setAdapter(adapter);
                                     } else {
                                         commentRecyclerView.setVisibility(View.GONE);

@@ -160,6 +160,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                     .userID(userId)
                     .activityID(activityId)
                     .extraField("text", replyText)
+                    .extraField("timestamp", System.currentTimeMillis())
                     .build();
             FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {

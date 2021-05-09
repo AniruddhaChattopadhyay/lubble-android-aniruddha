@@ -37,7 +37,7 @@ public class ReplyEditText extends AppCompatEditText {
             if (fragment != null && fragment instanceof ReplyBottomSheetDialogFrag) {
                 ((ReplyBottomSheetDialogFrag) fragment).onBackPressed();
             }
-            return true;
+            return false;
         }
         return super.onKeyPreIme(keyCode, event);
     }
