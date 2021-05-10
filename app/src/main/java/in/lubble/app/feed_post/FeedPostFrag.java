@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,6 +28,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
+import com.curios.textformatter.FormatText;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,6 +42,9 @@ import java.util.Map;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.CustomURLSpan;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.DateTimeUtils;
@@ -147,7 +153,18 @@ public class FeedPostFrag extends Fragment {
                                 if (extras != null) {
                                     if (extras.containsKey("message")) {
                                         textContentTv.setVisibility(View.VISIBLE);
-                                        textContentTv.setText(String.valueOf(extras.get("message")));
+                                        textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
+                                        textContentTv.setLinkTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+
+                                        Linkify.addLinks(textContentTv, Linkify.ALL);
+
+                                        CustomURLSpan.clickifyTextView(textContentTv, () -> {
+                                            Bundle bundle = new Bundle();
+                                            bundle.putString("group_id", String.valueOf(extras.get("group")));
+                                            bundle.putString("post_id", enrichedActivity.getID());
+                                            bundle.putString("author_uid", enrichedActivity.getActor().getID());
+                                            Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, requireContext());
+                                        });
                                     }
                                     if (extras.containsKey("photoLink")) {
                                         photoContentIv.setVisibility(View.VISIBLE);

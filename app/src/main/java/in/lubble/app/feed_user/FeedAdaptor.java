@@ -2,6 +2,8 @@ package in.lubble.app.feed_user;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +27,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
+import com.curios.textformatter.FormatText;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +41,9 @@ import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.CustomURLSpan;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
@@ -87,9 +93,20 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         if (extras != null) {
             if (extras.containsKey("message")) {
                 holder.textContentTv.setVisibility(View.VISIBLE);
-                holder.textContentTv.setText(String.valueOf(extras.get("message")));
+                holder.textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
+                holder.textContentTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+
+                Linkify.addLinks(holder.textContentTv, Linkify.ALL);
+
+                CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", String.valueOf(extras.get("group")));
+                    bundle.putString("post_id", activity.getID());
+                    bundle.putString("author_uid", activity.getActor().getID());
+                    Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, context);
+                });
             }
-            if (extras.containsKey("aspectRatio")) {
+            if (extras.containsKey("aspectRatio") && extras.get("aspectRatio") instanceof Double) {
                 float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
                 if (aspectRatio > 0) {
                     holder.photoContentIv.setVisibility(View.VISIBLE);
@@ -167,6 +184,9 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             FeedPostActivity.open(context, activity.getID());
         });
         holder.itemView.setOnClickListener(v -> {
+            FeedPostActivity.open(context, activity.getID());
+        });
+        holder.textContentTv.setOnClickListener(v -> {
             FeedPostActivity.open(context, activity.getID());
         });
         holder.authorPhotoIv.setOnClickListener(v -> {
