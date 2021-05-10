@@ -157,6 +157,7 @@ public class FeedPostFrag extends Fragment {
                                 if (extras != null) {
                                     if (extras.containsKey("message")) {
                                         textContentTv.setVisibility(View.VISIBLE);
+                                        textContentTv.setMaxLines(100);
                                         textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
                                         textContentTv.setLinkTextColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 

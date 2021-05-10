@@ -80,11 +80,18 @@
         tools:text="@tools:sample/lorem/random"
         tools:visibility="visible" />
 
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        layout="@layout/layout_feed_link_preview"
+        android:layout_below="@id/feed_text_content"/>
+
     <ImageView
         android:id="@+id/feed_photo_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/feed_text_content"
+        android:layout_below="@id/cont_link_preview"
         android:layout_marginTop="8dp"
         android:adjustViewBounds="true"
         android:maxHeight="500dp"

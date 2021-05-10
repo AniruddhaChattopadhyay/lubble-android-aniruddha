@@ -22,6 +22,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
@@ -153,7 +154,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
                             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
                             int width = displayMetrics.widthPixels;
 
-                            adapter = new FeedAdaptor(getContext(), enrichedActivities, width, this);
+                            adapter = new FeedAdaptor(getContext(), enrichedActivities, width,
+                                    GlideApp.with(this),
+                                    this);
                             feedRV.setAdapter(adapter);
                         });
                     }

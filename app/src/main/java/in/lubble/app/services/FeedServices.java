@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import io.getstream.cloud.CloudClient;
@@ -70,13 +71,16 @@ public class FeedServices {
         }
     }
 
-    public static boolean post(String postText, String groupName, @Nullable String imgUrl, float aspectRatio) {
-        Endpoints endpoints;
-        endpoints = ServiceGenerator.createService(Endpoints.class);
+    public static boolean post(FeedPostData feedPostData, String groupName, @Nullable String imgUrl, float aspectRatio) {
+        Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
-            jsonObject.put("message", postText);
+            jsonObject.put("message", feedPostData.getText());
             jsonObject.put("groupName", groupName);
+            jsonObject.put("linkTitle", feedPostData.getLinkTitle());
+            jsonObject.put("linkDesc", feedPostData.getLinkDesc());
+            jsonObject.put("linkPicUrl", feedPostData.getLinkImageUrl());
+            jsonObject.put("linkUrl", feedPostData.getLinkUrl());
             jsonObject.put("aspectRatio", Float.valueOf(aspectRatio));
             if (imgUrl != null) {
                 jsonObject.put("photoLink", imgUrl);

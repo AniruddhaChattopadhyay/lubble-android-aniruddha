@@ -109,11 +109,11 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadImageFeedService.EXTRA_FILE_URI, imgUri)
                             .putExtra(UploadImageFeedService.EXTRA_UPLOAD_PATH, uploadPath)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_GROUP_NAME, groupNameText)
-                            .putExtra(UploadImageFeedService.EXTRA_FEED_TEXT, feedPostData.getText())
+                            .putExtra(UploadImageFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(getContext(), serviceIntent);
                 } else {
-                    result = FeedServices.post(text, groupNameText, null, 0);
+                    result = FeedServices.post(feedPostData, groupNameText, null, 0);
                 }
             }
             if (result) {

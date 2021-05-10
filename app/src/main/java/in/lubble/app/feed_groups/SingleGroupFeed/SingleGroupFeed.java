@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.feed_user.AddPostForFeed;
@@ -148,7 +149,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = displayMetrics.widthPixels;
 
-        adapter = new FeedAdaptor(getContext(), activities, width, this);
+        adapter = new FeedAdaptor(getContext(), activities, width, GlideApp.with(this), this);
         feedRV.setAdapter(adapter);
 
         CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
