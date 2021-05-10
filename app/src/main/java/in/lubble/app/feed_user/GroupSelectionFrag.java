@@ -30,7 +30,6 @@ import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
-import io.getstream.core.exceptions.StreamException;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -114,11 +113,7 @@ public class GroupSelectionFrag extends Fragment {
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(getContext(), serviceIntent);
                 } else {
-                    try {
-                        result = FeedServices.post(text, groupNameText, null);
-                    } catch (StreamException e) {
-                        e.printStackTrace();
-                    }
+                    result = FeedServices.post(text, groupNameText, null, 0);
                 }
             }
             if (result) {

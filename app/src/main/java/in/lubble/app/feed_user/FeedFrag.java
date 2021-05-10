@@ -3,6 +3,7 @@ package in.lubble.app.feed_user;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,19 +13,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.net.MalformedURLException;
+import java.util.List;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.models.Reaction;
 import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Limit;
 import retrofit2.Call;
@@ -33,7 +39,7 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
-public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener {
+public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener, ReplyListener {
 
     private static final String TAG = "FeedFrag";
 
@@ -42,6 +48,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
     //private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
     private final String userId = FirebaseAuth.getInstance().getUid();
+    private FeedAdaptor adapter;
 
     public FeedFrag() {
         // Required empty public constructor
@@ -120,6 +127,8 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
 
     }
 
+    private List<EnrichedActivity> activityList;
+
     private void initRecyclerView() throws StreamException {
         FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
                 .getEnrichedActivities(new Limit(25),
@@ -138,8 +147,13 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
                                 // recycler view is currently holding shimmer adapter so hide it
                                 feedRV.hideShimmerAdapter();
                             }
+                            activityList = enrichedActivities;
 
-                            FeedAdaptor adapter = new FeedAdaptor(getContext(), enrichedActivities, this);
+                            DisplayMetrics displayMetrics = new DisplayMetrics();
+                            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                            int width = displayMetrics.widthPixels;
+
+                            adapter = new FeedAdaptor(getContext(), enrichedActivities, width, this);
                             feedRV.setAdapter(adapter);
                         });
                     }
@@ -147,10 +161,24 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
     }
 
     @Override
-    public void onReplyClicked(String activityId) {
+    public void onReplyClicked(String activityId, int position) {
         postBtn.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId);
-        replyBottomSheetDialogFrag.show(getFragmentManager(), null);
+        replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
+        RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
+        smoothScroller.setTargetPosition(position);
+        feedRV.getLayoutManager().startSmoothScroll(smoothScroller);
+    }
+
+    @Override
+    public void onReplied(String activityId, Reaction reaction) {
+        postBtn.setVisibility(View.VISIBLE);
+        adapter.addUserReply(activityId, reaction);
+    }
+
+    @Override
+    public void onDismissed() {
+        postBtn.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -164,4 +192,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
             }
         }
     }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
+    }
+
 }

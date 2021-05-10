@@ -13,7 +13,7 @@
         android:textStyle="bold"
         tools:text="User Name" />
 
-    <TextView
+    <androidx.emoji.widget.EmojiTextView
         android:id="@+id/comment_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

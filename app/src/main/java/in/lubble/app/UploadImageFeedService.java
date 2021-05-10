@@ -30,7 +30,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import in.lubble.app.services.FeedServices;
-import io.getstream.core.exceptions.StreamException;
 
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
@@ -128,7 +127,7 @@ public class UploadImageFeedService extends BaseTaskService {
         }
     }
 
-    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath,final String groupName, final String feedText) {
+    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath, final String groupName, final String feedText) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
@@ -142,10 +141,20 @@ public class UploadImageFeedService extends BaseTaskService {
                 .into(new CustomTarget<Bitmap>() {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        if (resource.getWidth() > 1000 || resource.getHeight() > 1000) {
-                            compressAndUpload(fileUri, fileName, photoRef,groupName,feedText);
+                        int width = resource.getWidth();
+                        int height = resource.getHeight();
+                        if (width > 1000 || height > 1000) {
+                            float downsizeFactor;
+                            if (width > height) {
+                                downsizeFactor = width / 1000f;
+                            } else {
+                                downsizeFactor = height / 1000f;
+                            }
+                            int targetWidth = Math.round(width / downsizeFactor);
+                            int targetHeight = Math.round(height / downsizeFactor);
+                            compressAndUpload(fileUri, fileName, targetWidth, targetHeight, photoRef, groupName, feedText);
                         } else {
-                            uploadFile(fileUri, photoRef,groupName,feedText);
+                            uploadFile(fileUri, photoRef, groupName, feedText, (float) width / height);
                         }
                     }
 
@@ -156,9 +165,9 @@ public class UploadImageFeedService extends BaseTaskService {
                 });
     }
 
-    private void compressAndUpload(final Uri fileUri, final String fileName, final StorageReference photoRef,final String groupName, final String feedText) {
+    private void compressAndUpload(final Uri fileUri, final String fileName, int targetWidth, int targetHeight, final StorageReference photoRef, final String groupName, final String feedText) {
         GlideApp.with(this).asBitmap()
-                .override(1000, 1000)
+                .override(targetWidth, targetHeight)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
                 .load(fileUri)
@@ -166,7 +175,7 @@ public class UploadImageFeedService extends BaseTaskService {
                     @Override
                     public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                         final Uri compressedFileUri = getUriFromTempBitmap(UploadImageFeedService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
-                        uploadFile(compressedFileUri, photoRef, groupName,feedText);
+                        uploadFile(compressedFileUri, photoRef, groupName, feedText, (float) targetWidth / targetHeight);
                     }
 
                     @Override
@@ -177,7 +186,7 @@ public class UploadImageFeedService extends BaseTaskService {
     }
 
 
-    private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef,final String groupName, final String feedText) {
+    private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, final String groupName, final String feedText, final float aspectRatio) {
         // Upload file to Firebase Storage
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
         final UploadTask uploadTask;
@@ -204,24 +213,18 @@ public class UploadImageFeedService extends BaseTaskService {
                                 if (task.isSuccessful()) {
                                     final Uri downloadUri = task.getResult();
                                     // [START_EXCLUDE]
-                                    try {
-                                        broadcastUploadFinished(downloadUri, compressedFileUri,true,groupName, feedText);
-                                    } catch (StreamException e) {
-                                        e.printStackTrace();
-                                    }
-                                    showUploadFinishedNotification(downloadUri, compressedFileUri, true,groupName, feedText);
+                                    broadcastUploadFinished(downloadUri, compressedFileUri, true, groupName, feedText, aspectRatio);
+
+                                    showUploadFinishedNotification(downloadUri, compressedFileUri, true, groupName, feedText);
                                     taskCompleted();
                                     // [END_EXCLUDE]
                                 } else {
                                     Log.d(TAG, "onComplete: failed");
 
                                     // [START_EXCLUDE]
-                                    try {
-                                        broadcastUploadFinished(null, compressedFileUri, false,groupName, feedText);
-                                    } catch (StreamException e) {
-                                        e.printStackTrace();
-                                    }
-                                    showUploadFinishedNotification(null, compressedFileUri, false,groupName, feedText);
+                                    broadcastUploadFinished(null, compressedFileUri, false, groupName, feedText, 0);
+
+                                    showUploadFinishedNotification(null, compressedFileUri, false, groupName, feedText);
                                     taskCompleted();
                                     // [END_EXCLUDE]
                                 }
@@ -237,12 +240,9 @@ public class UploadImageFeedService extends BaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        try {
-                            broadcastUploadFinished(null, compressedFileUri, false,groupName, feedText);
-                        } catch (StreamException e) {
-                            e.printStackTrace();
-                        }
-                        showUploadFinishedNotification(null, compressedFileUri, false,groupName, feedText);
+                        broadcastUploadFinished(null, compressedFileUri, false, groupName, feedText, 0);
+
+                        showUploadFinishedNotification(null, compressedFileUri, false, groupName, feedText);
                         taskCompleted();
                         // [END_EXCLUDE]
                     }
@@ -255,7 +255,7 @@ public class UploadImageFeedService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit,final String groupName, final String feedText) throws StreamException {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit, final String groupName, final String feedText, float aspectRatio) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
@@ -265,21 +265,17 @@ public class UploadImageFeedService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            transmitMedia(downloadUrl, groupName,  feedText);
+            FeedServices.post(feedText, groupName, downloadUrl.toString(), aspectRatio);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())
                 .sendBroadcast(broadcast);
     }
 
-    private void transmitMedia(Uri downloadUrl,final String groupName, final String feedText) throws StreamException {
-        FeedServices.post(feedText,groupName,downloadUrl.toString());
-    }
-
     /**
      * Show a notification for a finished upload.
      */
-    private void showUploadFinishedNotification(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean isConvo,final String groupName, final String feedText) {
+    private void showUploadFinishedNotification(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean isConvo, final String groupName, final String feedText) {
         // Hide the progress notification
         dismissProgressNotification();
         if (isConvo) {

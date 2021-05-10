@@ -16,7 +16,6 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import io.getstream.cloud.CloudClient;
-import io.getstream.core.exceptions.StreamException;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -71,14 +70,15 @@ public class FeedServices {
         }
     }
 
-    public static boolean post(String postText, String groupName, @Nullable  String imgUrl) throws StreamException {
+    public static boolean post(String postText, String groupName, @Nullable String imgUrl, float aspectRatio) {
         Endpoints endpoints;
         endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("message", postText);
             jsonObject.put("groupName", groupName);
-            if(imgUrl !=null){
+            jsonObject.put("aspectRatio", aspectRatio);
+            if (imgUrl != null) {
                 jsonObject.put("photoLink", imgUrl);
             }
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
@@ -87,19 +87,21 @@ public class FeedServices {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
-                        
+                        //todo
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-
+                    FirebaseCrashlytics.getInstance().recordException(t);
+                    //todo
                 }
             });
 
         } catch (JSONException e) {
             e.printStackTrace();
             FirebaseCrashlytics.getInstance().recordException(e);
+            //todo
             return false;
         }
         return true;
