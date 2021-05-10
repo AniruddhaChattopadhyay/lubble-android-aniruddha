@@ -77,7 +77,7 @@ public class FeedServices {
         try {
             jsonObject.put("message", postText);
             jsonObject.put("groupName", groupName);
-            jsonObject.put("aspectRatio", aspectRatio);
+            jsonObject.put("aspectRatio", Float.valueOf(aspectRatio));
             if (imgUrl != null) {
                 jsonObject.put("photoLink", imgUrl);
             }
