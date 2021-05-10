@@ -1,5 +1,8 @@
 package in.lubble.app.feed_post;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
@@ -40,11 +43,11 @@ import java.util.List;
 import java.util.Map;
 
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.chat.CustomURLSpan;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.DateTimeUtils;
@@ -58,6 +61,7 @@ import io.getstream.core.models.Reaction;
 import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Filter;
 import io.getstream.core.options.Limit;
+import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
 import static android.view.View.GONE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -158,13 +162,27 @@ public class FeedPostFrag extends Fragment {
 
                                         Linkify.addLinks(textContentTv, Linkify.ALL);
 
-                                        CustomURLSpan.clickifyTextView(textContentTv, () -> {
+                                        BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
                                             Bundle bundle = new Bundle();
                                             bundle.putString("group_id", String.valueOf(extras.get("group")));
                                             bundle.putString("post_id", enrichedActivity.getID());
                                             bundle.putString("author_uid", enrichedActivity.getActor().getID());
                                             Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, requireContext());
+                                            return false;
+                                        }).setOnLinkLongClickListener((textView, url) -> {
+                                            Bundle bundle = new Bundle();
+                                            bundle.putString("group_id", String.valueOf(extras.get("group")));
+                                            bundle.putString("post_id", enrichedActivity.getID());
+                                            bundle.putString("author_uid", enrichedActivity.getActor().getID());
+                                            Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, requireContext());
+
+                                            ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                                            ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
+                                            clipboard.setPrimaryClip(clip);
+                                            Toast.makeText(requireContext(), "Copied!", Toast.LENGTH_SHORT).show();
+                                            return true;
                                         });
+                                        textContentTv.setMovementMethod(betterLinkMovementMethod);
                                     }
                                     if (extras.containsKey("photoLink")) {
                                         photoContentIv.setVisibility(View.VISIBLE);
