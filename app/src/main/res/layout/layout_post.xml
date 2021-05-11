@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="@layout/feed_list_row">
 
@@ -56,9 +56,9 @@
         android:id="@+id/feed_post_timestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/iv_more_menu"
         android:layout_alignTop="@id/iv_more_menu"
         android:layout_alignBottom="@id/iv_more_menu"
+        android:layout_toLeftOf="@id/iv_more_menu"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:maxLines="1"
@@ -81,11 +81,11 @@
         tools:visibility="visible" />
 
     <include
+        layout="@layout/layout_feed_link_preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        layout="@layout/layout_feed_link_preview"
-        android:layout_below="@id/feed_text_content"/>
+        android:layout_below="@id/feed_text_content"
+        android:layout_marginTop="8dp" />
 
     <ImageView
         android:id="@+id/feed_photo_content"
@@ -94,7 +94,9 @@
         android:layout_below="@id/cont_link_preview"
         android:layout_marginTop="8dp"
         android:adjustViewBounds="true"
+        android:foreground="?attr/selectableItemBackground"
         android:maxHeight="500dp"
+        android:transitionName="fullscreen_image"
         android:visibility="gone"
         tools:src="@drawable/explore_default"
         tools:visibility="visible" />
