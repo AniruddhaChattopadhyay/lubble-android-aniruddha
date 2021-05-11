@@ -52,7 +52,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_view_all_replies"
             android:layout_marginTop="4dp"
-            android:layout_toLeftOf="@+id/comment_post_btn"
             android:background="@color/transparent"
             android:drawablePadding="4dp"
             android:hint="Add a reply..."
