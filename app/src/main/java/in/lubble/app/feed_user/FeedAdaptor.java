@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
@@ -54,7 +55,9 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
+import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.feed_post.FeedPostActivity;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.RoundedCornersTransformation;
@@ -179,11 +182,22 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 holder.lubbleNameTv.setVisibility(View.VISIBLE);
                 holder.lubbleNameTv.setText(extras.get("lubble_id").toString());
             }
+            if (extras.containsKey("group") && extras.containsKey("lubble_id")) {
+                String groupFeedName = extras.get("group").toString() + '_' + extras.get("lubble_id");
+                AppCompatActivity activityNew = (AppCompatActivity) context;
+                holder.groupNameTv.setOnClickListener(v -> {
+                    FeedGroupData feedGroupData = new FeedGroupData(100, extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
+                    GroupFeedActivity.open(context, feedGroupData);
+//                     activityNew.getSupportFragmentManager().beginTransaction()
+//                            .replace(R.id.fragment_container, SingleGroupFeed.newInstance(groupFeedName))
+//                            .commitNow();
+                });
+            }
         }
         Map<String, Object> actorMap = activity.getActor().getData();
         if (actorMap.containsKey("name")) {
             holder.authorNameTv.setText(String.valueOf(actorMap.get("name")));
-            if (actorMap.containsKey("profile_picture")) {
+            if (actorMap.containsKey("profile_picture") && actorMap.get("profile_picture") != null) {
                 Glide.with(context)
                         .load(actorMap.get("profile_picture").toString())
                         .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -194,15 +208,16 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         }
         holder.timePostedTv.setText(postDateDisplay);
 
-        List<Reaction> userLikes = activity.getOwnReactions().get("like");
-        if (userLikes != null && userLikes.size() > 0) {
-            holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-            likedMap.put(position, userLikes.get(0).getId());
-        } else {
-            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
-            likedMap.remove(position);
+        if (activity.getOwnReactions() != null) {
+            List<Reaction> userLikes = activity.getOwnReactions().get("like");
+            if (userLikes != null && userLikes.size() > 0) {
+                holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                likedMap.put(position, userLikes.get(0).getId());
+            } else {
+                holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+                likedMap.remove(position);
+            }
         }
-
         handleReactionStats(activity, holder);
         initCommentRecyclerView(holder, activity);
         handleCommentEditText(activity, holder);
@@ -291,6 +306,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
     public interface FeedListener {
         void onReplyClicked(String activityId, int position);
+
         void onImageClicked(String imgPath, ImageView imageView);
     }
 

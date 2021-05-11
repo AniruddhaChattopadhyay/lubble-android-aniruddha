@@ -87,7 +87,8 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                adapter.getFilter().filter(s);
+                if(adapter!=null)
+                    adapter.getFilter().filter(s);
             }
 
             @Override
@@ -120,7 +121,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
 
     private void getFeedGroups() {
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        Call<List<FeedGroupData>> call = endpoints.getFeedGroupList();
+        Call<List<FeedGroupData>> call = endpoints.getExploreFeedGroupList();
         call.enqueue(new Callback<List<FeedGroupData>>() {
             @Override
             public void onResponse(@NotNull Call<List<FeedGroupData>> call, @NotNull Response<List<FeedGroupData>> response) {
