@@ -3,7 +3,6 @@ package in.lubble.app.feed_groups.SingleGroupFeed;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +43,7 @@ import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FollowRelation;
 import io.getstream.core.models.Reaction;
+import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Limit;
 import io.getstream.core.options.Offset;
 import okhttp3.RequestBody;
@@ -140,9 +140,12 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private void initRecyclerView() throws StreamException {
         CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
         activities = groupFeed
-                .getEnrichedActivities(new Limit(25))
+                .getEnrichedActivities(new Limit(25),
+                        new EnrichmentFlags()
+                                .withReactionCounts()
+                                .withOwnReactions()
+                                .withRecentReactions())
                 .join();
-        Log.d("hey", "hey");
         if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
             // recycler view is currently holding shimmer adapter so hide it
             feedRV.hideShimmerAdapter();

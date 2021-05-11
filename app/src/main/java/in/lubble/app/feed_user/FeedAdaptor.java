@@ -208,15 +208,13 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         }
         holder.timePostedTv.setText(postDateDisplay);
 
-        if (activity.getOwnReactions() != null) {
-            List<Reaction> userLikes = activity.getOwnReactions().get("like");
-            if (userLikes != null && userLikes.size() > 0) {
-                holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                likedMap.put(position, userLikes.get(0).getId());
-            } else {
-                holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
-                likedMap.remove(position);
-            }
+        List<Reaction> userLikes = activity.getOwnReactions().get("like");
+        if (userLikes != null && userLikes.size() > 0) {
+            holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+            likedMap.put(position, userLikes.get(0).getId());
+        } else {
+            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+            likedMap.remove(position);
         }
         handleReactionStats(activity, holder);
         initCommentRecyclerView(holder, activity);
