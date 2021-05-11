@@ -22,6 +22,9 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -42,11 +45,13 @@ import io.getstream.core.models.FollowRelation;
 import io.getstream.core.models.Reaction;
 import io.getstream.core.options.Limit;
 import io.getstream.core.options.Offset;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.Constants.MEDIA_TYPE;
 
 public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickListener, ReplyListener {
 
@@ -180,6 +185,32 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
     private void joinGroup(CloudFlatFeed groupFeed, CloudFlatFeed userTimelineFeed) {
         try {
             userTimelineFeed.follow(groupFeed).join();
+            final JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("groupFeedId", groupFeed.getUserID());
+                RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+                Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+                Call<Void> call = endpoints.addGroupForUser(body);
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            //todo
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        FirebaseCrashlytics.getInstance().recordException(t);
+                        //todo
+                    }
+                });
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+                FirebaseCrashlytics.getInstance().recordException(e);
+                //todo
+            }
             Snackbar.make(rootView, "Joined", Snackbar.LENGTH_SHORT).show();
             joinGroupTv.setVisibility(View.GONE);
             postBtn.setVisibility(View.VISIBLE);

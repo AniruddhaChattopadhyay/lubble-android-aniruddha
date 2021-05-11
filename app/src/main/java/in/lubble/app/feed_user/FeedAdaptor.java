@@ -13,8 +13,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -44,7 +46,10 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
+import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
+import in.lubble.app.feed_groups.SingleGroupFeed.SingleGroupFeed;
 import in.lubble.app.feed_post.FeedPostActivity;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.RoundedCornersTransformation;
@@ -148,11 +153,22 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 holder.lubbleNameTv.setVisibility(View.VISIBLE);
                 holder.lubbleNameTv.setText(extras.get("lubble_id").toString());
             }
+            if(extras.containsKey("group") && extras.containsKey("lubble_id")){
+                String groupFeedName = extras.get("group").toString() + '_' + extras.get("lubble_id");
+                AppCompatActivity activityNew = (AppCompatActivity) context;
+                 holder.groupNameTv.setOnClickListener(v->{
+                     FeedGroupData feedGroupData = new FeedGroupData(100,extras.get("group").toString(),groupFeedName,extras.get("lubble_id").toString());
+                     GroupFeedActivity.open(context, feedGroupData);
+//                     activityNew.getSupportFragmentManager().beginTransaction()
+//                            .replace(R.id.fragment_container, SingleGroupFeed.newInstance(groupFeedName))
+//                            .commitNow();
+                });
+            }
         }
         Map<String, Object> actorMap = activity.getActor().getData();
         if (actorMap.containsKey("name")) {
             holder.authorNameTv.setText(String.valueOf(actorMap.get("name")));
-            if (actorMap.containsKey("profile_picture")) {
+            if (actorMap.containsKey("profile_picture") && actorMap.get("profile_picture")!=null) {
                 Glide.with(context)
                         .load(actorMap.get("profile_picture").toString())
                         .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -163,16 +179,17 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         }
         holder.timePostedTv.setText(postDateDisplay);
 
-        List<Reaction> userLikes = activity.getOwnReactions().get("like");
-        if (userLikes != null && userLikes.size() > 0) {
-            holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-            likedMap.put(position, userLikes.get(0).getId());
-        } else {
-            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
-            likedMap.remove(position);
+        if(activity.getOwnReactions()!=null) {
+            List<Reaction> userLikes = activity.getOwnReactions().get("like");
+            if (userLikes != null && userLikes.size() > 0) {
+                holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                likedMap.put(position, userLikes.get(0).getId());
+            } else {
+                holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+                likedMap.remove(position);
+            }
         }
-
-        handleReactionStats(activity, holder);
+         handleReactionStats(activity, holder);
         initCommentRecyclerView(holder, activity);
         handleCommentEditText(activity, holder);
 
@@ -219,21 +236,23 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
-        List<Reaction> commentList = activity.getLatestReactions().get("comment");
-        if (commentList != null && commentList.size() > 0) {
-            LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-            holder.commentRecyclerView.setVisibility(View.VISIBLE);
-            holder.viewAllRepliesTv.setVisibility(View.VISIBLE);
-            holder.commentRecyclerView.setLayoutManager(layoutManager);
-            holder.commentRecyclerView.setNestedScrollingEnabled(false);
-            holder.viewAllRepliesTv.setOnClickListener(v -> {
-                FeedPostActivity.open(context, activity.getID());
-            });
-            FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
-            holder.commentRecyclerView.setAdapter(adapter);
-        } else {
-            holder.commentRecyclerView.setVisibility(GONE);
-            holder.viewAllRepliesTv.setVisibility(GONE);
+        if(activity.getLatestReactions()!=null){
+            List<Reaction> commentList = activity.getLatestReactions().get("comment");
+            if (commentList != null && commentList.size() > 0) {
+                LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+                holder.commentRecyclerView.setVisibility(View.VISIBLE);
+                holder.viewAllRepliesTv.setVisibility(View.VISIBLE);
+                holder.commentRecyclerView.setLayoutManager(layoutManager);
+                holder.commentRecyclerView.setNestedScrollingEnabled(false);
+                holder.viewAllRepliesTv.setOnClickListener(v -> {
+                    FeedPostActivity.open(context, activity.getID());
+                });
+                FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
+                holder.commentRecyclerView.setAdapter(adapter);
+            } else {
+                holder.commentRecyclerView.setVisibility(GONE);
+                holder.viewAllRepliesTv.setVisibility(GONE);
+            }
         }
     }
 
@@ -243,20 +262,22 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int stringRes, int change) {
-        Number reactionNumber = enrichedActivity.getReactionCounts().get(reaction);
-        if (reactionNumber == null) {
-            reactionNumber = 0;
-        }
-        int reactionCount = reactionNumber.intValue();
-        if (change != 0) {
-            reactionCount += change;
-            enrichedActivity.getReactionCounts().put(reaction, reactionCount);
-        }
-        if (reactionCount > 0) {
-            statsTv.setVisibility(View.VISIBLE);
-            statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
-        } else {
-            statsTv.setVisibility(GONE);
+        if(enrichedActivity.getReactionCounts()!=null){
+            Number reactionNumber = enrichedActivity.getReactionCounts().get(reaction);
+            if (reactionNumber == null) {
+                reactionNumber = 0;
+            }
+            int reactionCount = reactionNumber.intValue();
+            if (change != 0) {
+                reactionCount += change;
+                enrichedActivity.getReactionCounts().put(reaction, reactionCount);
+            }
+            if (reactionCount > 0) {
+                statsTv.setVisibility(View.VISIBLE);
+                statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
+            } else {
+                statsTv.setVisibility(GONE);
+            }
         }
     }
 
