@@ -8,6 +8,10 @@ public class FeedPostData implements Serializable {
 
     private String text;
     private String imgUri = null;
+    private String linkTitle;
+    private String linkDesc;
+    private String linkImageUrl;
+    private String linkUrl;
 
     public String getImgUri() {
         return imgUri;
@@ -25,4 +29,35 @@ public class FeedPostData implements Serializable {
         this.text = text;
     }
 
+    public String getLinkTitle() {
+        return linkTitle;
+    }
+
+    public void setLinkTitle(String linkTitle) {
+        this.linkTitle = linkTitle;
+    }
+
+    public String getLinkDesc() {
+        return linkDesc;
+    }
+
+    public void setLinkDesc(String linkDesc) {
+        this.linkDesc = linkDesc;
+    }
+
+    public String getLinkImageUrl() {
+        return linkImageUrl;
+    }
+
+    public void setLinkImageUrl(String linkImageUrl) {
+        this.linkImageUrl = linkImageUrl;
+    }
+
+    public String getLinkUrl() {
+        return linkUrl;
+    }
+
+    public void setLinkUrl(String linkUrl) {
+        this.linkUrl = linkUrl;
+    }
 }

@@ -7,6 +7,7 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,11 +23,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.net.MalformedURLException;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
@@ -39,7 +42,7 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
-public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener, ReplyListener {
+public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener {
 
     private static final String TAG = "FeedFrag";
 
@@ -153,7 +156,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
                             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
                             int width = displayMetrics.widthPixels;
 
-                            adapter = new FeedAdaptor(getContext(), enrichedActivities, width, this);
+                            adapter = new FeedAdaptor(getContext(), enrichedActivities, width,
+                                    GlideApp.with(this),
+                                    this);
                             feedRV.setAdapter(adapter);
                         });
                     }
@@ -168,6 +173,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.ReplyClickListener
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
         smoothScroller.setTargetPosition(position);
         feedRV.getLayoutManager().startSmoothScroll(smoothScroller);
+    }
+
+    @Override
+    public void onImageClicked(String imgPath, ImageView imageView) {
+        FullScreenImageActivity.open(getActivity(), requireContext(), imgPath, imageView, null, R.drawable.ic_cancel_black_24dp);
     }
 
     @Override

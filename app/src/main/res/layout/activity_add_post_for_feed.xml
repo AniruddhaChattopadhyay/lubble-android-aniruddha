@@ -44,11 +44,13 @@
                 android:paddingTop="16dp"
                 android:scrollbars="vertical" />
 
+            <include layout="@layout/layout_feed_link_preview" />
+
             <ImageView
                 android:id="@+id/iv_attached_pic"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/post_edt_txt"
+                android:layout_below="@id/cont_link_preview"
                 android:layout_marginLeft="48dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginRight="16dp"

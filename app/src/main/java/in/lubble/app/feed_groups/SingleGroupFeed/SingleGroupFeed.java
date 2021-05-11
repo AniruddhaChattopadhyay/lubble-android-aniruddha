@@ -3,11 +3,9 @@ package in.lubble.app.feed_groups.SingleGroupFeed;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -29,6 +27,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.feed_user.AddPostForFeed;
@@ -38,11 +37,13 @@ import in.lubble.app.feed_user.ReplyListener;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FullScreenImageActivity;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FollowRelation;
 import io.getstream.core.models.Reaction;
+import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Limit;
 import io.getstream.core.options.Offset;
 import okhttp3.RequestBody;
@@ -53,13 +54,11 @@ import retrofit2.Response;
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 
-public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickListener, ReplyListener {
+public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListener, ReplyListener {
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
     private EmojiTextView joinGroupTv;
-    private EditText replyEt;
-    private ImageView replyIv;
     private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
@@ -141,9 +140,12 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
     private void initRecyclerView() throws StreamException {
         CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
         activities = groupFeed
-                .getEnrichedActivities(new Limit(25))
+                .getEnrichedActivities(new Limit(25),
+                        new EnrichmentFlags()
+                                .withReactionCounts()
+                                .withOwnReactions()
+                                .withRecentReactions())
                 .join();
-        Log.d("hey", "hey");
         if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
             // recycler view is currently holding shimmer adapter so hide it
             feedRV.hideShimmerAdapter();
@@ -153,7 +155,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = displayMetrics.widthPixels;
 
-        adapter = new FeedAdaptor(getContext(), activities, width, this);
+        adapter = new FeedAdaptor(getContext(), activities, width, GlideApp.with(this), this);
         feedRV.setAdapter(adapter);
 
         CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
@@ -231,6 +233,11 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
     public void onReplied(String activityId, Reaction reaction) {
         postBtn.setVisibility(View.VISIBLE);
         adapter.addUserReply(activityId, reaction);
+    }
+
+    @Override
+    public void onImageClicked(String imgPath, ImageView imageView) {
+        FullScreenImageActivity.open(getActivity(), requireContext(), imgPath, imageView, null, R.drawable.ic_cancel_black_24dp);
     }
 
     @Override

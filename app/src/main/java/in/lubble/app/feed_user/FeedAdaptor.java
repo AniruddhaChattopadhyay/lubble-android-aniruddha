@@ -1,22 +1,30 @@
 package in.lubble.app.feed_user;
 
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,13 +49,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import in.lubble.app.GlideApp;
+import in.lubble.app.GlideRequests;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
-import in.lubble.app.feed_groups.SingleGroupFeed.SingleGroupFeed;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
@@ -57,6 +65,7 @@ import in.lubble.app.utils.UiUtils;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.Reaction;
+import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
 import static android.view.View.GONE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -67,14 +76,16 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     private final List<EnrichedActivity> activityList;
     private final Context context;
     private int itemWidth;
-    private final ReplyClickListener replyClickListener;
+    private final FeedListener feedListener;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
+    private GlideRequests glide;
 
-    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, ReplyClickListener replyClickListener) {
+    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, GlideRequests glide, FeedListener feedListener) {
         this.activityList = moviesList;
         this.context = context;
-        this.replyClickListener = replyClickListener;
+        this.glide = glide;
+        this.feedListener = feedListener;
         this.itemWidth = displayWidth - UiUtils.dpToPx(32);
     }
 
@@ -102,13 +113,29 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 holder.textContentTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
 
                 Linkify.addLinks(holder.textContentTv, Linkify.ALL);
-
-                CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
+                BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
                     Bundle bundle = new Bundle();
                     bundle.putString("group_id", String.valueOf(extras.get("group")));
                     bundle.putString("post_id", activity.getID());
                     bundle.putString("author_uid", activity.getActor().getID());
                     Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, context);
+                    return false;
+                }).setOnLinkLongClickListener((textView, url) -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putString("group_id", String.valueOf(extras.get("group")));
+                    bundle.putString("post_id", activity.getID());
+                    bundle.putString("author_uid", activity.getActor().getID());
+                    Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, context);
+
+                    ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
+                    clipboard.setPrimaryClip(clip);
+                    Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT).show();
+                    return true;
+                });
+                holder.textContentTv.setMovementMethod(betterLinkMovementMethod);
+
+                CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
                 });
             }
             if (extras.containsKey("aspectRatio") && extras.get("aspectRatio") instanceof Double) {
@@ -124,8 +151,9 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             }
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
-                Glide.with(context)
-                        .load(extras.get("photoLink").toString())
+                String photoLink = extras.get("photoLink").toString();
+                glide
+                        .load(photoLink)
                         .listener(new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -140,6 +168,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                         })
                         .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .into(holder.photoContentIv);
+                holder.photoContentIv.setOnClickListener(v -> feedListener.onImageClicked(photoLink, holder.photoContentIv));
             }
 
             if (extras.containsKey("authorName")) {
@@ -153,12 +182,12 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 holder.lubbleNameTv.setVisibility(View.VISIBLE);
                 holder.lubbleNameTv.setText(extras.get("lubble_id").toString());
             }
-            if(extras.containsKey("group") && extras.containsKey("lubble_id")){
+            if (extras.containsKey("group") && extras.containsKey("lubble_id")) {
                 String groupFeedName = extras.get("group").toString() + '_' + extras.get("lubble_id");
                 AppCompatActivity activityNew = (AppCompatActivity) context;
-                 holder.groupNameTv.setOnClickListener(v->{
-                     FeedGroupData feedGroupData = new FeedGroupData(100,extras.get("group").toString(),groupFeedName,extras.get("lubble_id").toString());
-                     GroupFeedActivity.open(context, feedGroupData);
+                holder.groupNameTv.setOnClickListener(v -> {
+                    FeedGroupData feedGroupData = new FeedGroupData(100, extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
+                    GroupFeedActivity.open(context, feedGroupData);
 //                     activityNew.getSupportFragmentManager().beginTransaction()
 //                            .replace(R.id.fragment_container, SingleGroupFeed.newInstance(groupFeedName))
 //                            .commitNow();
@@ -168,7 +197,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         Map<String, Object> actorMap = activity.getActor().getData();
         if (actorMap.containsKey("name")) {
             holder.authorNameTv.setText(String.valueOf(actorMap.get("name")));
-            if (actorMap.containsKey("profile_picture") && actorMap.get("profile_picture")!=null) {
+            if (actorMap.containsKey("profile_picture") && actorMap.get("profile_picture") != null) {
                 Glide.with(context)
                         .load(actorMap.get("profile_picture").toString())
                         .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -179,23 +208,22 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         }
         holder.timePostedTv.setText(postDateDisplay);
 
-        if(activity.getOwnReactions()!=null) {
-            List<Reaction> userLikes = activity.getOwnReactions().get("like");
-            if (userLikes != null && userLikes.size() > 0) {
-                holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                likedMap.put(position, userLikes.get(0).getId());
-            } else {
-                holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
-                likedMap.remove(position);
-            }
+        List<Reaction> userLikes = activity.getOwnReactions().get("like");
+        if (userLikes != null && userLikes.size() > 0) {
+            holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+            likedMap.put(position, userLikes.get(0).getId());
+        } else {
+            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+            likedMap.remove(position);
         }
-         handleReactionStats(activity, holder);
+        handleReactionStats(activity, holder);
         initCommentRecyclerView(holder, activity);
         handleCommentEditText(activity, holder);
+        handleLinkPreview(activity, holder);
 
         holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
-            replyClickListener.onReplyClicked(activity.getID(), position);
+            feedListener.onReplyClicked(activity.getID(), position);
         });
         holder.replyStatsTv.setOnClickListener(v -> {
             FeedPostActivity.open(context, activity.getID());
@@ -211,8 +239,51 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         });
     }
 
+    private void handleLinkPreview(EnrichedActivity activity, MyViewHolder holder) {
+        if (activity.getExtra().containsKey("linkUrl")) {
+            String linkUrl = ((String) activity.getExtra().get("linkUrl")).toLowerCase();
+            if (!TextUtils.isEmpty(linkUrl)) {
+                holder.linkPreviewContainer.setVisibility(View.VISIBLE);
+                if (activity.getExtra().containsKey("linkTitle")) {
+                    holder.linkTitleTv.setText((String) activity.getExtra().get("linkTitle"));
+                }
+                if (activity.getExtra().containsKey("linkDesc")) {
+                    holder.linkDescTv.setText((String) activity.getExtra().get("linkDesc"));
+                }
+                if (activity.getExtra().containsKey("linkPicUrl")) {
+                    String linkPicUrl = (String) activity.getExtra().get("linkPicUrl");
+                    glide
+                            .load(linkPicUrl)
+                            .error(R.drawable.ic_public_black_24dp)
+                            .placeholder(R.drawable.ic_public_black_24dp)
+                            .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                            .into(holder.linkImageIv);
+                }
+                holder.linkPreviewContainer.setOnClickListener(v -> {
+                    CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                    intentBuilder.setToolbarColor(ContextCompat.getColor(context, R.color.colorAccent));
+                    intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(context, R.color.dk_colorAccent));
+                    intentBuilder.enableUrlBarHiding();
+                    intentBuilder.setShowTitle(true);
+                    CustomTabsIntent customTabsIntent = intentBuilder.build();
+                    try {
+                        customTabsIntent.launchUrl(context, Uri.parse(linkUrl));
+                    } catch (ActivityNotFoundException e) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(linkUrl));
+                        context.startActivity(i);
+                    }
+                });
+            } else {
+                holder.linkPreviewContainer.setVisibility(GONE);
+            }
+        } else {
+            holder.linkPreviewContainer.setVisibility(GONE);
+        }
+    }
+
     private void handleCommentEditText(EnrichedActivity activity, MyViewHolder holder) {
-        GlideApp.with(context)
+        glide
                 .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
                 .apply(new RequestOptions().override(dpToPx(24), dpToPx(24)))
                 .circleCrop()
@@ -228,31 +299,31 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                         holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
                     }
                 });
-        holder.commentEdtText.setOnClickListener(v -> replyClickListener.onReplyClicked(activity.getID(), holder.getAdapterPosition()));
+        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), holder.getAdapterPosition()));
     }
 
-    public interface ReplyClickListener {
+    public interface FeedListener {
         void onReplyClicked(String activityId, int position);
+
+        void onImageClicked(String imgPath, ImageView imageView);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
-        if(activity.getLatestReactions()!=null){
-            List<Reaction> commentList = activity.getLatestReactions().get("comment");
-            if (commentList != null && commentList.size() > 0) {
-                LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
-                holder.commentRecyclerView.setVisibility(View.VISIBLE);
-                holder.viewAllRepliesTv.setVisibility(View.VISIBLE);
-                holder.commentRecyclerView.setLayoutManager(layoutManager);
-                holder.commentRecyclerView.setNestedScrollingEnabled(false);
-                holder.viewAllRepliesTv.setOnClickListener(v -> {
-                    FeedPostActivity.open(context, activity.getID());
-                });
-                FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
-                holder.commentRecyclerView.setAdapter(adapter);
-            } else {
-                holder.commentRecyclerView.setVisibility(GONE);
-                holder.viewAllRepliesTv.setVisibility(GONE);
-            }
+        List<Reaction> commentList = activity.getLatestReactions().get("comment");
+        if (commentList != null && commentList.size() > 0) {
+            LinearLayoutManager layoutManager = new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false);
+            holder.commentRecyclerView.setVisibility(View.VISIBLE);
+            holder.viewAllRepliesTv.setVisibility(View.VISIBLE);
+            holder.commentRecyclerView.setLayoutManager(layoutManager);
+            holder.commentRecyclerView.setNestedScrollingEnabled(false);
+            holder.viewAllRepliesTv.setOnClickListener(v -> {
+                FeedPostActivity.open(context, activity.getID());
+            });
+            FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
+            holder.commentRecyclerView.setAdapter(adapter);
+        } else {
+            holder.commentRecyclerView.setVisibility(GONE);
+            holder.viewAllRepliesTv.setVisibility(GONE);
         }
     }
 
@@ -262,22 +333,20 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int stringRes, int change) {
-        if(enrichedActivity.getReactionCounts()!=null){
-            Number reactionNumber = enrichedActivity.getReactionCounts().get(reaction);
-            if (reactionNumber == null) {
-                reactionNumber = 0;
-            }
-            int reactionCount = reactionNumber.intValue();
-            if (change != 0) {
-                reactionCount += change;
-                enrichedActivity.getReactionCounts().put(reaction, reactionCount);
-            }
-            if (reactionCount > 0) {
-                statsTv.setVisibility(View.VISIBLE);
-                statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
-            } else {
-                statsTv.setVisibility(GONE);
-            }
+        Number reactionNumber = enrichedActivity.getReactionCounts().get(reaction);
+        if (reactionNumber == null) {
+            reactionNumber = 0;
+        }
+        int reactionCount = reactionNumber.intValue();
+        if (change != 0) {
+            reactionCount += change;
+            enrichedActivity.getReactionCounts().put(reaction, reactionCount);
+        }
+        if (reactionCount > 0) {
+            statsTv.setVisibility(View.VISIBLE);
+            statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
+        } else {
+            statsTv.setVisibility(GONE);
         }
     }
 
@@ -370,14 +439,15 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private EmojiTextView textContentTv;
         private ImageView photoContentIv;
-        private ImageView authorPhotoIv;
-        private TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
+        private ImageView authorPhotoIv, linkImageIv;
+        private TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, linkTitleTv, linkDescTv;
         private LinearLayout likeLayout;
         private TextView likeStatsTv, replyStatsTv;
         private ImageView likeIv;
         private LinearLayout commentLayout;
         private TextView commentEdtText;
         private RecyclerView commentRecyclerView;
+        private RelativeLayout linkPreviewContainer;
 
         public MyViewHolder(View view) {
             super(view);
@@ -396,6 +466,10 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             commentLayout = view.findViewById(R.id.cont_reply);
             commentEdtText = view.findViewById(R.id.comment_edit_text);
             commentRecyclerView = view.findViewById(R.id.comment_recycler_view);
+            linkPreviewContainer = view.findViewById(R.id.cont_link_preview);
+            linkImageIv = view.findViewById(R.id.iv_link_image);
+            linkTitleTv = view.findViewById(R.id.tv_link_title);
+            linkDescTv = view.findViewById(R.id.tv_link_desc);
         }
     }
 
