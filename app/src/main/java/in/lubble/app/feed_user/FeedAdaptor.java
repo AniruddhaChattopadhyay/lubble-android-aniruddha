@@ -1,5 +1,6 @@
 package in.lubble.app.feed_user;
 
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -7,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
@@ -59,7 +61,9 @@ import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FeedUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import io.getstream.core.exceptions.StreamException;
@@ -107,37 +111,36 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         holder.groupNameTv.setVisibility(View.GONE);
         holder.lubbleNameTv.setVisibility(View.GONE);
         if (extras != null) {
-            if (extras.containsKey("message")) {
-                holder.textContentTv.setVisibility(View.VISIBLE);
-                holder.textContentTv.setText(FormatText.boldAndItalics(String.valueOf(extras.get("message"))));
-                holder.textContentTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+            holder.textContentTv.setVisibility(View.VISIBLE);
+            final String message = String.valueOf(extras.get("message") == null ? "" : extras.get("message"));
+            holder.textContentTv.setText(FormatText.boldAndItalics(message));
+            holder.textContentTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
 
-                Linkify.addLinks(holder.textContentTv, Linkify.ALL);
-                BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("group_id", String.valueOf(extras.get("group")));
-                    bundle.putString("post_id", activity.getID());
-                    bundle.putString("author_uid", activity.getActor().getID());
-                    Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, context);
-                    return false;
-                }).setOnLinkLongClickListener((textView, url) -> {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("group_id", String.valueOf(extras.get("group")));
-                    bundle.putString("post_id", activity.getID());
-                    bundle.putString("author_uid", activity.getActor().getID());
-                    Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, context);
+            Linkify.addLinks(holder.textContentTv, Linkify.ALL);
+            BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
+                Bundle bundle = new Bundle();
+                bundle.putString("group_id", String.valueOf(extras.get("group")));
+                bundle.putString("post_id", activity.getID());
+                bundle.putString("author_uid", activity.getActor().getID());
+                Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, context);
+                return false;
+            }).setOnLinkLongClickListener((textView, url) -> {
+                Bundle bundle = new Bundle();
+                bundle.putString("group_id", String.valueOf(extras.get("group")));
+                bundle.putString("post_id", activity.getID());
+                bundle.putString("author_uid", activity.getActor().getID());
+                Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, context);
 
-                    ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
-                    clipboard.setPrimaryClip(clip);
-                    Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT).show();
-                    return true;
-                });
-                holder.textContentTv.setMovementMethod(betterLinkMovementMethod);
+                ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
+                clipboard.setPrimaryClip(clip);
+                Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT).show();
+                return true;
+            });
+            holder.textContentTv.setMovementMethod(betterLinkMovementMethod);
 
-                CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
-                });
-            }
+            CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
+            });
             if (extras.containsKey("aspectRatio") && extras.get("aspectRatio") instanceof Double) {
                 float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
                 if (aspectRatio > 0) {
@@ -237,6 +240,23 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         holder.authorPhotoIv.setOnClickListener(v -> {
             ProfileActivity.open(context, activity.getActor().getID());
         });
+        holder.shareLayout.setOnClickListener(v -> {
+            FeedUtils.requestPostShareIntent(glide, activity, extras, this::startShareFlow);
+        });
+    }
+
+    private void startShareFlow(Intent sharingIntent) {
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context, 21,
+                new Intent(context, ShareSheetReceiver.class),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.refer_share_title), pendingIntent.getIntentSender()));
+        } else {
+            context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.refer_share_title)));
+        }
+        Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, context);
     }
 
     private void handleLinkPreview(EnrichedActivity activity, MyViewHolder holder) {
@@ -441,7 +461,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         private ImageView photoContentIv;
         private ImageView authorPhotoIv, linkImageIv;
         private TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, linkTitleTv, linkDescTv;
-        private LinearLayout likeLayout;
+        private LinearLayout likeLayout, shareLayout;
         private TextView likeStatsTv, replyStatsTv;
         private ImageView likeIv;
         private LinearLayout commentLayout;
@@ -460,6 +480,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             viewAllRepliesTv = view.findViewById(R.id.tv_view_all_replies);
             timePostedTv = view.findViewById(R.id.feed_post_timestamp);
             likeLayout = view.findViewById(R.id.cont_like);
+            shareLayout = view.findViewById(R.id.cont_share);
             likeStatsTv = view.findViewById(R.id.tv_like_stats);
             replyStatsTv = view.findViewById(R.id.tv_reply_stats);
             likeIv = view.findViewById(R.id.like_imageview);

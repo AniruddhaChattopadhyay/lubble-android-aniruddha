@@ -1,5 +1,6 @@
 package in.lubble.app.feed_post;
 
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -7,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -54,8 +56,10 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.DateTimeUtils;
+import in.lubble.app.utils.FeedUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
@@ -83,7 +87,7 @@ public class FeedPostFrag extends Fragment {
     private ImageView photoContentIv;
     private ImageView authorPhotoIv;
     private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
-    private LinearLayout likeLayout;
+    private LinearLayout likeLayout, shareLayout;
     private TextView likeStatsTv, replyStatsTv, noRepliesHelpTextTv, linkTitleTv, linkDescTv;
     private ImageView likeIv, replyIv, linkImageIv;
     private LinearLayout commentLayout;
@@ -118,6 +122,7 @@ public class FeedPostFrag extends Fragment {
         authorPhotoIv = view.findViewById(R.id.feed_author_photo);
         timePostedTv = view.findViewById(R.id.feed_post_timestamp);
         likeLayout = view.findViewById(R.id.cont_like);
+        shareLayout = view.findViewById(R.id.cont_share);
         likeStatsTv = view.findViewById(R.id.tv_like_stats);
         likeIv = view.findViewById(R.id.like_imageview);
         commentLayout = view.findViewById(R.id.cont_reply);
@@ -256,6 +261,12 @@ public class FeedPostFrag extends Fragment {
                                 handleReactionStats(enrichedActivity);
                                 handleReplyBottomSheet(enrichedActivity);
                                 handleLinkPreview(enrichedActivity);
+
+                                shareLayout.setOnClickListener(v -> {
+                                    FeedUtils.requestPostShareIntent(GlideApp.with(requireContext()),
+                                            enrichedActivity, extras,
+                                            this::startShareFlow);
+                                });
                             } else {
                                 Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
                                 getActivity().finish();
@@ -508,6 +519,20 @@ public class FeedPostFrag extends Fragment {
                 //todo
             }
         }
+    }
+
+    private void startShareFlow(Intent sharingIntent) {
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                requireContext(), 21,
+                new Intent(requireContext(), ShareSheetReceiver.class),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title), pendingIntent.getIntentSender()));
+        } else {
+            startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
+        }
+        Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, requireContext());
     }
 
 }
