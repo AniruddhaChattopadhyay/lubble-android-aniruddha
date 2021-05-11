@@ -36,6 +36,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -192,11 +193,18 @@ public interface Endpoints {
     @GET("marketplace/getFeedGroupList/")
     Call<List<FeedGroupData>> getFeedGroupList();
 
+    @GET("marketplace/getExploreFeedGroupList/")
+    Call<List<FeedGroupData>> getExploreFeedGroupList();
+
     @POST("marketplace/addToUserLocalityAndGroupFeed/")
     Call<Void> addFeedPost(@Body RequestBody params);
 
-    @POST("marketplace/likePostToFeed/")
-    Call<Void> addLikeToFeed(@Body RequestBody params);
+    @POST("marketplace/addDeleteGroupForUser/")
+    Call<Void> addGroupForUser(@Body RequestBody params);
+
+    //@DELETE("marketplace/addDeleteGroupForUser/")
+    @HTTP(method = "DELETE", path = "marketplace/addDeleteGroupForUser/", hasBody = true)
+    Call<Void> deleteGroupForUser(@Body RequestBody params);
 
 
     public class StreamCredentials{

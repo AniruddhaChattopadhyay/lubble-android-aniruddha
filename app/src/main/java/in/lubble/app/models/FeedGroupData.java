@@ -10,6 +10,14 @@ public class FeedGroupData implements Serializable {
 
     @SerializedName("id")
     private Integer id;
+
+    public FeedGroupData(Integer id, String name, String feedName, String lubble) {
+        this.id = id;
+        this.name = name;
+        this.feedName = feedName;
+        this.lubble = lubble;
+    }
+
     @SerializedName("name")
     private String name;
     @SerializedName("feedName")
