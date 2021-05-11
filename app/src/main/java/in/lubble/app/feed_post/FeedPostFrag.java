@@ -1,9 +1,12 @@
 package in.lubble.app.feed_post;
 
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -15,11 +18,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
@@ -51,6 +56,7 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.DateTimeUtils;
+import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
@@ -78,8 +84,8 @@ public class FeedPostFrag extends Fragment {
     private ImageView authorPhotoIv;
     private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
     private LinearLayout likeLayout;
-    private TextView likeStatsTv, replyStatsTv, noRepliesHelpTextTv;
-    private ImageView likeIv, replyIv;
+    private TextView likeStatsTv, replyStatsTv, noRepliesHelpTextTv, linkTitleTv, linkDescTv;
+    private ImageView likeIv, replyIv, linkImageIv;
     private LinearLayout commentLayout;
     private ReplyEditText replyEt;
     private ShimmerRecyclerView commentRecyclerView;
@@ -87,6 +93,7 @@ public class FeedPostFrag extends Fragment {
     private String likeReactionId = null;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private BottomSheetBehavior sheetBehavior;
+    private RelativeLayout linkPreviewContainer;
 
     public static FeedPostFrag newInstance(String postId) {
         FeedPostFrag feedPostFrag = new FeedPostFrag();
@@ -121,6 +128,10 @@ public class FeedPostFrag extends Fragment {
         replyEt = view.findViewById(R.id.et_reply);
         replyIv = view.findViewById(R.id.iv_reply);
         replyProgressBar = view.findViewById(R.id.progressbar_reply);
+        linkPreviewContainer = view.findViewById(R.id.cont_link_preview);
+        linkImageIv = view.findViewById(R.id.iv_link_image);
+        linkTitleTv = view.findViewById(R.id.tv_link_title);
+        linkDescTv = view.findViewById(R.id.tv_link_desc);
 
         sheetBehavior = BottomSheetBehavior.from(replyBottomSheet);
         postId = requireArguments().getString(ARG_POST_ID);
@@ -187,10 +198,13 @@ public class FeedPostFrag extends Fragment {
                                     }
                                     if (extras.containsKey("photoLink")) {
                                         photoContentIv.setVisibility(View.VISIBLE);
+                                        String photoLink = extras.get("photoLink").toString();
                                         Glide.with(requireContext())
-                                                .load(extras.get("photoLink").toString())
+                                                .load(photoLink)
                                                 .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                                                 .into(photoContentIv);
+                                        photoContentIv.setOnClickListener(v ->
+                                                FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp));
                                     }
 
                                     if (extras.containsKey("authorName")) {
@@ -241,6 +255,7 @@ public class FeedPostFrag extends Fragment {
                                 });
                                 handleReactionStats(enrichedActivity);
                                 handleReplyBottomSheet(enrichedActivity);
+                                handleLinkPreview(enrichedActivity);
                             } else {
                                 Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
                                 getActivity().finish();
@@ -350,6 +365,46 @@ public class FeedPostFrag extends Fragment {
             Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             replyIv.setVisibility(View.VISIBLE);
             replyProgressBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void handleLinkPreview(EnrichedActivity activity) {
+        linkPreviewContainer.setVisibility(GONE);
+        if (activity.getExtra().containsKey("linkUrl")) {
+            String linkUrl = ((String) activity.getExtra().get("linkUrl")).toLowerCase();
+            if (!TextUtils.isEmpty(linkUrl)) {
+                linkPreviewContainer.setVisibility(View.VISIBLE);
+                if (activity.getExtra().containsKey("linkTitle")) {
+                    linkTitleTv.setText((String) activity.getExtra().get("linkTitle"));
+                }
+                if (activity.getExtra().containsKey("linkDesc")) {
+                    linkDescTv.setText((String) activity.getExtra().get("linkDesc"));
+                }
+                if (activity.getExtra().containsKey("linkPicUrl")) {
+                    String linkPicUrl = (String) activity.getExtra().get("linkPicUrl");
+                    GlideApp.with(requireContext())
+                            .load(linkPicUrl)
+                            .error(R.drawable.ic_public_black_24dp)
+                            .placeholder(R.drawable.ic_public_black_24dp)
+                            .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                            .into(linkImageIv);
+                }
+                linkPreviewContainer.setOnClickListener(v -> {
+                    CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                    intentBuilder.setToolbarColor(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+                    intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(requireContext(), R.color.dk_colorAccent));
+                    intentBuilder.enableUrlBarHiding();
+                    intentBuilder.setShowTitle(true);
+                    CustomTabsIntent customTabsIntent = intentBuilder.build();
+                    try {
+                        customTabsIntent.launchUrl(requireContext(), Uri.parse(linkUrl));
+                    } catch (ActivityNotFoundException e) {
+                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        i.setData(Uri.parse(linkUrl));
+                        startActivity(i);
+                    }
+                });
+            }
         }
     }
 

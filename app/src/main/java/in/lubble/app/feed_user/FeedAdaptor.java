@@ -73,16 +73,16 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     private final List<EnrichedActivity> activityList;
     private final Context context;
     private int itemWidth;
-    private final ReplyClickListener replyClickListener;
+    private final FeedListener feedListener;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
     private GlideRequests glide;
 
-    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, GlideRequests glide, ReplyClickListener replyClickListener) {
+    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, GlideRequests glide, FeedListener feedListener) {
         this.activityList = moviesList;
         this.context = context;
         this.glide = glide;
-        this.replyClickListener = replyClickListener;
+        this.feedListener = feedListener;
         this.itemWidth = displayWidth - UiUtils.dpToPx(32);
     }
 
@@ -148,8 +148,9 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             }
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
+                String photoLink = extras.get("photoLink").toString();
                 glide
-                        .load(extras.get("photoLink").toString())
+                        .load(photoLink)
                         .listener(new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -164,6 +165,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                         })
                         .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .into(holder.photoContentIv);
+                holder.photoContentIv.setOnClickListener(v -> feedListener.onImageClicked(photoLink, holder.photoContentIv));
             }
 
             if (extras.containsKey("authorName")) {
@@ -208,7 +210,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
         holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
-            replyClickListener.onReplyClicked(activity.getID(), position);
+            feedListener.onReplyClicked(activity.getID(), position);
         });
         holder.replyStatsTv.setOnClickListener(v -> {
             FeedPostActivity.open(context, activity.getID());
@@ -284,11 +286,12 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                         holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
                     }
                 });
-        holder.commentEdtText.setOnClickListener(v -> replyClickListener.onReplyClicked(activity.getID(), holder.getAdapterPosition()));
+        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), holder.getAdapterPosition()));
     }
 
-    public interface ReplyClickListener {
+    public interface FeedListener {
         void onReplyClicked(String activityId, int position);
+        void onImageClicked(String imgPath, ImageView imageView);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -453,9 +456,6 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             linkImageIv = view.findViewById(R.id.iv_link_image);
             linkTitleTv = view.findViewById(R.id.tv_link_title);
             linkDescTv = view.findViewById(R.id.tv_link_desc);
-
-            ImageView linkCloseIv = view.findViewById(R.id.iv_link_close);
-            linkCloseIv.setVisibility(GONE);
         }
     }
 

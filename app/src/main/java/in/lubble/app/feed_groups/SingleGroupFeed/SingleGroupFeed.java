@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -36,6 +35,7 @@ import in.lubble.app.feed_user.ReplyListener;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FullScreenImageActivity;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
@@ -49,13 +49,11 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
-public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickListener, ReplyListener {
+public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListener, ReplyListener {
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
     private EmojiTextView joinGroupTv;
-    private EditText replyEt;
-    private ImageView replyIv;
     private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
@@ -201,6 +199,11 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.ReplyClickL
     public void onReplied(String activityId, Reaction reaction) {
         postBtn.setVisibility(View.VISIBLE);
         adapter.addUserReply(activityId, reaction);
+    }
+
+    @Override
+    public void onImageClicked(String imgPath, ImageView imageView) {
+        FullScreenImageActivity.open(getActivity(), requireContext(), imgPath, imageView, null, R.drawable.ic_cancel_black_24dp);
     }
 
     @Override

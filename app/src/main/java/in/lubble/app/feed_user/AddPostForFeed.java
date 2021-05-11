@@ -85,6 +85,7 @@ public class AddPostForFeed extends BaseActivity {
         linkTitleTv = findViewById(R.id.tv_link_title);
         linkDescTv = findViewById(R.id.tv_link_desc);
         linkCloseIv = findViewById(R.id.iv_link_close);
+        linkCloseIv.setVisibility(View.VISIBLE);
 
         feedPostData = new FeedPostData();
         addTextChangeListener();
