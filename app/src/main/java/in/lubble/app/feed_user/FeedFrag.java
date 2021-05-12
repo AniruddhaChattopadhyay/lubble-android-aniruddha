@@ -12,16 +12,18 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.net.MalformedURLException;
-import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -32,7 +34,6 @@ import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.core.exceptions.StreamException;
-import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.Reaction;
 import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Limit;
@@ -42,7 +43,7 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
-public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener {
+public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener, SwipeRefreshLayout.OnRefreshListener {
 
     private static final String TAG = "FeedFrag";
 
@@ -52,6 +53,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private static final int REQUEST_CODE_POST = 800;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private FeedAdaptor adapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     public FeedFrag() {
         // Required empty public constructor
@@ -75,11 +77,14 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         final View view = inflater.inflate(R.layout.fragment_feed, container, false);
         postBtn = view.findViewById(R.id.btn_new_post);
         feedRV = view.findViewById(R.id.feed_recyclerview);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
 
         postBtn.setVisibility(View.VISIBLE);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         feedRV.setLayoutManager(layoutManager);
         feedRV.showShimmerAdapter();
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
@@ -130,7 +135,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     }
 
-    private List<EnrichedActivity> activityList;
 
     private void initRecyclerView() throws StreamException {
         FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
@@ -145,12 +149,15 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                         getActivity().runOnUiThread(() -> {
                             if (throwable != null) {
                                 //todo show retry option with error msg
+                                return;
                             }
                             if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
                                 // recycler view is currently holding shimmer adapter so hide it
                                 feedRV.hideShimmerAdapter();
                             }
-                            activityList = enrichedActivities;
+                            if (swipeRefreshLayout.isRefreshing()) {
+                                swipeRefreshLayout.setRefreshing(false);
+                            }
 
                             DisplayMetrics displayMetrics = new DisplayMetrics();
                             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -173,6 +180,16 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
         smoothScroller.setTargetPosition(position);
         feedRV.getLayoutManager().startSmoothScroll(smoothScroller);
+    }
+
+    @Override
+    public void onRefresh() {
+        try {
+            initRecyclerView();
+        } catch (StreamException e) {
+            e.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(e);
+        }
     }
 
     @Override
@@ -199,6 +216,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                 initRecyclerView();
             } catch (StreamException e) {
                 e.printStackTrace();
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         }
     }
@@ -208,5 +226,4 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         super.onStop();
         LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
     }
-
 }

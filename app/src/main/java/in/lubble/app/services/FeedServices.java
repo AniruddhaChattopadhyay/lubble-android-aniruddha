@@ -71,7 +71,7 @@ public class FeedServices {
         }
     }
 
-    public static boolean post(FeedPostData feedPostData, String groupName, @Nullable String imgUrl, float aspectRatio) {
+    public static boolean post(FeedPostData feedPostData, String groupName, @Nullable String imgUrl, float aspectRatio, @Nullable Callback<Void> callback) {
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
@@ -87,20 +87,21 @@ public class FeedServices {
             }
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
             Call<Void> call = endpoints.addFeedPost(body);
-            call.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    if (response.isSuccessful()) {
-                        //todo
-                    }
-                }
+            if (callback != null) {
+                call.enqueue(callback);
+            } else {
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
 
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    FirebaseCrashlytics.getInstance().recordException(t);
-                    //todo
-                }
-            });
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+
+                    }
+                });
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();

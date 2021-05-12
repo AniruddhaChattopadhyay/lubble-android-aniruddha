@@ -50,4 +50,12 @@
         app:backgroundTint="@color/colorAccent"
         app:icon="@drawable/ic_send_white_24dp" />
 
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressbar_post"/>
+
 </LinearLayout>
