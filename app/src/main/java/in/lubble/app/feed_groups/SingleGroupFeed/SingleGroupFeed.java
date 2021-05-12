@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -58,6 +59,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
+    private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
     private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
@@ -94,6 +96,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         joinGroupTv = rootView.findViewById(R.id.tv_join_group);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
+        joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
 
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
@@ -166,6 +169,9 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                 // joined
                 joinGroupTv.setVisibility(View.GONE);
                 postBtn.setVisibility(View.VISIBLE);
+                if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
+                    ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
+                }
             } else {
                 // not joined
                 joinGroupTv.setVisibility(View.VISIBLE);
@@ -187,6 +193,8 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private void joinGroup(CloudFlatFeed groupFeed, CloudFlatFeed userTimelineFeed) {
         try {
             userTimelineFeed.follow(groupFeed).join();
+            joinGroupTv.setText("");
+            joinGroupProgressBar.setVisibility(View.VISIBLE);
             final JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("groupFeedId", groupFeed.getUserID());
@@ -196,26 +204,38 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            //todo
+                        if (response.isSuccessful() && isAdded()) {
+                            Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
+                            joinGroupTv.setVisibility(View.GONE);
+                            postBtn.setVisibility(View.VISIBLE);
+                            joinGroupProgressBar.setVisibility(View.GONE);
+                            if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
+                                ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
+                            }
                         }
                     }
 
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         FirebaseCrashlytics.getInstance().recordException(t);
-                        //todo
+                        if (isAdded()) {
+                            joinGroupTv.setText("✨ JOIN GROUP");
+                            joinGroupProgressBar.setVisibility(View.GONE);
+                            String text = getString(R.string.all_something_wrong_try_again);
+                            if (t.getMessage() != null) {
+                                text = "Failed: " + t.getMessage();
+                            }
+                            Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT).show();
+                        }
                     }
                 });
 
             } catch (JSONException e) {
                 e.printStackTrace();
                 FirebaseCrashlytics.getInstance().recordException(e);
-                //todo
+                joinGroupProgressBar.setVisibility(View.GONE);
+                Snackbar.make(rootView, R.string.all_something_wrong_try_again, Snackbar.LENGTH_SHORT).show();
             }
-            Snackbar.make(rootView, "Joined", Snackbar.LENGTH_SHORT).show();
-            joinGroupTv.setVisibility(View.GONE);
-            postBtn.setVisibility(View.VISIBLE);
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
