@@ -145,7 +145,7 @@ dependencies {
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
     implementation files('libs/stream-analytics-release-1.1.0.aar')
     implementation project(path: ':libraries:ratingdialog')
-    implementation 'com.squareup.okhttp:okhttp:2.3.0'
+    implementation 'com.squareup.okhttp:okhttp:2.5.0'
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     implementation 'com.iceteck.silicompressorr:silicompressor:2.2.2'
     // in app update

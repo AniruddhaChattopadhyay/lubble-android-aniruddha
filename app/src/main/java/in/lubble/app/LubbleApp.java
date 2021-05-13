@@ -15,6 +15,7 @@ import com.clevertap.android.sdk.CleverTapAPI;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 import com.segment.analytics.Analytics;
@@ -28,6 +29,7 @@ import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
 import io.getstream.analytics.config.StreamAnalyticsAuth;
+import io.getstream.analytics.service.StreamAnalytics;
 import io.getstream.analytics.service.StreamAnalyticsImpl;
 
 import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
@@ -108,7 +110,8 @@ public class LubbleApp extends MultiDexApplication {
         Freshchat.getInstance(getApplicationContext()).setNotificationConfig(notificationConfig);
 
         StreamAnalyticsAuth auth = new StreamAnalyticsAuth("nvhsd4sv68k4", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.JNBodILjaJEuW2fwIjZTZcvKn8lXI0roercYGAZ1xAg");
-        StreamAnalyticsImpl.getInstance(auth);
+        StreamAnalytics streamAnalytics = StreamAnalyticsImpl.getInstance(auth);
+        streamAnalytics.setUserId(FirebaseAuth.getInstance().getUid());
     }
 
     public static LubbleApp getAppContext() {

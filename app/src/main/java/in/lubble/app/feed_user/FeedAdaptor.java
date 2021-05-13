@@ -79,11 +79,11 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     private static final String TAG = "FeedAdaptor";
     private final List<EnrichedActivity> activityList;
     private final Context context;
-    private int itemWidth;
+    private final int itemWidth;
     private final FeedListener feedListener;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
-    private GlideRequests glide;
+    private final GlideRequests glide;
 
     public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, GlideRequests glide, FeedListener feedListener) {
         this.activityList = moviesList;
