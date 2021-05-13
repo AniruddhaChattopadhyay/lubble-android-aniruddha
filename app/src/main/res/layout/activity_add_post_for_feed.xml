@@ -39,6 +39,7 @@
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:gravity="top|left"
+                android:maxLength="2000"
                 android:hint="What's happening around you?"
                 android:inputType="text|textCapSentences|textMultiLine"
                 android:paddingTop="16dp"

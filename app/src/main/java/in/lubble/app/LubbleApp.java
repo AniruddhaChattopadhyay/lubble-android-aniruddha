@@ -27,6 +27,8 @@ import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
+import io.getstream.analytics.config.StreamAnalyticsAuth;
+import io.getstream.analytics.service.StreamAnalyticsImpl;
 
 import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
 
@@ -105,6 +107,8 @@ public class LubbleApp extends MultiDexApplication {
 
         Freshchat.getInstance(getApplicationContext()).setNotificationConfig(notificationConfig);
 
+        StreamAnalyticsAuth auth = new StreamAnalyticsAuth("nvhsd4sv68k4", "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.JNBodILjaJEuW2fwIjZTZcvKn8lXI0roercYGAZ1xAg");
+        StreamAnalyticsImpl.getInstance(auth);
     }
 
     public static LubbleApp getAppContext() {

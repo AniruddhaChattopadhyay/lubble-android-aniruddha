@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.utils.StringUtils;
+import io.getstream.analytics.service.StreamAnalyticsImpl;
 
 public class Analytics {
 
@@ -204,6 +205,7 @@ public class Analytics {
                     .build();
             WorkManager.getInstance(context).enqueue(uploadWorkRequest);
 
+            StreamAnalyticsImpl.getInstance().setUserId(firebaseAuth.getUid());
         }
     }
 

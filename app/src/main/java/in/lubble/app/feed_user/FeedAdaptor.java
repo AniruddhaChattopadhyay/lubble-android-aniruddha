@@ -376,7 +376,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             // like
             Reaction like = new Reaction.Builder()
                     .kind("like")
-                    .id(userId)
+                    .id(userId + activity.getID())
                     .activityID(activity.getID())
                     .build();
             try {

@@ -487,7 +487,7 @@ public class FeedPostFrag extends Fragment {
             // like
             Reaction like = new Reaction.Builder()
                     .kind("like")
-                    .id(userId)
+                    .id(userId + enrichedActivity.getID())
                     .activityID(enrichedActivity.getID())
                     .build();
             try {
