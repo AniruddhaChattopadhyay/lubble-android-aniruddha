@@ -39,16 +39,19 @@ import io.getstream.core.models.Reaction;
 public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
 
     private static final String ARG_ACT_ID = "LBL_REPLY_ARG_ACT_ID";
+    private static final String ARG_FOREIGN_ID = "LBL_REPLY_ARG_FOREIGN_ID";
 
     private ReplyEditText replyEt;
     private ImageView replyIv;
     private ProgressBar progressBar;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private ReplyListener replyListener;
+    private String activityId, foreignId;
 
-    public static ReplyBottomSheetDialogFrag newInstance(String activityId) {
+    public static ReplyBottomSheetDialogFrag newInstance(String activityId, String foreignId) {
         Bundle args = new Bundle();
         args.putString(ARG_ACT_ID, activityId);
+        args.putString(ARG_FOREIGN_ID, foreignId);
         ReplyBottomSheetDialogFrag fragment = new ReplyBottomSheetDialogFrag();
         fragment.setArguments(args);
         return fragment;
@@ -87,7 +90,8 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
         replyEt.setFrag(this);
 
         if (getArguments() != null) {
-            getArguments().getString(ARG_ACT_ID);
+            activityId = getArguments().getString(ARG_ACT_ID);
+            foreignId = getArguments().getString(ARG_FOREIGN_ID);
         } else {
             throw new MissingFormatArgumentException("Activity ID missing");
         }
@@ -120,7 +124,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
 
         replyIv.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(replyEt.getText().toString())) {
-                postComment(getArguments().getString(ARG_ACT_ID));
+                postComment();
             } else {
                 Toast.makeText(getContext(), "Reply can't be empty", Toast.LENGTH_LONG).show();
             }
@@ -150,7 +154,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                 });
     }
 
-    private void postComment(String activityId) {
+    private void postComment() {
         try {
             replyIv.setVisibility(View.GONE);
             progressBar.setVisibility(View.VISIBLE);
@@ -173,7 +177,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                             replyEt.clearFocus();
                             replyEt.setText("");
                             LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
-                            replyListener.onReplied(activityId, reaction);
+                            replyListener.onReplied(activityId, foreignId, reaction);
                             dismiss();
                         }
                     });

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
@@ -20,13 +21,18 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.segment.analytics.Properties;
 import com.segment.analytics.Traits;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.StringUtils;
+import io.getstream.analytics.beans.Content;
+import io.getstream.analytics.beans.Engagement;
+import io.getstream.analytics.beans.Impression;
 import io.getstream.analytics.service.StreamAnalyticsImpl;
 
 public class Analytics {
@@ -207,6 +213,32 @@ public class Analytics {
 
             StreamAnalyticsImpl.getInstance().setUserId(firebaseAuth.getUid());
         }
+    }
+
+    public static void triggerFeedImpression(ArrayList<Content> contentList, @Nullable String feedName, String location) {
+        Impression.EventBuilder eventBuilder = new Impression.EventBuilder()
+                .withContentList(contentList)
+                .withLocation(location);
+        if (feedName != null) {
+            eventBuilder.withFeedId(feedName);
+        }
+        StreamAnalyticsImpl.getInstance().send(eventBuilder.build());
+    }
+
+    public static void triggerFeedEngagement(String foreignId, String action, int boost, @Nullable String feedName, String location) {
+        StreamAnalyticsImpl.getInstance().send(new Engagement.EventBuilder()
+                .withFeedId(feedName)
+                .withContent(
+                        new Content.ContentBuilder()
+                                .withForeignId(foreignId)
+                                .withAttribute("verb", action)
+                                .withAttribute("actor", FeedServices.uid)
+                                .build()
+                )
+                .withBoost(boost)
+                .withLocation(location)
+                .build()
+        );
     }
 
 }

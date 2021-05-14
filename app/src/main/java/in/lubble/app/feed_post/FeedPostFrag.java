@@ -46,6 +46,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -64,6 +65,7 @@ import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
+import io.getstream.analytics.beans.Content;
 import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
@@ -261,6 +263,7 @@ public class FeedPostFrag extends Fragment {
                                 handleReactionStats(enrichedActivity);
                                 handleReplyBottomSheet(enrichedActivity);
                                 handleLinkPreview(enrichedActivity);
+                                trackPostImpression(enrichedActivity);
 
                                 shareLayout.setOnClickListener(v -> {
                                     FeedUtils.requestPostShareIntent(GlideApp.with(requireContext()),
@@ -283,6 +286,15 @@ public class FeedPostFrag extends Fragment {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
+    }
+
+    private void trackPostImpression(EnrichedActivity enrichedActivity) {
+        ArrayList<Content> contentList = new ArrayList<>();
+        contentList.add(new Content.ContentBuilder()
+                .withForeignId(enrichedActivity.getForeignID())
+                .withAttribute("actor", userId)
+                .build());
+        Analytics.triggerFeedImpression(contentList, null, FeedPostFrag.class.getSimpleName());
     }
 
     private void handleReplyBottomSheet(EnrichedActivity enrichedActivity) {
@@ -316,7 +328,7 @@ public class FeedPostFrag extends Fragment {
 
         replyIv.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(replyEt.getText().toString())) {
-                postComment(activityId);
+                postComment(activityId, enrichedActivity.getForeignID());
             } else {
                 Toast.makeText(getContext(), "Reply can't be empty", Toast.LENGTH_LONG).show();
             }
@@ -340,7 +352,7 @@ public class FeedPostFrag extends Fragment {
                 });
     }
 
-    private void postComment(String activityId) {
+    private void postComment(String activityId, String foreignId) {
         try {
             replyIv.setVisibility(View.GONE);
             replyProgressBar.setVisibility(View.VISIBLE);
@@ -367,6 +379,7 @@ public class FeedPostFrag extends Fragment {
                             fetchPost();
                             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                             replyEt.hideIme();
+                            Analytics.triggerFeedEngagement(foreignId, "comment", 10, null, FeedPostFrag.class.getSimpleName());
                         }
                     });
                 }
@@ -499,6 +512,7 @@ public class FeedPostFrag extends Fragment {
                 likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 likeReactionId = like.getId();
                 extractReactionCount(enrichedActivity, "like", likeStatsTv, R.plurals.likes, 1);
+                Analytics.triggerFeedEngagement(enrichedActivity.getForeignID(), "like", 5, null, FeedPostFrag.class.getSimpleName());
             } catch (StreamException e) {
                 e.printStackTrace();
                 //todo
