@@ -7,12 +7,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -30,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.feed_user.AddPostForFeed;
 import in.lubble.app.feed_user.FeedAdaptor;
 import in.lubble.app.feed_user.ReplyBottomSheetDialogFrag;
@@ -38,6 +43,8 @@ import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.TrackingViewModel;
+import in.lubble.app.utils.VisibleState;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
@@ -53,11 +60,13 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListener, ReplyListener {
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
+    private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
     private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
@@ -66,6 +75,8 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private View rootView;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private FeedAdaptor adapter;
+    private LinearLayoutManager layoutManager;
+    private TrackingViewModel viewModel;
 
     public SingleGroupFeed() {
         // Required empty public constructor
@@ -84,6 +95,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             feedName = getArguments().getString(FEED_NAME_BUNDLE);
+            viewModel = new ViewModelProvider(this).get(TrackingViewModel.class);
         }
     }
 
@@ -94,12 +106,13 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         joinGroupTv = rootView.findViewById(R.id.tv_join_group);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
+        joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
 
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
         });
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         feedRV.setLayoutManager(layoutManager);
         feedRV.showShimmerAdapter();
         getCredentials();
@@ -157,6 +170,11 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
         adapter = new FeedAdaptor(getContext(), activities, width, GlideApp.with(this), this);
         feedRV.setAdapter(adapter);
+        feedRV.clearOnScrollListeners();
+        feedRV.addOnScrollListener(scrollListener);
+        viewModel.getDistinctLiveData().observe(this, visibleState -> {
+            processTrackedPosts(activities, visibleState, groupFeed.getID().toString(), SingleGroupFeed.class.getSimpleName());
+        });
 
         CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
         // Check if user follows this group feed
@@ -166,6 +184,9 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                 // joined
                 joinGroupTv.setVisibility(View.GONE);
                 postBtn.setVisibility(View.VISIBLE);
+                if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
+                    ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
+                }
             } else {
                 // not joined
                 joinGroupTv.setVisibility(View.VISIBLE);
@@ -184,9 +205,21 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         }
     }
 
+    RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
+        @Override
+        public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+            VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
+                    layoutManager.findLastCompletelyVisibleItemPosition());
+            viewModel.onScrolled(visibleState);
+        }
+    };
+
     private void joinGroup(CloudFlatFeed groupFeed, CloudFlatFeed userTimelineFeed) {
         try {
             userTimelineFeed.follow(groupFeed).join();
+            joinGroupTv.setText("");
+            joinGroupProgressBar.setVisibility(View.VISIBLE);
             final JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("groupFeedId", groupFeed.getUserID());
@@ -196,26 +229,38 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            //todo
+                        if (response.isSuccessful() && isAdded()) {
+                            Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
+                            joinGroupTv.setVisibility(View.GONE);
+                            postBtn.setVisibility(View.VISIBLE);
+                            joinGroupProgressBar.setVisibility(View.GONE);
+                            if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
+                                ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
+                            }
                         }
                     }
 
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         FirebaseCrashlytics.getInstance().recordException(t);
-                        //todo
+                        if (isAdded()) {
+                            joinGroupTv.setText("✨ JOIN GROUP");
+                            joinGroupProgressBar.setVisibility(View.GONE);
+                            String text = getString(R.string.all_something_wrong_try_again);
+                            if (t.getMessage() != null) {
+                                text = "Failed: " + t.getMessage();
+                            }
+                            Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT).show();
+                        }
                     }
                 });
 
             } catch (JSONException e) {
                 e.printStackTrace();
                 FirebaseCrashlytics.getInstance().recordException(e);
-                //todo
+                joinGroupProgressBar.setVisibility(View.GONE);
+                Snackbar.make(rootView, R.string.all_something_wrong_try_again, Snackbar.LENGTH_SHORT).show();
             }
-            Snackbar.make(rootView, "Joined", Snackbar.LENGTH_SHORT).show();
-            joinGroupTv.setVisibility(View.GONE);
-            postBtn.setVisibility(View.VISIBLE);
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
@@ -223,21 +268,27 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     }
 
     @Override
-    public void onReplyClicked(String activityId, int position) {
+    public void onReplyClicked(String activityId, String foreignId, int position) {
         postBtn.setVisibility(View.GONE);
-        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId);
+        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
     }
 
     @Override
-    public void onReplied(String activityId, Reaction reaction) {
+    public void onReplied(String activityId, String foreignId, Reaction reaction) {
         postBtn.setVisibility(View.VISIBLE);
         adapter.addUserReply(activityId, reaction);
+        Analytics.triggerFeedEngagement(foreignId, "comment", 10, "group:" + feedName, SingleGroupFeed.class.getSimpleName());
     }
 
     @Override
     public void onImageClicked(String imgPath, ImageView imageView) {
         FullScreenImageActivity.open(getActivity(), requireContext(), imgPath, imageView, null, R.drawable.ic_cancel_black_24dp);
+    }
+
+    @Override
+    public void onLiked(String foreignID) {
+        Analytics.triggerFeedEngagement(foreignID, "like", 5, "group:" + feedName, SingleGroupFeed.class.getSimpleName());
     }
 
     @Override

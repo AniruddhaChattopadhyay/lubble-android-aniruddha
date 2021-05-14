@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 // make sure this line comes *after* you apply the Android plugin
 apply plugin: 'com.google.firebase.firebase-perf'
 apply plugin: 'com.google.gms.google-services'
@@ -34,6 +35,9 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 
     flavorDimensions("type")
     productFlavors {
@@ -65,6 +69,7 @@ buildscript {
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    mavenCentral()
 }
 
 dependencies {
@@ -143,8 +148,9 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.2.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
+    implementation files('libs/stream-analytics-release-1.1.0.aar')
     implementation project(path: ':libraries:ratingdialog')
-    implementation 'com.squareup.okhttp:okhttp:2.3.0'
+    implementation 'com.squareup.okhttp:okhttp:2.5.0'
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     implementation 'com.iceteck.silicompressorr:silicompressor:2.2.2'
     // in app update
@@ -167,6 +173,9 @@ dependencies {
     implementation 'io.getstream.client:stream-java:3.2.4'
 
     implementation 'com.google.guava:guava:27.0.1-android'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2'
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
 
     //to solve the Duplicate class com.google.common.util.concurrent.ListenableFuture found in modules jetified-guava-20.0

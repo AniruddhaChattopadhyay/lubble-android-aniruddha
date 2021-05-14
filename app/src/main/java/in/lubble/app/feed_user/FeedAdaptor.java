@@ -23,7 +23,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
@@ -79,11 +78,11 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     private static final String TAG = "FeedAdaptor";
     private final List<EnrichedActivity> activityList;
     private final Context context;
-    private int itemWidth;
+    private final int itemWidth;
     private final FeedListener feedListener;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
-    private GlideRequests glide;
+    private final GlideRequests glide;
 
     public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, GlideRequests glide, FeedListener feedListener) {
         this.activityList = moviesList;
@@ -187,8 +186,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             }
             if (extras.containsKey("group") && extras.containsKey("lubble_id")) {
                 String groupFeedName = extras.get("group").toString() + '_' + extras.get("lubble_id");
-                AppCompatActivity activityNew = (AppCompatActivity) context;
                 holder.groupNameTv.setOnClickListener(v -> {
+                    //todo hardcoded id
                     FeedGroupData feedGroupData = new FeedGroupData(100, extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
                     GroupFeedActivity.open(context, feedGroupData);
 //                     activityNew.getSupportFragmentManager().beginTransaction()
@@ -226,7 +225,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
         holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
-            feedListener.onReplyClicked(activity.getID(), position);
+            feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), position);
         });
         holder.replyStatsTv.setOnClickListener(v -> {
             FeedPostActivity.open(context, activity.getID());
@@ -319,13 +318,15 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                         holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
                     }
                 });
-        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), holder.getAdapterPosition()));
+        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), holder.getAdapterPosition()));
     }
 
     public interface FeedListener {
-        void onReplyClicked(String activityId, int position);
+        void onReplyClicked(String activityId, String foreignId, int position);
 
         void onImageClicked(String imgPath, ImageView imageView);
+
+        void onLiked(String foreignID);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -376,7 +377,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             // like
             Reaction like = new Reaction.Builder()
                     .kind("like")
-                    .id(userId)
+                    .id(userId + activity.getID())
                     .activityID(activity.getID())
                     .build();
             try {
@@ -388,6 +389,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 likedMap.put(position, like.getId());
                 extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, 1);
+                feedListener.onLiked(activity.getForeignID());
             } catch (StreamException e) {
                 e.printStackTrace();
                 //todo

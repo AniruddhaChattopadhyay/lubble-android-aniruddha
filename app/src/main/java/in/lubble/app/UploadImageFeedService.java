@@ -266,7 +266,7 @@ public class UploadImageFeedService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            FeedServices.post(feedPostData, groupName, downloadUrl.toString(), aspectRatio);
+            FeedServices.post(feedPostData, groupName, downloadUrl.toString(), aspectRatio, null);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
@@ -12,14 +13,20 @@ import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.analytics.Analytics;
+import io.getstream.analytics.beans.Content;
 import io.getstream.core.models.EnrichedActivity;
 
 import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
@@ -103,6 +110,35 @@ public class FeedUtils {
             suffix = suffix.replace(lubbleNameKey, LubbleSharedPrefs.getInstance().getLubbleName());
         }
         return suffix;
+    }
+
+    public static void processTrackedPosts(List<EnrichedActivity> enrichedActivities, VisibleState visibleState, @Nullable String feedName, String location) {
+        try {
+            new Handler().post(() -> {
+                ArrayList<Content> contentList = new ArrayList<>();
+                int firstPos = visibleState.getFirstCompletelyVisible();
+                int lastPos = visibleState.getLastCompletelyVisible();
+                if (firstPos > 0 && lastPos > 0) {
+                    if (firstPos == lastPos) {
+                        contentList.add(new Content.ContentBuilder()
+                                .withForeignId(enrichedActivities.get(firstPos).getForeignID())
+                                .withAttribute("actor", FirebaseAuth.getInstance().getUid())
+                                .build());
+                    } else {
+                        List<EnrichedActivity> subList = enrichedActivities.subList(firstPos, lastPos);
+                        for (EnrichedActivity enrichedActivity : subList) {
+                            contentList.add(new Content.ContentBuilder()
+                                    .withForeignId(enrichedActivity.getForeignID())
+                                    .withAttribute("actor", FirebaseAuth.getInstance().getUid())
+                                    .build());
+                        }
+                    }
+                    Analytics.triggerFeedImpression(contentList, feedName, location);
+                }
+            });
+        } catch (Exception e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+        }
     }
 
 }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -48,6 +50,7 @@ public class GroupSelectionFrag extends Fragment {
     @Nullable
     private GroupSelectionAdapter groupSelectionAdapter;
     private List<FeedGroupData> feedGroupDataList;
+    private ProgressBar postProgressBar;
 
     public static GroupSelectionFrag newInstance(FeedPostData feedPostData) {
         GroupSelectionFrag groupSelectionFrag = new GroupSelectionFrag();
@@ -66,6 +69,7 @@ public class GroupSelectionFrag extends Fragment {
         groupsRv = view.findViewById(R.id.rv_groups);
         groupSv = view.findViewById(R.id.sv_group_selection);
         postSubmitBtn = view.findViewById(R.id.btn_post);
+        postProgressBar = view.findViewById(R.id.progressbar_post);
 
         groupsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
         getFeedGroups();
@@ -113,13 +117,32 @@ public class GroupSelectionFrag extends Fragment {
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(getContext(), serviceIntent);
                 } else {
-                    result = FeedServices.post(feedPostData, groupNameText, null, 0);
+                    postSubmitBtn.setVisibility(View.GONE);
+                    postProgressBar.setVisibility(View.VISIBLE);
+                    result = FeedServices.post(feedPostData, groupNameText, null, 0, new Callback<Void>() {
+                        @Override
+                        public void onResponse(Call<Void> call, Response<Void> response) {
+                            if (isAdded() && response.isSuccessful()) {
+                                requireActivity().setResult(RESULT_OK);
+                                requireActivity().finish();
+                                getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
+                            } else if (isAdded()) {
+                                postProgressBar.setVisibility(View.GONE);
+                                Snackbar.make(getView(), "Failed: " + response.message(), Snackbar.LENGTH_SHORT);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Void> call, Throwable t) {
+                            if (isAdded()) {
+                                postProgressBar.setVisibility(View.GONE);
+                                Snackbar.make(getView(), "Failed: " + t.getMessage(), Snackbar.LENGTH_SHORT);
+                            }
+                        }
+                    });
                 }
             }
             if (result) {
-                requireActivity().setResult(RESULT_OK);
-                requireActivity().finish();
-                getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
             }
         });
 
