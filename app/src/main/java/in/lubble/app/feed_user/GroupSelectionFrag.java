@@ -102,7 +102,6 @@ public class GroupSelectionFrag extends Fragment {
             String text = feedPostData.getText();
             FeedGroupData selectedGroupData = feedGroupDataList.get(groupSelectionAdapter.getLastCheckedPos());
             String groupNameText = selectedGroupData.getName();
-            boolean result = true;
             String uploadPath = "feed_photos";
             if (text != null) {
                 if (feedPostData.getImgUri() != null) {
@@ -119,9 +118,9 @@ public class GroupSelectionFrag extends Fragment {
                 } else {
                     postSubmitBtn.setVisibility(View.GONE);
                     postProgressBar.setVisibility(View.VISIBLE);
-                    result = FeedServices.post(feedPostData, groupNameText, null, 0, new Callback<Void>() {
+                    FeedServices.post(feedPostData, groupNameText, null, 0, new Callback<Void>() {
                         @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
+                        public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                             if (isAdded() && response.isSuccessful()) {
                                 requireActivity().setResult(RESULT_OK);
                                 requireActivity().finish();
@@ -133,7 +132,7 @@ public class GroupSelectionFrag extends Fragment {
                         }
 
                         @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
+                        public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
                             if (isAdded()) {
                                 postProgressBar.setVisibility(View.GONE);
                                 Snackbar.make(getView(), "Failed: " + t.getMessage(), Snackbar.LENGTH_SHORT);
@@ -141,8 +140,6 @@ public class GroupSelectionFrag extends Fragment {
                         }
                     });
                 }
-            }
-            if (result) {
             }
         });
 

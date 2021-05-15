@@ -187,12 +187,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             if (extras.containsKey("group") && extras.containsKey("lubble_id")) {
                 String groupFeedName = extras.get("group").toString() + '_' + extras.get("lubble_id");
                 holder.groupNameTv.setOnClickListener(v -> {
-                    //todo hardcoded id
-                    FeedGroupData feedGroupData = new FeedGroupData(100, extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
+                    FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
                     GroupFeedActivity.open(context, feedGroupData);
-//                     activityNew.getSupportFragmentManager().beginTransaction()
-//                            .replace(R.id.fragment_container, SingleGroupFeed.newInstance(groupFeedName))
-//                            .commitNow();
                 });
             }
         }

@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
@@ -45,17 +46,22 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
@@ -74,13 +80,19 @@ import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Filter;
 import io.getstream.core.options.Limit;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.view.View.GONE;
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedPostFrag extends Fragment {
 
     private static final String ARG_POST_ID = "LBL_ARG_POST_ID";
+    private static final int ACTION_PROMOTE_POST = 572;
 
     private String postId;
 
@@ -91,7 +103,7 @@ public class FeedPostFrag extends Fragment {
     private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
     private LinearLayout likeLayout, shareLayout;
     private TextView likeStatsTv, replyStatsTv, noRepliesHelpTextTv, linkTitleTv, linkDescTv;
-    private ImageView likeIv, replyIv, linkImageIv;
+    private ImageView likeIv, replyIv, linkImageIv, moreMenuIv;
     private LinearLayout commentLayout;
     private ReplyEditText replyEt;
     private ShimmerRecyclerView commentRecyclerView;
@@ -139,6 +151,7 @@ public class FeedPostFrag extends Fragment {
         linkImageIv = view.findViewById(R.id.iv_link_image);
         linkTitleTv = view.findViewById(R.id.tv_link_title);
         linkDescTv = view.findViewById(R.id.tv_link_desc);
+        moreMenuIv = view.findViewById(R.id.iv_more_menu);
 
         sheetBehavior = BottomSheetBehavior.from(replyBottomSheet);
         postId = requireArguments().getString(ARG_POST_ID);
@@ -270,6 +283,10 @@ public class FeedPostFrag extends Fragment {
                                             enrichedActivity, extras,
                                             this::startShareFlow);
                                 });
+
+                                moreMenuIv.setOnClickListener(v -> {
+                                    openMorePopupMenu(enrichedActivity.getID(), extras);
+                                });
                             } else {
                                 Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
                                 getActivity().finish();
@@ -286,6 +303,58 @@ public class FeedPostFrag extends Fragment {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
+    }
+
+    private void openMorePopupMenu(String activityId, Map<String, Object> extras) {
+        PopupMenu popupMenu = new PopupMenu(requireContext(), moreMenuIv);
+
+        popupMenu.getMenuInflater().inflate(R.menu.menu_post_more, popupMenu.getMenu());
+        if (BuildConfig.DEBUG || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+            popupMenu.getMenu().add(0, ACTION_PROMOTE_POST, popupMenu.getMenu().size(), "Promote Post");
+        } else {
+            popupMenu.getMenu().removeItem(ACTION_PROMOTE_POST);
+        }
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+            if (menuItem.getItemId() == ACTION_PROMOTE_POST) {
+                if (promotePost(activityId, extras)) return true;
+            }
+            return true;
+        });
+        popupMenu.show();
+    }
+
+    private boolean promotePost(String activityId, Map<String, Object> extras) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("feedGroupName", extras.get("group").toString() + "_" + extras.get("lubble_id").toString());
+            jsonObject.put("activityId", activityId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Snackbar.make(getView(), e.getMessage() == null ? "JSON error" : e.getMessage(), Snackbar.LENGTH_SHORT).show();
+            return true;
+        }
+        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+        endpoints.promotePost(body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                if (response.isSuccessful() && isAdded()) {
+                    Snackbar.make(getView(), "Promoted!", Snackbar.LENGTH_SHORT).show();
+                } else {
+                    if (isAdded()) {
+                        Toast.makeText(getContext(), response.message() == null ? getString(R.string.check_internet) : response.message(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                if (isAdded()) {
+                    Toast.makeText(getContext(), t.getMessage() == null ? getString(R.string.check_internet) : t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        return false;
     }
 
     private void trackPostImpression(EnrichedActivity enrichedActivity) {
