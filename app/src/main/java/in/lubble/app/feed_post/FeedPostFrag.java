@@ -41,6 +41,7 @@ import com.bumptech.glide.request.transition.Transition;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.curios.textformatter.FormatText;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -53,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -93,6 +93,7 @@ public class FeedPostFrag extends Fragment {
 
     private static final String ARG_POST_ID = "LBL_ARG_POST_ID";
     private static final int ACTION_PROMOTE_POST = 572;
+    private static final int ACTION_DELETE_POST = 464;
 
     private String postId;
 
@@ -242,7 +243,7 @@ public class FeedPostFrag extends Fragment {
                                 Map<String, Object> actorMap = enrichedActivity.getActor().getData();
                                 if (actorMap.containsKey("name")) {
                                     authorNameTv.setText(String.valueOf(actorMap.get("name")));
-                                    if (actorMap.containsKey("profile_picture")) {
+                                    if (actorMap.get("profile_picture") != null) {
                                         Glide.with(requireContext())
                                                 .load(actorMap.get("profile_picture").toString())
                                                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -285,7 +286,7 @@ public class FeedPostFrag extends Fragment {
                                 });
 
                                 moreMenuIv.setOnClickListener(v -> {
-                                    openMorePopupMenu(enrichedActivity.getID(), extras);
+                                    openMorePopupMenu(enrichedActivity.getID(), enrichedActivity.getActor().getID(), extras);
                                 });
                             } else {
                                 Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
@@ -305,25 +306,62 @@ public class FeedPostFrag extends Fragment {
         }
     }
 
-    private void openMorePopupMenu(String activityId, Map<String, Object> extras) {
+    private void openMorePopupMenu(String activityId, String actorId, Map<String, Object> extras) {
         PopupMenu popupMenu = new PopupMenu(requireContext(), moreMenuIv);
 
         popupMenu.getMenuInflater().inflate(R.menu.menu_post_more, popupMenu.getMenu());
-        if (BuildConfig.DEBUG || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
-            popupMenu.getMenu().add(0, ACTION_PROMOTE_POST, popupMenu.getMenu().size(), "Promote Post");
+        if (userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+            popupMenu.getMenu().add(0, ACTION_DELETE_POST, popupMenu.getMenu().size(), "Delete Post");
         } else {
             popupMenu.getMenu().removeItem(ACTION_PROMOTE_POST);
         }
+        if (userId.equalsIgnoreCase(actorId) || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+            popupMenu.getMenu().add(0, ACTION_DELETE_POST, popupMenu.getMenu().size(), "Delete Post");
+        } else {
+            popupMenu.getMenu().removeItem(ACTION_DELETE_POST);
+        }
         popupMenu.setOnMenuItemClickListener(menuItem -> {
             if (menuItem.getItemId() == ACTION_PROMOTE_POST) {
-                if (promotePost(activityId, extras)) return true;
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Promote Post?")
+                        .setMessage("Are you sure?")
+                        .setIcon(R.drawable.ic_star_shine)
+                        .setPositiveButton("Promote", (dialog, which) -> promotePost(activityId, extras))
+                        .setNegativeButton(R.string.all_cancel, (dialog, which) -> dialog.cancel())
+                        .show();
+            } else if (menuItem.getItemId() == ACTION_DELETE_POST) {
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Delete Post?")
+                        .setMessage("Are you sure? Once deleted, this post will be gone forever.\n\nThis action cannot be undone.")
+                        .setIcon(R.drawable.ic_cancel_red_24dp)
+                        .setPositiveButton(R.string.all_cancel, (dialog, which) -> dialog.cancel())
+                        .setNegativeButton("Delete Post", (dialog, which) -> deletePost(activityId))
+                        .show();
             }
             return true;
         });
         popupMenu.show();
     }
 
-    private boolean promotePost(String activityId, Map<String, Object> extras) {
+    private void deletePost(String activityId) {
+        try {
+            FeedServices.getTimelineClient().flatFeed("timeline", userId).removeActivityByID(activityId).whenComplete((aVoid, throwable) -> {
+                if (isAdded() && getActivity() != null) {
+                    if (throwable != null) {
+                        Snackbar.make(getView(), throwable.getMessage() == null ? "Failed to delete" : throwable.getMessage(), Snackbar.LENGTH_SHORT).show();
+                        return;
+                    }
+                    Toast.makeText(getContext(), "Post Deleted!", Toast.LENGTH_SHORT).show();
+                    getActivity().finish();
+                }
+            });
+        } catch (StreamException e) {
+            e.printStackTrace();
+            Snackbar.make(getView(), e.getMessage() == null ? "Failed to delete" : e.getMessage(), Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    private void promotePost(String activityId, Map<String, Object> extras) {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         JSONObject jsonObject = new JSONObject();
         try {
@@ -332,7 +370,7 @@ public class FeedPostFrag extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
             Snackbar.make(getView(), e.getMessage() == null ? "JSON error" : e.getMessage(), Snackbar.LENGTH_SHORT).show();
-            return true;
+            return;
         }
         RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
         endpoints.promotePost(body).enqueue(new Callback<Void>() {
@@ -354,7 +392,6 @@ public class FeedPostFrag extends Fragment {
                 }
             }
         });
-        return false;
     }
 
     private void trackPostImpression(EnrichedActivity enrichedActivity) {

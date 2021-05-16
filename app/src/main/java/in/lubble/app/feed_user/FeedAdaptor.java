@@ -489,6 +489,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             linkImageIv = view.findViewById(R.id.iv_link_image);
             linkTitleTv = view.findViewById(R.id.tv_link_title);
             linkDescTv = view.findViewById(R.id.tv_link_desc);
+            ImageView moreMenuIv = view.findViewById(R.id.iv_more_menu);
+            moreMenuIv.setVisibility(GONE);
         }
     }
 

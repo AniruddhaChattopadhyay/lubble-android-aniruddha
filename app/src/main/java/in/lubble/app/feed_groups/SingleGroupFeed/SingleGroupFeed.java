@@ -12,11 +12,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -62,7 +64,7 @@ import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
-public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListener, ReplyListener {
+public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListener, ReplyListener, SwipeRefreshLayout.OnRefreshListener {
 
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
@@ -74,6 +76,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private String feedName = null;
     private View rootView;
     private final String userId = FirebaseAuth.getInstance().getUid();
+    private SwipeRefreshLayout swipeRefreshLayout;
     private FeedAdaptor adapter;
     private LinearLayoutManager layoutManager;
     private TrackingViewModel viewModel;
@@ -107,6 +110,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         postBtn = rootView.findViewById(R.id.btn_new_post);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
         joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
+        swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_feed);
 
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
@@ -115,6 +119,9 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         feedRV.setLayoutManager(layoutManager);
         feedRV.showShimmerAdapter();
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
+
         getCredentials();
         return rootView;
     }
@@ -264,6 +271,16 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        try {
+            initRecyclerView();
+        } catch (StreamException e) {
+            e.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
 
