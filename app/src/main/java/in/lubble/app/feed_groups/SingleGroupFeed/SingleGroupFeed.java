@@ -39,20 +39,21 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.feed_user.AddPostForFeed;
 import in.lubble.app.feed_user.FeedAdaptor;
+import in.lubble.app.feed_user.FeedFrag;
+import in.lubble.app.feed_user.FeedPostComparator;
 import in.lubble.app.feed_user.ReplyBottomSheetDialogFrag;
 import in.lubble.app.feed_user.ReplyListener;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FeedViewModel;
 import in.lubble.app.utils.FullScreenImageActivity;
-import in.lubble.app.utils.TrackingViewModel;
 import in.lubble.app.utils.VisibleState;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FollowRelation;
 import io.getstream.core.models.Reaction;
-import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Limit;
 import io.getstream.core.options.Offset;
 import okhttp3.RequestBody;
@@ -79,7 +80,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private SwipeRefreshLayout swipeRefreshLayout;
     private FeedAdaptor adapter;
     private LinearLayoutManager layoutManager;
-    private TrackingViewModel viewModel;
+    private FeedViewModel viewModel;
 
     public SingleGroupFeed() {
         // Required empty public constructor
@@ -98,7 +99,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             feedName = getArguments().getString(FEED_NAME_BUNDLE);
-            viewModel = new ViewModelProvider(this).get(TrackingViewModel.class);
+            viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
         }
     }
 
@@ -159,28 +160,35 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     private void initRecyclerView() throws StreamException {
         CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
-        activities = groupFeed
-                .getEnrichedActivities(new Limit(25),
-                        new EnrichmentFlags()
-                                .withReactionCounts()
-                                .withOwnReactions()
-                                .withRecentReactions())
-                .join();
-        if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
-            // recycler view is currently holding shimmer adapter so hide it
-            feedRV.hideShimmerAdapter();
-        }
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = displayMetrics.widthPixels;
 
-        adapter = new FeedAdaptor(getContext(), activities, width, GlideApp.with(this), this);
-        feedRV.setAdapter(adapter);
-        feedRV.clearOnScrollListeners();
-        feedRV.addOnScrollListener(scrollListener);
-        viewModel.getDistinctLiveData().observe(this, visibleState -> {
-            processTrackedPosts(activities, visibleState, groupFeed.getID().toString(), SingleGroupFeed.class.getSimpleName());
+        viewModel.loadPaginatedActivities(groupFeed, 10).observe(this, pagingData -> {
+             /*if (throwable != null) {
+                //todo show retry option with error msg
+                return;
+            }*/
+            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
+                // recycler view is currently holding shimmer adapter so hide it
+                feedRV.hideShimmerAdapter();
+            }
+            if (swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
+
+            if (adapter == null) {
+                adapter = new FeedAdaptor(new FeedPostComparator());
+                adapter.setVars(getContext(), width, GlideApp.with(this), this);
+                feedRV.setAdapter(adapter);
+                feedRV.clearOnScrollListeners();
+                feedRV.addOnScrollListener(scrollListener);
+                viewModel.getDistinctLiveData().observe(this, visibleState -> {
+                    processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
+                });
+            }
+            adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
 
         CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
@@ -294,7 +302,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     @Override
     public void onReplied(String activityId, String foreignId, Reaction reaction) {
         postBtn.setVisibility(View.VISIBLE);
-        adapter.addUserReply(activityId, reaction);
+        //adapter.addUserReply(activityId, reaction);
         Analytics.triggerFeedEngagement(foreignId, "comment", 10, "group:" + feedName, SingleGroupFeed.class.getSimpleName());
     }
 

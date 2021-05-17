@@ -3,6 +3,7 @@ package in.lubble.app;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
+import android.os.StrictMode;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.provider.FontRequest;
@@ -45,6 +46,19 @@ public class LubbleApp extends MultiDexApplication {
     @Override
     public void onCreate() {
         ActivityLifecycleCallback.register(this);
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                    .detectDiskReads()
+                    .detectDiskWrites()
+                    .detectNetwork()   // or .detectAll() for all detectable problems
+                    .penaltyLog()
+                    .build());
+            StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+                    .detectLeakedSqlLiteObjects()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .build());
+        }
         super.onCreate();
 
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);

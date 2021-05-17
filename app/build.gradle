@@ -73,6 +73,7 @@ repositories {
 }
 
 dependencies {
+    def paging_version = "3.0.0"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'com.google.firebase:firebase-crashlytics:17.1.1'
@@ -176,6 +177,8 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2'
     implementation "androidx.core:core-ktx:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "androidx.paging:paging-runtime:$paging_version"
+    implementation "androidx.paging:paging-guava:$paging_version"
 
 
     //to solve the Duplicate class com.google.common.util.concurrent.ListenableFuture found in modules jetified-guava-20.0

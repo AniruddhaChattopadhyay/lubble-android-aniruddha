@@ -22,7 +22,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.net.MalformedURLException;
 
@@ -33,14 +32,12 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FeedViewModel;
 import in.lubble.app.utils.FullScreenImageActivity;
-import in.lubble.app.utils.TrackingViewModel;
 import in.lubble.app.utils.VisibleState;
 import in.lubble.app.widget.PostReplySmoothScroller;
-import io.getstream.core.exceptions.StreamException;
+import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.models.Reaction;
-import io.getstream.core.options.EnrichmentFlags;
-import io.getstream.core.options.Limit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -59,7 +56,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private FeedAdaptor adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayoutManager layoutManager;
-    private TrackingViewModel viewModel;
+    private FeedViewModel viewModel;
 
     public FeedFrag() {
         // Required empty public constructor
@@ -75,7 +72,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this).get(TrackingViewModel.class);
+        viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
     }
 
     @Nullable
@@ -98,15 +95,12 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
-        try {
-            getCredentials();
-        } catch (StreamException e) {
-            e.printStackTrace();
-        }
+        getCredentials();
+
         return view;
     }
 
-    void getCredentials() throws StreamException {
+    void getCredentials() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
         String feedApiKey = LubbleSharedPrefs.getInstance().getFeedApiKey();
@@ -122,7 +116,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                         try {
                             FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
                             initRecyclerView();
-                        } catch (MalformedURLException | StreamException e) {
+                        } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
                     } else {
@@ -143,46 +137,38 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     }
 
+    private void initRecyclerView() {
+        CloudFlatFeed timelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", userId);
 
-    private void initRecyclerView() throws StreamException {
-        FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
-                .getEnrichedActivities(new Limit(25),
-                        new EnrichmentFlags()
-                                .withReactionCounts()
-                                .withOwnReactions()
-                                .withRecentReactions()
-                )
-                .whenComplete((enrichedActivities, throwable) -> {
-                    if (getActivity() != null && !getActivity().isFinishing()) {
-                        getActivity().runOnUiThread(() -> {
-                            if (throwable != null) {
-                                //todo show retry option with error msg
-                                return;
-                            }
-                            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
-                                // recycler view is currently holding shimmer adapter so hide it
-                                feedRV.hideShimmerAdapter();
-                            }
-                            if (swipeRefreshLayout.isRefreshing()) {
-                                swipeRefreshLayout.setRefreshing(false);
-                            }
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int width = displayMetrics.widthPixels;
 
-                            DisplayMetrics displayMetrics = new DisplayMetrics();
-                            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                            int width = displayMetrics.widthPixels;
+        viewModel.loadPaginatedActivities(timelineFeed, 10).observe(this, pagingData -> {
+             /*if (throwable != null) {
+                //todo show retry option with error msg
+                return;
+            }*/
+            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
+                // recycler view is currently holding shimmer adapter so hide it
+                feedRV.hideShimmerAdapter();
+            }
+            if (swipeRefreshLayout.isRefreshing()) {
+                swipeRefreshLayout.setRefreshing(false);
+            }
 
-                            adapter = new FeedAdaptor(getContext(), enrichedActivities, width,
-                                    GlideApp.with(this),
-                                    this);
-                            feedRV.setAdapter(adapter);
-                            feedRV.clearOnScrollListeners();
-                            feedRV.addOnScrollListener(scrollListener);
-                            viewModel.getDistinctLiveData().observe(this, visibleState -> {
-                                processTrackedPosts(enrichedActivities, visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
-                            });
-                        });
-                    }
+            if (adapter == null) {
+                adapter = new FeedAdaptor(new FeedPostComparator());
+                adapter.setVars(getContext(), width, GlideApp.with(this), this);
+                feedRV.setAdapter(adapter);
+                feedRV.clearOnScrollListeners();
+                feedRV.addOnScrollListener(scrollListener);
+                viewModel.getDistinctLiveData().observe(this, visibleState -> {
+                    processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
                 });
+            }
+            adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
+        });
     }
 
     RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
@@ -207,12 +193,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void onRefresh() {
-        try {
-            initRecyclerView();
-        } catch (StreamException e) {
-            e.printStackTrace();
-            FirebaseCrashlytics.getInstance().recordException(e);
-        }
+        initRecyclerView();
     }
 
     @Override
@@ -241,12 +222,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_POST && resultCode == RESULT_OK) {
-            try {
-                initRecyclerView();
-            } catch (StreamException e) {
-                e.printStackTrace();
-                FirebaseCrashlytics.getInstance().recordException(e);
-            }
+            initRecyclerView();
         }
     }
 

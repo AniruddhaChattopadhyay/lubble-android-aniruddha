@@ -26,6 +26,8 @@ import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+import androidx.paging.PagingDataAdapter;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -73,19 +75,21 @@ import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import static android.view.View.GONE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
-public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> {
+public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor.MyViewHolder> {
 
     private static final String TAG = "FeedAdaptor";
-    private final List<EnrichedActivity> activityList;
-    private final Context context;
-    private final int itemWidth;
-    private final FeedListener feedListener;
+    private Context context;
+    private int itemWidth;
+    private FeedListener feedListener;
+    private GlideRequests glide;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
-    private final GlideRequests glide;
 
-    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, GlideRequests glide, FeedListener feedListener) {
-        this.activityList = moviesList;
+    public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
+        super(diffCallback);
+    }
+
+    public void setVars(Context context, int displayWidth, GlideRequests glide, FeedListener feedListener) {
         this.context = context;
         this.glide = glide;
         this.feedListener = feedListener;
@@ -102,7 +106,10 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        EnrichedActivity activity = activityList.get(position);
+        EnrichedActivity activity = getItem(position);
+        if (activity == null) {
+            return;
+        }
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
 
@@ -368,7 +375,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private void toggleLike(MyViewHolder holder, int position) {
-        EnrichedActivity activity = activityList.get(position);
+        EnrichedActivity activity = getItem(position);
         if (!likedMap.containsKey(position)) {
             // like
             Reaction like = new Reaction.Builder()
@@ -432,7 +439,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     public void addUserReply(String activityId, Reaction reaction) {
         int pos = getActivityPosById(activityId);
         if (pos >= 0) {
-            EnrichedActivity updatedActivity = activityList.get(pos);
+            EnrichedActivity updatedActivity = getItem(pos);
             List<Reaction> latestCommentList = updatedActivity.getLatestReactions().get("comment");
             if (latestCommentList == null)
                 latestCommentList = new ArrayList<>();
@@ -443,15 +450,10 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private int getActivityPosById(String activityId) {
-        for (int i = 0; i < activityList.size(); i++)
-            if (activityId.equalsIgnoreCase(activityList.get(i).getID()))
+        for (int i = 0; i < getItemCount(); i++)
+            if (activityId.equalsIgnoreCase(getItem(i).getID()))
                 return i;
         return -1;
-    }
-
-    @Override
-    public int getItemCount() {
-        return activityList.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
