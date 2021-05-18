@@ -39,9 +39,7 @@ class FeedViewModel : ViewModel() {
                 PagingConfig(limit, 1), null,
                 { FeedPagingSource(cloudFlatFeed, limit) })
 
-        val pagingLiveData = pager.liveData
-        pagingLiveData.cachedIn(viewModelScope)
-        return pagingLiveData
+        return pager.liveData.cachedIn(viewModelScope)
     }
 
 }

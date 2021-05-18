@@ -160,7 +160,13 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             if (adapter == null) {
                 adapter = new FeedAdaptor(new FeedPostComparator());
                 adapter.setVars(getContext(), width, GlideApp.with(this), this);
-                feedRV.setAdapter(adapter);
+
+                feedRV.setAdapter(adapter.withLoadStateFooter(
+                        new PagingLoadStateAdapter(() -> {
+                            adapter.retry();
+                            return null;
+                        })
+                ));
                 feedRV.clearOnScrollListeners();
                 feedRV.addOnScrollListener(scrollListener);
                 viewModel.getDistinctLiveData().observe(this, visibleState -> {

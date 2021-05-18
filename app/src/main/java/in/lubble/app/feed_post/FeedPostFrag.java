@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -310,12 +311,12 @@ public class FeedPostFrag extends Fragment {
         PopupMenu popupMenu = new PopupMenu(requireContext(), moreMenuIv);
 
         popupMenu.getMenuInflater().inflate(R.menu.menu_post_more, popupMenu.getMenu());
-        if (userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
-            popupMenu.getMenu().add(0, ACTION_DELETE_POST, popupMenu.getMenu().size(), "Delete Post");
+        if (BuildConfig.DEBUG || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+            popupMenu.getMenu().add(0, ACTION_PROMOTE_POST, popupMenu.getMenu().size(), "Promote Post");
         } else {
             popupMenu.getMenu().removeItem(ACTION_PROMOTE_POST);
         }
-        if (userId.equalsIgnoreCase(actorId) || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+        if (BuildConfig.DEBUG || userId.equalsIgnoreCase(actorId) || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
             popupMenu.getMenu().add(0, ACTION_DELETE_POST, popupMenu.getMenu().size(), "Delete Post");
         } else {
             popupMenu.getMenu().removeItem(ACTION_DELETE_POST);
