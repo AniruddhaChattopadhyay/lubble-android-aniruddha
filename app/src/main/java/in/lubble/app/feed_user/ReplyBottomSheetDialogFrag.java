@@ -34,6 +34,7 @@ import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
 
 public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
@@ -166,7 +167,8 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                     .extraField("text", replyText)
                     .extraField("timestamp", System.currentTimeMillis())
                     .build();
-            FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
+            String notificationUserFeedId = "notification:"+FirebaseAuth.getInstance().getUid();
+            FeedServices.getTimelineClient().reactions().add(comment,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         progressBar.setVisibility(View.GONE);

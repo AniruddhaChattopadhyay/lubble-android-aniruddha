@@ -67,6 +67,7 @@ import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
@@ -381,7 +382,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                     .activityID(activity.getID())
                     .build();
             try {
-                FeedServices.getTimelineClient().reactions().add(like).whenComplete((reaction, throwable) -> {
+                String notificationUserFeedId = "notification:"+FirebaseAuth.getInstance().getUid();
+                FeedServices.getTimelineClient().reactions().add(like,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         //todo
                     }
