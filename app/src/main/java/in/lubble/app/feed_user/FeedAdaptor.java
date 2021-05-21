@@ -26,7 +26,10 @@ import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+import androidx.paging.LoadState;
+import androidx.paging.LoadStateAdapter;
 import androidx.paging.PagingDataAdapter;
+import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -330,6 +333,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         void onImageClicked(String imgPath, ImageView imageView);
 
         void onLiked(String foreignID);
+
+        void onRefreshLoading(@NotNull LoadState refresh);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -413,6 +418,15 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 //todo
             }
         }
+    }
+
+    public ConcatAdapter withLoadStateAdapters(LoadStateAdapter footer) {
+        addLoadStateListener(combinedLoadStates -> {
+            footer.setLoadState(combinedLoadStates.getAppend());
+            feedListener.onRefreshLoading(combinedLoadStates.getRefresh());
+            return null;
+        });
+        return new ConcatAdapter(FeedAdaptor.this, footer);
     }
 
     private String getPostDateDisplay(Date timePosted) {

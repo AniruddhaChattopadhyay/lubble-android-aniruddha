@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.paging.LoadState;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -26,6 +27,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,8 +41,8 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.feed_user.AddPostForFeed;
 import in.lubble.app.feed_user.FeedAdaptor;
-import in.lubble.app.feed_user.FeedFrag;
 import in.lubble.app.feed_user.FeedPostComparator;
+import in.lubble.app.feed_user.PagingLoadStateAdapter;
 import in.lubble.app.feed_user.ReplyBottomSheetDialogFrag;
 import in.lubble.app.feed_user.ReplyListener;
 import in.lubble.app.network.Endpoints;
@@ -51,7 +53,6 @@ import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.VisibleState;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
-import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FollowRelation;
 import io.getstream.core.models.Reaction;
 import io.getstream.core.options.Limit;
@@ -71,7 +72,6 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private ShimmerRecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
-    private List<EnrichedActivity> activities = null;
     private static final int REQUEST_CODE_POST = 800;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
     private String feedName = null;
@@ -161,38 +161,38 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private void initRecyclerView() throws StreamException {
         CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int width = displayMetrics.widthPixels;
+        if (adapter == null) {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width = displayMetrics.widthPixels;
+            adapter = new FeedAdaptor(new FeedPostComparator());
+            adapter.setVars(getContext(), width, GlideApp.with(this), this);
 
+            feedRV.setAdapter(adapter.withLoadStateAdapters(
+                    new PagingLoadStateAdapter(() -> {
+                        adapter.retry();
+                        return null;
+                    })
+            ));
+            feedRV.clearOnScrollListeners();
+            feedRV.addOnScrollListener(scrollListener);
+            viewModel.getDistinctLiveData().observe(this, visibleState -> {
+                processTrackedPosts(adapter.snapshot().getItems(), visibleState, "group:" + feedName, SingleGroupFeed.class.getSimpleName());
+            });
+        }
         viewModel.loadPaginatedActivities(groupFeed, 10).observe(this, pagingData -> {
-             /*if (throwable != null) {
-                //todo show retry option with error msg
-                return;
-            }*/
-            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
-                // recycler view is currently holding shimmer adapter so hide it
-                feedRV.hideShimmerAdapter();
-            }
-            if (swipeRefreshLayout.isRefreshing()) {
-                swipeRefreshLayout.setRefreshing(false);
-            }
-
-            if (adapter == null) {
-                adapter = new FeedAdaptor(new FeedPostComparator());
-                adapter.setVars(getContext(), width, GlideApp.with(this), this);
-                feedRV.setAdapter(adapter);
-                feedRV.clearOnScrollListeners();
-                feedRV.addOnScrollListener(scrollListener);
-                viewModel.getDistinctLiveData().observe(this, visibleState -> {
-                    processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
-                });
-            }
+            layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
 
-        CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid);
-        // Check if user follows this group feed
+        checkGroupJoinedStatus(groupFeed);
+    }
+
+    /*
+    Check if user follows this group feed
+     */
+    private void checkGroupJoinedStatus(CloudFlatFeed groupFeed) throws StreamException {
+        CloudFlatFeed userTimelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", userId);
         try {
             List<FollowRelation> followed = userTimelineFeed.getFollowed(new Limit(1), new Offset(0), groupFeed.getID()).get();
             if (!followed.isEmpty()) {
@@ -217,6 +217,23 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                 getActivity().finish();
             }
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRefreshLoading(@NotNull LoadState refresh) {
+        if (refresh == LoadState.Loading.INSTANCE) {
+            if (!swipeRefreshLayout.isRefreshing()) {
+                //show shimmer only on first load, not when user pulled to refresh
+                feedRV.showShimmerAdapter();
+            }
+        } else {
+            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
+                // recycler view is currently holding shimmer adapter so hide it
+                // without this condition pagination will break!!
+                feedRV.hideShimmerAdapter();
+            }
+            swipeRefreshLayout.setRefreshing(false);
         }
     }
 

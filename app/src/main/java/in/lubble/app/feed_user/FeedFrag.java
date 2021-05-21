@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.paging.LoadState;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -22,6 +23,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
 
@@ -87,7 +90,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         feedRV.setLayoutManager(layoutManager);
-        feedRV.showShimmerAdapter();
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 
@@ -140,41 +142,46 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private void initRecyclerView() {
         CloudFlatFeed timelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", userId);
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int width = displayMetrics.widthPixels;
+        if (adapter == null) {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width = displayMetrics.widthPixels;
+            adapter = new FeedAdaptor(new FeedPostComparator());
+            adapter.setVars(getContext(), width, GlideApp.with(this), this);
 
+            feedRV.setAdapter(adapter.withLoadStateAdapters(
+                    new PagingLoadStateAdapter(() -> {
+                        adapter.retry();
+                        return null;
+                    })
+            ));
+            feedRV.clearOnScrollListeners();
+            feedRV.addOnScrollListener(scrollListener);
+            viewModel.getDistinctLiveData().observe(this, visibleState -> {
+                processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
+            });
+        }
         viewModel.loadPaginatedActivities(timelineFeed, 10).observe(this, pagingData -> {
-             /*if (throwable != null) {
-                //todo show retry option with error msg
-                return;
-            }*/
-            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
-                // recycler view is currently holding shimmer adapter so hide it
-                feedRV.hideShimmerAdapter();
-            }
-            if (swipeRefreshLayout.isRefreshing()) {
-                swipeRefreshLayout.setRefreshing(false);
-            }
-
-            if (adapter == null) {
-                adapter = new FeedAdaptor(new FeedPostComparator());
-                adapter.setVars(getContext(), width, GlideApp.with(this), this);
-
-                feedRV.setAdapter(adapter.withLoadStateFooter(
-                        new PagingLoadStateAdapter(() -> {
-                            adapter.retry();
-                            return null;
-                        })
-                ));
-                feedRV.clearOnScrollListeners();
-                feedRV.addOnScrollListener(scrollListener);
-                viewModel.getDistinctLiveData().observe(this, visibleState -> {
-                    processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
-                });
-            }
+            layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
+    }
+
+    @Override
+    public void onRefreshLoading(@NotNull LoadState refresh) {
+        if (refresh == LoadState.Loading.INSTANCE) {
+            if (!swipeRefreshLayout.isRefreshing()) {
+                //show shimmer only on first load, not when user pulled to refresh
+                feedRV.showShimmerAdapter();
+            }
+        } else {
+            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
+                // recycler view is currently holding shimmer adapter so hide it
+                // without this condition pagination will break!!
+                feedRV.hideShimmerAdapter();
+            }
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {

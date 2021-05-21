@@ -8,6 +8,8 @@ import io.getstream.core.models.EnrichedActivity
 import io.getstream.core.options.EnrichmentFlags
 import io.getstream.core.options.Limit
 import io.getstream.core.options.Offset
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class FeedPagingSource(
@@ -19,12 +21,7 @@ class FeedPagingSource(
         try {
             // Start refresh at 0 if undefined.
             val offset = params.key ?: 0
-            val response = cloudFlatFeed.getEnrichedActivities(Limit(limit), Offset(offset),
-                    EnrichmentFlags()
-                            .withReactionCounts()
-                            .withOwnReactions()
-                            .withRecentReactions())
-                    .join()
+            val response = getList(offset)
             val nextKey = if (response.size < limit) {
                 //fewer items were returned than the max limit, i.e. this is the last page
                 null
@@ -45,6 +42,17 @@ class FeedPagingSource(
         } catch (e: Exception) {
             // unexpected error
             return LoadResult.Error(e)
+        }
+    }
+
+    suspend fun getList(offset: Int): List<EnrichedActivity> {
+        return withContext(Dispatchers.Default) {
+            cloudFlatFeed.getEnrichedActivities(Limit(limit), Offset(offset),
+                    EnrichmentFlags()
+                            .withReactionCounts()
+                            .withOwnReactions()
+                            .withRecentReactions())
+                    .get()
         }
     }
 
