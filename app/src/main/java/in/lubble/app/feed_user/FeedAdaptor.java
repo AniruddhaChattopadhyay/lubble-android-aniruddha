@@ -81,7 +81,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
     private static final String TAG = "FeedAdaptor";
     private Context context;
-    private int itemWidth;
+    private int itemWidth, displayHeight;
     private FeedListener feedListener;
     private GlideRequests glide;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
@@ -91,11 +91,12 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         super(diffCallback);
     }
 
-    public void setVars(Context context, int displayWidth, GlideRequests glide, FeedListener feedListener) {
+    public void setVars(Context context, int displayWidth, int displayHeight, GlideRequests glide, FeedListener feedListener) {
         this.context = context;
         this.glide = glide;
         this.feedListener = feedListener;
         this.itemWidth = displayWidth - UiUtils.dpToPx(32);
+        this.displayHeight = displayHeight - UiUtils.dpToPx(172);
     }
 
     @Override
@@ -153,7 +154,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
                 if (aspectRatio > 0) {
                     holder.photoContentIv.setVisibility(View.VISIBLE);
-                    float targetHeight = itemWidth / aspectRatio;
+                    holder.photoContentIv.setMaxHeight(View.VISIBLE);
+                    float targetHeight = Math.min(displayHeight-holder.itemView.getMeasuredHeight(), itemWidth / aspectRatio);
                     ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
                     lp.height = Math.round(targetHeight);
                     holder.photoContentIv.setLayoutParams(lp);

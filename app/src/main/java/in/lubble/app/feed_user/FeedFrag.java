@@ -149,8 +149,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int width = displayMetrics.widthPixels;
+            int height = displayMetrics.heightPixels; //height of RV, excluding toolbar & bottom nav
             adapter = new FeedAdaptor(new FeedPostComparator());
-            adapter.setVars(getContext(), width, GlideApp.with(this), this);
+            adapter.setVars(getContext(), width, height, GlideApp.with(this), this);
 
             feedRV.setAdapter(adapter.withLoadStateAdapters(
                     new PagingLoadStateAdapter(() -> {

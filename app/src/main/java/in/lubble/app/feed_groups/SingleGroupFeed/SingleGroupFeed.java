@@ -165,8 +165,9 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int width = displayMetrics.widthPixels;
+            int height = displayMetrics.heightPixels;
             adapter = new FeedAdaptor(new FeedPostComparator());
-            adapter.setVars(getContext(), width, GlideApp.with(this), this);
+            adapter.setVars(getContext(), width, height, GlideApp.with(this), this);
 
             feedRV.setAdapter(adapter.withLoadStateAdapters(
                     new PagingLoadStateAdapter(() -> {

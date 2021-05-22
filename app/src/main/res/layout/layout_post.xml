@@ -100,6 +100,7 @@
         android:maxHeight="500dp"
         android:transitionName="fullscreen_image"
         android:visibility="gone"
+        android:scaleType="centerCrop"
         tools:src="@drawable/explore_default"
         tools:visibility="visible" />
 
@@ -109,17 +110,18 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/feed_photo_content"
         android:gravity="right"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal">
 
         <TextView
             android:id="@+id/tv_like_stats"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:layout_weight="1"
             android:drawablePadding="4dp"
             android:textColor="@color/black"
             android:visibility="gone"
+            android:textSize="12sp"
             app:drawableLeftCompat="@drawable/ic_favorite_16dp"
             tools:text="23 Likes"
             tools:visibility="visible" />
@@ -128,9 +130,9 @@
             android:id="@+id/tv_reply_stats"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_marginTop="8dp"
             android:drawablePadding="4dp"
             android:textColor="@color/black"
+            android:textSize="12sp"
             android:visibility="gone"
             app:drawableLeftCompat="@drawable/ic_reply_black_16dp"
             app:drawableTint="@color/md_grey_600"
@@ -144,7 +146,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@id/container_reaction_stats"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         app:srcCompat="@color/md_grey_300" />
 
     <LinearLayout
@@ -152,7 +154,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/separator_social"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -176,8 +178,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:gravity="center"
-                android:text="Like"
-                android:textColor="@color/black" />
+                android:text="Like" />
 
         </LinearLayout>
 
@@ -202,8 +203,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:gravity="center"
-                android:text="Reply"
-                android:textColor="@color/black" />
+                android:text="Reply"/>
 
         </LinearLayout>
 
@@ -228,8 +228,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:gravity="center"
-                android:text="Share"
-                android:textColor="@color/black" />
+                android:text="Share" />
 
         </LinearLayout>
 
@@ -240,6 +239,6 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_below="@id/social_layout"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         app:srcCompat="@color/md_grey_300" />
 </merge>
