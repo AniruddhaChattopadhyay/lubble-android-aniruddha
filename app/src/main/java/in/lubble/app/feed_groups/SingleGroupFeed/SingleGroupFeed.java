@@ -39,6 +39,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.feed_user.AddPostForFeed;
 import in.lubble.app.feed_user.FeedAdaptor;
 import in.lubble.app.feed_user.FeedPostComparator;
@@ -72,7 +73,8 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private ShimmerRecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
-    private static final int REQUEST_CODE_POST = 800;
+    private static final int REQUEST_CODE_NEW_POST = 800;
+    private static final int REQ_CODE_POST_ACTIV = 226;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
     private String feedName = null;
     private View rootView;
@@ -114,7 +116,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_feed);
 
         postBtn.setOnClickListener(v -> {
-            startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
+            startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
         });
 
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
@@ -139,10 +141,8 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                     final Endpoints.StreamCredentials credentials = response.body();
                     try {
                         FeedServices.init(credentials.getApi_key(), credentials.getUser_token());
-
                         initRecyclerView();
-
-                    } catch (MalformedURLException | StreamException e) {
+                    } catch (MalformedURLException e) {
                         e.printStackTrace();
                     }
 
@@ -158,7 +158,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         });
     }
 
-    private void initRecyclerView() throws StreamException {
+    private void initRecyclerView() {
         CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
 
         if (adapter == null) {
@@ -185,7 +185,12 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
 
-        checkGroupJoinedStatus(groupFeed);
+        try {
+            checkGroupJoinedStatus(groupFeed);
+        } catch (StreamException e) {
+            e.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(e);
+        }
     }
 
     /*
@@ -301,12 +306,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     @Override
     public void onRefresh() {
-        try {
-            initRecyclerView();
-        } catch (StreamException e) {
-            e.printStackTrace();
-            FirebaseCrashlytics.getInstance().recordException(e);
-        }
+        initRecyclerView();
     }
 
     @Override
@@ -334,6 +334,11 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     }
 
     @Override
+    public void openPostActivity(@NotNull String activityId) {
+        startActivityForResult(FeedPostActivity.getIntent(requireContext(), activityId), REQ_CODE_POST_ACTIV);
+    }
+
+    @Override
     public void onDismissed() {
         postBtn.setVisibility(View.VISIBLE);
     }
@@ -341,12 +346,11 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_POST && resultCode == RESULT_OK) {
-            try {
-                initRecyclerView();
-            } catch (StreamException e) {
-                e.printStackTrace();
-            }
+        if (requestCode == REQUEST_CODE_NEW_POST && resultCode == RESULT_OK) {
+            onRefresh();
+        } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
+            //refresh list
+            onRefresh();
         }
     }
 

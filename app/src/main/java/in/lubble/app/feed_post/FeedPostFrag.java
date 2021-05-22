@@ -1,6 +1,8 @@
 package in.lubble.app.feed_post;
 
+import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -336,7 +338,7 @@ public class FeedPostFrag extends Fragment {
                         .setMessage("Are you sure? Once deleted, this post will be gone forever.\n\nThis action cannot be undone.")
                         .setIcon(R.drawable.ic_cancel_red_24dp)
                         .setPositiveButton(R.string.all_cancel, (dialog, which) -> dialog.cancel())
-                        .setNegativeButton("Delete Post", (dialog, which) -> deletePost(activityId))
+                        .setNeutralButton("Delete Post", (dialog, which) -> deletePost(activityId))
                         .show();
             }
             return true;
@@ -345,21 +347,46 @@ public class FeedPostFrag extends Fragment {
     }
 
     private void deletePost(String activityId) {
+        ProgressDialog progressDialog = new ProgressDialog(requireContext());
+        progressDialog.setTitle("Deleting post");
+        progressDialog.setMessage("Please wait...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        JSONObject jsonObject = new JSONObject();
         try {
-            FeedServices.getTimelineClient().flatFeed("timeline", userId).removeActivityByID(activityId).whenComplete((aVoid, throwable) -> {
-                if (isAdded() && getActivity() != null) {
-                    if (throwable != null) {
-                        Snackbar.make(getView(), throwable.getMessage() == null ? "Failed to delete" : throwable.getMessage(), Snackbar.LENGTH_SHORT).show();
-                        return;
-                    }
-                    Toast.makeText(getContext(), "Post Deleted!", Toast.LENGTH_SHORT).show();
-                    getActivity().finish();
-                }
-            });
-        } catch (StreamException e) {
+            jsonObject.put("activityId", activityId);
+        } catch (JSONException e) {
             e.printStackTrace();
-            Snackbar.make(getView(), e.getMessage() == null ? "Failed to delete" : e.getMessage(), Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(getView(), e.getMessage() == null ? "JSON error" : e.getMessage(), Snackbar.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            return;
         }
+        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+        endpoints.deletePost(body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                if (response.isSuccessful() && isAdded()) {
+                    progressDialog.dismiss();
+                    Toast.makeText(LubbleApp.getAppContext(), "Post Deleted!", Toast.LENGTH_SHORT).show();
+                    getActivity().setResult(Activity.RESULT_OK);
+                    getActivity().finish();
+                } else {
+                    if (isAdded()) {
+                        progressDialog.dismiss();
+                        Toast.makeText(getContext(), response.message() == null ? getString(R.string.check_internet) : response.message(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                if (isAdded()) {
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), t.getMessage() == null ? getString(R.string.check_internet) : t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void promotePost(String activityId, Map<String, Object> extras) {

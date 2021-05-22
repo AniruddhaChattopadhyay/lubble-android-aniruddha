@@ -14,10 +14,10 @@ public class FeedPostActivity extends BaseActivity {
 
     private static final String ARG_POST_ID = "LBL_ARG_POST_ID";
 
-    public static void open(Context context, String postId) {
+    public static Intent getIntent(Context context, String postId) {
         Intent intent = new Intent(context, FeedPostActivity.class);
         intent.putExtra(ARG_POST_ID, postId);
-        context.startActivity(intent);
+        return intent;
     }
 
     @Override

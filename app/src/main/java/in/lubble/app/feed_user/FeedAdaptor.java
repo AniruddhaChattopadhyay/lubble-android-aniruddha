@@ -62,7 +62,6 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
-import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.receivers.ShareSheetReceiver;
@@ -234,13 +233,13 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), position);
         });
         holder.replyStatsTv.setOnClickListener(v -> {
-            FeedPostActivity.open(context, activity.getID());
+            feedListener.openPostActivity(activity.getID());
         });
         holder.itemView.setOnClickListener(v -> {
-            FeedPostActivity.open(context, activity.getID());
+            feedListener.openPostActivity(activity.getID());
         });
         holder.textContentTv.setOnClickListener(v -> {
-            FeedPostActivity.open(context, activity.getID());
+            feedListener.openPostActivity(activity.getID());
         });
         holder.authorPhotoIv.setOnClickListener(v -> {
             ProfileActivity.open(context, activity.getActor().getID());
@@ -335,6 +334,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         void onLiked(String foreignID);
 
         void onRefreshLoading(@NotNull LoadState refresh);
+
+        void openPostActivity(@NotNull String activityId);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -346,7 +347,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.commentRecyclerView.setLayoutManager(layoutManager);
             holder.commentRecyclerView.setNestedScrollingEnabled(false);
             holder.viewAllRepliesTv.setOnClickListener(v -> {
-                FeedPostActivity.open(context, activity.getID());
+                feedListener.openPostActivity(activity.getID());
             });
             FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
             holder.commentRecyclerView.setAdapter(adapter);

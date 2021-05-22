@@ -198,7 +198,7 @@ public class DeepLinkRouterActiv extends BaseActivity {
             case "feed_post":
                 final String postId = uri.getQueryParameter("id");
                 if (postId != null) {
-                    FeedPostActivity.open(this, postId);
+                    startActivity(FeedPostActivity.getIntent(this, postId));
                 } else {
                     startActivity(new Intent(this, MainActivity.class));
                 }

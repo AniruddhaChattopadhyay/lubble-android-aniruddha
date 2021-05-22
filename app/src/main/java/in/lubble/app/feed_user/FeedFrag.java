@@ -32,6 +32,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
@@ -52,9 +53,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     private static final String TAG = "FeedFrag";
 
+    private static final int REQUEST_CODE_NEW_POST = 800;
+    private static final int REQ_CODE_POST_ACTIV = 226;
+
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
-    private static final int REQUEST_CODE_POST = 800;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private FeedAdaptor adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -94,7 +97,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 
         postBtn.setOnClickListener(v -> {
-            startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
+            startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
         getCredentials();
@@ -168,6 +171,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     }
 
     @Override
+    public void openPostActivity(@NotNull String activityId) {
+        startActivityForResult(FeedPostActivity.getIntent(requireContext(), activityId), REQ_CODE_POST_ACTIV);
+    }
+
+    @Override
     public void onRefreshLoading(@NotNull LoadState refresh) {
         if (refresh == LoadState.Loading.INSTANCE) {
             if (!swipeRefreshLayout.isRefreshing()) {
@@ -234,7 +242,10 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_POST && resultCode == RESULT_OK) {
+        if (requestCode == REQUEST_CODE_NEW_POST && resultCode == RESULT_OK) {
+            initRecyclerView();
+        } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
+            //refresh list
             initRecyclerView();
         }
     }

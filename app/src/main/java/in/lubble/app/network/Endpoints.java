@@ -209,6 +209,9 @@ public interface Endpoints {
     @POST("marketplace/promotePost/")
     Call<Void> promotePost(@Body RequestBody params);
 
+    @POST("marketplace/deletePostByUserOrAdmin/")
+    Call<Void> deletePost(@Body RequestBody params);
+
     public class StreamCredentials{
         private String api_key;
         private String user_token;
