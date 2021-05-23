@@ -65,19 +65,18 @@ import in.lubble.app.chat.BlockedChatsActiv;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
-import in.lubble.app.feed_groups.FeedGroupsFrag;
-import in.lubble.app.feed_user.FeedFrag;
+import in.lubble.app.feed_user.FeedCombinedFragment;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
+import in.lubble.app.map.MapFragment;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.MainUtils;
 import in.lubble.app.utils.StringUtils;
@@ -345,10 +344,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
-//        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
-//        switchFrag(groupListFragment);
+        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
+        switchFrag(groupListFragment);
 
-        switchFrag(FeedFrag.newInstance());
 
         bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -630,10 +628,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
     }
 
-    public void openExplore() {
-        bottomNavigation.findViewById(R.id.navigation_explore).performClick();
-    }
-
     private void showBottomNavBadge() {
         if (!isNewUserInThisLubble) {
             if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
@@ -695,21 +689,21 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case "events":
                     bottomNavigation.setSelectedItemId(R.id.navigation_events);
                     break;
-                /*case "map":
+                case "map":
                     bottomNavigation.setSelectedItemId(R.id.navigation_map);
-                    break;*/
+                    break;
                 case "services":
                     bottomNavigation.setSelectedItemId(R.id.navigation_market);
                     break;
                 case "mplace":
                     bottomNavigation.setSelectedItemId(R.id.navigation_market);
                     break;
-                case "explore":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_explore);
+                case "feed":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_feed);
                     break;
-                case "games":
+                /*case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
-                    break;
+                    break;*/
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
         }
@@ -923,29 +917,22 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
-                    //switchFrag(groupListFragment = GroupListFragment.newInstance(false));
-                    switchFrag(FeedFrag.newInstance());
+                    switchFrag(groupListFragment = GroupListFragment.newInstance(false));
                     return true;
-                case R.id.navigation_explore:
-                    switchFrag(FeedGroupsFrag.newInstance());
-//                    switchFrag(ExploreFrag.newInstance());
+                case R.id.navigation_feed:
+                    switchFrag(FeedCombinedFragment.newInstance());
                     return true;
-                /*case R.id.navigation_map:
+                case R.id.navigation_map:
                     switchFrag(MapFragment.newInstance());
-                    return true;*/
+                    return true;
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
                     return true;
-                case R.id.navigation_fun:
+                /*case R.id.navigation_fun:
                     switchFrag(GamesFrag.newInstance());
-                    return true;
+                    return true;*/
                 case R.id.navigation_market:
                     switchFrag(MarketplaceFrag.newInstance());
-                    return true;
-//                case R.id.navigation_services:
-//                    switchFrag(ServicesFrag.newInstance());
-//                    return true;
-                case R.id.navigation_feed:
                     return true;
             }
             return false;

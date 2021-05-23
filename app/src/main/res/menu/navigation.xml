@@ -26,14 +26,9 @@
         android:icon="@drawable/ic_gamepad_controller"
         android:title="Quizzes" />-->
 
-<!--    <item-->
-<!--        android:id="@+id/navigation_services"-->
-<!--        android:icon="@drawable/ic_services_black"-->
-<!--        android:title="Services" />-->
-
     <item
-        android:id="@+id/navigation_feed"
-        android:icon="@drawable/ic_facebook"
-        android:title="Feed" />
+        android:id="@+id/navigation_services"
+        android:icon="@drawable/ic_services_black"
+        android:title="Services" />
 
 </menu>

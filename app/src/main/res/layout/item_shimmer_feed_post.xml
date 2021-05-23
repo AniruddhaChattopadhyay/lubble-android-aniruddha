@@ -14,7 +14,7 @@
         android:layout_alignParentTop="true"
         android:layout_margin="8dp"
         app:backgroundTint="@color/light_gray"
-        android:background="@drawable/circle" />
+        android:background="@drawable/circle_dark" />
 
     <View
         android:id="@+id/view-line1"

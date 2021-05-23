@@ -1,13 +1,17 @@
 package `in`.lubble.app.utils
 
+import `in`.lubble.app.feed_groups.FeedPagingSource
 import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.*
+import androidx.paging.*
+import io.getstream.cloud.CloudFlatFeed
+import io.getstream.core.models.EnrichedActivity
 import org.jetbrains.annotations.NotNull
 
-class TrackingViewModel : ViewModel() {
+class FeedViewModel : ViewModel() {
 
-    private val TAG = "TrackingFlow"
+    private val TAG = "FeedViewModel"
     private val liveData = MutableLiveData<VisibleState>()
     val distinctLiveData: LiveData<VisibleState> =
             Transformations.distinctUntilChanged(liveData).debounce()
@@ -28,6 +32,14 @@ class TrackingViewModel : ViewModel() {
 
     fun onScrolled(visibleState: @NotNull VisibleState) {
         liveData.postValue(visibleState)
+    }
+
+    fun loadPaginatedActivities(cloudFlatFeed: CloudFlatFeed, limit: Int): LiveData<PagingData<EnrichedActivity>> {
+        val pager: Pager<Int, EnrichedActivity> = Pager(
+                PagingConfig(limit, 1), null,
+                { FeedPagingSource(cloudFlatFeed, limit) })
+
+        return pager.liveData.cachedIn(viewModelScope)
     }
 
 }

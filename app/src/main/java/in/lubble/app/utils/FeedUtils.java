@@ -113,8 +113,8 @@ public class FeedUtils {
     }
 
     public static void processTrackedPosts(List<EnrichedActivity> enrichedActivities, VisibleState visibleState, @Nullable String feedName, String location) {
-        try {
-            new Handler().post(() -> {
+        new Handler().post(() -> {
+            try {
                 ArrayList<Content> contentList = new ArrayList<>();
                 int firstPos = visibleState.getFirstCompletelyVisible();
                 int lastPos = visibleState.getLastCompletelyVisible();
@@ -135,10 +135,10 @@ public class FeedUtils {
                     }
                     Analytics.triggerFeedImpression(contentList, feedName, location);
                 }
-            });
-        } catch (Exception e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-        }
+            } catch (Exception e) {
+                FirebaseCrashlytics.getInstance().recordException(e);
+            }
+        });
     }
 
 }

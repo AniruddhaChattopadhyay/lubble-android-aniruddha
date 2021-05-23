@@ -1,6 +1,8 @@
 package in.lubble.app.feed_post;
 
+import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -26,6 +28,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
@@ -40,22 +43,28 @@ import com.bumptech.glide.request.transition.Transition;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.curios.textformatter.FormatText;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
@@ -75,13 +84,20 @@ import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Filter;
 import io.getstream.core.options.Limit;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.view.View.GONE;
+import static in.lubble.app.Constants.MEDIA_TYPE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedPostFrag extends Fragment {
 
     private static final String ARG_POST_ID = "LBL_ARG_POST_ID";
+    private static final int ACTION_PROMOTE_POST = 572;
+    private static final int ACTION_DELETE_POST = 464;
 
     private String postId;
 
@@ -92,7 +108,7 @@ public class FeedPostFrag extends Fragment {
     private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
     private LinearLayout likeLayout, shareLayout;
     private TextView likeStatsTv, replyStatsTv, noRepliesHelpTextTv, linkTitleTv, linkDescTv;
-    private ImageView likeIv, replyIv, linkImageIv;
+    private ImageView likeIv, replyIv, linkImageIv, moreMenuIv;
     private LinearLayout commentLayout;
     private ReplyEditText replyEt;
     private ShimmerRecyclerView commentRecyclerView;
@@ -140,6 +156,7 @@ public class FeedPostFrag extends Fragment {
         linkImageIv = view.findViewById(R.id.iv_link_image);
         linkTitleTv = view.findViewById(R.id.tv_link_title);
         linkDescTv = view.findViewById(R.id.tv_link_desc);
+        moreMenuIv = view.findViewById(R.id.iv_more_menu);
 
         sheetBehavior = BottomSheetBehavior.from(replyBottomSheet);
         postId = requireArguments().getString(ARG_POST_ID);
@@ -230,7 +247,7 @@ public class FeedPostFrag extends Fragment {
                                 Map<String, Object> actorMap = enrichedActivity.getActor().getData();
                                 if (actorMap.containsKey("name")) {
                                     authorNameTv.setText(String.valueOf(actorMap.get("name")));
-                                    if (actorMap.containsKey("profile_picture") && actorMap.get("profile_picture")!=null) {
+                                    if (actorMap.get("profile_picture") != null) {
                                         Glide.with(requireContext())
                                                 .load(actorMap.get("profile_picture").toString())
                                                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -271,6 +288,10 @@ public class FeedPostFrag extends Fragment {
                                             enrichedActivity, extras,
                                             this::startShareFlow);
                                 });
+
+                                moreMenuIv.setOnClickListener(v -> {
+                                    openMorePopupMenu(enrichedActivity.getID(), enrichedActivity.getActor().getID(), extras);
+                                });
                             } else {
                                 Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
                                 getActivity().finish();
@@ -287,6 +308,119 @@ public class FeedPostFrag extends Fragment {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
+    }
+
+    private void openMorePopupMenu(String activityId, String actorId, Map<String, Object> extras) {
+        PopupMenu popupMenu = new PopupMenu(requireContext(), moreMenuIv);
+
+        popupMenu.getMenuInflater().inflate(R.menu.menu_post_more, popupMenu.getMenu());
+        if (BuildConfig.DEBUG || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+            popupMenu.getMenu().add(0, ACTION_PROMOTE_POST, popupMenu.getMenu().size(), "Promote Post");
+        } else {
+            popupMenu.getMenu().removeItem(ACTION_PROMOTE_POST);
+        }
+        if (BuildConfig.DEBUG || userId.equalsIgnoreCase(actorId) || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+            popupMenu.getMenu().add(0, ACTION_DELETE_POST, popupMenu.getMenu().size(), "Delete Post");
+        } else {
+            popupMenu.getMenu().removeItem(ACTION_DELETE_POST);
+        }
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+            if (menuItem.getItemId() == ACTION_PROMOTE_POST) {
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Promote Post?")
+                        .setMessage("Are you sure?")
+                        .setIcon(R.drawable.ic_star_shine)
+                        .setPositiveButton("Promote", (dialog, which) -> promotePost(activityId, extras))
+                        .setNegativeButton(R.string.all_cancel, (dialog, which) -> dialog.cancel())
+                        .show();
+            } else if (menuItem.getItemId() == ACTION_DELETE_POST) {
+                new MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Delete Post?")
+                        .setMessage("Are you sure? Once deleted, this post will be gone forever.\n\nThis action cannot be undone.")
+                        .setIcon(R.drawable.ic_cancel_red_24dp)
+                        .setPositiveButton(R.string.all_cancel, (dialog, which) -> dialog.cancel())
+                        .setNeutralButton("Delete Post", (dialog, which) -> deletePost(activityId))
+                        .show();
+            }
+            return true;
+        });
+        popupMenu.show();
+    }
+
+    private void deletePost(String activityId) {
+        ProgressDialog progressDialog = new ProgressDialog(requireContext());
+        progressDialog.setTitle("Deleting post");
+        progressDialog.setMessage("Please wait...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("activityId", activityId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Snackbar.make(getView(), e.getMessage() == null ? "JSON error" : e.getMessage(), Snackbar.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            return;
+        }
+        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+        endpoints.deletePost(body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                if (response.isSuccessful() && isAdded()) {
+                    progressDialog.dismiss();
+                    Toast.makeText(LubbleApp.getAppContext(), "Post Deleted!", Toast.LENGTH_SHORT).show();
+                    getActivity().setResult(Activity.RESULT_OK);
+                    getActivity().finish();
+                } else {
+                    if (isAdded()) {
+                        progressDialog.dismiss();
+                        Toast.makeText(getContext(), response.message() == null ? getString(R.string.check_internet) : response.message(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                if (isAdded()) {
+                    progressDialog.dismiss();
+                    Toast.makeText(getContext(), t.getMessage() == null ? getString(R.string.check_internet) : t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void promotePost(String activityId, Map<String, Object> extras) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("feedGroupName", extras.get("group").toString() + "_" + extras.get("lubble_id").toString());
+            jsonObject.put("activityId", activityId);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Snackbar.make(getView(), e.getMessage() == null ? "JSON error" : e.getMessage(), Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+        endpoints.promotePost(body).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
+                if (response.isSuccessful() && isAdded()) {
+                    Snackbar.make(getView(), "Promoted!", Snackbar.LENGTH_SHORT).show();
+                } else {
+                    if (isAdded()) {
+                        Toast.makeText(getContext(), response.message() == null ? getString(R.string.check_internet) : response.message(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<Void> call, @NotNull Throwable t) {
+                if (isAdded()) {
+                    Toast.makeText(getContext(), t.getMessage() == null ? getString(R.string.check_internet) : t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void trackPostImpression(EnrichedActivity enrichedActivity) {
@@ -329,7 +463,7 @@ public class FeedPostFrag extends Fragment {
 
         replyIv.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(replyEt.getText().toString())) {
-                postComment(activityId, enrichedActivity.getForeignID(),enrichedActivity.getActor().getID());
+                postComment(activityId, enrichedActivity.getForeignID(), enrichedActivity.getActor().getID());
             } else {
                 Toast.makeText(getContext(), "Reply can't be empty", Toast.LENGTH_LONG).show();
             }
@@ -353,7 +487,7 @@ public class FeedPostFrag extends Fragment {
                 });
     }
 
-    private void postComment(String activityId, String foreignId,String postActorUid) {
+    private void postComment(String activityId, String foreignId, String postActorUid) {
         try {
             replyIv.setVisibility(View.GONE);
             replyProgressBar.setVisibility(View.VISIBLE);
@@ -365,8 +499,8 @@ public class FeedPostFrag extends Fragment {
                     .extraField("text", replyText)
                     .extraField("timestamp", System.currentTimeMillis())
                     .build();
-            String notificationUserFeedId = "notification:"+postActorUid;
-            FeedServices.getTimelineClient().reactions().add(comment,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
+            String notificationUserFeedId = "notification:" + postActorUid;
+            FeedServices.getTimelineClient().reactions().add(comment, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         replyProgressBar.setVisibility(View.GONE);
@@ -506,8 +640,9 @@ public class FeedPostFrag extends Fragment {
                     .activityID(enrichedActivity.getID())
                     .build();
             try {
-                String notificationUserFeedId = "notification:"+ enrichedActivity.getActor().getID();;
-                FeedServices.getTimelineClient().reactions().add(like,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
+                String notificationUserFeedId = "notification:" + enrichedActivity.getActor().getID();
+                ;
+                FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         //todo
                     }

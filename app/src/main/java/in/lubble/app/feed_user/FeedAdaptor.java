@@ -26,6 +26,11 @@ import androidx.annotation.Nullable;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
+import androidx.paging.LoadState;
+import androidx.paging.LoadStateAdapter;
+import androidx.paging.PagingDataAdapter;
+import androidx.recyclerview.widget.ConcatAdapter;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -57,7 +62,6 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
-import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.receivers.ShareSheetReceiver;
@@ -74,23 +78,26 @@ import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import static android.view.View.GONE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
-public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> {
+public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor.MyViewHolder> {
 
     private static final String TAG = "FeedAdaptor";
-    private final List<EnrichedActivity> activityList;
-    private final Context context;
-    private final int itemWidth;
-    private final FeedListener feedListener;
+    private Context context;
+    private int itemWidth, displayHeight;
+    private FeedListener feedListener;
+    private GlideRequests glide;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
-    private final GlideRequests glide;
 
-    public FeedAdaptor(Context context, List<EnrichedActivity> moviesList, int displayWidth, GlideRequests glide, FeedListener feedListener) {
-        this.activityList = moviesList;
+    public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
+        super(diffCallback);
+    }
+
+    public void setVars(Context context, int displayWidth, int displayHeight, GlideRequests glide, FeedListener feedListener) {
         this.context = context;
         this.glide = glide;
         this.feedListener = feedListener;
         this.itemWidth = displayWidth - UiUtils.dpToPx(32);
+        this.displayHeight = displayHeight - UiUtils.dpToPx(172);
     }
 
     @Override
@@ -103,7 +110,10 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        EnrichedActivity activity = activityList.get(position);
+        EnrichedActivity activity = getItem(position);
+        if (activity == null) {
+            return;
+        }
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
 
@@ -145,7 +155,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                 float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
                 if (aspectRatio > 0) {
                     holder.photoContentIv.setVisibility(View.VISIBLE);
-                    float targetHeight = itemWidth / aspectRatio;
+                    holder.photoContentIv.setMaxHeight(View.VISIBLE);
+                    float targetHeight = Math.min(displayHeight - holder.itemView.getMeasuredHeight(), itemWidth / aspectRatio);
                     ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
                     lp.height = Math.round(targetHeight);
                     holder.photoContentIv.setLayoutParams(lp);
@@ -188,12 +199,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             if (extras.containsKey("group") && extras.containsKey("lubble_id")) {
                 String groupFeedName = extras.get("group").toString() + '_' + extras.get("lubble_id");
                 holder.groupNameTv.setOnClickListener(v -> {
-                    //todo hardcoded id
-                    FeedGroupData feedGroupData = new FeedGroupData(100, extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
+                    FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
                     GroupFeedActivity.open(context, feedGroupData);
-//                     activityNew.getSupportFragmentManager().beginTransaction()
-//                            .replace(R.id.fragment_container, SingleGroupFeed.newInstance(groupFeedName))
-//                            .commitNow();
                 });
             }
         }
@@ -226,16 +233,16 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
         holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
-            feedListener.onReplyClicked(activity.getID(), activity.getForeignID(),activity.getActor().getID(), position);
+            feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), position);
         });
         holder.replyStatsTv.setOnClickListener(v -> {
-            FeedPostActivity.open(context, activity.getID());
+            feedListener.openPostActivity(activity.getID());
         });
         holder.itemView.setOnClickListener(v -> {
-            FeedPostActivity.open(context, activity.getID());
+            feedListener.openPostActivity(activity.getID());
         });
         holder.textContentTv.setOnClickListener(v -> {
-            FeedPostActivity.open(context, activity.getID());
+            feedListener.openPostActivity(activity.getID());
         });
         holder.authorPhotoIv.setOnClickListener(v -> {
             ProfileActivity.open(context, activity.getActor().getID());
@@ -319,7 +326,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                         holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
                     }
                 });
-        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), activity.getForeignID(),activity.getActor().getID(), holder.getAdapterPosition()));
+        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), holder.getAdapterPosition()));
     }
 
     public interface FeedListener {
@@ -328,6 +335,10 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         void onImageClicked(String imgPath, ImageView imageView);
 
         void onLiked(String foreignID);
+
+        void onRefreshLoading(@NotNull LoadState refresh);
+
+        void openPostActivity(@NotNull String activityId);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -339,7 +350,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             holder.commentRecyclerView.setLayoutManager(layoutManager);
             holder.commentRecyclerView.setNestedScrollingEnabled(false);
             holder.viewAllRepliesTv.setOnClickListener(v -> {
-                FeedPostActivity.open(context, activity.getID());
+                feedListener.openPostActivity(activity.getID());
             });
             FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
             holder.commentRecyclerView.setAdapter(adapter);
@@ -373,7 +384,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private void toggleLike(MyViewHolder holder, int position) {
-        EnrichedActivity activity = activityList.get(position);
+        EnrichedActivity activity = getItem(position);
         if (!likedMap.containsKey(position)) {
             // like
             Reaction like = new Reaction.Builder()
@@ -382,8 +393,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                     .activityID(activity.getID())
                     .build();
             try {
-                String notificationUserFeedId = "notification:"+activity.getActor().getID();
-                FeedServices.getTimelineClient().reactions().add(like,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
+                String notificationUserFeedId = "notification:" + activity.getActor().getID();
+                FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         //todo
                     }
@@ -414,6 +425,15 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
         }
     }
 
+    public ConcatAdapter withLoadStateAdapters(LoadStateAdapter footer) {
+        addLoadStateListener(combinedLoadStates -> {
+            footer.setLoadState(combinedLoadStates.getAppend());
+            feedListener.onRefreshLoading(combinedLoadStates.getRefresh());
+            return null;
+        });
+        return new ConcatAdapter(FeedAdaptor.this, footer);
+    }
+
     private String getPostDateDisplay(Date timePosted) {
         Date timeNow = new Date(System.currentTimeMillis());
         long duration = timeNow.getTime() - timePosted.getTime();
@@ -438,7 +458,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     public void addUserReply(String activityId, Reaction reaction) {
         int pos = getActivityPosById(activityId);
         if (pos >= 0) {
-            EnrichedActivity updatedActivity = activityList.get(pos);
+            EnrichedActivity updatedActivity = getItem(pos);
             List<Reaction> latestCommentList = updatedActivity.getLatestReactions().get("comment");
             if (latestCommentList == null)
                 latestCommentList = new ArrayList<>();
@@ -449,15 +469,10 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
     }
 
     private int getActivityPosById(String activityId) {
-        for (int i = 0; i < activityList.size(); i++)
-            if (activityId.equalsIgnoreCase(activityList.get(i).getID()))
+        for (int i = 0; i < getItemCount(); i++)
+            if (activityId.equalsIgnoreCase(getItem(i).getID()))
                 return i;
         return -1;
-    }
-
-    @Override
-    public int getItemCount() {
-        return activityList.size();
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
@@ -495,6 +510,8 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
             linkImageIv = view.findViewById(R.id.iv_link_image);
             linkTitleTv = view.findViewById(R.id.tv_link_title);
             linkDescTv = view.findViewById(R.id.tv_link_desc);
+            ImageView moreMenuIv = view.findViewById(R.id.iv_more_menu);
+            moreMenuIv.setVisibility(GONE);
         }
     }
 

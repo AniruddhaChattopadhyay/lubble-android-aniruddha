@@ -206,6 +206,11 @@ public interface Endpoints {
     @HTTP(method = "DELETE", path = "marketplace/addDeleteGroupForUser/", hasBody = true)
     Call<Void> deleteGroupForUser(@Body RequestBody params);
 
+    @POST("marketplace/promotePost/")
+    Call<Void> promotePost(@Body RequestBody params);
+
+    @POST("marketplace/deletePostByUserOrAdmin/")
+    Call<Void> deletePost(@Body RequestBody params);
 
     public class StreamCredentials{
         private String api_key;

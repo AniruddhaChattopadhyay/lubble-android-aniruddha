@@ -15,6 +15,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.paging.LoadState;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -22,7 +23,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
 
@@ -30,17 +32,16 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FeedViewModel;
 import in.lubble.app.utils.FullScreenImageActivity;
-import in.lubble.app.utils.TrackingViewModel;
 import in.lubble.app.utils.VisibleState;
 import in.lubble.app.widget.PostReplySmoothScroller;
-import io.getstream.core.exceptions.StreamException;
+import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.models.Reaction;
-import io.getstream.core.options.EnrichmentFlags;
-import io.getstream.core.options.Limit;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -52,14 +53,16 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     private static final String TAG = "FeedFrag";
 
+    private static final int REQUEST_CODE_NEW_POST = 800;
+    private static final int REQ_CODE_POST_ACTIV = 226;
+
     private ExtendedFloatingActionButton postBtn;
     private ShimmerRecyclerView feedRV;
-    private static final int REQUEST_CODE_POST = 800;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private FeedAdaptor adapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayoutManager layoutManager;
-    private TrackingViewModel viewModel;
+    private FeedViewModel viewModel;
 
     public FeedFrag() {
         // Required empty public constructor
@@ -75,7 +78,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = new ViewModelProvider(this).get(TrackingViewModel.class);
+        viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
     }
 
     @Nullable
@@ -90,23 +93,19 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
         layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         feedRV.setLayoutManager(layoutManager);
-        feedRV.showShimmerAdapter();
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 
         postBtn.setOnClickListener(v -> {
-            startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_POST);
+            startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
-        try {
-            getCredentials();
-        } catch (StreamException e) {
-            e.printStackTrace();
-        }
+        getCredentials();
+
         return view;
     }
 
-    void getCredentials() throws StreamException {
+    void getCredentials() {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
         String feedApiKey = LubbleSharedPrefs.getInstance().getFeedApiKey();
@@ -122,7 +121,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                         try {
                             FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
                             initRecyclerView();
-                        } catch (MalformedURLException | StreamException e) {
+                        } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
                     } else {
@@ -143,46 +142,55 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     }
 
+    private void initRecyclerView() {
+        CloudFlatFeed timelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", userId);
 
-    private void initRecyclerView() throws StreamException {
-        FeedServices.getTimelineClient().flatFeed("timeline", FeedServices.uid)
-                .getEnrichedActivities(new Limit(25),
-                        new EnrichmentFlags()
-                                .withReactionCounts()
-                                .withOwnReactions()
-                                .withRecentReactions()
-                )
-                .whenComplete((enrichedActivities, throwable) -> {
-                    if (getActivity() != null && !getActivity().isFinishing()) {
-                        getActivity().runOnUiThread(() -> {
-                            if (throwable != null) {
-                                //todo show retry option with error msg
-                                return;
-                            }
-                            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
-                                // recycler view is currently holding shimmer adapter so hide it
-                                feedRV.hideShimmerAdapter();
-                            }
-                            if (swipeRefreshLayout.isRefreshing()) {
-                                swipeRefreshLayout.setRefreshing(false);
-                            }
+        if (adapter == null) {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width = displayMetrics.widthPixels;
+            int height = displayMetrics.heightPixels; //height of RV, excluding toolbar & bottom nav
+            adapter = new FeedAdaptor(new FeedPostComparator());
+            adapter.setVars(getContext(), width, height, GlideApp.with(this), this);
 
-                            DisplayMetrics displayMetrics = new DisplayMetrics();
-                            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                            int width = displayMetrics.widthPixels;
+            feedRV.setAdapter(adapter.withLoadStateAdapters(
+                    new PagingLoadStateAdapter(() -> {
+                        adapter.retry();
+                        return null;
+                    })
+            ));
+            feedRV.clearOnScrollListeners();
+            feedRV.addOnScrollListener(scrollListener);
+            viewModel.getDistinctLiveData().observe(this, visibleState -> {
+                processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
+            });
+        }
+        viewModel.loadPaginatedActivities(timelineFeed, 10).observe(this, pagingData -> {
+            layoutManager.scrollToPosition(0);
+            adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
+        });
+    }
 
-                            adapter = new FeedAdaptor(getContext(), enrichedActivities, width,
-                                    GlideApp.with(this),
-                                    this);
-                            feedRV.setAdapter(adapter);
-                            feedRV.clearOnScrollListeners();
-                            feedRV.addOnScrollListener(scrollListener);
-                            viewModel.getDistinctLiveData().observe(this, visibleState -> {
-                                processTrackedPosts(enrichedActivities, visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
-                            });
-                        });
-                    }
-                });
+    @Override
+    public void openPostActivity(@NotNull String activityId) {
+        startActivityForResult(FeedPostActivity.getIntent(requireContext(), activityId), REQ_CODE_POST_ACTIV);
+    }
+
+    @Override
+    public void onRefreshLoading(@NotNull LoadState refresh) {
+        if (refresh == LoadState.Loading.INSTANCE) {
+            if (!swipeRefreshLayout.isRefreshing()) {
+                //show shimmer only on first load, not when user pulled to refresh
+                feedRV.showShimmerAdapter();
+            }
+        } else {
+            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
+                // recycler view is currently holding shimmer adapter so hide it
+                // without this condition pagination will break!!
+                feedRV.hideShimmerAdapter();
+            }
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
@@ -196,9 +204,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     };
 
     @Override
-    public void onReplyClicked(String activityId, String foreignId,String postActorUid, int position) {
+    public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
         postBtn.setVisibility(View.GONE);
-        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId,postActorUid);
+        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
         smoothScroller.setTargetPosition(position);
@@ -207,12 +215,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void onRefresh() {
-        try {
-            initRecyclerView();
-        } catch (StreamException e) {
-            e.printStackTrace();
-            FirebaseCrashlytics.getInstance().recordException(e);
-        }
+        initRecyclerView();
     }
 
     @Override
@@ -240,13 +243,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_POST && resultCode == RESULT_OK) {
-            try {
-                initRecyclerView();
-            } catch (StreamException e) {
-                e.printStackTrace();
-                FirebaseCrashlytics.getInstance().recordException(e);
-            }
+        if (requestCode == REQUEST_CODE_NEW_POST && resultCode == RESULT_OK) {
+            initRecyclerView();
+        } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
+            //refresh list
+            initRecyclerView();
         }
     }
 
