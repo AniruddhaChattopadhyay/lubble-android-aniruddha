@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ServiceGenerator {
 
     private static final String BASE_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://devapi.lubble.in/" : "https://api.lubble.in/";
-//    private static final String BASE_URL = "http://172.31.80.1:8000/";
+//    private static final String BASE_URL = "http://172.30.80.1:8000/";
     private static final String AIRTABLE_API_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://api.airtable.com/v0/" : "https://api.lubble.in/";
 
     private static Retrofit.Builder builder =
