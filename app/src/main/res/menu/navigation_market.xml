@@ -3,28 +3,28 @@
 
     <item
         android:id="@+id/navigation_chats"
-        android:icon="@drawable/ic_group_black_24dp"
+        android:icon="@drawable/ic_baseline_chat_24"
         android:title="Chats" />
 
     <item
-        android:id="@+id/navigation_explore"
-        android:icon="@drawable/ic_search_gray_24dp"
-        android:title="Explore" />
+        android:id="@+id/navigation_feed"
+        android:icon="@drawable/ic_outline_line_weight_24"
+        android:title="Feed" />
 
     <item
         android:id="@+id/navigation_market"
         android:icon="@drawable/ic_store"
         android:title="Market" />
 
-    <!--<item
+    <item
         android:id="@+id/navigation_map"
         android:icon="@drawable/ic_location_on_black_24dp"
-        android:title="Map" />-->
+        android:title="Map" />
 
-    <item
+    <!--<item
         android:id="@+id/navigation_fun"
         android:icon="@drawable/ic_gamepad_controller"
-        android:title="Games" />
+        android:title="Games" />-->
 
     <item
         android:id="@+id/navigation_events"

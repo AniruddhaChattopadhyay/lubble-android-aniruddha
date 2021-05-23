@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +44,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
     private TextView descTv;
     private FeedGroupAdapter adapter;
     private boolean isOnboarding;
+    private LinearLayout searchContainer;
     private EditText searchEt;
 
     public FeedGroupsFrag() {
@@ -73,6 +75,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
         titleTv = rootView.findViewById(R.id.tv_title);
         descTv = rootView.findViewById(R.id.tv_desc);
         groupRecyclerView = rootView.findViewById(R.id.feed_group_recyclerview);
+        searchContainer = rootView.findViewById(R.id.container_search);
         searchEt = rootView.findViewById(R.id.et_search);
 
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
@@ -87,7 +90,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(adapter!=null)
+                if (adapter != null)
                     adapter.getFilter().filter(s);
             }
 
@@ -150,6 +153,8 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
                             joinedAllTv.setVisibility(View.VISIBLE);
                             titleTv.setVisibility(View.GONE);
                             descTv.setVisibility(View.GONE);
+                            searchEt.setVisibility(View.GONE);
+                            searchContainer.setVisibility(View.GONE);
                         }
                     } else {
                         Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
