@@ -329,7 +329,7 @@ public class FeedPostFrag extends Fragment {
 
         replyIv.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(replyEt.getText().toString())) {
-                postComment(activityId, enrichedActivity.getForeignID());
+                postComment(activityId, enrichedActivity.getForeignID(),enrichedActivity.getActor().getID());
             } else {
                 Toast.makeText(getContext(), "Reply can't be empty", Toast.LENGTH_LONG).show();
             }
@@ -353,7 +353,7 @@ public class FeedPostFrag extends Fragment {
                 });
     }
 
-    private void postComment(String activityId, String foreignId) {
+    private void postComment(String activityId, String foreignId,String postActorUid) {
         try {
             replyIv.setVisibility(View.GONE);
             replyProgressBar.setVisibility(View.VISIBLE);
@@ -365,7 +365,7 @@ public class FeedPostFrag extends Fragment {
                     .extraField("text", replyText)
                     .extraField("timestamp", System.currentTimeMillis())
                     .build();
-            String notificationUserFeedId = "notification:"+FirebaseAuth.getInstance().getUid();
+            String notificationUserFeedId = "notification:"+postActorUid;
             FeedServices.getTimelineClient().reactions().add(comment,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
@@ -506,7 +506,7 @@ public class FeedPostFrag extends Fragment {
                     .activityID(enrichedActivity.getID())
                     .build();
             try {
-                String notificationUserFeedId = "notification:"+FirebaseAuth.getInstance().getUid();
+                String notificationUserFeedId = "notification:"+ enrichedActivity.getActor().getID();;
                 FeedServices.getTimelineClient().reactions().add(like,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         //todo

@@ -226,7 +226,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
 
         holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
-            feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), position);
+            feedListener.onReplyClicked(activity.getID(), activity.getForeignID(),activity.getActor().getID(), position);
         });
         holder.replyStatsTv.setOnClickListener(v -> {
             FeedPostActivity.open(context, activity.getID());
@@ -319,11 +319,11 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                         holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
                     }
                 });
-        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), holder.getAdapterPosition()));
+        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), activity.getForeignID(),activity.getActor().getID(), holder.getAdapterPosition()));
     }
 
     public interface FeedListener {
-        void onReplyClicked(String activityId, String foreignId, int position);
+        void onReplyClicked(String activityId, String foreignId, String postActorUid, int position);
 
         void onImageClicked(String imgPath, ImageView imageView);
 
