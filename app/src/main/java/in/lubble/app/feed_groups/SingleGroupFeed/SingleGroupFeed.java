@@ -311,9 +311,9 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     }
 
     @Override
-    public void onReplyClicked(String activityId, String foreignId, int position) {
+    public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
         postBtn.setVisibility(View.GONE);
-        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId);
+        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
     }
 

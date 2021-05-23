@@ -204,9 +204,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     };
 
     @Override
-    public void onReplyClicked(String activityId, String foreignId, int position) {
+    public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
         postBtn.setVisibility(View.GONE);
-        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId);
+        ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
         smoothScroller.setTargetPosition(position);

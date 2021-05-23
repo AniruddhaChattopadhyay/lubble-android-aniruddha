@@ -71,6 +71,7 @@ import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
@@ -155,7 +156,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 if (aspectRatio > 0) {
                     holder.photoContentIv.setVisibility(View.VISIBLE);
                     holder.photoContentIv.setMaxHeight(View.VISIBLE);
-                    float targetHeight = Math.min(displayHeight-holder.itemView.getMeasuredHeight(), itemWidth / aspectRatio);
+                    float targetHeight = Math.min(displayHeight - holder.itemView.getMeasuredHeight(), itemWidth / aspectRatio);
                     ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
                     lp.height = Math.round(targetHeight);
                     holder.photoContentIv.setLayoutParams(lp);
@@ -232,7 +233,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
         holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
-            feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), position);
+            feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), position);
         });
         holder.replyStatsTv.setOnClickListener(v -> {
             feedListener.openPostActivity(activity.getID());
@@ -325,11 +326,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
                     }
                 });
-        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), holder.getAdapterPosition()));
+        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), holder.getAdapterPosition()));
     }
 
     public interface FeedListener {
-        void onReplyClicked(String activityId, String foreignId, int position);
+        void onReplyClicked(String activityId, String foreignId, String postActorUid, int position);
 
         void onImageClicked(String imgPath, ImageView imageView);
 
@@ -392,7 +393,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                     .activityID(activity.getID())
                     .build();
             try {
-                FeedServices.getTimelineClient().reactions().add(like).whenComplete((reaction, throwable) -> {
+                String notificationUserFeedId = "notification:" + activity.getActor().getID();
+                FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         //todo
                     }
