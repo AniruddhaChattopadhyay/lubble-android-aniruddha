@@ -275,7 +275,7 @@
         android:background="@drawable/circle"
         android:foreground="?attr/selectableItemBackground"
         android:padding="8dp"
-        android:tint="@color/black"
+        app:tint="@color/black"
         app:backgroundTint="@color/light_teal"
         app:layout_constraintBottom_toBottomOf="@id/iv_camera"
         app:layout_constraintHorizontal_bias="0.8"

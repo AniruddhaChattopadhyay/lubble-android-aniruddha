@@ -141,7 +141,7 @@
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:tint="@color/darker_gray"
+                    app:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_send_white_24dp" />
 
                 <TextView
@@ -186,7 +186,7 @@
             android:layout_height="16dp"
             android:layout_below="@id/lucky_draw_hint"
             android:layout_marginTop="8dp"
-            android:tint="@color/colorAccent"
+            app:tint="@color/colorAccent"
             android:visibility="gone"
             app:srcCompat="@drawable/ic_ticket_24dp" />
 
@@ -327,7 +327,7 @@
                 android:id="@+id/iv_map"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:tint="@color/dark_gray"
+                app:tint="@color/dark_gray"
                 app:srcCompat="@drawable/ic_map_black_24dp" />
 
             <TextView
@@ -377,7 +377,7 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:textColor="@color/colorAccent"
-                android:tint="@color/dark_gray"
+                app:tint="@color/dark_gray"
                 app:srcCompat="@drawable/ic_open_in_new_black_24dp" />
 
         </RelativeLayout>

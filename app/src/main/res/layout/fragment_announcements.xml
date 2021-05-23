@@ -50,7 +50,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_margin="16dp"
-        android:tint="@color/white"
+        app:tint="@color/white"
         android:visibility="gone"
         app:fabSize="normal"
         app:srcCompat="@drawable/ic_add_black_24dp"

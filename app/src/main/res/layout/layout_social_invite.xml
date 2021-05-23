@@ -94,7 +94,7 @@
         <ImageView
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:tint="@color/darker_gray"
+            app:tint="@color/darker_gray"
             app:srcCompat="@drawable/ic_share_black_24dp" />
 
         <TextView

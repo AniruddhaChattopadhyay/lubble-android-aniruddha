@@ -37,7 +37,7 @@
                 android:layout_below="@id/tv_group_desc"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="4dp"
-                android:tint="@color/dark_gray"
+                app:tint="@color/dark_gray"
                 app:srcCompat="@drawable/ic_public_black_24dp" />
 
             <TextView
@@ -120,7 +120,7 @@
                 android:id="@+id/iv_icon"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:tint="@color/dk_colorAccent"
+                app:tint="@color/dk_colorAccent"
                 app:srcCompat="@drawable/ic_person_add_24dp" />
 
             <TextView
@@ -147,7 +147,7 @@
             <ImageView
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                android:tint="@color/dk_colorAccent"
+                app:tint="@color/dk_colorAccent"
                 app:srcCompat="@drawable/ic_share_black_24dp" />
 
             <TextView

@@ -39,7 +39,7 @@
                 android:layout_marginBottom="4dp"
                 android:background="@drawable/circle_white"
                 android:padding="2dp"
-                android:tint="@color/dark_gray"
+                app:tint="@color/dark_gray"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_lock_black_24dp"
                 tools:visibility="visible" />
@@ -106,7 +106,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             app:srcCompat="@drawable/ic_arrow_back"
-            android:tint="@color/colorAccent"
+            app:tint="@color/colorAccent"
             android:visibility="gone"
             android:paddingLeft="16dp"
             android:paddingRight="8dp" />

@@ -38,6 +38,7 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.FeedViewModel;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.VisibleState;
 import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.cloud.CloudFlatFeed;
@@ -197,6 +198,12 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         @Override
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
+            if (dy > 0) {
+                UiUtils.animateSlideDownHide(getContext(), postBtn);
+            } else {
+                UiUtils.animateSlideUpShow(getContext(), postBtn);
+            }
+
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
                     layoutManager.findLastCompletelyVisibleItemPosition());
             viewModel.onScrolled(visibleState);

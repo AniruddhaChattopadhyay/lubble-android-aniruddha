@@ -67,7 +67,8 @@ import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.feed_user.FeedCombinedFragment;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.groups.GroupListFragment;
+import in.lubble.app.groups.ChatSearchListener;
+import in.lubble.app.groups.GroupsCombinedFrag;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.map.MapFragment;
@@ -149,8 +150,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private boolean isNewUserInThisLubble;
     private static final int nav_item_leaderboard = 311;
     private Menu navMenu;
-    private GroupListFragment groupListFragment;
     private ActionMode actionMode;
+    private ChatSearchListener chatSearchListener;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -257,24 +258,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private void onToolbarSearchClicked() {
         toggleSearchViewVisibility(true);
-        if (groupListFragment != null && groupListFragment.isVisible()) {
-            groupListFragment.reinitGroupListCopy();
-            groupListFragment.toggleVisibilityOfSlider(false);
+        if (chatSearchListener != null) {
+            chatSearchListener.toggleSliderVisibility(false);
+            chatSearchListener.reInitGroupListCopy();
         }
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (groupListFragment != null && groupListFragment.isVisible()) {
-                    groupListFragment.filterGroups(newText);
+                if (chatSearchListener != null) {
+                    chatSearchListener.filterGroups(newText);
                 }
                 return false;
             }
 
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if (groupListFragment != null && groupListFragment.isVisible()) {
-                    groupListFragment.filterGroups(query);
+                if (chatSearchListener != null) {
+                    chatSearchListener.filterGroups(query);
                 }
                 return false;
             }
@@ -314,8 +315,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             toolbarSearchTv.setVisibility(View.GONE);
             toolbarRewardsTv.setVisibility(View.GONE);
             toolbarTitle.setVisibility(View.GONE);
-            if (groupListFragment != null && groupListFragment.isVisible()) {
-                groupListFragment.toggleVisibilityOfSlider(false);
+            if (chatSearchListener != null) {
+                chatSearchListener.toggleSliderVisibility(false);
             }
         } else {
             searchView.setOnQueryTextListener(null);
@@ -326,8 +327,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             lubbleClickTarget.setVisibility(View.VISIBLE);
             toolbarRewardsTv.setVisibility(View.VISIBLE);
             toolbarTitle.setVisibility(View.VISIBLE);
-            if (groupListFragment != null && groupListFragment.isVisible()) {
-                groupListFragment.toggleVisibilityOfSlider(true);
+            if (chatSearchListener != null) {
+                chatSearchListener.toggleSliderVisibility(true);
             }
         }
     }
@@ -344,9 +345,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
-        groupListFragment = GroupListFragment.newInstance(isNewUserInThisLubble);
-        switchFrag(groupListFragment);
-
+        switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
 
         bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
@@ -917,7 +916,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_chats:
-                    switchFrag(groupListFragment = GroupListFragment.newInstance(false));
+                    switchFrag(GroupsCombinedFrag.newInstance(false));
                     return true;
                 case R.id.navigation_feed:
                     switchFrag(FeedCombinedFragment.newInstance());
@@ -1038,6 +1037,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             tooltip.show(toolbarRewardsTv, Tooltip.Gravity.BOTTOM, true);
             GlideApp.with(this).load(FirebaseRemoteConfig.getInstance().getString(REWARDS_EXPLAINER)).preload();
         }
+    }
+
+    public void setChatSearchListener(ChatSearchListener listener) {
+        this.chatSearchListener = listener;
     }
 
     @Override

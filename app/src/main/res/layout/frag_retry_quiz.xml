@@ -16,7 +16,7 @@
         android:layout_height="8dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="8dp"
-        android:tint="@color/gray"
+        app:tint="@color/gray"
         app:srcCompat="@drawable/rounded_rect_gray" />
 
     <TextView

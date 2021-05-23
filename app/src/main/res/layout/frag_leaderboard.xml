@@ -25,7 +25,7 @@
             android:layout_alignParentRight="true"
             android:alpha="0.6"
             android:padding="8dp"
-            android:tint="@color/white"
+            app:tint="@color/white"
             app:srcCompat="@drawable/ic_close_black_24dp" />
 
         <TextView
@@ -282,7 +282,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="16dp"
             android:adjustViewBounds="true"
-            android:tint="@color/light_gray"
+            app:tint="@color/light_gray"
             android:visibility="gone"
             app:srcCompat="@drawable/ic_lubble_logo_vector" />
 

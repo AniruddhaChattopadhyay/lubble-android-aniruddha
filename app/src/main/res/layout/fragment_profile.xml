@@ -198,7 +198,7 @@
                 android:layout_below="@id/container_stats"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="8dp"
-                android:tint="@color/gray"
+                app:tint="@color/gray"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_account_circle_black_24dp"
                 tools:visibility="visible" />
@@ -223,7 +223,7 @@
                 android:layout_below="@id/iv_gender"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="4dp"
-                android:tint="@color/gray"
+                app:tint="@color/gray"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_business_black_24dp"
                 tools:visibility="visible" />
@@ -248,7 +248,7 @@
                 android:layout_below="@id/iv_business"
                 android:layout_marginLeft="8dp"
                 android:layout_marginTop="4dp"
-                android:tint="@color/gray"
+                app:tint="@color/gray"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_school_black_24dp"
                 tools:visibility="visible" />

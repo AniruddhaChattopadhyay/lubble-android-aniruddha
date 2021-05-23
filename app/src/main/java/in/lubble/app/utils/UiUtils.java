@@ -29,7 +29,9 @@ import androidx.annotation.DrawableRes;
 import androidx.annotation.Nullable;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -38,6 +40,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
 
 import in.lubble.app.R;
 
@@ -342,6 +345,22 @@ public class UiUtils {
         circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
         circularProgressDrawable.start();
         return circularProgressDrawable;
+    }
+
+    public static void reduceDragSensitivity(ViewPager2 viewPager) {
+        try {
+            Field ff = ViewPager2.class.getDeclaredField("mRecyclerView");
+            ff.setAccessible(true);
+            RecyclerView recyclerView = (RecyclerView) ff.get(viewPager);
+            Field touchSlopField = RecyclerView.class.getDeclaredField("mTouchSlop");
+            touchSlopField.setAccessible(true);
+            int touchSlop = (int) touchSlopField.get(recyclerView);
+            touchSlopField.set(recyclerView, touchSlop * 4);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
 }

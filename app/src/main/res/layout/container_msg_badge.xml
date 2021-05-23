@@ -26,6 +26,6 @@
         android:layout_width="14dp"
         android:layout_height="14dp"
         android:layout_marginLeft="4dp"
-        android:tint="@color/white"
+        app:tint="@color/white"
         app:srcCompat="@drawable/ic_edit_white_24dp" />
 </LinearLayout>

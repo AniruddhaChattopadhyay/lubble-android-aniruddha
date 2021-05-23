@@ -119,7 +119,7 @@
                 android:layout_marginLeft="16dp"
                 android:layout_toRightOf="@id/tv_reward_code"
                 android:alpha="0.9"
-                android:tint="@color/white"
+                app:tint="@color/white"
                 app:srcCompat="@drawable/ic_content_copy_black_24dp" />
 
         </RelativeLayout>
