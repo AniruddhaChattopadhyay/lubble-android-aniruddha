@@ -35,6 +35,8 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.HTTP;
 import retrofit2.http.PATCH;
@@ -211,6 +213,12 @@ public interface Endpoints {
 
     @POST("marketplace/deletePostByUserOrAdmin/")
     Call<Void> deletePost(@Body RequestBody params);
+
+    @POST("marketplace/batchFollowGroups/")
+    Call<Void> batchFollowGroups(@Body RequestBody params);
+
+    @GET("marketplace/checkIfUserHasJoinedGroups/")
+    Call<String> checkIfGroupJoined();
 
     public class StreamCredentials{
         private String api_key;
