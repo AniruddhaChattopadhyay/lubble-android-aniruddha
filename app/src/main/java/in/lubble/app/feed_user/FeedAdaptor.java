@@ -382,7 +382,7 @@ public class FeedAdaptor extends RecyclerView.Adapter<FeedAdaptor.MyViewHolder> 
                     .activityID(activity.getID())
                     .build();
             try {
-                String notificationUserFeedId = "notification:"+FirebaseAuth.getInstance().getUid();
+                String notificationUserFeedId = "notification:"+activity.getActor().getID();
                 FeedServices.getTimelineClient().reactions().add(like,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         //todo
