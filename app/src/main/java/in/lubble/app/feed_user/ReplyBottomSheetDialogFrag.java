@@ -34,24 +34,27 @@ import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
 
 public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
 
     private static final String ARG_ACT_ID = "LBL_REPLY_ARG_ACT_ID";
     private static final String ARG_FOREIGN_ID = "LBL_REPLY_ARG_FOREIGN_ID";
+    private static final String ARG_POST_ACTOR_ID = "LBL_REPLY_ARG_POST_ACTOR";
 
     private ReplyEditText replyEt;
     private ImageView replyIv;
     private ProgressBar progressBar;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private ReplyListener replyListener;
-    private String activityId, foreignId;
+    private String activityId, foreignId, postActorUid;
 
-    public static ReplyBottomSheetDialogFrag newInstance(String activityId, String foreignId) {
+    public static ReplyBottomSheetDialogFrag newInstance(String activityId, String foreignId,String postActorUid) {
         Bundle args = new Bundle();
         args.putString(ARG_ACT_ID, activityId);
         args.putString(ARG_FOREIGN_ID, foreignId);
+        args.putString(ARG_POST_ACTOR_ID, postActorUid);
         ReplyBottomSheetDialogFrag fragment = new ReplyBottomSheetDialogFrag();
         fragment.setArguments(args);
         return fragment;
@@ -92,6 +95,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
         if (getArguments() != null) {
             activityId = getArguments().getString(ARG_ACT_ID);
             foreignId = getArguments().getString(ARG_FOREIGN_ID);
+            postActorUid = getArguments().getString(ARG_POST_ACTOR_ID);
         } else {
             throw new MissingFormatArgumentException("Activity ID missing");
         }
@@ -166,7 +170,8 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
                     .extraField("text", replyText)
                     .extraField("timestamp", System.currentTimeMillis())
                     .build();
-            FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
+            String notificationUserFeedId = "notification:"+ postActorUid;
+            FeedServices.getTimelineClient().reactions().add(comment,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         progressBar.setVisibility(View.GONE);

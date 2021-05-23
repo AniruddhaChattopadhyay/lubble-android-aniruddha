@@ -69,6 +69,7 @@ import io.getstream.analytics.beans.Content;
 import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
+import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
 import io.getstream.core.options.EnrichmentFlags;
 import io.getstream.core.options.Filter;
@@ -229,7 +230,7 @@ public class FeedPostFrag extends Fragment {
                                 Map<String, Object> actorMap = enrichedActivity.getActor().getData();
                                 if (actorMap.containsKey("name")) {
                                     authorNameTv.setText(String.valueOf(actorMap.get("name")));
-                                    if (actorMap.containsKey("profile_picture")) {
+                                    if (actorMap.containsKey("profile_picture") && actorMap.get("profile_picture")!=null) {
                                         Glide.with(requireContext())
                                                 .load(actorMap.get("profile_picture").toString())
                                                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
@@ -328,7 +329,7 @@ public class FeedPostFrag extends Fragment {
 
         replyIv.setOnClickListener(v -> {
             if (!TextUtils.isEmpty(replyEt.getText().toString())) {
-                postComment(activityId, enrichedActivity.getForeignID());
+                postComment(activityId, enrichedActivity.getForeignID(),enrichedActivity.getActor().getID());
             } else {
                 Toast.makeText(getContext(), "Reply can't be empty", Toast.LENGTH_LONG).show();
             }
@@ -352,7 +353,7 @@ public class FeedPostFrag extends Fragment {
                 });
     }
 
-    private void postComment(String activityId, String foreignId) {
+    private void postComment(String activityId, String foreignId,String postActorUid) {
         try {
             replyIv.setVisibility(View.GONE);
             replyProgressBar.setVisibility(View.VISIBLE);
@@ -364,7 +365,8 @@ public class FeedPostFrag extends Fragment {
                     .extraField("text", replyText)
                     .extraField("timestamp", System.currentTimeMillis())
                     .build();
-            FeedServices.getTimelineClient().reactions().add(comment).whenComplete((reaction, throwable) -> {
+            String notificationUserFeedId = "notification:"+postActorUid;
+            FeedServices.getTimelineClient().reactions().add(comment,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         replyProgressBar.setVisibility(View.GONE);
@@ -504,7 +506,8 @@ public class FeedPostFrag extends Fragment {
                     .activityID(enrichedActivity.getID())
                     .build();
             try {
-                FeedServices.getTimelineClient().reactions().add(like).whenComplete((reaction, throwable) -> {
+                String notificationUserFeedId = "notification:"+ enrichedActivity.getActor().getID();;
+                FeedServices.getTimelineClient().reactions().add(like,new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         //todo
                     }
