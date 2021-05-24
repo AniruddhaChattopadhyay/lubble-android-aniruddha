@@ -27,15 +27,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Objects;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.feed_post.FeedPostActivity;
-import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
@@ -82,6 +79,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
+        if (getParentFragment() instanceof FeedCombinedFragment) {
+            ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
+        }
     }
 
     @Nullable

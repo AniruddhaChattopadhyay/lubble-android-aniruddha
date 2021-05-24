@@ -1,6 +1,5 @@
 package in.lubble.app;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,7 +16,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -55,7 +53,6 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.segment.analytics.Traits;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -68,7 +65,6 @@ import in.lubble.app.chat.BlockedChatsActiv;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
-import in.lubble.app.feed_user.BulkGroupJoinFrag;
 import in.lubble.app.feed_user.FeedCombinedFragment;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.GroupListFragment;
@@ -924,33 +920,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     switchFrag(groupListFragment = GroupListFragment.newInstance(false));
                     return true;
                 case R.id.navigation_feed:
-                    if(LubbleSharedPrefs.getInstance().getCheckIfFeedGroupJoined()){
-                        switchFrag(FeedCombinedFragment.newInstance());
-                        return true;
-                    }
-                    final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-                    endpoints.checkIfGroupJoined().enqueue(new Callback<String>() {
-                        @Override
-                        public void onResponse(@NotNull Call<String> call, @NotNull Response<String> response) {
-                            if (response.isSuccessful()) {
-                               String message = response.body();
-                               if(message!=null && message.equals("New User")) {
-                                   switchFrag(BulkGroupJoinFrag.newInstance());
-                               }
-                               else {
-                                   switchFrag(FeedCombinedFragment.newInstance());
-                               }
-                            }
-                            else{
-                                Toast.makeText(getApplicationContext(),"Failed to check User Status!",Toast.LENGTH_LONG).show();
-                            }
-                        }
-                        @Override
-                        public void onFailure(@NotNull Call<String> call, @NotNull Throwable t) {
-                            Toast.makeText(getApplicationContext(),"Failed to check User Status!",Toast.LENGTH_LONG).show();
-                        }
-                    });
-                    //switchFrag(FeedCombinedFragment.newInstance());
+                    switchFrag(FeedCombinedFragment.newInstance());
                     return true;
                 case R.id.navigation_map:
                     switchFrag(MapFragment.newInstance());
