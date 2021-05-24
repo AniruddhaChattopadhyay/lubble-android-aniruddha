@@ -10,7 +10,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -57,7 +58,7 @@ public class FeedCombinedFragment extends Fragment {
         TabLayout tabLayout = view.findViewById(R.id.tabLayout_feed);
         ViewPager2 viewPager = view.findViewById(R.id.tab_pager);
 
-        MyTabPagerAdapter tabPager = new MyTabPagerAdapter(requireActivity());
+        MyTabPagerAdapter tabPager = new MyTabPagerAdapter(getChildFragmentManager(), getLifecycle());
         viewPager.setAdapter(tabPager);
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) ->
@@ -134,9 +135,9 @@ public class FeedCombinedFragment extends Fragment {
         this.feedRefreshListener = listener;
     }
 
-    static class MyTabPagerAdapter extends FragmentStateAdapter {
-        MyTabPagerAdapter(FragmentActivity fa) {
-            super(fa);
+    class MyTabPagerAdapter extends FragmentStateAdapter {
+        MyTabPagerAdapter(FragmentManager fm, Lifecycle lifecycle) {
+            super(fm, lifecycle);
         }
 
         @Override

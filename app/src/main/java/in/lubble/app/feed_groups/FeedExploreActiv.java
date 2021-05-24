@@ -48,7 +48,6 @@ public class FeedExploreActiv extends BaseActivity implements FeedGroupAdapter.O
     public static Intent getIntent(Context context, boolean isNewUser) {
         final Intent intent = new Intent(context, FeedExploreActiv.class);
         intent.putExtra(IS_NEW_USER, isNewUser);
-        context.startActivity(intent);
         return intent;
     }
 
@@ -85,6 +84,7 @@ public class FeedExploreActiv extends BaseActivity implements FeedGroupAdapter.O
                 public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                     if (response.isSuccessful() && !isFinishing()) {
                         progressDialog.dismiss();
+                        setResult(RESULT_OK);
                         finish();
                         overridePendingTransition(R.anim.none, R.anim.slide_to_bottom);
                         LubbleSharedPrefs.getInstance().setCheckIfFeedGroupJoined();

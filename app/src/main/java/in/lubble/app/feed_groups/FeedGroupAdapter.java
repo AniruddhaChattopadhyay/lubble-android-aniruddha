@@ -86,7 +86,7 @@ public class FeedGroupAdapter extends RecyclerView.Adapter<FeedGroupAdapter.Feed
         if (isOnboarding) {
             holder.joinTv.setText("SELECT");
             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
-            if (selectedMap.containsKey(feedGroupData.getId())) {
+            if (selectedMap.containsKey(feedGroupData.getFeedName())) {
                 holder.selectedContainer.setVisibility(View.VISIBLE);
                 holder.joinTv.setText("REMOVE");
                 holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));

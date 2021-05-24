@@ -25,7 +25,6 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.explore.ExploreGroupAdapter;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
@@ -180,7 +179,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
             // recycler view is currently holding shimmer adapter so hide it
             groupRecyclerView.hideShimmerAdapter();
         }
-        adapter = new FeedGroupAdapter(feedGroupDataList, mListener, GlideApp.with(requireContext()), false);
+        adapter = new FeedGroupAdapter(feedGroupDataList, mListener, GlideApp.with(requireContext()), isOnboarding);
         groupRecyclerView.setAdapter(adapter);
     }
 
@@ -199,7 +198,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
 
     @Override
     public void onListFragmentInteraction(String groupId, boolean isAdded) {
-        if (getActivity() instanceof ExploreGroupAdapter.OnListFragmentInteractionListener) {
+        if (getActivity() instanceof FeedGroupAdapter.OnListFragmentInteractionListener) {
             ((FeedGroupAdapter.OnListFragmentInteractionListener) getActivity()).onListFragmentInteraction(groupId, isAdded);
         }
     }
