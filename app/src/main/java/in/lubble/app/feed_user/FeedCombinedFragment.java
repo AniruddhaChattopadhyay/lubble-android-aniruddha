@@ -22,6 +22,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import org.jetbrains.annotations.NotNull;
 
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.feed_groups.FeedExploreActiv;
 import in.lubble.app.feed_groups.FeedGroupsFrag;
@@ -69,6 +70,9 @@ public class FeedCombinedFragment extends Fragment {
             fetchNewFeedUserStatus();
         }
 
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).removeFeedBadge();
+        }
         return view;
     }
 

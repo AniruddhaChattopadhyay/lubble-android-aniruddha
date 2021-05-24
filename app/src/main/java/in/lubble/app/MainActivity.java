@@ -35,6 +35,7 @@ import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatMessage;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -628,29 +629,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void showBottomNavBadge() {
-        if (!isNewUserInThisLubble) {
-            if (!LubbleSharedPrefs.getInstance().getIsMplaceOpened()) {
-                BottomNavigationMenuView bottomNavigationMenuView =
-                        (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-                View v = bottomNavigationMenuView.getChildAt(2);
-                BottomNavigationItemView itemView = (BottomNavigationItemView) v;
-
-                View badge = LayoutInflater.from(this)
-                        .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
-
-                itemView.addView(badge);
-            }
-            /*if (!LubbleSharedPrefs.getInstance().getIsServicesOpened()) {
-                BottomNavigationMenuView bottomNavigationMenuView =
-                        (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
-                View v = bottomNavigationMenuView.getChildAt(3);
-                BottomNavigationItemView itemView = (BottomNavigationItemView) v;
-
-                View badge = LayoutInflater.from(this)
-                        .inflate(R.layout.notification_badge, bottomNavigationMenuView, false);
-
-                itemView.addView(badge);
-            }*/
+        if (!LubbleSharedPrefs.getInstance().getIsFeedVisited()) {
+            BadgeDrawable badge = bottomNavigation.getOrCreateBadge(R.id.navigation_feed);
+            badge.setBackgroundColor(ContextCompat.getColor(this,R.color.md_yellow_600));
+            badge.setVisible(true);
         }
     }
 
@@ -983,6 +965,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
         }
+    }
+
+    public void removeFeedBadge() {
+        bottomNavigation.removeBadge(R.id.navigation_feed);
+        LubbleSharedPrefs.getInstance().setIsFeedVisited(true);
     }
 
     public void removeServicesBadge() {
