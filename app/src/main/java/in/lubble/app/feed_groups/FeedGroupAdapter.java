@@ -113,7 +113,7 @@ public class FeedGroupAdapter extends RecyclerView.Adapter<FeedGroupAdapter.Feed
             if (null != mListener) {
                 if (isOnboarding) {
                     try {
-                        String touchedGroupId = feedGroupList.get(holder.getAdapterPosition()).getId().toString();
+                        String touchedGroupId = feedGroupList.get(holder.getAdapterPosition()).getFeedName();
                         if (holder.selectedContainer.getVisibility() == View.GONE) {
                             if (selectedMap.size() < 10) {
                                 mListener.onListFragmentInteraction(touchedGroupId, true);

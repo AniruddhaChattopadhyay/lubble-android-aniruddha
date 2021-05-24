@@ -58,6 +58,7 @@ public class LubbleSharedPrefs {
     private final String FEED_API_KEY = "FEED_API_KEY";
     private final String FEED_USER_TOKEN = "FEED_USER_TOKEN";
     private final String REPLY_BOTTOM_SHEET = "REPLY_BOTTOM_SHEET";
+    private final String CHECK_IF_FEED_GROUPS_JOINED= "CHECK_IF_FEED_GROUPS_JOINED";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -406,4 +407,11 @@ public class LubbleSharedPrefs {
         return preferences.edit().putString(REPLY_BOTTOM_SHEET, reply).commit();
     }
 
+    public boolean getCheckIfFeedGroupJoined() {
+        return preferences.getBoolean(CHECK_IF_FEED_GROUPS_JOINED, false);
+    }
+
+    public boolean setCheckIfFeedGroupJoined() {
+        return preferences.edit().putBoolean(CHECK_IF_FEED_GROUPS_JOINED, true).commit();
+    }
 }

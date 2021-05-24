@@ -212,6 +212,12 @@ public interface Endpoints {
     @POST("marketplace/deletePostByUserOrAdmin/")
     Call<Void> deletePost(@Body RequestBody params);
 
+    @POST("marketplace/batchFollowGroups/")
+    Call<Void> batchFollowGroups(@Body RequestBody params);
+
+    @GET("marketplace/checkIfUserHasJoinedGroups/")
+    Call<String> checkIfGroupJoined();
+
     public class StreamCredentials{
         private String api_key;
         private String user_token;

@@ -80,6 +80,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
+        if (getParentFragment() instanceof FeedCombinedFragment) {
+            ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
+        }
     }
 
     @Nullable
@@ -101,6 +104,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
+
         getCredentials();
 
         return view;
@@ -144,8 +148,10 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     }
 
     private void initRecyclerView() {
+//        Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction()
+//                .replace(R.id.fragment_container, BulkGroupJoinFrag.newInstance())
+//                .commitNow();
         CloudFlatFeed timelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", userId);
-
         if (adapter == null) {
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);

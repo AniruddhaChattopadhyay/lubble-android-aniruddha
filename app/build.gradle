@@ -180,7 +180,6 @@ dependencies {
     implementation "androidx.paging:paging-runtime:$paging_version"
     implementation "androidx.paging:paging-guava:$paging_version"
 
-
     //to solve the Duplicate class com.google.common.util.concurrent.ListenableFuture found in modules jetified-guava-20.0
 //    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 

@@ -48,6 +48,10 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".feed_groups.FeedExploreActiv"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
             android:name=".chat.BlockedChatsActiv"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
