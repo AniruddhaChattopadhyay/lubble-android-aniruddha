@@ -132,7 +132,7 @@
                 android:layout_below="@id/container_action"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="8dp"
-                android:text="@string/add_new_item"
+                android:text="Add Product / Service"
                 android:theme="@style/AccentButton" />
 
             <TextView
