@@ -21,16 +21,27 @@
         android:textColor="@color/black"
         tools:text="Ramesh Singh" />
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/iv_arrow"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_alignTop="@id/feed_author_name"
+        android:layout_alignBottom="@id/feed_author_name"
+        android:layout_gravity="center"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_toRightOf="@+id/feed_author_name"
+        app:srcCompat="@drawable/ic_arrow_forward_black_24dp"
+        app:tint="@color/md_grey_600" />
+
     <TextView
         android:id="@+id/tv_group_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:layout_toRightOf="@+id/feed_author_name"
+        android:layout_toRightOf="@+id/iv_arrow"
         android:ellipsize="end"
         android:maxLines="1"
-        android:textColor="@color/black"
-        app:drawableLeftCompat="@drawable/ic_baseline_arrow_right_alt_24"
+        android:textColor="@color/dk_colorAccent"
         tools:text="QnAs" />
 
     <TextView
@@ -97,9 +108,9 @@
         android:adjustViewBounds="true"
         android:foreground="?attr/selectableItemBackground"
         android:maxHeight="500dp"
+        android:scaleType="centerCrop"
         android:transitionName="fullscreen_image"
         android:visibility="gone"
-        android:scaleType="centerCrop"
         tools:src="@drawable/explore_default"
         tools:visibility="visible" />
 
@@ -108,8 +119,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/feed_photo_content"
-        android:gravity="right"
         android:layout_marginTop="4dp"
+        android:gravity="right"
         android:orientation="horizontal">
 
         <TextView
@@ -119,8 +130,8 @@
             android:layout_weight="1"
             android:drawablePadding="4dp"
             android:textColor="@color/black"
-            android:visibility="gone"
             android:textSize="12sp"
+            android:visibility="gone"
             app:drawableLeftCompat="@drawable/ic_favorite_16dp"
             tools:text="23 Likes"
             tools:visibility="visible" />
@@ -202,7 +213,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="4dp"
                 android:gravity="center"
-                android:text="Reply"/>
+                android:text="Reply" />
 
         </LinearLayout>
 
