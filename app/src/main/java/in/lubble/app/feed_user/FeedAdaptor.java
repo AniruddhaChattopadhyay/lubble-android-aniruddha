@@ -45,6 +45,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.curios.textformatter.FormatText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -214,6 +215,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         .error(R.drawable.ic_account_circle_black_no_padding)
                         .circleCrop()
                         .into(holder.authorPhotoIv);
+            } else {
+                holder.authorPhotoIv.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_account_circle_black_no_padding));
             }
         }
         holder.timePostedTv.setText(postDateDisplay);
@@ -396,7 +399,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 String notificationUserFeedId = "notification:" + activity.getActor().getID();
                 FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
-                        //todo
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
@@ -405,14 +408,14 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 feedListener.onLiked(activity.getForeignID());
             } catch (StreamException e) {
                 e.printStackTrace();
-                //todo
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         } else {
             // unlike
             try {
                 FeedServices.getTimelineClient().reactions().delete(likedMap.get(position)).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
-                        //todo
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
@@ -420,7 +423,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, -1);
             } catch (StreamException e) {
                 e.printStackTrace();
-                //todo
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         }
     }

@@ -12,11 +12,13 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import io.getstream.cloud.CloudClient;
+import io.getstream.core.Region;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,8 +34,12 @@ public class FeedServices {
     public static final String uid = FirebaseAuth.getInstance().getUid();
 
     public static void init(String apiKey, String userToken) throws MalformedURLException {
-        client = CloudClient
-                .builder(apiKey, userToken, user)
+        CloudClient.Builder builder = CloudClient
+                .builder(apiKey, userToken, user);
+        if (!BuildConfig.DEBUG) {
+            builder.region(Region.SINGAPORE);
+        }
+        client = builder
                 .build();
     }
 
