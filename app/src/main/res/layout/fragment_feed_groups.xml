@@ -98,6 +98,8 @@
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="2"
         tools:context="in.lubble.app.explore.ExploreFrag"
+        android:clipToPadding="false"
+        android:paddingBottom="56dp"
         tools:listitem="@layout/item_explore_group" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

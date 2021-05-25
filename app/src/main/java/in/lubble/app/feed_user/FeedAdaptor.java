@@ -223,7 +223,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
             likedMap.put(position, userLikes.get(0).getId());
         } else {
-            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
             likedMap.remove(position);
         }
         handleReactionStats(activity, holder);
