@@ -155,14 +155,18 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             if (extras.containsKey("aspectRatio") && extras.get("aspectRatio") instanceof Double) {
                 float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
                 if (aspectRatio > 0) {
+                    holder.itemView.measure(
+                            View.MeasureSpec.makeMeasureSpec(itemWidth, View.MeasureSpec.EXACTLY),
+                            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
                     holder.photoContentIv.setVisibility(View.VISIBLE);
-                    holder.photoContentIv.setMaxHeight(View.VISIBLE);
-                    float targetHeight = Math.min(displayHeight - holder.itemView.getMeasuredHeight(), itemWidth / aspectRatio);
                     ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
+                    float targetHeight = Math.min(displayHeight - (holder.itemView.getMeasuredHeight() - holder.photoContentIv.getMeasuredHeight()), itemWidth / aspectRatio);
                     lp.height = Math.round(targetHeight);
                     holder.photoContentIv.setLayoutParams(lp);
                     holder.photoContentIv.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
                 }
+            } else {
+                // photoContentIv.visibility = GONE already at top
             }
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
