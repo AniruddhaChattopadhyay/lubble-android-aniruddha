@@ -123,7 +123,19 @@ public class LubbleApp extends MultiDexApplication {
 
         Freshchat.getInstance(getApplicationContext()).setNotificationConfig(notificationConfig);
 
-        StreamAnalyticsAuth auth = new StreamAnalyticsAuth("qeyr2a54nh9w", "r9mjpdzf5pe875ejz28kshrasz36c4xqqss9jendvkey86ev4fqj9jm9pejtg4aq");
+        StreamAnalyticsAuth auth;
+        if (BuildConfig.DEBUG) {
+            auth = new StreamAnalyticsAuth(
+                    "nvhsd4sv68k4",
+                    "sbhf4fagjmnpycy793jdnfpqrtp8ny8merahqkcj6254mzgx37f8k2ghfhufunjd"
+            );
+        } else {
+            auth = new StreamAnalyticsAuth(
+                    "qeyr2a54nh9w",
+                    "r9mjpdzf5pe875ejz28kshrasz36c4xqqss9jendvkey86ev4fqj9jm9pejtg4aq"
+            );
+        }
+
         StreamAnalytics streamAnalytics = StreamAnalyticsImpl.getInstance(auth);
         streamAnalytics.setUserId(FirebaseAuth.getInstance().getUid());
         streamAnalytics.setDebug(BuildConfig.DEBUG);
