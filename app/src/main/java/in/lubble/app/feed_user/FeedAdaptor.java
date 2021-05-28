@@ -183,6 +183,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 String photoLink = extras.get("photoLink").toString();
                 glide
                         .load(photoLink)
+                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .listener(new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -195,7 +196,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                                 return false;
                             }
                         })
-                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .into(holder.photoContentIv);
                 holder.photoContentIv.setOnClickListener(v -> feedListener.onImageClicked(photoLink, holder.photoContentIv));
             }

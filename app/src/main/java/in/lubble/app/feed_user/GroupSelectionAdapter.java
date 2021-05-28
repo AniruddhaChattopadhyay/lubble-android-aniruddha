@@ -18,7 +18,7 @@ import in.lubble.app.models.FeedGroupData;
 
 public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAdapter.GroupSelectionViewHolder> {
 
-    private int lastCheckedPos = 0;
+    private int lastCheckedPos = -1;
     private final List<FeedGroupData> stringList;
     private final List<FeedGroupData> stringListCopy;
 
@@ -46,7 +46,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
-            lastCheckedPos = holder.getAdapterPosition();
+            lastCheckedPos = holder.getBindingAdapterPosition();
             notifyItemChanged(copyOfLastCheckedPosition);
             notifyItemChanged(lastCheckedPos);
         });

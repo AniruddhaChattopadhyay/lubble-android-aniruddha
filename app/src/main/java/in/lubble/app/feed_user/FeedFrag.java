@@ -83,6 +83,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         if (getParentFragment() instanceof FeedCombinedFragment) {
             ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
         }
+        Analytics.triggerScreenEvent(requireContext(), this.getClass());
     }
 
     @Nullable
@@ -148,9 +149,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     }
 
     private void initRecyclerView() {
-//        Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction()
-//                .replace(R.id.fragment_container, BulkGroupJoinFrag.newInstance())
-//                .commitNow();
         CloudFlatFeed timelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", userId);
         if (adapter == null) {
             DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -176,6 +174,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
+        layoutManager.scrollToPosition(0);
     }
 
     @Override

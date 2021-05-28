@@ -1,5 +1,6 @@
 package in.lubble.app.services;
 
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
@@ -13,7 +14,10 @@ import org.json.JSONObject;
 import java.net.MalformedURLException;
 
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -77,7 +81,7 @@ public class FeedServices {
         }
     }
 
-    public static boolean post(FeedPostData feedPostData, String groupName, @Nullable String imgUrl, float aspectRatio, @Nullable Callback<Void> callback) {
+    public static void post(FeedPostData feedPostData, String groupName, @Nullable String imgUrl, float aspectRatio, @Nullable Callback<Void> callback) {
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
@@ -108,14 +112,13 @@ public class FeedServices {
                     }
                 });
             }
-
+            Bundle bundle = new Bundle();
+            bundle.putString("group", groupName);
+            Analytics.triggerEvent(AnalyticsEvents.FEED_SEND_POST, bundle, LubbleApp.getAppContext());
         } catch (JSONException e) {
             e.printStackTrace();
             FirebaseCrashlytics.getInstance().recordException(e);
-            //todo
-            return false;
         }
-        return true;
     }
 }
 

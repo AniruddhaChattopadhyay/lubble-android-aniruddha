@@ -103,6 +103,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
             feedName = getArguments().getString(FEED_NAME_BUNDLE);
             viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
         }
+        Analytics.triggerScreenEvent(requireContext(), this.getClass());
     }
 
     @Override
