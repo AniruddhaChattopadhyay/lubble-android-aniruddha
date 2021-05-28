@@ -12,7 +12,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingTop="14dp"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingBottom="14dp">
+    android:paddingBottom="10dp">
 
     <include layout="@layout/layout_post" />
 

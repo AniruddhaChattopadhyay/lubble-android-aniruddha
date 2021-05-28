@@ -31,15 +31,12 @@ import retrofit2.Response;
 import static in.lubble.app.Constants.MEDIA_TYPE;
 
 public class FeedServices {
-    private static final String user = FirebaseAuth.getInstance().getUid();// "c4ZIgCriHdcU5avx70AgY0000jj1";
     public static CloudClient client = null;
     private static CloudClient timelineClient = null;
-    public static final String userName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
-    public static final String uid = FirebaseAuth.getInstance().getUid();
 
     public static void init(String apiKey, String userToken) throws MalformedURLException {
         CloudClient.Builder builder = CloudClient
-                .builder(apiKey, userToken, user);
+                .builder(apiKey, userToken, FirebaseAuth.getInstance().getUid());
         if (!BuildConfig.DEBUG) {
             builder.region(Region.SINGAPORE);
         }
@@ -49,7 +46,7 @@ public class FeedServices {
 
     public static CloudClient initTimelineClient(String apiKey, String userToken) throws MalformedURLException {
         timelineClient = CloudClient
-                .builder(apiKey, userToken, user)
+                .builder(apiKey, userToken, FirebaseAuth.getInstance().getUid())
                 .build();
         LubbleSharedPrefs.getInstance().setFeedApiKey(apiKey);
         LubbleSharedPrefs.getInstance().setFeedUserToken(userToken);
@@ -73,7 +70,7 @@ public class FeedServices {
     public static void recreateTimelineClient(String feedUserToken, String feedApiKey) {
         try {
             timelineClient = CloudClient
-                    .builder(feedApiKey, feedUserToken, user)
+                    .builder(feedApiKey, feedUserToken, FirebaseAuth.getInstance().getUid())
                     .build();
         } catch (MalformedURLException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
@@ -120,35 +117,10 @@ public class FeedServices {
             FirebaseCrashlytics.getInstance().recordException(e);
         }
     }
+
+    public static void clearAll() {
+        client = null;
+        timelineClient = null;
+    }
+
 }
-
-
-//        if (client != null) {
-//            CloudFlatFeed userFeed = client.flatFeed("user",uid);
-//            String locality = LubbleSharedPrefs.getInstance().getLubbleName();
-//            CloudFlatFeed groupFeed = client.flatFeed("group",groupName+"_"+locality);
-//            CloudFlatFeed localityFeed = client.flatFeed("locality",locality);
-////            userFeed.follow(groupFeed);
-////            userFeed.follow(localityFeed);
-//            try {
-//                userFeed.addActivity(
-//                        Activity
-//                                .builder()
-//                                .actor("user:" + uid)
-//                                .verb("post")
-//                                .object("picture:10")
-//                                .extraField("message", postText)
-//                                .extraField("photoLink", "https://www.planetware.com/wpimages/2020/02/france-in-pictures-beautiful-places-to-photograph-eiffel-tower.jpg")
-//                                .extraField("authorName",userName)
-//                                .to(Lists.newArrayList(groupFeed.getID(), localityFeed.getID()))
-//                                .build()
-//                ).join();
-//                return true;
-//            } catch (StreamException e) {
-//                e.printStackTrace();
-//                return false;
-//            }
-//        }
-//        return false;
-//    }
-
