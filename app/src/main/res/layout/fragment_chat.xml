@@ -157,24 +157,10 @@
                     android:layout_toStartOf="@id/iv_send_btn"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_media_attach"
+                    app:layout_constraintEnd_toStartOf="@+id/iv_send_btn"
                     app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
                     app:tint="@color/md_grey_600"
                     app:srcCompat="@drawable/ic_camera_alt_white_24dp" />
-
-                <ImageView
-                    android:id="@+id/iv_media_attach"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginRight="8dp"
-                    android:layout_toLeftOf="@id/iv_send_btn"
-                    android:padding="10dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/iv_send_btn"
-                    app:layout_constraintTop_toTopOf="@+id/iv_send_btn"
-                    app:srcCompat="@drawable/ic_image_gallery" />
 
                 <EditText
                     android:id="@+id/et_new_message"

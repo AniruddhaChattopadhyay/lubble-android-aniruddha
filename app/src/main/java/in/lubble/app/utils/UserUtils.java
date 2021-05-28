@@ -31,6 +31,7 @@ import in.lubble.app.notifications.KeyMappingSharedPrefs;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
+import in.lubble.app.services.FeedServices;
 import io.branch.referral.Branch;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
@@ -78,6 +79,7 @@ public class UserUtils {
                                             KeyMappingSharedPrefs.getInstance().clearAll();
                                             GroupMappingSharedPrefs.getInstance().clearAll();
                                             AnswerSharedPrefs.getInstance().clearAll();
+                                            FeedServices.clearAll();
                                             Branch.getInstance().logout();
                                             Intent intent = new Intent(activity, LoginActivity.class);
                                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -119,6 +121,7 @@ public class UserUtils {
                                         KeyMappingSharedPrefs.getInstance().clearAll();
                                         GroupMappingSharedPrefs.getInstance().clearAll();
                                         AnswerSharedPrefs.getInstance().clearAll();
+                                        FeedServices.clearAll();
                                         Branch.getInstance().logout();
                                         Intent intent = new Intent(context, LoginActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);

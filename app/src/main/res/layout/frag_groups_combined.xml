@@ -4,16 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context=".feed_user.FeedCombinedFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout_feed"
+            android:id="@+id/tabLayout_groups"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_scrollFlags="scroll|enterAlways"
@@ -22,16 +20,16 @@
             app:tabTextColor="@color/md_grey_700">
 
             <com.google.android.material.tabs.TabItem
-                android:id="@+id/tab_feed"
+                android:id="@+id/tab_chats"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="Nearby Feed" />
+                tools:text="Chats" />
 
             <com.google.android.material.tabs.TabItem
                 android:id="@+id/tab_groups"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="Groups" />
+                tools:text="Explore Groups" />
 
         </com.google.android.material.tabs.TabLayout>
 

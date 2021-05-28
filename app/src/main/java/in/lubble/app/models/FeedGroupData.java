@@ -41,6 +41,8 @@ public class FeedGroupData implements Serializable {
     private String feedName;
     @SerializedName("lubble")
     private String lubble;
+    @SerializedName("groupPhotoUrl")
+    private String photoUrl;
 
     public @Nullable Integer getId() {
         return id;
@@ -66,7 +68,8 @@ public class FeedGroupData implements Serializable {
         this.feedName = feedName;
     }
 
-    public String getLubble() {
+    // don't use this lubble. Feed Groups are not meant to be constrained to any lubble (n'hood)
+    private String getLubble() {
         return lubble;
     }
 
@@ -74,4 +77,11 @@ public class FeedGroupData implements Serializable {
         this.lubble = lubble;
     }
 
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
 }

@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:tint="@color/dark_gray"
+        app:tint="@color/dark_gray"
         app:srcCompat="@drawable/ic_call_made_black_24dp" />
 
 </RelativeLayout>

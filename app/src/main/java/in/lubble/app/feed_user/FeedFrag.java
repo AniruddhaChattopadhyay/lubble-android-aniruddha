@@ -38,6 +38,7 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.FeedViewModel;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.VisibleState;
 import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.cloud.CloudFlatFeed;
@@ -82,6 +83,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         if (getParentFragment() instanceof FeedCombinedFragment) {
             ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
         }
+        Analytics.triggerScreenEvent(requireContext(), this.getClass());
     }
 
     @Nullable
@@ -94,7 +96,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
         postBtn.setVisibility(View.VISIBLE);
 
-        layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        layoutManager = new LinearLayoutManager(getContext());
         feedRV.setLayoutManager(layoutManager);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
@@ -147,9 +149,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     }
 
     private void initRecyclerView() {
-//        Objects.requireNonNull(getActivity()).getSupportFragmentManager().beginTransaction()
-//                .replace(R.id.fragment_container, BulkGroupJoinFrag.newInstance())
-//                .commitNow();
         CloudFlatFeed timelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", userId);
         if (adapter == null) {
             DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -168,13 +167,14 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             feedRV.clearOnScrollListeners();
             feedRV.addOnScrollListener(scrollListener);
             viewModel.getDistinctLiveData().observe(this, visibleState -> {
-                processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FeedServices.uid, FeedFrag.class.getSimpleName());
+                processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FirebaseAuth.getInstance().getUid(), FeedFrag.class.getSimpleName());
             });
         }
         viewModel.loadPaginatedActivities(timelineFeed, 10).observe(this, pagingData -> {
             layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
+        layoutManager.scrollToPosition(0);
     }
 
     @Override
@@ -203,6 +203,12 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         @Override
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
+            if (dy > 0) {
+                UiUtils.animateSlideDownHide(getContext(), postBtn);
+            } else {
+                UiUtils.animateSlideUpShow(getContext(), postBtn);
+            }
+
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
                     layoutManager.findLastCompletelyVisibleItemPosition());
             viewModel.onScrolled(visibleState);

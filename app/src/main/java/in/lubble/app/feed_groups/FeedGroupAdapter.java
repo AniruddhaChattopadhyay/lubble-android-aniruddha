@@ -16,6 +16,9 @@ import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.util.ArrayList;
@@ -25,7 +28,10 @@ import java.util.List;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.models.FeedGroupData;
+import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
+
+import static in.lubble.app.utils.RoundedCornersTransformation.CornerType.TOP;
 
 public class FeedGroupAdapter extends RecyclerView.Adapter<FeedGroupAdapter.FeedGroupViewHolder> implements Filterable {
 
@@ -74,19 +80,19 @@ public class FeedGroupAdapter extends RecyclerView.Adapter<FeedGroupAdapter.Feed
         FeedGroupData feedGroupData = feedGroupList.get(position);
         holder.groupNameTV.setText(feedGroupData.getName());
 
-        /*todo RequestOptions requestOptions = new RequestOptions();
+        RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, TOP));
         glide.load(feedGroupData.getPhotoUrl())
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(R.drawable.rounded_rect_gray)
                 .error(R.drawable.explore_default)
                 .apply(requestOptions)
-                .into(holder.imageView);*/
+                .into(holder.imageView);
 
         if (isOnboarding) {
             holder.joinTv.setText("SELECT");
             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
-            if (selectedMap.containsKey(feedGroupData.getId())) {
+            if (selectedMap.containsKey(feedGroupData.getFeedName())) {
                 holder.selectedContainer.setVisibility(View.VISIBLE);
                 holder.joinTv.setText("REMOVE");
                 holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));

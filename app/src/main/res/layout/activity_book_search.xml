@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:tint="@color/white"
+                app:tint="@color/white"
                 app:srcCompat="@drawable/ic_arrow_forward_black_24dp" />
 
         </RelativeLayout>
@@ -106,7 +106,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:tint="@color/dark_gray"
+                app:tint="@color/dark_gray"
                 app:srcCompat="@drawable/ic_search_gray_24dp" />
 
             <EditText
@@ -131,7 +131,7 @@
                 android:background="@drawable/half_rounded_rectangle_blue_clue_top"
                 android:padding="8dp"
                 android:rotation="90"
-                android:tint="@color/white"
+                app:tint="@color/white"
                 app:srcCompat="@drawable/ic_search_gray_24dp" />
 
         </LinearLayout>

@@ -9,6 +9,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
@@ -22,9 +24,10 @@ public class AuthenticationInterceptor implements Interceptor {
     }
 
     @Override
-    public Response intercept(Chain chain) throws IOException {
+    public @NotNull Response intercept(Chain chain) throws IOException {
         String authToken = "";
         Request original = chain.request();
+        Response ogResponse = chain.proceed(original);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -36,15 +39,10 @@ public class AuthenticationInterceptor implements Interceptor {
             } catch (ExecutionException e) {
                 crashlytics.recordException(e);
                 e.printStackTrace();
-                return null;
             } catch (InterruptedException e) {
                 crashlytics.recordException(e);
                 e.printStackTrace();
-                return null;
             }
-        } else {
-            //give up, user is logged out, no need to re-fresh token
-            return null;
         }
         if (!TextUtils.isEmpty(authToken)) {
             Request.Builder builder = original.newBuilder()
@@ -52,8 +50,7 @@ public class AuthenticationInterceptor implements Interceptor {
                     .header("Token", authToken);
             Request request = builder.build();
             return chain.proceed(request);
-        } else {
-            return null;
         }
+        return ogResponse;
     }
 }

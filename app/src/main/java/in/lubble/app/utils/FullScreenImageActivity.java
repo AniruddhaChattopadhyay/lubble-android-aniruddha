@@ -142,6 +142,7 @@ public class FullScreenImageActivity extends BaseActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_GROUP_DP && resultCode == RESULT_OK) {
             File imageFile;
             if (data != null && data.getData() != null) {

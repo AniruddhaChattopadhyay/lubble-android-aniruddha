@@ -27,6 +27,7 @@ import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.R;
 import in.lubble.app.UploadImageFeedService;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.Endpoints;
@@ -37,6 +38,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 
 public class GroupSelectionFrag extends Fragment {
 
@@ -71,6 +73,8 @@ public class GroupSelectionFrag extends Fragment {
         postSubmitBtn = view.findViewById(R.id.btn_post);
         postProgressBar = view.findViewById(R.id.progressbar_post);
 
+        Analytics.triggerScreenEvent(requireContext(), this.getClass());
+
         groupsRv.setLayoutManager(new LinearLayoutManager(requireContext()));
         getFeedGroups();
 
@@ -100,21 +104,29 @@ public class GroupSelectionFrag extends Fragment {
 
         postSubmitBtn.setOnClickListener(v -> {
             String text = feedPostData.getText();
-            FeedGroupData selectedGroupData = feedGroupDataList.get(groupSelectionAdapter.getLastCheckedPos());
+            int lastCheckedPos = groupSelectionAdapter.getLastCheckedPos();
+            if (lastCheckedPos == NO_POSITION) {
+                Toast.makeText(requireContext(), "Please select a group for this post", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            FeedGroupData selectedGroupData = feedGroupDataList.get(lastCheckedPos);
             String groupNameText = selectedGroupData.getName();
             String uploadPath = "feed_photos";
             if (text != null) {
                 if (feedPostData.getImgUri() != null) {
                     Uri imgUri = Uri.parse(feedPostData.getImgUri());
                     Intent serviceIntent = new Intent(getContext(), UploadImageFeedService.class)
-                            .putExtra(UploadImageFeedService.EXTRA_BUCKET, UploadImageFeedService.BUCKET_CONVO)
+                            .putExtra(UploadImageFeedService.EXTRA_BUCKET, UploadImageFeedService.BUCKET_DEFAULT)
                             .putExtra(UploadImageFeedService.EXTRA_FILE_NAME, imgUri.getLastPathSegment())
                             .putExtra(UploadImageFeedService.EXTRA_FILE_URI, imgUri)
                             .putExtra(UploadImageFeedService.EXTRA_UPLOAD_PATH, uploadPath)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_GROUP_NAME, groupNameText)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
-                    ContextCompat.startForegroundService(getContext(), serviceIntent);
+                    ContextCompat.startForegroundService(requireContext(), serviceIntent);
+                    requireActivity().setResult(RESULT_OK);
+                    requireActivity().finish();
+                    getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
                 } else {
                     postSubmitBtn.setVisibility(View.GONE);
                     postProgressBar.setVisibility(View.VISIBLE);

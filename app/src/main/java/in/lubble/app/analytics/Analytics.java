@@ -28,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.StringUtils;
 import io.getstream.analytics.beans.Content;
 import io.getstream.analytics.beans.Engagement;
@@ -232,7 +231,7 @@ public class Analytics {
                         new Content.ContentBuilder()
                                 .withForeignId(foreignId)
                                 .withAttribute("verb", action)
-                                .withAttribute("actor", FeedServices.uid)
+                                .withAttribute("actor", FirebaseAuth.getInstance().getUid())
                                 .build()
                 )
                 .withBoost(boost)

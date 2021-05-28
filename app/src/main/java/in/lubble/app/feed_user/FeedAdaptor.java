@@ -45,6 +45,7 @@ import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.curios.textformatter.FormatText;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -154,20 +155,35 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             if (extras.containsKey("aspectRatio") && extras.get("aspectRatio") instanceof Double) {
                 float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
                 if (aspectRatio > 0) {
+                    holder.itemView.measure(
+                            View.MeasureSpec.makeMeasureSpec(itemWidth, View.MeasureSpec.EXACTLY),
+                            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                    int itemViewHeight = holder.itemView.getMeasuredHeight();
+                    float targetHeight = Math.min(displayHeight - itemViewHeight, itemWidth / aspectRatio);
                     holder.photoContentIv.setVisibility(View.VISIBLE);
-                    holder.photoContentIv.setMaxHeight(View.VISIBLE);
-                    float targetHeight = Math.min(displayHeight - holder.itemView.getMeasuredHeight(), itemWidth / aspectRatio);
                     ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
+                    if (targetHeight < 300) {
+                        float delta = 300 - targetHeight;
+                        int linesToPurge = (int) Math.ceil(delta / UiUtils.spToPx(14));
+                        holder.textContentTv.setMaxLines(Math.max(9 - linesToPurge, 5));
+                        targetHeight = 300;
+                    } else {
+                        holder.textContentTv.setMaxLines(9);
+                    }
                     lp.height = Math.round(targetHeight);
                     holder.photoContentIv.setLayoutParams(lp);
                     holder.photoContentIv.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
                 }
+            } else {
+                // photoContentIv.visibility = GONE already at top
+                holder.textContentTv.setMaxLines(9);
             }
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
                 String photoLink = extras.get("photoLink").toString();
                 glide
                         .load(photoLink)
+                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .listener(new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
@@ -180,7 +196,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                                 return false;
                             }
                         })
-                        .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .into(holder.photoContentIv);
                 holder.photoContentIv.setOnClickListener(v -> feedListener.onImageClicked(photoLink, holder.photoContentIv));
             }
@@ -214,6 +229,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         .error(R.drawable.ic_account_circle_black_no_padding)
                         .circleCrop()
                         .into(holder.authorPhotoIv);
+            } else {
+                holder.authorPhotoIv.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_account_circle_black_no_padding));
             }
         }
         holder.timePostedTv.setText(postDateDisplay);
@@ -223,7 +240,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
             likedMap.put(position, userLikes.get(0).getId());
         } else {
-            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+            holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
             likedMap.remove(position);
         }
         handleReactionStats(activity, holder);
@@ -396,7 +413,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 String notificationUserFeedId = "notification:" + activity.getActor().getID();
                 FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
-                        //todo
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
@@ -405,14 +422,14 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 feedListener.onLiked(activity.getForeignID());
             } catch (StreamException e) {
                 e.printStackTrace();
-                //todo
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         } else {
             // unlike
             try {
                 FeedServices.getTimelineClient().reactions().delete(likedMap.get(position)).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
-                        //todo
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
@@ -420,7 +437,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, -1);
             } catch (StreamException e) {
                 e.printStackTrace();
-                //todo
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         }
     }

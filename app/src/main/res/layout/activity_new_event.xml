@@ -57,7 +57,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/til_event_name"
                     android:layout_marginBottom="10dp"
-                    android:tint="@color/darker_gray"
+                    app:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_edit_black_24dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -82,7 +82,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/til_event_desc"
                     android:layout_marginBottom="10dp"
-                    android:tint="@color/darker_gray"
+                    app:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_format_align_left_black_24dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -140,7 +140,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@id/til_event_date"
                     android:layout_marginBottom="10dp"
-                    android:tint="@color/darker_gray"
+                    app:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_event_black_24dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -166,7 +166,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignTop="@id/container_time"
                     android:layout_marginTop="20dp"
-                    android:tint="@color/darker_gray"
+                    app:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_access_time_black_24dp" />
 
                 <LinearLayout
@@ -331,7 +331,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignTop="@id/till_event_address"
                     android:layout_marginTop="20dp"
-                    android:tint="@color/darker_gray"
+                    app:tint="@color/darker_gray"
                     app:srcCompat="@drawable/ic_location_city_black_24dp" />
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -358,7 +358,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/till_event_address"
                     android:layout_marginTop="20dp"
-                    android:tint="@color/darker_gray"
+                    app:tint="@color/darker_gray"
                     android:layout_alignBottom="@id/til_event_url_tickets"
                     app:srcCompat="@drawable/ic_ticket_24dp" />
 

@@ -28,7 +28,7 @@
         android:background="@drawable/circle"
         android:backgroundTint="@color/black"
         android:padding="48dp"
-        android:tint="@color/white"
+        app:tint="@color/white"
         android:visibility="gone"
         app:srcCompat="@drawable/ic_edit_black_24dp"
         tools:visibility="visible" />
@@ -68,7 +68,7 @@
             android:layout_height="18dp"
             android:alpha="0.7"
             android:gravity="center"
-            android:tint="@color/white"
+            app:tint="@color/white"
             app:srcCompat="@drawable/ic_add_circle_black_24dp" />
 
     </LinearLayout>

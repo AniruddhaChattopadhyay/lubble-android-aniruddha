@@ -36,6 +36,8 @@ import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
@@ -69,6 +71,8 @@ public class AddPostForFeed extends BaseActivity {
 
         setContentView(R.layout.activity_add_post_for_feed);
 
+        Analytics.triggerScreenEvent(this, this.getClass());
+
         Toolbar toolbar = findViewById(R.id.text_toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -97,6 +101,8 @@ public class AddPostForFeed extends BaseActivity {
                     feedPostData.setImgUri(imageUri.toString());
                 }
                 openGroupSelectionActivity(feedPostData);
+
+                Analytics.triggerEvent(AnalyticsEvents.FEED_POST_COMPOSED, this);
             } else {
                 Snackbar.make(parentLayout, "Can't publish an empty post", Snackbar.LENGTH_SHORT).show();
             }
@@ -181,7 +187,7 @@ public class AddPostForFeed extends BaseActivity {
                 File imageFile = getFileFromInputStreamUri(this, uri);
                 uri = Uri.fromFile(imageFile);
 
-                addPhotoToFeedTv.setText("Photo added");
+                addPhotoToFeedTv.setText("Change Photo");
                 imageUri = uri;
 
                 feedPostData.setImgUri(uri.toString());
@@ -240,7 +246,7 @@ public class AddPostForFeed extends BaseActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Pix.start(this, Options.init().setRequestCode(100));
                 } else {
-                    Toast.makeText(this, "Approve permissions to open Pix ImagePicker", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Approve permissions to open ImagePicker", Toast.LENGTH_LONG).show();
                 }
                 return;
             }

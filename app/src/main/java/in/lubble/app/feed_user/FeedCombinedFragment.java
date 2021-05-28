@@ -7,19 +7,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.lifecycle.Lifecycle;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 import org.jetbrains.annotations.NotNull;
 
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.feed_groups.FeedExploreActiv;
 import in.lubble.app.feed_groups.FeedGroupsFrag;
@@ -30,6 +34,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static in.lubble.app.utils.UiUtils.reduceDragSensitivity;
 
 public class FeedCombinedFragment extends Fragment {
 
@@ -51,17 +56,24 @@ public class FeedCombinedFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.frag_feed_combined, container, false);
         TabLayout tabLayout = view.findViewById(R.id.tabLayout_feed);
-        ViewPager viewPager = view.findViewById(R.id.tab_pager);
+        ViewPager2 viewPager = view.findViewById(R.id.tab_pager);
 
-        MyTabPagerAdapter tabPager = new MyTabPagerAdapter(getFragmentManager());
+        MyTabPagerAdapter tabPager = new MyTabPagerAdapter(getChildFragmentManager(), getLifecycle());
         viewPager.setAdapter(tabPager);
-        tabLayout.setupWithViewPager(viewPager);
+        new TabLayoutMediator(tabLayout, viewPager,
+                (tab, position) ->
+                        tab.setText(position == 0 ? "Nearby Feed" : "Groups")
+        ).attach();
+        reduceDragSensitivity(viewPager);
 
         if (!LubbleSharedPrefs.getInstance().getCheckIfFeedGroupJoined()) {
             // User might not have joined any feed groups, check with backend
             fetchNewFeedUserStatus();
         }
 
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).removeFeedBadge();
+        }
         return view;
     }
 
@@ -123,18 +135,19 @@ public class FeedCombinedFragment extends Fragment {
         this.feedRefreshListener = listener;
     }
 
-    static class MyTabPagerAdapter extends FragmentStatePagerAdapter {
-        MyTabPagerAdapter(FragmentManager fm) {
-            super(fm);
+    class MyTabPagerAdapter extends FragmentStateAdapter {
+        MyTabPagerAdapter(FragmentManager fm, Lifecycle lifecycle) {
+            super(fm, lifecycle);
         }
 
         @Override
-        public int getCount() {
-            return 2; // One for each tab, 3 in our example.
+        public int getItemCount() {
+            return 2;
         }
 
+        @NonNull
         @Override
-        public Fragment getItem(int position) {
+        public Fragment createFragment(int position) {
             switch (position) {
                 case 0:
                     return new FeedFrag();
@@ -143,12 +156,6 @@ public class FeedCombinedFragment extends Fragment {
                 default:
                     throw new IllegalArgumentException();
             }
-        }
-
-        // Returns the page title for the top indicator
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return position == 0 ? "Nearby Feed" : "Groups";
         }
     }
 

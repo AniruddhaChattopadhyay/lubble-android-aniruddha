@@ -59,6 +59,7 @@ public class LubbleSharedPrefs {
     private final String FEED_USER_TOKEN = "FEED_USER_TOKEN";
     private final String REPLY_BOTTOM_SHEET = "REPLY_BOTTOM_SHEET";
     private final String CHECK_IF_FEED_GROUPS_JOINED= "CHECK_IF_FEED_GROUPS_JOINED";
+    private final String IS_FEED_VISITED = "IS_FEED_VISITED";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -403,15 +404,24 @@ public class LubbleSharedPrefs {
         return preferences.getString(REPLY_BOTTOM_SHEET, null);
     }
 
-    public boolean setReplyBottomSheet(String reply) {
-        return preferences.edit().putString(REPLY_BOTTOM_SHEET, reply).commit();
+    public void setReplyBottomSheet(String reply) {
+        preferences.edit().putString(REPLY_BOTTOM_SHEET, reply).apply();
     }
 
     public boolean getCheckIfFeedGroupJoined() {
         return preferences.getBoolean(CHECK_IF_FEED_GROUPS_JOINED, false);
     }
 
-    public boolean setCheckIfFeedGroupJoined() {
-        return preferences.edit().putBoolean(CHECK_IF_FEED_GROUPS_JOINED, true).commit();
+    public void setCheckIfFeedGroupJoined() {
+        preferences.edit().putBoolean(CHECK_IF_FEED_GROUPS_JOINED, true).apply();
     }
+
+    public boolean getIsFeedVisited() {
+        return preferences.getBoolean(IS_FEED_VISITED, false);
+    }
+
+    public void setIsFeedVisited(boolean isVisited) {
+        preferences.edit().putBoolean(IS_FEED_VISITED, isVisited).apply();
+    }
+
 }
