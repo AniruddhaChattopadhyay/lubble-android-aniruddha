@@ -264,7 +264,7 @@ public class FeedPostFrag extends Fragment {
                                     likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                                     likeReactionId = userLikes.get(0).getId();
                                 } else {
-                                    likeIv.setImageResource(R.drawable.ic_favorite_border_light);
+                                    likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
                                     likeReactionId = null;
                                 }
 

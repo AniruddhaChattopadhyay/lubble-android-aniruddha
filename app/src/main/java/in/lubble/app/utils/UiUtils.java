@@ -13,6 +13,7 @@ import android.media.ExifInterface;
 import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,6 +43,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 
+import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 
 /**
@@ -119,6 +121,10 @@ public class UiUtils {
 
     public static int dpToPx(int dp) {
         return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int spToPx(float sp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, LubbleApp.getAppContext().getResources().getDisplayMetrics());
     }
 
     public static void animateColor(final View view, @ColorInt int colorFrom, @ColorInt int colorTo) {

@@ -95,7 +95,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
         postBtn.setVisibility(View.VISIBLE);
 
-        layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        layoutManager = new LinearLayoutManager(getContext());
         feedRV.setLayoutManager(layoutManager);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
