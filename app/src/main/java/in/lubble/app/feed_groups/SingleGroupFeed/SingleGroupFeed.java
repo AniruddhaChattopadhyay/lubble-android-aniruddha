@@ -51,7 +51,9 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.FeedViewModel;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.VisibleState;
+import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.FollowRelation;
@@ -120,7 +122,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
         });
 
-        layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        layoutManager = new LinearLayoutManager(getContext());
         feedRV.setLayoutManager(layoutManager);
         feedRV.showShimmerAdapter();
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -154,7 +156,9 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
             @Override
             public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
-                Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                if(isAdded()) {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -166,7 +170,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
             int width = displayMetrics.widthPixels;
-            int height = displayMetrics.heightPixels;
+            int height = displayMetrics.heightPixels; //height of RV, excluding toolbar & bottom nav
             adapter = new FeedAdaptor(new FeedPostComparator());
             adapter.setVars(getContext(), width, height, GlideApp.with(this), this);
 
@@ -186,6 +190,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
             layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
+        layoutManager.scrollToPosition(0);
 
         try {
             checkGroupJoinedStatus(groupFeed);
@@ -248,6 +253,12 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         @Override
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
+            if (dy > 0) {
+                UiUtils.animateSlideDownHide(getContext(), postBtn);
+            } else {
+                UiUtils.animateSlideUpShow(getContext(), postBtn);
+            }
+
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
                     layoutManager.findLastCompletelyVisibleItemPosition());
             viewModel.onScrolled(visibleState);
@@ -316,12 +327,15 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         postBtn.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
+        RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
+        smoothScroller.setTargetPosition(position);
+        feedRV.getLayoutManager().startSmoothScroll(smoothScroller);
     }
 
     @Override
     public void onReplied(String activityId, String foreignId, Reaction reaction) {
         postBtn.setVisibility(View.VISIBLE);
-        //adapter.addUserReply(activityId, reaction);
+        adapter.addUserReply(activityId, reaction);
         Analytics.triggerFeedEngagement(foreignId, "comment", 10, "group:" + feedName, SingleGroupFeed.class.getSimpleName());
     }
 
