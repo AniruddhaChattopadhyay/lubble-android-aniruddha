@@ -138,7 +138,7 @@
                         android:id="@+id/iv_recommend"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:tint="@color/dk_red"
+                        app:tint="@color/dk_red"
                         app:srcCompat="@drawable/ic_favorite_border_24dp" />
 
                     <TextView
@@ -180,7 +180,7 @@
                     <ImageView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:tint="@color/dk_colorAccent"
+                        app:tint="@color/dk_colorAccent"
                         app:srcCompat="@drawable/ic_share_black_24dp" />
 
                     <TextView

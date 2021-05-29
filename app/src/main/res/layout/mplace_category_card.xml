@@ -11,7 +11,7 @@
         android:id="@+id/tv_category"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:drawableRight="@drawable/ic_arrow_forward_black_24dp"
+        app:drawableRightCompat="@drawable/ic_arrow_forward_black_24dp"
         android:textAppearance="@style/TextAppearance.AppCompat.Title"
         android:layout_marginLeft="16dp"
         android:paddingRight="16dp"

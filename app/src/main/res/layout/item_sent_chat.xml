@@ -301,7 +301,7 @@
                             android:layout_alignBottom="@id/tv_pdf_title"
                             android:layout_alignParentRight="true"
                             android:layout_marginRight="16dp"
-                            android:tint="@color/white"
+                            app:tint="@color/white"
                             app:srcCompat="@drawable/ic_file_download_black_24dp" />
 
                         <ProgressBar

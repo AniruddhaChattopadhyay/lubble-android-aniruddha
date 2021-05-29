@@ -74,7 +74,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.groups.GroupRecyclerAdapter.TYPE_HEADER;
 
-public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener {
+public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener, ChatSearchListener {
 
     private static final String TAG = "GroupListFragment";
     public static final String USER_INIT_LOGOUT_ACTION = "USER_INIT_LOGOUT_ACTION";
@@ -114,6 +114,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         bundle.putBoolean("isNewUserInThisLubble", isNewUserInThisLubble);
         groupListFragment.setArguments(bundle);
         return groupListFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (requireActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).setChatSearchListener(this);
+        }
     }
 
     @Override
@@ -317,7 +325,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
             }
             toggleSearch(true);
             groupTrace.stop();
-            reinitGroupListCopy();
+            reInitGroupListCopy();
             isPublicGroupsLoading = false;
 
             groupsRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -757,12 +765,14 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         mListener = this;
     }
 
-    public void reinitGroupListCopy() {
+    @Override
+    public void reInitGroupListCopy() {
         adapter.reinitGroupListCopy();
     }
 
-    public void toggleVisibilityOfSlider(boolean show) {
-        if (show) {
+    @Override
+    public void toggleSliderVisibility(boolean isShown) {
+        if (isShown) {
             pagerContainer.setVisibility(View.VISIBLE);
             tabLayout.setVisibility(View.VISIBLE);
         } else {
@@ -771,6 +781,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         }
     }
 
+    @Override
     public void filterGroups(String searchString) {
         adapter.getFilter().filter(searchString);
     }

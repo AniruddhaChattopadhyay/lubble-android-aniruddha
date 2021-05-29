@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/group_selection"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingTop="16dp"
+    android:paddingRight="16dp">
+
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/sv_group_selection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:queryHint="Search"
+        android:background="@drawable/rounded_rect_very_light_gray"
+        app:iconifiedByDefault="false"
+        app:queryBackground="@null"
+        app:closeIcon="@drawable/ic_close_black_24dp"
+        android:paddingLeft="-12dp"
+        android:focusableInTouchMode="true"
+        android:focusable="true"
+        android:paddingStart="-12dp" />
+
+    <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+        android:id="@+id/rv_groups"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        app:shimmer_demo_grid_child_count="7"
+        app:shimmer_demo_layout="@layout/layout_demo_shimmer_simple"
+        tools:itemCount="12"
+        tools:listitem="@layout/bulk_group_join_rv_row" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_join"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp"
+        android:minWidth="120dp"
+        android:text="Join"
+        android:theme="@style/MaterialButton"
+        app:backgroundTint="@color/colorAccent"
+        app:icon="@drawable/ic_send_white_24dp" />
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_gravity="right"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressbar_post"/>
+
+</LinearLayout>

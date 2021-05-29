@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <include layout="@layout/text_toolbar_no_shadow" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/post_btn"
+        android:layout_below="@id/text_toolbar">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/iv_profile_pic"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="14dp"
+                tools:src="@tools:sample/avatars" />
+
+            <EditText
+                android:id="@+id/post_edt_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="8dp"
+                android:layout_toRightOf="@id/iv_profile_pic"
+                android:background="@color/transparent"
+                android:cursorVisible="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:gravity="top|left"
+                android:maxLength="2000"
+                android:hint="What's happening around you?"
+                android:inputType="text|textCapSentences|textMultiLine"
+                android:paddingTop="16dp"
+                android:scrollbars="vertical" />
+
+            <include layout="@layout/layout_feed_link_preview" />
+
+            <ImageView
+                android:id="@+id/iv_attached_pic"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/cont_link_preview"
+                android:layout_marginLeft="48dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="16dp"
+                android:adjustViewBounds="true"
+                android:visibility="gone"
+                tools:src="@tools:sample/backgrounds/scenic"
+                tools:visibility="visible" />
+
+        </RelativeLayout>
+
+    </ScrollView>
+
+    <TextView
+        android:id="@+id/add_photo_feed_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/rect_rounded_border"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:padding="8dp"
+        android:text="Add Photo"
+        android:textColor="@color/black"
+        app:drawableLeftCompat="@drawable/ic_image_gallery" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/post_btn"
+        style="@style/Widget.MaterialComponents.Button.Icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="8dp"
+        android:enabled="false"
+        android:text="post"
+        android:theme="@style/MaterialButton"
+        app:backgroundTint="@color/button_color_selector"
+        app:icon="@drawable/ic_send_white_24dp" />
+
+    <TextView
+        android:id="@+id/tv_rules"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/post_btn"
+        android:layout_alignRight="@id/post_btn"
+        android:layout_marginLeft="16dp"
+        android:text="No promotions allowed\nPosting Guidelines"
+        android:textAlignment="textEnd"
+        android:textSize="12sp"
+        android:textStyle="italic"
+        android:visibility="gone" />
+
+</RelativeLayout>

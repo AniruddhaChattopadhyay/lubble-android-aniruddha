@@ -19,6 +19,7 @@ import java.util.List;
 
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
+import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.ItemActivity;
@@ -181,6 +182,11 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 exploreIntent.putExtra(EXTRA_TAB_NAME, "explore");
                 startActivity(exploreIntent);
                 break;
+            case "feed":
+                final Intent feedIntent = new Intent(this, MainActivity.class);
+                feedIntent.putExtra(EXTRA_TAB_NAME, "feed");
+                startActivity(feedIntent);
+                break;
             case "events":
                 final String event_id = uri.getQueryParameter("id");
                 if (event_id != null) {
@@ -193,6 +199,14 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 break;
             case "leaderboard":
                 LeaderboardActivity.open(this);
+                break;
+            case "feed_post":
+                final String postId = uri.getQueryParameter("id");
+                if (postId != null) {
+                    startActivity(FeedPostActivity.getIntent(this, postId));
+                } else {
+                    startActivity(new Intent(this, MainActivity.class));
+                }
                 break;
             default:
                 startActivity(new Intent(this, MainActivity.class));

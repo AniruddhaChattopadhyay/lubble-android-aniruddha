@@ -418,7 +418,7 @@
                 android:layout_marginLeft="22dp"
                 android:background="@drawable/circle"
                 android:padding="6dp"
-                android:tint="@color/darker_gray"
+                app:tint="@color/darker_gray"
                 android:visibility="gone"
                 app:srcCompat="@drawable/ic_share_black_24dp"
                 tools:visibility="visible" />

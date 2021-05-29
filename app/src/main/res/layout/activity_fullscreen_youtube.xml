@@ -15,7 +15,7 @@
         android:layout_marginTop="32dp"
         android:layout_marginRight="16dp"
         android:padding="8dp"
-        android:tint="@color/white"
+        app:tint="@color/white"
         app:srcCompat="@drawable/ic_close_black_24dp" />
 
     <in.lubble.app.utils.TouchableYoutubeFragment

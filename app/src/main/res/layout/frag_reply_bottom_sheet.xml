@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottomsheet_reply"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/transparent"
+    android:orientation="vertical"
+    app:behavior_hideable="false"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <ImageView
+        android:id="@+id/shadow"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:alpha="0.3"
+        app:srcCompat="@drawable/scrim" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <in.lubble.app.widget.ReplyEditText
+            android:id="@+id/et_reply"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:drawablePadding="4dp"
+            android:hint="Add a reply..."
+            android:inputType="text|textCapSentences|textMultiLine"
+            android:maxLines="6"
+            android:padding="8dp"
+            android:scrollbars="vertical"
+            app:drawableLeftCompat="@drawable/ic_account_circle_grey_24dp" />
+
+        <ImageView
+            android:id="@+id/iv_reply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.4"
+            android:background="@color/white"
+            android:paddingLeft="8dp"
+            android:paddingTop="8dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="8dp"
+            app:srcCompat="@drawable/ic_send_white_24dp"
+            app:tint="@color/colorAccent" />
+
+        <ProgressBar
+            android:id="@+id/progressbar_reply"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:paddingLeft="8dp"
+            android:paddingTop="8dp"
+            android:paddingRight="16dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_send_white_24dp"
+            app:tint="@color/colorAccent" />
+
+    </LinearLayout>
+
+</LinearLayout>

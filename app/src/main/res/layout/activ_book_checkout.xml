@@ -433,7 +433,7 @@
                 android:layout_marginTop="8dp"
                 android:background="@drawable/blue_circle"
                 android:padding="8dp"
-                android:tint="@color/white"
+                app:tint="@color/white"
                 app:srcCompat="@drawable/ic_access_time_black_24dp" />
 
             <TextView
@@ -475,7 +475,7 @@
                 android:layout_marginTop="16dp"
                 android:background="@drawable/green_circle"
                 android:padding="8dp"
-                android:tint="@color/white"
+                app:tint="@color/white"
                 app:srcCompat="@drawable/ic_location_on_black_24dp" />
 
             <TextView

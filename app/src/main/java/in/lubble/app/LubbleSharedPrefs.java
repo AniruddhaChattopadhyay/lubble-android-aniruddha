@@ -55,6 +55,12 @@ public class LubbleSharedPrefs {
     private final String SHARE_MSG_URL = "SHARE_MSG_URL";
     private final String SHOW_NOTIF_DIGEST = "SHOW_NOTIF_DIGEST";
     private final String LAST_USER_MESSAGE = "LAST_MESSAGE_USER";
+    private final String FEED_API_KEY = "FEED_API_KEY";
+    private final String FEED_USER_TOKEN = "FEED_USER_TOKEN";
+    private final String REPLY_BOTTOM_SHEET = "REPLY_BOTTOM_SHEET";
+    private final String CHECK_IF_FEED_GROUPS_JOINED= "CHECK_IF_FEED_GROUPS_JOINED";
+    private final String IS_FEED_VISITED = "IS_FEED_VISITED";
+    private final String PROFILE_PIC_URL = "PROFILE_PIC_URL";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -92,7 +98,7 @@ public class LubbleSharedPrefs {
         return preferences.getString(LAST_USER_MESSAGE, "");
     }
 
-    public boolean setLAST_USER_MESSAGE(String message){
+    public boolean setLAST_USER_MESSAGE(String message) {
         return preferences.edit().putString(LAST_USER_MESSAGE, message).commit();
     }
 
@@ -375,6 +381,57 @@ public class LubbleSharedPrefs {
 
     public boolean setShowNotifDigest(boolean shouldShow) {
         return preferences.edit().putBoolean(SHOW_NOTIF_DIGEST, shouldShow).commit();
+    }
+
+    @Nullable
+    public String getFeedApiKey() {
+        return preferences.getString(FEED_API_KEY, null);
+    }
+
+    public boolean setFeedApiKey(String key) {
+        return preferences.edit().putString(FEED_API_KEY, key).commit();
+    }
+
+    @Nullable
+    public String getFeedUserToken() {
+        return preferences.getString(FEED_USER_TOKEN, null);
+    }
+
+    public boolean setFeedUserToken(String userToken) {
+        return preferences.edit().putString(FEED_USER_TOKEN, userToken).commit();
+    }
+    @Nullable
+    public String getReplyBottomSheet() {
+        return preferences.getString(REPLY_BOTTOM_SHEET, null);
+    }
+
+    public void setReplyBottomSheet(String reply) {
+        preferences.edit().putString(REPLY_BOTTOM_SHEET, reply).apply();
+    }
+
+    public boolean getCheckIfFeedGroupJoined() {
+        return preferences.getBoolean(CHECK_IF_FEED_GROUPS_JOINED, false);
+    }
+
+    public void setCheckIfFeedGroupJoined() {
+        preferences.edit().putBoolean(CHECK_IF_FEED_GROUPS_JOINED, true).apply();
+    }
+
+    public boolean getIsFeedVisited() {
+        return preferences.getBoolean(IS_FEED_VISITED, false);
+    }
+
+    public void setIsFeedVisited(boolean isVisited) {
+        preferences.edit().putBoolean(IS_FEED_VISITED, isVisited).apply();
+    }
+
+    // DP thumbnail
+    public String getProfilePicUrl() {
+        return preferences.getString(PROFILE_PIC_URL, "");
+    }
+
+    public void setProfilePicUrl(String url) {
+        preferences.edit().putString(PROFILE_PIC_URL, url).apply();
     }
 
 }

@@ -51,7 +51,9 @@ public class AnalyticsEvents {
     public static final String SHARE_CATALOGUE = "SHARE_CATALOGUE";
 
     public static final String EXPLORE_DIALOG_SHOWN = "EXPLORE_DIALOG_SHOWN";
+    public static final String FEED_EXPLORE_DIALOG_SHOWN = "FEED_EXPLORE_DIALOG_SHOWN";
     public static final String EXPLORE_CONTINUE_CLICKED = "EXPLORE_CONTINUE_CLICKED";
+    public static final String FEED_EXPLORE_CONTINUE_CLICKED = "FEED_EXPLORE_CONTINUE_CLICKED";
 
     public static final String APP_UPDATE_BLOCK = "APP_UPDATE_BLOCK";
     public static final String APP_UPDATE_BLOCK_RETRY = "APP_UPDATE_BLOCK_RETRY";
@@ -155,4 +157,11 @@ public class AnalyticsEvents {
 
     public static final String MSG_LINK_CLICKED = "MSG_LINK_CLICKED";
     public static final String MSG_DP_CLICKED = "MSG_DP_CLICKED";
+
+    public static final String POST_LINK_CLICKED = "POST_LINK_CLICKED";
+    public static final String POST_LINK_LONG_CLICKED = "POST_LINK_LONG_CLICKED";
+    public static final String POST_SHARED = "POST_SHARED";
+    public static final String FEED_SEND_POST = "FEED_SEND_POST";
+    public static final String FEED_POST_COMPOSED = "FEED_POST_COMPOSED";
+
 }

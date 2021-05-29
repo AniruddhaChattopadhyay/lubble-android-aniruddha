@@ -15,6 +15,7 @@ import in.lubble.app.models.AirtablePlacesData;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.EventIdData;
 import in.lubble.app.models.FeatureData;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.models.marketplace.Category;
@@ -35,6 +36,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.HTTP;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -184,6 +186,59 @@ public interface Endpoints {
 
     @PUT("marketplace/autolike/")
     Call<Void> superLikeMsg(@Body RequestBody params);
+
+    @GET("marketplace/getFeedUserToken/")
+    Call<StreamCredentials> getStreamCredentials(@Query("feed_id")String feed_id);
+
+    @GET("marketplace/getFeedGroupList/")
+    Call<List<FeedGroupData>> getFeedGroupList();
+
+    @GET("marketplace/getExploreFeedGroupList/")
+    Call<List<FeedGroupData>> getExploreFeedGroupList();
+
+    @POST("marketplace/addToUserLocalityAndGroupFeed/")
+    Call<Void> addFeedPost(@Body RequestBody params);
+
+    @POST("marketplace/addDeleteGroupForUser/")
+    Call<Void> addGroupForUser(@Body RequestBody params);
+
+    //@DELETE("marketplace/addDeleteGroupForUser/")
+    @HTTP(method = "DELETE", path = "marketplace/addDeleteGroupForUser/", hasBody = true)
+    Call<Void> deleteGroupForUser(@Body RequestBody params);
+
+    @POST("marketplace/promotePost/")
+    Call<Void> promotePost(@Body RequestBody params);
+
+    @POST("marketplace/deletePostByUserOrAdmin/")
+    Call<Void> deletePost(@Body RequestBody params);
+
+    @POST("marketplace/batchFollowGroups/")
+    Call<Void> batchFollowGroups(@Body RequestBody params);
+
+    @GET("marketplace/checkIfUserHasJoinedGroups/")
+    Call<String> checkIfGroupJoined();
+
+    public class StreamCredentials{
+        private String api_key;
+        private String user_token;
+
+        public String getApi_key(){
+            return api_key;
+        }
+
+        public String getUser_token(){
+            return user_token;
+        }
+
+        public void setUser_token(String user_token){
+            this.user_token = user_token;
+        }
+
+        public void setApi_key(String api_key){
+            this.api_key = api_key;
+        }
+
+    }
 
     public class ExistingSellerData {
 
