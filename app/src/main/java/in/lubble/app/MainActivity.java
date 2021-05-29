@@ -752,6 +752,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(navHeaderIv);
                     navHeaderNameTv.setText(StringUtils.getTitleCase(profileInfo != null ? profileInfo.getName() : ""));
+                    LubbleSharedPrefs.getInstance().setProfilePicUrl(profileInfo == null ? "" : profileInfo.getThumbnail());
 
                     if (profileInfo != null && !isFinishing()) {
                         com.segment.analytics.Analytics.with(MainActivity.this).identify(firebaseAuth.getUid(), new Traits().putAvatar(profileInfo.getThumbnail()), null);
