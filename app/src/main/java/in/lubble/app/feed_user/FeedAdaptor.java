@@ -58,6 +58,7 @@ import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -328,7 +329,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
     private void handleCommentEditText(EnrichedActivity activity, MyViewHolder holder) {
         glide
-                .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
+                .load(LubbleSharedPrefs.getInstance().getProfilePicUrl())
                 .apply(new RequestOptions().override(dpToPx(24), dpToPx(24)))
                 .circleCrop()
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //caches final image after transformations

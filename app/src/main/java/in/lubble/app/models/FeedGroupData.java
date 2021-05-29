@@ -61,7 +61,7 @@ public class FeedGroupData implements Serializable {
     }
 
     public String getFeedName() {
-        return feedName == null ? this.name + "_" + this.lubble : feedName;
+        return feedName == null ? this.name.replaceAll(" ","_") + "_" + this.lubble : feedName;
     }
 
     public void setFeedName(String feedName) {

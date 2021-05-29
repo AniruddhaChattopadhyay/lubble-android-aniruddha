@@ -141,7 +141,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
         }, 600);
 
         GlideApp.with(requireContext())
-                .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
+                .load(LubbleSharedPrefs.getInstance().getProfilePicUrl())
                 .apply(new RequestOptions().override(UiUtils.dpToPx(24), UiUtils.dpToPx(24)))
                 .circleCrop()
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE) //caches final image after transformations

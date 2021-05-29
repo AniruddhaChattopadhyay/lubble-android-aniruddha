@@ -60,6 +60,7 @@ public class LubbleSharedPrefs {
     private final String REPLY_BOTTOM_SHEET = "REPLY_BOTTOM_SHEET";
     private final String CHECK_IF_FEED_GROUPS_JOINED= "CHECK_IF_FEED_GROUPS_JOINED";
     private final String IS_FEED_VISITED = "IS_FEED_VISITED";
+    private final String PROFILE_PIC_URL = "PROFILE_PIC_URL";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -422,6 +423,15 @@ public class LubbleSharedPrefs {
 
     public void setIsFeedVisited(boolean isVisited) {
         preferences.edit().putBoolean(IS_FEED_VISITED, isVisited).apply();
+    }
+
+    // DP thumbnail
+    public String getProfilePicUrl() {
+        return preferences.getString(PROFILE_PIC_URL, "");
+    }
+
+    public void setProfilePicUrl(String url) {
+        preferences.edit().putString(PROFILE_PIC_URL, url).apply();
     }
 
 }

@@ -26,7 +26,6 @@ import com.fxn.pix.Options;
 import com.fxn.pix.Pix;
 import com.fxn.utility.PermUtil;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -109,7 +108,7 @@ public class AddPostForFeed extends BaseActivity {
         });
 
         GlideApp.with(this)
-                .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
+                .load(LubbleSharedPrefs.getInstance().getProfilePicUrl())
                 .placeholder(R.drawable.ic_account_circle_black_no_padding)
                 .error(R.drawable.ic_account_circle_black_no_padding)
                 .circleCrop()

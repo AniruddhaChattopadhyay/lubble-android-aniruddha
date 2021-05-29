@@ -110,7 +110,7 @@ public class GroupSelectionFrag extends Fragment {
                 return;
             }
             FeedGroupData selectedGroupData = feedGroupDataList.get(lastCheckedPos);
-            String groupNameText = selectedGroupData.getName();
+            String groupNameText = selectedGroupData.getFeedName();
             String uploadPath = "feed_photos";
             if (text != null) {
                 if (feedPostData.getImgUri() != null) {
