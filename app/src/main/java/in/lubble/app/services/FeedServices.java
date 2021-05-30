@@ -78,12 +78,13 @@ public class FeedServices {
         }
     }
 
-    public static void post(FeedPostData feedPostData, String groupName, @Nullable String imgUrl, float aspectRatio, @Nullable Callback<Void> callback) {
+    public static void post(FeedPostData feedPostData, String groupName, String feedName, @Nullable String imgUrl, float aspectRatio, @Nullable Callback<Void> callback) {
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("message", feedPostData.getText());
             jsonObject.put("groupName", groupName);
+            jsonObject.put("feedName", feedName);
             jsonObject.put("linkTitle", feedPostData.getLinkTitle());
             jsonObject.put("linkDesc", feedPostData.getLinkDesc());
             jsonObject.put("linkPicUrl", feedPostData.getLinkImageUrl());
