@@ -110,7 +110,8 @@ public class GroupSelectionFrag extends Fragment {
                 return;
             }
             FeedGroupData selectedGroupData = feedGroupDataList.get(lastCheckedPos);
-            String groupNameText = selectedGroupData.getFeedName();
+            String groupNameText = selectedGroupData.getName();
+            String feedNameText = selectedGroupData.getFeedName();
             String uploadPath = "feed_photos";
             if (text != null) {
                 if (feedPostData.getImgUri() != null) {
@@ -121,6 +122,7 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadImageFeedService.EXTRA_FILE_URI, imgUri)
                             .putExtra(UploadImageFeedService.EXTRA_UPLOAD_PATH, uploadPath)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_GROUP_NAME, groupNameText)
+                            .putExtra(UploadImageFeedService.EXTRA_FEED_FEED_NAME, feedNameText)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(requireContext(), serviceIntent);
@@ -130,7 +132,7 @@ public class GroupSelectionFrag extends Fragment {
                 } else {
                     postSubmitBtn.setVisibility(View.GONE);
                     postProgressBar.setVisibility(View.VISIBLE);
-                    FeedServices.post(feedPostData, groupNameText, null, 0, new Callback<Void>() {
+                    FeedServices.post(feedPostData, groupNameText, feedNameText, null, 0, new Callback<Void>() {
                         @Override
                         public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                             if (isAdded() && response.isSuccessful()) {
