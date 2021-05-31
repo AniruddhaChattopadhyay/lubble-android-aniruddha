@@ -65,7 +65,7 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
         Reaction reaction = reactionList.get(position);
         Map<String, Object> activityMap = reaction.getActivityData();
 
-        if(activityMap!=null && activityMap.containsKey("key"))
+        if(activityMap!=null && activityMap.containsKey("text"))
             holder.commentTv.setText(activityMap.get("text").toString());
         Object timestamp = reaction.getExtra().get("timestamp");
         if (timestamp != null && timestamp instanceof Long) {
