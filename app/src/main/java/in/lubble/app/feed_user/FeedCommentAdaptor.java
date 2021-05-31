@@ -59,7 +59,8 @@ public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.
         Reaction reaction = reactionList.get(position);
         Map<String, Object> activityMap = reaction.getActivityData();
 
-        holder.commentTV.setText(activityMap.get("text").toString());
+        if(activityMap!=null && activityMap.containsKey("text"))
+            holder.commentTV.setText(activityMap.get("text").toString());
         Data userData = reaction.getUserData();
         if (userData != null) {
             holder.commentUserNameTv.setText(String.valueOf(userData.getData().get("name")));
