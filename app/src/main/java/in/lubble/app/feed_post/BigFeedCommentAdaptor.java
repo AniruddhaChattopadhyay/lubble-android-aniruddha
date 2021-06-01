@@ -65,33 +65,35 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
         Reaction reaction = reactionList.get(position);
         Map<String, Object> activityMap = reaction.getActivityData();
 
-        holder.commentTv.setText(activityMap.get("text").toString());
-        Object timestamp = reaction.getExtra().get("timestamp");
-        if (timestamp != null && timestamp instanceof Long) {
-            holder.commentTimestampTv.setText(DateTimeUtils.getHumanTimestamp((Long) timestamp));
-        }
-
-        String userId = reaction.getUserID();
-        if (userId == null && reaction.getExtra() != null) {
-            userId = String.valueOf(reaction.getExtra().get("userId"));
-        }
-        RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                final ProfileInfo profileInfo = snapshot.getValue(ProfileInfo.class);
-                holder.commentUserNameTv.setText(profileInfo.getName());
-                glide.load(profileInfo.getThumbnail())
-                        .placeholder(R.drawable.ic_account_circle_grey_24dp)
-                        .error(R.drawable.ic_account_circle_grey_24dp)
-                        .circleCrop()
-                        .into(holder.commentProfilePicIv);
+        if (activityMap != null && activityMap.containsKey("text")) {
+            holder.commentTv.setText(activityMap.get("text").toString());
+            Object timestamp = reaction.getExtra().get("timestamp");
+            if (timestamp instanceof Long) {
+                holder.commentTimestampTv.setText(DateTimeUtils.getHumanTimestamp((Long) timestamp));
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
+            String userId = reaction.getUserID();
+            if (userId == null && reaction.getExtra() != null) {
+                userId = String.valueOf(reaction.getExtra().get("userId"));
             }
-        });
+            RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    final ProfileInfo profileInfo = snapshot.getValue(ProfileInfo.class);
+                    holder.commentUserNameTv.setText(profileInfo.getName());
+                    glide.load(profileInfo.getThumbnail())
+                            .placeholder(R.drawable.ic_account_circle_grey_24dp)
+                            .error(R.drawable.ic_account_circle_grey_24dp)
+                            .circleCrop()
+                            .into(holder.commentProfilePicIv);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
     }
 
     @Override

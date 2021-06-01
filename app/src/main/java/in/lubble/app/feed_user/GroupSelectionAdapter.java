@@ -1,20 +1,27 @@
 package in.lubble.app.feed_user;
 
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.FeedGroupData;
+import in.lubble.app.utils.UiUtils;
 
 public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAdapter.GroupSelectionViewHolder> {
 
@@ -44,6 +51,23 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
 
         holder.selectionRb.setChecked(position == lastCheckedPos);
         holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
+
+        GlideApp.with(holder.itemView.getContext())
+                .load(feedGroupData.getPhotoUrl())
+                .apply(new RequestOptions().override(UiUtils.dpToPx(32), UiUtils.dpToPx(32)))
+                .placeholder(R.drawable.ic_group)
+                .error(R.drawable.ic_group)
+                .into(new CustomTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        holder.titleTv.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                    }
+                });
+
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
             lastCheckedPos = holder.getBindingAdapterPosition();

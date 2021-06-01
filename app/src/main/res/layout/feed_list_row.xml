@@ -10,7 +10,6 @@
     android:focusable="true"
     android:orientation="vertical"
     android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingTop="14dp"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingBottom="10dp">
 

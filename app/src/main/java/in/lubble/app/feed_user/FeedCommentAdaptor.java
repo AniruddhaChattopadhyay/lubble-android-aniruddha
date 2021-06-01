@@ -59,27 +59,29 @@ public class FeedCommentAdaptor extends RecyclerView.Adapter<FeedCommentAdaptor.
         Reaction reaction = reactionList.get(position);
         Map<String, Object> activityMap = reaction.getActivityData();
 
-        holder.commentTV.setText(activityMap.get("text").toString());
-        Data userData = reaction.getUserData();
-        if (userData != null) {
-            holder.commentUserNameTv.setText(String.valueOf(userData.getData().get("name")));
-        } else {
-            String userId = reaction.getUserID();
-            if (userId == null && reaction.getExtra() != null) {
-                userId = String.valueOf(reaction.getExtra().get("userId"));
+        if (activityMap != null && activityMap.containsKey("text")) {
+            holder.commentTV.setText(activityMap.get("text").toString());
+            Data userData = reaction.getUserData();
+            if (userData != null) {
+                holder.commentUserNameTv.setText(String.valueOf(userData.getData().get("name")));
+            } else {
+                String userId = reaction.getUserID();
+                if (userId == null && reaction.getExtra() != null) {
+                    userId = String.valueOf(reaction.getExtra().get("userId"));
+                }
+                RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        final ProfileInfo profileInfo = snapshot.getValue(ProfileInfo.class);
+                        holder.commentUserNameTv.setText(profileInfo.getName());
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
             }
-            RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    final ProfileInfo profileInfo = snapshot.getValue(ProfileInfo.class);
-                    holder.commentUserNameTv.setText(profileInfo.getName());
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
         }
     }
 

@@ -4,10 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="@layout/feed_list_row">
 
+    <TextView
+        android:id="@+id/tv_group_name"
+        android:layout_width="wrap_content"
+        android:paddingBottom="8dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:paddingRight="16dp"
+        app:drawableLeftCompat="@drawable/ic_group_black_14dp"
+        app:drawableTint="@color/md_grey_600"
+        android:drawablePadding="4dp"
+        tools:text="Local News Group"
+        android:textStyle="bold"
+        android:textColor="@color/md_grey_600"/>
+
     <ImageView
         android:id="@+id/feed_author_photo"
         android:layout_width="38dp"
         android:layout_height="38dp"
+        android:layout_below="@id/tv_group_name"
         android:layout_marginRight="8dp"
         app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
@@ -17,32 +32,11 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/feed_author_photo"
         android:ellipsize="end"
+        android:layout_below="@id/tv_group_name"
         android:maxLines="1"
+        android:textStyle="bold"
         android:textColor="@color/black"
         tools:text="Ramesh Singh" />
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/iv_arrow"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
-        android:layout_alignTop="@id/feed_author_name"
-        android:layout_alignBottom="@id/feed_author_name"
-        android:layout_gravity="center"
-        android:layout_marginLeft="2dp"
-        android:layout_marginRight="2dp"
-        android:layout_toRightOf="@+id/feed_author_name"
-        app:srcCompat="@drawable/ic_arrow_forward_black_24dp"
-        app:tint="@color/md_grey_600" />
-
-    <TextView
-        android:id="@+id/tv_group_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/iv_arrow"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="@color/dk_colorAccent"
-        tools:text="QnAs" />
 
     <TextView
         android:id="@+id/tv_lubble_name"
@@ -57,9 +51,10 @@
     <ImageView
         android:id="@+id/iv_more_menu"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_alignTop="@id/tv_group_name"
+        android:layout_height="24dp"
+        android:paddingTop="8dp"
         android:layout_alignParentRight="true"
+        android:layout_alignBottom="@id/feed_post_timestamp"
         android:layout_marginRight="-8dp"
         app:srcCompat="@drawable/ic_baseline_more_vert_24" />
 
@@ -68,7 +63,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignTop="@id/tv_group_name"
-        android:layout_alignBottom="@id/tv_group_name"
+        android:layout_alignBaseline="@id/tv_group_name"
         android:layout_toLeftOf="@id/iv_more_menu"
         android:layout_toRightOf="@id/tv_group_name"
         android:ellipsize="end"
@@ -121,7 +116,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/feed_photo_content"
-        android:layout_marginTop="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:gravity="right"
         android:orientation="horizontal">
 
@@ -132,7 +128,6 @@
             android:layout_weight="1"
             android:drawablePadding="4dp"
             android:textColor="@color/black"
-            android:textSize="12sp"
             android:visibility="gone"
             app:drawableLeftCompat="@drawable/ic_favorite_16dp"
             tools:text="23 Likes"
@@ -144,7 +139,6 @@
             android:layout_height="match_parent"
             android:drawablePadding="4dp"
             android:textColor="@color/black"
-            android:textSize="12sp"
             android:visibility="gone"
             app:drawableLeftCompat="@drawable/ic_reply_black_16dp"
             app:drawableTint="@color/md_grey_600"
