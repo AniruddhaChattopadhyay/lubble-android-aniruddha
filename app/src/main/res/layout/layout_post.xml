@@ -153,7 +153,7 @@
         android:layout_height="1dp"
         android:layout_below="@id/container_reaction_stats"
         android:layout_marginTop="4dp"
-        app:srcCompat="@color/md_grey_300" />
+        app:srcCompat="@color/md_grey_200" />
 
     <LinearLayout
         android:id="@+id/social_layout"
@@ -245,5 +245,5 @@
         android:layout_height="1dp"
         android:layout_below="@id/social_layout"
         android:layout_marginTop="4dp"
-        app:srcCompat="@color/md_grey_300" />
+        app:srcCompat="@color/md_grey_200" />
 </merge>

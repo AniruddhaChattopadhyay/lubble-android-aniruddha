@@ -77,6 +77,14 @@ public class FeedCombinedFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+        }
+    }
+
     public void fetchNewFeedUserStatus() {
         final ProgressDialog progressDialog = new ProgressDialog(requireContext());
         progressDialog.setTitle("Setting up Nearby Feed for you...");

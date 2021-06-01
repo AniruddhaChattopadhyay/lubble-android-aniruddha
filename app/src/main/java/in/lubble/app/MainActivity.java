@@ -86,8 +86,6 @@ import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-import it.sephiroth.android.library.xtooltip.ClosePolicy;
-import it.sephiroth.android.library.xtooltip.Tooltip;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -326,7 +324,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             dpContainer.setVisibility(View.VISIBLE);
             toolbarSearchTv.setVisibility(View.VISIBLE);
             lubbleClickTarget.setVisibility(View.VISIBLE);
-            toolbarRewardsTv.setVisibility(View.VISIBLE);
+            //toolbarRewardsTv.setVisibility(View.VISIBLE);
             toolbarTitle.setVisibility(View.VISIBLE);
             if (chatSearchListener != null) {
                 chatSearchListener.toggleSliderVisibility(true);
@@ -622,7 +620,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaults(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
-            toolbarRewardsTv.setVisibility(View.VISIBLE);
+            //toolbarRewardsTv.setVisibility(View.VISIBLE);
         } else {
             toolbarRewardsTv.setVisibility(View.GONE);
         }
@@ -631,7 +629,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void showBottomNavBadge() {
         if (!LubbleSharedPrefs.getInstance().getIsFeedVisited()) {
             BadgeDrawable badge = bottomNavigation.getOrCreateBadge(R.id.navigation_feed);
-            badge.setBackgroundColor(ContextCompat.getColor(this,R.color.md_yellow_600));
+            badge.setBackgroundColor(ContextCompat.getColor(this, R.color.md_yellow_600));
             badge.setVisible(true);
         }
     }
@@ -712,7 +710,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 if (task.isSuccessful()) {
                     firebaseRemoteConfig.activateFetched();
                     if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
-                        toolbarRewardsTv.setVisibility(View.VISIBLE);
+                        //toolbarRewardsTv.setVisibility(View.VISIBLE);
                     } else {
                         toolbarRewardsTv.setVisibility(View.GONE);
                     }
@@ -1006,24 +1004,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             if (itemView != null && itemView.getChildAt(2) != null) {
                 itemView.removeViewAt(2);
             }
-        }
-    }
-
-    public void showRewardsTooltip() {
-        if (toolbarRewardsTv.getVisibility() == View.VISIBLE && !LubbleSharedPrefs.getInstance().getIsRewardsOpened() && LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened()) {
-            final Tooltip tooltip = new Tooltip.Builder(this)
-                    .anchor(toolbarRewardsTv, 0, 0, false)
-                    .text("NEW! Get cool rewards nearby")
-                    .arrow(true)
-                    .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
-                    .closePolicy(new ClosePolicy.Builder().inside(true).consume(false).outside(true).build())
-                    .showDuration(15000)
-                    .overlay(true)
-                    .styleId(R.style.ToolTipLayoutHoianStyle)
-                    .create();
-
-            tooltip.show(toolbarRewardsTv, Tooltip.Gravity.BOTTOM, true);
-            GlideApp.with(this).load(FirebaseRemoteConfig.getInstance().getString(REWARDS_EXPLAINER)).preload();
         }
     }
 

@@ -20,7 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingTop="10dp"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingBottom="10dp">
 
@@ -28,6 +27,7 @@
                 android:id="@+id/progressbar_post"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:layout_centerHorizontal="true" />
 
             <include layout="@layout/layout_post" />
