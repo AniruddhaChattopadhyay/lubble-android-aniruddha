@@ -107,7 +107,7 @@ public class FeedPostFrag extends Fragment {
     private ImageView authorPhotoIv;
     private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
     private LinearLayout likeLayout, shareLayout;
-    private TextView likeStatsTv, replyStatsTv, noRepliesHelpTextTv, linkTitleTv, linkDescTv;
+    private TextView likeTv, replyTv, noRepliesHelpTextTv, linkTitleTv, linkDescTv;
     private ImageView likeIv, replyIv, linkImageIv, moreMenuIv;
     private LinearLayout commentLayout;
     private ReplyEditText replyEt;
@@ -142,12 +142,12 @@ public class FeedPostFrag extends Fragment {
         timePostedTv = view.findViewById(R.id.feed_post_timestamp);
         likeLayout = view.findViewById(R.id.cont_like);
         shareLayout = view.findViewById(R.id.cont_share);
-        likeStatsTv = view.findViewById(R.id.tv_like_stats);
+        likeTv = view.findViewById(R.id.tv_like);
         likeIv = view.findViewById(R.id.like_imageview);
         commentLayout = view.findViewById(R.id.cont_reply);
         commentRecyclerView = view.findViewById(R.id.comment_recycler_view);
         noRepliesHelpTextTv = view.findViewById(R.id.tv_no_replies_help_text);
-        replyStatsTv = view.findViewById(R.id.tv_reply_stats);
+        replyTv = view.findViewById(R.id.tv_reply);
         LinearLayout replyBottomSheet = view.findViewById(R.id.bottomsheet_reply);
         replyEt = view.findViewById(R.id.et_reply);
         replyIv = view.findViewById(R.id.iv_reply);
@@ -569,11 +569,11 @@ public class FeedPostFrag extends Fragment {
     }
 
     private void handleReactionStats(EnrichedActivity enrichedActivity) {
-        extractReactionCount(enrichedActivity, "like", likeStatsTv, R.plurals.likes, 0);
-        extractReactionCount(enrichedActivity, "comment", replyStatsTv, R.plurals.replies, 0);
+        extractReactionCount(enrichedActivity, "like", likeTv, 0);
+        extractReactionCount(enrichedActivity, "comment", replyTv, 0);
     }
 
-    private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int stringRes, int change) {
+    private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int change) {
         Number reactionNumber = enrichedActivity.getReactionCounts().get(reaction);
         if (reactionNumber == null) {
             reactionNumber = 0;
@@ -585,9 +585,9 @@ public class FeedPostFrag extends Fragment {
         }
         if (reactionCount > 0) {
             statsTv.setVisibility(View.VISIBLE);
-            statsTv.setText(reactionCount + " " + getContext().getResources().getQuantityString(stringRes, reactionCount));
+            statsTv.setText(String.valueOf(reactionCount));
         } else {
-            statsTv.setVisibility(GONE);
+            statsTv.setText("");
         }
     }
 
@@ -649,7 +649,7 @@ public class FeedPostFrag extends Fragment {
                 });
                 likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 likeReactionId = like.getId();
-                extractReactionCount(enrichedActivity, "like", likeStatsTv, R.plurals.likes, 1);
+                extractReactionCount(enrichedActivity, "like", likeTv, 1);
                 Analytics.triggerFeedEngagement(enrichedActivity.getForeignID(), "like", 5, null, FeedPostFrag.class.getSimpleName());
             } catch (StreamException e) {
                 e.printStackTrace();
@@ -665,7 +665,7 @@ public class FeedPostFrag extends Fragment {
                 });
                 likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
                 likeReactionId = null;
-                extractReactionCount(enrichedActivity, "like", likeStatsTv, R.plurals.likes, -1);
+                extractReactionCount(enrichedActivity, "like", likeTv, -1);
             } catch (StreamException e) {
                 e.printStackTrace();
                 //todo

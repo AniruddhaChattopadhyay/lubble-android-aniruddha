@@ -253,9 +253,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         holder.commentLayout.setOnClickListener(v -> {
             feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), position);
         });
-        holder.replyStatsTv.setOnClickListener(v -> {
-            feedListener.openPostActivity(activity.getID());
-        });
         holder.itemView.setOnClickListener(v -> {
             feedListener.openPostActivity(activity.getID());
         });
@@ -379,11 +376,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     }
 
     private void handleReactionStats(EnrichedActivity enrichedActivity, MyViewHolder holder) {
-        extractReactionCount(enrichedActivity, "like", holder.likeStatsTv, R.plurals.likes, 0);
-        extractReactionCount(enrichedActivity, "comment", holder.replyStatsTv, R.plurals.replies, 0);
+        extractReactionCount(enrichedActivity, "like", holder.likeTv, 0);
+        extractReactionCount(enrichedActivity, "comment", holder.replyTv, 0);
     }
 
-    private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int stringRes, int change) {
+    private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int change) {
         Number reactionNumber = enrichedActivity.getReactionCounts().get(reaction);
         if (reactionNumber == null) {
             reactionNumber = 0;
@@ -395,9 +392,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         if (reactionCount > 0) {
             statsTv.setVisibility(View.VISIBLE);
-            statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
+            statsTv.setText(String.valueOf(reactionCount));
         } else {
-            statsTv.setVisibility(GONE);
+            statsTv.setText("");
         }
     }
 
@@ -419,7 +416,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 });
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 likedMap.put(position, like.getId());
-                extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, 1);
+                extractReactionCount(activity, "like", holder.likeTv, 1);
                 feedListener.onLiked(activity.getForeignID());
             } catch (StreamException e) {
                 e.printStackTrace();
@@ -435,7 +432,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 });
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
                 likedMap.remove(position);
-                extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, -1);
+                extractReactionCount(activity, "like", holder.likeTv, -1);
             } catch (StreamException e) {
                 e.printStackTrace();
                 FirebaseCrashlytics.getInstance().recordException(e);
@@ -499,10 +496,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private ImageView authorPhotoIv, linkImageIv;
         private TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, linkTitleTv, linkDescTv;
         private LinearLayout likeLayout, shareLayout;
-        private TextView likeStatsTv, replyStatsTv;
         private ImageView likeIv;
         private LinearLayout commentLayout;
-        private TextView commentEdtText;
+        private TextView commentEdtText, likeTv, replyTv;
         private RecyclerView commentRecyclerView;
         private RelativeLayout linkPreviewContainer;
 
@@ -518,9 +514,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             timePostedTv = view.findViewById(R.id.feed_post_timestamp);
             likeLayout = view.findViewById(R.id.cont_like);
             shareLayout = view.findViewById(R.id.cont_share);
-            likeStatsTv = view.findViewById(R.id.tv_like_stats);
-            replyStatsTv = view.findViewById(R.id.tv_reply_stats);
             likeIv = view.findViewById(R.id.like_imageview);
+            likeTv = view.findViewById(R.id.tv_like);
+            replyTv = view.findViewById(R.id.tv_reply);
             commentLayout = view.findViewById(R.id.cont_reply);
             commentEdtText = view.findViewById(R.id.comment_edit_text);
             commentRecyclerView = view.findViewById(R.id.comment_recycler_view);

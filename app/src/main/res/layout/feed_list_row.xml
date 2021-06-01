@@ -19,7 +19,7 @@
         android:id="@+id/comment_section_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/separator_social_bottom"
+        android:layout_below="@+id/social_layout"
         android:orientation="vertical">
 
         <androidx.recyclerview.widget.RecyclerView

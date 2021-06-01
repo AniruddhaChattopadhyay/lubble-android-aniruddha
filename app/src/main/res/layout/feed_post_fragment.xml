@@ -36,7 +36,7 @@
                 android:id="@+id/comment_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/separator_social_bottom"
+                android:layout_below="@id/social_layout"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:paddingBottom="32dp"
