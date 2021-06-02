@@ -212,8 +212,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 holder.lubbleNameTv.setVisibility(View.VISIBLE);
                 holder.lubbleNameTv.setText(extras.get("lubble_id").toString());
             }
-            if (extras.containsKey("group") && extras.containsKey("lubble_id")) {
-                String groupFeedName = extras.get("group").toString() + '_' + extras.get("lubble_id");
+            if (extras.containsKey("feed_name")) {
+                String groupFeedName = extras.get("feed_name").toString();
                 holder.groupNameTv.setOnClickListener(v -> {
                     FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
                     GroupFeedActivity.open(context, feedGroupData);

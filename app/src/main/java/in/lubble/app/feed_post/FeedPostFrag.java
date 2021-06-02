@@ -63,6 +63,8 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
@@ -77,6 +79,7 @@ import in.lubble.app.widget.ReplyEditText;
 import io.getstream.analytics.beans.Content;
 import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.Data;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
@@ -91,6 +94,7 @@ import retrofit2.Response;
 
 import static android.view.View.GONE;
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.utils.FeedUtils.getMsgSuffix;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedPostFrag extends Fragment {
@@ -243,6 +247,13 @@ public class FeedPostFrag extends Fragment {
                                         lubbleNameTv.setVisibility(View.VISIBLE);
                                         lubbleNameTv.setText(extras.get("lubble_id").toString());
                                     }
+                                    if (extras.containsKey("feed_name")) {
+                                        String groupFeedName = extras.get("feed_name").toString();
+                                        groupNameTv.setOnClickListener(v -> {
+                                            FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
+                                            GroupFeedActivity.open(requireContext(), feedGroupData);
+                                        });
+                                    }
                                 }
                                 Map<String, Object> actorMap = enrichedActivity.getActor().getData();
                                 if (actorMap.containsKey("name")) {
@@ -290,7 +301,7 @@ public class FeedPostFrag extends Fragment {
                                 });
 
                                 moreMenuIv.setOnClickListener(v -> {
-                                    openMorePopupMenu(enrichedActivity.getID(), enrichedActivity.getActor().getID(), extras);
+                                    openMorePopupMenu(enrichedActivity.getID(), enrichedActivity.getActor(), extras);
                                 });
                             } else {
                                 Toast.makeText(getContext(), "Post not found", Toast.LENGTH_SHORT).show();
@@ -310,7 +321,7 @@ public class FeedPostFrag extends Fragment {
         }
     }
 
-    private void openMorePopupMenu(String activityId, String actorId, Map<String, Object> extras) {
+    private void openMorePopupMenu(String activityId, Data actorData, Map<String, Object> extras) {
         PopupMenu popupMenu = new PopupMenu(requireContext(), moreMenuIv);
 
         popupMenu.getMenuInflater().inflate(R.menu.menu_post_more, popupMenu.getMenu());
@@ -319,7 +330,7 @@ public class FeedPostFrag extends Fragment {
         } else {
             popupMenu.getMenu().removeItem(ACTION_PROMOTE_POST);
         }
-        if (BuildConfig.DEBUG || userId.equalsIgnoreCase(actorId) || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
+        if (BuildConfig.DEBUG || userId.equalsIgnoreCase(actorData.getID()) || userId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
             popupMenu.getMenu().add(0, ACTION_DELETE_POST, popupMenu.getMenu().size(), "Delete Post");
         } else {
             popupMenu.getMenu().removeItem(ACTION_DELETE_POST);
@@ -339,24 +350,38 @@ public class FeedPostFrag extends Fragment {
                         .setMessage("Are you sure? Once deleted, this post will be gone forever.\n\nThis action cannot be undone.")
                         .setIcon(R.drawable.ic_cancel_red_24dp)
                         .setPositiveButton(R.string.all_cancel, (dialog, which) -> dialog.cancel())
-                        .setNeutralButton("Delete Post", (dialog, which) -> deletePost(activityId))
+                        .setNeutralButton("Delete Post", (dialog, which) -> deletePost(activityId, extras))
                         .show();
+            } else if (menuItem.getItemId() == R.id.action_copy_post) {
+                ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
+                String postText = String.valueOf(extras.get("message"));
+                String suffix = getMsgSuffix(String.valueOf(actorData.getData().get("name")), LubbleSharedPrefs.getInstance().getMsgCopyShareUrl());
+                String message = postText + suffix;
+                ClipData clip = ClipData.newPlainText("lubble_copied_text", message);
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                    Analytics.triggerEvent(AnalyticsEvents.MSG_COPIED, requireContext());
+                    Toast.makeText(requireContext(), "Text Copied!", Toast.LENGTH_SHORT).show();
+                }
             }
             return true;
         });
         popupMenu.show();
     }
 
-    private void deletePost(String activityId) {
+    private void deletePost(String activityId, Map<String, Object> extras) {
         ProgressDialog progressDialog = new ProgressDialog(requireContext());
         progressDialog.setTitle("Deleting post");
         progressDialog.setMessage("Please wait...");
         progressDialog.setCancelable(false);
         progressDialog.show();
+        String groupFeedName = extras.get("feed_name").toString();
+
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         JSONObject jsonObject = new JSONObject();
         try {
             jsonObject.put("activityId", activityId);
+            jsonObject.put("feedName", groupFeedName);
         } catch (JSONException e) {
             e.printStackTrace();
             Snackbar.make(getView(), e.getMessage() == null ? "JSON error" : e.getMessage(), Snackbar.LENGTH_SHORT).show();
@@ -393,8 +418,9 @@ public class FeedPostFrag extends Fragment {
     private void promotePost(String activityId, Map<String, Object> extras) {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         JSONObject jsonObject = new JSONObject();
+        String groupFeedName = extras.get("feed_name").toString();
         try {
-            jsonObject.put("feedGroupName", extras.get("group").toString() + "_" + extras.get("lubble_id").toString());
+            jsonObject.put("feedGroupName", groupFeedName);
             jsonObject.put("activityId", activityId);
         } catch (JSONException e) {
             e.printStackTrace();

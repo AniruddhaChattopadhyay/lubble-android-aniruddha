@@ -56,6 +56,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
                 .load(feedGroupData.getPhotoUrl())
                 .apply(new RequestOptions().override(UiUtils.dpToPx(32), UiUtils.dpToPx(32)))
                 .placeholder(R.drawable.ic_group)
+                .circleCrop()
                 .error(R.drawable.ic_group)
                 .into(new CustomTarget<Drawable>() {
                     @Override
