@@ -23,11 +23,11 @@ public class AuthenticationInterceptor implements Interceptor {
     public AuthenticationInterceptor() {
     }
 
+    private static final String TAG = "AuthenticationIntercept";
     @Override
     public @NotNull Response intercept(Chain chain) throws IOException {
         String authToken = "";
         Request original = chain.request();
-        Response ogResponse = chain.proceed(original);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
@@ -51,6 +51,6 @@ public class AuthenticationInterceptor implements Interceptor {
             Request request = builder.build();
             return chain.proceed(request);
         }
-        return ogResponse;
+        return chain.proceed(original);
     }
 }
