@@ -1,5 +1,6 @@
 package in.lubble.app.chat;
 
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.URLSpan;
 import android.view.View;
@@ -35,7 +36,7 @@ public class CustomURLSpan extends URLSpan {
             int end = current.getSpanEnd(span);
 
             current.removeSpan(span);
-            current.setSpan(new CustomURLSpan(span.getURL(), clickAction), start, end, 0);
+            current.setSpan(new CustomURLSpan(span.getURL(), clickAction), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             tv.setText(current);
         }
     }

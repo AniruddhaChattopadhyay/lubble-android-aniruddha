@@ -2,8 +2,6 @@ package in.lubble.app.feed_user;
 
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -19,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,7 +54,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.GlideRequests;
-import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
@@ -75,7 +71,6 @@ import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
-import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
 import static android.view.View.GONE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -129,29 +124,12 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.textContentTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
 
             Linkify.addLinks(holder.textContentTv, Linkify.ALL);
-            BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
+            CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
                 Bundle bundle = new Bundle();
-                bundle.putString("group_id", String.valueOf(extras.get("group")));
+                bundle.putString("group_id", String.valueOf(extras.get("feed_name")));
                 bundle.putString("post_id", activity.getID());
                 bundle.putString("author_uid", activity.getActor().getID());
                 Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, context);
-                return false;
-            }).setOnLinkLongClickListener((textView, url) -> {
-                Bundle bundle = new Bundle();
-                bundle.putString("group_id", String.valueOf(extras.get("group")));
-                bundle.putString("post_id", activity.getID());
-                bundle.putString("author_uid", activity.getActor().getID());
-                Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, context);
-
-                ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT).show();
-                return true;
-            });
-            holder.textContentTv.setMovementMethod(betterLinkMovementMethod);
-
-            CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
             });
             if (extras.containsKey("aspectRatio") && extras.get("aspectRatio") instanceof Double) {
                 float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
