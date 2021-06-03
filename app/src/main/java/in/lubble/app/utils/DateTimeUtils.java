@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import static android.text.format.DateUtils.FORMAT_ABBREV_ALL;
 import static android.text.format.DateUtils.FORMAT_ABBREV_MONTH;
 import static android.text.format.DateUtils.FORMAT_ABBREV_RELATIVE;
 
@@ -112,12 +113,12 @@ public class DateTimeUtils {
 
     @NonNull
     public static String getHumanTimestamp(long time) {
-        String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, FORMAT_ABBREV_RELATIVE | FORMAT_ABBREV_MONTH ).toString();
+        String humanTime = DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS, FORMAT_ABBREV_ALL).toString();
         if (humanTime.equalsIgnoreCase("0 min. ago")
                 || humanTime.equalsIgnoreCase("0 mins ago")
                 || humanTime.equalsIgnoreCase("In 0 min.")
                 || humanTime.equalsIgnoreCase("In 0 mins")
-                ) {
+        ) {
             return "Just now";
         }
         return humanTime;
@@ -135,7 +136,7 @@ public class DateTimeUtils {
                     || humanTime.equalsIgnoreCase("0 mins ago")
                     || humanTime.equalsIgnoreCase("In 0 min.")
                     || humanTime.equalsIgnoreCase("In 0 mins")
-                    ) {
+            ) {
                 return "Just now";
             }
             return humanTime;

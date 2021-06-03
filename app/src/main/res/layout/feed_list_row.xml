@@ -15,12 +15,19 @@
 
     <include layout="@layout/layout_post" />
 
-    <RelativeLayout
+
+    <LinearLayout
         android:id="@+id/comment_section_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/social_layout"
         android:orientation="vertical">
+
+        <View
+            android:id="@+id/sep_post"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/md_grey_200" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/comment_recycler_view"
@@ -52,14 +59,14 @@
             android:layout_below="@id/tv_view_all_replies"
             android:layout_marginTop="4dp"
             android:background="@color/transparent"
-            android:drawablePadding="4dp"
-            android:hint="Add a reply..."
-            android:gravity="center_vertical"
-            android:paddingTop="4dp"
             android:drawableRight="@drawable/ic_send__trans_blue_24dp"
+            android:drawablePadding="4dp"
+            android:gravity="center_vertical"
+            android:hint="Add a reply..."
+            android:paddingTop="4dp"
             android:textSize="14sp"
             app:drawableLeftCompat="@drawable/ic_account_circle_grey_24dp" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

@@ -156,7 +156,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
             @Override
             public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
-                if(isAdded()) {
+                if (isAdded()) {
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -220,7 +220,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                 postBtn.setVisibility(View.GONE);
 
                 joinGroupTv.setOnClickListener(v -> {
-                    joinGroup(groupFeed, userTimelineFeed);
+                    joinGroup(groupFeed);
                 });
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -265,55 +265,49 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         }
     };
 
-    private void joinGroup(CloudFlatFeed groupFeed, CloudFlatFeed userTimelineFeed) {
+    private void joinGroup(CloudFlatFeed groupFeed) {
+        joinGroupTv.setText("");
+        joinGroupProgressBar.setVisibility(View.VISIBLE);
+        final JSONObject jsonObject = new JSONObject();
         try {
-            userTimelineFeed.follow(groupFeed).join();
-            joinGroupTv.setText("");
-            joinGroupProgressBar.setVisibility(View.VISIBLE);
-            final JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("groupFeedId", groupFeed.getUserID());
-                RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
-                Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-                Call<Void> call = endpoints.addGroupForUser(body);
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful() && isAdded()) {
-                            Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
-                            joinGroupTv.setVisibility(View.GONE);
-                            postBtn.setVisibility(View.VISIBLE);
-                            joinGroupProgressBar.setVisibility(View.GONE);
-                            if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
-                                ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
-                            }
+            jsonObject.put("groupFeedId", groupFeed.getUserID());
+            RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+            Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+            Call<Void> call = endpoints.addGroupForUser(body);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful() && isAdded()) {
+                        Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
+                        joinGroupTv.setVisibility(View.GONE);
+                        postBtn.setVisibility(View.VISIBLE);
+                        joinGroupProgressBar.setVisibility(View.GONE);
+                        if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
+                            ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
                         }
                     }
+                }
 
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        FirebaseCrashlytics.getInstance().recordException(t);
-                        if (isAdded()) {
-                            joinGroupTv.setText("✨ JOIN GROUP");
-                            joinGroupProgressBar.setVisibility(View.GONE);
-                            String text = getString(R.string.all_something_wrong_try_again);
-                            if (t.getMessage() != null) {
-                                text = "Failed: " + t.getMessage();
-                            }
-                            Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT).show();
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    FirebaseCrashlytics.getInstance().recordException(t);
+                    if (isAdded()) {
+                        joinGroupTv.setText("✨ JOIN GROUP");
+                        joinGroupProgressBar.setVisibility(View.GONE);
+                        String text = getString(R.string.all_something_wrong_try_again);
+                        if (t.getMessage() != null) {
+                            text = "Failed: " + t.getMessage();
                         }
+                        Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT).show();
                     }
-                });
+                }
+            });
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-                FirebaseCrashlytics.getInstance().recordException(e);
-                joinGroupProgressBar.setVisibility(View.GONE);
-                Snackbar.make(rootView, R.string.all_something_wrong_try_again, Snackbar.LENGTH_SHORT).show();
-            }
-        } catch (StreamException e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
+        } catch (JSONException e) {
             e.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(e);
+            joinGroupProgressBar.setVisibility(View.GONE);
+            Snackbar.make(rootView, R.string.all_something_wrong_try_again, Snackbar.LENGTH_SHORT).show();
         }
     }
 

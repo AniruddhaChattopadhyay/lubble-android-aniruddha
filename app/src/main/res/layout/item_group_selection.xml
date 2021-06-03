@@ -30,7 +30,7 @@
         android:clickable="false"
         android:focusable="false"
         android:foreground="?attr/selectableItemBackground"
-        android:padding="0dp"
+        android:paddingRight="16dp"
         android:text="" />
 
 </LinearLayout>

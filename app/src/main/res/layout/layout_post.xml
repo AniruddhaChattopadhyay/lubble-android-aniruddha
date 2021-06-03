@@ -121,15 +121,16 @@
         <LinearLayout
             android:id="@+id/cont_reply"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_weight="1"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="12dp"
             android:paddingTop="8dp"
-            android:paddingRight="8dp">
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp">
 
             <ImageView
                 android:layout_width="18dp"
@@ -150,14 +151,15 @@
         <LinearLayout
             android:id="@+id/cont_like"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_weight="1"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="12dp"
             android:paddingTop="8dp"
-            android:paddingRight="8dp">
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp">
 
             <ImageView
                 android:id="@+id/like_imageview"
@@ -178,15 +180,16 @@
         <LinearLayout
             android:id="@+id/cont_share"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_weight="1"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:orientation="horizontal"
             android:paddingLeft="12dp"
             android:paddingTop="8dp"
-            android:paddingRight="12dp">
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp">
 
             <ImageView
                 android:layout_width="18dp"

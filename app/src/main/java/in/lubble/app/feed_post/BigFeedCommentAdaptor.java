@@ -1,6 +1,7 @@
 package in.lubble.app.feed_post;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,9 +68,9 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
 
         if (activityMap != null && activityMap.containsKey("text")) {
             holder.commentTv.setText(activityMap.get("text").toString());
-            Object timestamp = reaction.getExtra().get("timestamp");
-            if (timestamp instanceof Long) {
-                holder.commentTimestampTv.setText(DateTimeUtils.getHumanTimestamp((Long) timestamp));
+            Object timestamp = reaction.getExtra().get("created_at");
+            if (timestamp instanceof String && !TextUtils.isEmpty(String.valueOf(timestamp))) {
+                holder.commentTimestampTv.setText(DateTimeUtils.getHumanTimestamp((String) timestamp));
             }
 
             String userId = reaction.getUserID();

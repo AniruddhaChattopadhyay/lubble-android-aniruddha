@@ -367,7 +367,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.viewAllRepliesTv.setOnClickListener(v -> {
                 feedListener.openPostActivity(activity.getID());
             });
-            FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
+            FeedCommentAdaptor adapter = new FeedCommentAdaptor(commentList, activity.getID(), feedListener);
             holder.commentRecyclerView.setAdapter(adapter);
         } else {
             holder.commentRecyclerView.setVisibility(GONE);
@@ -490,17 +490,17 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         return -1;
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        private EmojiTextView textContentTv;
-        private ImageView photoContentIv;
-        private ImageView authorPhotoIv, linkImageIv;
-        private TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, linkTitleTv, linkDescTv;
-        private LinearLayout likeLayout, shareLayout;
-        private ImageView likeIv;
-        private LinearLayout commentLayout;
-        private TextView commentEdtText, likeTv, replyTv;
-        private RecyclerView commentRecyclerView;
-        private RelativeLayout linkPreviewContainer;
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
+        private final EmojiTextView textContentTv;
+        private final ImageView photoContentIv;
+        private final ImageView authorPhotoIv, linkImageIv;
+        private final TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, linkTitleTv, linkDescTv;
+        private final LinearLayout likeLayout, shareLayout;
+        private final ImageView likeIv;
+        private final LinearLayout commentLayout;
+        private final TextView commentEdtText, likeTv, replyTv;
+        private final RecyclerView commentRecyclerView;
+        private final RelativeLayout linkPreviewContainer;
 
         public MyViewHolder(View view) {
             super(view);
