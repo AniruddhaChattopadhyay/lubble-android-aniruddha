@@ -172,6 +172,7 @@ public class FeedPostFrag extends Fragment {
 
         fetchPost();
 
+        Analytics.triggerScreenEvent(requireContext(), this.getClass());
         return view;
     }
 

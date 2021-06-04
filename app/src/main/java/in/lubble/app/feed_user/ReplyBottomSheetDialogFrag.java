@@ -30,6 +30,7 @@ import java.util.MissingFormatArgumentException;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
@@ -65,6 +66,7 @@ public class ReplyBottomSheetDialogFrag extends BottomSheetDialogFragment {
         super.onCreate(savedInstanceState);
         try {
             replyListener = (ReplyListener) getParentFragment();
+            Analytics.triggerScreenEvent(requireContext(), this.getClass());
         } catch (ClassCastException e) {
             throw new ClassCastException("Calling fragment must implement ReplyListener interface");
         }
