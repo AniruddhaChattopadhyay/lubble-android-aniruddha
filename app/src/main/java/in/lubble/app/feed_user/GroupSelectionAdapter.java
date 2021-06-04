@@ -1,18 +1,15 @@
 package in.lubble.app.feed_user;
 
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
@@ -51,6 +48,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
 
         holder.selectionRb.setChecked(position == lastCheckedPos);
         holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
+        holder.groupIv.setOnClickListener(v -> holder.selectionRb.performClick());
 
         GlideApp.with(holder.itemView.getContext())
                 .load(feedGroupData.getPhotoUrl())
@@ -58,16 +56,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
                 .placeholder(R.drawable.ic_group)
                 .circleCrop()
                 .error(R.drawable.ic_group)
-                .into(new CustomTarget<Drawable>() {
-                    @Override
-                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        holder.titleTv.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
-                    }
-
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
-                    }
-                });
+                .into(holder.groupIv);
 
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
@@ -104,11 +93,13 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
     public static class GroupSelectionViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView titleTv;
+        final ImageView groupIv;
         final MaterialRadioButton selectionRb;
 
         GroupSelectionViewHolder(View view) {
             super(view);
             mView = view;
+            groupIv = view.findViewById(R.id.iv_group_selection);
             titleTv = view.findViewById(R.id.tv_group_name);
             selectionRb = view.findViewById(R.id.rb_group_selection);
         }
