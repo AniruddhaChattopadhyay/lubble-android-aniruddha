@@ -46,6 +46,7 @@ import in.lubble.app.feed_user.FeedPostComparator;
 import in.lubble.app.feed_user.PagingLoadStateAdapter;
 import in.lubble.app.feed_user.ReplyBottomSheetDialogFrag;
 import in.lubble.app.feed_user.ReplyListener;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
@@ -346,6 +347,11 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     @Override
     public void openPostActivity(@NotNull String activityId) {
         startActivityForResult(FeedPostActivity.getIntent(requireContext(), activityId), REQ_CODE_POST_ACTIV);
+    }
+
+    @Override
+    public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
+        // do nothing
     }
 
     @Override

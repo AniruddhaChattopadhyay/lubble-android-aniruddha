@@ -59,7 +59,6 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
-import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.receivers.ShareSheetReceiver;
@@ -194,7 +193,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 String groupFeedName = extras.get("feed_name").toString();
                 holder.groupNameTv.setOnClickListener(v -> {
                     FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
-                    GroupFeedActivity.open(context, feedGroupData);
+                    feedListener.openGroupFeed(feedGroupData);
                 });
             }
         }
@@ -332,6 +331,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         void onRefreshLoading(@NotNull LoadState refresh);
 
         void openPostActivity(@NotNull String activityId);
+
+        void openGroupFeed(@NotNull FeedGroupData feedGroupData);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -452,11 +453,20 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         int pos = getActivityPosById(activityId);
         if (pos >= 0) {
             EnrichedActivity updatedActivity = getItem(pos);
+            // add reply to comment RV
             List<Reaction> latestCommentList = updatedActivity.getLatestReactions().get("comment");
             if (latestCommentList == null)
                 latestCommentList = new ArrayList<>();
             latestCommentList.add(0, reaction);
             updatedActivity.getLatestReactions().put("comment", latestCommentList);
+            // update reply count
+            Number reactionNumber = updatedActivity.getReactionCounts().get(reaction.getKind());
+            if (reactionNumber == null) {
+                reactionNumber = 0;
+            }
+            int reactionCount = reactionNumber.intValue();
+            updatedActivity.getReactionCounts().put(reaction.getKind(), ++reactionCount);
+
             notifyItemChanged(pos);
         }
     }

@@ -538,6 +538,7 @@ public class FeedPostFrag extends Fragment {
                         } else {
                             replyEt.clearFocus();
                             replyEt.setText("");
+                            replyIv.setVisibility(View.VISIBLE);
                             LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
                             fetchPost();
                             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);

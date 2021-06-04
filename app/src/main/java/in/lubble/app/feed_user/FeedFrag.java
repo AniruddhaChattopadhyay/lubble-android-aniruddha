@@ -32,7 +32,9 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.feed_post.FeedPostActivity;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
@@ -180,6 +182,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void openPostActivity(@NotNull String activityId) {
         startActivityForResult(FeedPostActivity.getIntent(requireContext(), activityId), REQ_CODE_POST_ACTIV);
+    }
+
+    @Override
+    public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
+        GroupFeedActivity.open(requireContext(), feedGroupData);
     }
 
     @Override
