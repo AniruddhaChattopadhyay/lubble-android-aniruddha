@@ -333,6 +333,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         void openPostActivity(@NotNull String activityId);
 
         void openGroupFeed(@NotNull FeedGroupData feedGroupData);
+
+        void showEmptyView(boolean show);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -423,6 +425,13 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         addLoadStateListener(combinedLoadStates -> {
             footer.setLoadState(combinedLoadStates.getAppend());
             feedListener.onRefreshLoading(combinedLoadStates.getRefresh());
+            if (combinedLoadStates.getSource().getRefresh() instanceof LoadState.NotLoading
+                    && combinedLoadStates.getAppend().getEndOfPaginationReached()
+                    && getItemCount() < 1) {
+                feedListener.showEmptyView(true);
+            } else {
+                feedListener.showEmptyView(false);
+            }
             return null;
         });
         return new ConcatAdapter(FeedAdaptor.this, footer);

@@ -100,7 +100,7 @@ public class FeedCombinedFragment extends Fragment {
                     progressDialog.dismiss();
                     String message = response.body();
                     if (message != null && message.equals("New User")) {
-                        startActivityForResult(FeedExploreActiv.getIntent(requireContext(), true), REQ_CODE_JOIN_GROUPS);
+                        startActivityForResult(FeedExploreActiv.getIntent(requireContext(), true, true), REQ_CODE_JOIN_GROUPS);
                     } else {
                         LubbleSharedPrefs.getInstance().setCheckIfFeedGroupJoined();
                     }

@@ -17,8 +17,8 @@
 
         <ImageView
             android:id="@+id/iv_bottom_sheet_icon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             app:srcCompat="@drawable/ic_public_black_24dp" />
 
         <androidx.emoji.widget.EmojiTextView
@@ -37,6 +37,9 @@
         android:id="@+id/tv_bottom_sheet_subtitle"
         tools:text="@tools:sample/lorem/random"
         android:visibility="gone"
+        tools:visibility="visible"
+        android:textColor="@color/black"
+        android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
