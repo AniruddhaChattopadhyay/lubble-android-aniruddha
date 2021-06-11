@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -76,6 +77,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private ShimmerRecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
+    private TextView emptyHintTv;
     private static final int REQUEST_CODE_NEW_POST = 800;
     private static final int REQ_CODE_POST_ACTIV = 226;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
@@ -114,6 +116,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_single_group_feed, container, false);
         joinGroupTv = rootView.findViewById(R.id.tv_join_group);
+        emptyHintTv = rootView.findViewById(R.id.tv_empty_hint);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
         joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
@@ -352,6 +355,17 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     @Override
     public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
         // do nothing
+    }
+
+    @Override
+    public void showEmptyView(boolean show) {
+        if (show) {
+            emptyHintTv.setVisibility(View.VISIBLE);
+            emptyHintTv.setText("Be the first to post here!");
+            emptyHintTv.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_add_circle_black_24dp, 0, 0);
+        } else {
+            emptyHintTv.setVisibility(View.GONE);
+        }
     }
 
     @Override

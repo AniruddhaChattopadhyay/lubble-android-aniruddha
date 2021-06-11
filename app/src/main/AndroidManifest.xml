@@ -27,10 +27,24 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup">
-        <activity android:name=".feed_post.FeedPostActivity"></activity>
-        <activity android:name=".feed_groups.SingleGroupFeed.GroupFeedActivity" />
+        <activity
+            android:name=".groups.ChatGroupListActivity"
+            android:parentActivityName=".MainActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".feed_post.FeedPostActivity"
+            android:parentActivityName=".MainActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".feed_groups.SingleGroupFeed.GroupFeedActivity"
+            android:parentActivityName=".MainActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".feed_user.AddPostForFeed"
+            android:parentActivityName=".MainActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
@@ -62,6 +76,7 @@
             android:name=".leaderboard.LeaderboardActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"
             android:theme="@style/BlueAppTheme" />
         <activity
             android:name=".rewards.ClaimedRewardsActiv"

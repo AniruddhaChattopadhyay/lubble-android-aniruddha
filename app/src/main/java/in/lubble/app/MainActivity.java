@@ -1,12 +1,12 @@
 package in.lubble.app;
 
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.view.ActionMode;
 import androidx.appcompat.widget.SearchView;
@@ -28,6 +29,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
@@ -39,6 +41,7 @@ import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -54,6 +57,7 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.segment.analytics.Traits;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -66,8 +70,12 @@ import in.lubble.app.chat.BlockedChatsActiv;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
+import in.lubble.app.feed_groups.FeedExploreActiv;
+import in.lubble.app.feed_groups.FeedGroupsFrag;
 import in.lubble.app.feed_user.FeedCombinedFragment;
+import in.lubble.app.feed_user.FeedFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.groups.ChatGroupListActivity;
 import in.lubble.app.groups.ChatSearchListener;
 import in.lubble.app.groups.GroupsCombinedFrag;
 import in.lubble.app.leaderboard.LeaderboardActivity;
@@ -129,6 +137,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final String IS_NEW_USER_IN_THIS_LUBBLE = "IS_NEW_USER_IN_THIS_LUBBLE";
 
     public static final String EXTRA_TAB_NAME = "extra_tab_name";
+    private static final int REQ_CODE_JOIN_GROUPS = 272;
 
     private Toolbar toolbar;
     private FirebaseAuth firebaseAuth;
@@ -136,7 +145,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ValueEventListener presenceValueListener;
     private RelativeLayout dpContainer;
     private ImageView profileIcon;
-    private ImageView navHeaderIv;
+    private ImageView navHeaderIv, chatsIv;
     private TextView navHeaderNameTv, toolbarRewardsTv, toolbarSearchTv;
     private SearchView searchView;
     private ImageView searchBackIv;
@@ -151,6 +160,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private Menu navMenu;
     private ActionMode actionMode;
     private ChatSearchListener chatSearchListener;
+    private SwipeRefreshLayout.OnRefreshListener feedRefreshListener;
+    private boolean isSearchVisible;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -170,6 +181,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         dpContainer = toolbar.findViewById(R.id.container_dp);
         toolbarRewardsTv = toolbar.findViewById(R.id.tv_toolbar_rewards);
         toolbarSearchTv = toolbar.findViewById(R.id.tv_toolbar_search);
+        chatsIv = toolbar.findViewById(R.id.iv_chats);
         searchView = toolbar.findViewById(R.id.search_view);
         searchBackIv = toolbar.findViewById(R.id.iv_search_back);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -226,7 +238,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             });
         }
 
-        handleExploreActivity();
         if (isNewUserInThisLubble) {
             if (!TextUtils.isEmpty(FirebaseAuth.getInstance().getCurrentUser().getPhoneNumber())) {
                 try {
@@ -252,6 +263,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 searchView.setQuery("", true);
                 toggleSearchViewVisibility(false);
             }
+        });
+
+        chatsIv.setOnClickListener(v -> {
+            ChatGroupListActivity.Companion.open(this);
         });
     }
 
@@ -285,9 +300,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toolbarSearchTv.setEnabled(isSearchEnabled);
     }
 
+    public void toggleChatInToolbar(boolean isEnabled) {
+        chatsIv.setVisibility(isEnabled ? View.VISIBLE : View.GONE);
+    }
+
     public void toggleSearchInToolbar(boolean show) {
         toggleSearchViewVisibility(false);
         toolbarSearchTv.setVisibility(show ? View.VISIBLE : View.GONE);
+        isSearchVisible = show;
     }
 
     public ActionMode toggleActionMode(boolean show, ActionMode.Callback callback) {
@@ -322,7 +342,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             searchView.setVisibility(View.GONE);
             searchBackIv.setVisibility(View.GONE);
             dpContainer.setVisibility(View.VISIBLE);
-            toolbarSearchTv.setVisibility(View.VISIBLE);
+            toolbarSearchTv.setVisibility(isSearchVisible ? View.VISIBLE : View.GONE);
             lubbleClickTarget.setVisibility(View.VISIBLE);
             //toolbarRewardsTv.setVisibility(View.VISIBLE);
             toolbarTitle.setVisibility(View.VISIBLE);
@@ -344,14 +364,33 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
-        switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
 
         bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
         bottomNavigation.getMenu().clear();
-        bottomNavigation.inflateMenu(R.menu.navigation_market);
+
+        if ("koramangala".equalsIgnoreCase(LubbleSharedPrefs.getInstance().getLubbleId())) {
+            // for existing users show chat-first menu
+            bottomNavigation.inflateMenu(R.menu.navigation_chat_n_feed);
+            switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
+            if (isNewUserInThisLubble) {
+                // new signup
+                ExploreActiv.open(this, true);
+            }
+        } else {
+            // Feed-first menu for new n'hoods
+            bottomNavigation.inflateMenu(R.menu.navigation_menu_feed);
+            switchFrag(FeedFrag.newInstance());
+            if (isNewUserInThisLubble) {
+                // new signup; open Feed Explore
+                startActivityForResult(FeedExploreActiv.getIntent(MainActivity.this, true, false), REQ_CODE_JOIN_GROUPS);
+            } else if (!LubbleSharedPrefs.getInstance().getCheckIfFeedGroupJoined()) {
+                // (old user/reinstalled) User might not have joined any feed groups, check with backend
+                fetchNewFeedUserStatus();
+            }
+        }
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
@@ -369,6 +408,51 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         fetchAndPersistMplaceItems();
         initFirebaseRemoteConfig();
         initDrawer();
+    }
+
+    public void fetchNewFeedUserStatus() {
+        final ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setTitle("Setting up Nearby Feed for you...");
+        progressDialog.setMessage(getString(R.string.all_please_wait));
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.checkIfGroupJoined().enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(@NotNull Call<String> call, @NotNull Response<String> response) {
+                if (response.isSuccessful() && !isFinishing()) {
+                    progressDialog.dismiss();
+                    String message = response.body();
+                    if (message != null && message.equals("New User")) {
+                        startActivityForResult(FeedExploreActiv.getIntent(MainActivity.this, true, true), REQ_CODE_JOIN_GROUPS);
+                    } else {
+                        LubbleSharedPrefs.getInstance().setCheckIfFeedGroupJoined();
+                    }
+                } else if (!isFinishing()) {
+                    progressDialog.dismiss();
+                    new MaterialAlertDialogBuilder(MainActivity.this)
+                            .setTitle("Failed to set up Feed")
+                            .setMessage("Error: " + (response.message() == null ? getString(R.string.check_internet) : response.message()))
+                            .setPositiveButton(R.string.all_retry, (dialog, which) -> fetchNewFeedUserStatus())
+                            .setCancelable(false)
+                            .show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NotNull Call<String> call, @NotNull Throwable t) {
+                if (!isFinishing()) {
+                    progressDialog.dismiss();
+                    new MaterialAlertDialogBuilder(MainActivity.this)
+                            .setTitle("Failed to set up Feed")
+                            .setMessage("Error: " + (t.getMessage() == null ? getString(R.string.check_internet) : t.getMessage()))
+                            .setPositiveButton(R.string.all_retry, (dialog, which) -> fetchNewFeedUserStatus())
+                            .setCancelable(false)
+                            .show();
+                }
+            }
+        });
     }
 
     private void initDrawer() {
@@ -553,44 +637,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         prefs.setReferrerUid("");
     }
 
-    private void handleExploreActivity() {
-        if (isNewUserInThisLubble) {
-            // new signup
-            ExploreActiv.open(this, true);
-        } else {
-            if (!LubbleSharedPrefs.getInstance().getIsExploreShown()) {
-                RealtimeDbHelper.getThisUserRef().child("isExploreShown").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot != null && isActive && !isFinishing()) {
-                            final Boolean isExploreShownInRdb = dataSnapshot.getValue() == null ? false : dataSnapshot.getValue(Boolean.class);
-                            LubbleSharedPrefs.getInstance().setIsExploreShown(isExploreShownInRdb);
-                            if (!isExploreShownInRdb) {
-                                openExploreWithDelay();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
-            }
-        }
-    }
-
-    private void openExploreWithDelay() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (isActive && !isFinishing()) {
-                    ExploreActiv.open(MainActivity.this, false);
-                    overridePendingTransition(R.anim.slide_from_bottom, R.anim.none);
-                }
-            }
-        }, 300);
-    }
-
     private void initFirebaseRemoteConfig() {
         FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
@@ -679,6 +725,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     break;
                 case "feed":
                     bottomNavigation.setSelectedItemId(R.id.navigation_feed);
+                    break;
+                case "explore":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_feed_groups);
                     break;
                 /*case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
@@ -902,6 +951,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case R.id.navigation_feed:
                     switchFrag(FeedCombinedFragment.newInstance());
                     return true;
+                case R.id.navigation_feed_home:
+                    switchFrag(FeedFrag.newInstance());
+                    return true;
+                case R.id.navigation_feed_groups:
+                    switchFrag(FeedGroupsFrag.newInstance());
+                    return true;
+                case R.id.navigation_market:
+                    switchFrag(MarketplaceFrag.newInstance());
+                    return true;
                 case R.id.navigation_map:
                     switchFrag(MapFragment.newInstance());
                     return true;
@@ -911,13 +969,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 /*case R.id.navigation_fun:
                     switchFrag(GamesFrag.newInstance());
                     return true;*/
-                case R.id.navigation_market:
-                    switchFrag(MarketplaceFrag.newInstance());
-                    return true;
             }
             return false;
         }
     };
+
+    public void setRefreshListener(SwipeRefreshLayout.OnRefreshListener listener) {
+        this.feedRefreshListener = listener;
+    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -945,6 +1004,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void switchFrag(Fragment fragment) {
         FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction().replace(R.id.tv_book_author, fragment).commitAllowingStateLoss();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CODE_JOIN_GROUPS && resultCode == RESULT_OK && feedRefreshListener != null) {
+            feedRefreshListener.onRefresh();
+        }
     }
 
     @Override

@@ -369,4 +369,14 @@ public class UiUtils {
         }
     }
 
+    public static int getActionBarHeight(Context context) {
+        // Calculate ActionBar height in pixels
+        TypedValue tv = new TypedValue();
+        int actionBarHeight = 72;
+        if (context.getTheme().resolveAttribute(androidx.appcompat.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, context.getResources().getDisplayMetrics());
+        }
+        return actionBarHeight;
+    }
+
 }

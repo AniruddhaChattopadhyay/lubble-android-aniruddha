@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.auth.FirebaseAuth;
+
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -22,11 +24,11 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.FragUtils;
+import in.lubble.app.utils.UiUtils;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,15 +41,17 @@ import static in.lubble.app.analytics.AnalyticsEvents.FEED_EXPLORE_DIALOG_SHOWN;
 public class FeedExploreActiv extends BaseActivity implements FeedGroupAdapter.OnListFragmentInteractionListener {
 
     private static final String IS_NEW_USER = "IS_NEW_USER";
+    private static final String SHOW_MIGRATION_INFO = "SHOW_MIGRATION_INFO";
 
     private HashMap<String, Boolean> selectedGroupIdMap = new HashMap<>();
     private ImageView crossIv;
     private Button joinBtn;
-    private boolean isNewUser;
+    private boolean isNewUser, showMigrationInfo;
 
-    public static Intent getIntent(Context context, boolean isNewUser) {
+    public static Intent getIntent(Context context, boolean isNewUser, boolean showMigrationInfo) {
         final Intent intent = new Intent(context, FeedExploreActiv.class);
         intent.putExtra(IS_NEW_USER, isNewUser);
+        intent.putExtra(SHOW_MIGRATION_INFO, showMigrationInfo);
         return intent;
     }
 
@@ -62,8 +66,20 @@ public class FeedExploreActiv extends BaseActivity implements FeedGroupAdapter.O
         Analytics.triggerScreenEvent(this, this.getClass());
 
         isNewUser = getIntent().getBooleanExtra(IS_NEW_USER, false);
+        showMigrationInfo = getIntent().getBooleanExtra(SHOW_MIGRATION_INFO, false);
 
         FragUtils.replaceFrag(getSupportFragmentManager(), FeedGroupsFrag.newInstance(), R.id.frag_container);
+
+        if (showMigrationInfo) {
+            UiUtils.showBottomSheetAlertLight(this, getLayoutInflater(),
+                    FirebaseAuth.getInstance().getCurrentUser().getDisplayName()+", we've shifted a few things around here!",
+                    "Welcome to Nearby Feed!" +
+                            "\n\n\uD83C\uDFE1 You'll see posts from not just your neighbours, but from nearby neighbourhoods as well!" +
+                            "\n\n\uD83D\uDCCD Groups in feed can also be joined by those in nearby neighbourhoods" +
+                            "\n\nSo go ahead & join some groups. Posts from these groups will appear in your Feed!",
+                    R.drawable.ic_namaste, "Continue", null
+            );
+        }
 
         joinBtn.setOnClickListener(v -> {
             joinBtn.setEnabled(false);
@@ -118,9 +134,7 @@ public class FeedExploreActiv extends BaseActivity implements FeedGroupAdapter.O
         });
 
         LubbleSharedPrefs.getInstance().setIsExploreShown(true);
-        RealtimeDbHelper.getThisUserRef().child("isExploreShown").setValue(true);
         Analytics.triggerEvent(FEED_EXPLORE_DIALOG_SHOWN, this);
-
     }
 
     @Override
