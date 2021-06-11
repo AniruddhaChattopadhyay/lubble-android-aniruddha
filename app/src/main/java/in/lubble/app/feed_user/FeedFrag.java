@@ -109,10 +109,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(64));
         } else {
             lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(16));
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) requireActivity()).toggleSearchInToolbar(false);
-                ((MainActivity) requireActivity()).toggleChatInToolbar(true);
-            }
         }
         postBtn.setLayoutParams(lp);
 
@@ -129,6 +125,15 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         getCredentials();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof MainActivity && !(getParentFragment() instanceof FeedCombinedFragment)) {
+            ((MainActivity) requireActivity()).toggleSearchInToolbar(false);
+            ((MainActivity) requireActivity()).toggleChatInToolbar(true);
+        }
     }
 
     void getCredentials() {

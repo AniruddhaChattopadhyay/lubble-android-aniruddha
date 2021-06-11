@@ -75,8 +75,8 @@ import in.lubble.app.feed_groups.FeedGroupsFrag;
 import in.lubble.app.feed_user.FeedCombinedFragment;
 import in.lubble.app.feed_user.FeedFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.groups.ChatGroupListActivity;
 import in.lubble.app.groups.ChatSearchListener;
-import in.lubble.app.groups.GroupListFragment;
 import in.lubble.app.groups.GroupsCombinedFrag;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
@@ -266,7 +266,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         });
 
         chatsIv.setOnClickListener(v -> {
-            switchFrag(GroupListFragment.newInstance(isNewUserInThisLubble));
+            ChatGroupListActivity.Companion.open(this);
         });
     }
 
@@ -301,8 +301,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     public void toggleChatInToolbar(boolean isEnabled) {
-        // todo put GroupListFrag inside an activity
-        // chatsIv.setVisibility(isEnabled ? View.VISIBLE : View.GONE);
+        chatsIv.setVisibility(isEnabled ? View.VISIBLE : View.GONE);
     }
 
     public void toggleSearchInToolbar(boolean show) {
@@ -726,6 +725,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     break;
                 case "feed":
                     bottomNavigation.setSelectedItemId(R.id.navigation_feed);
+                    break;
+                case "explore":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_feed_groups);
                     break;
                 /*case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);

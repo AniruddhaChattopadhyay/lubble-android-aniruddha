@@ -127,6 +127,7 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
+            android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
             android:padding="8dp"
             android:visibility="gone"

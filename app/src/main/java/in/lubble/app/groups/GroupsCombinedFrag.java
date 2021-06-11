@@ -27,6 +27,10 @@ public class GroupsCombinedFrag extends Fragment {
         // Required empty public constructor
     }
 
+    /**
+     * @param isNewUserInThisLubble used to sort joined-groups list after a delay,
+     *                              to allow bulk group sync via explore to complete
+     */
     public static GroupsCombinedFrag newInstance(boolean isNewUserInThisLubble) {
         GroupsCombinedFrag groupsCombinedFrag = new GroupsCombinedFrag();
         Bundle bundle = new Bundle();

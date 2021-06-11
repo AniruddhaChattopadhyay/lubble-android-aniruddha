@@ -8,6 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.TaskStackBuilder;
 
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -202,10 +203,16 @@ public class DeepLinkRouterActiv extends BaseActivity {
                 break;
             case "feed_post":
                 final String postId = uri.getQueryParameter("id");
+                final Intent feedFallbackIntent = new Intent(this, MainActivity.class);
+                feedFallbackIntent.putExtra(EXTRA_TAB_NAME, "feed");
                 if (postId != null) {
-                    startActivity(FeedPostActivity.getIntent(this, postId));
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+                    stackBuilder.addParentStack(MainActivity.class);
+                    stackBuilder.addNextIntent(feedFallbackIntent);
+                    stackBuilder.addNextIntent(FeedPostActivity.getIntent(this, postId));
+                    stackBuilder.startActivities();
                 } else {
-                    startActivity(new Intent(this, MainActivity.class));
+                    startActivity(feedFallbackIntent);
                 }
                 break;
             default:
