@@ -2,8 +2,6 @@ package in.lubble.app.feed_user;
 
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -19,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,13 +54,11 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.GlideRequests;
-import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.CustomURLSpan;
-import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.receivers.ShareSheetReceiver;
@@ -75,7 +70,6 @@ import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
-import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 
 import static android.view.View.GONE;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -129,29 +123,12 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.textContentTv.setLinkTextColor(ContextCompat.getColor(context, R.color.colorAccent));
 
             Linkify.addLinks(holder.textContentTv, Linkify.ALL);
-            BetterLinkMovementMethod betterLinkMovementMethod = BetterLinkMovementMethod.newInstance().setOnLinkClickListener((textView, url) -> {
+            CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
                 Bundle bundle = new Bundle();
-                bundle.putString("group_id", String.valueOf(extras.get("group")));
+                bundle.putString("group_id", String.valueOf(extras.get("feed_name")));
                 bundle.putString("post_id", activity.getID());
                 bundle.putString("author_uid", activity.getActor().getID());
                 Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, context);
-                return false;
-            }).setOnLinkLongClickListener((textView, url) -> {
-                Bundle bundle = new Bundle();
-                bundle.putString("group_id", String.valueOf(extras.get("group")));
-                bundle.putString("post_id", activity.getID());
-                bundle.putString("author_uid", activity.getActor().getID());
-                Analytics.triggerEvent(AnalyticsEvents.POST_LINK_LONG_CLICKED, bundle, context);
-
-                ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("lubble_feed_copied_url", url);
-                clipboard.setPrimaryClip(clip);
-                Toast.makeText(context, "Copied!", Toast.LENGTH_SHORT).show();
-                return true;
-            });
-            holder.textContentTv.setMovementMethod(betterLinkMovementMethod);
-
-            CustomURLSpan.clickifyTextView(holder.textContentTv, () -> {
             });
             if (extras.containsKey("aspectRatio") && extras.get("aspectRatio") instanceof Double) {
                 float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
@@ -215,11 +192,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 else
                     holder.lubbleNameTv.setText(extras.get("lubble_id").toString());
             }
-            if (extras.containsKey("group") && extras.containsKey("lubble_id")) {
-                String groupFeedName = extras.get("group").toString() + '_' + extras.get("lubble_id");
+            if (extras.containsKey("feed_name")) {
+                String groupFeedName = extras.get("feed_name").toString();
                 holder.groupNameTv.setOnClickListener(v -> {
                     FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
-                    GroupFeedActivity.open(context, feedGroupData);
+                    feedListener.openGroupFeed(feedGroupData);
                 });
             }
         }
@@ -255,9 +232,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
         holder.commentLayout.setOnClickListener(v -> {
             feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), position);
-        });
-        holder.replyStatsTv.setOnClickListener(v -> {
-            feedListener.openPostActivity(activity.getID());
         });
         holder.itemView.setOnClickListener(v -> {
             feedListener.openPostActivity(activity.getID());
@@ -360,6 +334,10 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         void onRefreshLoading(@NotNull LoadState refresh);
 
         void openPostActivity(@NotNull String activityId);
+
+        void openGroupFeed(@NotNull FeedGroupData feedGroupData);
+
+        void showEmptyView(boolean show);
     }
 
     private void initCommentRecyclerView(MyViewHolder holder, EnrichedActivity activity) {
@@ -373,7 +351,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.viewAllRepliesTv.setOnClickListener(v -> {
                 feedListener.openPostActivity(activity.getID());
             });
-            FeedCommentAdaptor adapter = new FeedCommentAdaptor(context, commentList);
+            FeedCommentAdaptor adapter = new FeedCommentAdaptor(commentList, activity.getID(), feedListener);
             holder.commentRecyclerView.setAdapter(adapter);
         } else {
             holder.commentRecyclerView.setVisibility(GONE);
@@ -382,11 +360,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     }
 
     private void handleReactionStats(EnrichedActivity enrichedActivity, MyViewHolder holder) {
-        extractReactionCount(enrichedActivity, "like", holder.likeStatsTv, R.plurals.likes, 0);
-        extractReactionCount(enrichedActivity, "comment", holder.replyStatsTv, R.plurals.replies, 0);
+        extractReactionCount(enrichedActivity, "like", holder.likeTv, 0);
+        extractReactionCount(enrichedActivity, "comment", holder.replyTv, 0);
     }
 
-    private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int stringRes, int change) {
+    private void extractReactionCount(EnrichedActivity enrichedActivity, @NotNull String reaction, TextView statsTv, int change) {
         Number reactionNumber = enrichedActivity.getReactionCounts().get(reaction);
         if (reactionNumber == null) {
             reactionNumber = 0;
@@ -398,9 +376,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         if (reactionCount > 0) {
             statsTv.setVisibility(View.VISIBLE);
-            statsTv.setText(reactionCount + " " + context.getResources().getQuantityString(stringRes, reactionCount));
+            statsTv.setText(String.valueOf(reactionCount));
         } else {
-            statsTv.setVisibility(GONE);
+            statsTv.setText("");
         }
     }
 
@@ -422,7 +400,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 });
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 likedMap.put(position, like.getId());
-                extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, 1);
+                extractReactionCount(activity, "like", holder.likeTv, 1);
                 feedListener.onLiked(activity.getForeignID());
             } catch (StreamException e) {
                 e.printStackTrace();
@@ -438,7 +416,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 });
                 holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
                 likedMap.remove(position);
-                extractReactionCount(activity, "like", holder.likeStatsTv, R.plurals.likes, -1);
+                extractReactionCount(activity, "like", holder.likeTv, -1);
             } catch (StreamException e) {
                 e.printStackTrace();
                 FirebaseCrashlytics.getInstance().recordException(e);
@@ -450,6 +428,13 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         addLoadStateListener(combinedLoadStates -> {
             footer.setLoadState(combinedLoadStates.getAppend());
             feedListener.onRefreshLoading(combinedLoadStates.getRefresh());
+            if (combinedLoadStates.getSource().getRefresh() instanceof LoadState.NotLoading
+                    && combinedLoadStates.getAppend().getEndOfPaginationReached()
+                    && getItemCount() < 1) {
+                feedListener.showEmptyView(true);
+            } else {
+                feedListener.showEmptyView(false);
+            }
             return null;
         });
         return new ConcatAdapter(FeedAdaptor.this, footer);
@@ -480,11 +465,20 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         int pos = getActivityPosById(activityId);
         if (pos >= 0) {
             EnrichedActivity updatedActivity = getItem(pos);
+            // add reply to comment RV
             List<Reaction> latestCommentList = updatedActivity.getLatestReactions().get("comment");
             if (latestCommentList == null)
                 latestCommentList = new ArrayList<>();
             latestCommentList.add(0, reaction);
             updatedActivity.getLatestReactions().put("comment", latestCommentList);
+            // update reply count
+            Number reactionNumber = updatedActivity.getReactionCounts().get(reaction.getKind());
+            if (reactionNumber == null) {
+                reactionNumber = 0;
+            }
+            int reactionCount = reactionNumber.intValue();
+            updatedActivity.getReactionCounts().put(reaction.getKind(), ++reactionCount);
+
             notifyItemChanged(pos);
         }
     }
@@ -496,18 +490,17 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         return -1;
     }
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
-        private EmojiTextView textContentTv;
-        private ImageView photoContentIv;
-        private ImageView authorPhotoIv, linkImageIv;
-        private TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, linkTitleTv, linkDescTv;
-        private LinearLayout likeLayout, shareLayout;
-        private TextView likeStatsTv, replyStatsTv;
-        private ImageView likeIv;
-        private LinearLayout commentLayout;
-        private TextView commentEdtText;
-        private RecyclerView commentRecyclerView;
-        private RelativeLayout linkPreviewContainer;
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
+        private final EmojiTextView textContentTv;
+        private final ImageView photoContentIv;
+        private final ImageView authorPhotoIv, linkImageIv;
+        private final TextView viewAllRepliesTv, authorNameTv, timePostedTv, groupNameTv, lubbleNameTv, linkTitleTv, linkDescTv;
+        private final LinearLayout likeLayout, shareLayout;
+        private final ImageView likeIv;
+        private final LinearLayout commentLayout;
+        private final TextView commentEdtText, likeTv, replyTv;
+        private final RecyclerView commentRecyclerView;
+        private final RelativeLayout linkPreviewContainer;
 
         public MyViewHolder(View view) {
             super(view);
@@ -521,9 +514,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             timePostedTv = view.findViewById(R.id.feed_post_timestamp);
             likeLayout = view.findViewById(R.id.cont_like);
             shareLayout = view.findViewById(R.id.cont_share);
-            likeStatsTv = view.findViewById(R.id.tv_like_stats);
-            replyStatsTv = view.findViewById(R.id.tv_reply_stats);
             likeIv = view.findViewById(R.id.like_imageview);
+            likeTv = view.findViewById(R.id.tv_like);
+            replyTv = view.findViewById(R.id.tv_reply);
             commentLayout = view.findViewById(R.id.cont_reply);
             commentEdtText = view.findViewById(R.id.comment_edit_text);
             commentRecyclerView = view.findViewById(R.id.comment_recycler_view);

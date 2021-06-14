@@ -93,7 +93,7 @@ public class AppNotifUtils {
 
         try {
             if (isValidString(appNotifData.getIconUrl())) {
-                final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getIconUrl()).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
+                final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getIconUrl()).submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
                 builder.setLargeIcon(bitmap);
             } else if (appNotifData.getType().equalsIgnoreCase("lubb")) {
                 builder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_notif_like));
@@ -130,7 +130,7 @@ public class AppNotifUtils {
 
         try {
             if (isValidString(appNotifData.getIconUrl())) {
-                final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getIconUrl()).circleCrop().submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
+                final Bitmap bitmap = GlideApp.with(context).asBitmap().load(appNotifData.getIconUrl()).submit(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL).get();
                 builder.setLargeIcon(bitmap);
             }
 

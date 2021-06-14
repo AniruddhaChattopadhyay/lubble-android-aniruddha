@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
@@ -48,6 +49,8 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
 
         crossIv = findViewById(R.id.iv_cross);
         joinBtn = findViewById(R.id.btn_join);
+        TextView subtitleTv = findViewById(R.id.tv_subtitle);
+        subtitleTv.setVisibility(View.GONE);
 
         Analytics.triggerScreenEvent(this, this.getClass());
 

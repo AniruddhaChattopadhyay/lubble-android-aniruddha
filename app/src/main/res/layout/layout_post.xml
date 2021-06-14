@@ -4,10 +4,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="@layout/feed_list_row">
 
+    <TextView
+        android:id="@+id/tv_group_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="4dp"
+        android:paddingTop="16dp"
+        android:paddingRight="40dp"
+        android:paddingBottom="8dp"
+        android:textColor="@color/md_grey_600"
+        android:textStyle="bold"
+        app:drawableLeftCompat="@drawable/ic_group_black_14dp"
+        app:drawableTint="@color/md_grey_600"
+        tools:text="Local News Group" />
+
     <ImageView
         android:id="@+id/feed_author_photo"
         android:layout_width="38dp"
         android:layout_height="38dp"
+        android:layout_below="@id/tv_group_name"
         android:layout_marginRight="8dp"
         app:srcCompat="@drawable/ic_account_circle_black_no_padding" />
 
@@ -15,34 +30,13 @@
         android:id="@+id/feed_author_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/tv_group_name"
         android:layout_toRightOf="@+id/feed_author_photo"
         android:ellipsize="end"
         android:maxLines="1"
         android:textColor="@color/black"
+        android:textStyle="bold"
         tools:text="Ramesh Singh" />
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/iv_arrow"
-        android:layout_width="12dp"
-        android:layout_height="12dp"
-        android:layout_alignTop="@id/feed_author_name"
-        android:layout_alignBottom="@id/feed_author_name"
-        android:layout_gravity="center"
-        android:layout_marginLeft="2dp"
-        android:layout_marginRight="2dp"
-        android:layout_toRightOf="@+id/feed_author_name"
-        app:srcCompat="@drawable/ic_arrow_forward_black_24dp"
-        app:tint="@color/md_grey_600" />
-
-    <TextView
-        android:id="@+id/tv_group_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/iv_arrow"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textColor="@color/dk_colorAccent"
-        tools:text="QnAs" />
 
     <TextView
         android:id="@+id/tv_lubble_name"
@@ -57,18 +51,19 @@
     <ImageView
         android:id="@+id/iv_more_menu"
         android:layout_width="wrap_content"
-        android:layout_height="20dp"
-        android:layout_alignTop="@id/tv_group_name"
+        android:layout_height="24dp"
+        android:layout_alignBottom="@id/feed_post_timestamp"
         android:layout_alignParentRight="true"
         android:layout_marginRight="-8dp"
+        android:paddingTop="8dp"
         app:srcCompat="@drawable/ic_baseline_more_vert_24" />
 
     <TextView
         android:id="@+id/feed_post_timestamp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/tv_group_name"
         android:layout_alignTop="@id/tv_group_name"
-        android:layout_alignBottom="@id/tv_group_name"
         android:layout_toLeftOf="@id/iv_more_menu"
         android:layout_toRightOf="@id/tv_group_name"
         android:ellipsize="end"
@@ -99,7 +94,7 @@
         android:layout_below="@id/feed_text_content"
         android:layout_marginTop="8dp"
         android:visibility="gone"
-        tools:visibility="visible" />
+        tools:visibility="gone" />
 
     <ImageView
         android:id="@+id/feed_photo_content"
@@ -114,84 +109,14 @@
         android:transitionName="fullscreen_image"
         android:visibility="gone"
         tools:src="@drawable/explore_default"
-        tools:visibility="visible" />
-
-    <LinearLayout
-        android:id="@+id/container_reaction_stats"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/feed_photo_content"
-        android:layout_marginTop="8dp"
-        android:gravity="right"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/tv_like_stats"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:drawablePadding="4dp"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            android:visibility="gone"
-            app:drawableLeftCompat="@drawable/ic_favorite_16dp"
-            tools:text="23 Likes"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/tv_reply_stats"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:drawablePadding="4dp"
-            android:textColor="@color/black"
-            android:textSize="12sp"
-            android:visibility="gone"
-            app:drawableLeftCompat="@drawable/ic_reply_black_16dp"
-            app:drawableTint="@color/md_grey_600"
-            tools:text="9 replies"
-            tools:visibility="visible" />
-
-    </LinearLayout>
-
-    <ImageView
-        android:id="@+id/separator_social"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/container_reaction_stats"
-        android:layout_marginTop="4dp"
-        app:srcCompat="@color/md_grey_300" />
+        tools:visibility="gone" />
 
     <LinearLayout
         android:id="@+id/social_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/separator_social"
-        android:layout_marginTop="4dp"
+        android:layout_below="@id/feed_photo_content"
         android:orientation="horizontal">
-
-        <LinearLayout
-            android:id="@+id/cont_like"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/like_imageview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:srcCompat="@drawable/ic_favorite_border_24dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:gravity="center"
-                android:text="Like" />
-
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/cont_reply"
@@ -201,20 +126,54 @@
             android:layout_weight="1"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp">
 
             <ImageView
-                android:layout_width="wrap_content"
+                android:layout_width="18dp"
                 android:layout_height="wrap_content"
                 app:srcCompat="@drawable/ic_reply_black_24dp"
                 app:tint="@color/md_grey_600" />
 
             <TextView
+                android:id="@+id/tv_reply"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
                 android:gravity="center"
-                android:text="Reply" />
+                android:minEms="1"
+                tools:text="3" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/cont_like"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp">
+
+            <ImageView
+                android:id="@+id/like_imageview"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                app:srcCompat="@drawable/ic_favorite_border_24dp" />
+
+            <TextView
+                android:id="@+id/tv_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:minEms="1"
+                tools:text="8" />
 
         </LinearLayout>
 
@@ -226,30 +185,20 @@
             android:layout_weight="1"
             android:foreground="?attr/selectableItemBackground"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp">
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
                 app:srcCompat="@drawable/ic_share_black_24dp"
                 app:tint="@color/md_grey_600" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="4dp"
-                android:gravity="center"
-                android:text="Share" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/separator_social_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_below="@id/social_layout"
-        android:layout_marginTop="4dp"
-        app:srcCompat="@color/md_grey_300" />
 </merge>

@@ -20,7 +20,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingTop="10dp"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingBottom="10dp">
 
@@ -28,19 +27,29 @@
                 android:id="@+id/progressbar_post"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
                 android:layout_centerHorizontal="true" />
 
             <include layout="@layout/layout_post" />
+
+            <View
+                android:id="@+id/sep_post"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/md_grey_200"
+                android:layout_marginTop="8dp"
+                android:layout_below="@id/social_layout"/>
 
             <com.cooltechworks.views.shimmer.ShimmerRecyclerView
                 android:id="@+id/comment_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/separator_social_bottom"
+                android:layout_below="@id/sep_post"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:paddingBottom="32dp"
                 app:shimmer_demo_angle="20"
+                android:layout_marginTop="8dp"
                 app:shimmer_demo_child_count="3"
                 app:shimmer_demo_layout="@layout/layout_demo_shimmer_simple"
                 app:shimmer_demo_layout_manager_type="linear_vertical"

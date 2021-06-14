@@ -4,21 +4,25 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.models.FeedGroupData;
 import retrofit2.http.Body;
+import in.lubble.app.utils.UiUtils;
 
 public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAdapter.GroupSelectionViewHolder> {
 
@@ -58,6 +62,16 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
 
         holder.selectionRb.setChecked(position == lastCheckedPos);
         holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
+        holder.groupIv.setOnClickListener(v -> holder.selectionRb.performClick());
+
+        GlideApp.with(holder.itemView.getContext())
+                .load(feedGroupData.getPhotoUrl())
+                .apply(new RequestOptions().override(UiUtils.dpToPx(32), UiUtils.dpToPx(32)))
+                .placeholder(R.drawable.ic_group)
+                .circleCrop()
+                .error(R.drawable.ic_group)
+                .into(holder.groupIv);
+
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
             lastCheckedPos = holder.getBindingAdapterPosition();
@@ -101,11 +115,13 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
     public static class GroupSelectionViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView titleTv;
+        final ImageView groupIv;
         final MaterialRadioButton selectionRb;
 
         GroupSelectionViewHolder(View view) {
             super(view);
             mView = view;
+            groupIv = view.findViewById(R.id.iv_group_selection);
             titleTv = view.findViewById(R.id.tv_group_name);
             selectionRb = view.findViewById(R.id.rb_group_selection);
         }

@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,7 @@ import in.lubble.app.feed_user.FeedPostComparator;
 import in.lubble.app.feed_user.PagingLoadStateAdapter;
 import in.lubble.app.feed_user.ReplyBottomSheetDialogFrag;
 import in.lubble.app.feed_user.ReplyListener;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
@@ -75,6 +77,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private ShimmerRecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
+    private TextView emptyHintTv;
     private static final int REQUEST_CODE_NEW_POST = 800;
     private static final int REQ_CODE_POST_ACTIV = 226;
     private static final String FEED_NAME_BUNDLE = "FEED_NAME";
@@ -113,6 +116,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_single_group_feed, container, false);
         joinGroupTv = rootView.findViewById(R.id.tv_join_group);
+        emptyHintTv = rootView.findViewById(R.id.tv_empty_hint);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
         joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
@@ -156,7 +160,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
             @Override
             public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
-                if(isAdded()) {
+                if (isAdded()) {
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -220,7 +224,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                 postBtn.setVisibility(View.GONE);
 
                 joinGroupTv.setOnClickListener(v -> {
-                    joinGroup(groupFeed, userTimelineFeed);
+                    joinGroup(groupFeed);
                 });
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -265,55 +269,49 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         }
     };
 
-    private void joinGroup(CloudFlatFeed groupFeed, CloudFlatFeed userTimelineFeed) {
+    private void joinGroup(CloudFlatFeed groupFeed) {
+        joinGroupTv.setText("");
+        joinGroupProgressBar.setVisibility(View.VISIBLE);
+        final JSONObject jsonObject = new JSONObject();
         try {
-            userTimelineFeed.follow(groupFeed).join();
-            joinGroupTv.setText("");
-            joinGroupProgressBar.setVisibility(View.VISIBLE);
-            final JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put("groupFeedId", groupFeed.getUserID());
-                RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
-                Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-                Call<Void> call = endpoints.addGroupForUser(body);
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful() && isAdded()) {
-                            Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
-                            joinGroupTv.setVisibility(View.GONE);
-                            postBtn.setVisibility(View.VISIBLE);
-                            joinGroupProgressBar.setVisibility(View.GONE);
-                            if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
-                                ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
-                            }
+            jsonObject.put("groupFeedId", groupFeed.getUserID());
+            RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+            Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+            Call<Void> call = endpoints.addGroupForUser(body);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.isSuccessful() && isAdded()) {
+                        Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
+                        joinGroupTv.setVisibility(View.GONE);
+                        postBtn.setVisibility(View.VISIBLE);
+                        joinGroupProgressBar.setVisibility(View.GONE);
+                        if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
+                            ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
                         }
                     }
+                }
 
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        FirebaseCrashlytics.getInstance().recordException(t);
-                        if (isAdded()) {
-                            joinGroupTv.setText("✨ JOIN GROUP");
-                            joinGroupProgressBar.setVisibility(View.GONE);
-                            String text = getString(R.string.all_something_wrong_try_again);
-                            if (t.getMessage() != null) {
-                                text = "Failed: " + t.getMessage();
-                            }
-                            Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT).show();
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    FirebaseCrashlytics.getInstance().recordException(t);
+                    if (isAdded()) {
+                        joinGroupTv.setText("✨ JOIN GROUP");
+                        joinGroupProgressBar.setVisibility(View.GONE);
+                        String text = getString(R.string.all_something_wrong_try_again);
+                        if (t.getMessage() != null) {
+                            text = "Failed: " + t.getMessage();
                         }
+                        Snackbar.make(rootView, text, Snackbar.LENGTH_SHORT).show();
                     }
-                });
+                }
+            });
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-                FirebaseCrashlytics.getInstance().recordException(e);
-                joinGroupProgressBar.setVisibility(View.GONE);
-                Snackbar.make(rootView, R.string.all_something_wrong_try_again, Snackbar.LENGTH_SHORT).show();
-            }
-        } catch (StreamException e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
+        } catch (JSONException e) {
             e.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(e);
+            joinGroupProgressBar.setVisibility(View.GONE);
+            Snackbar.make(rootView, R.string.all_something_wrong_try_again, Snackbar.LENGTH_SHORT).show();
         }
     }
 
@@ -352,6 +350,22 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     @Override
     public void openPostActivity(@NotNull String activityId) {
         startActivityForResult(FeedPostActivity.getIntent(requireContext(), activityId), REQ_CODE_POST_ACTIV);
+    }
+
+    @Override
+    public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
+        // do nothing
+    }
+
+    @Override
+    public void showEmptyView(boolean show) {
+        if (show) {
+            emptyHintTv.setVisibility(View.VISIBLE);
+            emptyHintTv.setText("Be the first to post here!");
+            emptyHintTv.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_add_circle_black_24dp, 0, 0);
+        } else {
+            emptyHintTv.setVisibility(View.GONE);
+        }
     }
 
     @Override

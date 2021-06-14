@@ -31,7 +31,7 @@
             app:itemIconTint="@color/bottom_nav_selector"
             app:itemTextColor="@color/bottom_nav_selector"
             app:labelVisibilityMode="labeled"
-            app:menu="@menu/navigation" />
+            app:menu="@menu/navigation_chat_n_feed" />
 
         <FrameLayout
             android:id="@+id/tv_book_author"
@@ -43,8 +43,9 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="4dp"
+            android:rotation="180"
             android:layout_above="@id/navigation"
-            app:srcCompat="@drawable/gradient_black_light_trans" />
+            app:srcCompat="@drawable/shadow" />
 
     </RelativeLayout>
 

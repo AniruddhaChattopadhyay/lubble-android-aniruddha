@@ -1,6 +1,7 @@
 package in.lubble.app.feed_post;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -65,34 +66,35 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
         Reaction reaction = reactionList.get(position);
         Map<String, Object> activityMap = reaction.getActivityData();
 
-        if(activityMap!=null && activityMap.containsKey("text"))
+        if (activityMap != null && activityMap.containsKey("text")) {
             holder.commentTv.setText(activityMap.get("text").toString());
-        Object timestamp = reaction.getExtra().get("timestamp");
-        if (timestamp != null && timestamp instanceof Long) {
-            holder.commentTimestampTv.setText(DateTimeUtils.getHumanTimestamp((Long) timestamp));
-        }
-
-        String userId = reaction.getUserID();
-        if (userId == null && reaction.getExtra() != null) {
-            userId = String.valueOf(reaction.getExtra().get("userId"));
-        }
-        RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                final ProfileInfo profileInfo = snapshot.getValue(ProfileInfo.class);
-                holder.commentUserNameTv.setText(profileInfo.getName());
-                glide.load(profileInfo.getThumbnail())
-                        .placeholder(R.drawable.ic_account_circle_grey_24dp)
-                        .error(R.drawable.ic_account_circle_grey_24dp)
-                        .circleCrop()
-                        .into(holder.commentProfilePicIv);
+            Object timestamp = reaction.getExtra().get("created_at");
+            if (timestamp instanceof String && !TextUtils.isEmpty(String.valueOf(timestamp))) {
+                holder.commentTimestampTv.setText(DateTimeUtils.getHumanTimestamp((String) timestamp));
             }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
+            String userId = reaction.getUserID();
+            if (userId == null && reaction.getExtra() != null) {
+                userId = String.valueOf(reaction.getExtra().get("userId"));
             }
-        });
+            RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    final ProfileInfo profileInfo = snapshot.getValue(ProfileInfo.class);
+                    holder.commentUserNameTv.setText(profileInfo.getName());
+                    glide.load(profileInfo.getThumbnail())
+                            .placeholder(R.drawable.ic_account_circle_grey_24dp)
+                            .error(R.drawable.ic_account_circle_grey_24dp)
+                            .circleCrop()
+                            .into(holder.commentProfilePicIv);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+        }
     }
 
     @Override

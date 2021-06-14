@@ -77,6 +77,14 @@ public class FeedCombinedFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+        }
+    }
+
     public void fetchNewFeedUserStatus() {
         final ProgressDialog progressDialog = new ProgressDialog(requireContext());
         progressDialog.setTitle("Setting up Nearby Feed for you...");
@@ -92,7 +100,7 @@ public class FeedCombinedFragment extends Fragment {
                     progressDialog.dismiss();
                     String message = response.body();
                     if (message != null && message.equals("New User")) {
-                        startActivityForResult(FeedExploreActiv.getIntent(requireContext(), true), REQ_CODE_JOIN_GROUPS);
+                        startActivityForResult(FeedExploreActiv.getIntent(requireContext(), true, true), REQ_CODE_JOIN_GROUPS);
                     } else {
                         LubbleSharedPrefs.getInstance().setCheckIfFeedGroupJoined();
                     }

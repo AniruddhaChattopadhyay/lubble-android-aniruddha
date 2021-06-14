@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="8dp">
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <ImageView
         android:id="@+id/iv_comment_profile_pic"
@@ -27,7 +28,7 @@
         android:id="@+id/tv_comment_timestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="8dp"
+        android:textSize="12sp"
         android:layout_alignParentRight="true"
         tools:text="4hr ago" />
 

@@ -7,7 +7,9 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,9 +32,12 @@ import java.net.MalformedURLException;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
+import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.feed_post.FeedPostActivity;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
@@ -58,6 +63,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private static final int REQ_CODE_POST_ACTIV = 226;
 
     private ExtendedFloatingActionButton postBtn;
+    private TextView emptyHintTv;
     private ShimmerRecyclerView feedRV;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private FeedAdaptor adapter;
@@ -82,6 +88,8 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
         if (getParentFragment() instanceof FeedCombinedFragment) {
             ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
+        } else if (getActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).setRefreshListener(this);
         }
         Analytics.triggerScreenEvent(requireContext(), this.getClass());
     }
@@ -91,10 +99,18 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_feed, container, false);
         postBtn = view.findViewById(R.id.btn_new_post);
+        emptyHintTv = view.findViewById(R.id.tv_empty_hint);
         feedRV = view.findViewById(R.id.feed_recyclerview);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
 
         postBtn.setVisibility(View.VISIBLE);
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) postBtn.getLayoutParams();
+        if (getParentFragment() instanceof FeedCombinedFragment) {
+            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(64));
+        } else {
+            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(16));
+        }
+        postBtn.setLayoutParams(lp);
 
         layoutManager = new LinearLayoutManager(getContext());
         feedRV.setLayoutManager(layoutManager);
@@ -109,6 +125,15 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         getCredentials();
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() instanceof MainActivity && !(getParentFragment() instanceof FeedCombinedFragment)) {
+            ((MainActivity) requireActivity()).toggleSearchInToolbar(false);
+            ((MainActivity) requireActivity()).toggleChatInToolbar(true);
+        }
     }
 
     void getCredentials() {
@@ -180,6 +205,21 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void openPostActivity(@NotNull String activityId) {
         startActivityForResult(FeedPostActivity.getIntent(requireContext(), activityId), REQ_CODE_POST_ACTIV);
+    }
+
+    @Override
+    public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
+        GroupFeedActivity.open(requireContext(), feedGroupData);
+    }
+
+    @Override
+    public void showEmptyView(boolean show) {
+        if (show) {
+            emptyHintTv.setVisibility(View.VISIBLE);
+            emptyHintTv.setText("Join groups to view their posts here");
+        } else {
+            emptyHintTv.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -260,6 +300,14 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
             //refresh list
             initRecyclerView();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).toggleChatInToolbar(false);
         }
     }
 
