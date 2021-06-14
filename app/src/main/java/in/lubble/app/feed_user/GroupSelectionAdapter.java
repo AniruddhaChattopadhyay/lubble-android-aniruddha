@@ -3,27 +3,41 @@ package in.lubble.app.feed_user;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import in.lubble.app.R;
 import in.lubble.app.models.FeedGroupData;
+import retrofit2.http.Body;
 
 public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAdapter.GroupSelectionViewHolder> {
 
     private int lastCheckedPos = -1;
     private final List<FeedGroupData> stringList;
+    private final HashSet<FeedGroupData> exploreGroupList;
     private final List<FeedGroupData> stringListCopy;
+    private MaterialButton postSubmitBtn;
 
-    public GroupSelectionAdapter(List<FeedGroupData> stringList) {
+    public boolean isGroupJoined() {
+        return isGroupJoined;
+    }
+
+    private boolean isGroupJoined = true;
+
+    public GroupSelectionAdapter(List<FeedGroupData> stringList, HashSet<FeedGroupData> exploreGroupList, MaterialButton postSubmitBtn) {
         this.stringList = stringList;
+        this.exploreGroupList = exploreGroupList;
+        this.postSubmitBtn = postSubmitBtn;
         stringListCopy = new ArrayList<>();
         stringListCopy.addAll(stringList);
     }
@@ -47,6 +61,14 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
             lastCheckedPos = holder.getBindingAdapterPosition();
+            if(exploreGroupList.contains(stringList.get(lastCheckedPos))){
+                postSubmitBtn.setText("Join and Post");
+                isGroupJoined = false;
+            }
+            else{
+                postSubmitBtn.setText("Post");
+                isGroupJoined = true;
+            }
             notifyItemChanged(copyOfLastCheckedPosition);
             notifyItemChanged(lastCheckedPos);
         });

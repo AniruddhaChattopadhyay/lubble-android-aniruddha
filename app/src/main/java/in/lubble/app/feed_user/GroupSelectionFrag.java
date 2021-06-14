@@ -22,8 +22,10 @@ import com.google.android.material.snackbar.Snackbar;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.MissingFormatArgumentException;
+import java.util.Set;
 
 import in.lubble.app.R;
 import in.lubble.app.UploadImageFeedService;
@@ -51,7 +53,7 @@ public class GroupSelectionFrag extends Fragment {
     private FeedPostData feedPostData;
     @Nullable
     private GroupSelectionAdapter groupSelectionAdapter;
-    private List<FeedGroupData> feedGroupDataList;
+    private List<FeedGroupData> feedGroupDataList,exploreGroupDataList;
     private ProgressBar postProgressBar;
 
     public static GroupSelectionFrag newInstance(FeedPostData feedPostData) {
@@ -105,6 +107,7 @@ public class GroupSelectionFrag extends Fragment {
         postSubmitBtn.setOnClickListener(v -> {
             String text = feedPostData.getText();
             int lastCheckedPos = groupSelectionAdapter.getLastCheckedPos();
+            boolean isGroupJoined = groupSelectionAdapter.isGroupJoined();
             if (lastCheckedPos == NO_POSITION) {
                 Toast.makeText(requireContext(), "Please select a group for this post", Toast.LENGTH_SHORT).show();
                 return;
@@ -123,6 +126,7 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadImageFeedService.EXTRA_UPLOAD_PATH, uploadPath)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_GROUP_NAME, groupNameText)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_FEED_NAME, feedNameText)
+                            .putExtra(UploadImageFeedService.EXTRA_FEED_IS_GROUP_JOINED, isGroupJoined)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(requireContext(), serviceIntent);
@@ -132,7 +136,7 @@ public class GroupSelectionFrag extends Fragment {
                 } else {
                     postSubmitBtn.setVisibility(View.GONE);
                     postProgressBar.setVisibility(View.VISIBLE);
-                    FeedServices.post(feedPostData, groupNameText, feedNameText, null, 0, new Callback<Void>() {
+                    FeedServices.post(feedPostData, groupNameText, feedNameText, null, 0, isGroupJoined,new Callback<Void>() {
                         @Override
                         public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                             if (isAdded() && response.isSuccessful()) {
@@ -169,18 +173,36 @@ public class GroupSelectionFrag extends Fragment {
         call.enqueue(new Callback<List<FeedGroupData>>() {
             @Override
             public void onResponse(@NotNull Call<List<FeedGroupData>> call, @NotNull Response<List<FeedGroupData>> response) {
+
                 feedGroupDataList = response.body();
-                if (groupsRv.getActualAdapter() != groupsRv.getAdapter()) {
-                    // recycler view is currently holding shimmer adapter so hide it
-                    groupsRv.hideShimmerAdapter();
-                }
-                if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
-                    groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList);
-                    groupsRv.setAdapter(groupSelectionAdapter);
-                    postSubmitBtn.setEnabled(true);
-                } else if (isAdded()) {
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                }
+
+                Call<List<FeedGroupData>> call2 = endpoints.getExploreFeedGroupList();
+                call2.enqueue(new Callback<List<FeedGroupData>>() {
+                    @Override
+                    public void onResponse(@NotNull Call<List<FeedGroupData>> call, @NotNull Response<List<FeedGroupData>> response) {
+                        feedGroupDataList.addAll(response.body());
+                        exploreGroupDataList = response.body();
+                        HashSet<FeedGroupData> exploreGroupSet = new HashSet<FeedGroupData>(exploreGroupDataList);
+                        if (groupsRv.getActualAdapter() != groupsRv.getAdapter()) {
+                            // recycler view is currently holding shimmer adapter so hide it
+                            groupsRv.hideShimmerAdapter();
+                        }
+                        if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
+                            groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList, exploreGroupSet,postSubmitBtn);
+                            groupsRv.setAdapter(groupSelectionAdapter);
+                            postSubmitBtn.setEnabled(true);
+                        } else if (isAdded()) {
+                            Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<List<FeedGroupData>> call, Throwable t) {
+                        if (isAdded()) {
+                            Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
 
             @Override
