@@ -127,12 +127,12 @@ public class LubbleApp extends MultiDexApplication {
         if (BuildConfig.DEBUG) {
             auth = new StreamAnalyticsAuth(
                     "nvhsd4sv68k4",
-                    "sbhf4fagjmnpycy793jdnfpqrtp8ny8merahqkcj6254mzgx37f8k2ghfhufunjd"
+                    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.JNBodILjaJEuW2fwIjZTZcvKn8lXI0roercYGAZ1xAg"
             );
         } else {
             auth = new StreamAnalyticsAuth(
                     "qeyr2a54nh9w",
-                    "r9mjpdzf5pe875ejz28kshrasz36c4xqqss9jendvkey86ev4fqj9jm9pejtg4aq"
+                    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.TUwowYvGfa0rJTC2gOcDLsBmAAL5-9EAFkeQBtw9wgA"
             );
         }
 

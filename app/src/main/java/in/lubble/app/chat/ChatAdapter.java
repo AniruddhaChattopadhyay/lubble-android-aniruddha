@@ -1273,6 +1273,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
         if (isValidString(chatData.getImgUrl())) {
             imageView.setOnClickListener(null);
             imgContainer.setVisibility(VISIBLE);
+            imageView.setImageDrawable(UiUtils.getCircularProgressDrawable(context));
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && downloadIv != null) {
                 // Permission is not granted
                 glide.load(chatData.getImgUrl()).override(18, 18).diskCacheStrategy(DiskCacheStrategy.NONE).centerCrop().into(imageView);
@@ -1295,6 +1296,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
             }
         } else {
             imgContainer.setVisibility(GONE);
+            progressBar.setVisibility(GONE);
         }
     }
 
@@ -1399,7 +1401,6 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void downloadAndSavePic(final ProgressBar progressBar, final ImageView imageView, final ChatData chatData) {
-
         glide
                 .asBitmap()
                 .load(chatData.getImgUrl())
@@ -1420,6 +1421,7 @@ public class ChatAdapter extends RecyclerView.Adapter {
                         // if you are referencing the bitmap somewhere else too other than this imageView
                         // clear it here as you can no longer have the bitmap
                         Log.d(TAG, "onLoadCleared: ");
+                        progressBar.setVisibility(GONE);
                     }
                 });
     }
