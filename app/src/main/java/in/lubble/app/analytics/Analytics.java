@@ -236,6 +236,7 @@ public class Analytics {
                 )
                 .withBoost(boost)
                 .withLocation(location)
+                .withLabel(action)
                 .build()
         );
     }

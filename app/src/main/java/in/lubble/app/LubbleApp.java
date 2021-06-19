@@ -124,7 +124,7 @@ public class LubbleApp extends MultiDexApplication {
         Freshchat.getInstance(getApplicationContext()).setNotificationConfig(notificationConfig);
 
         StreamAnalyticsAuth auth;
-        if (BuildConfig.DEBUG) {
+        if (BuildConfig.FLAVOR != "prod") {
             auth = new StreamAnalyticsAuth(
                     "nvhsd4sv68k4",
                     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.JNBodILjaJEuW2fwIjZTZcvKn8lXI0roercYGAZ1xAg"
