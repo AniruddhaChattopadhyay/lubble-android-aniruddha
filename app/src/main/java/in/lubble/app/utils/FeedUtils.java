@@ -26,7 +26,7 @@ import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.Analytics;
-import io.getstream.analytics.beans.Content;
+import io.getstream.core.models.Content;
 import io.getstream.core.models.EnrichedActivity;
 
 import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
@@ -120,17 +120,13 @@ public class FeedUtils {
                 int lastPos = visibleState.getLastCompletelyVisible();
                 if (firstPos > 0 && lastPos > 0) {
                     if (firstPos == lastPos) {
-                        contentList.add(new Content.ContentBuilder()
-                                .withForeignId(enrichedActivities.get(firstPos).getForeignID())
-                                .withAttribute("actor", FirebaseAuth.getInstance().getUid())
-                                .build());
+                        contentList.add(new Content(enrichedActivities.get(firstPos).getForeignID())
+                                .set("actor", FirebaseAuth.getInstance().getUid()));
                     } else {
                         List<EnrichedActivity> subList = enrichedActivities.subList(firstPos, lastPos);
                         for (EnrichedActivity enrichedActivity : subList) {
-                            contentList.add(new Content.ContentBuilder()
-                                    .withForeignId(enrichedActivity.getForeignID())
-                                    .withAttribute("actor", FirebaseAuth.getInstance().getUid())
-                                    .build());
+                            contentList.add(new Content(enrichedActivity.getForeignID())
+                                    .set("actor", FirebaseAuth.getInstance().getUid()));
                         }
                     }
                     Analytics.triggerFeedImpression(contentList, feedName, location);

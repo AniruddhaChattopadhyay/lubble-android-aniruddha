@@ -193,8 +193,8 @@
             android:configChanges="orientation"
             android:label="Invite People"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateHidden|adjustResize" /> <!-- use CTBackgroundIntentService to target users below Android 21 (Lollipop) -->
-        <activity android:name=".utils.FullScreenImageActivity" /> <!-- use CTBackgroundJobService to target users on and above Android 21 (Lollipop) -->
+            android:windowSoftInputMode="stateHidden|adjustResize" />
+        <activity android:name=".utils.FullScreenImageActivity" />
         <activity
             android:name=".chat.AttachImageActivity"
             android:configChanges="orientation"
@@ -540,18 +540,7 @@
             android:name=".FetchAddressIntentService"
             android:exported="false" />
         <service
-            android:name="com.clevertap.android.sdk.CTBackgroundIntentService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.clevertap.BG_EVENT" />
-            </intent-filter>
-        </service>
-        <service
-            android:name="com.clevertap.android.sdk.CTBackgroundJobService"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service
-            android:name="com.clevertap.android.sdk.CTNotificationIntentService"
+            android:name="com.clevertap.android.sdk.pushnotification.CTNotificationIntentService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.clevertap.PUSH_EVENT" />

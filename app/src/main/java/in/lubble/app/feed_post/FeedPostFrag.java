@@ -76,9 +76,9 @@ import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
-import io.getstream.analytics.beans.Content;
 import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.Content;
 import io.getstream.core.models.Data;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FeedID;
@@ -452,11 +452,8 @@ public class FeedPostFrag extends Fragment {
 
     private void trackPostImpression(EnrichedActivity enrichedActivity) {
         ArrayList<Content> contentList = new ArrayList<>();
-        contentList.add(new Content.ContentBuilder()
-                .withForeignId(enrichedActivity.getForeignID())
-                .withAttribute("actor", userId)
-                .build());
-        Analytics.triggerFeedImpression(contentList, null, FeedPostFrag.class.getSimpleName());
+        contentList.add(new Content(enrichedActivity.getForeignID()));
+        Analytics.triggerFeedImpression(contentList, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
     }
 
     private void handleReplyBottomSheet(EnrichedActivity enrichedActivity) {

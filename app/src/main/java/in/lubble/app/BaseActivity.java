@@ -106,12 +106,9 @@ public class BaseActivity extends AppCompatActivity {
         }
 
         final FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        firebaseRemoteConfig.fetch().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    firebaseRemoteConfig.activateFetched();
-                }
+        firebaseRemoteConfig.fetch().addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                firebaseRemoteConfig.activate();
             }
         });
 
