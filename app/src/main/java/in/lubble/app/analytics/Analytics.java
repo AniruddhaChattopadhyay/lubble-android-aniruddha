@@ -233,6 +233,7 @@ public class Analytics {
                             "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.TUwowYvGfa0rJTC2gOcDLsBmAAL5-9EAFkeQBtw9wgA",
                             FirebaseAuth.getInstance().getUid())
                     .region(Region.SINGAPORE)
+                    .region("Singapore")
                     .build();
         }
         return analyticsClient;
@@ -257,10 +258,7 @@ public class Analytics {
         try {
             Engagement engagement = new Engagement.Builder()
                     .feedID(feedName)
-                    .content(new Content(foreignId)
-                            .set("verb", action)
-                            .set("actor", FirebaseAuth.getInstance().getUid())
-                    )
+                    .content(new Content(foreignId))
                     .label(action)
                     .userData(new UserData(FirebaseAuth.getInstance().getUid(), FirebaseAuth.getInstance().getUid()))
                     .boost(boost)

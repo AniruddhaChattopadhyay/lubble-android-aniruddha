@@ -120,13 +120,11 @@ public class FeedUtils {
                 int lastPos = visibleState.getLastCompletelyVisible();
                 if (firstPos > 0 && lastPos > 0) {
                     if (firstPos == lastPos) {
-                        contentList.add(new Content(enrichedActivities.get(firstPos).getForeignID())
-                                .set("actor", FirebaseAuth.getInstance().getUid()));
+                        contentList.add(new Content(enrichedActivities.get(firstPos).getForeignID()));
                     } else {
                         List<EnrichedActivity> subList = enrichedActivities.subList(firstPos, lastPos);
                         for (EnrichedActivity enrichedActivity : subList) {
-                            contentList.add(new Content(enrichedActivity.getForeignID())
-                                    .set("actor", FirebaseAuth.getInstance().getUid()));
+                            contentList.add(new Content(enrichedActivity.getForeignID()));
                         }
                     }
                     Analytics.triggerFeedImpression(contentList, feedName, location);
