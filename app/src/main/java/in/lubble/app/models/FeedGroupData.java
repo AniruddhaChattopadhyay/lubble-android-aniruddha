@@ -43,6 +43,9 @@ public class FeedGroupData implements Serializable {
     private String lubble;
     @SerializedName("groupPhotoUrl")
     private String photoUrl;
+    @Nullable
+    @SerializedName("joined")
+    private boolean groupJoined;
 
     public @Nullable Integer getId() {
         return id;
@@ -83,5 +86,13 @@ public class FeedGroupData implements Serializable {
 
     public void setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
+    }
+
+    public boolean isGroupJoined() {
+        return groupJoined;
+    }
+
+    public void setGroupJoined(boolean groupJoined) {
+        this.groupJoined = groupJoined;
     }
 }

@@ -193,6 +193,9 @@ public interface Endpoints {
     @GET("marketplace/getFeedGroupList/")
     Call<List<FeedGroupData>> getFeedGroupList();
 
+    @GET("marketplace/getAllFeedGroups/")
+    Call<List<FeedGroupData>> getAllFeedGroupList();
+
     @GET("marketplace/getExploreFeedGroupList/")
     Call<List<FeedGroupData>> getExploreFeedGroupList();
 
