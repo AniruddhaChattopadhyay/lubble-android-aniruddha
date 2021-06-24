@@ -254,7 +254,7 @@ public class Analytics {
 
     }
 
-    public static void triggerFeedEngagement(String foreignId, String action, int boost, @Nullable String feedName, String location) {
+    public static void triggerFeedEngagement(String foreignId, String action, int boost, @NotNull String feedName, String location) {
         try {
             Engagement engagement = new Engagement.Builder()
                     .feedID(feedName)
@@ -263,6 +263,7 @@ public class Analytics {
                     .userData(new UserData(FirebaseAuth.getInstance().getUid(), FirebaseAuth.getInstance().getUid()))
                     .boost(boost)
                     .location(location)
+                    .position(1)
                     .build();
             getAnalyticsClient().analytics().trackEngagement(engagement);
         } catch (Exception e) {

@@ -540,7 +540,7 @@ public class FeedPostFrag extends Fragment {
                             fetchPost();
                             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                             replyEt.hideIme();
-                            Analytics.triggerFeedEngagement(foreignId, "comment", 10, null, FeedPostFrag.class.getSimpleName());
+                            Analytics.triggerFeedEngagement(foreignId, "comment", 10, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
                         }
                     });
                 }
@@ -675,7 +675,7 @@ public class FeedPostFrag extends Fragment {
                 likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 likeReactionId = like.getId();
                 extractReactionCount(enrichedActivity, "like", likeTv, 1);
-                Analytics.triggerFeedEngagement(enrichedActivity.getForeignID(), "like", 5, null, FeedPostFrag.class.getSimpleName());
+                Analytics.triggerFeedEngagement(enrichedActivity.getForeignID(), "like", 5, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
             } catch (StreamException e) {
                 e.printStackTrace();
                 //todo
