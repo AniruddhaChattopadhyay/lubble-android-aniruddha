@@ -13,14 +13,9 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
@@ -45,7 +40,7 @@ public class AttachVideoActivity extends BaseActivity {
     private static final String EXTRA_AUTHOR_ID = BuildConfig.APPLICATION_ID + "_AUTHOR_ID";
     private static final String EXTRA_IS_AUTHOR_SELLER = BuildConfig.APPLICATION_ID + "_IS_AUTHOR_SELLER";
 
-    SimpleExoPlayerView exoPlayerView;
+    PlayerView exoPlayerView;
     SimpleExoPlayer exoPlayer;
     private EditText captionEt;
     private ImageView sendIcon;
@@ -118,7 +113,7 @@ public class AttachVideoActivity extends BaseActivity {
     }
 
     private void prepareExoPlayerFromFileUri(Uri uri) {
-        exoPlayer = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(null), new DefaultLoadControl());
+        exoPlayer = new SimpleExoPlayer.Builder(this).build();
         DataSpec dataSpec = new DataSpec(uri);
         final FileDataSource fileDataSource = new FileDataSource();
         try {
@@ -134,11 +129,11 @@ public class AttachVideoActivity extends BaseActivity {
                 return fileDataSource;
             }
         };
-        MediaSource videosource = new ExtractorMediaSource(fileDataSource.getUri(),
-                factory, new DefaultExtractorsFactory(), null, null);
-
+        /*todo deprecated MediaSource videosource = new ExtractorMediaSource(fileDataSource.getUri(),
+                factory, new DefaultExtractorsFactory(), null, null);*/
+        exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
         exoPlayerView.setPlayer(exoPlayer);
-        exoPlayer.prepare(videosource);
+        exoPlayer.prepare();
 
     }
 

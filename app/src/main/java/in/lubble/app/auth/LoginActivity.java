@@ -9,19 +9,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,8 +27,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import org.json.JSONObject;
 
@@ -43,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import in.lubble.app.BaseActivity;
-import in.lubble.app.BuildConfig;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
@@ -302,46 +294,36 @@ public class LoginActivity extends BaseActivity {
             }
         }
         profileData.setInfo(profileInfo);
-        Task<InstanceIdResult> resultTask = FirebaseInstanceId.getInstance().getInstanceId();
-        resultTask.addOnCompleteListener(this, new OnCompleteListener<InstanceIdResult>() {
-            @Override
-            public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                if (task.isSuccessful()) {
-                    profileData.setToken(task.getResult().getToken());
-                    profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
+        FirebaseMessaging.getInstance().getToken().addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                profileData.setToken(task.getResult());
+                profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
 
-                    getThisUserRef().setValue(profileData)
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    if (!isFinishing()) {
-                                        progressDialog.dismiss();
-                                        final Intent intent = new Intent(LoginActivity.this, LocationActivity.class);
-                                        intent.putExtra("idpResponse", response);
-                                        startActivityForResult(intent, REQUEST_LOCATION);
-                                    }
+                getThisUserRef().setValue(profileData)
+                        .addOnSuccessListener(aVoid -> {
+                            if (!isFinishing()) {
+                                progressDialog.dismiss();
+                                final Intent intent = new Intent(LoginActivity.this, LocationActivity.class);
+                                intent.putExtra("idpResponse", response);
+                                startActivityForResult(intent, REQUEST_LOCATION);
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            // Write failed
+                            if (!isFinishing()) {
+                                progressDialog.dismiss();
+                                FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
+                                crashlytics.log("OMG Failed to write FB profile info");
+                                crashlytics.recordException(e);
+                                if (!isFinishing()) {
+                                    Toast.makeText(LoginActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                 }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    // Write failed
-                                    if (!isFinishing()) {
-                                        progressDialog.dismiss();
-                                        FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
-                                        crashlytics.log("OMG Failed to write FB profile info");
-                                        crashlytics.recordException(e);
-                                        if (!isFinishing()) {
-                                            Toast.makeText(LoginActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                }
-                            });
-                } else {
-                    progressDialog.dismiss();
-                    if (!isFinishing()) {
-                        Toast.makeText(LoginActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                    }
+                            }
+                        });
+            } else {
+                progressDialog.dismiss();
+                if (!isFinishing()) {
+                    Toast.makeText(LoginActivity.this, R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
         });

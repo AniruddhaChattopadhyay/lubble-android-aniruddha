@@ -69,8 +69,12 @@ public class FeedServices {
 
     public static void recreateTimelineClient(String feedUserToken, String feedApiKey) {
         try {
-            timelineClient = CloudClient
-                    .builder(feedApiKey, feedUserToken, FirebaseAuth.getInstance().getUid())
+            CloudClient.Builder builder = CloudClient
+                    .builder(feedApiKey, feedUserToken, FirebaseAuth.getInstance().getUid());
+            if (!BuildConfig.DEBUG) {
+                builder.region(Region.SINGAPORE);
+            }
+            timelineClient = builder
                     .build();
         } catch (MalformedURLException e) {
             FirebaseCrashlytics.getInstance().recordException(e);

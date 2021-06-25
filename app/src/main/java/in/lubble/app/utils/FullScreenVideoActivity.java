@@ -25,22 +25,14 @@ import androidx.core.content.FileProvider;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
+import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -71,7 +63,7 @@ public class FullScreenVideoActivity extends BaseActivity {
     private static final String EXTRA_IMG_PATH = BuildConfig.APPLICATION_ID + "_EXTRA_IMG_PATH";
     private static final String EXTRA_MSG = BuildConfig.APPLICATION_ID + "_EXTRA_MSG";
     private static final String EXTRA_SHARE_SUFFIX = BuildConfig.APPLICATION_ID + "_EXTRA_SHARE_SUFFIX";
-    private SimpleExoPlayerView exoPlayerView;
+    private PlayerView exoPlayerView;
     private SimpleExoPlayer exoPlayer;
     private ProgressBar progressBar;
     private String videoname, captionMsg, shareSuffix;
@@ -193,25 +185,15 @@ public class FullScreenVideoActivity extends BaseActivity {
 
     private void initializePlayer(Uri mediaUri) {
         if (exoPlayer == null) {
-            BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-            TrackSelector trackSelector = new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(bandwidthMeter));
-            exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-            exoPlayer.addListener(new ExoPlayer.EventListener() {
+            //todo deprecated BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter.Builder(this).build();
+            TrackSelector trackSelector = new DefaultTrackSelector(this);
+            exoPlayer = new SimpleExoPlayer.Builder(this)
+                    .setTrackSelector(trackSelector)
+                    .build();
+            exoPlayer.addListener(new Player.Listener() {
                 @Override
-                public void onTimelineChanged(Timeline timeline, Object manifest) {
-                }
-
-                @Override
-                public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-                }
-
-                @Override
-                public void onLoadingChanged(boolean isLoading) {
-                }
-
-                @Override
-                public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                    if (playbackState == ExoPlayer.STATE_BUFFERING) {
+                public void onPlaybackStateChanged(int state) {
+                    if (state == ExoPlayer.STATE_BUFFERING) {
                         Log.d("FullScreenVideoActivit1", "inside buffer");
                         progressBar.setVisibility(View.VISIBLE);
                     } else {
@@ -220,23 +202,21 @@ public class FullScreenVideoActivity extends BaseActivity {
                 }
 
                 @Override
+                public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
+
+                }
+
+                @Override
                 public void onPlayerError(ExoPlaybackException error) {
                     FirebaseCrashlytics.getInstance().recordException(error);
-                }
-
-                @Override
-                public void onPositionDiscontinuity() {
-                }
-
-                @Override
-                public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
                 }
             });
             DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this, "ua");
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
-            MediaSource mediaSource = new ExtractorMediaSource(videourl, dataSourceFactory, extractorsFactory, null, null);
+            //todo deprecated MediaSource mediaSource = new ExtractorMediaSource(videourl, dataSourceFactory, extractorsFactory, null, null);
+            exoPlayer.setMediaItem(MediaItem.fromUri(videourl));
             exoPlayerView.setPlayer(exoPlayer);
-            exoPlayer.prepare(mediaSource);
+            exoPlayer.prepare();
             exoPlayer.setPlayWhenReady(true);
             if (position != C.TIME_UNSET) {
                 exoPlayer.seekTo(position);

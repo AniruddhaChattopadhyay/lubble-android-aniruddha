@@ -9,7 +9,7 @@
 
     <include layout="@layout/text_toolbar" />
 
-    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+    <com.google.android.exoplayer2.ui.PlayerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/et_vid_caption"
