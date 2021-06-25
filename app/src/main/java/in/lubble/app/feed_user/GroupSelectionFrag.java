@@ -106,11 +106,11 @@ public class GroupSelectionFrag extends Fragment {
         postSubmitBtn.setOnClickListener(v -> {
             String text = feedPostData.getText();
             int lastCheckedPos = groupSelectionAdapter.getLastCheckedPos();
-            boolean isGroupJoined = feedGroupDataList.get(lastCheckedPos).isGroupJoined();
             if (lastCheckedPos == NO_POSITION) {
                 Toast.makeText(requireContext(), "Please select a group for this post", Toast.LENGTH_SHORT).show();
                 return;
             }
+            boolean isGroupJoined = feedGroupDataList.get(lastCheckedPos).isGroupJoined();
             FeedGroupData selectedGroupData = feedGroupDataList.get(lastCheckedPos);
             String groupNameText = selectedGroupData.getName();
             String feedNameText = selectedGroupData.getFeedName();
