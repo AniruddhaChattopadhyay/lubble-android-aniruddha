@@ -68,7 +68,9 @@ public class UploadImageFeedService extends BaseTaskService {
     public static final String EXTRA_FEED_GROUP_NAME = "extra_feed_group_name";
     public static final String EXTRA_FEED_FEED_NAME = "EXTRA_FEED_FEED_NAME";
     public static final String EXTRA_FEED_POST_DATA = "EXTRA_FEED_POST_DATA";
+    public static final String EXTRA_FEED_IS_GROUP_JOINED = "EXTRA_FEED_IS_GROUP_JOINED";
 
+    public boolean isGroupJoined;
 
     private StorageReference mStorageRef;
 
@@ -107,6 +109,7 @@ public class UploadImageFeedService extends BaseTaskService {
 
 
         Uri fileUri = intent.getParcelableExtra(EXTRA_FILE_URI);
+        isGroupJoined = intent.getBooleanExtra(EXTRA_FEED_IS_GROUP_JOINED,false);
         uploadFromUri(
                 fileUri,
                 intent.getStringExtra(EXTRA_FILE_NAME),
@@ -268,7 +271,7 @@ public class UploadImageFeedService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            FeedServices.post(feedPostData, groupName, feedName, downloadUrl.toString(), aspectRatio, null);
+            FeedServices.post(feedPostData, groupName, feedName, downloadUrl.toString(), aspectRatio,isGroupJoined, null);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())

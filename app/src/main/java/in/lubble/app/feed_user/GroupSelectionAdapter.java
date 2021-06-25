@@ -9,10 +9,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import in.lubble.app.GlideApp;
@@ -25,9 +27,14 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
     private int lastCheckedPos = -1;
     private final List<FeedGroupData> stringList;
     private final List<FeedGroupData> stringListCopy;
+    private MaterialButton postSubmitBtn;
 
-    public GroupSelectionAdapter(List<FeedGroupData> stringList) {
+
+
+
+    public GroupSelectionAdapter(List<FeedGroupData> stringList, MaterialButton postSubmitBtn) {
         this.stringList = stringList;
+        this.postSubmitBtn = postSubmitBtn;
         stringListCopy = new ArrayList<>();
         stringListCopy.addAll(stringList);
     }
@@ -61,6 +68,12 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
             lastCheckedPos = holder.getBindingAdapterPosition();
+            if(stringList.get(lastCheckedPos).isGroupJoined()){
+                postSubmitBtn.setText("Post");
+            }
+            else{
+                postSubmitBtn.setText("Join and Post");
+            }
             notifyItemChanged(copyOfLastCheckedPosition);
             notifyItemChanged(lastCheckedPos);
         });

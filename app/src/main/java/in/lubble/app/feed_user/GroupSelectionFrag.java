@@ -22,6 +22,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.MissingFormatArgumentException;
 
@@ -51,7 +52,7 @@ public class GroupSelectionFrag extends Fragment {
     private FeedPostData feedPostData;
     @Nullable
     private GroupSelectionAdapter groupSelectionAdapter;
-    private List<FeedGroupData> feedGroupDataList;
+    private List<FeedGroupData> feedGroupDataList,exploreGroupDataList;
     private ProgressBar postProgressBar;
 
     public static GroupSelectionFrag newInstance(FeedPostData feedPostData) {
@@ -109,6 +110,7 @@ public class GroupSelectionFrag extends Fragment {
                 Toast.makeText(requireContext(), "Please select a group for this post", Toast.LENGTH_SHORT).show();
                 return;
             }
+            boolean isGroupJoined = feedGroupDataList.get(lastCheckedPos).isGroupJoined();
             FeedGroupData selectedGroupData = feedGroupDataList.get(lastCheckedPos);
             String groupNameText = selectedGroupData.getName();
             String feedNameText = selectedGroupData.getFeedName();
@@ -123,6 +125,7 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadImageFeedService.EXTRA_UPLOAD_PATH, uploadPath)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_GROUP_NAME, groupNameText)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_FEED_NAME, feedNameText)
+                            .putExtra(UploadImageFeedService.EXTRA_FEED_IS_GROUP_JOINED, isGroupJoined)
                             .putExtra(UploadImageFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(requireContext(), serviceIntent);
@@ -132,7 +135,7 @@ public class GroupSelectionFrag extends Fragment {
                 } else {
                     postSubmitBtn.setVisibility(View.GONE);
                     postProgressBar.setVisibility(View.VISIBLE);
-                    FeedServices.post(feedPostData, groupNameText, feedNameText, null, 0, new Callback<Void>() {
+                    FeedServices.post(feedPostData, groupNameText, feedNameText, null, 0, isGroupJoined,new Callback<Void>() {
                         @Override
                         public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                             if (isAdded() && response.isSuccessful()) {
@@ -165,7 +168,7 @@ public class GroupSelectionFrag extends Fragment {
         groupsRv.showShimmerAdapter();
 
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        Call<List<FeedGroupData>> call = endpoints.getFeedGroupList();
+        Call<List<FeedGroupData>> call = endpoints.getAllFeedGroupList();
         call.enqueue(new Callback<List<FeedGroupData>>() {
             @Override
             public void onResponse(@NotNull Call<List<FeedGroupData>> call, @NotNull Response<List<FeedGroupData>> response) {
@@ -175,7 +178,7 @@ public class GroupSelectionFrag extends Fragment {
                     groupsRv.hideShimmerAdapter();
                 }
                 if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
-                    groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList);
+                    groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList,postSubmitBtn);
                     groupsRv.setAdapter(groupSelectionAdapter);
                     postSubmitBtn.setEnabled(true);
                 } else if (isAdded()) {
