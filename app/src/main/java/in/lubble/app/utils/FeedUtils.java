@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.text.TextUtils;
 
@@ -13,6 +14,8 @@ import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -26,6 +29,7 @@ import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import io.getstream.core.models.Content;
 import io.getstream.core.models.EnrichedActivity;
 
@@ -116,18 +120,24 @@ public class FeedUtils {
         new Handler().post(() -> {
             try {
                 ArrayList<Content> contentList = new ArrayList<>();
+                ArrayList<String> foreignIdList = new ArrayList<>();
                 int firstPos = visibleState.getFirstCompletelyVisible();
                 int lastPos = visibleState.getLastCompletelyVisible();
                 if (firstPos > 0 && lastPos > 0) {
                     if (firstPos == lastPos) {
                         contentList.add(new Content(enrichedActivities.get(firstPos).getForeignID()));
+                        foreignIdList.add(enrichedActivities.get(firstPos).getForeignID());
                     } else {
                         List<EnrichedActivity> subList = enrichedActivities.subList(firstPos, lastPos);
-                        for (EnrichedActivity enrichedActivity : subList) {
-                            contentList.add(new Content(enrichedActivity.getForeignID()));
-                        }
+                        contentList.addAll(Lists.transform(subList, input -> new Content(input.getForeignID())));
+                        foreignIdList.addAll(Lists.transform(subList, input -> input.getForeignID()));
                     }
                     Analytics.triggerFeedImpression(contentList, feedName, location);
+                    Bundle bundle = new Bundle();
+                    bundle.putStringArrayList("foreignIdList", foreignIdList);
+                    bundle.putString("feedName", feedName);
+                    bundle.putString("location", location);
+                    Analytics.triggerEvent(AnalyticsEvents.FEED_POST_IMPRESSION, bundle, LubbleApp.getAppContext());
                 }
             } catch (Exception e) {
                 FirebaseCrashlytics.getInstance().recordException(e);

@@ -163,5 +163,7 @@ public class AnalyticsEvents {
     public static final String POST_SHARED = "POST_SHARED";
     public static final String FEED_SEND_POST = "FEED_SEND_POST";
     public static final String FEED_POST_COMPOSED = "FEED_POST_COMPOSED";
+    public static final String FEED_POST_IMPRESSION = "FEED_POST_IMPRESSION";
+    public static final String FEED_POST_ENGAGEMENT = "FEED_POST_ENGAGEMENT";
 
 }

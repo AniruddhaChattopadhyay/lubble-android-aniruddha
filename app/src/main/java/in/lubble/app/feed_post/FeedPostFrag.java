@@ -454,6 +454,14 @@ public class FeedPostFrag extends Fragment {
         ArrayList<Content> contentList = new ArrayList<>();
         contentList.add(new Content(enrichedActivity.getForeignID()));
         Analytics.triggerFeedImpression(contentList, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
+
+        Bundle bundle = new Bundle();
+        ArrayList<String> foreignIdList = new ArrayList<>();
+        foreignIdList.add(enrichedActivity.getForeignID());
+        bundle.putStringArrayList("foreignIdList", foreignIdList);
+        bundle.putString("feedName", "timeline:" + userId);
+        bundle.putString("location", FeedPostFrag.class.getSimpleName());
+        Analytics.triggerEvent(AnalyticsEvents.FEED_POST_IMPRESSION, bundle, getContext());
     }
 
     private void handleReplyBottomSheet(EnrichedActivity enrichedActivity) {

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
@@ -30,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.utils.StringUtils;
 import io.getstream.cloud.CloudClient;
@@ -266,6 +266,14 @@ public class Analytics {
                     .position(1)
                     .build();
             getAnalyticsClient().analytics().trackEngagement(engagement);
+
+            Bundle bundle = new Bundle();
+            bundle.putString("foreignId", foreignId);
+            bundle.putString("action", action);
+            bundle.putInt("boost", boost);
+            bundle.putString("feedName", feedName);
+            bundle.putString("location", location);
+            triggerEvent(AnalyticsEvents.FEED_POST_ENGAGEMENT, bundle, LubbleApp.getAppContext());
         } catch (Exception e) {
             e.printStackTrace();
             FirebaseCrashlytics.getInstance().recordException(e);
