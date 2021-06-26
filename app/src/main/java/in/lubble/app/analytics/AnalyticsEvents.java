@@ -159,6 +159,7 @@ public class AnalyticsEvents {
     public static final String MSG_DP_CLICKED = "MSG_DP_CLICKED";
 
     public static final String POST_LINK_CLICKED = "POST_LINK_CLICKED";
+    public static final String COMMENT_LINK_CLICKED = "COMMENT_LINK_CLICKED";
     public static final String POST_LINK_LONG_CLICKED = "POST_LINK_LONG_CLICKED";
     public static final String POST_SHARED = "POST_SHARED";
     public static final String FEED_SEND_POST = "FEED_SEND_POST";

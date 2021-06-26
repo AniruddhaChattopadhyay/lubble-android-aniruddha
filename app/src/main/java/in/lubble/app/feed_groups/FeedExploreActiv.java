@@ -74,10 +74,10 @@ public class FeedExploreActiv extends BaseActivity implements FeedGroupAdapter.O
             UiUtils.showBottomSheetAlertLight(this, getLayoutInflater(),
                     FirebaseAuth.getInstance().getCurrentUser().getDisplayName()+", we've shifted a few things around here!",
                     "Welcome to Nearby Feed!" +
-                            "\n\n\uD83C\uDFE1 You'll see posts from not just your neighbours, but from nearby neighbourhoods as well!" +
-                            "\n\n\uD83D\uDCCD Groups in feed can also be joined by those in nearby neighbourhoods" +
-                            "\n\nSo go ahead & join some groups. Posts from these groups will appear in your Feed!",
-                    R.drawable.ic_namaste, "Continue", null
+                            "\n\n\uD83C\uDFE1 View posts from your neighbours & nearby areas!" +
+                            "\n\n\uD83D\uDCCD Feed Groups are open for your locality & nearby areas" +
+                            "\n\n\uD83C\uDFB2 Posts from local groups you join will appear in your Feed",
+                    R.drawable.ic_namaste, "Let's Go!", null
             );
         }
 

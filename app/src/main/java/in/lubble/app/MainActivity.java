@@ -369,7 +369,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         bottomNavigation.getMenu().clear();
 
-        if ("koramangala".equalsIgnoreCase(LubbleSharedPrefs.getInstance().getLubbleId())) {
+        String lubbleId = LubbleSharedPrefs.getInstance().getLubbleId();
+        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId)) {
             // for existing users show chat-first menu
             bottomNavigation.inflateMenu(R.menu.navigation_chat_n_feed);
             switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
@@ -657,7 +658,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(EVENTS_MAINTENANCE_IMG, "");
         map.put(MARKET_MAINTENANCE_TEXT, "");
         map.put(IS_NOTIF_SNOOZE_ON, true);
-        map.put(IS_TIME_SHOWN, false);
+        map.put(IS_TIME_SHOWN, true);
         map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
         map.put(WIKI_URL, "https://lubble.in/neighbourhoods/");
 

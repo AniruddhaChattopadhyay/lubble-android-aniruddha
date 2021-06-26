@@ -7,9 +7,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.Toolbar
 
 class ChatGroupListActivity : BaseActivity() {
+
+    private var actionMode: ActionMode? = null
 
     companion object {
         public fun open(context: Context) {
@@ -29,6 +32,15 @@ class ChatGroupListActivity : BaseActivity() {
         supportFragmentManager.beginTransaction()
                 .replace(R.id.container, GroupsCombinedFrag.newInstance(false))
                 .commitNow()
+    }
+
+    fun toggleActionMode(show: Boolean, callback: ActionMode.Callback?): ActionMode? {
+        if (show && callback != null) {
+            return startSupportActionMode(callback).also { actionMode = it }
+        } else {
+            actionMode?.finish()
+        }
+        return null
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
