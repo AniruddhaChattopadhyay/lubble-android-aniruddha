@@ -1005,7 +1005,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_CODE_JOIN_GROUPS && resultCode == RESULT_OK && feedRefreshListener != null) {
+        if (requestCode == REQ_CODE_JOIN_GROUPS && feedRefreshListener != null) {
             feedRefreshListener.onRefresh();
         }
     }
