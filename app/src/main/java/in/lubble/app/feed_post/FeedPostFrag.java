@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -94,6 +95,8 @@ import retrofit2.Response;
 
 import static android.view.View.GONE;
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
+import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
 import static in.lubble.app.utils.FeedUtils.getMsgSuffix;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -640,6 +643,7 @@ public class FeedPostFrag extends Fragment {
                                     }
                                     if (reactions.size() > 0) {
                                         commentRecyclerView.setNestedScrollingEnabled(false);
+                                        sortComments(reactions);
                                         BigFeedCommentAdaptor adapter = new BigFeedCommentAdaptor(getContext(), GlideApp.with(requireContext()), reactions);
                                         commentRecyclerView.setAdapter(adapter);
                                     } else {
@@ -662,6 +666,15 @@ public class FeedPostFrag extends Fragment {
                 Snackbar.make(getView(), "Failed to load replies: " + e.getCause(), Snackbar.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void sortComments(List<Reaction> commentList) {
+        Collections.sort(commentList, (o1, o2) ->
+                Long.compare(
+                        stringTimeToEpoch((String) o1.getExtra().get("created_at"), SERVER_DATE_TIME),
+                        stringTimeToEpoch((String) o2.getExtra().get("created_at"), SERVER_DATE_TIME)
+                )
+        );
     }
 
     private void toggleLike(EnrichedActivity enrichedActivity) {

@@ -47,6 +47,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -72,6 +73,8 @@ import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
 
 import static android.view.View.GONE;
+import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
+import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor.MyViewHolder> {
@@ -187,7 +190,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             }
             if (extras.containsKey("lubble_id")) {
                 holder.lubbleNameTv.setVisibility(View.VISIBLE);
-                if(extras.containsKey("lubble_name"))
+                if (extras.containsKey("lubble_name"))
                     holder.lubbleNameTv.setText(extras.get("lubble_name").toString());
                 else
                     holder.lubbleNameTv.setText(extras.get("lubble_id").toString());
@@ -351,12 +354,22 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.viewAllRepliesTv.setOnClickListener(v -> {
                 feedListener.openPostActivity(activity.getID());
             });
+            sortComments(commentList);
             FeedCommentAdaptor adapter = new FeedCommentAdaptor(commentList, activity.getID(), feedListener);
             holder.commentRecyclerView.setAdapter(adapter);
         } else {
             holder.commentRecyclerView.setVisibility(GONE);
             holder.viewAllRepliesTv.setVisibility(GONE);
         }
+    }
+
+    private void sortComments(List<Reaction> commentList) {
+        Collections.sort(commentList, (o1, o2) ->
+                Long.compare(
+                        stringTimeToEpoch((String) o1.getExtra().get("created_at"), SERVER_DATE_TIME),
+                        stringTimeToEpoch((String) o2.getExtra().get("created_at"), SERVER_DATE_TIME)
+                )
+        );
     }
 
     private void handleReactionStats(EnrichedActivity enrichedActivity, MyViewHolder holder) {

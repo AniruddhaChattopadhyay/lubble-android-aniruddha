@@ -63,6 +63,7 @@ public class AddPostForFeed extends BaseActivity {
     private String uploadPath = "feed_photos/";
     private String prevUrl = "";
     private LinkMetaAsyncTask linkMetaAsyncTask;
+    private boolean isLinkPreviewClosedByUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,7 +124,10 @@ public class AddPostForFeed extends BaseActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(postText, InputMethodManager.SHOW_IMPLICIT);
 
-        linkCloseIv.setOnClickListener(v -> resetLinkPreview());
+        linkCloseIv.setOnClickListener(v -> {
+            isLinkPreviewClosedByUser = true;
+            resetLinkPreview();
+        });
     }
 
     private void addTextChangeListener() {
@@ -146,12 +150,17 @@ public class AddPostForFeed extends BaseActivity {
                     }
                     final String inputString = s.toString();
                     final String extractedUrl = extractFirstLink(inputString);
-                    if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl)) {
+                    if (extractedUrl != null && !prevUrl.equalsIgnoreCase(extractedUrl)
+                            && !isLinkPreviewClosedByUser) {
                         prevUrl = extractedUrl;
                         linkMetaAsyncTask = new LinkMetaAsyncTask(prevUrl, getLinkMetaListener());
                         linkMetaAsyncTask.execute();
-                    } else if (extractedUrl == null && linkPreviewContainer.getVisibility() == View.VISIBLE) {
-                        resetLinkPreview();
+                    } else if (extractedUrl == null) {
+                        if (linkPreviewContainer.getVisibility() == View.VISIBLE) {
+                            resetLinkPreview();
+                        }
+                        // url no longer exists in the text; reset user override flag
+                        isLinkPreviewClosedByUser = false;
                     }
                 }
             }
@@ -166,6 +175,7 @@ public class AddPostForFeed extends BaseActivity {
         feedPostData.setLinkTitle("");
         feedPostData.setLinkDesc("");
         feedPostData.setLinkImageUrl("");
+        feedPostData.setLinkUrl("");
     }
 
     private void openGroupSelectionActivity(FeedPostData feedPostData) {
@@ -239,6 +249,7 @@ public class AddPostForFeed extends BaseActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PermUtil.REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS: {
                 // If request is cancelled, the result arrays are empty.
