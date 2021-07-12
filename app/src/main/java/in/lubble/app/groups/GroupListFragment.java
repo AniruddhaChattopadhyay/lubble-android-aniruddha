@@ -729,36 +729,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         map.put(getLubbleGroupsRef().child(groupId), joinedGroupListener);
     }
 
-    private void showEventUnreadCount() {
-        getEventsRef().orderByChild("startTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (totalUnreadCount == 0 && isAdded()) {
-                    int upcomingEventsCount = 0;
-                    for (DataSnapshot child : dataSnapshot.getChildren()) {
-                        final EventData eventData = child.getValue(EventData.class);
-                        if (eventData != null) {
-                            eventData.setId(child.getKey());
-                            long timestampToCompare = eventData.getEndTimestamp() == 0L ? eventData.getStartTimestamp() : eventData.getEndTimestamp();
-                            if (timestampToCompare > System.currentTimeMillis()) {
-                                final Set<String> readEventSet = LubbleSharedPrefs.getInstance().getEventSet();
-                                if (!readEventSet.contains(eventData.getId())) {
-                                    upcomingEventsCount++;
-                                }
-                            }
-                        }
-                    }
-                    ((MainActivity) getActivity()).showEventsBadge(upcomingEventsCount);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -789,8 +759,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     @Override
     public ActionMode onActionModeEnabled(@NonNull ActionMode.Callback callback) {
-        if (getActivity() != null) {
-            return ((MainActivity) getActivity()).toggleActionMode(true, callback);
+        if (getActivity() != null && getActivity() instanceof ChatGroupListActivity) {
+            return ((ChatGroupListActivity) getActivity()).toggleActionMode(true, callback);
         }
         return null;
     }
@@ -802,6 +772,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
             ((MainActivity) getActivity()).toggleActionMode(false, null);
+        } else if (getActivity() != null && getActivity() instanceof ChatGroupListActivity) {
+            ((ChatGroupListActivity) getActivity()).toggleActionMode(false, null);
         }
     }
 

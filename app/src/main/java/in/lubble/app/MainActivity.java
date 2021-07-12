@@ -35,8 +35,6 @@ import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatMessage;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
@@ -51,8 +49,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.segment.analytics.Traits;
@@ -94,6 +91,7 @@ import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import io.getstream.core.StreamAnalytics;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -371,7 +369,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
         bottomNavigation.getMenu().clear();
 
-        if ("koramangala".equalsIgnoreCase(LubbleSharedPrefs.getInstance().getLubbleId())) {
+        String lubbleId = LubbleSharedPrefs.getInstance().getLubbleId();
+        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId)) {
             // for existing users show chat-first menu
             bottomNavigation.inflateMenu(R.menu.navigation_chat_n_feed);
             switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
@@ -640,9 +639,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void initFirebaseRemoteConfig() {
         FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
-                .setDeveloperModeEnabled(BuildConfig.DEBUG)
+                .setMinimumFetchIntervalInSeconds(TimeUnit.HOURS.toSeconds(1))
                 .build();
-        firebaseRemoteConfig.setConfigSettings(configSettings);
+        firebaseRemoteConfig.setConfigSettingsAsync(configSettings);
         HashMap<String, Object> map = new HashMap<>();
         map.put(REFER_MSG, getString(R.string.refer_msg));
         map.put(IS_QUIZ_SHOWN, true);
@@ -659,12 +658,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(EVENTS_MAINTENANCE_IMG, "");
         map.put(MARKET_MAINTENANCE_TEXT, "");
         map.put(IS_NOTIF_SNOOZE_ON, true);
-        map.put(IS_TIME_SHOWN, false);
+        map.put(IS_TIME_SHOWN, true);
         map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
         map.put(WIKI_URL, "https://lubble.in/neighbourhoods/");
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
-        firebaseRemoteConfig.setDefaults(map);
+        firebaseRemoteConfig.setDefaultsAsync(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
             //toolbarRewardsTv.setVisibility(View.VISIBLE);
         } else {
@@ -753,17 +752,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
         final FirebaseRemoteConfig firebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        firebaseRemoteConfig.fetch(TimeUnit.HOURS.toSeconds(1)).addOnCompleteListener(this, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    firebaseRemoteConfig.activateFetched();
+        firebaseRemoteConfig.fetch(TimeUnit.HOURS.toSeconds(1)).addOnCompleteListener(this, task -> {
+            if (task.isSuccessful()) {
+                firebaseRemoteConfig.activate().addOnCompleteListener(this, t -> {
                     if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
                         //toolbarRewardsTv.setVisibility(View.VISIBLE);
                     } else {
                         toolbarRewardsTv.setVisibility(View.GONE);
                     }
-                }
+                });
             }
         });
         showRatingsDialog();
@@ -860,16 +857,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private void syncFcmToken() {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(this, new OnCompleteListener<InstanceIdResult>() {
-                @Override
-                public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                    if (task.isSuccessful()) {
-                        String token = task.getResult().getToken();
-                        getThisUserRef().child("token")
-                                .setValue(token);
-                        CleverTapAPI.getDefaultInstance(MainActivity.this).pushFcmRegistrationId(token, true);
-                        Freshchat.getInstance(MainActivity.this).setPushRegistrationToken(token);
-                    }
+            FirebaseMessaging.getInstance().getToken().addOnCompleteListener(this, task -> {
+                if (task.isSuccessful()) {
+                    String token = task.getResult();
+                    getThisUserRef().child("token")
+                            .setValue(token);
+                    CleverTapAPI.getDefaultInstance(MainActivity.this).pushFcmRegistrationId(token, true);
+                    Freshchat.getInstance(MainActivity.this).setPushRegistrationToken(token);
+                } else {
+                    Log.w(TAG, "Fetching FCM registration token failed", task.getException());
                 }
             });
         }
@@ -1009,7 +1005,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQ_CODE_JOIN_GROUPS && resultCode == RESULT_OK && feedRefreshListener != null) {
+        if (requestCode == REQ_CODE_JOIN_GROUPS && feedRefreshListener != null) {
             feedRefreshListener.onRefresh();
         }
     }

@@ -1,7 +1,9 @@
 package in.lubble.app.feed_post;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +23,12 @@ import java.util.Map;
 
 import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.CustomURLSpan;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.utils.DateTimeUtils;
 import io.getstream.core.models.Reaction;
 
@@ -73,10 +79,20 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
                 holder.commentTimestampTv.setText(DateTimeUtils.getHumanTimestamp((String) timestamp));
             }
 
-            String userId = reaction.getUserID();
-            if (userId == null && reaction.getExtra() != null) {
+            final String userId;
+            if (reaction.getUserID() == null && reaction.getExtra() != null) {
                 userId = String.valueOf(reaction.getExtra().get("userId"));
+            } else {
+                userId = reaction.getUserID();
             }
+
+            Linkify.addLinks(holder.commentTv, Linkify.ALL);
+            CustomURLSpan.clickifyTextView(holder.commentTv, () -> {
+                Bundle bundle = new Bundle();
+                bundle.putString("post_id", reaction.getActivityID());
+                bundle.putString("commenter_id", userId);
+                Analytics.triggerEvent(AnalyticsEvents.COMMENT_LINK_CLICKED, bundle, context);
+            });
             RealtimeDbHelper.getUserInfoRef(userId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -94,6 +110,9 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
 
                 }
             });
+            holder.commentProfilePicIv.setOnClickListener(v ->
+                    ProfileActivity.open(context, userId)
+            );
         }
     }
 

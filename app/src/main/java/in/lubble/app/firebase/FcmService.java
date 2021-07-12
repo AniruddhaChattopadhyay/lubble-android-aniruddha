@@ -9,7 +9,7 @@ import android.util.Log;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.clevertap.android.sdk.CleverTapAPI;
-import com.clevertap.android.sdk.NotificationInfo;
+import com.clevertap.android.sdk.pushnotification.NotificationInfo;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;

@@ -9,7 +9,7 @@
     <include layout="@layout/transparent_toolbar" />
 
 
-    <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+    <com.google.android.exoplayer2.ui.PlayerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/exo_player_full_screen"

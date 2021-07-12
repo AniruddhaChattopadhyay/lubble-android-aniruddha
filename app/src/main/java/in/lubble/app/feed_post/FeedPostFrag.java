@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -76,9 +77,9 @@ import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
-import io.getstream.analytics.beans.Content;
 import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.Content;
 import io.getstream.core.models.Data;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FeedID;
@@ -94,6 +95,8 @@ import retrofit2.Response;
 
 import static android.view.View.GONE;
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
+import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
 import static in.lubble.app.utils.FeedUtils.getMsgSuffix;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -452,11 +455,16 @@ public class FeedPostFrag extends Fragment {
 
     private void trackPostImpression(EnrichedActivity enrichedActivity) {
         ArrayList<Content> contentList = new ArrayList<>();
-        contentList.add(new Content.ContentBuilder()
-                .withForeignId(enrichedActivity.getForeignID())
-                .withAttribute("actor", userId)
-                .build());
-        Analytics.triggerFeedImpression(contentList, null, FeedPostFrag.class.getSimpleName());
+        contentList.add(new Content(enrichedActivity.getForeignID()));
+        Analytics.triggerFeedImpression(contentList, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
+
+        Bundle bundle = new Bundle();
+        ArrayList<String> foreignIdList = new ArrayList<>();
+        foreignIdList.add(enrichedActivity.getForeignID());
+        bundle.putStringArrayList("foreignIdList", foreignIdList);
+        bundle.putString("feedName", "timeline:" + userId);
+        bundle.putString("location", FeedPostFrag.class.getSimpleName());
+        Analytics.triggerEvent(AnalyticsEvents.FEED_POST_IMPRESSION, bundle, getContext());
     }
 
     private void handleReplyBottomSheet(EnrichedActivity enrichedActivity) {
@@ -543,7 +551,7 @@ public class FeedPostFrag extends Fragment {
                             fetchPost();
                             sheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                             replyEt.hideIme();
-                            Analytics.triggerFeedEngagement(foreignId, "comment", 10, null, FeedPostFrag.class.getSimpleName());
+                            Analytics.triggerFeedEngagement(foreignId, "comment", 10, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
                         }
                     });
                 }
@@ -635,6 +643,7 @@ public class FeedPostFrag extends Fragment {
                                     }
                                     if (reactions.size() > 0) {
                                         commentRecyclerView.setNestedScrollingEnabled(false);
+                                        sortComments(reactions);
                                         BigFeedCommentAdaptor adapter = new BigFeedCommentAdaptor(getContext(), GlideApp.with(requireContext()), reactions);
                                         commentRecyclerView.setAdapter(adapter);
                                     } else {
@@ -659,6 +668,15 @@ public class FeedPostFrag extends Fragment {
         }
     }
 
+    private void sortComments(List<Reaction> commentList) {
+        Collections.sort(commentList, (o1, o2) ->
+                Long.compare(
+                        stringTimeToEpoch((String) o1.getExtra().get("created_at"), SERVER_DATE_TIME),
+                        stringTimeToEpoch((String) o2.getExtra().get("created_at"), SERVER_DATE_TIME)
+                )
+        );
+    }
+
     private void toggleLike(EnrichedActivity enrichedActivity) {
         if (likeReactionId == null) {
             // like
@@ -678,7 +696,7 @@ public class FeedPostFrag extends Fragment {
                 likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 likeReactionId = like.getId();
                 extractReactionCount(enrichedActivity, "like", likeTv, 1);
-                Analytics.triggerFeedEngagement(enrichedActivity.getForeignID(), "like", 5, null, FeedPostFrag.class.getSimpleName());
+                Analytics.triggerFeedEngagement(enrichedActivity.getForeignID(), "like", 5, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
             } catch (StreamException e) {
                 e.printStackTrace();
                 //todo

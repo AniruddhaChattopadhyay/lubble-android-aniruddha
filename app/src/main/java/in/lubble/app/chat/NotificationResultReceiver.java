@@ -8,10 +8,7 @@ import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -99,19 +96,13 @@ public class NotificationResultReceiver extends BroadcastReceiver {
                     unreadCountRef = RealtimeDbHelper.getDmsRef().child(notifData.getGroupId()).child("members").child(uid).child("unreadCount");
                 }
             }
-            unreadCountRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+            unreadCountRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
                     Long oldCount = 0L;
-                    if (dataSnapshot.getValue() != null) {
-                        oldCount = dataSnapshot.getValue(Long.class);
+                    if (task.getResult().getValue() != null) {
+                        oldCount = task.getResult().getValue(Long.class);
                     }
-                    dataSnapshot.getRef().setValue(++oldCount);
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
+                    task.getResult().getRef().setValue(++oldCount);
                 }
             });
         }

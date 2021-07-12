@@ -16,7 +16,6 @@ import com.clevertap.android.sdk.CleverTapAPI;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 import com.segment.analytics.Analytics;
@@ -29,9 +28,6 @@ import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
-import io.getstream.analytics.config.StreamAnalyticsAuth;
-import io.getstream.analytics.service.StreamAnalytics;
-import io.getstream.analytics.service.StreamAnalyticsImpl;
 
 import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
 
@@ -123,22 +119,22 @@ public class LubbleApp extends MultiDexApplication {
 
         Freshchat.getInstance(getApplicationContext()).setNotificationConfig(notificationConfig);
 
-        StreamAnalyticsAuth auth;
-        if (BuildConfig.DEBUG) {
+        /*StreamAnalyticsAuth auth;
+        if (BuildConfig.FLAVOR != "prod") {
             auth = new StreamAnalyticsAuth(
                     "nvhsd4sv68k4",
-                    "sbhf4fagjmnpycy793jdnfpqrtp8ny8merahqkcj6254mzgx37f8k2ghfhufunjd"
+                    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.JNBodILjaJEuW2fwIjZTZcvKn8lXI0roercYGAZ1xAg"
             );
         } else {
             auth = new StreamAnalyticsAuth(
                     "qeyr2a54nh9w",
-                    "r9mjpdzf5pe875ejz28kshrasz36c4xqqss9jendvkey86ev4fqj9jm9pejtg4aq"
+                    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.TUwowYvGfa0rJTC2gOcDLsBmAAL5-9EAFkeQBtw9wgA"
             );
         }
 
         StreamAnalytics streamAnalytics = StreamAnalyticsImpl.getInstance(auth);
         streamAnalytics.setUserId(FirebaseAuth.getInstance().getUid());
-        streamAnalytics.setDebug(BuildConfig.DEBUG);
+        streamAnalytics.setDebug(BuildConfig.DEBUG);*/
     }
 
     public static LubbleApp getAppContext() {

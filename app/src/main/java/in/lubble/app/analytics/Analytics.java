@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
@@ -21,18 +20,24 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.segment.analytics.Properties;
 import com.segment.analytics.Traits;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.utils.StringUtils;
-import io.getstream.analytics.beans.Content;
-import io.getstream.analytics.beans.Engagement;
-import io.getstream.analytics.beans.Impression;
-import io.getstream.analytics.service.StreamAnalyticsImpl;
+import io.getstream.cloud.CloudClient;
+import io.getstream.core.Region;
+import io.getstream.core.models.Content;
+import io.getstream.core.models.Engagement;
+import io.getstream.core.models.Impression;
+import io.getstream.core.models.UserData;
 
 public class Analytics {
 
@@ -210,34 +215,69 @@ public class Analytics {
                     .build();
             WorkManager.getInstance(context).enqueue(uploadWorkRequest);
 
-            StreamAnalyticsImpl.getInstance().setUserId(firebaseAuth.getUid());
+            /*StreamAnalyticsImpl.getInstance().setUserId(firebaseAuth.getUid());*/
         }
     }
 
-    public static void triggerFeedImpression(ArrayList<Content> contentList, @Nullable String feedName, String location) {
-        Impression.EventBuilder eventBuilder = new Impression.EventBuilder()
-                .withContentList(contentList)
-                .withLocation(location);
-        if (feedName != null) {
-            eventBuilder.withFeedId(feedName);
+    private static CloudClient getAnalyticsClient() throws MalformedURLException {
+        CloudClient analyticsClient;
+        if ("dev".equalsIgnoreCase(BuildConfig.FLAVOR)) {
+            analyticsClient = CloudClient
+                    .builder("nvhsd4sv68k4",
+                            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.JNBodILjaJEuW2fwIjZTZcvKn8lXI0roercYGAZ1xAg",
+                            FirebaseAuth.getInstance().getUid())
+                    .build();
+        } else {
+            analyticsClient = CloudClient
+                    .builder("qeyr2a54nh9w",
+                            "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXNvdXJjZSI6ImFuYWx5dGljcyIsImFjdGlvbiI6IioiLCJ1c2VyX2lkIjoiKiJ9.TUwowYvGfa0rJTC2gOcDLsBmAAL5-9EAFkeQBtw9wgA",
+                            FirebaseAuth.getInstance().getUid())
+                    .region(Region.SINGAPORE)
+                    .region("Singapore")
+                    .build();
         }
-        StreamAnalyticsImpl.getInstance().send(eventBuilder.build());
+        return analyticsClient;
     }
 
-    public static void triggerFeedEngagement(String foreignId, String action, int boost, @Nullable String feedName, String location) {
-        StreamAnalyticsImpl.getInstance().send(new Engagement.EventBuilder()
-                .withFeedId(feedName)
-                .withContent(
-                        new Content.ContentBuilder()
-                                .withForeignId(foreignId)
-                                .withAttribute("verb", action)
-                                .withAttribute("actor", FirebaseAuth.getInstance().getUid())
-                                .build()
-                )
-                .withBoost(boost)
-                .withLocation(location)
-                .build()
-        );
+    public static void triggerFeedImpression(ArrayList<Content> contentList, @NotNull String feedName, String location) {
+        try {
+            Impression.Builder eventBuilder = new Impression.Builder()
+                    .contentList(contentList)
+                    .feedID(feedName)
+                    .userData(new UserData(FirebaseAuth.getInstance().getUid(), FirebaseAuth.getInstance().getUid()))
+                    .location(location);
+            getAnalyticsClient().analytics().trackImpression(eventBuilder.build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(e);
+        }
+
+    }
+
+    public static void triggerFeedEngagement(String foreignId, String action, int boost, @NotNull String feedName, String location) {
+        try {
+            Engagement engagement = new Engagement.Builder()
+                    .feedID(feedName)
+                    .content(new Content(foreignId))
+                    .label(action)
+                    .userData(new UserData(FirebaseAuth.getInstance().getUid(), FirebaseAuth.getInstance().getUid()))
+                    .boost(boost)
+                    .location(location)
+                    .position(1)
+                    .build();
+            getAnalyticsClient().analytics().trackEngagement(engagement);
+
+            Bundle bundle = new Bundle();
+            bundle.putString("foreignId", foreignId);
+            bundle.putString("action", action);
+            bundle.putInt("boost", boost);
+            bundle.putString("feedName", feedName);
+            bundle.putString("location", location);
+            triggerEvent(AnalyticsEvents.FEED_POST_ENGAGEMENT, bundle, LubbleApp.getAppContext());
+        } catch (Exception e) {
+            e.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(e);
+        }
     }
 
 }

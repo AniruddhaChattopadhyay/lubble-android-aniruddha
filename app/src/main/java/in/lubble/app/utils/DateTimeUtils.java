@@ -72,6 +72,17 @@ public class DateTimeUtils {
         return dateTimeInMilliSec;
     }
 
+    public static long stringTimeToEpoch(String timestamp, String inputFormat) {
+        try {
+            SimpleDateFormat df = new SimpleDateFormat(inputFormat, Locale.ENGLISH);
+            Date date = df.parse(timestamp);
+            return date.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
     @NonNull
     public static String getDateFromLong(long timeInMillis) {
         Date resultDate = new Date(timeInMillis);

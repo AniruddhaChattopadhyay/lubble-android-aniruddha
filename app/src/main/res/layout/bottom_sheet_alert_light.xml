@@ -38,6 +38,7 @@
         tools:text="@tools:sample/lorem/random"
         android:visibility="gone"
         tools:visibility="visible"
+        android:textSize="16sp"
         android:textColor="@color/black"
         android:layout_marginTop="8dp"
         android:layout_width="wrap_content"

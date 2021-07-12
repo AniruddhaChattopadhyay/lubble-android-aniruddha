@@ -20,11 +20,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.iid.FirebaseInstanceId;
-import com.google.firebase.iid.InstanceIdResult;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -113,44 +111,41 @@ public class NameFrag extends Fragment {
                                     profileInfo.setName(fullNameStr);
                                     profileData.setInfo(profileInfo);
 
-                                    FirebaseInstanceId.getInstance().getInstanceId().addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<InstanceIdResult> task) {
-                                            if (task.isSuccessful()) {
-                                                profileData.setToken(task.getResult().getToken());
-                                                profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
+                                    FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task1 -> {
+                                        if (task1.isSuccessful()) {
+                                            profileData.setToken(task1.getResult());
+                                            profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
 
-                                                getThisUserRef().setValue(profileData)
-                                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                            @Override
-                                                            public void onSuccess(Void aVoid) {
+                                            getThisUserRef().setValue(profileData)
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            if (isAdded() && isVisible()) {
+                                                                progressDialog.dismiss();
+                                                                final Intent intent = new Intent(getContext(), LocationActivity.class);
+                                                                getActivity().startActivityForResult(intent, REQUEST_LOCATION);
+                                                            }
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            // Write failed
+                                                            if (isAdded() && isVisible()) {
+                                                                progressDialog.dismiss();
+                                                                FirebaseCrashlytics.getInstance().log("OMG Failed to write profile info inside NameFrag");
+                                                                FirebaseCrashlytics.getInstance().recordException(e);
                                                                 if (isAdded() && isVisible()) {
-                                                                    progressDialog.dismiss();
-                                                                    final Intent intent = new Intent(getContext(), LocationActivity.class);
-                                                                    getActivity().startActivityForResult(intent, REQUEST_LOCATION);
+                                                                    Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                                                 }
                                                             }
-                                                        })
-                                                        .addOnFailureListener(new OnFailureListener() {
-                                                            @Override
-                                                            public void onFailure(@NonNull Exception e) {
-                                                                // Write failed
-                                                                if (isAdded() && isVisible()) {
-                                                                    progressDialog.dismiss();
-                                                                    FirebaseCrashlytics.getInstance().log("OMG Failed to write profile info inside NameFrag");
-                                                                    FirebaseCrashlytics.getInstance().recordException(e);
-                                                                    if (isAdded() && isVisible()) {
-                                                                        Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
-                                                                    }
-                                                                }
-                                                            }
-                                                        });
-                                            } else {
-                                                if (progressDialog != null) {
-                                                    progressDialog.dismiss();
-                                                }
-                                                Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+                                        } else {
+                                            if (progressDialog != null) {
+                                                progressDialog.dismiss();
                                             }
+                                            Toast.makeText(requireContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                                         }
                                     });
                                 } else {
