@@ -35,7 +35,8 @@ public class GroupSelectionActiv extends BaseActivity {
 
         if (getIntent().hasExtra(EXTRA_FEED_POST_DATA)) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, GroupSelectionFrag.newInstance((FeedPostData) getIntent().getSerializableExtra(EXTRA_FEED_POST_DATA)))
+                    .replace(R.id.container, GroupSelectionFrag.newInstance((FeedPostData) getIntent().getSerializableExtra(EXTRA_FEED_POST_DATA),
+                            getIntent().getBooleanExtra(AddPostForFeed.QnAString,false)))
                     .commitNow();
         } else {
             throw new MissingFormatArgumentException("no FeedPostData passed while opening GroupSelectionActiv");

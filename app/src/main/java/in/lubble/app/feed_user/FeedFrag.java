@@ -7,8 +7,8 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +62,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private static final int REQUEST_CODE_NEW_POST = 800;
     private static final int REQ_CODE_POST_ACTIV = 226;
 
-    private ExtendedFloatingActionButton postBtn;
+    private MaterialButton postBtn;
+    private MaterialButton postQandABtn;
+    private RelativeLayout postBtnRv;
     private TextView emptyHintTv;
     private ShimmerRecyclerView feedRV;
     private final String userId = FirebaseAuth.getInstance().getUid();
@@ -99,18 +101,20 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_feed, container, false);
         postBtn = view.findViewById(R.id.btn_new_post);
+        postQandABtn = view.findViewById(R.id.btn_QandA_new_post);
+        postBtnRv = view.findViewById(R.id.post_btn_RV);
         emptyHintTv = view.findViewById(R.id.tv_empty_hint);
         feedRV = view.findViewById(R.id.feed_recyclerview);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
 
-        postBtn.setVisibility(View.VISIBLE);
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) postBtn.getLayoutParams();
-        if (getParentFragment() instanceof FeedCombinedFragment) {
-            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(64));
-        } else {
-            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(16));
-        }
-        postBtn.setLayoutParams(lp);
+        postBtnRv.setVisibility(View.VISIBLE);
+//        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) postButtonsRV.getLayoutParams();
+//        if (getParentFragment() instanceof FeedCombinedFragment) {
+//            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(64));
+//        } else {
+//            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(16));
+//        }
+//        postBtn.setLayoutParams(lp);
 
         layoutManager = new LinearLayoutManager(getContext());
         feedRV.setLayoutManager(layoutManager);
@@ -120,6 +124,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
+        });
+        postQandABtn.setOnClickListener(v->{
+            Intent intent = new Intent(getContext(), AddPostForFeed.class);
+            intent.putExtra(AddPostForFeed.QnAString,true);
+            startActivityForResult(intent, REQUEST_CODE_NEW_POST);
         });
 
         getCredentials();
@@ -244,9 +253,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
             if (dy > 0) {
-                UiUtils.animateSlideDownHide(getContext(), postBtn);
+                UiUtils.animateSlideDownHide(getContext(), postBtnRv);
             } else {
-                UiUtils.animateSlideUpShow(getContext(), postBtn);
+                UiUtils.animateSlideUpShow(getContext(), postBtnRv);
             }
 
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
@@ -257,7 +266,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
-        postBtn.setVisibility(View.GONE);
+        postBtnRv.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
@@ -282,14 +291,14 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void onReplied(String activityId, String foreignId, Reaction reaction) {
-        postBtn.setVisibility(View.VISIBLE);
+        postBtnRv.setVisibility(View.VISIBLE);
         adapter.addUserReply(activityId, reaction);
         Analytics.triggerFeedEngagement(foreignId, "comment", 10, "timeline:" + userId, FeedFrag.class.getSimpleName());
     }
 
     @Override
     public void onDismissed() {
-        postBtn.setVisibility(View.VISIBLE);
+        postBtnRv.setVisibility(View.VISIBLE);
     }
 
     @Override

@@ -61,9 +61,11 @@ public class AddPostForFeed extends BaseActivity {
     private TextView addPhotoToFeedTv, linkTitleTv, linkDescTv;
     private Uri imageUri = null;
     private String uploadPath = "feed_photos/";
+    public static String QnAString = "QandA";
     private String prevUrl = "";
     private LinkMetaAsyncTask linkMetaAsyncTask;
     private boolean isLinkPreviewClosedByUser;
+    private boolean isQandA;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +94,8 @@ public class AddPostForFeed extends BaseActivity {
         linkCloseIv.setVisibility(View.VISIBLE);
 
         feedPostData = new FeedPostData();
+        isQandA = getIntent().getBooleanExtra(QnAString,false);
         addTextChangeListener();
-
         postSubmitBtn.setOnClickListener(v -> {
             if (postText.getText().toString().trim().length() > 0) {
                 feedPostData.setText(postText.getText().toString());
@@ -128,6 +130,11 @@ public class AddPostForFeed extends BaseActivity {
             isLinkPreviewClosedByUser = true;
             resetLinkPreview();
         });
+        if(isQandA) {
+            Editable edit = postText.getText();
+            postText.setText("?");
+            postText.setSelection(0);
+        }
     }
 
     private void addTextChangeListener() {
@@ -180,6 +187,9 @@ public class AddPostForFeed extends BaseActivity {
 
     private void openGroupSelectionActivity(FeedPostData feedPostData) {
         Intent groupSelectionActivIntent = GroupSelectionActiv.getIntent(this, feedPostData);
+        if(isQandA){
+            groupSelectionActivIntent.putExtra(QnAString,true);
+        }
         startActivityForResult(groupSelectionActivIntent, REQ_CODE_GROUPS_SELECT);
     }
 

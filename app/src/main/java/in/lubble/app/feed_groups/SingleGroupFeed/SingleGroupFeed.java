@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -73,7 +74,9 @@ import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListener, ReplyListener, SwipeRefreshLayout.OnRefreshListener {
 
-    private ExtendedFloatingActionButton postBtn;
+    private MaterialButton postBtn;
+    private MaterialButton postQandABtn;
+    private RelativeLayout postBtnRv;
     private ShimmerRecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
@@ -118,12 +121,19 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         joinGroupTv = rootView.findViewById(R.id.tv_join_group);
         emptyHintTv = rootView.findViewById(R.id.tv_empty_hint);
         postBtn = rootView.findViewById(R.id.btn_new_post);
+        postQandABtn = rootView.findViewById(R.id.btn_QandA_new_post);
+        postBtnRv = rootView.findViewById(R.id.post_btn_RV);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
         joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
         swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_feed);
 
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
+        });
+        postQandABtn.setOnClickListener(v->{
+            Intent intent = new Intent(getContext(), AddPostForFeed.class);
+            intent.putExtra(AddPostForFeed.QnAString,true);
+            startActivityForResult(intent, REQUEST_CODE_NEW_POST);
         });
 
         layoutManager = new LinearLayoutManager(getContext());
@@ -214,14 +224,14 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
             if (!followed.isEmpty()) {
                 // joined
                 joinGroupTv.setVisibility(View.GONE);
-                postBtn.setVisibility(View.VISIBLE);
+                postBtnRv.setVisibility(View.VISIBLE);
                 if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
                     ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
                 }
             } else {
                 // not joined
                 joinGroupTv.setVisibility(View.VISIBLE);
-                postBtn.setVisibility(View.GONE);
+                postBtnRv.setVisibility(View.GONE);
 
                 joinGroupTv.setOnClickListener(v -> {
                     joinGroup(groupFeed);
@@ -258,9 +268,9 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
             if (dy > 0) {
-                UiUtils.animateSlideDownHide(getContext(), postBtn);
+                UiUtils.animateSlideDownHide(getContext(), postBtnRv);
             } else {
-                UiUtils.animateSlideUpShow(getContext(), postBtn);
+                UiUtils.animateSlideUpShow(getContext(), postBtnRv);
             }
 
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
@@ -284,7 +294,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                     if (response.isSuccessful() && isAdded()) {
                         Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
                         joinGroupTv.setVisibility(View.GONE);
-                        postBtn.setVisibility(View.VISIBLE);
+                        postBtnRv.setVisibility(View.VISIBLE);
                         joinGroupProgressBar.setVisibility(View.GONE);
                         if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
                             ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
@@ -322,7 +332,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     @Override
     public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
-        postBtn.setVisibility(View.GONE);
+        postBtnRv.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
@@ -332,7 +342,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     @Override
     public void onReplied(String activityId, String foreignId, Reaction reaction) {
-        postBtn.setVisibility(View.VISIBLE);
+        postBtnRv.setVisibility(View.VISIBLE);
         adapter.addUserReply(activityId, reaction);
         Analytics.triggerFeedEngagement(foreignId, "comment", 10, "group:" + feedName, SingleGroupFeed.class.getSimpleName());
     }
@@ -370,7 +380,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     @Override
     public void onDismissed() {
-        postBtn.setVisibility(View.VISIBLE);
+        postBtnRv.setVisibility(View.VISIBLE);
     }
 
     @Override
