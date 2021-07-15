@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -76,7 +77,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     private MaterialButton postBtn;
     private MaterialButton postQandABtn;
-    private RelativeLayout postBtnRv;
+    private LinearLayout postBtnRv;
     private ShimmerRecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
@@ -122,7 +123,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         emptyHintTv = rootView.findViewById(R.id.tv_empty_hint);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         postQandABtn = rootView.findViewById(R.id.btn_QandA_new_post);
-        postBtnRv = rootView.findViewById(R.id.post_btn_RV);
+        postBtnRv = rootView.findViewById(R.id.post_btn_LL);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
         joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
         swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_feed);

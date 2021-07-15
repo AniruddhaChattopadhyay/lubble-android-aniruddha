@@ -39,6 +39,13 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         stringListCopy = new ArrayList<>();
         stringListCopy.addAll(stringList);
         this.isQnA = isQnA;
+        lastCheckedPos = -1;
+        for(int i=0;i<stringList.size();i++){
+            if(stringList.get(i).getName().equals("QnAs")){
+                lastCheckedPos = i;
+            }
+        }
+
     }
 
     @NonNull
@@ -54,11 +61,8 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         FeedGroupData feedGroupData = stringList.get(position);
 
         holder.titleTv.setText(feedGroupData.getName());
-        if(isQnA && feedGroupData.getName().equals("QnAs")){
-            lastCheckedPos = holder.getBindingAdapterPosition();
-        }
-
         holder.selectionRb.setChecked(position == lastCheckedPos);
+        holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
         holder.groupIv.setOnClickListener(v -> holder.selectionRb.performClick());
 
         GlideApp.with(holder.itemView.getContext())
