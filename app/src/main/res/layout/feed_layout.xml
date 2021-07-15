@@ -104,19 +104,6 @@
 
         </LinearLayout>
 
-<!--        <RelativeLayout-->
-<!--            android:id="@+id/post_btn_RV"-->
-<!--            android:visibility="gone"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_gravity="center|bottom"-->
-<!--            android:layout_marginBottom="?attr/actionBarSize"-->
-<!--            tools:visibility="visible"-->
-<!--            >-->
-
-
-
-<!--        </RelativeLayout>-->
 
     </FrameLayout>
 
