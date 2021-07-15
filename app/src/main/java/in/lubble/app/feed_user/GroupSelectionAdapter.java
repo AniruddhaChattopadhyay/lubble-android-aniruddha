@@ -40,9 +40,11 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         stringListCopy.addAll(stringList);
         this.isQnA = isQnA;
         lastCheckedPos = -1;
-        for(int i=0;i<stringList.size();i++){
-            if(stringList.get(i).getName().equals("QnAs")){
-                lastCheckedPos = i;
+        if(isQnA) {
+            for (int i = 0; i < stringList.size(); i++) {
+                if (stringList.get(i).getName().equals("QnAs")) {
+                    lastCheckedPos = i;
+                }
             }
         }
 
