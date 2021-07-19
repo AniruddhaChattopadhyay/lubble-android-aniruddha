@@ -65,12 +65,20 @@ public class JoinedGroupsStoriesRecyclerViewAdapter extends RecyclerView.Adapter
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         FeedGroupData feedGroupData = storyDataList.get(position);
-        Glide.with(mContext)
-                .asBitmap()
-                .load(feedGroupData.getPhotoUrl())
-                .circleCrop()
-                .into(holder.image);
-
+        if(feedGroupData.getPhotoUrl() ==null){
+            Glide.with(mContext)
+                    .asBitmap()
+                    .load("https://student.argiaacademy.sch.id/wp-content/plugins/profilegrid-user-profiles-groups-and-communities/public/partials/images/default-group.png")
+                    .circleCrop()
+                    .into(holder.image);
+        }
+        else{
+            Glide.with(mContext)
+                    .asBitmap()
+                    .load(feedGroupData.getPhotoUrl())
+                    .circleCrop()
+                    .into(holder.image);
+        }
         holder.name.setText(feedGroupData.getName());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

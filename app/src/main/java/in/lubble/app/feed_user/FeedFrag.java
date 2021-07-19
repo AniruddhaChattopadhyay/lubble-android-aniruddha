@@ -179,58 +179,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         });
 
     }
-    void toggleStoriesVisibility(boolean show) {
-        if (show) {
-            joinedGroupStroriesLL.setVisibility(VISIBLE);
-        } else {
-            joinedGroupStroriesLL.setVisibility(GONE);
-        }
-    }
 
-    void scrollStories(int dy, int state) {
-        if (feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
-            if (dy < 0 && state == SCROLL_STATE_DRAGGING && joinedGroupStroriesLL.getVisibility() == VISIBLE && joinedGroupStroriesLL.getAnimation() == null) {
-                //scrolling up
-                Animation hideAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.slide_up_hide);
-                hideAnimation.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        joinedGroupStroriesLL.setVisibility(View.GONE);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                joinedGroupStroriesLL.startAnimation(hideAnimation);
-            } else if (dy > 0 && state == SCROLL_STATE_DRAGGING && joinedGroupStroriesLL.getVisibility() == GONE && joinedGroupStroriesLL.getAnimation() == null) {
-                Animation showAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.slide_down_show);
-                showAnimation.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        joinedGroupStroriesLL.setVisibility(View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                joinedGroupStroriesLL.startAnimation(showAnimation);
-            }
-        }
-    }
     @Override
     public void onResume() {
         super.onResume();
@@ -360,7 +309,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             } else {
                 UiUtils.animateSlideUpShow(getContext(), postBtnLL);
             }
-            scrollStories(dy,state);
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
                     layoutManager.findLastCompletelyVisibleItemPosition());
             viewModel.onScrolled(visibleState);
