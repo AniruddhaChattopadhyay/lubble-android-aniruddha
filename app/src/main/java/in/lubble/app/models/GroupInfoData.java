@@ -4,61 +4,31 @@ import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.Exclude;
 
 import java.util.HashMap;
 import java.util.Set;
 
-import in.lubble.app.LubbleSharedPrefs;
-
 /**
  * Created by ishaan on 28/1/18.
  */
 
-public class GroupData {
+public class GroupInfoData {
 
-    private String id;
     private String profilePic;
     private String thumbnail;
     private String title;
     private String description;
     private boolean isPrivate;
-    private HashMap<String, Object> members = new HashMap<>();
     private String lastMessage;
     private long lastMessageTimestamp = 0;
     private String createdBy;
     private String question;
     private String questionChatId = "101";
-    @Exclude
-    private Set<String> invitedBy;
     private boolean isPinned;
-    @Exclude
-    private boolean isDm;
-    @Exclude
-    private boolean isJoined;
 
-    public GroupData() {
+    public GroupInfoData() {
     }  // Needed for Firebase
-
-    public boolean equals(Object obj) {
-        if (obj instanceof GroupData) {
-            GroupData objectToCompare = (GroupData) obj;
-            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
-                return true;
-            }
-            return false;
-        }
-        return super.equals(obj);
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getProfilePic() {
         return profilePic;
@@ -84,16 +54,6 @@ public class GroupData {
         this.description = description;
     }
 
-    @Exclude
-    public boolean isJoined() {
-        return isJoined;
-    }
-
-    @Exclude
-    public void setJoined(boolean isJoined) {
-        this.isJoined = isJoined;
-    }
-
     public boolean getIsPrivate() {
         return this.isPrivate;
     }
@@ -108,14 +68,6 @@ public class GroupData {
 
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
-    }
-
-    public HashMap<String, Object> getMembers() {
-        return members;
-    }
-
-    public void setMembers(HashMap<String, Object> members) {
-        this.members = members;
     }
 
     public String getLastMessage() {
@@ -134,40 +86,12 @@ public class GroupData {
         this.lastMessageTimestamp = lastMessageTimestamp;
     }
 
-    @Exclude
-    @Nullable
-    public Set<String> getInvitedBy() {
-        return invitedBy;
-    }
-
-    @Exclude
-    public void setInvitedBy(Set<String> invitedBy) {
-        this.invitedBy = invitedBy;
-    }
-
     public String getCreatedBy() {
         return createdBy;
     }
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    @Exclude
-    public long getJoinedTimestamp() {
-        if (isJoined() && !this.isDm) {
-            return 0; //todo fix
-        } else {
-            return 0;
-        }
-    }
-
-    public boolean getIsDm() {
-        return isDm;
-    }
-
-    public void setIsDm(boolean isDm) {
-        this.isDm = isDm;
     }
 
     public boolean getIsPinned() {

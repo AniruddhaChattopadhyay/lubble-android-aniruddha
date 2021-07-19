@@ -222,11 +222,6 @@ public class ShareActiv extends BaseActivity {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     final String dmId = snapshot.getKey();
                     if (dmId != null) {
-                        HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
-                        Long count = 0L;
-                        if (map != null && map.containsKey("unreadCount")) {
-                            count = (Long) map.get("unreadCount");
-                        }
                         fetchDmFrom(dmId);
                     }
                 }

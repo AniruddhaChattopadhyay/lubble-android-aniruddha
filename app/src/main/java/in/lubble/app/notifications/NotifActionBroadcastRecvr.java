@@ -81,8 +81,7 @@ public class NotifActionBroadcastRecvr extends BroadcastReceiver {
                     }
                 }
                 // reset user's group unread counter for current user
-                RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
-                        .child("unreadCount").setValue(0);
+                RealtimeDbHelper.getUserGroupsRef().child(groupId).child("unreadCount").setValue(0);
                 deleteUnreadMsgsForGroupId(groupId, context);
                 NotifUtils.sendNotifAnalyticEvent(AnalyticsEvents.NOTIF_MARKED_READ, groupId, context);
             }

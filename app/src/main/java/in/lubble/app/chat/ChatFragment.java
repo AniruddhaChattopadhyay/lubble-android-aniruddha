@@ -59,6 +59,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 
@@ -122,9 +123,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getGroupTypingRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.EVENT;
 import static in.lubble.app.models.ChatData.GROUP;
 import static in.lubble.app.models.ChatData.HIDDEN;
@@ -175,6 +174,8 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     private EventData eventData;
     @Nullable
     private GroupData groupData;
+    @Nullable
+    private UserGroupData userGroupData;
     private RelativeLayout joinContainer;
     private TextView joinDescTv;
     private Button joinBtn;
@@ -316,7 +317,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         isJoining = getArguments().getBoolean(KEY_IS_JOINING);
 
         if (groupId != null) {
-            groupReference = getLubbleGroupsRef().child(groupId);
+            groupReference = getLubbleGroupsRef().child(groupId).child("groupInfo");
             messagesReference = getMessagesRef().child(groupId);
         } else if (dmId != null) {
             dmInfoReference = getDmsRef().child(dmId);
@@ -430,7 +431,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         attachMediaBtn.setOnClickListener(v -> openAttachmentSheet());
         mediaAttachBtn.setOnClickListener(v -> Pix.start(ChatFragment.this, Options.init().setRequestCode(REQUEST_CODE_MEDIA_ATTACH)));
         joinBtn.setOnClickListener(v -> joinBtnClick());
-        declineIv.setOnClickListener(v -> declineInvite(v));
+        declineIv.setOnClickListener(this::declineInvite);
         linkCancel.setOnClickListener(v -> cancelLink());
 
         if (!TextUtils.isEmpty(itemTitle)) {
@@ -700,18 +701,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     groupData = dataSnapshot.getValue(GroupData.class);
                     if (groupData != null && getActivity() != null) {
-                        //fetchMembersProfile(groupData.getMembers()); //can be used for tagging too
-                        if (!groupData.isJoined() && groupData.getIsPrivate()) {
-                            chatRecyclerView.setVisibility(View.GONE);
-                            pvtSystemMsg.setVisibility(View.VISIBLE);
-                            ((TextView) pvtSystemMsg.findViewById(R.id.tv_system_msg)).setText(R.string.pvt_group_msgs_hidden);
-                        } else {
-                            chatRecyclerView.setVisibility(View.VISIBLE);
-                            pvtSystemMsg.setVisibility(View.GONE);
-                        }
-                        ((ChatActivity) getActivity()).setGroupMeta(groupData.getTitle(), groupData.isJoined(), groupData.getThumbnail(), groupData.getIsPrivate(), groupData.getMembers().size());
                         showBottomBar(groupData);
-                        resetUnreadCount();
                         showPublicGroupWarning(groupData);
                     } else {
                         FirebaseCrashlytics.getInstance().recordException(new NullPointerException("groupdata is null for group id: " + groupId));
@@ -772,10 +762,11 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                                     if (profileMap.get("isSeller") != null) {
                                         isSellerProfile = (boolean) profileMap.get("isSeller");
                                     }
-                                    if (isSellerProfile) {
-                                        fetchSellerProfileFrom(profileId);
-                                    } else {
-                                        fetchProfileFrom(profileId);
+                                    String name = String.valueOf(profileMap.get("name"));
+                                    String profilePic = String.valueOf(profileMap.get("profilePic"));
+                                    ((ChatActivity) getActivity()).setGroupMeta(name, false, profilePic, true, 0);
+                                    if (!isThisUserJoined) {
+                                        joinDescTv.setText(name + " wants to message you");
                                     }
                                 }
                             }
@@ -786,12 +777,9 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                             joinContainer.setVisibility(View.VISIBLE);
                             joinDescTv.setText("Unblock to message them");
                             joinBtn.setText("unblock");
-                            joinBtn.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    dmInfoReference.child("members").child(authorId).child("blocked_status").removeValue();
-                                    dmInfoReference.child("members").child(authorId).child("blocked_timestamp").removeValue();
-                                }
+                            joinBtn.setOnClickListener(v -> {
+                                dmInfoReference.child("members").child(authorId).child("blocked_status").removeValue();
+                                dmInfoReference.child("members").child(authorId).child("blocked_timestamp").removeValue();
                             });
                             declineIv.setVisibility(View.GONE);
                         } else if (isThisUserJoined && isOtherUserJoined) {
@@ -802,26 +790,16 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                             bottomContainer.setVisibility(View.VISIBLE);
                             composeContainer.setVisibility(View.GONE);
                             joinContainer.setVisibility(View.VISIBLE);
-                            joinDescTv.setText("They want to message you");
-                            joinBtn.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    dmInfoReference.child("members").child(authorId).child("joinedTimestamp").setValue(ServerValue.TIMESTAMP);
-                                }
-                            });
-                            declineIv.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
+                            joinBtn.setOnClickListener(v ->
+                                    dmInfoReference.child("members").child(authorId).child("joinedTimestamp").setValue(ServerValue.TIMESTAMP)
+                            );
+                            declineIv.setOnClickListener(v ->
                                     UiUtils.showBottomSheetAlertLight(requireContext(), getLayoutInflater(), "Decline this personal chat invitation? It will be moved to blocked chats",
-                                            null, R.drawable.ic_cancel_red_24dp, "DECLINE", new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View v) {
-                                                    setBlockedStatus("declined");
-                                                    getActivity().finish();
-                                                }
-                                            });
-                                }
-                            });
+                                            null, R.drawable.ic_cancel_red_24dp, "DECLINE", v1 -> {
+                                                setBlockedStatus("declined");
+                                                requireActivity().finish();
+                                            })
+                            );
                         } else {
                             bottomContainer.setVisibility(View.VISIBLE);
                             composeContainer.setVisibility(View.GONE);
@@ -830,52 +808,10 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                             declineIv.setVisibility(View.GONE);
                             joinContainer.setVisibility(View.VISIBLE);
                         }
-                        resetUnreadCount();
+                        resetUnreadCount(null);
                     } else {
                         FirebaseCrashlytics.getInstance().recordException(new NullPointerException("dmData is null for dm id: " + dmId));
                     }
-                }
-
-                private void fetchProfileFrom(String profileId) {
-                    getUserInfoRef(profileId).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                            if (map != null) {
-                                final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                                if (profileInfo != null && getActivity() != null) {
-                                    profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                    ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), false, profileInfo.getThumbnail(), true, 0);
-                                    if (!isThisUserJoined) {
-                                        joinDescTv.setText(profileInfo.getName() + " wants to message you");
-                                    }
-                                }
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
-                        }
-                    });
-                }
-
-                private synchronized void fetchSellerProfileFrom(String profileId) {
-                    getSellerRef().child(profileId).child("info").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                            if (profileInfo != null) {
-                                profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                ((ChatActivity) getActivity()).setGroupMeta(profileInfo.getName(), false, profileInfo.getThumbnail(), true, 0);
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
-                        }
-                    });
                 }
 
                 @Override
@@ -909,38 +845,29 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         dmInfoReference.child("members").child(authorId).child("blocked_timestamp").setValue(System.currentTimeMillis());
     }
 
-    private void fetchMembersProfile(HashMap<String, Object> membersMap) {
-        for (String uid : membersMap.keySet()) {
-            ValueEventListener valueEventListener = getUserInfoRef(uid).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                    if (profileInfo != null) {
-                        profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                        groupMembersMap.put(dataSnapshot.getRef().getParent().getKey(), profileInfo);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
-                }
-            });
-        }
-    }
-
     private void showBottomBar(final GroupData groupData) {
-        if (!isJoining && groupData.isJoined()) {
-            bottomContainer.setVisibility(View.VISIBLE);
-        }
         if (bottomBarListener != null) {
             RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
         }
         bottomBarListener = RealtimeDbHelper.getUserGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 bottomContainer.setVisibility(View.VISIBLE);
-                if (groupData.isJoined()) {
+                userGroupData = dataSnapshot.getValue(UserGroupData.class);
+                resetUnreadCount(userGroupData);
+
+                boolean isJoined = userGroupData != null && userGroupData.isJoined();
+
+                toggleChatVisibility(isJoined, groupData.getIsPrivate());
+
+                if (getActivity() != null && getActivity() instanceof ChatActivity) {
+                    ((ChatActivity) getActivity()).setGroupMeta(
+                            groupData.getTitle(), isJoined, groupData.getThumbnail(),
+                            groupData.getIsPrivate(), groupData.getMembers().size()
+                    );
+                }
+
+                if (isJoined) {
                     composeContainer.setVisibility(View.VISIBLE);
                     joinContainer.setVisibility(View.GONE);
                     if (joiningProgressDialog != null && isJoining) {
@@ -948,7 +875,6 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                         isJoining = false;
                     }
                 } else {
-                    final UserGroupData userGroupData = dataSnapshot.getValue(UserGroupData.class);
                     if (userGroupData != null && userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() != 0) {
                         final HashMap<String, Boolean> invitedBy = userGroupData.getInvitedBy();
                         String inviter = (String) invitedBy.keySet().toArray()[0];
@@ -986,6 +912,19 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         });
     }
 
+    private void toggleChatVisibility(boolean isJoined, boolean isPrivate) {
+        if (!isJoined && isPrivate) {
+            // hide chats if unjoined pvt group
+            chatRecyclerView.setVisibility(View.GONE);
+            pvtSystemMsg.setVisibility(View.VISIBLE);
+            ((TextView) pvtSystemMsg.findViewById(R.id.tv_system_msg)).setText(R.string.pvt_group_msgs_hidden);
+        } else {
+            // show chats
+            chatRecyclerView.setVisibility(View.VISIBLE);
+            pvtSystemMsg.setVisibility(View.GONE);
+        }
+    }
+
     private void showPublicGroupWarning(GroupData groupData) {
         if (lubbleMainGroupRef == null && !LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupData.getIsPinned()) {
             lubbleMainGroupRef = RealtimeDbHelper.getLubbleRef();
@@ -1002,8 +941,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                                     public void onClick(View v) {
                                         LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
                                         LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
-                                        DatabaseReference unreadCountRef = getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
-                                                .child("unreadCount");
+                                        DatabaseReference unreadCountRef = RealtimeDbHelper.getUserGroupsRef().child(groupId).child("unreadCount");
                                         unreadCountRef.setValue(1);
                                         unreadCountRef.setValue(0);
                                     }
@@ -1020,18 +958,19 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         }
     }
 
-    private void resetUnreadCount() {
-        if (!TextUtils.isEmpty(groupId) && groupData != null && groupData.isJoined()) {
-            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").child(FirebaseAuth.getInstance().getUid())
-                    .child("unreadCount").setValue(0);
+    private void resetUnreadCount(@Nullable UserGroupData userGroupData) {
+        if (!TextUtils.isEmpty(groupId) && userGroupData != null && userGroupData.isJoined()) {
+            RealtimeDbHelper.getUserGroupsRef().child(groupId).child("unreadCount").setValue(0);
         } else if (!TextUtils.isEmpty(dmId)) {
             if (isCurrUserSeller) {
-                RealtimeDbHelper.getDmsRef().child(dmId).child("members")
+                RealtimeDbHelper.getSellerRef()
                         .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
+                        .child("dms")
+                        .child(dmId)
                         .child("unreadCount").setValue(0);
             } else {
-                RealtimeDbHelper.getDmsRef().child(dmId).child("members").child(FirebaseAuth.getInstance().getUid())
-                        .child("unreadCount").setValue(0);
+                RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid())
+                        .child(dmId).child("unreadCount").setValue(0);
             }
         }
     }
@@ -1995,7 +1934,8 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     }
 
     public void openGroupInfo() {
-        if (groupData != null && (groupData.isJoined() || !groupData.getIsPrivate())) {
+        if ((userGroupData != null && userGroupData.isJoined()) || (groupData != null && !groupData.getIsPrivate())) {
+            //open group info if group is joined or is a public group
             ScrollingGroupInfoActivity.open(getContext(), groupId);
         } else if (dmOtherUserId != null) {
             if (isSellerProfile) {
@@ -2234,6 +2174,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     void showNeverAskForExtStorage() {
         Toast.makeText(getContext(), R.string.write_storage_perm_never_text, Toast.LENGTH_LONG).show();
     }
+
     @OnNeverAskAgain(Manifest.permission.CAMERA)
     void showNeverAskForCamera() {
         Toast.makeText(getContext(), "To open camera, allow camera permission from app settings of Lubble app", Toast.LENGTH_LONG).show();

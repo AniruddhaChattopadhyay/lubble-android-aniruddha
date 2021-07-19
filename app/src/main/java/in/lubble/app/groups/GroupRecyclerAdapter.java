@@ -130,7 +130,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             groupViewHolder.titleTv.setText(groupData.getTitle());
             final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
-            if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
+            if (!userGroupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
                 String inviter = (String) groupData.getInvitedBy().toArray()[0];
                 if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
                     groupViewHolder.subtitleTv.setText(R.string.ready_to_join);
@@ -171,9 +171,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 }
             });
 
-            if (groupData.getUnreadCount() > 0) {
+            if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
                 groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
-                groupViewHolder.unreadCountTv.setText(String.valueOf(groupData.getUnreadCount()));
+                groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
                 groupViewHolder.pinIv.setVisibility(View.GONE);
             } else {
                 if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupOpened() && groupData.getIsPinned()) {
@@ -204,7 +204,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private void toggleViewBtn(GroupData groupData, UserGroupData userGroupData, GroupViewHolder groupViewHolder) {
-        if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
+        if (!userGroupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
             groupViewHolder.viewGroupTv.setVisibility(View.VISIBLE);
         } else {
             groupViewHolder.viewGroupTv.setVisibility(View.GONE);
@@ -213,14 +213,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
-        if ((!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) || groupData.getLastMessageTimestamp() == 0) {
+        if ((!userGroupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) || groupData.getLastMessageTimestamp() == 0) {
             // for pending group invite
             timestampTv.setVisibility(View.GONE);
         } else {
             // joined or unjoined groups
             timestampTv.setVisibility(View.VISIBLE);
             timestampTv.setText(getHumanTimestamp(groupData.getLastMessageTimestamp()));
-            if (!groupData.isJoined()) {
+            if (!userGroupData.isJoined()) {
                 // align time with "view" btn
                 ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.setMargins(0, 0, dpToPx(8), dpToPx(4));
@@ -229,8 +229,30 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
+    @Deprecated
     public void addGroupToTop(GroupData groupData) {
         if (getChildIndex(groupData.getId()) == -1) {
+            int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
+            if (newIndex > groupDataList.size()) {
+                // happens while groupDataList is cleared (user searched something) & a new group invite is added
+                // then add new group to groupDataListCopy so that when user closes search, the new groups are added properly
+                groupDataListCopy.add(newIndex, groupData);
+                publicCursorPos++;
+            } else {
+                groupDataList.add(newIndex, groupData);
+                //notifyItemInserted(newIndex);
+            }
+            cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
+            publicCursorPos++;
+            Log.d("trace", "addGroupToTop: ");
+        } else {
+            updateGroup(groupData);
+        }
+    }
+
+    public void addGroupToTop(GroupData groupData, UserGroupData userGroupData) {
+        if (getChildIndex(groupData.getId()) == -1) {
+            userGroupDataMap.put(groupData.getId(), userGroupData);
             int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
             if (newIndex > groupDataList.size()) {
                 // happens while groupDataList is cleared (user searched something) & a new group invite is added
@@ -245,7 +267,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             publicCursorPos++;
             Log.d("trace", "addGroupToTop: ");
         } else {
-            updateGroup(groupData);
+            updateGroup(groupData, userGroupData);
         }
     }
 
@@ -268,6 +290,28 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
+    public void updateGroup(GroupData newGroupData, @Nullable UserGroupData userGroupData) {
+        final int pos = getChildIndex(newGroupData.getId());
+        if (pos != -1) {
+            final GroupData oldGroupData = groupDataList.get(pos);
+            if (!oldGroupData.isJoined() && newGroupData.isJoined()
+                    || (userGroupDataMap.get(newGroupData.getId()) == null
+                    && userGroupData != null && userGroupData.isJoined())) {
+                // move group from public list to joined list
+                removeGroup(newGroupData.getId());
+                addGroupToTop(newGroupData, userGroupData);
+            } else {
+                groupDataList.set(pos, newGroupData);
+                if (userGroupData != null) {
+                    userGroupDataMap.put(newGroupData.getId(), userGroupData);
+                }
+                notifyItemChanged(pos);
+            }
+            sortJoinedGroupsList();
+        }
+        Log.d("trace", "updateGroup1: ");
+    }
+
     public void updateUserGroupData(String id, UserGroupData userGroupData) {
         final int pos = getChildIndex(id);
         userGroupDataMap.put(id, userGroupData);
@@ -277,6 +321,20 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         Log.d("trace", "updateUserGroupData: ");
     }
 
+    public void updateDmUnreadCounter(String id, Long unreadCount) {
+        final int pos = getChildIndex(id);
+        UserGroupData userGroupData = userGroupDataMap.get(id);
+        if (userGroupData != null) {
+            userGroupData.setUnreadCount(unreadCount);
+            userGroupDataMap.put(id, userGroupData);
+            if (pos != -1) {
+                notifyItemChanged(pos);
+            }
+            Log.d("trace", "updateUserGroupData: ");
+        }
+    }
+
+    @Deprecated
     public void updateGroup(GroupData newGroupData) {
         final int pos = getChildIndex(newGroupData.getId());
         if (pos != -1) {
@@ -327,10 +385,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         Collections.sort(groupDataList, new Comparator<GroupData>() {
             @Override
             public int compare(GroupData o1, GroupData o2) {
-                if (o1 != null && o2 != null && o1.isJoined() && o2.isJoined()) {
-                    if (o1.getIsPinned()) return -1;
-                    if (o2.getIsPinned()) return 1;
-                    return (o1.getLastMessageTimestamp() < o2.getLastMessageTimestamp()) ? 1 : ((o1.getLastMessageTimestamp() == o2.getLastMessageTimestamp()) ? 0 : -1);
+                if (o1 != null && o2 != null) {
+                    UserGroupData userGroup1Data = userGroupDataMap.get(o1.getId());
+                    UserGroupData userGroup2Data = userGroupDataMap.get(o2.getId());
+                    if (userGroup1Data != null && userGroup2Data != null && userGroup1Data.isJoined() && userGroup2Data.isJoined()) {
+                        if (o1.getIsPinned()) return -1;
+                        if (o2.getIsPinned()) return 1;
+                        return (o1.getLastMessageTimestamp() < o2.getLastMessageTimestamp()) ? 1 : ((o1.getLastMessageTimestamp() == o2.getLastMessageTimestamp()) ? 0 : -1);
+                    }
                 }
                 return 0;
             }
@@ -471,7 +533,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 public boolean onLongClick(View v) {
                     if (getAdapterPosition() != highlightedPos) {
                         GroupData groupData = groupDataList.get(getAdapterPosition());
-                        if (groupData.isJoined()) {
+                        if (userGroupDataMap.containsKey(groupData.getId())
+                                && userGroupDataMap.get(groupData.getId()).isJoined()) {
                             selectedGroupId = groupData.getId();
                             actionMode = mListener.onActionModeEnabled(actionModeCallbacks);
                             itemView.setBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.very_light_gray));

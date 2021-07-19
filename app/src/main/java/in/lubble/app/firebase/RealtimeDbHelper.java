@@ -56,8 +56,20 @@ public class RealtimeDbHelper {
         return getUserLubbleRef().child("groups");
     }
 
+    /**
+     * DON'T USE getLubbleRef() -> LEADS TO WHOLE NODE BEING DOWNLOADED
+     * VERY IMP TO NEVER USE IT, EVER.
+     * Might as well break the whole app.
+     *
+     * Instead, use child nodes like lubbleInfo, events, etc.
+     */
+    @Deprecated()
     public static DatabaseReference getLubbleRef() {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId());
+    }
+
+    public static DatabaseReference getLubbleInfoRef() {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/lubbleInfo");
     }
 
     public static DatabaseReference getLubbleMembersRef() {
