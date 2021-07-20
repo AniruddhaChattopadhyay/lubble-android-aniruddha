@@ -229,10 +229,10 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
                         && groupData.getMembers().size() > 0) {
                     // non-joined public groups with non-zero members
                     ExploreGroupData exploreGroupData = new ExploreGroupData();
-                    exploreGroupData.setFirebaseGroupId(groupData.getId());
+                    exploreGroupData.setId(groupData.getId());
                     exploreGroupData.setTitle(groupData.getTitle());
-                    exploreGroupData.setPhotoUrl(groupData.getProfilePic());
-                    exploreGroupData.setMemberCount(groupData.getMembers().size());
+                    exploreGroupData.setThumbnail(groupData.getProfilePic());
+                    exploreGroupData.setMemberCount(groupData.getMembers().size());//todo
                     exploreGroupData.setLastMessageTimestamp(groupData.getLastMessageTimestamp());
                     exploreGroupAdapter.updateGroup(exploreGroupData);
                 }

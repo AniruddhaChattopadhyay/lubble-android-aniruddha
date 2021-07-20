@@ -86,7 +86,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         holder.titleTv.setText(exploreGroupData.getTitle());
         RequestOptions requestOptions = new RequestOptions();
         requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0, TOP));
-        glide.load(exploreGroupData.getPhotoUrl())
+        glide.load(exploreGroupData.getProfilePic())
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .placeholder(R.drawable.rounded_rect_gray)
                 .error(R.drawable.explore_default)
@@ -96,7 +96,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
         if (isOnboarding) {
             holder.joinTv.setText("SELECT");
             holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.colorAccent));
-            if (selectedMap.containsKey(mValues.get(position).getFirebaseGroupId())) {
+            if (selectedMap.containsKey(mValues.get(position).getId())) {
                 holder.selectedContainer.setVisibility(View.VISIBLE);
                 holder.joinTv.setText("REMOVE");
                 holder.joinTv.setTextColor(ContextCompat.getColor(holder.mView.getContext(), R.color.red));
@@ -115,7 +115,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                 @Override
                 public void onClick(View v) {
                     if (!isOnboarding) {
-                        ChatActivity.openForGroup(holder.mView.getContext(), exploreGroupData.getFirebaseGroupId(), false, null);
+                        ChatActivity.openForGroup(holder.mView.getContext(), exploreGroupData.getId(), false, null);
                     }
                 }
             });
@@ -158,13 +158,6 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_brown_900));
             holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_whatshot_14, 0, 0, 0);
         }
-        if (System.currentTimeMillis() - exploreGroupData.getLastMessageTimestamp() < TimeUnit.HOURS.toMillis(1)) {
-            holder.labelTv.setVisibility(View.VISIBLE);
-            holder.labelTv.setText("Active");
-            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_50)));
-            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_grey_900));
-            holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_live_active_14, 0, 0, 0);
-        }
     }
 
     private void initCardClickListener(final ViewHolder holder, final ExploreGroupData exploreGroupData) {
@@ -172,7 +165,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
             if (null != mListener) {
                 if (isOnboarding) {
                     try {
-                        String touchedGroupId = mValues.get(holder.getAdapterPosition()).getFirebaseGroupId();
+                        String touchedGroupId = mValues.get(holder.getAbsoluteAdapterPosition()).getId();
                         if (holder.selectedContainer.getVisibility() == View.GONE) {
                             if (selectedMap.size() < 10) {
                                 mListener.onListFragmentInteraction(holder.groupItem, true);
@@ -197,7 +190,7 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
                     }
                 } else {
                     // for explore bottom tab
-                    ChatActivity.openForGroup(holder.mView.getContext(), exploreGroupData.getFirebaseGroupId(), false, null);
+                    ChatActivity.openForGroup(holder.mView.getContext(), exploreGroupData.getId(), false, null);
                 }
             }
         });

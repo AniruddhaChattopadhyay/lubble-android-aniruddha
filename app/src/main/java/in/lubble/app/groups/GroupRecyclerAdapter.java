@@ -41,6 +41,7 @@ import in.lubble.app.LubbleApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.chat.SnoozeGroupBottomSheet;
+import in.lubble.app.explore.ExploreGroupData;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.UserGroupData;
@@ -130,7 +131,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             groupViewHolder.titleTv.setText(groupData.getTitle());
             final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
-            if (!userGroupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
+            if (userGroupData != null && !userGroupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
                 String inviter = (String) groupData.getInvitedBy().toArray()[0];
                 if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
                     groupViewHolder.subtitleTv.setText(R.string.ready_to_join);
@@ -204,7 +205,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private void toggleViewBtn(GroupData groupData, UserGroupData userGroupData, GroupViewHolder groupViewHolder) {
-        if (!userGroupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
+        if (userGroupData == null || (!userGroupData.isJoined() && (userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0))) {
             groupViewHolder.viewGroupTv.setVisibility(View.VISIBLE);
         } else {
             groupViewHolder.viewGroupTv.setVisibility(View.GONE);
@@ -213,14 +214,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
-        if ((!userGroupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) || groupData.getLastMessageTimestamp() == 0) {
+        if ((userGroupData != null && !userGroupData.isJoined() && userGroupData.getInvitedTimeStamp() > 0) || groupData.getLastMessageTimestamp() == 0) {
             // for pending group invite
             timestampTv.setVisibility(View.GONE);
         } else {
             // joined or unjoined groups
             timestampTv.setVisibility(View.VISIBLE);
             timestampTv.setText(getHumanTimestamp(groupData.getLastMessageTimestamp()));
-            if (!userGroupData.isJoined()) {
+            if (userGroupData != null && !userGroupData.isJoined()) {
                 // align time with "view" btn
                 ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.setMargins(0, 0, dpToPx(8), dpToPx(4));
@@ -402,16 +403,14 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     void sortPublicGroupList(int startingIndex) {
-        Log.d("trace", "--------------------\nsorting started: ");
+        Log.d("trace", "--------------------\npublic group sorting started: ");
         startingIndex = startingIndex == -1 ? publicCursorPos : startingIndex;
         List<GroupData> list = groupDataList.subList(startingIndex, groupDataList.size());
         Collections.sort(list, new Comparator<GroupData>() {
             @Override
             public int compare(GroupData o1, GroupData o2) {
-                if (o1 != null && o2 != null) {
-                    if (o1.getIsPinned()) return -1;
-                    if (o2.getIsPinned()) return 1;
-                    return (o1.getLastMessageTimestamp() < o2.getLastMessageTimestamp()) ? 1 : ((o1.getLastMessageTimestamp() == o2.getLastMessageTimestamp()) ? 0 : -1);
+                if (o1 instanceof ExploreGroupData && o2 instanceof ExploreGroupData) {
+                    return Integer.compare(((ExploreGroupData) o2).getPriority(), ((ExploreGroupData) o1).getPriority());
                 }
                 return 0;
             }
@@ -422,7 +421,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (filter != null) {
             filter.addGroups(list);
         }
-        Log.d("trace", "--------------------\nsorting ended: ");
+        Log.d("trace", "--------------------\npublic group sorting ended: ");
     }
 
     public void flashPos(int pos) {

@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -51,6 +53,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
+import in.lubble.app.explore.ExploreGroupData;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
@@ -60,6 +63,7 @@ import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.UiUtils;
+import io.getstream.client.User;
 import me.crosswall.lib.coverflow.CoverFlow;
 import me.crosswall.lib.coverflow.core.PagerContainer;
 import retrofit2.Call;
@@ -253,14 +257,50 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         isPublicGroupsLoading = true;
                         groupsRecyclerView.setPadding(0, 0, 0, UiUtils.dpToPx(80));
                         progressBarPublicGroups.setVisibility(View.VISIBLE);
-                        publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
-                        publicGroupsQuery.addValueEventListener(publicGroupListener);
+                        fetchPublicGroups();
                     }
                 }
             });
         }
     }
 
+    private void fetchPublicGroups() {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.fetchExploreGroups(LubbleSharedPrefs.getInstance().requireLubbleId()).enqueue(new Callback<ArrayList<ExploreGroupData>>() {
+            @Override
+            public void onResponse(@NotNull Call<ArrayList<ExploreGroupData>> call, @NotNull Response<ArrayList<ExploreGroupData>> response) {
+                final ArrayList<ExploreGroupData> exploreGroupDataList = response.body();
+                if (response.isSuccessful() && exploreGroupDataList != null && isAdded() && !exploreGroupDataList.isEmpty() && isVisible()) {
+                    progressBarPublicGroups.setVisibility(View.GONE);
+                    int startingIndex = -1;
+                    for (ExploreGroupData exploreGroupData : exploreGroupDataList) {
+                        int index = adapter.addPublicGroupToTop(exploreGroupData);
+                        if (startingIndex == -1) {
+                            startingIndex = index;
+                        }
+                    }
+                    adapter.sortPublicGroupList(startingIndex);
+                } else {
+                    if (isAdded() && isVisible()) {
+                        progressBarPublicGroups.setVisibility(View.GONE);
+                        if (exploreGroupDataList != null && exploreGroupDataList.isEmpty()) {
+                            Snackbar.make(getView(), "Joined all groups \ud83d\ude0e", Snackbar.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<ExploreGroupData>> call, Throwable t) {
+                if (isAdded() && isVisible()) {
+                    progressBarPublicGroups.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
     private void toggleSearch(boolean isEnabled) {
         if (getActivity() != null & getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).setIsSearchEnabled(isEnabled);
@@ -280,10 +320,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     if (!groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
                             && groupData.getMembers().size() > 0) {
                         // non-joined public groups with non-zero members
-                        int index = adapter.addPublicGroupToTop(groupData);
+                        /*int index = adapter.addPublicGroupToTop(groupData);
                         if (startingIndex == -1) {
                             startingIndex = index;
-                        }
+                        }*/
                     }
                 }
             }

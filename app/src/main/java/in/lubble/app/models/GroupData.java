@@ -4,13 +4,11 @@ import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.Exclude;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 import java.util.Set;
-
-import in.lubble.app.LubbleSharedPrefs;
 
 /**
  * Created by ishaan on 28/1/18.
@@ -18,9 +16,12 @@ import in.lubble.app.LubbleSharedPrefs;
 
 public class GroupData {
 
+    @SerializedName("firebase_id")
     private String id;
+    @SerializedName("icon")
     private String profilePic;
     private String thumbnail;
+    @SerializedName("title")
     private String title;
     private String description;
     private boolean isPrivate;
@@ -103,7 +104,7 @@ public class GroupData {
     }
 
     public String getThumbnail() {
-        return thumbnail;
+        return thumbnail == null ? profilePic : thumbnail;
     }
 
     public void setThumbnail(String thumbnail) {
