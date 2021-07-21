@@ -863,7 +863,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
                 if (getActivity() != null && getActivity() instanceof ChatActivity) {
                     ((ChatActivity) getActivity()).setGroupMeta(
                             groupData.getTitle(), isJoined, groupData.getThumbnail(),
-                            groupData.getIsPrivate(), groupData.getMembers().size()
+                            groupData.getIsPrivate(), 0
                     );
                 }
 

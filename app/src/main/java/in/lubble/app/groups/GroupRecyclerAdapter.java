@@ -230,27 +230,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-    @Deprecated
-    public void addGroupToTop(GroupData groupData) {
-        if (getChildIndex(groupData.getId()) == -1) {
-            int newIndex = groupData.getIsPinned() ? 0 : cursorPos;
-            if (newIndex > groupDataList.size()) {
-                // happens while groupDataList is cleared (user searched something) & a new group invite is added
-                // then add new group to groupDataListCopy so that when user closes search, the new groups are added properly
-                groupDataListCopy.add(newIndex, groupData);
-                publicCursorPos++;
-            } else {
-                groupDataList.add(newIndex, groupData);
-                //notifyItemInserted(newIndex);
-            }
-            cursorPos = groupData.getIsPinned() ? 1 : cursorPos;
-            publicCursorPos++;
-            Log.d("trace", "addGroupToTop: ");
-        } else {
-            updateGroup(groupData);
-        }
-    }
-
     public void addGroupToTop(GroupData groupData, UserGroupData userGroupData) {
         if (getChildIndex(groupData.getId()) == -1) {
             userGroupDataMap.put(groupData.getId(), userGroupData);
@@ -286,7 +265,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 return groupDataList.size() - 1;
             }
         } else {
-            updateGroup(groupData);
+            updateGroup(groupData, null);
             return -1;
         }
     }
@@ -294,10 +273,8 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
     public void updateGroup(GroupData newGroupData, @Nullable UserGroupData userGroupData) {
         final int pos = getChildIndex(newGroupData.getId());
         if (pos != -1) {
-            final GroupData oldGroupData = groupDataList.get(pos);
-            if (!oldGroupData.isJoined() && newGroupData.isJoined()
-                    || (userGroupDataMap.get(newGroupData.getId()) == null
-                    && userGroupData != null && userGroupData.isJoined())) {
+            if (userGroupDataMap.get(newGroupData.getId()) == null
+                    && userGroupData != null && userGroupData.isJoined()) {
                 // move group from public list to joined list
                 removeGroup(newGroupData.getId());
                 addGroupToTop(newGroupData, userGroupData);
@@ -333,25 +310,6 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
             Log.d("trace", "updateUserGroupData: ");
         }
-    }
-
-    @Deprecated
-    public void updateGroup(GroupData newGroupData) {
-        final int pos = getChildIndex(newGroupData.getId());
-        if (pos != -1) {
-            final GroupData oldGroupData = groupDataList.get(pos);
-            if (!oldGroupData.isJoined() && newGroupData.isJoined()) {
-                // move group from public list to joined list
-                removeGroup(newGroupData.getId());
-                addGroupToTop(newGroupData);
-                sortJoinedGroupsList();
-                //addGroupWithSortFromBottom(newGroupData);
-            } else {
-                groupDataList.set(pos, newGroupData);
-                notifyItemChanged(pos);
-            }
-        }
-        Log.d("trace", "updateGroup: ");
     }
 
     public void removeGroup(String groupId) {
