@@ -16,6 +16,7 @@ import java.util.Set;
 public class GroupInfoData {
 
     private String profilePic;
+    private String id;
     private String thumbnail;
     private String title;
     private String description;
@@ -26,6 +27,10 @@ public class GroupInfoData {
     private String question;
     private String questionChatId = "101";
     private boolean isPinned;
+    @Exclude
+    private boolean isDm;
+    @Exclude
+    private Set<String> invitedBy;
 
     public GroupInfoData() {
     }  // Needed for Firebase
@@ -118,4 +123,31 @@ public class GroupInfoData {
         this.questionChatId = questionChatId;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Exclude
+    public boolean getIsDm() {
+        return isDm;
+    }
+
+    @Exclude
+    public void setIsDm(boolean dm) {
+        isDm = dm;
+    }
+
+    @Exclude
+    public Set<String> getInvitedBy() {
+        return invitedBy;
+    }
+
+    @Exclude
+    public void setInvitedBy(Set<String> invitedBy) {
+        this.invitedBy = invitedBy;
+    }
 }

@@ -51,12 +51,11 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
-import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.explore.ExploreGroupData;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
 import in.lubble.app.models.DmData;
-import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -71,7 +70,7 @@ import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
 import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
@@ -469,7 +468,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         // joined chat
                         dmData.setId(dataSnapshot.getKey());
 
-                        final GroupData dmGroupData = new GroupData();
+                        final GroupInfoData dmGroupData = new GroupInfoData();
                         dmGroupData.setId(dmData.getId());
                         dmGroupData.setLastMessage(dmData.getLastMessage());
                         dmGroupData.setLastMessageTimestamp(dmData.getLastMessageTimestamp());
@@ -527,6 +526,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         syncJoinedGroups(dataSnapshot.getKey());
                     } else {
                         if (userGroupData.getInvitedBy() != null) {
+                            queryCounter++;
                             groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
                             syncInvitedGroups(dataSnapshot.getKey());
                         }
@@ -572,10 +572,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private void syncJoinedGroups(String groupId) {
         // get meta data of the groups joined by the user
         final ValueEventListener joinedGroupListener =
-                getLubbleGroupsRef().child(groupId).child("groupInfo").addValueEventListener(new ValueEventListener() {
+                getLubbleGroupInfoRef(groupId).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                        GroupInfoData groupData = dataSnapshot.getValue(GroupInfoData.class);
                         String groupId = dataSnapshot.getRef().getParent().getKey();
                         final UserGroupData userGroupData = userGroupDataMap.get(groupId);
                         if (groupData != null && userGroupData != null) {
@@ -602,39 +602,41 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                    public void onCancelled(@NotNull DatabaseError databaseError) {
 
                     }
                 });
-        map.put(getLubbleGroupsRef().child(groupId).child("groupInfo"), joinedGroupListener);
+        map.put(getLubbleGroupInfoRef(groupId), joinedGroupListener);
     }
 
     private void syncInvitedGroups(final String groupId) {
         // get meta data of the groups joined by the user
-        final ValueEventListener invitedGroupListener = getLubbleGroupsRef().child(groupId).child("groupInfo")
+        final ValueEventListener invitedGroupListener = getLubbleGroupInfoRef(groupId)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        GroupData groupData = dataSnapshot.getValue(GroupData.class);
+                    public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
+                        GroupInfoData groupData = dataSnapshot.getValue(GroupInfoData.class);
                         if (groupData != null) {
-                            if (groupData.getMembers().get(FirebaseAuth.getInstance().getUid()) == null) {
+                            if (groupInvitedByMap.containsKey(groupData.getId())) {
                                 groupData.setInvitedBy(groupInvitedByMap.get(groupData.getId()));
                             }
-                            final UserGroupData userGroupData = userGroupDataMap.get(dataSnapshot.getKey());
+                            final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
                             adapter.addGroupToTop(groupData, userGroupData);
+                            queryCounter--;
+                            checkAllChatsSynced();
                         }
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                    public void onCancelled(@NotNull DatabaseError databaseError) {
 
                     }
                 });
-        map.put(getLubbleGroupsRef().child(groupId).child("groupInfo"), invitedGroupListener);
+        map.put(getLubbleGroupInfoRef(groupId), invitedGroupListener);
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NotNull Context context) {
         super.onAttach(context);
         mListener = this;
     }

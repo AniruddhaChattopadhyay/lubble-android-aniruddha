@@ -60,7 +60,7 @@ public class RealtimeDbHelper {
      * DON'T USE getLubbleRef() -> LEADS TO WHOLE NODE BEING DOWNLOADED
      * VERY IMP TO NEVER USE IT, EVER.
      * Might as well break the whole app.
-     *
+     * <p>
      * Instead, use child nodes like lubbleInfo, events, etc.
      */
     @Deprecated()
@@ -80,8 +80,18 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/domesticDirectory");
     }
 
+    /*
+    Be Careful! getLubbleGroupsRef() will download the whole group node along with 1000s of members!
+    User GroupInfo node instead to get just meta data of group.
+    */
+    @Deprecated
     public static DatabaseReference getLubbleGroupsRef() {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups");
+    }
+
+    public static DatabaseReference getLubbleGroupInfoRef(String groupId) {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups")
+                .child(groupId).child("groupInfo");
     }
 
     public static DatabaseReference getLubbleBlocksRef() {

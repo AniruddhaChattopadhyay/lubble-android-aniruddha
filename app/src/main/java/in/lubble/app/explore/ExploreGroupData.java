@@ -4,18 +4,19 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
-import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 
-public class ExploreGroupData extends GroupData {
+public class ExploreGroupData extends GroupInfoData {
 
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof ExploreGroupData) {
-            GroupData objectToCompare = (GroupData) obj;
+            GroupInfoData objectToCompare = (GroupInfoData) obj;
             return this.getId().equalsIgnoreCase(objectToCompare.getId());
         }
         return super.equals(obj);
     }
+
     @SerializedName("priority")
     private int priority;
     private int memberCount;
