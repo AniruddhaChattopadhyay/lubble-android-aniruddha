@@ -51,6 +51,7 @@ import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.explore.ExploreGroupData;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
@@ -190,6 +191,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     }
 
     private void syncAllGroups() {
+        queryCounter = 0;
         adapter.clearGroups();
         progressBar.setVisibility(View.VISIBLE);
         toggleSearch(false);
@@ -493,7 +495,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                                 HashMap thisMemberMap = (HashMap) members.get(memberUid);
                                 if (thisMemberMap.containsKey("joinedTimestamp") && (Long) thisMemberMap.get("joinedTimestamp") > 0) {
                                     userGroupData.setJoined(true);
-                                    dmGroupData.setJoined(true);
                                 }
                             }
                         }
@@ -575,9 +576,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         GroupData groupData = dataSnapshot.getValue(GroupData.class);
-
-                        if (groupData != null && groupData.getId() != null) {
-                            final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
+                        String groupId = dataSnapshot.getRef().getParent().getKey();
+                        final UserGroupData userGroupData = userGroupDataMap.get(groupId);
+                        if (groupData != null && userGroupData != null) {
+                            groupData.setId(groupId);
                             //groupData.setJoined(true);
                             userGroupData.setJoined(true);
                             adapter.addGroupToTop(groupData, userGroupData);
@@ -609,7 +611,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     private void syncInvitedGroups(final String groupId) {
         // get meta data of the groups joined by the user
-        final ValueEventListener invitedGroupListener = getLubbleGroupsRef().child(groupId)
+        final ValueEventListener invitedGroupListener = getLubbleGroupsRef().child(groupId).child("groupInfo")
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -628,7 +630,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
                     }
                 });
-        map.put(getLubbleGroupsRef().child(groupId), invitedGroupListener);
+        map.put(getLubbleGroupsRef().child(groupId).child("groupInfo"), invitedGroupListener);
     }
 
     @Override

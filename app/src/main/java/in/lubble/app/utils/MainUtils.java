@@ -8,12 +8,9 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.database.DbSingleton;
-import in.lubble.app.marketplace.ItemSearchData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -45,31 +42,6 @@ public class MainUtils {
                 Log.e(TAG, "onFailure: ");
             }
         });
-    }
-
-    public static void fetchAndPersistMplaceItems() {
-        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.fetchItemList().enqueue(new Callback<ArrayList<ItemSearchData>>() {
-            @Override
-            public void onResponse(Call<ArrayList<ItemSearchData>> call, Response<ArrayList<ItemSearchData>> response) {
-                final ArrayList<ItemSearchData> itemsList = response.body();
-                if (itemsList != null && itemsList.size() > 0) {
-                    insertItemsToDb(itemsList);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ArrayList<ItemSearchData>> call, Throwable t) {
-                Log.e(TAG, "onFailure: ");
-            }
-        });
-    }
-
-    private static void insertItemsToDb(final ArrayList<ItemSearchData> itemsList) {
-        DbSingleton.getInstance().deleteAllSearchData();
-        for (ItemSearchData itemSearchData : itemsList) {
-            //DbSingleton.getInstance().createItemSearchData(itemSearchData);
-        }
     }
 
     public static void openPlayStore(Context context) {

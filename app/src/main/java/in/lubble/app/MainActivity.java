@@ -91,7 +91,6 @@ import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-import io.getstream.core.StreamAnalytics;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -127,7 +126,6 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
-import static in.lubble.app.utils.MainUtils.fetchAndPersistMplaceItems;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -404,7 +402,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         });
         //showBottomNavBadge();
         fetchAndPersistAppFeatures();
-        fetchAndPersistMplaceItems();
         initFirebaseRemoteConfig();
         initDrawer();
     }

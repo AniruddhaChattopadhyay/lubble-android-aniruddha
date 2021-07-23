@@ -86,9 +86,8 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
     }
 
     private void fetchBlockedGroups() {
-        query = RealtimeDbHelper.getDmsRef().orderByChild("lastMessageTimestamp");
+        query = RealtimeDbHelper.getDmsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).startAt("");
         query.addChildEventListener(dmListener);
-        getUserGroupsRef().addValueEventListener(userDmListener);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -152,8 +151,7 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
         @Override
         public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-            if (groupData != null && groupData.isJoined()
-                    && groupData.getMembers().get("blocked_status") == null) {
+            if (groupData != null && groupData.getMembers().get("blocked_status") == null) {
                 groupData.setId(dataSnapshot.getKey());
                 groupData.setIsDm(true);
                 if (TextUtils.isEmpty(groupData.getTitle())) {
@@ -190,25 +188,11 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
         @Override
         public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
             final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-            if (groupData != null && groupData.isJoined() && groupData.getMembers().get("blocked_status") != null) {
+            if (groupData != null && groupData.getMembers().get("blocked_status") != null) {
                 groupData.setId(dataSnapshot.getKey());
                 groupData.setIsPrivate(true);
                 groupData.setIsDm(true);
                 adapter.updateGroupPos(groupData);
-            }
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-        }
-    };
-
-    private final ValueEventListener userDmListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            for (DataSnapshot userGroupDataSnapshot : dataSnapshot.getChildren()) {
-                adapter.updateUserGroupData(userGroupDataSnapshot.getKey(), userGroupDataSnapshot.getValue(UserGroupData.class));
             }
         }
 
@@ -238,9 +222,6 @@ public class BlockedChatsFrag extends Fragment implements OnBlockedChatClickList
     @Override
     public void onPause() {
         super.onPause();
-
         query.removeEventListener(dmListener);
-        getUserGroupsRef().removeEventListener(userDmListener);
-
     }
 }

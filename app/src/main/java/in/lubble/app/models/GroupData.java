@@ -86,6 +86,7 @@ public class GroupData {
     }
 
     @Exclude
+    @Deprecated
     public boolean isJoined() {
         return isJoined;
     }
@@ -152,15 +153,6 @@ public class GroupData {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    @Exclude
-    public long getJoinedTimestamp() {
-        if (isJoined() && !this.isDm) {
-            return 0; //todo fix
-        } else {
-            return 0;
-        }
     }
 
     public boolean getIsDm() {
