@@ -87,7 +87,7 @@ import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.DmData;
 import in.lubble.app.models.EventData;
-import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
@@ -121,7 +121,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getGroupTypingRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.models.ChatData.EVENT;
@@ -173,7 +173,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     private Endpoints endpoints;
     private EventData eventData;
     @Nullable
-    private GroupData groupData;
+    private GroupInfoData groupInfoData;
     @Nullable
     private UserGroupData userGroupData;
     private RelativeLayout joinContainer;
@@ -317,7 +317,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         isJoining = getArguments().getBoolean(KEY_IS_JOINING);
 
         if (groupId != null) {
-            groupReference = getLubbleGroupsRef().child(groupId).child("groupInfo");
+            groupReference = getLubbleGroupInfoRef(groupId);
             messagesReference = getMessagesRef().child(groupId);
         } else if (dmId != null) {
             dmInfoReference = getDmsRef().child(dmId);
@@ -667,19 +667,19 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     }
 
     private void addGroupJoinPrompt() {
-        if (groupData != null && !TextUtils.isEmpty(groupData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)) {
+        if (groupInfoData != null && !TextUtils.isEmpty(groupInfoData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)) {
             final ChatData personalChatData = new ChatData();
-            personalChatData.setId(groupData.getQuestionChatId());
+            personalChatData.setId(groupInfoData.getQuestionChatId());
             personalChatData.setType(ChatData.GROUP_PROMPT);
             personalChatData.setAuthorUid(LubbleSharedPrefs.getInstance().getSupportUid());
 //            final String firstName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName().split(" ")[0];
             personalChatData.setMessage(
                     "👋 Welcome " + firstName + "!" +
                             "\n\nLet's introduce you to everyone in the group with an answer to this:" +
-                            "\n\n" + groupData.getQuestion()
+                            "\n\n" + groupInfoData.getQuestion()
                             + "\n\nAnswer by tapping on Reply \uD83D\uDC47"
             );
-            personalChatData.setPromptQues(groupData.getQuestion());
+            personalChatData.setPromptQues(groupInfoData.getQuestion());
             personalChatData.setCreatedTimestamp(System.currentTimeMillis());
             personalChatData.setServerTimestamp(System.currentTimeMillis());
             chatAdapter.addPersonalChatData(personalChatData);
@@ -699,10 +699,10 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
             groupInfoListener = groupReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    groupData = dataSnapshot.getValue(GroupData.class);
-                    if (groupData != null && getActivity() != null) {
-                        showBottomBar(groupData);
-                        showPublicGroupWarning(groupData);
+                    groupInfoData = dataSnapshot.getValue(GroupInfoData.class);
+                    if (groupInfoData != null && getActivity() != null) {
+                        showBottomBar(groupInfoData);
+                        showPublicGroupWarning(groupInfoData);
                     } else {
                         FirebaseCrashlytics.getInstance().recordException(new NullPointerException("groupdata is null for group id: " + groupId));
                     }
@@ -845,7 +845,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         dmInfoReference.child("members").child(authorId).child("blocked_timestamp").setValue(System.currentTimeMillis());
     }
 
-    private void showBottomBar(final GroupData groupData) {
+    private void showBottomBar(final GroupInfoData groupInfoData) {
         if (bottomBarListener != null) {
             RealtimeDbHelper.getUserGroupsRef().child(groupId).removeEventListener(bottomBarListener);
         }
@@ -858,12 +858,12 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
 
                 boolean isJoined = userGroupData != null && userGroupData.isJoined();
 
-                toggleChatVisibility(isJoined, groupData.getIsPrivate());
+                toggleChatVisibility(isJoined, groupInfoData.getIsPrivate());
 
                 if (getActivity() != null && getActivity() instanceof ChatActivity) {
                     ((ChatActivity) getActivity()).setGroupMeta(
-                            groupData.getTitle(), isJoined, groupData.getThumbnail(),
-                            groupData.getIsPrivate(), 0
+                            groupInfoData.getTitle(), isJoined, groupInfoData.getThumbnail(),
+                            groupInfoData.getIsPrivate(), groupInfoData.getMemberCount()
                     );
                 }
 
@@ -925,8 +925,8 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         }
     }
 
-    private void showPublicGroupWarning(GroupData groupData) {
-        if (lubbleMainGroupRef == null && !LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupData.getIsPinned()) {
+    private void showPublicGroupWarning(GroupInfoData groupInfoData) {
+        if (lubbleMainGroupRef == null && !LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupInfoData.getIsPinned()) {
             lubbleMainGroupRef = RealtimeDbHelper.getLubbleRef();
             lubbleMainGroupRef.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -1511,21 +1511,26 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
 
     private void fetchAndShowAttachedGroupInfo() {
         if (!TextUtils.isEmpty(attachedGroupId)) {
-            RealtimeDbHelper.getLubbleGroupsRef().child(attachedGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
+            RealtimeDbHelper.getLubbleGroupInfoRef(attachedGroupId).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot != null) {
+                    if (isAdded()) {
                         linkMetaContainer.setVisibility(View.VISIBLE);
-                        final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                        linkTitle.setText(groupData.getTitle());
-                        linkDesc.setText(groupData.getDescription());
-                        GlideApp.with(getContext())
-                                .load(groupData.getThumbnail())
-                                .circleCrop()
-                                .placeholder(R.drawable.ic_circle_group_24dp)
-                                .error(R.drawable.ic_circle_group_24dp)
-                                .into(linkPicIv);
-                        attachedGroupPicUrl = groupData.getThumbnail();
+                        final GroupInfoData groupInfoData = dataSnapshot.getValue(GroupInfoData.class);
+                        if (groupInfoData != null) {
+                            linkTitle.setText(groupInfoData.getTitle());
+                            linkDesc.setText(groupInfoData.getDescription());
+                            GlideApp.with(getContext())
+                                    .load(groupInfoData.getThumbnail())
+                                    .circleCrop()
+                                    .placeholder(R.drawable.ic_circle_group_24dp)
+                                    .error(R.drawable.ic_circle_group_24dp)
+                                    .into(linkPicIv);
+                            attachedGroupPicUrl = groupInfoData.getThumbnail();
+                        } else {
+                            Toast.makeText(getContext(), "Failed to fetch attached group", Toast.LENGTH_SHORT).show();
+                            FirebaseCrashlytics.getInstance().recordException(new Exception("Failed to fetch attached group id: " + attachedGroupId));
+                        }
                     }
                 }
 
@@ -1934,7 +1939,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     }
 
     public void openGroupInfo() {
-        if ((userGroupData != null && userGroupData.isJoined()) || (groupData != null && !groupData.getIsPrivate())) {
+        if ((userGroupData != null && userGroupData.isJoined()) || (groupInfoData != null && !groupInfoData.getIsPrivate())) {
             //open group info if group is joined or is a public group
             ScrollingGroupInfoActivity.open(getContext(), groupId);
         } else if (dmOtherUserId != null) {

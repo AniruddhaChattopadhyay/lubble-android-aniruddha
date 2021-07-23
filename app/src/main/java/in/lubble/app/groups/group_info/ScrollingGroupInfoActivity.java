@@ -255,7 +255,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
                     })
                     .into(groupIv);
 
-            List<Map.Entry> memberEntryList = new ArrayList<Map.Entry>(groupData.getMembers().entrySet());
+            List<Map.Entry> memberEntryList = new ArrayList<>(groupData.getMembers().entrySet());
             adapter.clear();
             fetchAllGroupUsers();
             for (Map.Entry entry : memberEntryList) {

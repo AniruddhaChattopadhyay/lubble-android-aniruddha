@@ -23,6 +23,7 @@ public class GroupInfoData {
     private boolean isPrivate;
     private String lastMessage;
     private long lastMessageTimestamp = 0;
+    private int memberCount = 0;
     private String createdBy;
     private String question;
     private String questionChatId = "101";
@@ -149,5 +150,13 @@ public class GroupInfoData {
     @Exclude
     public void setInvitedBy(Set<String> invitedBy) {
         this.invitedBy = invitedBy;
+    }
+
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
     }
 }

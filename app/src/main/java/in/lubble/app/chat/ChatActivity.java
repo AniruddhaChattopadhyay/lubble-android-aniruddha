@@ -385,7 +385,7 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         sharedPreferences = ChatActivity.this.getSharedPreferences(MyPrefs, Context.MODE_PRIVATE);
         groupList = sharedPreferences.getStringSet(pinnedMessageDontShowGroupList, null);
         if (dmId == null && (groupList == null || !(groupList.contains(groupId)))) {
-            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("pinned_message").addListenerForSingleValueEvent(new ValueEventListener() {
+            RealtimeDbHelper.getLubbleGroupInfoRef(groupId).child("pinned_message").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     if (snapshot.exists()) {

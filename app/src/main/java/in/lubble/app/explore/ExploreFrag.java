@@ -34,6 +34,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import retrofit2.Call;
@@ -141,12 +142,12 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     }
 
     private void fetchLubbleSize(@NonNull String defaultGroup) {
-        RealtimeDbHelper.getLubbleGroupsRef().child(defaultGroup).addListenerForSingleValueEvent(new ValueEventListener() {
+        RealtimeDbHelper.getLubbleGroupInfoRef(defaultGroup).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                GroupData groupData = snapshot.getValue(GroupData.class);
+                GroupInfoData groupData = snapshot.getValue(GroupInfoData.class);
                 if (groupData != null) {
-                    exploreGroupAdapter.setLubbleMemberCount(groupData.getMembers().size());
+                    exploreGroupAdapter.setLubbleMemberCount(groupData.getMemberCount());
                 }
             }
 
