@@ -10,8 +10,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ServiceGenerator {
 
     private static final String BASE_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://devapi.lubble.in/" : "https://api.lubble.in/";
-//    private static final String BASE_URL = "http://192.168.56.1:8000/";
+    //    private static final String BASE_URL = "http://192.168.56.1:8000/";
     private static final String AIRTABLE_API_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://api.airtable.com/v0/" : "https://api.lubble.in/";
+    private static final String FIREBASE_API_URL = "dev".equalsIgnoreCase(BuildConfig.FLAVOR) ? "https://lubble-dev.firebaseio.com/" : "https://lubble-in.firebaseio.com/";
 
     private static Retrofit.Builder builder =
             new Retrofit.Builder()
@@ -23,8 +24,14 @@ public class ServiceGenerator {
                     .baseUrl(AIRTABLE_API_URL)
                     .addConverterFactory(GsonConverterFactory.create());
 
+    private static Retrofit.Builder firebaseRestBuilder =
+            new Retrofit.Builder()
+                    .baseUrl(FIREBASE_API_URL)
+                    .addConverterFactory(GsonConverterFactory.create());
+
     private static Retrofit retrofit = builder.build();
     private static Retrofit airtableRetrofit = airtableBuilder.build();
+    private static Retrofit firebaseRetrofit = firebaseRestBuilder.build();
 
     private static HttpLoggingInterceptor logging =
             new HttpLoggingInterceptor()
@@ -34,6 +41,9 @@ public class ServiceGenerator {
             new OkHttpClient.Builder();
     private static OkHttpClient.Builder airtableHttpClient =
             new OkHttpClient.Builder();
+    private static OkHttpClient.Builder firebaseHttpClient =
+            new OkHttpClient.Builder();
+
     private static AuthenticationInterceptor authenticationInterceptor =
             new AuthenticationInterceptor();
 
@@ -81,6 +91,15 @@ public class ServiceGenerator {
             airtableRetrofit = airtableBuilder.build();
         }
         return airtableRetrofit.create(serviceClass);
+    }
+
+    public static <S> S createFirebaseService(Class<S> serviceClass) {
+        if (!firebaseHttpClient.interceptors().contains(logging)) {
+            firebaseHttpClient.addInterceptor(logging);
+            firebaseRestBuilder.client(firebaseHttpClient.build());
+            firebaseRetrofit = firebaseRestBuilder.build();
+        }
+        return firebaseRetrofit.create(serviceClass);
     }
 
 }
