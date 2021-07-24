@@ -44,7 +44,6 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
     private final OnListFragmentInteractionListener mListener;
     private final GlideRequests glide;
     private final boolean isOnboarding;
-    private int lubbleMemberCount = 500;
     private HashMap<String, Boolean> selectedMap = new HashMap<>();
 
     public ExploreGroupAdapter(List<ExploreGroupData> items, OnListFragmentInteractionListener listener, GlideRequests glide, boolean isOnboarding) {
@@ -126,38 +125,15 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
 
         if (exploreGroupData.getMemberCount() == 0) {
             holder.memberCountTv.setVisibility(View.GONE);
-        } else if (exploreGroupData.getMemberCount() < 10) {
+        }/* else if (exploreGroupData.getMemberCount() < 10) {
             holder.memberCountTv.setVisibility(View.VISIBLE);
             holder.memberCountTv.setText("<10");
         } else {
             holder.memberCountTv.setVisibility(View.VISIBLE);
             holder.memberCountTv.setText(String.valueOf(exploreGroupData.getMemberCount()));
-        }
-
-        setLabel(holder, exploreGroupData);
+        }*/
 
         initCardClickListener(holder, exploreGroupData);
-    }
-
-    private void setLabel(ViewHolder holder, ExploreGroupData exploreGroupData) {
-        holder.labelTv.setVisibility(View.GONE);
-
-        if (exploreGroupData.getPriority() > 0 && exploreGroupData.getMemberCount() > 0) {
-            //added check for member count to ensure the priority label isnt applied before the firebase values are fetched
-            // otherwise it looks janky & buggy
-            holder.labelTv.setVisibility(View.VISIBLE);
-            holder.labelTv.setText("Suggested");
-            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_green_50)));
-            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_blue_grey_900));
-            holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_stars_green_14dp, 0, 0, 0);
-        }
-        if (exploreGroupData.getMemberCount() > lubbleMemberCount / 2.5) {
-            holder.labelTv.setVisibility(View.VISIBLE);
-            holder.labelTv.setText("Popular");
-            ViewCompat.setBackgroundTintList(holder.labelTv, ColorStateList.valueOf(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_red_50)));
-            holder.labelTv.setTextColor(ContextCompat.getColor(LubbleApp.getAppContext(), R.color.md_brown_900));
-            holder.labelTv.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_whatshot_14, 0, 0, 0);
-        }
     }
 
     private void initCardClickListener(final ViewHolder holder, final ExploreGroupData exploreGroupData) {
@@ -226,11 +202,6 @@ public class ExploreGroupAdapter extends RecyclerView.Adapter<ExploreGroupAdapte
 
     public interface OnListFragmentInteractionListener {
         void onListFragmentInteraction(ExploreGroupData item, boolean isAdded);
-    }
-
-    void setLubbleMemberCount(int count) {
-        lubbleMemberCount = count;
-        notifyDataSetChanged();
     }
 
     @Override

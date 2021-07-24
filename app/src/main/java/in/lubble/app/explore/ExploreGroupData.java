@@ -19,15 +19,6 @@ public class ExploreGroupData extends GroupInfoData {
 
     @SerializedName("priority")
     private int priority;
-    private int memberCount;
-
-    public int getMemberCount() {
-        return memberCount;
-    }
-
-    public void setMemberCount(int memberCount) {
-        this.memberCount = memberCount;
-    }
 
     public int getPriority() {
         return priority;

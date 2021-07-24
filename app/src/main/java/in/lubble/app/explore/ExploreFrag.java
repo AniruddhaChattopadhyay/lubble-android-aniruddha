@@ -54,7 +54,6 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     private ExploreGroupAdapter exploreGroupAdapter;
     private boolean isOnboarding;
     private EditText searchEt;
-    private Query publicGroupsQuery;
 
     public ExploreFrag() {
     }
@@ -120,41 +119,6 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
-
-        String defaultGroupId = LubbleSharedPrefs.getInstance().getDefaultGroupId();
-        if (TextUtils.isEmpty(defaultGroupId)) {
-            RealtimeDbHelper.getLubbleRef().child("defaultGroup").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String defaultGroup = snapshot.getValue(String.class);
-                    if (defaultGroup != null) {
-                        fetchLubbleSize(defaultGroup);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                }
-            });
-        } else {
-            fetchLubbleSize(defaultGroupId);
-        }
-    }
-
-    private void fetchLubbleSize(@NonNull String defaultGroup) {
-        RealtimeDbHelper.getLubbleGroupInfoRef(defaultGroup).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                GroupInfoData groupData = snapshot.getValue(GroupInfoData.class);
-                if (groupData != null) {
-                    exploreGroupAdapter.setLubbleMemberCount(groupData.getMemberCount());
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-            }
-        });
     }
 
     private void fetchExploreGroups() {
@@ -168,7 +132,6 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
                         // recycler view is currently holding shimmer adapter so hide it
                         recyclerView.hideShimmerAdapter();
                     }
-                    addGroupsListener();
                     exploreGroupAdapter.updateList(exploreGroupDataList);
                     if (isOnboarding) {
                         titleTv.setVisibility(View.GONE);
@@ -215,39 +178,6 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
         });
     }
 
-    private void addGroupsListener() {
-        publicGroupsQuery = getLubbleGroupsRef().orderByChild("members/" + FirebaseAuth.getInstance().getUid()).endAt(null);
-        publicGroupsQuery.addValueEventListener(publicGroupListener);
-    }
-
-    private ValueEventListener publicGroupListener = new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            Log.d(TAG, "onDataChange: ");
-            for (DataSnapshot snapshotChild : dataSnapshot.getChildren()) {
-                final GroupData groupData = snapshotChild.getValue(GroupData.class);
-                if (groupData != null && !groupData.getIsPrivate() && groupData.getId() != null && !TextUtils.isEmpty(groupData.getTitle())
-                        && groupData.getMembers().size() > 0) {
-                    // non-joined public groups with non-zero members
-                    ExploreGroupData exploreGroupData = new ExploreGroupData();
-                    exploreGroupData.setId(groupData.getId());
-                    exploreGroupData.setTitle(groupData.getTitle());
-                    exploreGroupData.setThumbnail(groupData.getProfilePic());
-                    exploreGroupData.setMemberCount(groupData.getMembers().size());//todo
-                    exploreGroupData.setLastMessageTimestamp(groupData.getLastMessageTimestamp());
-                    exploreGroupAdapter.updateGroup(exploreGroupData);
-                }
-            }
-            publicGroupsQuery.removeEventListener(publicGroupListener);
-        }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            Log.e(TAG, "onCancelled: ");
-            FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
-        }
-    };
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -258,14 +188,6 @@ public class ExploreFrag extends Fragment implements ExploreGroupAdapter.OnListF
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (publicGroupsQuery != null && publicGroupListener != null) {
-            publicGroupsQuery.removeEventListener(publicGroupListener);
-        }
     }
 
     @Override
