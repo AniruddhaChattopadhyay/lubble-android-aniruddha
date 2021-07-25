@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,7 +17,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
@@ -29,16 +29,22 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.internal.LinkedTreeMap;
 
-import java.util.ArrayList;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
@@ -48,14 +54,21 @@ import in.lubble.app.R;
 import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.chat.SnoozeGroupBottomSheet;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.CompleteListener;
 import in.lubble.app.utils.FullScreenImageActivity;
 import in.lubble.app.utils.NotifUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -207,20 +220,36 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        // fetch token
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(false)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        String idToken = task.getResult().getToken();
+                        fetchGroupMembers(idToken);
+                    } else {
+                        Toast.makeText(this, "Failed to fetch access token", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         syncGroupInfo();
     }
 
     private void syncGroupInfo() {
-        getLubbleGroupsRef().child(groupId)
+        getLubbleGroupInfoRef(groupId)
                 .addValueEventListener(groupInfoEventListener);
     }
 
     final ValueEventListener groupInfoEventListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            final GroupData groupData = dataSnapshot.getValue(GroupData.class);
+            final GroupInfoData groupData = dataSnapshot.getValue(GroupInfoData.class);
             setTitle(groupData.getTitle());
             descTv.setText(groupData.getDescription());
             GlideApp.with(ScrollingGroupInfoActivity.this)
@@ -255,7 +284,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
                     })
                     .into(groupIv);
 
-            List<Map.Entry> memberEntryList = new ArrayList<>(groupData.getMembers().entrySet());
+            /*List<Map.Entry> memberEntryList = new ArrayList<>(groupData.getMembers().entrySet());
             adapter.clear();
             fetchAllGroupUsers();
             for (Map.Entry entry : memberEntryList) {
@@ -263,10 +292,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
                 if (map.get("admin") == Boolean.TRUE) {
                     adapter.addAdminId((String) entry.getKey());
                 }
-            }
-
-            toggleLeaveGroupVisibility(groupData);
-            toggleMemberElements(groupData.isJoined());
+            }*/
 
             privacyIcon.setImageResource(groupData.getIsPrivate() ? R.drawable.ic_lock_black_24dp : R.drawable.ic_public_black_24dp);
             privacyTv.setText(groupData.getIsPrivate() ? getString(R.string.private_group) : getString(R.string.public_group));
@@ -278,37 +304,52 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
         }
     };
 
-    private void fetchAllGroupUsers() {
+    private void fetchGroupMembers(String idToken) {
+        adapter.clear();
         groupMembersProgressBar.setVisibility(View.VISIBLE);
-        FirebaseDatabase.getInstance().getReference("users").orderByChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()
-                + "/groups/" + groupId + "/joined").equalTo(true)
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (!isFinishing()) {
-                            adapter.clear();
-                            groupMembersProgressBar.setVisibility(View.GONE);
-                            for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                if (!(child.getValue() instanceof Boolean)) {
-                                    final ProfileData profileData = child.getValue(ProfileData.class);
-                                    if (profileData != null && profileData.getInfo() != null && !profileData.getIsDeleted()) {
-                                        profileData.setId(child.getKey());
-                                        profileData.getInfo().setId(child.getKey());
-                                        adapter.addProfile(profileData.getInfo());
-                                    }
-                                }
+        final Endpoints endpoints = ServiceGenerator.createFirebaseService(Endpoints.class);
+        String lubbleId = LubbleSharedPrefs.getInstance().requireLubbleId();
+        Call<JsonObject> lubbleMembersCall =
+                endpoints.fetchLubbleMembers("\"lubbles/" + lubbleId + "\"", "\"\"", idToken);
+        lubbleMembersCall.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NotNull Call<JsonObject> call, @NotNull Response<JsonObject> response) {
+                if (response.isSuccessful() && !isFinishing()) {
+                    groupMembersProgressBar.setVisibility(View.GONE);
+                    final JsonObject responseJson = response.body();
+                    Gson gson = new Gson();
+                    boolean isJoined = false;
+                    for (Map.Entry<String, JsonElement> entry : responseJson.entrySet()) {
+                        ProfileData profileData = gson.fromJson(entry.getValue(), ProfileData.class);
+                        final ProfileInfo profileInfo = profileData.getInfo();
+                        HashMap<String, Object> groupsMap = profileData.getLubbles().get(lubbleId).get("groups");
+                        if (groupsMap != null && groupsMap.containsKey(groupId) && profileInfo != null && profileInfo.getName() != null && !profileData.getIsDeleted()) {
+                            profileInfo.setId(entry.getKey());
+                            adapter.addProfile(profileInfo);
+                            if (entry.getKey().equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
+                                isJoined = true;
                             }
                         }
                     }
+                    toggleLeaveGroupVisibility(isJoined);
+                    toggleMemberElements(isJoined);
+                } else if (!isFinishing()) {
+                    groupMembersProgressBar.setVisibility(View.GONE);
+                    Toast.makeText(ScrollingGroupInfoActivity.this, "error: " + response.message(), Toast.LENGTH_SHORT).show();
+                }
+            }
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if (!isFinishing()) {
+                    groupMembersProgressBar.setVisibility(View.GONE);
+                    Toast.makeText(ScrollingGroupInfoActivity.this, R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
-    private void openDpInFullScreen(GroupData groupData) {
+    private void openDpInFullScreen(GroupInfoData groupData) {
         FullScreenImageActivity.open(this,
                 this,
                 groupData.getProfilePic(),
@@ -352,12 +393,12 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
         }
     }
 
-    private void toggleLeaveGroupVisibility(final GroupData groupData) {
+    private void toggleLeaveGroupVisibility(boolean isJoined) {
         final String defaultGroupId = LubbleSharedPrefs.getInstance().getDefaultGroupId();
         if (groupId.equalsIgnoreCase(defaultGroupId)) {
             leaveGroupTV.setVisibility(View.GONE);
         } else {
-            if (groupData != null && groupData.isJoined()) {
+            if (isJoined) {
                 leaveGroupTV.setVisibility(View.VISIBLE);
             } else {
                 leaveGroupTV.setVisibility(View.GONE);

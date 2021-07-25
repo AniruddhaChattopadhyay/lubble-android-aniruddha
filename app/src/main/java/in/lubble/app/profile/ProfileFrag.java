@@ -302,24 +302,16 @@ public class ProfileFrag extends Fragment {
         }
     }
 
-    private void syncGroups(Set<Map.Entry<String, Object>> lubbleSet) {
-
+    private void syncGroups(ProfileData profileData) {
         // fetch token first
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         mUser.getIdToken(false)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         String idToken = task.getResult().getToken();
-                        for (Map.Entry<String, Object> lubbleMap : lubbleSet) {
-                            if (lubbleMap.getKey().equalsIgnoreCase(LubbleSharedPrefs.getInstance().getLubbleId())) {
-                                for (Map.Entry<String, Object> lubbleNodesMap : ((HashMap<String, Object>) lubbleMap.getValue()).entrySet()) {
-                                    if (lubbleNodesMap.getKey().equalsIgnoreCase("groups")) {
-                                        for (String groupId : ((HashMap<String, Object>) lubbleNodesMap.getValue()).keySet()) {
-                                            fetchGroupInfo(groupId, idToken);
-                                        }
-                                    }
-                                }
-                            }
+                        HashMap<String, Object> groupsMap = profileData.getLubbles().get(LubbleSharedPrefs.getInstance().getLubbleId()).get("groups");
+                        for (String groupId : groupsMap.keySet()) {
+                            fetchGroupInfo(groupId, idToken);
                         }
                     } else {
                         Toast.makeText(getContext(), "Failed to fetch access token", Toast.LENGTH_SHORT).show();
@@ -458,7 +450,7 @@ public class ProfileFrag extends Fragment {
                         });
                         if (lubbleId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getLubbleId())) {
                             // profile is of the same lubble as current user, show chat groups
-                            syncGroups(profileData.getLubbles().entrySet());
+                            syncGroups(profileData);
                         }
                         break;
                     }

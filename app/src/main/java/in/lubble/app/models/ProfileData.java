@@ -39,7 +39,7 @@ public class ProfileData {
     private ProfileAddress profileAddress;
     @Exclude
     private String groupFlair;
-    private HashMap<String, Object> lubbles;
+    private HashMap<String, HashMap<String, HashMap<String, Object>>> lubbles;
 
     @Override
     public boolean equals(@Nullable Object obj) {
@@ -272,11 +272,11 @@ public class ProfileData {
         isDmEnabled = dmEnabled;
     }
 
-    public HashMap<String, Object> getLubbles() {
+    public HashMap<String, HashMap<String, HashMap<String, Object>>> getLubbles() {
         return lubbles;
     }
 
-    public void setLubbles(HashMap<String, Object> lubbles) {
+    public void setLubbles(HashMap<String, HashMap<String, HashMap<String, Object>>> lubbles) {
         this.lubbles = lubbles;
     }
 }

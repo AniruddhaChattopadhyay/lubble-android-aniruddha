@@ -222,7 +222,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
     private void fetchLubbleMembers(String idToken) {
         final Endpoints endpoints = ServiceGenerator.createFirebaseService(Endpoints.class);
         Call<JsonObject> lubbleMembersCall =
-                endpoints.fetchLubbleMembers("\"lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "\"", "", idToken);
+                endpoints.fetchLubbleMembers("\"lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "\"", "\"\"", idToken);
         lubbleMembersCall.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NotNull Call<JsonObject> call, @NotNull Response<JsonObject> response) {
@@ -232,7 +232,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
                     for (Map.Entry<String, JsonElement> entry : responseJson.entrySet()) {
                         ProfileData profileData = gson.fromJson(entry.getValue(), ProfileData.class);
                         final ProfileInfo profileInfo = profileData.getInfo();
-                        if (profileInfo != null && profileInfo.getName() != null) {
+                        if (profileInfo != null && profileInfo.getName() != null && !profileData.getIsDeleted()) {
                             profileInfo.setId(entry.getKey());
                             userAdapter.addMemberProfile(profileInfo);
                         }

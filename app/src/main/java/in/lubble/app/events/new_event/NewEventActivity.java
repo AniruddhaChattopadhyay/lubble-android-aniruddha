@@ -104,9 +104,6 @@ import static in.lubble.app.utils.FileUtils.getPickImageIntent;
 import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.StringUtils.isValidString;
 
-//import com.google.android.gms.location.places.Place;
-//import com.google.android.gms.location.places.Places;
-
 @RuntimePermissions
 public class NewEventActivity extends BaseActivity {
 
@@ -131,20 +128,20 @@ public class NewEventActivity extends BaseActivity {
     private TextInputLayout endTimeTil;
     private TextInputLayout addressTil;
     private TextInputLayout ticketUrl;
-    private RadioGroup radioGroup;
-    private RadioButton newGroupRadioBtn;
+    /*private RadioGroup radioGroup;
+    private RadioButton newGroupRadioBtn;*/
     private String eventId;
-    private CompoundButton oldGroupRadioBtn;
+    /*private CompoundButton oldGroupRadioBtn;
     private TextView notAdminHintTv;
     private TextView relatedGroupsTv;
-    private Spinner adminGroupsSpinner;
+    private Spinner adminGroupsSpinner;*/
     private EventGroupSpinnerAdapter spinnerAdapter;
     private Calendar myCalendar;
-    private ChildEventListener userGroupRef;
-    private HashMap<Query, ValueEventListener> map = new HashMap<>();
+    //private ChildEventListener userGroupRef;
+    //private HashMap<Query, ValueEventListener> map = new HashMap<>();
     private Button submitBtn;
     private Place place;
-    private ArrayList<String> relatedGroupIdList = new ArrayList<>();
+    //private ArrayList<String> relatedGroupIdList = new ArrayList<>();
     private ProgressDialog progressDialog;
 
     public static void open(Context context) {
@@ -166,12 +163,12 @@ public class NewEventActivity extends BaseActivity {
         startTimeTil = findViewById(R.id.til_event_start_time);
         endTimeTil = findViewById(R.id.til_event_end_time);
         addressTil = findViewById(R.id.till_event_address);
-        radioGroup = findViewById(R.id.radioGroup_group_link);
+        /*radioGroup = findViewById(R.id.radioGroup_group_link);
         newGroupRadioBtn = findViewById(R.id.radiobtn_new_group);
         oldGroupRadioBtn = findViewById(R.id.radiobtn_old_group);
         notAdminHintTv = findViewById(R.id.tv_not_admin_hint);
         relatedGroupsTv = findViewById(R.id.tv_related_groups);
-        adminGroupsSpinner = findViewById(R.id.spinner_admin_groups);
+        adminGroupsSpinner = findViewById(R.id.spinner_admin_groups);*/
         ticketUrl = findViewById(R.id.til_event_url_tickets);
         submitBtn = findViewById(R.id.btn_submit);
 
@@ -197,7 +194,7 @@ public class NewEventActivity extends BaseActivity {
         endTimeTil.getEditText().setCursorVisible(false);
         endTimeTil.getEditText().setKeyListener(null);
 
-        spinnerAdapter = new EventGroupSpinnerAdapter(this, R.layout.item_privacy_spinner, new ArrayList<GroupData>(), GlideApp.with(this));
+        /*spinnerAdapter = new EventGroupSpinnerAdapter(this, R.layout.item_privacy_spinner, new ArrayList<GroupData>(), GlideApp.with(this));
         adminGroupsSpinner.setAdapter(spinnerAdapter);
 
         newGroupRadioBtn.setChecked(true);
@@ -210,7 +207,7 @@ public class NewEventActivity extends BaseActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 adminGroupsSpinner.setVisibility(isChecked ? View.VISIBLE : View.GONE);
             }
-        });
+        });*/
 
         progressDialog = new ProgressDialog(this);
 
@@ -230,9 +227,9 @@ public class NewEventActivity extends BaseActivity {
                 eventData.setOrganizer(organizerTil.getEditText().getText().toString().trim());
                 eventData.setTicketUrl(ticketUrl.getEditText().getText().toString().trim());
                 StringBuilder relatedGroupsStr = new StringBuilder();
-                for (String groudId : relatedGroupIdList) {
+                /*for (String groudId : relatedGroupIdList) {
                     relatedGroupsStr.append(groudId + ",");
-                }
+                }*/
                 eventData.setRelatedGroups(relatedGroupsStr.toString());
 
                 final String dateStr = dateTil.getEditText().getText().toString();
@@ -253,12 +250,12 @@ public class NewEventActivity extends BaseActivity {
                     eventData.setLongi(place.getLatLng().longitude);
                     eventData.setAddress(addressTil.getEditText().getText().toString());
                     eventData.setLubble_id(LubbleSharedPrefs.getInstance().getLubbleId());
-                    if (oldGroupRadioBtn.isChecked()) {
+                    /*if (oldGroupRadioBtn.isChecked()) {
                         final GroupData selectedGroupData = (GroupData) adminGroupsSpinner.getSelectedItem();
                         eventData.setGid(selectedGroupData.getId());
                     } else {
                         eventData.setGid("");
-                    }
+                    }*/
                     EventMemberData eventMemberData = new EventMemberData();
                     eventMemberData.setisAdmin(true);
                     eventMemberData.setResponse(GOING);
@@ -330,12 +327,12 @@ public class NewEventActivity extends BaseActivity {
             }
         });
 
-        relatedGroupsTv.setOnClickListener(new View.OnClickListener() {
+        /*relatedGroupsTv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivityForResult(GroupMultiSelectActiv.getIntent(NewEventActivity.this), REQUEST_CODE_RELATED_GROUPS);
             }
-        });
+        });*/
 
     }
 
@@ -404,10 +401,10 @@ public class NewEventActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        fetchUserGroups();
+        //fetchUserGroups();
     }
 
-    private void fetchUserGroups() {
+    /*private void fetchUserGroups() {
         spinnerAdapter.clear();
         userGroupRef = getUserGroupsRef().addChildEventListener(new ChildEventListener() {
             @Override
@@ -436,9 +433,9 @@ public class NewEventActivity extends BaseActivity {
             }
         });
 
-    }
+    }*/
 
-    private void fetchGroupInfo(String groupId) {
+    /*private void fetchGroupInfo(String groupId) {
         final ValueEventListener joinedGroupRef = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -465,7 +462,7 @@ public class NewEventActivity extends BaseActivity {
             }
         });
         map.put(getLubbleGroupsRef().child(groupId), joinedGroupRef);
-    }
+    }*/
 
     @NonNull
     private View.OnClickListener getOnDateClickListener() {
@@ -627,24 +624,24 @@ public class NewEventActivity extends BaseActivity {
                     .signature(new ObjectKey(imageFile.length() + "@" + imageFile.lastModified()))
                     .into(headerImage);
         } else if (requestCode == REQUEST_CODE_RELATED_GROUPS && resultCode == RESULT_OK && data.hasExtra("selected_list")) {
-            relatedGroupIdList = (ArrayList<String>) data.getSerializableExtra("selected_list");
+            /*relatedGroupIdList = (ArrayList<String>) data.getSerializableExtra("selected_list");
             if (!relatedGroupIdList.isEmpty()) {
                 relatedGroupsTv.setText(String.format("Add event to %s", getResources().getQuantityString(R.plurals.group_count, relatedGroupIdList.size(), relatedGroupIdList.size())));
                 relatedGroupsTv.setTextColor(ContextCompat.getColor(this, R.color.black));
             } else {
                 relatedGroupsTv.setText("Select All Related Groups");
                 relatedGroupsTv.setTextColor(ContextCompat.getColor(this, R.color.link_blue));
-            }
+            }*/
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        getUserGroupsRef().removeEventListener(userGroupRef);
+        /*getUserGroupsRef().removeEventListener(userGroupRef);
         for (Query query : map.keySet()) {
             query.removeEventListener(map.get(query));
-        }
+        }*/
     }
 
 
