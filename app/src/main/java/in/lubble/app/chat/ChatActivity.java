@@ -677,12 +677,12 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
         } else {
             toolbarInviteHint.setVisibility(View.GONE);
             highlightNamesTv.setVisibility(View.VISIBLE);
-            if (memberCount < 5) {
+            if (memberCount < 3) {
                 memberCountTV.setVisibility(View.GONE);
                 highlightNamesTv.setText(R.string.click_group_info);
             } else {
                 memberCountTV.setVisibility(View.VISIBLE);
-                Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(5);
+                Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(3);
                 final Set<String> nameSet = new HashSet<>();
                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -699,19 +699,19 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                                         nameList += firstName + ", ";
                                     }
                                     nameSet.add(snapshot.getValue(String.class));
-                                    if (nameSet.size() == 5 || nameSet.size() == memberCount) {
+                                    if (nameSet.size() == 3 || nameSet.size() == memberCount) {
                                         if (isGroupJoined) {
                                             String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
                                             nameSet.add(nameUser);
                                             nameList = "<b>" + nameUser + "</b>, " + nameList;
                                             highlightNamesTv.setText(Html.fromHtml(nameList));
                                             String count = "+" + (memberCount - nameSet.size());
-                                            if (memberCount > 5)
+                                            if (memberCount > 3)
                                                 memberCountTV.setText(count);
                                         } else {
                                             highlightNamesTv.setText(nameList);
                                             String count = "+" + (memberCount - nameSet.size());
-                                            if (memberCount > 5)
+                                            if (memberCount > 3)
                                                 memberCountTV.setText(count);
                                         }
                                     }

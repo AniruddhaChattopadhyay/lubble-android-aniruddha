@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import com.google.firebase.database.Exclude;
 
 import java.util.Calendar;
+import java.util.HashMap;
 
 import in.lubble.app.utils.DateTimeUtils;
 
@@ -38,6 +39,7 @@ public class ProfileData {
     private ProfileAddress profileAddress;
     @Exclude
     private String groupFlair;
+    private HashMap<String, Object> lubbles;
 
     @Override
     public boolean equals(@Nullable Object obj) {
@@ -268,5 +270,13 @@ public class ProfileData {
 
     public void setIsDmEnabled(boolean dmEnabled) {
         isDmEnabled = dmEnabled;
+    }
+
+    public HashMap<String, Object> getLubbles() {
+        return lubbles;
+    }
+
+    public void setLubbles(HashMap<String, Object> lubbles) {
+        this.lubbles = lubbles;
     }
 }

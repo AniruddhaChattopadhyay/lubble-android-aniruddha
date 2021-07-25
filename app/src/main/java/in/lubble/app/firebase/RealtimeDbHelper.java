@@ -72,6 +72,10 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/lubbleInfo");
     }
 
+    public static DatabaseReference getLubbleInfoRef(String lubbleId) {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + lubbleId + "/lubbleInfo");
+    }
+
     public static DatabaseReference getLubbleMembersRef() {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/members");
     }
