@@ -420,7 +420,7 @@ public class ScrollingGroupInfoActivity extends BaseActivity {
     @Override
     public void onPause() {
         super.onPause();
-        getLubbleGroupsRef().child(groupId).removeEventListener(groupInfoEventListener);
+        getLubbleGroupInfoRef(groupId).removeEventListener(groupInfoEventListener);
     }
 
 }

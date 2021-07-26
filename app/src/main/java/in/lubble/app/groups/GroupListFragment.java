@@ -584,8 +584,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                             userGroupData.setJoined(true);
                             adapter.addGroupToTop(groupData, userGroupData);
                             groupsRecyclerView.scrollToPosition(0);
-                            queryCounter--;
-                            checkAllChatsSynced();
                     /* todo check if reqd with new user onboarding
                     // delayed sorting for new users
                         if (isNewUser && newUserGroupsMap == null && GroupPromptSharedPrefs.getInstance().getPreferences().getAll().size() > 0) {
@@ -599,6 +597,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                         }
                      */
                         }
+                        queryCounter--;
+                        checkAllChatsSynced();
                     }
 
                     @Override
@@ -622,9 +622,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                             }
                             final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
                             adapter.addGroupToTop(groupData, userGroupData);
-                            queryCounter--;
-                            checkAllChatsSynced();
                         }
+                        queryCounter--;
+                        checkAllChatsSynced();
                     }
 
                     @Override
