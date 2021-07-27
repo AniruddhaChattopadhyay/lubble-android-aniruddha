@@ -84,8 +84,8 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private OnListFragmentInteractionListener mListener;
     private LinearLayout newGroupContainer;
     private GroupRecyclerAdapter adapter;
-    private HashMap<Query, ValueEventListener> map = new HashMap<>();
-    private HashMap<Query, ValueEventListener> dmListenersMap = new HashMap<>();
+    private final HashMap<Query, ValueEventListener> map = new HashMap<>();
+    private final HashMap<Query, ValueEventListener> dmListenersMap = new HashMap<>();
     private ChildEventListener userGroupsListener;
     private ChildEventListener userDmsListener;
     private RecyclerView groupsRecyclerView;
@@ -100,7 +100,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private Timer sliderTimer;
     private int currentPage = 0;
     private TabLayout tabLayout;
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
     private ChildEventListener sellerDmsListener;
     private Trace groupTrace;

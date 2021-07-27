@@ -37,6 +37,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.common.base.Joiner;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
@@ -44,7 +45,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
@@ -70,7 +70,6 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.stories.StoriesRecyclerViewAdapter;
 import in.lubble.app.chat.stories.StoryData;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.NotifData;
@@ -129,8 +128,6 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private SearchResultData searchResultData = null;
     private int currSearchCursorPos = 0;
     private ProgressDialog searchProgressDialog;
-    private String nameList;
-    private String nameUser = "";
     private SharedPreferences sharedPreferences;
     private final String MyPrefs = "ChatActivity";
     Set<String> groupList;
@@ -717,15 +714,16 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
     private void fetchGroupMembers(String idToken, boolean isGroupJoined, int memberCount) {
         final Endpoints endpoints = ServiceGenerator.createFirebaseService(Endpoints.class);
         String lubbleId = LubbleSharedPrefs.getInstance().requireLubbleId();
+        //fetch 5 members & show max 3 non-null names
         Call<JsonObject> lubbleMembersCall =
-                endpoints.fetchLubbleMembersLimit("\"lubbles/" + lubbleId + "\"", "\"\"", 3, idToken);
+                endpoints.fetchLubbleMembersLimit("\"lubbles/" + lubbleId + "\"", "\"\"", 5, idToken);
         lubbleMembersCall.enqueue(new Callback<JsonObject>() {
             @Override
             public void onResponse(@NotNull Call<JsonObject> call, @NotNull Response<JsonObject> response) {
                 if (response.isSuccessful() && !isFinishing()) {
                     final JsonObject responseJson = response.body();
                     Gson gson = new Gson();
-                    nameList = "";
+                    ArrayList<String> nameList = new ArrayList<>();
                     for (Map.Entry<String, JsonElement> entry : responseJson.entrySet()) {
                         ProfileData profileData = gson.fromJson(entry.getValue(), ProfileData.class);
                         final ProfileInfo profileInfo = profileData.getInfo();
@@ -734,19 +732,20 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                             profileInfo.setId(entry.getKey());
                             String firstName = getFirstName(profileInfo.getName());
                             if (firstName != null) {
-                                nameList += firstName + ", ";
+                                nameList.add(firstName);
+                                if (nameList.size() >= 3) break;
                             }
                         }
                     }
                     if (isGroupJoined) {
                         String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-                        nameList = "<b>" + nameUser + "</b>, " + nameList;
-                        highlightNamesTv.setText(Html.fromHtml(nameList));
+                        nameList.add(0, "<b>" + nameUser + "</b>");
+                        highlightNamesTv.setText(Html.fromHtml(Joiner.on(", ").join(nameList)));
                         String count = "+" + (memberCount - 3);
                         if (memberCount > 3)
                             memberCountTV.setText(count);
                     } else {
-                        highlightNamesTv.setText(nameList);
+                        highlightNamesTv.setText(Joiner.on(", ").join(nameList));
                         String count = "+" + (memberCount - 3);
                         if (memberCount > 3)
                             memberCountTV.setText(count);
