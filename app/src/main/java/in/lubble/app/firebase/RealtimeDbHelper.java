@@ -76,10 +76,6 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + lubbleId + "/lubbleInfo");
     }
 
-    public static DatabaseReference getLubbleMembersRef() {
-        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/members");
-    }
-
     public static DatabaseReference getLubbleDomesticRef() {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/domesticDirectory");
     }
@@ -142,10 +138,6 @@ public class RealtimeDbHelper {
 
     public static DatabaseReference getDevRef() {
         return FirebaseDatabase.getInstance().getReference("devs");
-    }
-
-    public static DatabaseReference getEventsRef() {
-        return getLubbleRef().child("events");
     }
 
     /*

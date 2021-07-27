@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -38,13 +37,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.internal.LinkedTreeMap;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
@@ -69,7 +66,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupInfoRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class ScrollingGroupInfoActivity extends BaseActivity {

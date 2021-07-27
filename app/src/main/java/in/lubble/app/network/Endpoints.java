@@ -231,6 +231,9 @@ public interface Endpoints {
     @GET("users.json")
     Call<JsonObject> fetchLubbleMembers(@Query("orderBy") String orderBy, @Query("startAt") String startAt, @Query("auth") String token);
 
+    @GET("users.json")
+    Call<JsonObject> fetchLubbleMembersLimit(@Query("orderBy") String orderBy, @Query("startAt") String startAt, @Query("limitToLast") int limit, @Query("auth") String token);
+
     @GET("lubbles/{lubble_id}/groups/{group_id}.json")
     Call<GroupData> fetchGroupData(@Path("lubble_id") String lubbleId, @Path("group_id") String groupId, @Query("auth") String token);
 

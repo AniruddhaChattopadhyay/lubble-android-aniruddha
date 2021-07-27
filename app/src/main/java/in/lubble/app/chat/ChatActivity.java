@@ -38,6 +38,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -48,6 +49,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,15 +70,23 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.stories.StoriesRecyclerViewAdapter;
 import in.lubble.app.chat.stories.StoryData;
 import in.lubble.app.firebase.RealtimeDbHelper;
+import in.lubble.app.groups.group_info.ScrollingGroupInfoActivity;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.GroupData;
 import in.lubble.app.models.NotifData;
+import in.lubble.app.models.ProfileData;
+import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.search.Hit;
 import in.lubble.app.models.search.SearchResultData;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.user_search.UserSearchActivity;
 import in.lubble.app.utils.FragUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -682,56 +694,71 @@ public class ChatActivity extends BaseActivity implements ChatMoreFragment.Flair
                 highlightNamesTv.setText(R.string.click_group_info);
             } else {
                 memberCountTV.setVisibility(View.VISIBLE);
-                Query query = RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("members").limitToLast(3);
-                final Set<String> nameSet = new HashSet<>();
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        nameList = "";
-                        for (DataSnapshot childSnapShot : snapshot.getChildren()) {
-                            String uid;
-                            uid = childSnapShot.getKey();
-                            RealtimeDbHelper.getUserInfoRef(uid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    String firstName = getFirstName(snapshot.getValue(String.class));
-                                    if (firstName != null) {
-                                        nameList += firstName + ", ";
-                                    }
-                                    nameSet.add(snapshot.getValue(String.class));
-                                    if (nameSet.size() == 3 || nameSet.size() == memberCount) {
-                                        if (isGroupJoined) {
-                                            String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
-                                            nameSet.add(nameUser);
-                                            nameList = "<b>" + nameUser + "</b>, " + nameList;
-                                            highlightNamesTv.setText(Html.fromHtml(nameList));
-                                            String count = "+" + (memberCount - nameSet.size());
-                                            if (memberCount > 3)
-                                                memberCountTV.setText(count);
-                                        } else {
-                                            highlightNamesTv.setText(nameList);
-                                            String count = "+" + (memberCount - nameSet.size());
-                                            if (memberCount > 3)
-                                                memberCountTV.setText(count);
-                                        }
-                                    }
+                // fetch token
+                FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+                mUser.getIdToken(false)
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                String idToken = task.getResult().getToken();
+                                try {
+                                    fetchGroupMembers(idToken, isGroupJoined, memberCount);
+                                } catch (Exception e) {
+                                    // dont crash app if this breaks
+                                    FirebaseCrashlytics.getInstance().recordException(e);
                                 }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    FirebaseCrashlytics.getInstance().recordException(error.toException());
-                                }
-                            });
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        FirebaseCrashlytics.getInstance().recordException(error.toException());
-                    }
-                });
+                            } else {
+                                Toast.makeText(this, "Failed to fetch access token", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
         }
+    }
+
+    private void fetchGroupMembers(String idToken, boolean isGroupJoined, int memberCount) {
+        final Endpoints endpoints = ServiceGenerator.createFirebaseService(Endpoints.class);
+        String lubbleId = LubbleSharedPrefs.getInstance().requireLubbleId();
+        Call<JsonObject> lubbleMembersCall =
+                endpoints.fetchLubbleMembersLimit("\"lubbles/" + lubbleId + "\"", "\"\"", 3, idToken);
+        lubbleMembersCall.enqueue(new Callback<JsonObject>() {
+            @Override
+            public void onResponse(@NotNull Call<JsonObject> call, @NotNull Response<JsonObject> response) {
+                if (response.isSuccessful() && !isFinishing()) {
+                    final JsonObject responseJson = response.body();
+                    Gson gson = new Gson();
+                    nameList = "";
+                    for (Map.Entry<String, JsonElement> entry : responseJson.entrySet()) {
+                        ProfileData profileData = gson.fromJson(entry.getValue(), ProfileData.class);
+                        final ProfileInfo profileInfo = profileData.getInfo();
+                        HashMap<String, Object> groupsMap = profileData.getLubbles().get(lubbleId).get("groups");
+                        if (groupsMap != null && groupsMap.containsKey(groupId) && profileInfo != null && profileInfo.getName() != null && !profileData.getIsDeleted()) {
+                            profileInfo.setId(entry.getKey());
+                            String firstName = getFirstName(profileInfo.getName());
+                            if (firstName != null) {
+                                nameList += firstName + ", ";
+                            }
+                        }
+                    }
+                    if (isGroupJoined) {
+                        String nameUser = getFirstName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
+                        nameList = "<b>" + nameUser + "</b>, " + nameList;
+                        highlightNamesTv.setText(Html.fromHtml(nameList));
+                        String count = "+" + (memberCount - 3);
+                        if (memberCount > 3)
+                            memberCountTV.setText(count);
+                    } else {
+                        highlightNamesTv.setText(nameList);
+                        String count = "+" + (memberCount - 3);
+                        if (memberCount > 3)
+                            memberCountTV.setText(count);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                //ignore
+            }
+        });
     }
 
     private String getFirstName(String name) {

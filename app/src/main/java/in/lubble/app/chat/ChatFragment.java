@@ -192,8 +192,6 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     private TextView linkDesc;
     private ImageView linkCancel;
     @Nullable
-    private DatabaseReference lubbleMainGroupRef;
-    @Nullable
     private DatabaseReference groupReference;
     @Nullable
     private DatabaseReference dmInfoReference;
@@ -926,34 +924,21 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     }
 
     private void showPublicGroupWarning(GroupInfoData groupInfoData) {
-        if (lubbleMainGroupRef == null && !LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupInfoData.getIsPinned()) {
-            lubbleMainGroupRef = RealtimeDbHelper.getLubbleRef();
-            lubbleMainGroupRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (isAdded()) {
-                        String lubbleName = dataSnapshot.child("title").getValue(String.class);
-                        showBottomSheetAlert(getContext(), getLayoutInflater(),
-                                "\uD83D\uDC4B " + String.format(getString(R.string.lubble_group_warning_title), lubbleName),
-                                String.format(getString(R.string.lubble_group_warning_subtitle), lubbleName),
-                                0, new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
-                                        LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
-                                        DatabaseReference unreadCountRef = RealtimeDbHelper.getUserGroupsRef().child(groupId).child("unreadCount");
-                                        unreadCountRef.setValue(1);
-                                        unreadCountRef.setValue(0);
-                                    }
-                                });
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-                    FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
-                }
-            });
+        if (!LubbleSharedPrefs.getInstance().getIsDefaultGroupInfoShown() && groupInfoData.getIsPinned()) {
+            String lubbleName = LubbleSharedPrefs.getInstance().getLubbleName();
+            showBottomSheetAlert(getContext(), getLayoutInflater(),
+                    "\uD83D\uDC4B " + String.format(getString(R.string.lubble_group_warning_title), lubbleName),
+                    String.format(getString(R.string.lubble_group_warning_subtitle), lubbleName),
+                    0, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            LubbleSharedPrefs.getInstance().setIsDefaultGroupInfoShown(true);
+                            LubbleSharedPrefs.getInstance().setIsDefaultGroupOpened(true);
+                            DatabaseReference unreadCountRef = RealtimeDbHelper.getUserGroupsRef().child(groupId).child("unreadCount");
+                            unreadCountRef.setValue(1);
+                            unreadCountRef.setValue(0);
+                        }
+                    });
 
         }
     }
