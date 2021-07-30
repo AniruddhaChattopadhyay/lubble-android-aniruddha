@@ -46,8 +46,8 @@ public class UserUtils {
     public static boolean isNewUser(FirebaseUser currentUser) {
         FirebaseUserMetadata metadata = currentUser.getMetadata();
         return (metadata != null &&
-                (metadata.getCreationTimestamp() <= metadata.getLastSignInTimestamp() + 100
-                        || metadata.getCreationTimestamp() >= metadata.getLastSignInTimestamp() - 100)
+                metadata.getCreationTimestamp() <= metadata.getLastSignInTimestamp() + 100
+                && metadata.getCreationTimestamp() >= metadata.getLastSignInTimestamp() - 100
         );
     }
 

@@ -402,7 +402,7 @@ public class LocationActivity extends BaseActivity {
 
     private void validateUserLocation(final Location location) {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2 && location.isFromMockProvider() && !BuildConfig.DEBUG) {
+        if (location.isFromMockProvider() && !BuildConfig.DEBUG) {
             showMockLocationDialog();
             return;
         }
@@ -445,7 +445,7 @@ public class LocationActivity extends BaseActivity {
 
         final JSONObject jsonObject = new JSONObject(params);
 
-        RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+        RequestBody body = RequestBody.create(jsonObject.toString(), MEDIA_TYPE);
 
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         endpoints.uploadSignUp(body).enqueue(new Callback<ArrayList<LocationsData>>() {
