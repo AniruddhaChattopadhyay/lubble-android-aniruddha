@@ -17,6 +17,8 @@ public class ExploreGroupData extends GroupInfoData {
         return super.equals(obj);
     }
 
+    @SerializedName("firebase_id")
+    private String id;
     @SerializedName("priority")
     private int priority;
 
@@ -26,6 +28,16 @@ public class ExploreGroupData extends GroupInfoData {
 
     public void setPriority(int priority) {
         this.priority = priority;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
     }
 
 }
