@@ -119,7 +119,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
 
             GlideApp.with(groupViewHolder.mView)
-                    .load(groupData.getThumbnail())
+                    .load(groupData.getThumbnail() == null ? groupData.getProfilePic() : groupData.getThumbnail())
                     .placeholder(placeholderThumbnail)
                     .error(placeholderThumbnail)
                     .circleCrop()

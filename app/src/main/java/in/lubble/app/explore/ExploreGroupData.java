@@ -19,6 +19,8 @@ public class ExploreGroupData extends GroupInfoData {
 
     @SerializedName("firebase_id")
     private String id;
+    @SerializedName("icon")
+    private String profilePic;
     @SerializedName("priority")
     private int priority;
 
@@ -40,4 +42,13 @@ public class ExploreGroupData extends GroupInfoData {
         this.id = id;
     }
 
+    @Override
+    public String getProfilePic() {
+        return profilePic;
+    }
+
+    @Override
+    public void setProfilePic(String profilePic) {
+        this.profilePic = profilePic;
+    }
 }
