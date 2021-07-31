@@ -310,6 +310,7 @@ public class ProfileFrag extends Fragment {
                     if (task.isSuccessful()) {
                         String idToken = task.getResult().getToken();
                         HashMap<String, Object> groupsMap = profileData.getLubbles().get(LubbleSharedPrefs.getInstance().getLubbleId()).get("groups");
+                        groupsAdapter.clear();
                         for (String groupId : groupsMap.keySet()) {
                             fetchGroupInfo(groupId, idToken);
                         }
@@ -403,6 +404,11 @@ public class ProfileFrag extends Fragment {
 
         void addGroupInfo(GroupInfoData groupInfoData) {
             groupList.add(groupInfoData);
+            notifyDataSetChanged();
+        }
+
+        public void clear() {
+            groupList.clear();
             notifyDataSetChanged();
         }
 
