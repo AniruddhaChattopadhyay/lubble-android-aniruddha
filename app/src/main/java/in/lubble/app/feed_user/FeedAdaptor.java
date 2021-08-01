@@ -1,5 +1,6 @@
 package in.lubble.app.feed_user;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -10,7 +11,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -86,6 +90,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private GlideRequests glide;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
+    private String photoLink = null;
+    private GestureDetector gestureDetector;
 
     public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
         super(diffCallback);
@@ -107,6 +113,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         return new MyViewHolder(itemView);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
         EnrichedActivity activity = getItem(position);
@@ -161,7 +168,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             }
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
-                String photoLink = extras.get("photoLink").toString();
+                photoLink = extras.get("photoLink").toString();
                 glide
                         .load(photoLink)
                         .transform(new RoundedCornersTransformation(dpToPx(8), 0))
@@ -178,7 +185,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                             }
                         })
                         .into(holder.photoContentIv);
-                holder.photoContentIv.setOnClickListener(v -> feedListener.onImageClicked(photoLink, holder.photoContentIv));
             }
 
             if (extras.containsKey("authorName")) {
@@ -194,13 +200,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                     holder.lubbleNameTv.setText(extras.get("lubble_name").toString());
                 else
                     holder.lubbleNameTv.setText(extras.get("lubble_id").toString());
-            }
-            if (extras.containsKey("feed_name")) {
-                String groupFeedName = extras.get("feed_name").toString();
-                holder.groupNameTv.setOnClickListener(v -> {
-                    FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
-                    feedListener.openGroupFeed(feedGroupData);
-                });
             }
         }
         Map<String, Object> actorMap = activity.getActor().getData();
@@ -231,23 +230,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         initCommentRecyclerView(holder, activity);
         handleCommentEditText(activity, holder);
         handleLinkPreview(activity, holder);
-
-        holder.likeLayout.setOnClickListener(v -> toggleLike(holder, position));
-        holder.commentLayout.setOnClickListener(v -> {
-            feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), position);
-        });
-        holder.itemView.setOnClickListener(v -> {
-            feedListener.openPostActivity(activity.getID());
-        });
-        holder.textContentTv.setOnClickListener(v -> {
-            feedListener.openPostActivity(activity.getID());
-        });
-        holder.authorPhotoIv.setOnClickListener(v -> {
-            ProfileActivity.open(context, activity.getActor().getID());
-        });
-        holder.shareLayout.setOnClickListener(v -> {
-            FeedUtils.requestPostShareIntent(glide, activity, extras, this::startShareFlow);
-        });
     }
 
     private void startShareFlow(Intent sharingIntent) {
@@ -284,21 +266,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                             .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                             .into(holder.linkImageIv);
                 }
-                holder.linkPreviewContainer.setOnClickListener(v -> {
-                    CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-                    intentBuilder.setToolbarColor(ContextCompat.getColor(context, R.color.colorAccent));
-                    intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(context, R.color.dk_colorAccent));
-                    intentBuilder.enableUrlBarHiding();
-                    intentBuilder.setShowTitle(true);
-                    CustomTabsIntent customTabsIntent = intentBuilder.build();
-                    try {
-                        customTabsIntent.launchUrl(context, Uri.parse(linkUrl));
-                    } catch (ActivityNotFoundException e) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(linkUrl));
-                        context.startActivity(i);
-                    }
-                });
             } else {
                 holder.linkPreviewContainer.setVisibility(GONE);
             }
@@ -324,7 +291,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         holder.commentEdtText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_account_circle_grey_24dp, 0, 0, 0);
                     }
                 });
-        holder.commentEdtText.setOnClickListener(v -> feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), holder.getAdapterPosition()));
     }
 
     public interface FeedListener {
@@ -351,9 +317,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             holder.viewAllRepliesTv.setVisibility(View.VISIBLE);
             holder.commentRecyclerView.setLayoutManager(layoutManager);
             holder.commentRecyclerView.setNestedScrollingEnabled(false);
-            holder.viewAllRepliesTv.setOnClickListener(v -> {
-                feedListener.openPostActivity(activity.getID());
-            });
             sortComments(commentList);
             FeedCommentAdaptor adapter = new FeedCommentAdaptor(commentList, activity.getID(), feedListener);
             holder.commentRecyclerView.setAdapter(adapter);
@@ -437,6 +400,49 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
     }
 
+
+    private void toggleLike2(ImageView likeIv, TextView likeTv, int position) {
+        EnrichedActivity activity = getItem(position);
+        if (!likedMap.containsKey(position)) {
+            // like
+            Reaction like = new Reaction.Builder()
+                    .kind("like")
+                    .id(userId + activity.getID())
+                    .activityID(activity.getID())
+                    .build();
+            try {
+                String notificationUserFeedId = "notification:" + activity.getActor().getID();
+                FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
+                    if (throwable != null) {
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
+                    }
+                });
+                likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+                likedMap.put(position, like.getId());
+                extractReactionCount(activity, "like", likeTv, 1);
+                feedListener.onLiked(activity.getForeignID());
+            } catch (StreamException e) {
+                e.printStackTrace();
+                FirebaseCrashlytics.getInstance().recordException(e);
+            }
+        } else {
+            // unlike
+            try {
+                FeedServices.getTimelineClient().reactions().delete(likedMap.get(position)).whenComplete((aVoid, throwable) -> {
+                    if (throwable != null) {
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
+                    }
+                });
+                likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
+                likedMap.remove(position);
+                extractReactionCount(activity, "like", likeTv, -1);
+            } catch (StreamException e) {
+                e.printStackTrace();
+                FirebaseCrashlytics.getInstance().recordException(e);
+            }
+        }
+    }
+
     public ConcatAdapter withLoadStateAdapters(LoadStateAdapter footer) {
         addLoadStateListener(combinedLoadStates -> {
             footer.setLoadState(combinedLoadStates.getAppend());
@@ -503,7 +509,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         return -1;
     }
 
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder implements View.OnTouchListener {
         private final EmojiTextView textContentTv;
         private final ImageView photoContentIv;
         private final ImageView authorPhotoIv, linkImageIv;
@@ -514,6 +520,100 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private final TextView commentEdtText, likeTv, replyTv;
         private final RecyclerView commentRecyclerView;
         private final RelativeLayout linkPreviewContainer;
+        private View touchView;
+        private EnrichedActivity activity;
+        private Map<String, Object> extras;
+
+        private final GestureDetector gestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                toggleLike2(likeIv , likeTv, getAbsoluteAdapterPosition());
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                activity = getItem(getAbsoluteAdapterPosition());
+                if(activity==null)
+                    return false;
+                extras = activity.getExtra();
+                switch (touchView.getId()) {
+                    case R.id.feed_photo_content:
+                        photoLink = extras.get("photoLink").toString();
+                        feedListener.onImageClicked(photoLink, photoContentIv);
+                        break;
+
+                    case R.id.feed_text_content:
+                        feedListener.openPostActivity(activity.getID());
+                        break;
+
+                    case R.id.tv_group_name:
+                        if (extras.containsKey("feed_name")) {
+                            String groupFeedName = extras.get("feed_name").toString();
+                            FeedGroupData feedGroupData = new FeedGroupData(extras.get("group").toString(), groupFeedName, extras.get("lubble_id").toString());
+                            feedListener.openGroupFeed(feedGroupData);
+
+                        }
+                        break;
+
+                    case R.id.cont_like:
+                        toggleLike2(likeIv,likeTv,getAbsoluteAdapterPosition());
+                        break;
+
+                    case R.id.cont_reply:
+                        feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), getAbsoluteAdapterPosition());
+                        break;
+
+
+                    case R.id.feed_author_photo:
+                        ProfileActivity.open(context, activity.getActor().getID());
+                        break;
+
+                    case R.id.cont_share:
+                        FeedUtils.requestPostShareIntent(glide, activity, extras, FeedAdaptor.this::startShareFlow);
+                        break;
+
+                    case R.id.cont_link_preview:
+                        if (activity.getExtra().containsKey("linkUrl")) {
+                            String linkUrl = ((String) activity.getExtra().get("linkUrl")).toLowerCase();
+                            CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+                            intentBuilder.setToolbarColor(ContextCompat.getColor(context, R.color.colorAccent));
+                            intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(context, R.color.dk_colorAccent));
+                            intentBuilder.enableUrlBarHiding();
+                            intentBuilder.setShowTitle(true);
+                            CustomTabsIntent customTabsIntent = intentBuilder.build();
+                            try {
+                                customTabsIntent.launchUrl(context, Uri.parse(linkUrl));
+                            } catch (ActivityNotFoundException exception) {
+                                Intent i = new Intent(Intent.ACTION_VIEW);
+                                i.setData(Uri.parse(linkUrl));
+                                context.startActivity(i);
+                            }
+                        }
+                        break;
+
+                    case R.id.comment_edit_text:
+                        feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), getAbsoluteAdapterPosition());
+                        break;
+
+                    case R.id.tv_view_all_replies:
+                        feedListener.openPostActivity(activity.getID());
+                        break;
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return true;
+            }
+        });
+
 
         public MyViewHolder(View view) {
             super(view);
@@ -539,6 +639,25 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             linkDescTv = view.findViewById(R.id.tv_link_desc);
             ImageView moreMenuIv = view.findViewById(R.id.iv_more_menu);
             moreMenuIv.setVisibility(GONE);
+
+            photoContentIv.setOnTouchListener(this);
+            textContentTv.setOnTouchListener(this);
+            groupNameTv.setOnTouchListener(this);
+            likeLayout.setOnTouchListener(this);
+            commentLayout.setOnTouchListener(this);
+            authorPhotoIv.setOnTouchListener(this);
+            shareLayout.setOnTouchListener(this);
+            linkPreviewContainer.setOnTouchListener(this);
+            commentEdtText.setOnTouchListener(this);
+            viewAllRepliesTv.setOnTouchListener(this);
+
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            touchView = v;
+            boolean b = gestureDetector.onTouchEvent(event);
+            return b;
         }
     }
 
