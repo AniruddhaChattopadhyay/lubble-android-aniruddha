@@ -1,22 +1,15 @@
 package in.lubble.app.database;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-
-import java.util.ArrayList;
-
-import in.lubble.app.marketplace.ItemSearchData;
 
 public class SqliteHelper extends SQLiteOpenHelper {
 
     private static final String TAG = "SqliteHelper";
 
     public static final String DATABASE_NAME = "LubbleDatabase.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     /**
      * COLUMNS
@@ -44,68 +37,17 @@ public class SqliteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE_ITEM_SEARCH_DATA);
+        // no more tables reqd.
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
-    }
-
-    /**
-     * CRUD TABLE_ITEM_SEARCH_DATA
-     */
-
-    public long createItemSearchData(ItemSearchData itemSearchData) {
-
-        long createdRowNumber = 0;
-        SQLiteDatabase db = DbSingleton.openDatabase();
-        ContentValues values = new ContentValues();
-
-        values.put(MPLACE_SEARCH_ITEM_ID, itemSearchData.getId());
-        values.put(MPLACE_SEARCH_ITEM_NAME, itemSearchData.getName());
-
-        createdRowNumber = db.insert(TABLE_ITEM_SEARCH_DATA, null, values);
-        DbSingleton.closeDatabase();
-
-        Log.i(TAG, "TABLE_ITEM_SEARCH_DATA: Created row #" + createdRowNumber);
-        return createdRowNumber;
-    }
-
-    public ArrayList<ItemSearchData> readAllItemSearchData(String query) {
-
-        SQLiteDatabase db = DbSingleton.openDatabase();
-
-        String rawQuery = "SELECT * FROM " + TABLE_ITEM_SEARCH_DATA
-                + " WHERE " + MPLACE_SEARCH_ITEM_NAME + " LIKE " + "'%" + query + "%'";
-        Cursor cursor = db.rawQuery(rawQuery, null);
-        ArrayList<ItemSearchData> itemSearchDataList = new ArrayList<>();
-
-        while (cursor.moveToNext()) {
-            ItemSearchData data = new ItemSearchData();
-            data.setId(cursor.getInt(cursor.getColumnIndex(MPLACE_SEARCH_ITEM_ID)));
-            data.setName(cursor.getString(cursor.getColumnIndex(MPLACE_SEARCH_ITEM_NAME)));
-            itemSearchDataList.add(data);
+        switch (oldVersion) {
+            case 1:
+                // Delete table as we switched to Algolia search
+                db.execSQL("DROP TABLE IF EXISTS " + TABLE_ITEM_SEARCH_DATA);
+                break;
         }
-
-        Log.i(TAG, "TABLE_ITEM_SEARCH_DATA: Rows read #" + cursor.getCount());
-
-        cursor.close();
-        DbSingleton.closeDatabase();
-
-        return itemSearchDataList;
-    }
-
-    public long deleteAllSearchData() {
-
-        long createdRowNumber = 0;
-        SQLiteDatabase db = DbSingleton.openDatabase();
-
-        db.delete(TABLE_ITEM_SEARCH_DATA, null, null);
-        DbSingleton.closeDatabase();
-
-        Log.i(TAG, "TABLE_ITEM_SEARCH_DATA: Deleted");
-        return createdRowNumber;
     }
 
 }

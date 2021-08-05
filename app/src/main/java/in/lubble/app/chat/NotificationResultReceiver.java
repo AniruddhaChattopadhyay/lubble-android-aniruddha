@@ -6,12 +6,20 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.MissingFormatArgumentException;
@@ -82,30 +90,38 @@ public class NotificationResultReceiver extends BroadcastReceiver {
     }
 
     private void updateUnreadCounter(NotifData notifData, boolean isDm) {
-        String uid = FirebaseAuth.getInstance().getUid();
-        if (uid != null) {
-            DatabaseReference unreadCountRef = RealtimeDbHelper.getLubbleGroupsRef().child(notifData.getGroupId()).child("members").child(uid).child("unreadCount");
-            if (isDm) {
-                if (notifData.getIsSeller()) {
-                    unreadCountRef = RealtimeDbHelper.getDmsRef()
-                            .child(notifData.getGroupId())
-                            .child("members")
-                            .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
-                            .child("unreadCount");
-                } else {
-                    unreadCountRef = RealtimeDbHelper.getDmsRef().child(notifData.getGroupId()).child("members").child(uid).child("unreadCount");
+        DatabaseReference unreadCountRef = RealtimeDbHelper.getUserGroupsRef().child(notifData.getGroupId()).child("unreadCount");
+        if (isDm) {
+            if (notifData.getIsSeller()) {
+                unreadCountRef = RealtimeDbHelper.getSellerRef()
+                        .child(String.valueOf(LubbleSharedPrefs.getInstance().getSellerId()))
+                        .child("dms")
+                        .child(notifData.getGroupId())
+                        .child("unreadCount");
+            } else {
+                unreadCountRef = RealtimeDbHelper.getUserDmsRef(FirebaseAuth.getInstance().getUid()).child(notifData.getGroupId()).child("unreadCount");
+            }
+        }
+        unreadCountRef.runTransaction(new Transaction.Handler() {
+            @NotNull
+            @Override
+            public Transaction.Result doTransaction(@NotNull MutableData currentData) {
+                Long oldUnreadCount = currentData.getValue(Long.class);
+                if (oldUnreadCount == null) {
+                    oldUnreadCount = 0L;
+                }
+                // Set value and report transaction success
+                currentData.setValue(++oldUnreadCount);
+                return Transaction.success(currentData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (error != null) {
+                    FirebaseCrashlytics.getInstance().recordException(error.toException());
                 }
             }
-            unreadCountRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    Long oldCount = 0L;
-                    if (task.getResult().getValue() != null) {
-                        oldCount = task.getResult().getValue(Long.class);
-                    }
-                    task.getResult().getRef().setValue(++oldCount);
-                }
-            });
-        }
+        });
     }
 
     private void pullNewMsgs(NotifData notifData) {

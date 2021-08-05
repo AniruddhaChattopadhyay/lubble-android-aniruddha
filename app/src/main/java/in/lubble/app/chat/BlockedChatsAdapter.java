@@ -4,36 +4,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.emoji.widget.EmojiTextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.GroupData;
-import in.lubble.app.models.UserGroupData;
 
-import static in.lubble.app.utils.DateTimeUtils.getHumanTimestamp;
 import static in.lubble.app.utils.StringUtils.isValidString;
-import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class BlockedChatsAdapter extends RecyclerView.Adapter<BlockedChatsAdapter.ViewHolder> {
 
     private final List<GroupData> groupDataList;
     private final OnBlockedChatClickListener mListener;
     // <GroupID, UserGroupData>
-    private final HashMap<String, UserGroupData> userGroupDataMap;
 
     public BlockedChatsAdapter(OnBlockedChatClickListener listener) {
         groupDataList = new ArrayList<>();
-        userGroupDataMap = new HashMap<>();
         mListener = listener;
     }
 
@@ -82,7 +75,7 @@ public class BlockedChatsAdapter extends RecyclerView.Adapter<BlockedChatsAdapte
         groupViewHolder.lockIv.setVisibility(groupData.getIsPrivate() ? View.VISIBLE : View.GONE);
 
         groupViewHolder.titleTv.setText(groupData.getTitle());
-        if (!groupData.isJoined() && groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
+        if (groupData.getInvitedBy() != null && groupData.getInvitedBy().size() > 0) {
             String inviter = (String) groupData.getInvitedBy().toArray()[0];
             if (inviter.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getSupportUid())) {
                 groupViewHolder.subtitleTv.setText(R.string.ready_to_join);
@@ -108,50 +101,6 @@ public class BlockedChatsAdapter extends RecyclerView.Adapter<BlockedChatsAdapte
                 }
             }
         });
-
-        final UserGroupData userGroupData = userGroupDataMap.get(groupData.getId());
-        if (userGroupData != null && userGroupData.getUnreadCount() > 0) {
-            groupViewHolder.unreadCountTv.setVisibility(View.VISIBLE);
-            groupViewHolder.unreadCountTv.setText(String.valueOf(userGroupData.getUnreadCount()));
-        } else {
-            groupViewHolder.unreadCountTv.setVisibility(View.GONE);
-        }
-        handleTimestamp(groupViewHolder.timestampTv, groupData, userGroupData);
-
-        if (!groupData.isJoined() && (userGroupData == null || userGroupData.getInvitedBy() == null || userGroupData.getInvitedBy().size() == 0)) {
-            groupViewHolder.viewGroupTv.setVisibility(View.VISIBLE);
-        } else {
-            groupViewHolder.viewGroupTv.setVisibility(View.GONE);
-        }
-    }
-
-    private void handleTimestamp(TextView timestampTv, GroupData groupData, UserGroupData userGroupData) {
-        if (!groupData.isJoined() && userGroupData != null && userGroupData.getInvitedTimeStamp() > 0) {
-            // for pending group invite
-            timestampTv.setVisibility(View.GONE);
-        } else {
-            // joined or unjoined groups
-            timestampTv.setVisibility(View.VISIBLE);
-            if (groupData.getJoinedTimestamp() > groupData.getLastMessageTimestamp()) {
-                timestampTv.setText(getHumanTimestamp(groupData.getJoinedTimestamp()));
-            } else {
-                timestampTv.setText(getHumanTimestamp(groupData.getLastMessageTimestamp()));
-            }
-            if (!groupData.isJoined()) {
-                // align time with "view" btn
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                params.setMargins(0, 0, dpToPx(8), dpToPx(4));
-                timestampTv.setLayoutParams(params);
-            }
-        }
-    }
-
-    public void updateUserGroupData(String groupId, UserGroupData userGroupData) {
-        final int pos = getChildIndex(groupId);
-        userGroupDataMap.put(groupId, userGroupData);
-        if (pos != -1) {
-            notifyItemChanged(pos);
-        }
     }
 
     public void removeGroup(String groupId) {
@@ -210,6 +159,10 @@ public class BlockedChatsAdapter extends RecyclerView.Adapter<BlockedChatsAdapte
             timestampTv = view.findViewById(R.id.tv_last_msg_time);
             viewGroupTv = view.findViewById(R.id.tv_view_group);
             inviteIcon = view.findViewById(R.id.ic_invite);
+
+            unreadCountTv.setVisibility(View.GONE);
+            timestampTv.setVisibility(View.GONE);
+            viewGroupTv.setVisibility(View.GONE);
         }
 
     }

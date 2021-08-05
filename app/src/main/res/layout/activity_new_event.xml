@@ -214,7 +214,7 @@
 
                 </LinearLayout>
 
-                <ImageView
+                <!--<ImageView
                     android:id="@+id/iv_group_link"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
@@ -302,14 +302,14 @@
                     android:layout_alignLeft="@id/tv_organizer_hint"
                     android:paddingBottom="8dp"
                     android:text="The event will be shown in these related groups"
-                    android:textSize="12sp" />
+                    android:textSize="12sp" />-->
 
                 <fragment
                     android:id="@+id/map"
                     android:name="com.google.android.gms.maps.SupportMapFragment"
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
-                    android:layout_below="@id/tv_related_groups_hint"
+                    android:layout_below="@id/container_time"
                     android:layout_marginTop="8dp"
                     app:liteMode="true"
                     tools:context="com.example.mapwithmarker.MapsMarkerActivity" />

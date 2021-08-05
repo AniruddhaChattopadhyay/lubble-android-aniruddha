@@ -113,11 +113,11 @@ public class ExploreActiv extends BaseActivity implements ExploreGroupAdapter.On
     @Override
     public void onListFragmentInteraction(ExploreGroupData item, boolean isAdded) {
         if (isAdded) {
-            selectedGroupIdMap.put(item.getFirebaseGroupId(), true);
+            selectedGroupIdMap.put(item.getId(), true);
             joinBtn.setVisibility(View.VISIBLE);
 
         } else {
-            selectedGroupIdMap.remove(item.getFirebaseGroupId());
+            selectedGroupIdMap.remove(item.getId());
             if (selectedGroupIdMap.size() == 0) {
                 joinBtn.setVisibility(View.GONE);
             }

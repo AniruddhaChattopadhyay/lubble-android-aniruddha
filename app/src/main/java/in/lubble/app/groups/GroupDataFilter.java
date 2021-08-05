@@ -6,14 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 
 public class GroupDataFilter extends Filter {
 
     private final GroupRecyclerAdapter adapter;
-    private final List<GroupData> originalList;
-    private final List<GroupData> filteredList;
+    private final List<GroupInfoData> originalList;
+    private final List<GroupInfoData> filteredList;
 
-    public GroupDataFilter(GroupRecyclerAdapter adapter, List<GroupData> groupDataListst) {
+    public GroupDataFilter(GroupRecyclerAdapter adapter, List<GroupInfoData> groupDataListst) {
         this.adapter = adapter;
         this.originalList = new ArrayList<>(groupDataListst);
         this.filteredList = new ArrayList<>();
@@ -28,7 +29,7 @@ public class GroupDataFilter extends Filter {
             filteredList.addAll(originalList);
         } else {
             final String filterPattern = charSequence.toString().toLowerCase().trim();
-            for (GroupData groupData : originalList) {
+            for (GroupInfoData groupData : originalList) {
                 if (groupData != null && groupData.getTitle().toLowerCase().contains(filterPattern)) {
                     filteredList.add(groupData);
                 }
@@ -40,7 +41,7 @@ public class GroupDataFilter extends Filter {
         return results;
     }
 
-    void addGroups(List<GroupData> list){
+    void addGroups(List<GroupInfoData> list){
         originalList.addAll(list);
     }
 

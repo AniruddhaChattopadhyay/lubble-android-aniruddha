@@ -102,6 +102,7 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
@@ -1104,12 +1105,12 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void showGroupQues(final TextView linkTitleTv, final TextView linkDescTv) {
-        RealtimeDbHelper.getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+        RealtimeDbHelper.getLubbleGroupInfoRef(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
-                    GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                    linkDescTv.setText(groupData.getQuestion());
+                    GroupInfoData groupInfoData = dataSnapshot.getValue(GroupInfoData.class);
+                    linkDescTv.setText(groupInfoData.getQuestion());
                     showName(linkTitleTv, LubbleSharedPrefs.getInstance().getSupportUid());
                 }
             }

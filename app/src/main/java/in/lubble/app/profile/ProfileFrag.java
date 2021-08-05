@@ -35,6 +35,7 @@ import com.bumptech.glide.request.target.Target;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,19 +44,24 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -102,7 +108,6 @@ public class ProfileFrag extends Fragment {
     private CardView referralCard;
     private DatabaseReference userRef;
     private DatabaseReference dmRef;
-    private ValueEventListener valueEventListener;
     @Nullable
     private ProfileData profileData;
     private String sharingUrl;
@@ -253,7 +258,6 @@ public class ProfileFrag extends Fragment {
         groupsAdapter = new GroupsAdapter(GlideApp.with(requireContext()));
         userGroupsRv.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
         userGroupsRv.setAdapter(groupsAdapter);
-        syncGroups();
         fetchStats();
 
         coinsContainer.setOnClickListener(new View.OnClickListener() {
@@ -298,25 +302,45 @@ public class ProfileFrag extends Fragment {
         }
     }
 
-    private void syncGroups() {
-        RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ArrayList<GroupData> groupDataList = new ArrayList<>();
-
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    final GroupData groupData = child.getValue(GroupData.class);
-                    if (groupData != null && groupData.getMembers().containsKey(userId) && !groupData.getIsPrivate() && !groupData.getIsDm()) {
-                        groupDataList.add(groupData);
+    private void syncGroups(ProfileData profileData) {
+        // fetch token first
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(false)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        String idToken = task.getResult().getToken();
+                        HashMap<String, Object> groupsMap = profileData.getLubbles().get(LubbleSharedPrefs.getInstance().getLubbleId()).get("groups");
+                        groupsAdapter.clear();
+                        for (String groupId : groupsMap.keySet()) {
+                            fetchGroupInfo(groupId, idToken);
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "Failed to fetch access token", Toast.LENGTH_SHORT).show();
                     }
+                });
+    }
+
+    private void fetchGroupInfo(String groupId, String idToken) {
+        final Endpoints endpoints = ServiceGenerator.createFirebaseService(Endpoints.class);
+        Call<GroupInfoData> groupDataCall = endpoints.fetchGroupInfo(LubbleSharedPrefs.getInstance().requireLubbleId(), groupId, idToken);
+        groupDataCall.enqueue(new Callback<GroupInfoData>() {
+            @Override
+            public void onResponse(@NotNull Call<GroupInfoData> call, @NotNull Response<GroupInfoData> response) {
+                if (response.isSuccessful() && isAdded()) {
+                    final GroupInfoData groupInfoData = response.body();
+                    if (groupInfoData != null && !groupInfoData.getIsPrivate() && !groupInfoData.getIsDm()) {
+                        groupsAdapter.addGroupInfo(groupInfoData);
+                    }
+                } else if (isAdded()) {
+                    Toast.makeText(getContext(), "error: " + response.message(), Toast.LENGTH_SHORT).show();
                 }
-                Collections.reverse(groupDataList);
-                groupsAdapter.addGroupList(groupDataList);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            public void onFailure(Call<GroupInfoData> call, Throwable t) {
+                if (isAdded() && isVisible()) {
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -342,7 +366,7 @@ public class ProfileFrag extends Fragment {
 
     private class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder> {
 
-        private ArrayList<GroupData> groupList = new ArrayList<>();
+        private ArrayList<GroupInfoData> groupList = new ArrayList<>();
         private GlideRequests glideApp;
 
         GroupsAdapter(GlideRequests glideApp) {
@@ -356,7 +380,7 @@ public class ProfileFrag extends Fragment {
 
         @Override
         public void onBindViewHolder(GroupsAdapter.ViewHolder holder, int position) {
-            final GroupData groupData = groupList.get(position);
+            final GroupInfoData groupData = groupList.get(position);
             RequestOptions requestOptions = new RequestOptions();
             requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0));
             glideApp.load(groupData.getThumbnail())
@@ -373,8 +397,18 @@ public class ProfileFrag extends Fragment {
             return groupList.size();
         }
 
-        void addGroupList(ArrayList<GroupData> groupDataList) {
+        void addGroupList(ArrayList<GroupInfoData> groupDataList) {
             groupList.addAll(groupDataList);
+            notifyDataSetChanged();
+        }
+
+        void addGroupInfo(GroupInfoData groupInfoData) {
+            groupList.add(groupInfoData);
+            notifyDataSetChanged();
+        }
+
+        public void clear() {
+            groupList.clear();
             notifyDataSetChanged();
         }
 
@@ -392,40 +426,47 @@ public class ProfileFrag extends Fragment {
                 itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        final GroupData groupData = groupList.get(getAdapterPosition());
+                        final GroupInfoData groupData = groupList.get(getAdapterPosition());
                         ChatActivity.openForGroup(getContext(), groupData.getId(), false, null);
                     }
                 });
             }
         }
-
     }
 
     private void fetchProfileFeed() {
         progressBar.setVisibility(View.VISIBLE);
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                profileData = dataSnapshot.getValue(ProfileData.class);
+        userRef.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebase", "Error getting data", task.getException());
+            } else {
+                profileData = task.getResult().getValue(ProfileData.class);
                 if (profileData != null && profileData.getInfo() != null) {
                     userName.setText(profileData.getInfo().getName());
+                    for (String lubbleId : profileData.getLubbles().keySet()) {
+                        RealtimeDbHelper.getLubbleInfoRef(lubbleId).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                lubbleTv.setText(dataSnapshot.child("title").getValue(String.class));
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
+                        if (lubbleId.equalsIgnoreCase(LubbleSharedPrefs.getInstance().getLubbleId())) {
+                            // profile is of the same lubble as current user, show chat groups
+                            syncGroups(profileData);
+                        }
+                        break;
+                    }
                     if (!TextUtils.isEmpty(profileData.getInfo().getBadge())) {
                         badgeTv.setVisibility(View.VISIBLE);
                         badgeTv.setText(profileData.getInfo().getBadge());
                     } else {
                         badgeTv.setVisibility(View.GONE);
                     }
-                    RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            lubbleTv.setText(dataSnapshot.child("title").getValue(String.class));
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
                     if (isValidString(profileData.getBio())) {
                         userBio.setText(profileData.getBio());
                     } else if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
@@ -476,13 +517,7 @@ public class ProfileFrag extends Fragment {
                     }
                 }
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        userRef.addValueEventListener(valueEventListener);
+        });
     }
 
     private void syncDms() {
@@ -604,9 +639,6 @@ public class ProfileFrag extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (userRef != null && valueEventListener != null) {
-            userRef.removeEventListener(valueEventListener);
-        }
         if (dmRef != null && dmValueEventListener != null) {
             dmRef.removeEventListener(dmValueEventListener);
         }

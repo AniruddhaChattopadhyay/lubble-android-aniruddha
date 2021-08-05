@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import androidx.annotation.Nullable;
 
 import com.google.firebase.database.Exclude;
-import com.google.gson.annotations.SerializedName;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -14,52 +13,28 @@ import java.util.Set;
  * Created by ishaan on 28/1/18.
  */
 
-public class GroupData {
+public class GroupInfoData {
 
-    @SerializedName("firebase_id")
-    private String id;
-    @SerializedName("icon")
     private String profilePic;
+    private String id;
     private String thumbnail;
-    @SerializedName("title")
     private String title;
     private String description;
     private boolean isPrivate;
-    private HashMap<String, Object> members = new HashMap<>();
     private String lastMessage;
     private long lastMessageTimestamp = 0;
+    private int memberCount = 0;
     private String createdBy;
     private String question;
     private String questionChatId = "101";
-    @Exclude
-    private Set<String> invitedBy;
     private boolean isPinned;
     @Exclude
     private boolean isDm;
     @Exclude
-    private boolean isJoined;
+    private Set<String> invitedBy;
 
-    public GroupData() {
+    public GroupInfoData() {
     }  // Needed for Firebase
-
-    public boolean equals(Object obj) {
-        if (obj instanceof GroupData) {
-            GroupData objectToCompare = (GroupData) obj;
-            if (this.id.equalsIgnoreCase(objectToCompare.getId())) {
-                return true;
-            }
-            return false;
-        }
-        return super.equals(obj);
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getProfilePic() {
         return profilePic;
@@ -85,17 +60,6 @@ public class GroupData {
         this.description = description;
     }
 
-    @Exclude
-    @Deprecated
-    public boolean isJoined() {
-        return isJoined;
-    }
-
-    @Exclude
-    public void setJoined(boolean isJoined) {
-        this.isJoined = isJoined;
-    }
-
     public boolean getIsPrivate() {
         return this.isPrivate;
     }
@@ -105,19 +69,11 @@ public class GroupData {
     }
 
     public String getThumbnail() {
-        return thumbnail == null ? profilePic : thumbnail;
+        return thumbnail;
     }
 
     public void setThumbnail(String thumbnail) {
         this.thumbnail = thumbnail;
-    }
-
-    public HashMap<String, Object> getMembers() {
-        return members;
-    }
-
-    public void setMembers(HashMap<String, Object> members) {
-        this.members = members;
     }
 
     public String getLastMessage() {
@@ -136,31 +92,12 @@ public class GroupData {
         this.lastMessageTimestamp = lastMessageTimestamp;
     }
 
-    @Exclude
-    @Nullable
-    public Set<String> getInvitedBy() {
-        return invitedBy;
-    }
-
-    @Exclude
-    public void setInvitedBy(Set<String> invitedBy) {
-        this.invitedBy = invitedBy;
-    }
-
     public String getCreatedBy() {
         return createdBy;
     }
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
-    }
-
-    public boolean getIsDm() {
-        return isDm;
-    }
-
-    public void setIsDm(boolean isDm) {
-        this.isDm = isDm;
     }
 
     public boolean getIsPinned() {
@@ -187,4 +124,39 @@ public class GroupData {
         this.questionChatId = questionChatId;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Exclude
+    public boolean getIsDm() {
+        return isDm;
+    }
+
+    @Exclude
+    public void setIsDm(boolean dm) {
+        isDm = dm;
+    }
+
+    @Exclude
+    public Set<String> getInvitedBy() {
+        return invitedBy;
+    }
+
+    @Exclude
+    public void setInvitedBy(Set<String> invitedBy) {
+        this.invitedBy = invitedBy;
+    }
+
+    public int getMemberCount() {
+        return memberCount;
+    }
+
+    public void setMemberCount(int memberCount) {
+        this.memberCount = memberCount;
+    }
 }

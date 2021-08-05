@@ -16,13 +16,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
@@ -30,6 +34,11 @@ import in.lubble.app.GlideRequests;
 import in.lubble.app.R;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
+import in.lubble.app.models.UserGroupData;
+
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupInfoRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 
 public class GroupPickerActiv extends BaseActivity {
 
@@ -37,8 +46,8 @@ public class GroupPickerActiv extends BaseActivity {
 
     private ProgressBar progressbar;
     private RecyclerView recyclerView;
-    private Query query;
-    private ValueEventListener valueEventListener;
+    private HashMap<String, UserGroupData> userGroupDataMap;
+    private GroupPickerAdapter groupPickerAdapter;
 
     public static Intent getIntent(Context context) {
         return new Intent(context, GroupPickerActiv.class);
@@ -58,6 +67,8 @@ public class GroupPickerActiv extends BaseActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         DividerItemDecoration itemDecor = new DividerItemDecoration(this, LinearLayoutManager.VERTICAL);
         recyclerView.addItemDecoration(itemDecor);
+        groupPickerAdapter = new GroupPickerAdapter(GlideApp.with(GroupPickerActiv.this));
+        recyclerView.setAdapter(groupPickerAdapter);
 
         closeIv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,43 +80,71 @@ public class GroupPickerActiv extends BaseActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        recyclerView.setAdapter(new GroupPickerAdapter(new ArrayList<GroupData>(), GlideApp.with(GroupPickerActiv.this)));
+    protected void onStart() {
+        super.onStart();
+        userGroupDataMap = new HashMap<>();
+        syncUserGroupIds();
+    }
 
-        query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
-        valueEventListener = new ValueEventListener() {
+    private void syncUserGroupIds() {
+        // gets list of group IDs joined by the user
+        getUserGroupsRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ArrayList<GroupData> groupDataList = new ArrayList<>();
-
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    final GroupData groupData = child.getValue(GroupData.class);
-                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid()) && !groupData.getIsPrivate()) {
-                        groupDataList.add(groupData);
+            public void onDataChange(@NonNull @NotNull DataSnapshot dataSnapshot) {
+                progressbar.setVisibility(View.GONE);
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    final UserGroupData userGroupData = snapshot.getValue(UserGroupData.class);
+                    if (userGroupData != null) {
+                        userGroupDataMap.put(snapshot.getKey(), userGroupData);
+                        if (userGroupData.isJoined()) {
+                            syncJoinedGroups(snapshot.getKey());
+                        }
                     }
                 }
-                Collections.reverse(groupDataList);
-                progressbar.setVisibility(View.GONE);
-                recyclerView.setAdapter(new GroupPickerAdapter(groupDataList, GlideApp.with(GroupPickerActiv.this)));
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+                FirebaseCrashlytics.getInstance().recordException(error.toException());
+                progressbar.setVisibility(View.GONE);
             }
-        };
-        query.addValueEventListener(valueEventListener);
+        });
+    }
+
+
+    private void syncJoinedGroups(String groupId) {
+        // get meta data of the groups joined by the user
+        getLubbleGroupInfoRef(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GroupInfoData groupData = dataSnapshot.getValue(GroupInfoData.class);
+                String groupId = dataSnapshot.getRef().getParent().getKey();
+                final UserGroupData userGroupData = userGroupDataMap.get(groupId);
+                if (groupData != null && userGroupData != null) {
+                    groupData.setId(groupId);
+                    groupPickerAdapter.addJoinedGroup(groupData);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NotNull DatabaseError error) {
+                FirebaseCrashlytics.getInstance().recordException(error.toException());
+            }
+        });
     }
 
     private class GroupPickerAdapter extends RecyclerView.Adapter<GroupPickerAdapter.ViewHolder> {
+        private final ArrayList<GroupInfoData> groupList;
+        private final GlideRequests glideApp;
 
-        private ArrayList<GroupData> groupList;
-        private GlideRequests glideApp;
-
-        GroupPickerAdapter(ArrayList<GroupData> groupList, GlideRequests glideApp) {
-            this.groupList = groupList;
+        GroupPickerAdapter(GlideRequests glideApp) {
+            this.groupList = new ArrayList<>();
             this.glideApp = glideApp;
+        }
+
+        void addJoinedGroup(GroupInfoData groupInfoData) {
+            groupList.add(groupInfoData);
+            notifyItemInserted(groupList.size());
         }
 
         @Override
@@ -115,7 +154,7 @@ public class GroupPickerActiv extends BaseActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            final GroupData groupData = groupList.get(position);
+            final GroupInfoData groupData = groupList.get(position);
             glideApp.load(groupData.getThumbnail())
                     .placeholder(R.drawable.ic_circle_group_24dp)
                     .error(R.drawable.ic_circle_group_24dp)
@@ -153,13 +192,5 @@ public class GroupPickerActiv extends BaseActivity {
             }
         }
 
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (valueEventListener != null) {
-            query.removeEventListener(valueEventListener);
-        }
     }
 }
