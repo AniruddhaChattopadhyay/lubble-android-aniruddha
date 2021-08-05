@@ -340,28 +340,28 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     void sortJoinedGroupsList() {
         Log.d("trace", "--------------------\nsorting started: ");
-        Collections.sort(groupDataList, (o1, o2) -> {
-            if (o1 != null && o2 != null) {
-                UserGroupData userGroup1Data = userGroupDataMap.get(o1.getId());
-                UserGroupData userGroup2Data = userGroupDataMap.get(o2.getId());
-                if (userGroup1Data != null && userGroup2Data != null && userGroup1Data.isJoined() && userGroup2Data.isJoined()) {
-                    if (o1.getIsPinned()) return -1;
-                    if (o2.getIsPinned()) return 1;
-                    return Long.compare(o2.getLastMessageTimestamp(), o1.getLastMessageTimestamp());
-                } else if (userGroup1Data != null && userGroup2Data != null) {
-                    // for invited groups
-                    if (o1.getIsPinned()) return -1;
-                    if (o2.getIsPinned()) return 1;
-                    if (userGroup1Data.getInvitedTimeStamp() > 0 && userGroup2Data.getInvitedTimeStamp() > 0) {
-                        return Long.compare(userGroup2Data.getInvitedTimeStamp(), userGroup1Data.getInvitedTimeStamp());
-                    } else if (userGroup1Data.getInvitedTimeStamp() > 0) {
-                        return Long.compare(o2.getLastMessageTimestamp(), userGroup1Data.getInvitedTimeStamp());
-                    } else if (userGroup2Data.getInvitedTimeStamp() > 0) {
-                        return Long.compare(userGroup2Data.getInvitedTimeStamp(), o1.getLastMessageTimestamp());
-                    }
-                }
+        Collections.sort(groupDataList, (lhs, rhs) -> {
+            // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+            if (lhs == null || rhs == null) {
+                return 0;
             }
-            return 0;
+            if (lhs.getIsPinned()) return -1;
+            if (rhs.getIsPinned()) return 1;
+            long lhsTs = 0;
+            long rhsTs = 0;
+            UserGroupData userGroupData1 = userGroupDataMap.get(lhs.getId());
+            UserGroupData userGroupData2 = userGroupDataMap.get(rhs.getId());
+            if (userGroupData1 != null && !userGroupData1.isJoined()) {
+                lhsTs = userGroupData1.getInvitedTimeStamp();
+            } else {
+                lhsTs = lhs.getLastMessageTimestamp();
+            }
+            if (userGroupData2 != null && !userGroupData2.isJoined()) {
+                rhsTs = userGroupData2.getInvitedTimeStamp();
+            } else {
+                rhsTs = rhs.getLastMessageTimestamp();
+            }
+            return (lhsTs > rhsTs) ? -1 : 1;
         });
         notifyDataSetChanged();
         Log.d("trace", "--------------------\nsorting ended: ");
