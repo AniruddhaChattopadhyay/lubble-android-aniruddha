@@ -166,13 +166,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(getContext());
         lbm.registerReceiver(userInitiatedLogoutReceiver, new IntentFilter(USER_INIT_LOGOUT_ACTION));
-        return view;
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
         syncAllGroups();
+
+        return view;
     }
 
     @Override
@@ -688,12 +685,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     @Override
     public void onDetach() {
         super.onDetach();
-        //removeListeners();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
         removeListeners();
     }
 
