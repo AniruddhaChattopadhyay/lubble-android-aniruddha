@@ -75,6 +75,8 @@ import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.EnrichedActivity;
 import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
+import it.sephiroth.android.library.xtooltip.ClosePolicy;
+import it.sephiroth.android.library.xtooltip.Tooltip;
 
 import static android.view.View.GONE;
 import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
@@ -84,7 +86,7 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor.MyViewHolder> {
 
     private static final String TAG = "FeedAdaptor";
-    private Context context;
+    private Context context=null;
     private int itemWidth, displayHeight;
     private FeedListener feedListener;
     private GlideRequests glide;
@@ -122,7 +124,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
-
         holder.photoContentIv.setVisibility(View.GONE);
         holder.groupNameTv.setVisibility(View.GONE);
         holder.lubbleNameTv.setVisibility(View.GONE);
@@ -166,6 +167,18 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 // photoContentIv.visibility = GONE already at top
                 holder.textContentTv.setMaxLines(9);
             }
+            //setting the tooltip for the first post
+            if(holder.getAbsoluteAdapterPosition()==0){
+                if(extras.containsKey("photoLink")){
+                    View v = holder.photoContentIv;
+                    v.post(() ->setToolTipForDoubleTapLike(v) );
+                }
+                else{
+                    View v = holder.textContentTv;
+                    v.post(() ->setToolTipForDoubleTapLike(v));
+                }
+            }
+
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
                 photoLink = extras.get("photoLink").toString();
@@ -230,6 +243,25 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         initCommentRecyclerView(holder, activity);
         handleCommentEditText(activity, holder);
         handleLinkPreview(activity, holder);
+    }
+
+    private void setToolTipForDoubleTapLike(View view) {
+        if(view == null || context==null || LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG())
+            return;
+
+        Tooltip tooltip = new Tooltip.Builder(context)
+                .anchor(view, -200, 25, false)
+                .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_CONSUME())
+                .showDuration(5000)
+                .overlay(false)
+                .text(" Double tap anywhere to like the post!")
+                .create();
+
+        tooltip.show(view, Tooltip.Gravity.BOTTOM, false);
+        LubbleSharedPrefs.getInstance().setFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG();
+        boolean ans = LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG();
+        ans = false;
+
     }
 
     private void startShareFlow(Intent sharingIntent) {
@@ -563,6 +595,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
                     case R.id.cont_like:
                         toggleLike2(likeIv,likeTv,getAbsoluteAdapterPosition());
+//                        View v = likeLayout.findViewById(R.id.cont_like);
+//                        setToolTipForDoubleTapLike(v);
                         break;
 
                     case R.id.cont_reply:
@@ -650,6 +684,10 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             linkPreviewContainer.setOnTouchListener(this);
             commentEdtText.setOnTouchListener(this);
             viewAllRepliesTv.setOnTouchListener(this);
+
+            //View v = likeLayout.findViewById(R.id.cont_like);
+//            likeLayout.post(()->setToolTipForDoubleTapLike(likeLayout));
+            //setToolTipForDoubleTapLike(likeLayout);
 
         }
 

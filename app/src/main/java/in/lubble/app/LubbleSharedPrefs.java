@@ -61,6 +61,7 @@ public class LubbleSharedPrefs {
     private final String CHECK_IF_FEED_GROUPS_JOINED= "CHECK_IF_FEED_GROUPS_JOINED";
     private final String IS_FEED_VISITED = "IS_FEED_VISITED";
     private final String PROFILE_PIC_URL = "PROFILE_PIC_URL";
+    private final String FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG = "FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -434,4 +435,11 @@ public class LubbleSharedPrefs {
         preferences.edit().putString(PROFILE_PIC_URL, url).apply();
     }
 
+    public boolean getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG() {
+        return preferences.getBoolean(FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG,false);
+    }
+
+    public void setFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG() {
+        preferences.edit().putBoolean(FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG, true).apply();
+    }
 }
