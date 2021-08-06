@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -78,6 +79,13 @@ public class LubbleActivity extends BaseActivity {
                 if (progress == 100) {
                     progressBar.setVisibility(View.INVISIBLE);
                 }
+            }
+        });
+        wikiWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return false;
             }
         });
     }
