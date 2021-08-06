@@ -361,7 +361,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             } else {
                 rhsTs = rhs.getLastMessageTimestamp();
             }
-            return (lhsTs > rhsTs) ? -1 : 1;
+            return Long.compare(rhsTs, lhsTs);
         });
         notifyDataSetChanged();
         Log.d("trace", "--------------------\nsorting ended: ");
@@ -587,7 +587,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 alertDialog.dismiss();
-                leaveGroup(context, selectedGroupId);
+                leaveGroup(selectedGroupId);
             }
         });
         alertDialog.setButton(DialogInterface.BUTTON_NEGATIVE, context.getString(R.string.all_cancel), new DialogInterface.OnClickListener() {
@@ -599,7 +599,7 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
         alertDialog.show();
     }
 
-    private void leaveGroup(final Context context, final String groupId) {
+    private void leaveGroup(final String groupId) {
         Map<String, Object> childUpdates = new HashMap<>();
         childUpdates.put(RealtimeDbHelper.getUserGroupPath() + "/" + groupId, null);
         childUpdates.put(
@@ -607,12 +607,9 @@ public class GroupRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.View
                 null
         );
 
-        FirebaseDatabase.getInstance().getReference().updateChildren(childUpdates, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if (!fragmentManager.isStateSaved() && !fragmentManager.isDestroyed()) {
-                    removeGroup(selectedGroupId);
-                }
+        FirebaseDatabase.getInstance().getReference().updateChildren(childUpdates, (databaseError, databaseReference) -> {
+            if (!fragmentManager.isStateSaved() && !fragmentManager.isDestroyed()) {
+                removeGroup(selectedGroupId);
             }
         });
     }
