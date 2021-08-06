@@ -551,6 +551,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                 if (dataSnapshot.getKey() != null) {
                     // remove from list
                     adapter.removeGroup(dataSnapshot.getKey());
+                    userGroupDataMap.remove(dataSnapshot.getKey());
                 }
             }
 
