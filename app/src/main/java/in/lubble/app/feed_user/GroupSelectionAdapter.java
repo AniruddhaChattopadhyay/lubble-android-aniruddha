@@ -28,15 +28,26 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
     private final List<FeedGroupData> stringList;
     private final List<FeedGroupData> stringListCopy;
     private MaterialButton postSubmitBtn;
+    private boolean isQnA;
 
 
 
 
-    public GroupSelectionAdapter(List<FeedGroupData> stringList, MaterialButton postSubmitBtn) {
+    public GroupSelectionAdapter(List<FeedGroupData> stringList, MaterialButton postSubmitBtn,boolean isQnA) {
         this.stringList = stringList;
         this.postSubmitBtn = postSubmitBtn;
         stringListCopy = new ArrayList<>();
         stringListCopy.addAll(stringList);
+        this.isQnA = isQnA;
+        lastCheckedPos = -1;
+        if(isQnA) {
+            for (int i = 0; i < stringList.size(); i++) {
+                if (stringList.get(i).getName().equals("QnAs")) {
+                    lastCheckedPos = i;
+                }
+            }
+        }
+
     }
 
     @NonNull
@@ -52,7 +63,6 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         FeedGroupData feedGroupData = stringList.get(position);
 
         holder.titleTv.setText(feedGroupData.getName());
-
         holder.selectionRb.setChecked(position == lastCheckedPos);
         holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
         holder.groupIv.setOnClickListener(v -> holder.selectionRb.performClick());
@@ -64,7 +74,6 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
                 .circleCrop()
                 .error(R.drawable.ic_group)
                 .into(holder.groupIv);
-
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
             lastCheckedPos = holder.getBindingAdapterPosition();
