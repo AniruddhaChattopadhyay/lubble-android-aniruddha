@@ -7,6 +7,9 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -29,12 +32,15 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.chat.stories.StoriesRecyclerViewAdapter;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.models.FeedGroupData;
@@ -53,6 +59,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener, SwipeRefreshLayout.OnRefreshListener {
@@ -72,7 +82,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayoutManager layoutManager;
     private FeedViewModel viewModel;
-
+    private LinearLayout joinedGroupStroriesLL;
+    private RecyclerView joinedGroupStoriesRV;
+    ArrayList<FeedGroupData> feedGroupDataList;
     public FeedFrag() {
         // Required empty public constructor
     }
@@ -106,16 +118,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         emptyHintTv = view.findViewById(R.id.tv_empty_hint);
         feedRV = view.findViewById(R.id.feed_recyclerview);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
-
+        joinedGroupStoriesRV = view.findViewById(R.id.joined_groups_stories_recycler_view);
+        joinedGroupStroriesLL = view.findViewById(R.id.ll_joined_groups_stories);
         postBtnLL.setVisibility(View.VISIBLE);
-//        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) postButtonsRV.getLayoutParams();
-//        if (getParentFragment() instanceof FeedCombinedFragment) {
-//            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(64));
-//        } else {
-//            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(16));
-//        }
-//        postBtn.setLayoutParams(lp);
-
         layoutManager = new LinearLayoutManager(getContext());
         feedRV.setLayoutManager(layoutManager);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -132,8 +137,47 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         });
 
         getCredentials();
+        initJoinedGroupRecyclerView();
 
         return view;
+    }
+
+    private void initJoinedGroupRecyclerView() {
+        Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        Call<List<FeedGroupData>> call = endpoints.getFeedGroupList();
+        call.enqueue(new Callback<List<FeedGroupData>>() {
+            @Override
+            public void onResponse(@NotNull Call<List<FeedGroupData>> call, @NotNull Response<List<FeedGroupData>> response) {
+                feedGroupDataList = (ArrayList<FeedGroupData>) response.body();
+                if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+                    joinedGroupStroriesLL.setVisibility(View.VISIBLE);
+                    final ViewTreeObserver observer = joinedGroupStroriesLL.getViewTreeObserver();
+                    observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            int heightOfLayout = joinedGroupStroriesLL.getHeight();
+                            if (observer.isAlive()) {
+                                observer.removeOnGlobalLayoutListener(this);
+                            }
+                        }
+                    });
+                    joinedGroupStoriesRV.setLayoutManager(layoutManager);
+                    JoinedGroupsStoriesRecyclerViewAdapter adapter = new JoinedGroupsStoriesRecyclerViewAdapter(getContext(), feedGroupDataList,getParentFragmentManager());
+                    joinedGroupStoriesRV.setAdapter(adapter);
+                } else if (isAdded()) {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FeedGroupData>> call, Throwable t) {
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
     @Override
@@ -249,6 +293,14 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     }
 
     RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
+        int state = SCROLL_STATE_IDLE;
+
+        @Override
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            state = newState;
+        }
+
         @Override
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
@@ -257,7 +309,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             } else {
                 UiUtils.animateSlideUpShow(getContext(), postBtnLL);
             }
-
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
                     layoutManager.findLastCompletelyVisibleItemPosition());
             viewModel.onScrolled(visibleState);
