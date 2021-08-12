@@ -1,109 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipe_refresh_feed"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
-    <FrameLayout
+    tools:showIn="@layout/fragment_feed">
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh_feed"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/md_grey_200"
-        >
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <TextView
-            android:id="@+id/tv_empty_hint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:drawableTopCompat="@drawable/ic_category"
-            android:gravity="center"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            android:padding="8dp"
-            android:text="Join groups to view their posts here"
-            android:textColor="@color/black"
-            app:drawableTint="@color/colorAccent" />
-
-        <com.cooltechworks.views.shimmer.ShimmerRecyclerView
-            android:id="@+id/feed_recyclerview"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingBottom="64dp"
-            android:scrollbars="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:shimmer_demo_angle="20"
-            app:shimmer_demo_child_count="5"
-            app:shimmer_demo_layout="@layout/item_shimmer_feed_post"
-            app:shimmer_demo_layout_manager_type="linear_vertical"
-            tools:listitem="@layout/feed_list_row" />
+            android:background="@color/md_grey_200">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_empty_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="Join groups to view their posts here"
+                android:textColor="@color/black"
+                android:visibility="gone"
+                app:drawableTint="@color/colorAccent"
+                app:drawableTopCompat="@drawable/ic_category" />
+
+            <com.cooltechworks.views.shimmer.ShimmerRecyclerView
+                android:id="@+id/feed_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="64dp"
+                android:scrollbars="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:shimmer_demo_angle="20"
+                app:shimmer_demo_child_count="5"
+                app:shimmer_demo_layout="@layout/item_shimmer_feed_post"
+                app:shimmer_demo_layout_manager_type="linear_vertical"
+                tools:listitem="@layout/feed_list_row" />
+
+        </FrameLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:id="@+id/post_btn_LL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center|bottom"
+        android:layout_marginTop="24dp"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:weightSum="2"
+        app:layout_anchor="@id/swipe_refresh_feed"
+        app:layout_anchorGravity="bottom"
+        tools:visibility="visible">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_new_post"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:id="@+id/post_btn_LL"
-            android:visibility="gone"
-            android:layout_marginBottom="?attr/actionBarSize"
-            tools:visibility="visible"
-            android:layout_marginTop="24dp"
-            android:orientation="horizontal"
-            android:layout_gravity="center|bottom"
-            android:weightSum="2">
-
-            <LinearLayout
-                android:id="@+id/add_post_container"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_new_post"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:width="140dp"
-                    android:text="Add Post"
-                    android:textAllCaps="true"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    app:backgroundTint="@color/button_color_selector"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:theme="@style/MaterialButton"
-                    tools:visibility="visible"
-                    />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/add_question_container"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_QandA_new_post"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@+id/btn_new_post"
-                    android:text="Post Questions"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:textAllCaps="true"
-                    app:backgroundTint="@color/button_color_selector"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:theme="@style/MaterialButton"
-                    tools:visibility="visible"
-                    />
-            </LinearLayout>
-
-        </LinearLayout>
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:width="140dp"
+            android:text="New Post"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:theme="@style/MaterialButton"
+            app:backgroundTint="@color/md_blue_grey_800"
+            tools:visibility="visible" />
 
 
-    </FrameLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_QandA_new_post"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_toEndOf="@+id/btn_new_post"
+            android:layout_weight="1"
+            android:text="Ask local Question"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:theme="@style/MaterialButton"
+            app:backgroundTint="@color/md_blue_grey_800"
+            tools:visibility="visible" />
 
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
+</merge>

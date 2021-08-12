@@ -244,11 +244,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             ));
             feedRV.clearOnScrollListeners();
             feedRV.addOnScrollListener(scrollListener);
-            viewModel.getDistinctLiveData().observe(this, visibleState -> {
+            viewModel.getDistinctLiveData().observe(getViewLifecycleOwner(), visibleState -> {
                 processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FirebaseAuth.getInstance().getUid(), FeedFrag.class.getSimpleName());
             });
         }
-        viewModel.loadPaginatedActivities(timelineFeed, 10).observe(this, pagingData -> {
+        viewModel.loadPaginatedActivities(timelineFeed, 10).observe(getViewLifecycleOwner(), pagingData -> {
             layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
