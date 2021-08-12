@@ -8,8 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -40,7 +38,6 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.chat.stories.StoriesRecyclerViewAdapter;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.models.FeedGroupData;
@@ -59,9 +56,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
-import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
@@ -163,7 +157,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                         }
                     });
                     joinedGroupStoriesRV.setLayoutManager(layoutManager);
-                    JoinedGroupsStoriesRecyclerViewAdapter adapter = new JoinedGroupsStoriesRecyclerViewAdapter(getContext(), feedGroupDataList,getParentFragmentManager());
+                    JoinedGroupsStoriesAdapter adapter = new JoinedGroupsStoriesAdapter(getContext(), feedGroupDataList,getParentFragmentManager());
                     joinedGroupStoriesRV.setAdapter(adapter);
                 } else if (isAdded()) {
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
