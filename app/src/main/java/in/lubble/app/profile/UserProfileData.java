@@ -2,6 +2,10 @@ package in.lubble.app.profile;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
+import in.lubble.app.models.FeedGroupData;
+
 public class UserProfileData {
 
     @SerializedName("points")
@@ -10,6 +14,16 @@ public class UserProfileData {
     private int rank;
     @SerializedName("referrals")
     private int referrals;
+    @SerializedName("Joined Groups")
+    private List<FeedGroupData> joinedGroups;
+
+    public List<FeedGroupData> getJoinedGroups() {
+        return joinedGroups;
+    }
+
+    public void setJoinedGroups(List<FeedGroupData> joinedGroups) {
+        this.joinedGroups = joinedGroups;
+    }
 
     public int getPoints() {
         return points;
