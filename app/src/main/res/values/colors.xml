@@ -19,6 +19,7 @@
     <color name="lt_gold">#FFD542</color>
     <color name="very_trans_white">#45FFFFFF</color>
     <color name="trans_white">#96ffffff</color>
+    <color name="lt_trans_white">#CCFFFFFF</color>
     <color name="circle_trans_white">#caffffff</color>
     <color name="default_text_color">#808080</color>
     <color name="link_text_color">#9C000000</color>

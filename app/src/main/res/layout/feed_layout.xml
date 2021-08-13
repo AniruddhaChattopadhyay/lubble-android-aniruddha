@@ -55,6 +55,7 @@
         android:layout_marginTop="24dp"
         android:gravity="bottom"
         android:orientation="horizontal"
+        android:background="@color/lt_trans_white"
         android:visibility="gone"
         android:weightSum="2"
         app:layout_anchor="@id/swipe_refresh_feed"
@@ -70,11 +71,12 @@
             android:layout_weight="1"
             android:width="140dp"
             android:text="New Post"
+            app:icon="@drawable/ic_edit_white_24dp"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="12sp"
             android:theme="@style/MaterialButton"
-            app:backgroundTint="@color/md_blue_grey_800"
+            app:backgroundTint="@color/md_blue_grey_700"
             tools:visibility="visible" />
 
 
@@ -86,12 +88,13 @@
             android:layout_marginEnd="8dp"
             android:layout_toEndOf="@+id/btn_new_post"
             android:layout_weight="1"
-            android:text="Ask local Question"
+            android:text="Ask a Question"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="12sp"
+            app:icon="@drawable/ic_help_outline_black_24dp"
             android:theme="@style/MaterialButton"
-            app:backgroundTint="@color/md_blue_grey_800"
+            app:backgroundTint="@color/md_blue_grey_700"
             tools:visibility="visible" />
 
     </LinearLayout>
