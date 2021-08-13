@@ -126,7 +126,6 @@ public class ProfileFrag extends Fragment {
     private int profileView;
     private UserProfileData userProfileData;
 
-
     public ProfileFrag() {
         //Required empty public constructor
     }
@@ -324,8 +323,8 @@ public class ProfileFrag extends Fragment {
 
     private class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder> {
 
-        private List<FeedGroupData> groupList = new ArrayList<>();
-        private GlideRequests glideApp;
+        private final List<FeedGroupData> groupList = new ArrayList<>();
+        private final GlideRequests glideApp;
 
         GroupsAdapter(GlideRequests glideApp) {
             this.glideApp = glideApp;
@@ -555,9 +554,8 @@ public class ProfileFrag extends Fragment {
             @Override
             public void onResponse(Call<UserProfileData> call, Response<UserProfileData> response) {
                 userProfileData = response.body();
-                if(userProfileData!=null)
+                if (response.isSuccessful() && userProfileData != null && isAdded()) {
                     groupsAdapter.addGroupList(userProfileData.getJoinedGroups());
-                if (response.isSuccessful() && userProfileData != null && isAdded() && isVisible()) {
                     invitedTv.setText(String.valueOf(userProfileData.getReferrals()));
                 } else if (isAdded() && isVisible()) {
                     FirebaseCrashlytics.getInstance().log("referral leaderboard bad response");
