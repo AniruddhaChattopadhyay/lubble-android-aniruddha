@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -86,7 +85,7 @@ import static in.lubble.app.utils.UiUtils.dpToPx;
 public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor.MyViewHolder> {
 
     private static final String TAG = "FeedAdaptor";
-    private Context context=null;
+    private Context context = null;
     private int itemWidth, displayHeight;
     private FeedListener feedListener;
     private GlideRequests glide;
@@ -148,7 +147,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                             View.MeasureSpec.makeMeasureSpec(itemWidth, View.MeasureSpec.EXACTLY),
                             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
                     int itemViewHeight = holder.itemView.getMeasuredHeight();
-                    float targetHeight = Math.min(displayHeight - itemViewHeight, itemWidth / aspectRatio);
+                    float targetHeight = Math.min(displayHeight - itemViewHeight - dpToPx(80), itemWidth / aspectRatio); //80->sum of heights for joined groups & new post btns
                     holder.photoContentIv.setVisibility(View.VISIBLE);
                     ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
                     if (targetHeight < 300) {
@@ -168,14 +167,13 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 holder.textContentTv.setMaxLines(9);
             }
             //setting the tooltip for the first post
-            if(holder.getAbsoluteAdapterPosition()==0){
-                if(extras.containsKey("photoLink")){
+            if (holder.getAbsoluteAdapterPosition() == 0) {
+                if (extras.containsKey("photoLink")) {
                     View v = holder.photoContentIv;
-                    v.post(() ->setToolTipForDoubleTapLike(v) );
-                }
-                else{
+                    v.post(() -> setToolTipForDoubleTapLike(v));
+                } else {
                     View v = holder.textContentTv;
-                    v.post(() ->setToolTipForDoubleTapLike(v));
+                    v.post(() -> setToolTipForDoubleTapLike(v));
                 }
             }
 
@@ -246,21 +244,19 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     }
 
     private void setToolTipForDoubleTapLike(View view) {
-        if(view == null || context==null || LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG())
+        if (view == null || context == null || LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG())
             return;
 
         Tooltip tooltip = new Tooltip.Builder(context)
-                .anchor(view, 0, 0, false)
-                .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_CONSUME())
+                .anchor(view, 0, -dpToPx(24), true)
+                .closePolicy(ClosePolicy.Companion.getTOUCH_NONE())
                 .showDuration(5000)
                 .overlay(false)
-                .text(" Double tap anywhere to like the post!")
+                .text("Double tap anywhere to like")
                 .create();
 
-        tooltip.show(view, Tooltip.Gravity.BOTTOM, false);
+        tooltip.show(view, Tooltip.Gravity.BOTTOM, true);
         LubbleSharedPrefs.getInstance().setFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG();
-        boolean ans = LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG();
-        ans = false;
 
     }
 
@@ -564,14 +560,14 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                toggleLike2(likeIv , likeTv, getAbsoluteAdapterPosition());
+                toggleLike2(likeIv, likeTv, getAbsoluteAdapterPosition());
                 return true;
             }
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 activity = getItem(getAbsoluteAdapterPosition());
-                if(activity==null)
+                if (activity == null)
                     return false;
                 extras = activity.getExtra();
                 switch (touchView.getId()) {
@@ -594,7 +590,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         break;
 
                     case R.id.cont_like:
-                        toggleLike2(likeIv,likeTv,getAbsoluteAdapterPosition());
+                        toggleLike2(likeIv, likeTv, getAbsoluteAdapterPosition());
 //                        View v = likeLayout.findViewById(R.id.cont_like);
 //                        setToolTipForDoubleTapLike(v);
                         break;

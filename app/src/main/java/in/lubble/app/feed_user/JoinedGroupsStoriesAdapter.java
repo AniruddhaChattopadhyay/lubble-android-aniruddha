@@ -41,7 +41,7 @@ public class JoinedGroupsStoriesAdapter extends RecyclerView.Adapter<JoinedGroup
 
     @Override
     public @NotNull ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.story_layout, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_joined_groups, parent, false);
         return new ViewHolder(view);
     }
 
