@@ -56,20 +56,42 @@ public class RealtimeDbHelper {
         return getUserLubbleRef().child("groups");
     }
 
+    /**
+     * DON'T USE getLubbleRef() -> LEADS TO WHOLE NODE BEING DOWNLOADED
+     * VERY IMP TO NEVER USE IT, EVER.
+     * Might as well break the whole app.
+     * <p>
+     * Instead, use child nodes like lubbleInfo, events, etc.
+     */
+    @Deprecated()
     public static DatabaseReference getLubbleRef() {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId());
     }
 
-    public static DatabaseReference getLubbleMembersRef() {
-        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/members");
+    public static DatabaseReference getLubbleInfoRef() {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/lubbleInfo");
+    }
+
+    public static DatabaseReference getLubbleInfoRef(String lubbleId) {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + lubbleId + "/lubbleInfo");
     }
 
     public static DatabaseReference getLubbleDomesticRef() {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/domesticDirectory");
     }
 
+    /*
+    Be Careful! getLubbleGroupsRef() will download the whole group node along with 1000s of members!
+    User GroupInfo node instead to get just meta data of group.
+    */
+    @Deprecated
     public static DatabaseReference getLubbleGroupsRef() {
         return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups");
+    }
+
+    public static DatabaseReference getLubbleGroupInfoRef(String groupId) {
+        return FirebaseDatabase.getInstance().getReference("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "/groups")
+                .child(groupId).child("groupInfo");
     }
 
     public static DatabaseReference getLubbleBlocksRef() {
@@ -116,10 +138,6 @@ public class RealtimeDbHelper {
 
     public static DatabaseReference getDevRef() {
         return FirebaseDatabase.getInstance().getReference("devs");
-    }
-
-    public static DatabaseReference getEventsRef() {
-        return getLubbleRef().child("events");
     }
 
     /*

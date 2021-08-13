@@ -33,6 +33,7 @@ import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import okhttp3.RequestBody;
@@ -196,21 +197,21 @@ public class EventGroupJoinedActivity extends BaseActivity {
 
 
     private void fetchLinkedGroupInfo(String gid) {
-        listener = RealtimeDbHelper.getLubbleGroupsRef().child(gid).addValueEventListener(new ValueEventListener() {
+        listener = RealtimeDbHelper.getLubbleGroupInfoRef(gid).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot != null) {
-                    final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                    if (groupData != null) {
+                    final GroupInfoData groupInfoData = dataSnapshot.getValue(GroupInfoData.class);
+                    if (groupInfoData != null) {
 
                         GlideApp.with(EventGroupJoinedActivity.this)
-                                .load(groupData.getThumbnail())
+                                .load(groupInfoData.getThumbnail())
                                 .placeholder(R.drawable.ic_circle_group_24dp)
                                 .error(R.drawable.ic_circle_group_24dp)
                                 .circleCrop()
                                 .into(groupIcon);
 
-                        groupNameTv.setText(groupData.getTitle());
+                        groupNameTv.setText(groupInfoData.getTitle());
                     }
                 }
             }
@@ -226,7 +227,7 @@ public class EventGroupJoinedActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         if (listener != null) {
-            RealtimeDbHelper.getLubbleGroupsRef().child(groupId).removeEventListener(listener);
+            RealtimeDbHelper.getLubbleGroupInfoRef(groupId).removeEventListener(listener);
         }
     }
 }

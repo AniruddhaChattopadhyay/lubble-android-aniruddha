@@ -7,8 +7,9 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,12 +24,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
@@ -53,6 +56,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener, SwipeRefreshLayout.OnRefreshListener {
@@ -62,7 +66,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private static final int REQUEST_CODE_NEW_POST = 800;
     private static final int REQ_CODE_POST_ACTIV = 226;
 
-    private ExtendedFloatingActionButton postBtn;
+    private MaterialButton postBtn;
+    private MaterialButton postQandABtn;
+    private LinearLayout postBtnLL;
     private TextView emptyHintTv;
     private ShimmerRecyclerView feedRV;
     private final String userId = FirebaseAuth.getInstance().getUid();
@@ -70,7 +76,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private SwipeRefreshLayout swipeRefreshLayout;
     private LinearLayoutManager layoutManager;
     private FeedViewModel viewModel;
-
+    private LinearLayout joinedGroupStroriesLL;
+    private RecyclerView joinedGroupStoriesRV;
+    ArrayList<FeedGroupData> feedGroupDataList;
     public FeedFrag() {
         // Required empty public constructor
     }
@@ -99,19 +107,14 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_feed, container, false);
         postBtn = view.findViewById(R.id.btn_new_post);
+        postQandABtn = view.findViewById(R.id.btn_QandA_new_post);
+        postBtnLL = view.findViewById(R.id.post_btn_LL);
         emptyHintTv = view.findViewById(R.id.tv_empty_hint);
         feedRV = view.findViewById(R.id.feed_recyclerview);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
-
-        postBtn.setVisibility(View.VISIBLE);
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) postBtn.getLayoutParams();
-        if (getParentFragment() instanceof FeedCombinedFragment) {
-            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(64));
-        } else {
-            lp.setMargins(0, 0, UiUtils.dpToPx(16), UiUtils.dpToPx(16));
-        }
-        postBtn.setLayoutParams(lp);
-
+        joinedGroupStoriesRV = view.findViewById(R.id.joined_groups_stories_recycler_view);
+        joinedGroupStroriesLL = view.findViewById(R.id.ll_joined_groups_stories);
+        postBtnLL.setVisibility(View.VISIBLE);
         layoutManager = new LinearLayoutManager(getContext());
         feedRV.setLayoutManager(layoutManager);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -121,10 +124,54 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
+        postQandABtn.setOnClickListener(v->{
+            Intent intent = new Intent(getContext(), AddPostForFeed.class);
+            intent.putExtra(AddPostForFeed.QnAString,true);
+            startActivityForResult(intent, REQUEST_CODE_NEW_POST);
+        });
 
         getCredentials();
+        initJoinedGroupRecyclerView();
 
         return view;
+    }
+
+    private void initJoinedGroupRecyclerView() {
+        Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        Call<List<FeedGroupData>> call = endpoints.getFeedGroupList();
+        call.enqueue(new Callback<List<FeedGroupData>>() {
+            @Override
+            public void onResponse(@NotNull Call<List<FeedGroupData>> call, @NotNull Response<List<FeedGroupData>> response) {
+                feedGroupDataList = (ArrayList<FeedGroupData>) response.body();
+                if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
+                    LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+                    joinedGroupStroriesLL.setVisibility(View.VISIBLE);
+                    final ViewTreeObserver observer = joinedGroupStroriesLL.getViewTreeObserver();
+                    observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            int heightOfLayout = joinedGroupStroriesLL.getHeight();
+                            if (observer.isAlive()) {
+                                observer.removeOnGlobalLayoutListener(this);
+                            }
+                        }
+                    });
+                    joinedGroupStoriesRV.setLayoutManager(layoutManager);
+                    JoinedGroupsStoriesAdapter adapter = new JoinedGroupsStoriesAdapter(getContext(), feedGroupDataList,getParentFragmentManager());
+                    joinedGroupStoriesRV.setAdapter(adapter);
+                } else if (isAdded()) {
+                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<FeedGroupData>> call, Throwable t) {
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
     }
 
     @Override
@@ -191,11 +238,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             ));
             feedRV.clearOnScrollListeners();
             feedRV.addOnScrollListener(scrollListener);
-            viewModel.getDistinctLiveData().observe(this, visibleState -> {
+            viewModel.getDistinctLiveData().observe(getViewLifecycleOwner(), visibleState -> {
                 processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FirebaseAuth.getInstance().getUid(), FeedFrag.class.getSimpleName());
             });
         }
-        viewModel.loadPaginatedActivities(timelineFeed, 10).observe(this, pagingData -> {
+        viewModel.loadPaginatedActivities(timelineFeed, 10).observe(getViewLifecycleOwner(), pagingData -> {
             layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
@@ -240,15 +287,22 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     }
 
     RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
+        int state = SCROLL_STATE_IDLE;
+
+        @Override
+        public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            state = newState;
+        }
+
         @Override
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
             if (dy > 0) {
-                UiUtils.animateSlideDownHide(getContext(), postBtn);
+                UiUtils.animateSlideDownHide(getContext(), postBtnLL);
             } else {
-                UiUtils.animateSlideUpShow(getContext(), postBtn);
+                UiUtils.animateSlideUpShow(getContext(), postBtnLL);
             }
-
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
                     layoutManager.findLastCompletelyVisibleItemPosition());
             viewModel.onScrolled(visibleState);
@@ -257,7 +311,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
-        postBtn.setVisibility(View.GONE);
+        postBtnLL.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
@@ -282,14 +336,14 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void onReplied(String activityId, String foreignId, Reaction reaction) {
-        postBtn.setVisibility(View.VISIBLE);
+        postBtnLL.setVisibility(View.VISIBLE);
         adapter.addUserReply(activityId, reaction);
         Analytics.triggerFeedEngagement(foreignId, "comment", 10, "timeline:" + userId, FeedFrag.class.getSimpleName());
     }
 
     @Override
     public void onDismissed() {
-        postBtn.setVisibility(View.VISIBLE);
+        postBtnLL.setVisibility(View.VISIBLE);
     }
 
     @Override

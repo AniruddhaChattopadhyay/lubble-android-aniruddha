@@ -110,7 +110,7 @@ public class ReferralsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        referralHdrImgListener = RealtimeDbHelper.getLubbleRef().child("referralHdrImg").addValueEventListener(new ValueEventListener() {
+        referralHdrImgListener = RealtimeDbHelper.getLubbleInfoRef().child("referralHdrImg").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 GlideApp.with(getContext())
@@ -255,60 +255,15 @@ public class ReferralsFragment extends Fragment {
     }
 
     private void fetchReferralLeaderboard() {
-        fetchAllLubbleUsers();
+        //fetchAllLubbleUsers();
     }
 
-    private void fetchAllLubbleUsers() {
-        RealtimeDbHelper.getLubbleMembersRef().addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                adapter.clear();
-                // get list of all lubble users
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    fetchLubbleMembersProfile(child.getKey());
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void fetchLubbleMembersProfile(String uid) {
-        getUserRef(uid).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null && profileData.getInfo() != null) {
-                    profileData.setId(dataSnapshot.getKey());
-                    addPersonToAdapter(profileData, 0);
-                }
-            }
-
-            private void addPersonToAdapter(ProfileData profileData1, int rank) {
-                final LeaderboardPersonData leaderboardPersonData = new LeaderboardPersonData();
-                leaderboardPersonData.setUid(profileData1.getId());
-                leaderboardPersonData.setName(profileData1.getInfo().getName());
-                leaderboardPersonData.setPoints((int) profileData1.getCoins());
-                leaderboardPersonData.setThumbnail(profileData1.getInfo().getThumbnail());
-                leaderboardPersonData.setCurrentUserRank(rank);
-                adapter.addPerson(leaderboardPersonData);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
 
     @Override
     public void onPause() {
         super.onPause();
         if (referralHdrImgListener != null) {
-            RealtimeDbHelper.getLubbleRef().child("referralHdrImg").removeEventListener(referralHdrImgListener);
+            RealtimeDbHelper.getLubbleInfoRef().child("referralHdrImg").removeEventListener(referralHdrImgListener);
         }
         if (thisUserListener != null) {
             getThisUserRef().removeEventListener(thisUserListener);

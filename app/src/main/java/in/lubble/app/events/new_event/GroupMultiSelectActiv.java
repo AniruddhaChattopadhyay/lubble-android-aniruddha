@@ -92,7 +92,7 @@ public class GroupMultiSelectActiv extends BaseActivity {
         super.onResume();
         recyclerView.setAdapter(new MultiGroupPickerAdapter(new ArrayList<GroupData>(), GlideApp.with(GroupMultiSelectActiv.this)));
 
-        query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
+        /*query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
         valueEventListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -114,7 +114,7 @@ public class GroupMultiSelectActiv extends BaseActivity {
 
             }
         };
-        query.addValueEventListener(valueEventListener);
+        query.addValueEventListener(valueEventListener);*/
     }
 
     private class MultiGroupPickerAdapter extends RecyclerView.Adapter<MultiGroupPickerAdapter.ViewHolder> {

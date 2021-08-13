@@ -23,21 +23,25 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleApp;
@@ -48,12 +52,17 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ShareActiv;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.network.Endpoints;
+import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupsRef;
 import static in.lubble.app.utils.ReferralUtils.generateBranchUrlForGroup;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntentForGroup;
 
@@ -127,8 +136,7 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
 
         userAdapter = new UserAdapter(mListener, GlideApp.with(getContext()), groupId);
         usersRecyclerView.setAdapter(userAdapter);
-        fetchAllLubbleUsers();
-        fetchGroupUsers();
+        fetchAllUsers();
 
         selectedUsersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
         selectedUserAdapter = new SelectedUserAdapter(mListener, GlideApp.with(getContext()));
@@ -196,53 +204,83 @@ public class UserSearchFrag extends Fragment implements OnUserSelectedListener {
         });
     }
 
-    private void fetchAllLubbleUsers() {
-        FirebaseDatabase.getInstance().getReference("users").orderByChild("lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId()).startAt("")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        userAdapter.clear();
-                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            if (!(child.getValue() instanceof Boolean && child.hasChild("info"))) {
-                                final ProfileInfo profileInfo = child.child("info").getValue(ProfileInfo.class);
-                                if (profileInfo != null) {
-                                    profileInfo.setId(child.getKey());
-                                    userAdapter.addMemberProfile(profileInfo);
-                                }
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        FirebaseCrashlytics.getInstance().recordException(databaseError.toException());
+    private void fetchAllUsers() {
+        // fetch token first
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mUser.getIdToken(false)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        String idToken = task.getResult().getToken();
+                        fetchLubbleMembers(idToken);
+                        fetchGroupUsers(idToken);
+                    } else {
+                        Toast.makeText(getContext(), "Failed to fetch access token", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void fetchGroupUsers() {
-        // keep this as singleEventListener to avoid over complications
-        getLubbleGroupsRef().child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+    private void fetchLubbleMembers(String idToken) {
+        final Endpoints endpoints = ServiceGenerator.createFirebaseService(Endpoints.class);
+        Call<JsonObject> lubbleMembersCall =
+                endpoints.fetchLubbleMembers("\"lubbles/" + LubbleSharedPrefs.getInstance().requireLubbleId() + "\"", "\"\"", idToken);
+        lubbleMembersCall.enqueue(new Callback<JsonObject>() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final GroupData groupData = dataSnapshot.getValue(GroupData.class);
-                if (groupData != null && getContext() != null) {
-                    final ArrayList<String> groupMembersList = new ArrayList<>(groupData.getMembers().keySet());
-                    final HashMap<String, Boolean> groupMembersMap = new HashMap<>();
-                    for (String uid : groupMembersList) {
-                        groupMembersMap.put(uid, true);
+            public void onResponse(@NotNull Call<JsonObject> call, @NotNull Response<JsonObject> response) {
+                if (response.isSuccessful() && isAdded()) {
+                    final JsonObject responseJson = response.body();
+                    Gson gson = new Gson();
+                    for (Map.Entry<String, JsonElement> entry : responseJson.entrySet()) {
+                        ProfileData profileData = gson.fromJson(entry.getValue(), ProfileData.class);
+                        final ProfileInfo profileInfo = profileData.getInfo();
+                        if (profileInfo != null && profileInfo.getName() != null && !profileData.getIsDeleted()) {
+                            profileInfo.setId(entry.getKey());
+                            userAdapter.addMemberProfile(profileInfo);
+                        }
                     }
-                    userAdapter.addGroupMembersList(groupMembersMap);
-
-                    sharingProgressDialog = new ProgressDialog(getContext());
-                    generateBranchUrlForGroup(getContext(), linkCreateListener, groupData);
-                    initClickHandlers(groupData);
+                } else if (isAdded()) {
+                    Toast.makeText(getContext(), "error: " + response.message(), Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onFailure(Call<JsonObject> call, Throwable t) {
+                if (isAdded() && isVisible()) {
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
 
+    private void fetchGroupUsers(String idToken) {
+        final Endpoints endpoints = ServiceGenerator.createFirebaseService(Endpoints.class);
+        Call<GroupData> groupDataCall = endpoints.fetchGroupData(LubbleSharedPrefs.getInstance().requireLubbleId(), groupId, idToken);
+        groupDataCall.enqueue(new Callback<GroupData>() {
+            @Override
+            public void onResponse(@NotNull Call<GroupData> call, @NotNull Response<GroupData> response) {
+                if (response.isSuccessful() && isAdded()) {
+                    final GroupData groupData = response.body();
+                    if (groupData != null && getContext() != null) {
+                        final ArrayList<String> groupMembersList = new ArrayList<>(groupData.getMembers().keySet());
+                        final HashMap<String, Boolean> groupMembersMap = new HashMap<>();
+                        for (String uid : groupMembersList) {
+                            groupMembersMap.put(uid, true);
+                        }
+                        userAdapter.addGroupMembersList(groupMembersMap);
+
+                        sharingProgressDialog = new ProgressDialog(getContext());
+                        generateBranchUrlForGroup(getContext(), linkCreateListener, groupData);
+                        initClickHandlers(groupData);
+                    }
+                } else if (isAdded()) {
+                    Toast.makeText(getContext(), "error: " + response.message(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GroupData> call, Throwable t) {
+                if (isAdded() && isVisible()) {
+                    Toast.makeText(getContext(), R.string.check_internet, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

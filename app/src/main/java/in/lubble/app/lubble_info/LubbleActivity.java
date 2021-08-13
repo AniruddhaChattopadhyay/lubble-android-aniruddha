@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -60,9 +62,15 @@ public class LubbleActivity extends BaseActivity {
         wikiWebView = findViewById(R.id.webview_wiki);
 
         String wikiUrl = FirebaseRemoteConfig.getInstance().getString(Constants.WIKI_URL);
+        Uri uri = Uri.parse(wikiUrl);
+        if ("neighbourhoods".equalsIgnoreCase(uri.getLastPathSegment())) {
+            // couldnt resolve apt nhood name from firebase remoteConfig, use redirects in WP instead
+            // remoteConfig will fail for new users whose uid & lubble ID are just set in analytics but not yet synced with remoteConfig
+            uri = uri.buildUpon().appendQueryParameter("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId()).build();
+        }
 
         wikiWebView.getSettings().setJavaScriptEnabled(true);
-        wikiWebView.loadUrl(wikiUrl);
+        wikiWebView.loadUrl(uri.toString());
         progressBar.setVisibility(View.VISIBLE);
 
         wikiWebView.setWebChromeClient(new WebChromeClient() {
@@ -71,6 +79,13 @@ public class LubbleActivity extends BaseActivity {
                 if (progress == 100) {
                     progressBar.setVisibility(View.INVISIBLE);
                 }
+            }
+        });
+        wikiWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return false;
             }
         });
     }

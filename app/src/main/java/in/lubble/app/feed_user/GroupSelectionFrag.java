@@ -44,6 +44,7 @@ import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 public class GroupSelectionFrag extends Fragment {
 
     private static final String ARG_POST_DATA = "LBL_ARG_POST_DATA";
+    private static final String ARG_IS_QnA = "LBL_ARG_IS_QnA";
     private static final String TAG = "GroupSelectionFrag";
 
     private ShimmerRecyclerView groupsRv;
@@ -54,11 +55,13 @@ public class GroupSelectionFrag extends Fragment {
     private GroupSelectionAdapter groupSelectionAdapter;
     private List<FeedGroupData> feedGroupDataList,exploreGroupDataList;
     private ProgressBar postProgressBar;
+    private boolean isQnA;
 
-    public static GroupSelectionFrag newInstance(FeedPostData feedPostData) {
+    public static GroupSelectionFrag newInstance(FeedPostData feedPostData,boolean isQnA) {
         GroupSelectionFrag groupSelectionFrag = new GroupSelectionFrag();
         Bundle bundle = new Bundle();
         bundle.putSerializable(ARG_POST_DATA, feedPostData);
+        bundle.putSerializable(ARG_IS_QnA,isQnA);
         groupSelectionFrag.setArguments(bundle);
         return groupSelectionFrag;
     }
@@ -83,6 +86,12 @@ public class GroupSelectionFrag extends Fragment {
             feedPostData = (FeedPostData) getArguments().getSerializable(ARG_POST_DATA);
         } else {
             throw new MissingFormatArgumentException("no ARG_POST_DATA passed while opening GroupSelectionFrag");
+        }
+
+        if (getArguments() != null && getArguments().containsKey(ARG_IS_QnA)) {
+            isQnA = (boolean) getArguments().getSerializable(ARG_IS_QnA);
+        } else {
+            throw new MissingFormatArgumentException("no ARG_IS_QnA passed while opening GroupSelectionFrag");
         }
 
         groupSv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -178,7 +187,7 @@ public class GroupSelectionFrag extends Fragment {
                     groupsRv.hideShimmerAdapter();
                 }
                 if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
-                    groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList,postSubmitBtn);
+                    groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList,postSubmitBtn,isQnA);
                     groupsRv.setAdapter(groupSelectionAdapter);
                     postSubmitBtn.setEnabled(true);
                 } else if (isAdded()) {

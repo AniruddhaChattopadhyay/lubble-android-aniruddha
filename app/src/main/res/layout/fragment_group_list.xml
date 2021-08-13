@@ -110,6 +110,7 @@
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:background="@drawable/pill_button"
+            app:layout_goneMarginTop="4dp"
             android:text="VIEW"
             android:layout_gravity="center"
             android:visibility="gone"

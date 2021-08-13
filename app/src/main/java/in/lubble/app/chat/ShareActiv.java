@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,10 +19,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,13 +42,16 @@ import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.DmData;
 import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.models.UserGroupData;
 import in.lubble.app.utils.FileUtils;
 
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupInfoRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 
@@ -59,6 +66,7 @@ public class ShareActiv extends BaseActivity {
     private static final String ARG_TYPE = "ARG_TYPE";
 
     private RecyclerView recyclerView;
+    private ProgressBar progressBar;
     private Query query;
     private ValueEventListener valueEventListener;
     private ChatsAdapter chatsAdapter;
@@ -66,6 +74,8 @@ public class ShareActiv extends BaseActivity {
     private ShareType shareType;
     private final ChatData chatDataToSend = new ChatData();
     private Uri mediaUri;
+    private int queryCounter = 0;
+    private HashMap<String, UserGroupData> userGroupDataMap;
 
     public static void open(Context context, String groupIdToShare, ShareType shareType) {
         final Intent intent = new Intent(context, ShareActiv.class);
@@ -80,6 +90,7 @@ public class ShareActiv extends BaseActivity {
         setContentView(R.layout.activity_share);
 
         recyclerView = findViewById(R.id.rv_share_chats);
+        progressBar = findViewById(R.id.progressbar);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         chatsAdapter = new ChatsAdapter(GlideApp.with(this));
         recyclerView.setAdapter(chatsAdapter);
@@ -115,7 +126,11 @@ public class ShareActiv extends BaseActivity {
             shareType = (ShareType) getIntent().getSerializableExtra(ARG_TYPE);
         }
 
-        syncGroups();
+        userGroupDataMap = new HashMap<>();
+        progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        queryCounter = 0;
+        syncUserGroupIds();
         syncUserDmIds();
         syncSellerDmIds();
     }
@@ -170,30 +185,52 @@ public class ShareActiv extends BaseActivity {
         }
     }
 
-
-    private void syncGroups() {
-        query = RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp");
-        valueEventListener = new ValueEventListener() {
+    private void syncUserGroupIds() {
+        // gets list of group IDs joined by the user
+        getUserGroupsRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ArrayList<GroupData> groupDataList = new ArrayList<>();
-
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    final GroupData groupData = child.getValue(GroupData.class);
-                    if (groupData.getMembers().containsKey(FirebaseAuth.getInstance().getUid())) {
-                        groupDataList.add(groupData);
+            public void onDataChange(@NonNull @NotNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    final UserGroupData userGroupData = snapshot.getValue(UserGroupData.class);
+                    if (userGroupData != null) {
+                        userGroupDataMap.put(snapshot.getKey(), userGroupData);
+                        if (userGroupData.isJoined()) {
+                            queryCounter++;
+                            syncJoinedGroups(snapshot.getKey());
+                        }
                     }
                 }
-                Collections.reverse(groupDataList);
-                chatsAdapter.addGroupList(groupDataList);
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
+            public void onCancelled(@NonNull @NotNull DatabaseError error) {
+                FirebaseCrashlytics.getInstance().recordException(error.toException());
             }
-        };
-        query.addListenerForSingleValueEvent(valueEventListener);
+        });
+    }
+
+
+    private void syncJoinedGroups(String groupId) {
+        // get meta data of the groups joined by the user
+        getLubbleGroupInfoRef(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GroupInfoData groupData = dataSnapshot.getValue(GroupInfoData.class);
+                String groupId = dataSnapshot.getRef().getParent().getKey();
+                final UserGroupData userGroupData = userGroupDataMap.get(groupId);
+                if (groupData != null && userGroupData != null) {
+                    groupData.setId(groupId);
+                    chatsAdapter.addGroup(groupData, userGroupData);
+                }
+                queryCounter--;
+                checkAllChatsSynced();
+            }
+
+            @Override
+            public void onCancelled(@NotNull DatabaseError error) {
+                FirebaseCrashlytics.getInstance().recordException(error.toException());
+            }
+        });
     }
 
     private void syncSellerDmIds() {
@@ -203,6 +240,7 @@ public class ShareActiv extends BaseActivity {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     final String dmId = snapshot.getKey();
                     if (dmId != null) {
+                        queryCounter++;
                         fetchDmFrom(dmId);
                     }
                 }
@@ -222,11 +260,7 @@ public class ShareActiv extends BaseActivity {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     final String dmId = snapshot.getKey();
                     if (dmId != null) {
-                        HashMap<String, Object> map = (HashMap<String, Object>) snapshot.getValue();
-                        Long count = 0L;
-                        if (map != null && map.containsKey("unreadCount")) {
-                            count = (Long) map.get("unreadCount");
-                        }
+                        queryCounter++;
                         fetchDmFrom(dmId);
                     }
                 }
@@ -240,6 +274,7 @@ public class ShareActiv extends BaseActivity {
     }
 
     private void fetchDmFrom(@NonNull final String dmId) {
+        final String sellerIdStr = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
         getDmsRef().child(dmId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -247,76 +282,39 @@ public class ShareActiv extends BaseActivity {
                 if (dmData != null) {
                     dmData.setId(dataSnapshot.getKey());
 
-                    final GroupData dmGroupData = new GroupData();
+                    final GroupInfoData dmGroupData = new GroupInfoData();
                     dmGroupData.setId(dmData.getId());
                     dmGroupData.setLastMessage(dmData.getLastMessage());
                     dmGroupData.setLastMessageTimestamp(dmData.getLastMessageTimestamp());
                     dmGroupData.setIsPrivate(true);
                     dmGroupData.setIsDm(true);
 
+                    final UserGroupData userGroupData = new UserGroupData();
                     final HashMap<String, Object> members = dmData.getMembers();
-                    for (String profileId : members.keySet()) {
-                        final String sellerId = String.valueOf(LubbleSharedPrefs.getInstance().getSellerId());
-                        if (!FirebaseAuth.getInstance().getUid().equalsIgnoreCase(profileId) && !sellerId.equalsIgnoreCase(profileId)) {
-                            final HashMap<String, Object> profileMap = (HashMap<String, Object>) members.get(profileId);
-                            if (profileMap != null) {
-                                final boolean isSeller = Boolean.valueOf(String.valueOf(profileMap.get("isSeller")));
-                                if (isSeller) {
-                                    fetchSellerProfileFrom(profileId, dmGroupData);
-                                } else {
-                                    fetchProfileFrom(profileId, dmGroupData);
-                                }
+                    for (String memberUid : members.keySet()) {
+                        if (!memberUid.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())
+                                && !memberUid.equalsIgnoreCase(sellerIdStr)) {
+                            // Other user
+                            HashMap otherMemberMap = (HashMap) members.get(memberUid);
+                            if (otherMemberMap != null) {
+                                final String name = String.valueOf(otherMemberMap.get("name"));
+                                final String dp = String.valueOf(otherMemberMap.get("profilePic"));
+                                dmGroupData.setTitle(name);
+                                dmGroupData.setThumbnail(dp);
+
+                            }
+                        } else {
+                            // this user/seller
+                            HashMap thisMemberMap = (HashMap) members.get(memberUid);
+                            if (thisMemberMap.containsKey("joinedTimestamp") && (Long) thisMemberMap.get("joinedTimestamp") > 0) {
+                                userGroupData.setJoined(true);
                             }
                         }
+                        chatsAdapter.addGroup(dmGroupData, userGroupData);
                     }
                 }
-            }
-
-            private void fetchProfileFrom(String profileId, final GroupData dmGroupData) {
-                getUserInfoRef(profileId).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        HashMap<String, String> map = (HashMap<String, String>) dataSnapshot.getValue();
-                        if (map != null) {
-                            final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                            if (profileInfo != null) {
-                                profileInfo.setId(dataSnapshot.getRef().getParent().getKey()); // this works. Don't touch.
-                                dmGroupData.setTitle(profileInfo.getName());
-                                dmGroupData.setThumbnail(profileInfo.getThumbnail());
-                                final UserGroupData userGroupData = new UserGroupData();
-                                userGroupData.setJoined(true);
-                                chatsAdapter.addGroup(dmGroupData, userGroupData);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-
-            private synchronized void fetchSellerProfileFrom(String profileId, final GroupData dmGroupData) {
-                getSellerRef().child(profileId).child("info").addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        final ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
-                        if (profileInfo != null) {
-                            profileInfo.setId(dataSnapshot.getKey());
-                            dmGroupData.setTitle(profileInfo.getName());
-                            dmGroupData.setThumbnail(profileInfo.getThumbnail());
-                            final UserGroupData userGroupData = new UserGroupData();
-                            userGroupData.setJoined(true);
-                            chatsAdapter.addGroup(dmGroupData, userGroupData);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
+                queryCounter--;
+                checkAllChatsSynced();
             }
 
             @Override
@@ -326,9 +324,16 @@ public class ShareActiv extends BaseActivity {
         });
     }
 
+    private void checkAllChatsSynced() {
+        if (queryCounter == 0) {
+            progressBar.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
+        }
+    }
+
     private class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> {
 
-        private ArrayList<GroupData> groupList = new ArrayList<>();
+        private ArrayList<GroupInfoData> groupList = new ArrayList<>();
         private GlideRequests glideApp;
         // <GroupID, UserGroupData>
         private final HashMap<String, UserGroupData> userGroupDataMap;
@@ -345,7 +350,7 @@ public class ShareActiv extends BaseActivity {
 
         @Override
         public void onBindViewHolder(ChatsAdapter.ViewHolder holder, int position) {
-            final GroupData groupData = groupList.get(position);
+            final GroupInfoData groupData = groupList.get(position);
             glideApp.load(groupData.getThumbnail())
                     .placeholder(R.drawable.ic_circle_group_24dp)
                     .error(R.drawable.ic_circle_group_24dp)
@@ -365,11 +370,11 @@ public class ShareActiv extends BaseActivity {
             return groupList.size();
         }
 
-        void addGroup(GroupData newGroupData, UserGroupData userGroupData) {
+        void addGroup(GroupInfoData newGroupData, UserGroupData userGroupData) {
             if (!userGroupDataMap.containsKey(newGroupData.getId())) {
                 // if not already present
                 for (int i = 0; i < groupList.size(); i++) {
-                    final GroupData groupData = groupList.get(i);
+                    final GroupInfoData groupData = groupList.get(i);
                     if (newGroupData.getLastMessageTimestamp() >= groupData.getLastMessageTimestamp()) {
                         groupList.add(i, newGroupData);
                         userGroupDataMap.put(newGroupData.getId(), userGroupData);
@@ -385,7 +390,7 @@ public class ShareActiv extends BaseActivity {
             }
         }
 
-        void addGroupList(ArrayList<GroupData> groupDataList) {
+        void addGroupList(ArrayList<GroupInfoData> groupDataList) {
             groupList.addAll(groupDataList);
             notifyDataSetChanged();
         }
@@ -413,7 +418,7 @@ public class ShareActiv extends BaseActivity {
                             chatDataToSend.setType(ChatData.EVENT);
                             chatDataToSend.setAttachedGroupId(shareId);
                         }
-                        final GroupData groupData = groupList.get(getAdapterPosition());
+                        final GroupInfoData groupData = groupList.get(getBindingAdapterPosition());
                         if (groupData.getIsDm()) {
                             ChatActivity.openForDm(ShareActiv.this, groupData.getId(), null, null, chatDataToSend, mediaUri);
                         } else {

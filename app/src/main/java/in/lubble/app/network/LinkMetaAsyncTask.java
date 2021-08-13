@@ -28,7 +28,7 @@ public class LinkMetaAsyncTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         try {
-            Document doc = Jsoup.connect(url).timeout(30 * 1000).get();
+            Document doc = Jsoup.connect(url).timeout(10 * 1000).get();
 
             String title = "";
             Elements metaOgTitle = doc.select("meta[property=og:title]");

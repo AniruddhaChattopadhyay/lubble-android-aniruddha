@@ -1,6 +1,11 @@
 package in.lubble.app.network;
 
+import android.service.autofill.UserData;
+
+import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +21,8 @@ import in.lubble.app.models.EventData;
 import in.lubble.app.models.EventIdData;
 import in.lubble.app.models.FeatureData;
 import in.lubble.app.models.FeedGroupData;
+import in.lubble.app.models.GroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksData;
 import in.lubble.app.models.airtable_pojo.AirtableBooksRecord;
 import in.lubble.app.models.marketplace.Category;
@@ -220,6 +227,18 @@ public interface Endpoints {
 
     @GET("marketplace/checkIfUserHasJoinedGroups/")
     Call<String> checkIfGroupJoined();
+
+    @GET("users.json")
+    Call<JsonObject> fetchLubbleMembers(@Query("orderBy") String orderBy, @Query("startAt") String startAt, @Query("auth") String token);
+
+    @GET("users.json")
+    Call<JsonObject> fetchLubbleMembersLimit(@Query("orderBy") String orderBy, @Query("startAt") String startAt, @Query("limitToLast") int limit, @Query("auth") String token);
+
+    @GET("lubbles/{lubble_id}/groups/{group_id}.json")
+    Call<GroupData> fetchGroupData(@Path("lubble_id") String lubbleId, @Path("group_id") String groupId, @Query("auth") String token);
+
+    @GET("lubbles/{lubble_id}/groups/{group_id}/groupInfo.json")
+    Call<GroupInfoData> fetchGroupInfo(@Path("lubble_id") String lubbleId, @Path("group_id") String groupId, @Query("auth") String token);
 
     public class StreamCredentials{
         private String api_key;

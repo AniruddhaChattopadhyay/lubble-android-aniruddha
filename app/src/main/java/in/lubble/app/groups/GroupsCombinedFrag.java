@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -48,7 +47,7 @@ public class GroupsCombinedFrag extends Fragment {
 
         isNewUser = requireArguments().getBoolean("isNewUserInThisLubble", false);
 
-        MyTabPagerAdapter tabPager = new MyTabPagerAdapter(requireActivity());
+        MyTabPagerAdapter tabPager = new MyTabPagerAdapter(this);
         viewPager.setAdapter(tabPager);
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) ->
@@ -60,8 +59,8 @@ public class GroupsCombinedFrag extends Fragment {
     }
 
     static class MyTabPagerAdapter extends FragmentStateAdapter {
-        MyTabPagerAdapter(FragmentActivity fa) {
-            super(fa);
+        MyTabPagerAdapter(Fragment frag) {
+            super(frag);
         }
 
         @NonNull

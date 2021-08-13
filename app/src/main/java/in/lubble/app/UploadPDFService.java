@@ -7,7 +7,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -169,24 +168,22 @@ public class UploadPDFService extends BaseTaskService {
     private Bitmap pdfToBitmap(Uri uri) {
         File pdfFile = new File(uri.getPath());
         Bitmap bitmap = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            try {
-                PdfRenderer renderer = new PdfRenderer(ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_READ_ONLY));
-                PdfRenderer.Page page = renderer.openPage(0);
+        try {
+            PdfRenderer renderer = new PdfRenderer(ParcelFileDescriptor.open(pdfFile, ParcelFileDescriptor.MODE_READ_ONLY));
+            PdfRenderer.Page page = renderer.openPage(0);
 
-                int width = getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
-                int height = getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
-                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                canvas.drawColor(Color.WHITE);
-                canvas.drawBitmap(bitmap, 0, 0, null);
-                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-                page.close();
-                renderer.close();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                FirebaseCrashlytics.getInstance().recordException(ex);
-            }
+            int width = getResources().getDisplayMetrics().densityDpi / 72 * page.getWidth();
+            int height = getResources().getDisplayMetrics().densityDpi / 72 * page.getHeight();
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            canvas.drawColor(Color.WHITE);
+            canvas.drawBitmap(bitmap, 0, 0, null);
+            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+            page.close();
+            renderer.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            FirebaseCrashlytics.getInstance().recordException(ex);
         }
         return bitmap;
 

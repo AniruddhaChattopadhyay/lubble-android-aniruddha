@@ -35,6 +35,7 @@ import com.bumptech.glide.request.target.Target;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -43,19 +44,27 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
+import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
-import in.lubble.app.models.GroupData;
+import in.lubble.app.models.FeedGroupData;
+import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -102,26 +111,23 @@ public class ProfileFrag extends Fragment {
     private CardView referralCard;
     private DatabaseReference userRef;
     private DatabaseReference dmRef;
-    private ValueEventListener valueEventListener;
     @Nullable
     private ProfileData profileData;
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
     private GroupsAdapter groupsAdapter;
     private ConstraintLayout statsContainer;
-
     private ImageView genderIv;
     private TextView genderTv;
     private ImageView businessIv;
     private TextView businessTv;
     private ImageView educationIv;
     private TextView educationTv;
-
     private int profileView;
-
+    private UserProfileData userProfileData;
 
     public ProfileFrag() {
-        // Required empty public constructor
+        //Required empty public constructor
     }
 
     public static ProfileFrag newInstance(String profileId) {
@@ -253,7 +259,6 @@ public class ProfileFrag extends Fragment {
         groupsAdapter = new GroupsAdapter(GlideApp.with(requireContext()));
         userGroupsRv.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false));
         userGroupsRv.setAdapter(groupsAdapter);
-        syncGroups();
         fetchStats();
 
         coinsContainer.setOnClickListener(new View.OnClickListener() {
@@ -297,30 +302,6 @@ public class ProfileFrag extends Fragment {
             });
         }
     }
-
-    private void syncGroups() {
-        RealtimeDbHelper.getLubbleGroupsRef().orderByChild("lastMessageTimestamp").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ArrayList<GroupData> groupDataList = new ArrayList<>();
-
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    final GroupData groupData = child.getValue(GroupData.class);
-                    if (groupData != null && groupData.getMembers().containsKey(userId) && !groupData.getIsPrivate() && !groupData.getIsDm()) {
-                        groupDataList.add(groupData);
-                    }
-                }
-                Collections.reverse(groupDataList);
-                groupsAdapter.addGroupList(groupDataList);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
     final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
         @Override
         public void onLinkCreate(String url, BranchError error) {
@@ -342,8 +323,8 @@ public class ProfileFrag extends Fragment {
 
     private class GroupsAdapter extends RecyclerView.Adapter<GroupsAdapter.ViewHolder> {
 
-        private ArrayList<GroupData> groupList = new ArrayList<>();
-        private GlideRequests glideApp;
+        private final List<FeedGroupData> groupList = new ArrayList<>();
+        private final GlideRequests glideApp;
 
         GroupsAdapter(GlideRequests glideApp) {
             this.glideApp = glideApp;
@@ -356,16 +337,19 @@ public class ProfileFrag extends Fragment {
 
         @Override
         public void onBindViewHolder(GroupsAdapter.ViewHolder holder, int position) {
-            final GroupData groupData = groupList.get(position);
+            final FeedGroupData groupData = groupList.get(position);
             RequestOptions requestOptions = new RequestOptions();
             requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCornersTransformation(UiUtils.dpToPx(8), 0));
-            glideApp.load(groupData.getThumbnail())
+            glideApp.load(groupData.getPhotoUrl())
                     .placeholder(R.drawable.rounded_rect_gray)
                     .error(R.drawable.rounded_rect_gray)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .apply(requestOptions)
                     .into(holder.groupDpIv);
-            holder.groupNameTv.setText(groupData.getTitle());
+            holder.groupNameTv.setText(groupData.getName());
+            holder.itemView.setOnClickListener(v->{
+                GroupFeedActivity.open(requireContext(), groupData);
+            });
         }
 
         @Override
@@ -373,8 +357,13 @@ public class ProfileFrag extends Fragment {
             return groupList.size();
         }
 
-        void addGroupList(ArrayList<GroupData> groupDataList) {
+        void addGroupList(List<FeedGroupData> groupDataList) {
             groupList.addAll(groupDataList);
+            notifyDataSetChanged();
+        }
+
+        public void clear() {
+            groupList.clear();
             notifyDataSetChanged();
         }
 
@@ -389,43 +378,39 @@ public class ProfileFrag extends Fragment {
                 groupDpIv = itemView.findViewById(R.id.iv_wheretonight_pic);
                 groupNameTv = itemView.findViewById(R.id.tv_group_title);
                 groupMemberTv = itemView.findViewById(R.id.tv_member_hint);
-                itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        final GroupData groupData = groupList.get(getAdapterPosition());
-                        ChatActivity.openForGroup(getContext(), groupData.getId(), false, null);
-                    }
-                });
             }
         }
-
     }
 
     private void fetchProfileFeed() {
         progressBar.setVisibility(View.VISIBLE);
-        valueEventListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                profileData = dataSnapshot.getValue(ProfileData.class);
+        userRef.get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.e("firebase", "Error getting data", task.getException());
+            } else {
+                profileData = task.getResult().getValue(ProfileData.class);
                 if (profileData != null && profileData.getInfo() != null) {
                     userName.setText(profileData.getInfo().getName());
+                    for (String lubbleId : profileData.getLubbles().keySet()) {
+                        RealtimeDbHelper.getLubbleInfoRef(lubbleId).addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                lubbleTv.setText(dataSnapshot.child("title").getValue(String.class));
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+                            }
+                        });
+                        break;
+                    }
                     if (!TextUtils.isEmpty(profileData.getInfo().getBadge())) {
                         badgeTv.setVisibility(View.VISIBLE);
                         badgeTv.setText(profileData.getInfo().getBadge());
                     } else {
                         badgeTv.setVisibility(View.GONE);
                     }
-                    RealtimeDbHelper.getLubbleRef().addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            lubbleTv.setText(dataSnapshot.child("title").getValue(String.class));
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
                     if (isValidString(profileData.getBio())) {
                         userBio.setText(profileData.getBio());
                     } else if (userId.equalsIgnoreCase(FirebaseAuth.getInstance().getUid())) {
@@ -476,13 +461,7 @@ public class ProfileFrag extends Fragment {
                     }
                 }
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        };
-        userRef.addValueEventListener(valueEventListener);
+        });
     }
 
     private void syncDms() {
@@ -574,8 +553,9 @@ public class ProfileFrag extends Fragment {
         endpoints.fetchUserProfile(userId).enqueue(new Callback<UserProfileData>() {
             @Override
             public void onResponse(Call<UserProfileData> call, Response<UserProfileData> response) {
-                final UserProfileData userProfileData = response.body();
-                if (response.isSuccessful() && userProfileData != null && isAdded() && isVisible()) {
+                userProfileData = response.body();
+                if (response.isSuccessful() && userProfileData != null && isAdded()) {
+                    groupsAdapter.addGroupList(userProfileData.getJoinedGroups());
                     invitedTv.setText(String.valueOf(userProfileData.getReferrals()));
                 } else if (isAdded() && isVisible()) {
                     FirebaseCrashlytics.getInstance().log("referral leaderboard bad response");
@@ -604,9 +584,6 @@ public class ProfileFrag extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        if (userRef != null && valueEventListener != null) {
-            userRef.removeEventListener(valueEventListener);
-        }
         if (dmRef != null && dmValueEventListener != null) {
             dmRef.removeEventListener(dmValueEventListener);
         }

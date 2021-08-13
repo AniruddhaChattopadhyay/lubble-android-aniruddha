@@ -701,7 +701,7 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private void fetchLinkedGroupInfo(String gid) {
-        groupTitleRef = RealtimeDbHelper.getLubbleGroupsRef().child(gid).child("title");
+        groupTitleRef = RealtimeDbHelper.getLubbleGroupInfoRef(gid).child("title");
         groupTitleListener = groupTitleRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

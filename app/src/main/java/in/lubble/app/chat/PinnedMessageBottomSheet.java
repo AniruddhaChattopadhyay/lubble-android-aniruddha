@@ -47,7 +47,7 @@ public class PinnedMessageBottomSheet extends BottomSheetDialogFragment {
         pinnedMessageContainer = rootview.findViewById(R.id.pinned_message_container);
         MaterialButton dismissBtn = rootview.findViewById(R.id.btn_pin_msg_ok);
 
-        RealtimeDbHelper.getLubbleGroupsRef().child(groupId).child("pinned_message").addListenerForSingleValueEvent(new ValueEventListener() {
+        RealtimeDbHelper.getLubbleGroupInfoRef(groupId).child("pinned_message").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
