@@ -59,7 +59,7 @@ import static android.app.Activity.RESULT_OK;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
-public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener, SwipeRefreshLayout.OnRefreshListener {
+public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener, SwipeRefreshLayout.OnRefreshListener, JoinedGroupsStoriesAdapter.JoinedGroupsListener {
 
     private static final String TAG = "FeedFrag";
 
@@ -157,7 +157,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                         }
                     });
                     joinedGroupStoriesRV.setLayoutManager(layoutManager);
-                    JoinedGroupsStoriesAdapter adapter = new JoinedGroupsStoriesAdapter(getContext(), feedGroupDataList,getParentFragmentManager());
+                    JoinedGroupsStoriesAdapter adapter = new JoinedGroupsStoriesAdapter(getContext(), feedGroupDataList, FeedFrag.this);
                     joinedGroupStoriesRV.setAdapter(adapter);
                 } else if (isAdded()) {
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
@@ -317,6 +317,17 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
         smoothScroller.setTargetPosition(position);
         feedRV.getLayoutManager().startSmoothScroll(smoothScroller);
+    }
+
+    @Override
+    public void onExploreClicked() {
+        if (getParentFragment() instanceof FeedCombinedFragment) {
+            // koramangala, SVR -> open 2nd top tab
+            ((FeedCombinedFragment) getParentFragment()).setCurrentTabPos(1);
+        } else if (getActivity() instanceof MainActivity) {
+            // all else -> open 2nd bottom tab
+            ((MainActivity) requireActivity()).setSelectedNavPos(R.id.navigation_feed_groups);
+        }
     }
 
     @Override

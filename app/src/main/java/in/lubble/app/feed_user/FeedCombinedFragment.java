@@ -3,6 +3,7 @@ package in.lubble.app.feed_user;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,8 +40,11 @@ import static in.lubble.app.utils.UiUtils.reduceDragSensitivity;
 public class FeedCombinedFragment extends Fragment {
 
     private static final int REQ_CODE_JOIN_GROUPS = 628;
+    private static final String TAG = "FeedCombinedFragment";
 
     private SwipeRefreshLayout.OnRefreshListener feedRefreshListener;
+    private ViewPager2 viewPager;
+    private MyTabPagerAdapter tabPager;
 
     public FeedCombinedFragment() {
         // Required empty public constructor
@@ -56,9 +60,10 @@ public class FeedCombinedFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.frag_feed_combined, container, false);
         TabLayout tabLayout = view.findViewById(R.id.tabLayout_feed);
-        ViewPager2 viewPager = view.findViewById(R.id.tab_pager);
 
-        MyTabPagerAdapter tabPager = new MyTabPagerAdapter(getChildFragmentManager(), getLifecycle());
+        viewPager = view.findViewById(R.id.tab_pager);
+
+        tabPager = new MyTabPagerAdapter(getChildFragmentManager(), getLifecycle());
         viewPager.setAdapter(tabPager);
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) ->
@@ -108,7 +113,7 @@ public class FeedCombinedFragment extends Fragment {
                     progressDialog.dismiss();
                     new MaterialAlertDialogBuilder(requireContext())
                             .setTitle("Failed to set up Feed")
-                            .setMessage("Error: " + (response.message() == null ? getString(R.string.check_internet) : response.message()))
+                            .setMessage("Error: " + response.message())
                             .setPositiveButton(R.string.all_retry, (dialog, which) -> fetchNewFeedUserStatus())
                             .setCancelable(false)
                             .show();
@@ -143,7 +148,15 @@ public class FeedCombinedFragment extends Fragment {
         this.feedRefreshListener = listener;
     }
 
-    class MyTabPagerAdapter extends FragmentStateAdapter {
+    void setCurrentTabPos(int pos) {
+        if (pos < 0 || pos >= tabPager.getItemCount()) {
+            Log.e(TAG, "setCurrentTabPos: invalid pos");
+            return;
+        }
+        viewPager.setCurrentItem(pos);
+    }
+
+    static class MyTabPagerAdapter extends FragmentStateAdapter {
         MyTabPagerAdapter(FragmentManager fm, Lifecycle lifecycle) {
             super(fm, lifecycle);
         }

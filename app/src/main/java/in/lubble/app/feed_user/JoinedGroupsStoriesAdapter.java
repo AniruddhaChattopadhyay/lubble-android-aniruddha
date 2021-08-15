@@ -26,17 +26,21 @@ public class JoinedGroupsStoriesAdapter extends RecyclerView.Adapter<JoinedGroup
     private static final String TAG = "StoriesRecyclerViewAdapter";
 
     private final ArrayList<FeedGroupData> storyDataList;
-    private final FragmentManager fmContext;
+    private final JoinedGroupsListener joinedGroupsListener;
     private final Context mContext;
     private final static String MORE_GROUPS = "More Groups";
 
-    public JoinedGroupsStoriesAdapter(Context context, ArrayList<FeedGroupData> storyDataList, FragmentManager fmContext) {
+    public JoinedGroupsStoriesAdapter(Context context, ArrayList<FeedGroupData> storyDataList, JoinedGroupsListener joinedGroupsListener) {
         mContext = context;
         this.storyDataList = storyDataList;
-        this.fmContext = fmContext;
+        this.joinedGroupsListener = joinedGroupsListener;
         FeedGroupData feedGroupData = new FeedGroupData("More Groups", "Explore Feed", "Lubble");
         this.storyDataList.add(feedGroupData);
 
+    }
+
+    public interface JoinedGroupsListener {
+        void onExploreClicked();
     }
 
     @Override
@@ -64,7 +68,7 @@ public class JoinedGroupsStoriesAdapter extends RecyclerView.Adapter<JoinedGroup
         holder.name.setText(feedGroupData.getName());
         holder.itemView.setOnClickListener(view -> {
             if (feedGroupData.getName().equals(MORE_GROUPS)) {
-                fmContext.beginTransaction().replace(R.id.tv_book_author, FeedGroupsFrag.newInstance()).commitAllowingStateLoss();
+                joinedGroupsListener.onExploreClicked();
             } else {
                 GroupFeedActivity.open(mContext, feedGroupData);
             }

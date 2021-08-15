@@ -1071,6 +1071,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         this.chatSearchListener = listener;
     }
 
+    public void setSelectedNavPos(int itemId) {
+        bottomNavigation.setSelectedItemId(itemId);
+    }
+
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
