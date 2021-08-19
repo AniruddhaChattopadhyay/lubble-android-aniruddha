@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,6 +31,7 @@ import in.lubble.app.feed_groups.FeedExploreActiv;
 import in.lubble.app.feed_groups.FeedGroupsFrag;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
+import in.lubble.app.utils.UiUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -44,6 +46,7 @@ public class FeedCombinedFragment extends Fragment {
 
     private SwipeRefreshLayout.OnRefreshListener feedRefreshListener;
     private ViewPager2 viewPager;
+    private LinearLayout postBtnsLL;
     private MyTabPagerAdapter tabPager;
 
     public FeedCombinedFragment() {
@@ -62,6 +65,7 @@ public class FeedCombinedFragment extends Fragment {
         TabLayout tabLayout = view.findViewById(R.id.tabLayout_feed);
 
         viewPager = view.findViewById(R.id.tab_pager);
+        postBtnsLL = view.findViewById(R.id.post_btn_LL);
 
         tabPager = new MyTabPagerAdapter(getChildFragmentManager(), getLifecycle());
         viewPager.setAdapter(tabPager);
@@ -70,6 +74,7 @@ public class FeedCombinedFragment extends Fragment {
                         tab.setText(position == 0 ? "Nearby Feed" : "Groups")
         ).attach();
         reduceDragSensitivity(viewPager);
+        viewPager.registerOnPageChangeCallback(pageChangeListener);
 
         if (!LubbleSharedPrefs.getInstance().getCheckIfFeedGroupJoined()) {
             // User might not have joined any feed groups, check with backend
@@ -155,6 +160,24 @@ public class FeedCombinedFragment extends Fragment {
         }
         viewPager.setCurrentItem(pos);
     }
+
+    ViewPager2.OnPageChangeCallback pageChangeListener = new ViewPager2.OnPageChangeCallback() {
+        /**
+         * This method will be invoked when a new page becomes selected. Animation is not
+         * necessarily complete.
+         *
+         * @param position Position index of the new selected page.
+         */
+        @Override
+        public void onPageSelected(int position) {
+            super.onPageSelected(position);
+            if (position == 1) {
+                UiUtils.animateSlideDownHide(getContext(), postBtnsLL);
+            } else {
+                UiUtils.animateSlideUpShow(getContext(), postBtnsLL);
+            }
+        }
+    };
 
     static class MyTabPagerAdapter extends FragmentStateAdapter {
         MyTabPagerAdapter(FragmentManager fm, Lifecycle lifecycle) {
