@@ -584,6 +584,10 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         feedListener.openPostActivity(activity.getID());
                         break;
 
+                    case -1:
+                        feedListener.openPostActivity(activity.getID());
+                        break;
+
                     case R.id.tv_group_name:
                         if (extras.containsKey("feed_name")) {
                             String groupFeedName = extras.get("feed_name").toString();
