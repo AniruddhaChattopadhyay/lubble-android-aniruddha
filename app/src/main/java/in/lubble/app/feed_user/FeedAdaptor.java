@@ -684,6 +684,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             linkPreviewContainer.setOnTouchListener(this);
             commentEdtText.setOnTouchListener(this);
             viewAllRepliesTv.setOnTouchListener(this);
+            itemView.setOnTouchListener(this);
 
             //View v = likeLayout.findViewById(R.id.cont_like);
 //            likeLayout.post(()->setToolTipForDoubleTapLike(likeLayout));
