@@ -250,7 +250,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         Tooltip tooltip = new Tooltip.Builder(context)
                 .anchor(view, 0, -dpToPx(24), true)
                 .closePolicy(ClosePolicy.Companion.getTOUCH_NONE())
-                .showDuration(5000)
+                .showDuration(15000)
                 .overlay(false)
                 .text("Double tap anywhere to like")
                 .create();
