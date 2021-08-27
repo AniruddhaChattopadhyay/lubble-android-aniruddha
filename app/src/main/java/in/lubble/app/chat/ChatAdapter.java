@@ -1172,12 +1172,24 @@ public class ChatAdapter extends RecyclerView.Adapter {
             recvdChatViewHolder.dpIv.setVisibility(VISIBLE);
             final ProfileData profileData = profileDataMap.get(chatData.getAuthorUid());
             final ProfileInfo profileInfo = profileData.getInfo();
-            glide.load(profileInfo.getThumbnail())
+            String dpUrl;
+            if(chatData.getAuthorDpUrl()!=null){
+                dpUrl = chatData.getAuthorDpUrl();
+            }
+            else{
+                dpUrl = profileInfo.getThumbnail();
+            }
+            glide.load(dpUrl)
                     .circleCrop()
                     .placeholder(R.drawable.ic_account_circle_black_no_padding)
                     .error(R.drawable.ic_account_circle_black_no_padding)
                     .into(recvdChatViewHolder.dpIv);
-            recvdChatViewHolder.authorNameTv.setText(profileInfo.getName().split(" ")[0]);
+            if(chatData.getAuthorName()!=null) {
+                recvdChatViewHolder.authorNameTv.setText(chatData.getAuthorName());
+            }
+            else{
+                recvdChatViewHolder.authorNameTv.setText(profileInfo.getName().split(" ")[0]);
+            }
             recvdChatViewHolder.badgeTextTv.setVisibility(GONE);
             if (!TextUtils.isEmpty(profileInfo.getBadge())) {
 //                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();

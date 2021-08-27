@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import in.lubble.app.models.ChatData;
+import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.FileUtils;
 
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
@@ -393,6 +394,7 @@ public class UploadVideoService extends BaseTaskService {
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
         chatData.setMessage(caption);
+        ChatUtils.addAuthorNameandDp(chatData);
         chatData.setVidUrl(downloadUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);

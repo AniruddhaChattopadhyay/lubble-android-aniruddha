@@ -1,12 +1,18 @@
 package in.lubble.app.models;
 
+import android.net.Uri;
+
 import androidx.annotation.Nullable;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
+
+import in.lubble.app.LubbleSharedPrefs;
 
 /**
  * Created by ishaan on 21/1/18.
@@ -57,6 +63,30 @@ public class ChatData implements Serializable {
     private String attachedGroupId; // or attached event ID
     private HashMap<String, String> tagged; // <UID, UserName>
     private HashMap<String, Object> reporters; // <UID, Timestamp>
+
+    private String authorName;
+    private String authorDpUrl;
+
+
+//    public ChatData(){
+//
+//    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public String getAuthorDpUrl() {
+        return authorDpUrl;
+    }
+
+    public void setAuthorDpUrl(String authorDpUrl) {
+        this.authorDpUrl = authorDpUrl;
+    }
 
     @Override
     public boolean equals(Object obj) {
