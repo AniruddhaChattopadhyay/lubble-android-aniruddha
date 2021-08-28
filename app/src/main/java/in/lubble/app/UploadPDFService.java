@@ -35,6 +35,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 
 import in.lubble.app.models.ChatData;
+import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.FileUtils;
 
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
@@ -399,6 +400,7 @@ public class UploadPDFService extends BaseTaskService {
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
         chatData.setMessage("\uD83D\uDCC4 PDF Attached");
+        ChatUtils.addAuthorNameandDp(chatData);
         chatData.setPdfFileName(filename);
         if (downloadThumbnailUrl == null)
             chatData.setPdfThumbnailUrl("https://i.imgur.com/ma03D59.png");

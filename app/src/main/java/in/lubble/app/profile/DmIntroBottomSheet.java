@@ -41,6 +41,7 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.utils.ChatUtils;
 
 import static in.lubble.app.analytics.AnalyticsEvents.NEW_DM_SENT;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
@@ -197,6 +198,7 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
         chatData.setAuthorUid(authorId);
         chatData.setAuthorIsSeller(false);
         chatData.setMessage(introMsgTil.getEditText().getText().toString());
+        ChatUtils.addAuthorNameandDp(chatData);
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);
         chatData.setIsDm(true);

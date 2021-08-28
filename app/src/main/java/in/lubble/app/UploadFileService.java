@@ -30,6 +30,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import in.lubble.app.models.ChatData;
+import in.lubble.app.utils.ChatUtils;
 import in.lubble.app.utils.FileUtils;
 
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
@@ -304,6 +305,7 @@ public class UploadFileService extends BaseTaskService {
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
         chatData.setMessage(caption);
+        ChatUtils.addAuthorNameandDp(chatData);
         chatData.setImgUrl(downloadUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);

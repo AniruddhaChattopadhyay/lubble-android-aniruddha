@@ -27,6 +27,7 @@ import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
 import in.lubble.app.models.ProfileInfo;
+import in.lubble.app.utils.ChatUtils;
 
 import static android.widget.RelativeLayout.ALIGN_BOTTOM;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
@@ -121,6 +122,7 @@ public class NewPollActiv extends BaseActivity {
                     chatData.setAuthorUid(FirebaseAuth.getInstance().getUid());
                     chatData.setIsDm(false);
                     chatData.setMessage(getString(R.string.poll_msg_body));
+                    ChatUtils.addAuthorNameandDp(chatData);
                     chatData.setPollQues(askQuesEt.getText().toString());
                     chatData.setCreatedTimestamp(System.currentTimeMillis());
                     chatData.setServerTimestamp(ServerValue.TIMESTAMP);

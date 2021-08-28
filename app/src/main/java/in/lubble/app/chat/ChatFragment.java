@@ -1165,6 +1165,7 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
         chatData.setAuthorUid(authorId);
         chatData.setAuthorIsSeller(isCurrUserSeller);
         chatData.setMessage(newMessageEt.getText().toString().trim());
+        ChatUtils.addAuthorNameandDp(chatData);
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);
         chatData.setIsDm(TextUtils.isEmpty(groupId));
