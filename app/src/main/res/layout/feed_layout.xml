@@ -46,57 +46,6 @@
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <LinearLayout
-        android:id="@+id/post_btn_LL"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_gravity="center|bottom"
-        android:layout_marginTop="24dp"
-        android:gravity="bottom"
-        android:orientation="horizontal"
-        android:background="@color/lt_trans_white"
-        android:visibility="gone"
-        android:weightSum="2"
-        app:layout_anchor="@id/swipe_refresh_feed"
-        app:layout_anchorGravity="bottom"
-        tools:visibility="visible">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_new_post"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="1"
-            android:width="140dp"
-            android:text="New Post"
-            app:icon="@drawable/ic_edit_white_24dp"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:theme="@style/MaterialButton"
-            app:backgroundTint="@color/md_blue_grey_700"
-            tools:visibility="visible" />
-
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_QandA_new_post"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="8dp"
-            android:layout_toEndOf="@+id/btn_new_post"
-            android:layout_weight="1"
-            android:text="Ask a Question"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            app:icon="@drawable/ic_help_outline_black_24dp"
-            android:theme="@style/MaterialButton"
-            app:backgroundTint="@color/md_blue_grey_700"
-            tools:visibility="visible" />
-
-    </LinearLayout>
+    <include layout="@layout/layout_feed_post_btns" />
 
 </merge>

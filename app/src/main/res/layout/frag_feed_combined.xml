@@ -41,4 +41,55 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
+    <include layout="@layout/layout_feed_post_btns" />
+
+    <!--<LinearLayout
+        android:id="@+id/post_btn_LL1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="center|bottom"
+        android:layout_marginTop="24dp"
+        android:gravity="bottom"
+        android:orientation="horizontal"
+        android:background="@color/lt_trans_white"
+        android:weightSum="2"
+        tools:visibility="visible"
+        tools:showIn="@layout/feed_layout">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_new_post1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:width="140dp"
+            android:text="New Post"
+            app:icon="@drawable/ic_edit_white_24dp"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            android:theme="@style/MaterialButton"
+            tools:visibility="visible" />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_QandA_new_post2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_toEndOf="@+id/btn_new_post"
+            android:layout_weight="1"
+            android:text="Ask a Question"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:icon="@drawable/ic_help_outline_black_24dp"
+            android:theme="@style/MaterialButton"
+            tools:visibility="visible" />
+
+    </LinearLayout>-->
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

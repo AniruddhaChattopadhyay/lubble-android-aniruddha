@@ -690,7 +690,7 @@ public class FeedPostFrag extends Fragment {
                 ;
                 FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
-                        //todo
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
                 likeIv.setImageResource(R.drawable.ic_favorite_24dp);
@@ -699,14 +699,14 @@ public class FeedPostFrag extends Fragment {
                 Analytics.triggerFeedEngagement(enrichedActivity.getForeignID(), "like", 5, "timeline:" + userId, FeedPostFrag.class.getSimpleName());
             } catch (StreamException e) {
                 e.printStackTrace();
-                //todo
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         } else {
             // unlike
             try {
                 FeedServices.getTimelineClient().reactions().delete(likeReactionId).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
-                        //todo
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
                 likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
@@ -714,7 +714,7 @@ public class FeedPostFrag extends Fragment {
                 extractReactionCount(enrichedActivity, "like", likeTv, -1);
             } catch (StreamException e) {
                 e.printStackTrace();
-                //todo
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         }
     }

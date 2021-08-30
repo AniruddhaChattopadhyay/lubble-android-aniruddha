@@ -603,8 +603,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), getAbsoluteAdapterPosition());
                         break;
 
-
                     case R.id.feed_author_photo:
+                    case R.id.feed_author_name:
                         ProfileActivity.open(context, activity.getActor().getID());
                         break;
 
@@ -684,6 +684,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             linkPreviewContainer.setOnTouchListener(this);
             commentEdtText.setOnTouchListener(this);
             viewAllRepliesTv.setOnTouchListener(this);
+            authorNameTv.setOnTouchListener(this);
             itemView.setOnTouchListener(this);
 
             //View v = likeLayout.findViewById(R.id.cont_like);

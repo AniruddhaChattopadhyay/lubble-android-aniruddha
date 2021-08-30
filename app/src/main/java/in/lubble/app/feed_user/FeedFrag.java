@@ -79,6 +79,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private LinearLayout joinedGroupStroriesLL;
     private RecyclerView joinedGroupStoriesRV;
     ArrayList<FeedGroupData> feedGroupDataList;
+
     public FeedFrag() {
         // Required empty public constructor
     }
@@ -106,9 +107,17 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_feed, container, false);
-        postBtn = view.findViewById(R.id.btn_new_post);
-        postQandABtn = view.findViewById(R.id.btn_QandA_new_post);
-        postBtnLL = view.findViewById(R.id.post_btn_LL);
+
+        if (getParentFragment() instanceof FeedCombinedFragment && getParentFragment().getView() != null) {
+            View parentFragView = getParentFragment().getView();
+            postBtnLL = parentFragView.findViewById(R.id.post_btn_LL);
+            postBtn = parentFragView.findViewById(R.id.btn_new_post);
+            postQandABtn = parentFragView.findViewById(R.id.btn_QandA_new_post);
+        } else {
+            postBtnLL = view.findViewById(R.id.post_btn_LL);
+            postBtn = view.findViewById(R.id.btn_new_post);
+            postQandABtn = view.findViewById(R.id.btn_QandA_new_post);
+        }
         emptyHintTv = view.findViewById(R.id.tv_empty_hint);
         feedRV = view.findViewById(R.id.feed_recyclerview);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
@@ -124,9 +133,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
-        postQandABtn.setOnClickListener(v->{
+        postQandABtn.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), AddPostForFeed.class);
-            intent.putExtra(AddPostForFeed.QnAString,true);
+            intent.putExtra(AddPostForFeed.QnAString, true);
             startActivityForResult(intent, REQUEST_CODE_NEW_POST);
         });
 
