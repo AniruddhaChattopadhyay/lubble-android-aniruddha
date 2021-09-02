@@ -121,17 +121,33 @@
             app:queryHint="Search all groups"
             app:searchIcon="@null" />
 
-        <ImageView
-            android:id="@+id/iv_chats"
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:gravity="center"
-            android:padding="8dp"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_baseline_chat_24" />
+            android:foreground="?attr/selectableItemBackground">
+            <ImageView
+                android:id="@+id/iv_chats"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:gravity="center"
+                android:padding="8dp"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_baseline_chat_24"
+                tools:visibility="visible"
+                />
+            <TextView
+                android:id="@+id/unread_chats_count_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/blue_circle"
+                android:text="4"
+                android:visibility="gone"
+                tools:visibility="visible"
+                android:gravity="center"
+                android:textColor="@color/white"/>
+        </RelativeLayout>
 
     </RelativeLayout>
 

@@ -142,7 +142,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private RelativeLayout dpContainer;
     private ImageView profileIcon;
     private ImageView navHeaderIv, chatsIv;
-    private TextView navHeaderNameTv, toolbarRewardsTv, toolbarSearchTv;
+    private TextView navHeaderNameTv, toolbarRewardsTv, toolbarSearchTv, unreadChatTv;
     private SearchView searchView;
     private ImageView searchBackIv;
     private TextView toolbarTitle;
@@ -158,6 +158,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ChatSearchListener chatSearchListener;
     private SwipeRefreshLayout.OnRefreshListener feedRefreshListener;
     private boolean isSearchVisible;
+    private long unreadChatsCount =0;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -178,6 +179,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toolbarRewardsTv = toolbar.findViewById(R.id.tv_toolbar_rewards);
         toolbarSearchTv = toolbar.findViewById(R.id.tv_toolbar_search);
         chatsIv = toolbar.findViewById(R.id.iv_chats);
+        unreadChatTv = toolbar.findViewById(R.id.unread_chats_count_tv);
         searchView = toolbar.findViewById(R.id.search_view);
         searchBackIv = toolbar.findViewById(R.id.iv_search_back);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -298,6 +300,53 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     public void toggleChatInToolbar(boolean isEnabled) {
         chatsIv.setVisibility(isEnabled ? View.VISIBLE : View.GONE);
+        if(chatsIv.getVisibility()==View.VISIBLE) {
+            RealtimeDbHelper.getThisUserRef().addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
+                    if(chatsIv.getVisibility()==View.VISIBLE) {
+                        try{
+                            unreadChatsCount = 0;
+                            HashMap<String, Object> h = (HashMap<String, Object>) snapshot.getValue();
+                            assert h != null;
+                            if(h.containsKey("dms")){
+                                HashMap<String, Object> dms = (HashMap<String, Object>) h.get("dms");
+                                assert dms != null;
+                                for (Object e : dms.values()) {
+                                    assert e != null;
+                                    HashMap<String, Object> temp = (HashMap<String, Object>) e;
+                                    if (temp.get("unreadCount") != null)
+                                        unreadChatsCount += (long) temp.get("unreadCount");
+                                }
+                            }
+                            HashMap<String, HashMap<String, Object>> lubbles = (HashMap<String, HashMap<String, Object>>) h.get("lubbles");
+                            HashMap<String, Object> groups = (HashMap<String, Object>) lubbles.get(LubbleSharedPrefs.getInstance().getLubbleId()).get("groups");
+                            assert groups != null;
+                            for (Object e : groups.values()) {
+                                assert e!=null;
+                                HashMap<String, Object> temp = (HashMap<String, Object>) e;
+                                if (temp.get("unreadCount") != null)
+                                    unreadChatsCount += (long) temp.get("unreadCount");
+                            }
+                            if (unreadChatsCount != 0) {
+                                unreadChatTv.setVisibility(View.VISIBLE);
+                                unreadChatTv.setText(Long.toString(unreadChatsCount));
+                            } else
+                                unreadChatTv.setVisibility(View.GONE);
+                            }
+                        catch (Exception e){
+                            FirebaseCrashlytics.getInstance().recordException(e);
+                        }
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull @NotNull DatabaseError error) {
+
+                }
+            });
+        }
     }
 
     public void toggleSearchInToolbar(boolean show) {
