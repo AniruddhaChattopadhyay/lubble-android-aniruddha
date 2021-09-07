@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideRequests;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
@@ -166,16 +168,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 // photoContentIv.visibility = GONE already at top
                 holder.textContentTv.setMaxLines(9);
             }
-            //setting the tooltip for the first post
-            if (holder.getAbsoluteAdapterPosition() == 0) {
-                if (extras.containsKey("photoLink")) {
-                    View v = holder.photoContentIv;
-                    v.post(() -> setToolTipForDoubleTapLike(v));
-                } else {
-                    View v = holder.textContentTv;
-                    v.post(() -> setToolTipForDoubleTapLike(v));
-                }
-            }
 
             if (extras.containsKey("photoLink")) {
                 holder.photoContentIv.setVisibility(View.VISIBLE);
@@ -241,16 +233,44 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         initCommentRecyclerView(holder, activity);
         handleCommentEditText(activity, holder);
         handleLinkPreview(activity, holder);
+
+        //setting the tooltip for the first post
+        if (holder.getAbsoluteAdapterPosition() == 0 && (!LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG() || BuildConfig.DEBUG)) {
+            prepareDoubleTapToLikeTooltip(holder, extras);
+        }
+    }
+
+    private void prepareDoubleTapToLikeTooltip(MyViewHolder holder, Map<String, Object> extras) {
+        try {
+            View v;
+            if (extras.containsKey("photoLink")) {
+                v = holder.photoContentIv;
+            } else {
+                v = holder.textContentTv;
+            }
+            v.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    if (v.getWindowToken() != null) {
+                        setToolTipForDoubleTapLike(v);
+                        v.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            // Avoid crashing the app just coz showing the tooltip broke
+            FirebaseCrashlytics.getInstance().recordException(e);
+        }
     }
 
     private void setToolTipForDoubleTapLike(View view) {
-        if (view == null || context == null || LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG())
+        if (view == null || context == null)
             return;
 
         Tooltip tooltip = new Tooltip.Builder(context)
                 .anchor(view, 0, -dpToPx(24), true)
                 .closePolicy(ClosePolicy.Companion.getTOUCH_NONE())
-                .showDuration(15000)
+                .showDuration(10000)
                 .overlay(false)
                 .text("Double tap anywhere to like")
                 .create();
