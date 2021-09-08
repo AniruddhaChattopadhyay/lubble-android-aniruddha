@@ -235,7 +235,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         handleLinkPreview(activity, holder);
 
         //setting the tooltip for the first post
-        if (holder.getAbsoluteAdapterPosition() == 0 && (!LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG() || BuildConfig.DEBUG)) {
+        if (holder.getAbsoluteAdapterPosition() == 0 && !LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG()) {
             prepareDoubleTapToLikeTooltip(holder, extras);
         }
     }
@@ -270,7 +270,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         Tooltip tooltip = new Tooltip.Builder(context)
                 .anchor(view, 0, -dpToPx(24), true)
                 .closePolicy(ClosePolicy.Companion.getTOUCH_NONE())
-                .showDuration(10000)
+                .showDuration(5000)
                 .overlay(false)
                 .text("Double tap anywhere to like")
                 .create();
