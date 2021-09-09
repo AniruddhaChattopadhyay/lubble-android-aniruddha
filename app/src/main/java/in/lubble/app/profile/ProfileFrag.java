@@ -387,7 +387,7 @@ public class ProfileFrag extends Fragment {
         userRef.get().addOnCompleteListener(task -> {
             if (!task.isSuccessful()) {
                 Log.e("firebase", "Error getting data", task.getException());
-            } else {
+            } else if (isAdded()) {
                 profileData = task.getResult().getValue(ProfileData.class);
                 if (profileData != null && profileData.getInfo() != null) {
                     userName.setText(profileData.getInfo().getName());
