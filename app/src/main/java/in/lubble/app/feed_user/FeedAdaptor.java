@@ -614,8 +614,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
                     case R.id.cont_like:
                         toggleLike2(likeIv, likeTv, getAbsoluteAdapterPosition());
-//                        View v = likeLayout.findViewById(R.id.cont_like);
-//                        setToolTipForDoubleTapLike(v);
                         break;
 
                     case R.id.cont_reply:
@@ -705,10 +703,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             viewAllRepliesTv.setOnTouchListener(this);
             authorNameTv.setOnTouchListener(this);
             itemView.setOnTouchListener(this);
-
-            //View v = likeLayout.findViewById(R.id.cont_like);
-//            likeLayout.post(()->setToolTipForDoubleTapLike(likeLayout));
-            //setToolTipForDoubleTapLike(likeLayout);
 
         }
 

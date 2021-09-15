@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -57,6 +58,7 @@ import com.segment.analytics.Traits;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -85,6 +87,7 @@ import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
+import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.MainUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
@@ -404,6 +407,34 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         fetchAndPersistAppFeatures();
         initFirebaseRemoteConfig();
         initDrawer();
+        initFeedCreds();
+    }
+
+    private void initFeedCreds() {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
+        String feedApiKey = LubbleSharedPrefs.getInstance().getFeedApiKey();
+        if (TextUtils.isEmpty(feedApiKey) || TextUtils.isEmpty(feedUserToken)) {
+            Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(FirebaseAuth.getInstance().getUid());
+            call.enqueue(new Callback<Endpoints.StreamCredentials>() {
+                @Override
+                public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
+                    if (response.isSuccessful() && !isFinishing()) {
+                        assert response.body() != null;
+                        final Endpoints.StreamCredentials credentials = response.body();
+                        try {
+                            FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
+                }
+            });
+        }
     }
 
     public void fetchNewFeedUserStatus() {
