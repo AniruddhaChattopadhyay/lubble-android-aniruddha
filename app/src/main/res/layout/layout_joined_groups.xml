@@ -4,13 +4,13 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:foreground="?attr/selectableItemBackground"
-    android:paddingLeft="4dp"
-    android:paddingRight="4dp">
+    android:paddingLeft="2dp"
+    android:paddingRight="2dp">
 
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_centerHorizontal="true"
         android:scaleType="centerCrop"
         tools:src="@drawable/ic_circle_group_24dp" />
