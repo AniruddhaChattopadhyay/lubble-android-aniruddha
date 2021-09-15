@@ -274,12 +274,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 .text("Double tap anywhere to like")
                 .create();
 
-        view.post(()->{
-            tooltip.show(view, Tooltip.Gravity.BOTTOM, true);
-        });
-        //tooltip.show(view, Tooltip.Gravity.BOTTOM, true);
+        tooltip.show(view, Tooltip.Gravity.BOTTOM, true);
         LubbleSharedPrefs.getInstance().setFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG();
-
     }
 
     private void startShareFlow(Intent sharingIntent) {
