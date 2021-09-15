@@ -10,6 +10,10 @@ import android.widget.TextView;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -54,14 +58,17 @@ public class JoinedGroupsStoriesAdapter extends RecyclerView.Adapter<JoinedGroup
         FeedGroupData feedGroupData = storyDataList.get(position);
 
         GlideRequests glide = GlideApp.with(mContext);
+        RequestOptions requestOptions = new RequestOptions();
+        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(16));
         if (feedGroupData.getName().equals(MORE_GROUPS)) {
             glide.load(R.drawable.ic_category_colored)
+                    .apply(requestOptions)
                     .into(holder.image);
         } else {
             glide.load(feedGroupData.getPhotoUrl())
                     .placeholder(R.drawable.ic_circle_group_24dp)
                     .error(R.drawable.ic_circle_group_24dp)
-                    .circleCrop()
+                    .apply(requestOptions)
                     .into(holder.image);
         }
 
