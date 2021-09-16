@@ -280,7 +280,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         }
     };
 
-    private void joinGroup(CloudFlatFeed groupFeed) {
+    public void joinGroup(CloudFlatFeed groupFeed) {
         joinGroupTv.setText("");
         joinGroupProgressBar.setVisibility(View.VISIBLE);
         final JSONObject jsonObject = new JSONObject();

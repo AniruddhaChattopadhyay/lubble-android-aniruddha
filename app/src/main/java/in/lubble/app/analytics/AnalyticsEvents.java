@@ -169,4 +169,6 @@ public class AnalyticsEvents {
 
     public static final String RTDB_PRUNED = "RTDB_PRUNED";
 
+    public static final String  FEED_GROUP_INVITE_CLICKED = " FEED_GROUP_INVITE_CLICKED";
+
 }
