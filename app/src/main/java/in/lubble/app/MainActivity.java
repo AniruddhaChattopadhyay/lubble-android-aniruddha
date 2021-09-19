@@ -16,7 +16,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -79,7 +78,6 @@ import in.lubble.app.groups.ChatSearchListener;
 import in.lubble.app.groups.GroupsCombinedFrag;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
-import in.lubble.app.map.MapFragment;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
@@ -162,7 +160,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ChatSearchListener chatSearchListener;
     private SwipeRefreshLayout.OnRefreshListener feedRefreshListener;
     private boolean isSearchVisible;
-    private long unreadChatsCount =0;
+    private long unreadChatsCount = 0;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -304,16 +302,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     public void toggleChatInToolbar(boolean isEnabled) {
         chatsIv.setVisibility(isEnabled ? View.VISIBLE : View.GONE);
-        if(chatsIv.getVisibility()==View.VISIBLE) {
+        //showUnreadChatCount();
+    }
+
+    /*private void showUnreadChatCount() {
+        if (chatsIv.getVisibility() == View.VISIBLE) {
             RealtimeDbHelper.getThisUserRef().addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                    if(chatsIv.getVisibility()==View.VISIBLE) {
-                        try{
+                    if (chatsIv.getVisibility() == View.VISIBLE) {
+                        try {
                             unreadChatsCount = 0;
                             HashMap<String, Object> h = (HashMap<String, Object>) snapshot.getValue();
                             assert h != null;
-                            if(h.containsKey("dms")){
+                            if (h.containsKey("dms")) {
                                 HashMap<String, Object> dms = (HashMap<String, Object>) h.get("dms");
                                 assert dms != null;
                                 for (Object e : dms.values()) {
@@ -327,7 +329,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                             HashMap<String, Object> groups = (HashMap<String, Object>) lubbles.get(LubbleSharedPrefs.getInstance().getLubbleId()).get("groups");
                             assert groups != null;
                             for (Object e : groups.values()) {
-                                assert e!=null;
+                                assert e != null;
                                 HashMap<String, Object> temp = (HashMap<String, Object>) e;
                                 if (temp.get("unreadCount") != null)
                                     unreadChatsCount += (long) temp.get("unreadCount");
@@ -337,8 +339,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                                 unreadChatTv.setText(Long.toString(unreadChatsCount));
                             } else
                                 unreadChatTv.setVisibility(View.GONE);
-                            }
-                        catch (Exception e){
+                        } catch (Exception e) {
                             FirebaseCrashlytics.getInstance().recordException(e);
                         }
                     }
@@ -351,7 +352,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             });
         }
-    }
+    }*/
 
     public void toggleSearchInToolbar(boolean show) {
         toggleSearchViewVisibility(false);
