@@ -24,6 +24,7 @@ import in.lubble.app.R;
 import in.lubble.app.feed_groups.FeedGroupsFrag;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.models.FeedGroupData;
+import in.lubble.app.utils.UiUtils;
 
 public class JoinedGroupsStoriesAdapter extends RecyclerView.Adapter<JoinedGroupsStoriesAdapter.ViewHolder> {
 
@@ -59,7 +60,7 @@ public class JoinedGroupsStoriesAdapter extends RecyclerView.Adapter<JoinedGroup
 
         GlideRequests glide = GlideApp.with(mContext);
         RequestOptions requestOptions = new RequestOptions();
-        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(16));
+        requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(UiUtils.dpToPx(8)));
         if (feedGroupData.getName().equals(MORE_GROUPS)) {
             glide.load(R.drawable.ic_category_colored)
                     .apply(requestOptions)

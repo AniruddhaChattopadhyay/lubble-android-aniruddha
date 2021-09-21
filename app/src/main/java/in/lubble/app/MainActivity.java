@@ -57,6 +57,7 @@ import com.segment.analytics.Traits;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -77,14 +78,15 @@ import in.lubble.app.groups.ChatSearchListener;
 import in.lubble.app.groups.GroupsCombinedFrag;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
-import in.lubble.app.map.MapFragment;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
+import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
+import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.MainUtils;
 import in.lubble.app.utils.StringUtils;
 import in.lubble.app.utils.UiUtils;
@@ -158,7 +160,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private ChatSearchListener chatSearchListener;
     private SwipeRefreshLayout.OnRefreshListener feedRefreshListener;
     private boolean isSearchVisible;
-    private long unreadChatsCount =0;
+    private long unreadChatsCount = 0;
 
     public static Intent createIntent(Context context, boolean isNewUserInThisLubble) {
         Intent startIntent = new Intent(context, MainActivity.class);
@@ -300,16 +302,20 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     public void toggleChatInToolbar(boolean isEnabled) {
         chatsIv.setVisibility(isEnabled ? View.VISIBLE : View.GONE);
-        if(chatsIv.getVisibility()==View.VISIBLE) {
+        //showUnreadChatCount();
+    }
+
+    /*private void showUnreadChatCount() {
+        if (chatsIv.getVisibility() == View.VISIBLE) {
             RealtimeDbHelper.getThisUserRef().addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull @NotNull DataSnapshot snapshot) {
-                    if(chatsIv.getVisibility()==View.VISIBLE) {
-                        try{
+                    if (chatsIv.getVisibility() == View.VISIBLE) {
+                        try {
                             unreadChatsCount = 0;
                             HashMap<String, Object> h = (HashMap<String, Object>) snapshot.getValue();
                             assert h != null;
-                            if(h.containsKey("dms")){
+                            if (h.containsKey("dms")) {
                                 HashMap<String, Object> dms = (HashMap<String, Object>) h.get("dms");
                                 assert dms != null;
                                 for (Object e : dms.values()) {
@@ -323,7 +329,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                             HashMap<String, Object> groups = (HashMap<String, Object>) lubbles.get(LubbleSharedPrefs.getInstance().getLubbleId()).get("groups");
                             assert groups != null;
                             for (Object e : groups.values()) {
-                                assert e!=null;
+                                assert e != null;
                                 HashMap<String, Object> temp = (HashMap<String, Object>) e;
                                 if (temp.get("unreadCount") != null)
                                     unreadChatsCount += (long) temp.get("unreadCount");
@@ -333,8 +339,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                                 unreadChatTv.setText(Long.toString(unreadChatsCount));
                             } else
                                 unreadChatTv.setVisibility(View.GONE);
-                            }
-                        catch (Exception e){
+                        } catch (Exception e) {
                             FirebaseCrashlytics.getInstance().recordException(e);
                         }
                     }
@@ -347,7 +352,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 }
             });
         }
-    }
+    }*/
 
     public void toggleSearchInToolbar(boolean show) {
         toggleSearchViewVisibility(false);
@@ -453,6 +458,34 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         fetchAndPersistAppFeatures();
         initFirebaseRemoteConfig();
         initDrawer();
+        initFeedCreds();
+    }
+
+    private void initFeedCreds() {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
+        String feedApiKey = LubbleSharedPrefs.getInstance().getFeedApiKey();
+        if (TextUtils.isEmpty(feedApiKey) || TextUtils.isEmpty(feedUserToken)) {
+            Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(FirebaseAuth.getInstance().getUid());
+            call.enqueue(new Callback<Endpoints.StreamCredentials>() {
+                @Override
+                public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
+                    if (response.isSuccessful() && !isFinishing()) {
+                        assert response.body() != null;
+                        final Endpoints.StreamCredentials credentials = response.body();
+                        try {
+                            FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
+                        } catch (MalformedURLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
+                }
+            });
+        }
     }
 
     public void fetchNewFeedUserStatus() {
@@ -759,9 +792,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case "events":
                     bottomNavigation.setSelectedItemId(R.id.navigation_events);
                     break;
-                case "map":
+                /*case "map":
                     bottomNavigation.setSelectedItemId(R.id.navigation_map);
-                    break;
+                    break;*/
                 case "services":
                     bottomNavigation.setSelectedItemId(R.id.navigation_market);
                     break;
@@ -774,9 +807,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case "explore":
                     bottomNavigation.setSelectedItemId(R.id.navigation_feed_groups);
                     break;
-                /*case "games":
+                case "games":
                     bottomNavigation.setSelectedItemId(R.id.navigation_fun);
-                    break;*/
+                    break;
             }
             getIntent().removeExtra(EXTRA_TAB_NAME);
         }
@@ -1002,15 +1035,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 case R.id.navigation_market:
                     switchFrag(MarketplaceFrag.newInstance());
                     return true;
-                case R.id.navigation_map:
+                /*case R.id.navigation_map:
                     switchFrag(MapFragment.newInstance());
-                    return true;
+                    return true;*/
                 case R.id.navigation_events:
                     switchFrag(EventsFrag.newInstance());
                     return true;
-                /*case R.id.navigation_fun:
+                case R.id.navigation_fun:
                     switchFrag(GamesFrag.newInstance());
-                    return true;*/
+                    return true;
             }
             return false;
         }
