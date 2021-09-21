@@ -29,23 +29,23 @@
         tools:replace="android:allowBackup">
         <activity
             android:name=".groups.ChatGroupListActivity"
-            android:parentActivityName=".MainActivity"
             android:configChanges="orientation"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".feed_post.FeedPostActivity"
-            android:parentActivityName=".MainActivity"
             android:configChanges="orientation"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".feed_groups.SingleGroupFeed.GroupFeedActivity"
-            android:parentActivityName=".MainActivity"
             android:configChanges="orientation"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".feed_user.AddPostForFeed"
-            android:parentActivityName=".MainActivity"
             android:configChanges="orientation"
+            android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
             android:name=".feed_user.GroupSelectionActiv"
@@ -75,8 +75,8 @@
         <activity
             android:name=".leaderboard.LeaderboardActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/BlueAppTheme" />
         <activity
             android:name=".rewards.ClaimedRewardsActiv"

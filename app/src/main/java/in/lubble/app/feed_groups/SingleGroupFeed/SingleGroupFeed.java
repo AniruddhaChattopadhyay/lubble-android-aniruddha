@@ -233,7 +233,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
                 // not joined
                 joinGroupTv.setVisibility(View.VISIBLE);
                 postBtnRv.setVisibility(View.GONE);
-
+                ((GroupFeedActivity) getActivity()).toggleContextMenu(false);
                 joinGroupTv.setOnClickListener(v -> {
                     joinGroup(groupFeed);
                 });

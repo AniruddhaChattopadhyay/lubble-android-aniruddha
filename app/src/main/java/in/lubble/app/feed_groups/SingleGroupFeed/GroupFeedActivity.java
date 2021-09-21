@@ -1,14 +1,9 @@
 package in.lubble.app.feed_groups.SingleGroupFeed;
 
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -21,7 +16,6 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
@@ -32,19 +26,14 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
-import in.lubble.app.analytics.Analytics;
-import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.feed_user_search.FeedUserShareBottomSheetFrag;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
-import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -55,8 +44,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.utils.ReferralUtils.getReferralIntentForFeedGroup;
-import static in.lubble.app.utils.ReferralUtils.getReferralIntentForGroup;
 
 public class GroupFeedActivity extends BaseActivity {
 
@@ -78,6 +65,10 @@ public class GroupFeedActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_feed);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        setTitle("");
 
         if (getIntent().hasExtra(EXTRA_FEED_GROUP_DATA)) {
             feedGroupData = (FeedGroupData) getIntent().getSerializableExtra(EXTRA_FEED_GROUP_DATA);
@@ -108,28 +99,17 @@ public class GroupFeedActivity extends BaseActivity {
         joinInviteTv.setText(joinText);
         linearLayout.setOnClickListener(v -> {
             if(isJoined){
-                sharingProgressDialog = new ProgressDialog(this);
-                final Intent referralIntent = getReferralIntentForFeedGroup(this, null, sharingProgressDialog, feedGroupData, linkCreateListener);
-                if (referralIntent != null) {
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                            this, 21,
-                            new Intent(this, ShareSheetReceiver.class),
-                            PendingIntent.FLAG_UPDATE_CURRENT);
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                        startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title), pendingIntent.getIntentSender()));
-                    } else {
-                        startActivity(Intent.createChooser(referralIntent, getString(R.string.refer_share_title)));
-                    }
-                    Analytics.triggerEvent(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, this);
-                }
+//                FeedUserSearchActivity.newInstance(this,feedGroupData.getFeedName(),feedGroupData);
+                FeedUserShareBottomSheetFrag feedUserShareBottomSheetFrag = new FeedUserShareBottomSheetFrag(feedGroupData.getFeedName(),feedGroupData);
+                feedUserShareBottomSheetFrag.show(getSupportFragmentManager(), feedUserShareBottomSheetFrag.getTag());
             }
             else{
                 CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedGroupData.getFeedName());
                 singleGroupFeed.joinGroup(groupFeed);
             }
         });
-        invalidateOptionsMenu();
+        if(isJoined)
+            invalidateOptionsMenu();
     }
 
     @Override

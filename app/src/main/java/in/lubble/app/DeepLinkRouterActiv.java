@@ -20,12 +20,15 @@ import java.util.List;
 
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
+import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
+import in.lubble.app.feed_groups.SingleGroupFeed.SingleGroupFeed;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.ItemActivity;
 import in.lubble.app.marketplace.ItemListActiv;
 import in.lubble.app.marketplace.SellerDashActiv;
+import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.models.marketplace.Item;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.referrals.ReferralActivity;
@@ -100,9 +103,17 @@ public class DeepLinkRouterActiv extends BaseActivity {
 
                     public void openChatGroup(@NonNull JSONObject referringParams) {
                         final String groupId = referringParams.optString("group_id");
+                        final String feedGroupFeedName = referringParams.optString("feed_group_feed_name");
                         if (!TextUtils.isEmpty(groupId)) {
                             ChatActivity.openForGroup(DeepLinkRouterActiv.this, groupId, false, null);
-                        } else {
+                        }
+                        else if(!TextUtils.isEmpty(feedGroupFeedName)){
+                            final String feedGroupName = referringParams.optString("feed_group_name");
+                            final String feedGroupPhotoUrl = referringParams.optString("feed_group_photo_url");
+                            FeedGroupData feedGroupData = new FeedGroupData(feedGroupName,feedGroupFeedName,feedGroupPhotoUrl,"");
+                            GroupFeedActivity.open(DeepLinkRouterActiv.this, feedGroupData);
+                        }
+                        else {
                             startActivity(new Intent(DeepLinkRouterActiv.this, MainActivity.class));
                         }
                     }

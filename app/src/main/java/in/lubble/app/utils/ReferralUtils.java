@@ -98,13 +98,17 @@ public class ReferralUtils {
 
     public static void generateBranchUrlForFeedGroup(Context context, Branch.BranchLinkCreateListener callback, FeedGroupData feedGroupData) {
         BranchUniversalObject branchUniversalObject = new BranchUniversalObject()
-                .setCanonicalIdentifier("lbl/groupInvite/" + feedGroupData.getId())
+                .setCanonicalIdentifier("lbl/groupInvite/" + feedGroupData.getName())
                 .setTitle("Invite to join " + feedGroupData.getName() + " group")
                 .setContentDescription("Join me in " + feedGroupData.getName() + " group for " + LubbleSharedPrefs.getInstance().getLubbleName())
                 .setContentImageUrl(feedGroupData.getPhotoUrl())
                 .setContentIndexingMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
                 .setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
-                .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid()).addCustomMetadata("group_id", Integer.toString(feedGroupData.getId())));
+                .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid())
+                        .addCustomMetadata("feed_group_feed_name", feedGroupData.getFeedName())
+                        .addCustomMetadata("feed_group_photo_url",feedGroupData.getPhotoUrl())
+                        .addCustomMetadata("feed_group_name",feedGroupData.getName())
+                        );
 
         final LinkProperties linkProperties = new LinkProperties()
                 .setChannel("Android")
