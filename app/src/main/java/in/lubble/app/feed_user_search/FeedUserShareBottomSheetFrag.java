@@ -1,12 +1,10 @@
 package in.lubble.app.feed_user_search;
 
-import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -15,35 +13,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.os.Handler;
-import android.text.InputFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.List;
 
@@ -51,17 +29,9 @@ import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.chat.ChatMoreFragment;
-import in.lubble.app.chat.ShareActiv;
-import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.FeedGroupData;
-import in.lubble.app.profile.RecyclerTouchListener;
-import in.lubble.app.profile.StatusBottomSheetAdapter;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.user_search.OnUserSelectedListener;
-import in.lubble.app.user_search.SelectedUserAdapter;
-import in.lubble.app.user_search.UserAdapter;
-import in.lubble.app.utils.UiUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
@@ -113,7 +83,7 @@ public class FeedUserShareBottomSheetFrag extends BottomSheetDialogFragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_feed_user_search, container, false);
-        View view = inflater.inflate(R.layout.fragment_feed_user_search, container, false);
+        View view = inflater.inflate(R.layout.bottom_sheet_feed_invite, container, false);
         inviteLinksContainer = view.findViewById(R.id.container_invite_links);
         sendGroupContainer = view.findViewById(R.id.container_send);
         fbContainer = view.findViewById(R.id.container_fb);
@@ -221,33 +191,5 @@ public class FeedUserShareBottomSheetFrag extends BottomSheetDialogFragment {
     public int getTheme() {
         return R.style.RoundedBottomSheetDialog;
     }
-
-//    @NonNull
-//    @Override
-//    public Dialog onCreateDialog(Bundle savedInstanceState) {
-//        Dialog dialog = super.onCreateDialog(savedInstanceState);
-//
-//        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-//        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
-//            @Override
-//            public void onShow(final DialogInterface dialog) {
-//                new Handler().post(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        FrameLayout bottomSheet = (FrameLayout) ((BottomSheetDialog) dialog).findViewById(R.id.design_bottom_sheet);
-//                        BottomSheetBehavior.from(bottomSheet).setState(BottomSheetBehavior.STATE_EXPANDED);
-//                    }
-//                });
-//            }
-//        });
-//        return dialog;
-//    }
-//
-//
-//
-//    @Override
-//    public void dismiss() {
-//        super.dismiss();
-//    }
 
 }

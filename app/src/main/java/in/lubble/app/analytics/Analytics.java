@@ -135,6 +135,16 @@ public class Analytics {
             unSetUser(context);
         }
     }
+    public static void triggerFeedInviteClicked(Context context){
+        if (context != null) {
+            Bundle attributes = new Bundle();
+            setupDefaultAttributes(context, attributes);
+            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
+            firebaseAnalytics.logEvent(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, attributes);
+            com.segment.analytics.Analytics.with(context).track(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, bundleToSegmentProperties(attributes));
+            unSetUser(context);
+        }
+    }
 
     private static void setupDefaultAttributes(Context context, Bundle attributes) {
         if (context != null) {

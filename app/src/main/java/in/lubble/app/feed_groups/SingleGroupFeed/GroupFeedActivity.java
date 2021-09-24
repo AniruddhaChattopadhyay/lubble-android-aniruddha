@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.json.JSONException;
@@ -29,7 +30,9 @@ import org.json.JSONObject;
 import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.BaseActivity;
+import in.lubble.app.GlideApp;
 import in.lubble.app.R;
+import in.lubble.app.analytics.Analytics;
 import in.lubble.app.feed_user_search.FeedUserShareBottomSheetFrag;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
@@ -75,11 +78,10 @@ public class GroupFeedActivity extends BaseActivity {
             CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_feed_group);
             collapsingToolbarLayout.setTitle(feedGroupData.getFeedName());
             ImageView imageView = findViewById(R.id.collapsing_toolbar_feed_group_background);
-            Glide.with(this)
+            GlideApp.with(this)
                     .load(feedGroupData.getPhotoUrl())
                     .placeholder(R.drawable.ic_group)
                     .error(R.drawable.ic_account_circle_grey_24dp)
-                    .circleCrop()
                     .into(imageView);
             singleGroupFeed = SingleGroupFeed.newInstance(feedGroupData.getFeedName()) ;
             getSupportFragmentManager().beginTransaction()
@@ -99,9 +101,9 @@ public class GroupFeedActivity extends BaseActivity {
         joinInviteTv.setText(joinText);
         linearLayout.setOnClickListener(v -> {
             if(isJoined){
-//                FeedUserSearchActivity.newInstance(this,feedGroupData.getFeedName(),feedGroupData);
                 FeedUserShareBottomSheetFrag feedUserShareBottomSheetFrag = new FeedUserShareBottomSheetFrag(feedGroupData.getFeedName(),feedGroupData);
                 feedUserShareBottomSheetFrag.show(getSupportFragmentManager(), feedUserShareBottomSheetFrag.getTag());
+                Analytics.triggerFeedInviteClicked(this);
             }
             else{
                 CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedGroupData.getFeedName());
@@ -176,24 +178,6 @@ public class GroupFeedActivity extends BaseActivity {
             }
         });
     }
-
-    final Branch.BranchLinkCreateListener linkCreateListener = new Branch.BranchLinkCreateListener() {
-        @Override
-        public void onLinkCreate(String url, BranchError error) {
-            if (url != null) {
-                Log.d(TAG, "got my Branch link to share: " + url);
-                sharingUrl = url;
-                if (sharingProgressDialog != null && sharingProgressDialog.isShowing()) {
-                    sharingProgressDialog.dismiss();
-                }
-            } else {
-                Log.e(TAG, "Branch onLinkCreate: " + error.getMessage());
-                FirebaseCrashlytics.getInstance().recordException(new IllegalStateException(error.getMessage()));
-                Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-
-            }
-        }
-    };
 
     private void leaveGroupConfirmation(DialogInterface.OnClickListener listener) {
         new MaterialAlertDialogBuilder(this)
