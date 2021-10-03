@@ -862,6 +862,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 try {
+                    LubbleSharedPrefs.getInstance().setUserFlair(profileInfo.getBadge());
                     GlideApp.with(MainActivity.this)
                             .load(profileInfo == null ? "" : profileInfo.getThumbnail())
                             .circleCrop()

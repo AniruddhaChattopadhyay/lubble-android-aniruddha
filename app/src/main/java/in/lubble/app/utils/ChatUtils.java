@@ -13,36 +13,13 @@ import static in.lubble.app.models.ChatData.REPLY;
 
 public class ChatUtils {
 
-    public static ChatData createGroupChatdata(String message) {
-        final ChatData chatData = new ChatData();
-        chatData.setAuthorUid(FirebaseAuth.getInstance().getUid());
-        chatData.setMessage(message);
-        ChatUtils.addAuthorNameandDp(chatData);
-        chatData.setCreatedTimestamp(System.currentTimeMillis());
-        chatData.setServerTimestamp(ServerValue.TIMESTAMP);
-        chatData.setIsDm(false);
-        return chatData;
-    }
-
-    public static void addAuthorNameandDp(ChatData chatData){
+    public static void addAuthorNameandDp(ChatData chatData, String userFlair) {
         chatData.setAuthorName(FirebaseAuth.getInstance().getCurrentUser().getDisplayName());
         Uri uri = FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl();
-        if(uri != null){
+        if (uri != null) {
             chatData.setAuthorDpUrl(uri.toString());
         }
-    }
-
-    public static ChatData createReplyChatdata(String message, String replyMsgId) {
-        final ChatData chatData = new ChatData();
-        chatData.setAuthorUid(FirebaseAuth.getInstance().getUid());
-        chatData.setMessage(message);
-        ChatUtils.addAuthorNameandDp(chatData);
-        chatData.setCreatedTimestamp(System.currentTimeMillis());
-        chatData.setServerTimestamp(ServerValue.TIMESTAMP);
-        chatData.setIsDm(false);
-        chatData.setType(REPLY);
-        chatData.setReplyMsgId(replyMsgId);
-        return chatData;
+        chatData.setFlair(userFlair);
     }
 
     public static String getKeyByValue(Map<String, String> map, String value) {

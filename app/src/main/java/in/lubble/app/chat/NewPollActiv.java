@@ -23,6 +23,7 @@ import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
@@ -31,6 +32,7 @@ import in.lubble.app.utils.ChatUtils;
 
 import static android.widget.RelativeLayout.ALIGN_BOTTOM;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.models.ChatData.POLL;
 
@@ -53,6 +55,7 @@ public class NewPollActiv extends BaseActivity {
     private int expiryDayCount = 1;
     private ImageView pollDpIv;
     private String groupId;
+    private String userFlair = LubbleSharedPrefs.getInstance().getUserFlair();
 
     public static void open(Context context, String grouId) {
         final Intent intent = new Intent(context, NewPollActiv.class);
@@ -122,7 +125,7 @@ public class NewPollActiv extends BaseActivity {
                     chatData.setAuthorUid(FirebaseAuth.getInstance().getUid());
                     chatData.setIsDm(false);
                     chatData.setMessage(getString(R.string.poll_msg_body));
-                    ChatUtils.addAuthorNameandDp(chatData);
+                    ChatUtils.addAuthorNameandDp(chatData, userFlair);
                     chatData.setPollQues(askQuesEt.getText().toString());
                     chatData.setCreatedTimestamp(System.currentTimeMillis());
                     chatData.setServerTimestamp(ServerValue.TIMESTAMP);
@@ -138,7 +141,7 @@ public class NewPollActiv extends BaseActivity {
     }
 
     private void setDp() {
-        getUserInfoRef(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+        getThisUserRef().addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
@@ -149,6 +152,7 @@ public class NewPollActiv extends BaseActivity {
                             .placeholder(R.drawable.ic_account_circle_black_no_padding)
                             .error(R.drawable.ic_account_circle_black_no_padding)
                             .into(pollDpIv);
+                    userFlair = profileInfo.getBadge();
                 } catch (IllegalArgumentException e) {
                     FirebaseCrashlytics.getInstance().recordException(e);
                 }

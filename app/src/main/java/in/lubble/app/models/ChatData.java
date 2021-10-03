@@ -66,6 +66,7 @@ public class ChatData implements Serializable {
 
     private String authorName;
     private String authorDpUrl;
+    private String flair;
 
 
 //    public ChatData(){
@@ -343,5 +344,13 @@ public class ChatData implements Serializable {
 
     public void setReporters(HashMap<String, Object> reporters) {
         this.reporters = reporters;
+    }
+
+    public String getFlair() {
+        return flair;
+    }
+
+    public void setFlair(String flair) {
+        this.flair = flair;
     }
 }
