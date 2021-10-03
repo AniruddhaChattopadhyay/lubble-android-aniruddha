@@ -305,7 +305,7 @@ public class UploadFileService extends BaseTaskService {
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
         chatData.setMessage(caption);
-        ChatUtils.addAuthorNameandDp(chatData);
+        ChatUtils.addAuthorNameandDp(chatData, LubbleSharedPrefs.getInstance().getUserFlair());
         chatData.setImgUrl(downloadUrl.toString());
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);

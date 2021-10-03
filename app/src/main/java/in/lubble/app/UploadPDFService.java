@@ -44,9 +44,6 @@ import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketR
 import static in.lubble.app.firebase.RealtimeDbHelper.getDmMessagesRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
 
-//import com.shockwave.pdfium.PdfDocument;
-//import com.shockwave.pdfium.PdfiumCore;
-
 public class UploadPDFService extends BaseTaskService {
     private static final String TAG = "UploadPDFService";
     public static final int BUCKET_DEFAULT = 362;
@@ -400,7 +397,7 @@ public class UploadPDFService extends BaseTaskService {
         chatData.setAuthorIsSeller(isAuthorSeller);
         chatData.setIsDm(isDm);
         chatData.setMessage("\uD83D\uDCC4 PDF Attached");
-        ChatUtils.addAuthorNameandDp(chatData);
+        ChatUtils.addAuthorNameandDp(chatData, LubbleSharedPrefs.getInstance().getUserFlair());
         chatData.setPdfFileName(filename);
         if (downloadThumbnailUrl == null)
             chatData.setPdfThumbnailUrl("https://i.imgur.com/ma03D59.png");
