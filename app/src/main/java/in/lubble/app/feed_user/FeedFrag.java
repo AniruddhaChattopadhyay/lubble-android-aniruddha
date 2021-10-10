@@ -251,6 +251,25 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                 processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FirebaseAuth.getInstance().getUid(), FeedFrag.class.getSimpleName());
             });
         }
+        else{
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width = displayMetrics.widthPixels;
+            int height = displayMetrics.heightPixels;
+            adapter.setVars(getContext(), width, height, GlideApp.with(this), this);
+
+            feedRV.setAdapter(adapter.withLoadStateAdapters(
+                    new PagingLoadStateAdapter(() -> {
+                        adapter.retry();
+                        return null;
+                    })
+            ));
+            feedRV.clearOnScrollListeners();
+            feedRV.addOnScrollListener(scrollListener);
+            viewModel.getDistinctLiveData().observe(getViewLifecycleOwner(), visibleState -> {
+                processTrackedPosts(adapter.snapshot().getItems(), visibleState, "timeline:" + FirebaseAuth.getInstance().getUid(), FeedFrag.class.getSimpleName());
+            });
+        }
         viewModel.loadPaginatedActivities(timelineFeed, 10).observe(getViewLifecycleOwner(), pagingData -> {
             layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
