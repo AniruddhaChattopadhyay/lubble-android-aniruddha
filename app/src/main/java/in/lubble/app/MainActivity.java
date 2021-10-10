@@ -1166,18 +1166,18 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         bottomNavigation.setSelectedItemId(itemId);
     }
 
-//    @Override
-//    public void onBackPressed() {
-////        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-////            drawerLayout.closeDrawer(GravityCompat.START);
-////        } else if (searchView.getVisibility() == View.VISIBLE) {
-////            UiUtils.hideKeyboard(MainActivity.this);
-////            searchView.setQuery("", true);
-////            toggleSearchViewVisibility(false);
-////        } else {
-////            super.onBackPressed();
-////        }
-//
+    @Override
+    public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START);
+        } else if (searchView.getVisibility() == View.VISIBLE) {
+            UiUtils.hideKeyboard(MainActivity.this);
+            searchView.setQuery("", true);
+            toggleSearchViewVisibility(false);
+        } else {
+            super.onBackPressed();
+        }
+
 //        if(bottomNavigation.getSelectedItemId()==R.id.navigation_feed_home){
 //            super.onBackPressed();
 //            finish();
@@ -1185,7 +1185,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 //        else{
 //            bottomNavigation.setSelectedItemId(R.id.navigation_feed_home);
 //        }
-//    }
+    }
 
     @Override
     protected void onStop() {
