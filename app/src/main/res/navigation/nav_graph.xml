@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_feed_home">
+
+    <fragment
+        android:id="@+id/navigation_feed_home"
+        android:name="in.lubble.app.feed_user.FeedFrag"
+        android:label="fragment_feed"
+        tools:layout="@layout/fragment_feed" >
+        <action
+            android:id="@+id/action_home2_to_explore"
+            app:destination="@id/navigation_feed_groups" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_feed_groups"
+        android:name="in.lubble.app.feed_groups.FeedGroupsFrag"
+        android:label="fragment_feed_groups"
+        tools:layout="@layout/fragment_feed_groups" >
+        <action
+            android:id="@+id/action_feed_groups_to_market"
+            app:destination="@id/navigation_market" />
+    </fragment>
+    <fragment
+        android:id="@+id/navigation_market"
+        android:name="in.lubble.app.marketplace.MarketplaceFrag"
+        android:label="fragment_marketplace"
+        tools:layout="@layout/fragment_marketplace" >
+        <action
+            android:id="@+id/action_marketplace_to_games"
+            app:destination="@id/navigation_fun"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_fun"
+        android:name="in.lubble.app.quiz.GamesFrag"
+        android:label="fragment_games"
+        tools:layout="@layout/fragment_games" >
+        <action
+            android:id="@+id/action_games_to_events"
+            app:destination="@id/navigation_events"
+            />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_events"
+        android:name="in.lubble.app.events.EventsFrag"
+        android:label="fragment_events"
+        tools:layout="@layout/fragment_events" >
+    </fragment>
+</navigation>

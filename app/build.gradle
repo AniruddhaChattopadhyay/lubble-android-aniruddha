@@ -76,6 +76,11 @@ dependencies {
     def paging_version = "3.0.1"
     def exoplayer_version = "2.14.2"
     def permission_dispatcher_version = "4.8.0"
+
+    def nav_version = "2.4.0-alpha01"
+
+    implementation "androidx.navigation:navigation-fragment:$nav_version"
+    implementation "androidx.navigation:navigation-ui:$nav_version"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     //implementation files('libs/stream-analytics-release-1.1.0.aar')
     implementation 'androidx.recyclerview:recyclerview:1.2.1'

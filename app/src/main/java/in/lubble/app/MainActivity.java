@@ -29,8 +29,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.freshchat.consumer.sdk.Freshchat;
@@ -172,8 +176,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
         toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
         profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
@@ -414,9 +416,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
-
         bottomNavigation = findViewById(R.id.navigation);
-        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        NavHostFragment navHostFragment = (NavHostFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        NavigationUI.setupWithNavController(bottomNavigation,
+                navHostFragment.getNavController());
+
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavigationUI.setupWithNavController(
+                 bottomNavigation,navController);
+        //bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
         bottomNavigation.getMenu().clear();
@@ -425,7 +434,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId)) {
             // for existing users show chat-first menu
             bottomNavigation.inflateMenu(R.menu.navigation_chat_n_feed);
-            switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
+            //switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
             if (isNewUserInThisLubble) {
                 // new signup
                 ExploreActiv.open(this, true);
@@ -433,7 +442,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else {
             // Feed-first menu for new n'hoods
             bottomNavigation.inflateMenu(R.menu.navigation_menu_feed);
-            switchFrag(FeedFrag.newInstance());
+            //switchFrag(FeedFrag.newInstance());
             if (isNewUserInThisLubble) {
                 // new signup; open Feed Explore
                 startActivityForResult(FeedExploreActiv.getIntent(MainActivity.this, true, false), REQ_CODE_JOIN_GROUPS);
@@ -787,32 +796,32 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toggleSearchViewVisibility(false);
         searchView.setQuery("", false);
 
-        if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
-            switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
-                case "events":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
-                    break;
-                /*case "map":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_map);
-                    break;*/
-                case "services":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
-                    break;
-                case "mplace":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
-                    break;
-                case "feed":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_feed);
-                    break;
-                case "explore":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_feed_groups);
-                    break;
-                case "games":
-                    bottomNavigation.setSelectedItemId(R.id.navigation_fun);
-                    break;
-            }
-            getIntent().removeExtra(EXTRA_TAB_NAME);
-        }
+//        if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
+//            switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
+//                case "events":
+//                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
+//                    break;
+//                /*case "map":
+//                    bottomNavigation.setSelectedItemId(R.id.navigation_map);
+//                    break;*/
+//                case "services":
+//                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
+//                    break;
+//                case "mplace":
+//                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
+//                    break;
+//                case "feed":
+//                    bottomNavigation.setSelectedItemId(R.id.navigation_feed);
+//                    break;
+//                case "explore":
+//                    bottomNavigation.setSelectedItemId(R.id.navigation_feed_groups);
+//                    break;
+//                case "games":
+//                    bottomNavigation.setSelectedItemId(R.id.navigation_fun);
+//                    break;
+//            }
+//            getIntent().removeExtra(EXTRA_TAB_NAME);
+//        }
         try {
             Intent intent = this.getIntent();
             if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(TRACK_NOTIF_ID)
@@ -1013,41 +1022,41 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         getUserInfoRef(firebaseAuth.getUid()).removeEventListener(dpEventListener);
     }
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_chats:
-                    switchFrag(GroupsCombinedFrag.newInstance(false));
-                    return true;
-                case R.id.navigation_feed:
-                    switchFrag(FeedCombinedFragment.newInstance());
-                    return true;
-                case R.id.navigation_feed_home:
-                    switchFrag(FeedFrag.newInstance());
-                    return true;
-                case R.id.navigation_feed_groups:
-                    switchFrag(FeedGroupsFrag.newInstance());
-                    return true;
-                case R.id.navigation_market:
-                    switchFrag(MarketplaceFrag.newInstance());
-                    return true;
-                /*case R.id.navigation_map:
-                    switchFrag(MapFragment.newInstance());
-                    return true;*/
-                case R.id.navigation_events:
-                    switchFrag(EventsFrag.newInstance());
-                    return true;
-                case R.id.navigation_fun:
-                    switchFrag(GamesFrag.newInstance());
-                    return true;
-            }
-            return false;
-        }
-    };
+//
+//    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+//            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+//
+//        @Override
+//        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+//            switch (item.getItemId()) {
+//                case R.id.navigation_chats:
+//                    switchFrag(GroupsCombinedFrag.newInstance(false));
+//                    return true;
+//                case R.id.navigation_feed:
+//                    switchFrag(FeedCombinedFragment.newInstance());
+//                    return true;
+//                case R.id.navigation_feed_home:
+//                    switchFrag(FeedFrag.newInstance());
+//                    return true;
+//                case R.id.navigation_feed_groups:
+//                    switchFrag(FeedGroupsFrag.newInstance());
+//                    return true;
+//                case R.id.navigation_market:
+//                    switchFrag(MarketplaceFrag.newInstance());
+//                    return true;
+//                /*case R.id.navigation_map:
+//                    switchFrag(MapFragment.newInstance());
+//                    return true;*/
+//                case R.id.navigation_events:
+//                    switchFrag(EventsFrag.newInstance());
+//                    return true;
+//                case R.id.navigation_fun:
+//                    switchFrag(GamesFrag.newInstance());
+//                    return true;
+//            }
+//            return false;
+//        }
+//    };
 
     public void setRefreshListener(SwipeRefreshLayout.OnRefreshListener listener) {
         this.feedRefreshListener = listener;
@@ -1157,18 +1166,26 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         bottomNavigation.setSelectedItemId(itemId);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (searchView.getVisibility() == View.VISIBLE) {
-            UiUtils.hideKeyboard(MainActivity.this);
-            searchView.setQuery("", true);
-            toggleSearchViewVisibility(false);
-        } else {
-            super.onBackPressed();
-        }
-    }
+//    @Override
+//    public void onBackPressed() {
+////        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+////            drawerLayout.closeDrawer(GravityCompat.START);
+////        } else if (searchView.getVisibility() == View.VISIBLE) {
+////            UiUtils.hideKeyboard(MainActivity.this);
+////            searchView.setQuery("", true);
+////            toggleSearchViewVisibility(false);
+////        } else {
+////            super.onBackPressed();
+////        }
+//
+//        if(bottomNavigation.getSelectedItemId()==R.id.navigation_feed_home){
+//            super.onBackPressed();
+//            finish();
+//        }
+//        else{
+//            bottomNavigation.setSelectedItemId(R.id.navigation_feed_home);
+//        }
+//    }
 
     @Override
     protected void onStop() {
