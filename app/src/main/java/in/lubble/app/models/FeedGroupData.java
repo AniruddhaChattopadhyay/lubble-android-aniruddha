@@ -20,6 +20,12 @@ public class FeedGroupData implements Serializable {
         this.lubble = lubble;
     }
 
+    public FeedGroupData(String name, String feedName, String photoUrl,String emptyString) {
+        this.name = name;
+        this.feedName = feedName;
+        this.photoUrl = photoUrl;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
