@@ -4,24 +4,21 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 
-import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.json.JSONException;
@@ -38,8 +35,6 @@ import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
-import io.branch.referral.Branch;
-import io.branch.referral.BranchError;
 import io.getstream.cloud.CloudFlatFeed;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -57,6 +52,7 @@ public class GroupFeedActivity extends BaseActivity {
     private ProgressDialog sharingProgressDialog;
     private static final String TAG = "GroupFeedActivity";
     private String sharingUrl;
+    private MaterialButton joinInviteBtn;
 
     public static void open(Context context, FeedGroupData feedGroupData) {
         Intent intent = new Intent(context, GroupFeedActivity.class);
@@ -69,6 +65,7 @@ public class GroupFeedActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group_feed);
         Toolbar toolbar = findViewById(R.id.toolbar);
+        joinInviteBtn = findViewById(R.id.btn_join_invite);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("");
@@ -80,10 +77,9 @@ public class GroupFeedActivity extends BaseActivity {
             ImageView imageView = findViewById(R.id.collapsing_toolbar_feed_group_background);
             GlideApp.with(this)
                     .load(feedGroupData.getPhotoUrl())
-                    .placeholder(R.drawable.ic_group)
-                    .error(R.drawable.ic_account_circle_grey_24dp)
+                    .error(R.drawable.ic_circle_group_24dp)
                     .into(imageView);
-            singleGroupFeed = SingleGroupFeed.newInstance(feedGroupData.getFeedName()) ;
+            singleGroupFeed = SingleGroupFeed.newInstance(feedGroupData.getFeedName());
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, singleGroupFeed)
                     .commitNow();
@@ -94,23 +90,22 @@ public class GroupFeedActivity extends BaseActivity {
 
     void toggleContextMenu(boolean isJoined) {
         this.isJoined = isJoined;
-        TextView joinInviteTv = findViewById(R.id.join_invite_tv);
-        LinearLayout linearLayout = findViewById(R.id.container_join_invite);
-        linearLayout.setVisibility(View.VISIBLE);
-        String joinText = isJoined?"Invite":"Join";
-        joinInviteTv.setText(joinText);
-        linearLayout.setOnClickListener(v -> {
-            if(isJoined){
-                FeedUserShareBottomSheetFrag feedUserShareBottomSheetFrag = new FeedUserShareBottomSheetFrag(feedGroupData.getFeedName(),feedGroupData);
+        joinInviteBtn.setVisibility(View.VISIBLE);
+        String joinText = isJoined ? "Invite Friends" : "Join Group";
+        Drawable icon = isJoined ? ContextCompat.getDrawable(this, R.drawable.ic_person_add_24dp) : ContextCompat.getDrawable(this, R.drawable.ic_add_circle_black_24dp);
+        joinInviteBtn.setIcon(icon);
+        joinInviteBtn.setText(joinText);
+        joinInviteBtn.setOnClickListener(v -> {
+            if (isJoined) {
+                FeedUserShareBottomSheetFrag feedUserShareBottomSheetFrag = new FeedUserShareBottomSheetFrag(feedGroupData.getFeedName(), feedGroupData);
                 feedUserShareBottomSheetFrag.show(getSupportFragmentManager(), feedUserShareBottomSheetFrag.getTag());
                 Analytics.triggerFeedInviteClicked(this);
-            }
-            else{
+            } else {
                 CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedGroupData.getFeedName());
                 singleGroupFeed.joinGroup(groupFeed);
             }
         });
-        if(isJoined)
+        if (isJoined)
             invalidateOptionsMenu();
     }
 
@@ -187,7 +182,6 @@ public class GroupFeedActivity extends BaseActivity {
                 .setPositiveButton(R.string.leave_group_title, listener)
                 .setNegativeButton(R.string.all_cancel, (dialog, which) -> dialog.cancel()).show();
     }
-
 
 
 }
