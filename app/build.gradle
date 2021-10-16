@@ -6,11 +6,11 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.crashlytics'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 31
     defaultConfig {
         applicationId "in.lubble.app"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
@@ -76,8 +76,8 @@ dependencies {
     def paging_version = "3.0.1"
     def exoplayer_version = "2.14.2"
     def permission_dispatcher_version = "4.8.0"
-    def fragment_version = "1.4.0-alpha01"
-    def nav_version = "2.4.0-alpha01"
+    def fragment_version = "1.4.0-alpha10"
+    def nav_version = "2.4.0-alpha10"
 
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"

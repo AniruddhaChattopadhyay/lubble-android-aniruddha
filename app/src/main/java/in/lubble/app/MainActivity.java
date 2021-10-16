@@ -434,7 +434,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId)) {
             // for existing users show chat-first menu
             bottomNavigation.inflateMenu(R.menu.navigation_chat_n_feed);
-            //switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
+            switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
             if (isNewUserInThisLubble) {
                 // new signup
                 ExploreActiv.open(this, true);
@@ -796,32 +796,32 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         toggleSearchViewVisibility(false);
         searchView.setQuery("", false);
 
-//        if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
-//            switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
-//                case "events":
-//                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
-//                    break;
-//                /*case "map":
-//                    bottomNavigation.setSelectedItemId(R.id.navigation_map);
-//                    break;*/
-//                case "services":
-//                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
-//                    break;
-//                case "mplace":
-//                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
-//                    break;
-//                case "feed":
-//                    bottomNavigation.setSelectedItemId(R.id.navigation_feed);
-//                    break;
-//                case "explore":
-//                    bottomNavigation.setSelectedItemId(R.id.navigation_feed_groups);
-//                    break;
-//                case "games":
-//                    bottomNavigation.setSelectedItemId(R.id.navigation_fun);
-//                    break;
-//            }
-//            getIntent().removeExtra(EXTRA_TAB_NAME);
-//        }
+        if (getIntent().hasExtra(EXTRA_TAB_NAME)) {
+            switch (getIntent().getStringExtra(EXTRA_TAB_NAME)) {
+                case "events":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_events);
+                    break;
+                /*case "map":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_map);
+                    break;*/
+                case "services":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
+                    break;
+                case "mplace":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_market);
+                    break;
+                case "feed":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_feed);
+                    break;
+                case "explore":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_feed_groups);
+                    break;
+                case "games":
+                    bottomNavigation.setSelectedItemId(R.id.navigation_fun);
+                    break;
+            }
+            getIntent().removeExtra(EXTRA_TAB_NAME);
+        }
         try {
             Intent intent = this.getIntent();
             if (intent != null && intent.getExtras() != null && intent.getExtras().containsKey(TRACK_NOTIF_ID)
