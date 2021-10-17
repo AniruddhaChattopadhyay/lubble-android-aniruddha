@@ -29,8 +29,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.freshchat.consumer.sdk.Freshchat;
@@ -172,8 +176,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
         toolbar = findViewById(R.id.lubble_toolbar);
         setSupportActionBar(toolbar);
         profileIcon = toolbar.findViewById(R.id.iv_toolbar_profile);
@@ -414,9 +416,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
-
         bottomNavigation = findViewById(R.id.navigation);
-        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        NavHostFragment navHostFragment = (NavHostFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment);
+        NavigationUI.setupWithNavController(bottomNavigation,
+                navHostFragment.getNavController());
+
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
+        NavigationUI.setupWithNavController(
+                 bottomNavigation,navController);
+        //bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
         bottomNavigation.getMenu().clear();
@@ -433,7 +442,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else {
             // Feed-first menu for new n'hoods
             bottomNavigation.inflateMenu(R.menu.navigation_menu_feed);
-            switchFrag(FeedFrag.newInstance());
+            //switchFrag(FeedFrag.newInstance());
             if (isNewUserInThisLubble) {
                 // new signup; open Feed Explore
                 startActivityForResult(FeedExploreActiv.getIntent(MainActivity.this, true, false), REQ_CODE_JOIN_GROUPS);
@@ -1014,41 +1023,41 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         getUserInfoRef(firebaseAuth.getUid()).removeEventListener(dpEventListener);
     }
-
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_chats:
-                    switchFrag(GroupsCombinedFrag.newInstance(false));
-                    return true;
-                case R.id.navigation_feed:
-                    switchFrag(FeedCombinedFragment.newInstance());
-                    return true;
-                case R.id.navigation_feed_home:
-                    switchFrag(FeedFrag.newInstance());
-                    return true;
-                case R.id.navigation_feed_groups:
-                    switchFrag(FeedGroupsFrag.newInstance());
-                    return true;
-                case R.id.navigation_market:
-                    switchFrag(MarketplaceFrag.newInstance());
-                    return true;
-                /*case R.id.navigation_map:
-                    switchFrag(MapFragment.newInstance());
-                    return true;*/
-                case R.id.navigation_events:
-                    switchFrag(EventsFrag.newInstance());
-                    return true;
-                case R.id.navigation_fun:
-                    switchFrag(GamesFrag.newInstance());
-                    return true;
-            }
-            return false;
-        }
-    };
+//
+//    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+//            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+//
+//        @Override
+//        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+//            switch (item.getItemId()) {
+//                case R.id.navigation_chats:
+//                    switchFrag(GroupsCombinedFrag.newInstance(false));
+//                    return true;
+//                case R.id.navigation_feed:
+//                    switchFrag(FeedCombinedFragment.newInstance());
+//                    return true;
+//                case R.id.navigation_feed_home:
+//                    switchFrag(FeedFrag.newInstance());
+//                    return true;
+//                case R.id.navigation_feed_groups:
+//                    switchFrag(FeedGroupsFrag.newInstance());
+//                    return true;
+//                case R.id.navigation_market:
+//                    switchFrag(MarketplaceFrag.newInstance());
+//                    return true;
+//                /*case R.id.navigation_map:
+//                    switchFrag(MapFragment.newInstance());
+//                    return true;*/
+//                case R.id.navigation_events:
+//                    switchFrag(EventsFrag.newInstance());
+//                    return true;
+//                case R.id.navigation_fun:
+//                    switchFrag(GamesFrag.newInstance());
+//                    return true;
+//            }
+//            return false;
+//        }
+//    };
 
     public void setRefreshListener(SwipeRefreshLayout.OnRefreshListener listener) {
         this.feedRefreshListener = listener;
@@ -1169,6 +1178,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else {
             super.onBackPressed();
         }
+
+//        if(bottomNavigation.getSelectedItemId()==R.id.navigation_feed_home){
+//            super.onBackPressed();
+//            finish();
+//        }
+//        else{
+//            bottomNavigation.setSelectedItemId(R.id.navigation_feed_home);
+//        }
     }
 
     @Override

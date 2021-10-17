@@ -30,7 +30,7 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.feed_user_search.FeedUserShareBottomSheetFrag;
+import in.lubble.app.feed_bottom_sheet.FeedUserShareBottomSheetFrag;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
