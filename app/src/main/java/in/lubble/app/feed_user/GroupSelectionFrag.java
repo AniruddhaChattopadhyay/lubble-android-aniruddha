@@ -28,6 +28,7 @@ import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.R;
 import in.lubble.app.UploadImageFeedService;
+import in.lubble.app.UploadVideoFeedService;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.models.FeedPostData;
@@ -141,10 +142,29 @@ public class GroupSelectionFrag extends Fragment {
                     requireActivity().setResult(RESULT_OK);
                     requireActivity().finish();
                     getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
-                } else {
+                }
+                else if(feedPostData.getVidUri() != null){
+                    uploadPath = "feed_videos";
+                    Uri vidUri = Uri.parse(feedPostData.getVidUri());
+                    Intent serviceIntent = new Intent(getContext(), UploadVideoFeedService.class)
+                            .putExtra(UploadVideoFeedService.EXTRA_BUCKET, UploadVideoFeedService.BUCKET_DEFAULT)
+                            .putExtra(UploadVideoFeedService.EXTRA_FILE_NAME, vidUri.getLastPathSegment())
+                            .putExtra(UploadVideoFeedService.EXTRA_FILE_URI, vidUri)
+                            .putExtra(UploadVideoFeedService.EXTRA_UPLOAD_PATH, uploadPath)
+                            .putExtra(UploadVideoFeedService.EXTRA_FEED_GROUP_NAME, groupNameText)
+                            .putExtra(UploadVideoFeedService.EXTRA_FEED_FEED_NAME, feedNameText)
+                            .putExtra(UploadVideoFeedService.EXTRA_FEED_IS_GROUP_JOINED, isGroupJoined)
+                            .putExtra(UploadVideoFeedService.EXTRA_FEED_POST_DATA, feedPostData)
+                            .setAction(UploadVideoFeedService.ACTION_UPLOAD);
+                    ContextCompat.startForegroundService(requireContext(), serviceIntent);
+                    requireActivity().setResult(RESULT_OK);
+                    requireActivity().finish();
+                    getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
+                }
+                else {
                     postSubmitBtn.setVisibility(View.GONE);
                     postProgressBar.setVisibility(View.VISIBLE);
-                    FeedServices.post(feedPostData, groupNameText, feedNameText, null, 0, isGroupJoined,new Callback<Void>() {
+                    FeedServices.post(feedPostData, groupNameText, feedNameText, null,null, 0, isGroupJoined,new Callback<Void>() {
                         @Override
                         public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                             if (isAdded() && response.isSuccessful()) {

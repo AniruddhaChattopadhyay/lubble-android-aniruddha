@@ -25,7 +25,15 @@ import androidx.core.content.FileProvider;
 import com.fxn.pix.Options;
 import com.fxn.pix.Pix;
 import com.fxn.utility.PermUtil;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,12 +45,16 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
+import in.lubble.app.chat.AttachVideoActivity;
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
+import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
+import static in.lubble.app.utils.FileUtils.Video_Size;
 import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.FileUtils.getMimeType;
 import static in.lubble.app.utils.StringUtils.extractFirstLink;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -66,6 +78,9 @@ public class AddPostForFeed extends BaseActivity {
     private LinkMetaAsyncTask linkMetaAsyncTask;
     private boolean isLinkPreviewClosedByUser;
     private boolean isQandA;
+    private PlayerView exoPlayerView;
+    private SimpleExoPlayer exoPlayer;
+    private static final int PERMITTED_VIDEO_SIZE = 30;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +106,7 @@ public class AddPostForFeed extends BaseActivity {
         linkTitleTv = findViewById(R.id.tv_link_title);
         linkDescTv = findViewById(R.id.tv_link_desc);
         linkCloseIv = findViewById(R.id.iv_link_close);
+        exoPlayerView = findViewById(R.id.exo_player_add_feed_post);
         linkCloseIv.setVisibility(View.VISIBLE);
 
         feedPostData = new FeedPostData();
@@ -201,9 +217,17 @@ public class AddPostForFeed extends BaseActivity {
             finish();
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_MEDIA_ATTACH) {
             ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
-            if (returnValue != null && !returnValue.isEmpty()) {
-                Uri uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
-                File imageFile = getFileFromInputStreamUri(this, uri);
+            Uri uri=null;
+            String type = null;
+            File imageFile;
+            if (returnValue!=null) {
+                uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
+                type = getMimeType(uri);
+                imageFile = getFileFromInputStreamUri(this, uri);
+            }
+            if (type!=null && (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) ) {//returnValue != null && !returnValue.isEmpty()
+                //uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
+                imageFile = getFileFromInputStreamUri(this, uri);
                 uri = Uri.fromFile(imageFile);
 
                 addPhotoToFeedTv.setText("Change Photo");
@@ -216,10 +240,56 @@ public class AddPostForFeed extends BaseActivity {
                         .load(uri)
                         .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .into(attachedPicIv);
-            } else {
+            }
+            else if(returnValue != null && (type.contains("video") || type.contains("mp4"))){
+                //uri = data.getData();
+                String extension = FileUtils.getFileExtension(this, uri);
+                if (!TextUtils.isEmpty(extension) && extension.contains("mov")) {
+                    Toast.makeText(this, "Unsupported File type", Toast.LENGTH_LONG).show();
+                } else {
+                    File videoFile;
+                    videoFile = getFileFromInputStreamUri(this, uri);
+                    Video_Size = videoFile.length() / (1024f * 1024f);
+                    if (Video_Size > PERMITTED_VIDEO_SIZE) {
+                        Toast.makeText(this, "Choose a video size less than 30 MB", Toast.LENGTH_LONG).show();
+                        videoFile.delete();
+                    } else {
+                        final Uri vidUri = Uri.fromFile(videoFile);
+                        feedPostData.setVidUri(vidUri.toString());
+                        exoPlayerView.setVisibility(View.VISIBLE);
+                        prepareExoPlayerFromFileUri(vidUri);
+                        exoPlayer.setPlayWhenReady(false);
+                    }
+                }
+            }
+            else {
                 Toast.makeText(this, R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void prepareExoPlayerFromFileUri(Uri uri) {
+        exoPlayer = new SimpleExoPlayer.Builder(this).build();
+        DataSpec dataSpec = new DataSpec(uri);
+        final FileDataSource fileDataSource = new FileDataSource();
+        try {
+            fileDataSource.open(dataSpec);
+        } catch (FileDataSource.FileDataSourceException e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
+
+        DataSource.Factory factory = new DataSource.Factory() {
+            @Override
+            public DataSource createDataSource() {
+                return fileDataSource;
+            }
+        };
+        /*todo deprecated MediaSource videosource = new ExtractorMediaSource(fileDataSource.getUri(),
+                factory, new DefaultExtractorsFactory(), null, null);*/
+        exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
+        exoPlayerView.setPlayer(exoPlayer);
+        exoPlayer.prepare();
     }
 
     private LinkMetaListener getLinkMetaListener() {

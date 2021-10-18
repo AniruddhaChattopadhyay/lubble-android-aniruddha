@@ -45,6 +45,11 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.curios.textformatter.FormatText;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
@@ -94,6 +99,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private final String userId = FirebaseAuth.getInstance().getUid();
     private String photoLink = null;
     private GestureDetector gestureDetector;
+    private SimpleExoPlayer exoPlayer;
 
     public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
         super(diffCallback);
@@ -124,9 +130,10 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
-        holder.photoContentIv.setVisibility(View.GONE);
-        holder.groupNameTv.setVisibility(View.GONE);
-        holder.lubbleNameTv.setVisibility(View.GONE);
+            holder.photoContentIv.setVisibility(View.GONE);
+            holder.exoPlayerView.setVisibility(GONE);
+            holder.groupNameTv.setVisibility(View.GONE);
+            holder.lubbleNameTv.setVisibility(View.GONE);
         if (extras != null) {
             holder.textContentTv.setVisibility(View.VISIBLE);
             final String message = String.valueOf(extras.get("message") == null ? "" : extras.get("message"));
@@ -169,6 +176,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             }
 
             if (extras.containsKey("photoLink")) {
+//                holder.mediaLayout.setVisibility(View.VISIBLE);
                 holder.photoContentIv.setVisibility(View.VISIBLE);
                 photoLink = extras.get("photoLink").toString();
                 glide
@@ -187,6 +195,14 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                             }
                         })
                         .into(holder.photoContentIv);
+            }
+
+            if(extras.containsKey("videoLink")){
+//                holder.mediaLayout.setVisibility(View.VISIBLE);
+                String vidUrl = extras.get("videoLink").toString();
+                holder.exoPlayerView.setVisibility(View.VISIBLE);
+                prepareExoPlayerFromFileUri(holder,Uri.parse(vidUrl));
+                exoPlayer.setPlayWhenReady(false);
             }
 
             if (extras.containsKey("authorName")) {
@@ -237,6 +253,31 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         if (holder.getAbsoluteAdapterPosition() == 0 && !LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG()) {
             prepareDoubleTapToLikeTooltip(holder, extras);
         }
+    }
+
+    private void prepareExoPlayerFromFileUri(MyViewHolder holder, Uri uri) {
+        exoPlayer = new SimpleExoPlayer.Builder(context).build();
+        DataSpec dataSpec = new DataSpec(uri);
+        final FileDataSource fileDataSource = new FileDataSource();
+        try {
+            fileDataSource.open(dataSpec);
+        } catch (FileDataSource.FileDataSourceException e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
+
+        com.google.android.exoplayer2.upstream.DataSource.Factory factory = new com.google.android.exoplayer2.upstream.DataSource.Factory() {
+            @Override
+            public com.google.android.exoplayer2.upstream.DataSource createDataSource() {
+                return fileDataSource;
+            }
+        };
+        /*todo deprecated MediaSource videosource = new ExtractorMediaSource(fileDataSource.getUri(),
+                factory, new DefaultExtractorsFactory(), null, null);*/
+        exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
+        holder.exoPlayerView.setPlayer(exoPlayer);
+        exoPlayer.prepare();
+
     }
 
     private void prepareDoubleTapToLikeTooltip(MyViewHolder holder, Map<String, Object> extras) {
@@ -566,6 +607,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private final TextView commentEdtText, likeTv, replyTv;
         private final RecyclerView commentRecyclerView;
         private final RelativeLayout linkPreviewContainer;
+        private final PlayerView exoPlayerView;
+        //private final LinearLayout mediaLayout;
         private View touchView;
         private EnrichedActivity activity;
         private Map<String, Object> extras;
@@ -687,6 +730,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             linkImageIv = view.findViewById(R.id.iv_link_image);
             linkTitleTv = view.findViewById(R.id.tv_link_title);
             linkDescTv = view.findViewById(R.id.tv_link_desc);
+            //mediaLayout = view.findViewById(R.id.media_container);
+            exoPlayerView = view.findViewById(R.id.exo_player_feed_content);
             ImageView moreMenuIv = view.findViewById(R.id.iv_more_menu);
             moreMenuIv.setVisibility(GONE);
 

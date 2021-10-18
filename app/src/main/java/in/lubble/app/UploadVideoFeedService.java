@@ -4,10 +4,13 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
@@ -25,25 +28,29 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+import com.google.firebase.perf.FirebasePerformance;
+import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.iceteck.silicompressorr.SiliCompressor;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.FileUtils;
 
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
 import static in.lubble.app.utils.FileUtils.getUriFromTempBitmap;
 
-/**
- * Service to handle uploading files to Firebase Storage
- * Created by ishaan on 26/1/18.
- */
-
-public class UploadImageFeedService extends BaseTaskService {
-
+public class UploadVideoFeedService extends BaseTaskService {
     private static final String TAG = "UploadFileService";
     public static final int BUCKET_DEFAULT = 362;
     public static final int BUCKET_CONVO = 491;
@@ -69,6 +76,8 @@ public class UploadImageFeedService extends BaseTaskService {
     public static final String EXTRA_FEED_FEED_NAME = "EXTRA_FEED_FEED_NAME";
     public static final String EXTRA_FEED_POST_DATA = "EXTRA_FEED_POST_DATA";
     public static final String EXTRA_FEED_IS_GROUP_JOINED = "EXTRA_FEED_IS_GROUP_JOINED";
+    public static final String TRACK_UPLOAD_TIME = "TRACK_UPLOAD_TIME";
+    public static final String TRACK_COMPRESS_TIME = "TRACK_COMPRESS_TIME";
 
     public boolean isGroupJoined;
 
@@ -133,66 +142,50 @@ public class UploadImageFeedService extends BaseTaskService {
         }
     }
 
-    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath, final String groupName, final String feedName, FeedPostData feedPostData) {
+    private void uploadFromUri(final Uri fileUri, final String fileName, final String uploadPath,final String groupName, final String feedName, FeedPostData feedPostData ) {
         Log.d(TAG, "uploadFromUri:src:" + fileUri.toString());
 
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference photoRef = mStorageRef.child(uploadPath)
                 .child(fileName);
+        // uploadFile(fileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
+        uploadFile(fileUri, photoRef, groupName, feedName,feedPostData);
+        //compressAndUpload(fileUri, fileName, photoRef,uploadPath, groupName, feedName, feedPostData);
 
-        GlideApp.with(this).asBitmap()
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .load(fileUri)
-                .into(new CustomTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        int width = resource.getWidth();
-                        int height = resource.getHeight();
-                        if (width > 1000 || height > 1000) {
-                            float downsizeFactor;
-                            if (width > height) {
-                                downsizeFactor = width / 1000f;
-                            } else {
-                                downsizeFactor = height / 1000f;
-                            }
-                            int targetWidth = Math.round(width / downsizeFactor);
-                            int targetHeight = Math.round(height / downsizeFactor);
-                            compressAndUpload(fileUri, fileName, targetWidth, targetHeight, photoRef, groupName, feedName, feedPostData);
-                        } else {
-                            uploadFile(fileUri, photoRef, groupName, feedName, (float) width / height, feedPostData);
-                        }
-                    }
-
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                    }
-                });
-    }
-
-    private void compressAndUpload(final Uri fileUri, final String fileName, int targetWidth, int targetHeight, final StorageReference photoRef, final String groupName, final String feedName, FeedPostData feedPostData) {
-        GlideApp.with(this).asBitmap()
-                .override(targetWidth, targetHeight)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .load(fileUri)
-                .into(new CustomTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        final Uri compressedFileUri = getUriFromTempBitmap(UploadImageFeedService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
-                        uploadFile(compressedFileUri, photoRef, groupName, feedName, (float) targetWidth / targetHeight, feedPostData);
-                    }
-
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
-
-                    }
-                });
     }
 
 
-    private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, final String groupName, final String feedName, final float aspectRatio, FeedPostData feedPostData) {
+    private void compressAndUpload(final Uri fileUri, final String fileName,final StorageReference photoRef, final String uploadPath,final String groupName, final String feedName, FeedPostData feedPostData) {
+        File f = new File(getFilesDir().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
+        if (f.mkdirs() || f.isDirectory()) {
+            //compress and output new video specs
+            Log.d(TAG, "inside if to async task");
+            new VideoCompressAsyncTask(this,this, fileUri, fileName, photoRef,uploadPath, groupName, feedName, feedPostData).execute(fileUri.toString(), f.getPath());
+        }
+    }
+
+//    private void compressAndUpload(final Uri fileUri, final String fileName, int targetWidth, int targetHeight, final StorageReference photoRef, final String groupName, final String feedName, FeedPostData feedPostData) {
+//        GlideApp.with(this).asBitmap()
+//                .override(targetWidth, targetHeight)
+//                .diskCacheStrategy(DiskCacheStrategy.NONE)
+//                .skipMemoryCache(true)
+//                .load(fileUri)
+//                .into(new CustomTarget<Bitmap>() {
+//                    @Override
+//                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+//                        final Uri compressedFileUri = getUriFromTempBitmap(UploadImageFeedService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
+//                        uploadFile(compressedFileUri, photoRef, groupName, feedName, (float) targetWidth / targetHeight, feedPostData);
+//                    }
+//
+//                    @Override
+//                    public void onLoadCleared(@Nullable Drawable placeholder) {
+//
+//                    }
+//                });
+//    }
+
+
+    private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, final String groupName, final String feedName, FeedPostData feedPostData) {
         // Upload file to Firebase Storage
         Log.d(TAG, "uploadFromUri:dst:" + photoRef.getPath());
         final UploadTask uploadTask;
@@ -219,7 +212,7 @@ public class UploadImageFeedService extends BaseTaskService {
                                 if (task.isSuccessful()) {
                                     final Uri downloadUri = task.getResult();
                                     // [START_EXCLUDE]
-                                    broadcastUploadFinished(downloadUri, compressedFileUri, true, groupName, feedName, aspectRatio, feedPostData);
+                                    broadcastUploadFinished(downloadUri, compressedFileUri, true, groupName, feedName, feedPostData);
 
                                     showUploadFinishedNotification(downloadUri, compressedFileUri, true);
                                     taskCompleted();
@@ -228,7 +221,7 @@ public class UploadImageFeedService extends BaseTaskService {
                                     Log.d(TAG, "onComplete: failed");
 
                                     // [START_EXCLUDE]
-                                    broadcastUploadFinished(null, compressedFileUri, false, groupName, feedName, 0, feedPostData);
+                                    broadcastUploadFinished(null, compressedFileUri, false, groupName, feedName, feedPostData);
 
                                     showUploadFinishedNotification(null, compressedFileUri, false);
                                     taskCompleted();
@@ -246,7 +239,7 @@ public class UploadImageFeedService extends BaseTaskService {
                         Log.w(TAG, "uploadFromUri:onFailure", exception);
 
                         // [START_EXCLUDE]
-                        broadcastUploadFinished(null, compressedFileUri, false, groupName, feedName, 0, feedPostData);
+                        broadcastUploadFinished(null, compressedFileUri, false, groupName, feedName, feedPostData);
 
                         showUploadFinishedNotification(null, compressedFileUri, false);
                         taskCompleted();
@@ -261,7 +254,7 @@ public class UploadImageFeedService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit, final String groupName, final String feedName, float aspectRatio, FeedPostData feedPostData) {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit, final String groupName, final String feedName, FeedPostData feedPostData) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
@@ -271,7 +264,7 @@ public class UploadImageFeedService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            FeedServices.post(feedPostData, groupName, feedName, downloadUrl.toString(),null, aspectRatio,isGroupJoined, null);
+            FeedServices.post(feedPostData, groupName, feedName, null,downloadUrl.toString(), 0,isGroupJoined, null);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())
@@ -304,5 +297,104 @@ public class UploadImageFeedService extends BaseTaskService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
+        Trace compressTime = FirebasePerformance.getInstance().newTrace(TRACK_COMPRESS_TIME);
+        Context mContext;
+        UploadVideoFeedService uploadVideoFeedService;
+        Uri fileUri;
+        String fileName;
+        String uploadPath;
+        String groupName;
+        String feedName;
+        FeedPostData feedPostData;
+        StorageReference photoRef;
+        Uri cachevid = null;
+        Uri compressedUri = null;
+        double compessed_video_size = 0;
+
+        public VideoCompressAsyncTask(Context context, UploadVideoFeedService uploadVideoFeedService, final Uri fileUri, final String fileName,final StorageReference photoRef, final String uploadPath,final String groupName, final String feedName, FeedPostData feedPostData) {
+            mContext = context;
+            this.uploadVideoFeedService = uploadVideoFeedService;
+            this.fileUri = fileUri;
+            this.fileName = fileName;
+            this.photoRef = photoRef;
+            this.uploadPath = uploadPath;
+            this.groupName = groupName;
+            this.feedName = feedName;
+            this.feedPostData = feedPostData;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            compressTime.start();
+        }
+
+        @Override
+        protected String doInBackground(String... paths) {
+            String filePath = null;
+            try {
+                //Uri pathdesc = Uri.parse(paths[1]);
+                Log.d(TAG, "path0 = " + paths[0] + " path1=" + paths[1] + "from file " + Uri.fromFile(new File(paths[1])).toString());
+                Log.d(TAG, "path0 = " + Uri.parse(paths[0]).getPath() + " path1=" + paths[1] + "from file " + Uri.fromFile(new File(paths[1])).getPath());
+
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(Uri.parse(paths[0]).getPath());
+                int bitrate = Integer.parseInt(retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_BITRATE)));
+
+                Log.d(TAG, "OG bitrate is : " + bitrate);
+
+                int destBitrate = bitrate;
+                if (bitrate > 5 * 1024 * 1024 || new File(paths[0]).length() > 10 * 1024 * 1024) {
+                    destBitrate = Math.min(bitrate / 2, 5 * 1024 * 1024); // max Bitrate allowed = 5Mbps
+                }
+
+                filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath(), Uri.fromFile(new File(paths[1])).getPath(), 0, 0, destBitrate);
+                cachevid = Uri.parse(paths[0]);
+
+            } catch (URISyntaxException e) {
+                FirebaseCrashlytics.getInstance().recordException(e);
+                e.printStackTrace();
+            }
+            return filePath;
+
+        }
+
+
+        @Override
+        protected void onPostExecute(String compressedFilePath) {
+            super.onPostExecute(compressedFilePath);
+            File imageFile = new File(compressedFilePath);
+            compessed_video_size = imageFile.length() / (1024f * 1024f);
+            compressTime.stop();
+            compressedUri = Uri.fromFile(imageFile);
+            Log.i(TAG, "Path: " + compressedFilePath);
+            File file = new File(cachevid.getPath());
+
+            Log.d(TAG, "OG SIZE: " + file.length() / (1024f * 1024f));
+            Log.d(TAG, "compressed size: " + compessed_video_size);
+
+            if (compessed_video_size <= FileUtils.Video_Size) {
+                //delete image in cache
+                if (cachevid != null) {
+                    file.delete();
+                    if (file.exists()) {
+                        try {
+                            file.getCanonicalFile().delete();
+                            if (file.exists()) {
+                                getApplicationContext().deleteFile(file.getName());
+                            }
+                        } catch (IOException e) {
+                            FirebaseCrashlytics.getInstance().recordException(e);
+                            e.printStackTrace();
+                        }
+                    }
+                }
+                uploadVideoFeedService.uploadFile(compressedUri, photoRef, groupName, feedName,feedPostData);
+            } else
+                uploadVideoFeedService.uploadFile(cachevid,photoRef, groupName, feedName,feedPostData);
+        }
     }
 }

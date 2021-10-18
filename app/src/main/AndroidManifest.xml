@@ -548,6 +548,7 @@
         </service>
         <service android:name=".UploadFileService" />
         <service android:name=".UploadImageFeedService" />
+        <service android:name=".UploadVideoFeedService"/>
         <service android:name=".firebase.FcmService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
