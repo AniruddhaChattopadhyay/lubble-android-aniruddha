@@ -73,7 +73,7 @@ public class GroupFeedActivity extends BaseActivity {
         if (getIntent().hasExtra(EXTRA_FEED_GROUP_DATA)) {
             feedGroupData = (FeedGroupData) getIntent().getSerializableExtra(EXTRA_FEED_GROUP_DATA);
             CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_feed_group);
-            collapsingToolbarLayout.setTitle(feedGroupData.getFeedName());
+            collapsingToolbarLayout.setTitle(feedGroupData.getName());
             ImageView imageView = findViewById(R.id.collapsing_toolbar_feed_group_background);
             GlideApp.with(this)
                     .load(feedGroupData.getPhotoUrl())
