@@ -91,7 +91,7 @@ public class GroupFeedActivity extends BaseActivity {
     void toggleContextMenu(boolean isJoined) {
         this.isJoined = isJoined;
         joinInviteBtn.setVisibility(View.VISIBLE);
-        String joinText = isJoined ? "Invite Friends" : "Join Group";
+        String joinText = isJoined ? "Invite" : "Join Group";
         Drawable icon = isJoined ? ContextCompat.getDrawable(this, R.drawable.ic_person_add_24dp) : ContextCompat.getDrawable(this, R.drawable.ic_add_circle_black_24dp);
         joinInviteBtn.setIcon(icon);
         joinInviteBtn.setText(joinText);
