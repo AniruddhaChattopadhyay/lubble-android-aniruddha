@@ -30,6 +30,7 @@ import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.feed_bottom_sheet.FeedUserShareBottomSheetFrag;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
@@ -99,7 +100,10 @@ public class GroupFeedActivity extends BaseActivity {
             if (isJoined) {
                 FeedUserShareBottomSheetFrag feedUserShareBottomSheetFrag = new FeedUserShareBottomSheetFrag(feedGroupData.getFeedName(), feedGroupData);
                 feedUserShareBottomSheetFrag.show(getSupportFragmentManager(), feedUserShareBottomSheetFrag.getTag());
-                Analytics.triggerFeedInviteClicked(this);
+                Bundle bundle = new Bundle();
+                bundle.putInt("group_id", feedGroupData.getId());
+                bundle.putString("group_name", feedGroupData.getName());
+                Analytics.triggerEvent(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, bundle, this);
             } else {
                 CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedGroupData.getFeedName());
                 singleGroupFeed.joinGroup(groupFeed);
