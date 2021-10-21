@@ -106,7 +106,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database:20.0.1'
     implementation 'com.google.firebase:firebase-storage:20.0.0'
     implementation 'com.github.drawers:SpinnerDatePicker:2.0.1'
-    implementation 'com.facebook.android:facebook-login:9.1.1'
+    implementation 'com.facebook.android:facebook-login:11.3.0'
     implementation "androidx.drawerlayout:drawerlayout:1.1.1"
     implementation 'com.segment.analytics.android:analytics:4.9.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
