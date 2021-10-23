@@ -1012,41 +1012,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         getUserInfoRef(firebaseAuth.getUid()).removeEventListener(dpEventListener);
     }
-//
-//    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-//            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-//
-//        @Override
-//        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-//            switch (item.getItemId()) {
-//                case R.id.navigation_chats:
-//                    switchFrag(GroupsCombinedFrag.newInstance(false));
-//                    return true;
-//                case R.id.navigation_feed:
-//                    switchFrag(FeedCombinedFragment.newInstance());
-//                    return true;
-//                case R.id.navigation_feed_home:
-//                    switchFrag(FeedFrag.newInstance());
-//                    return true;
-//                case R.id.navigation_feed_groups:
-//                    switchFrag(FeedGroupsFrag.newInstance());
-//                    return true;
-//                case R.id.navigation_market:
-//                    switchFrag(MarketplaceFrag.newInstance());
-//                    return true;
-//                /*case R.id.navigation_map:
-//                    switchFrag(MapFragment.newInstance());
-//                    return true;*/
-//                case R.id.navigation_events:
-//                    switchFrag(EventsFrag.newInstance());
-//                    return true;
-//                case R.id.navigation_fun:
-//                    switchFrag(GamesFrag.newInstance());
-//                    return true;
-//            }
-//            return false;
-//        }
-//    };
 
     public void setRefreshListener(SwipeRefreshLayout.OnRefreshListener listener) {
         this.feedRefreshListener = listener;
@@ -1075,11 +1040,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         return true;
     }
 
-    private void switchFrag(Fragment fragment) {
-        FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().replace(R.id.tv_book_author, fragment).commitAllowingStateLoss();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -1092,10 +1052,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
-    }
-
-    private void openProfile() {
-        ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
     }
 
     public void removeMplaceBadge() {
@@ -1167,14 +1123,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else {
             super.onBackPressed();
         }
-
-//        if(bottomNavigation.getSelectedItemId()==R.id.navigation_feed_home){
-//            super.onBackPressed();
-//            finish();
-//        }
-//        else{
-//            bottomNavigation.setSelectedItemId(R.id.navigation_feed_home);
-//        }
     }
 
     @Override
