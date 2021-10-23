@@ -42,6 +42,11 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.curios.textformatter.FormatText;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
@@ -65,6 +70,7 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
+import in.lubble.app.feed_user.FeedAdaptor;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -74,6 +80,7 @@ import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FeedUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.FullScreenVideoActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
@@ -110,6 +117,7 @@ public class FeedPostFrag extends Fragment {
 
     private ProgressBar progressBar, replyProgressBar;
     private EmojiTextView textContentTv;
+    private RelativeLayout mediaLayout;
     private ImageView photoContentIv;
     private ImageView authorPhotoIv;
     private TextView authorNameTv, timePostedTv, groupNameTv, lubbleNameTv;
@@ -119,11 +127,15 @@ public class FeedPostFrag extends Fragment {
     private LinearLayout commentLayout;
     private ReplyEditText replyEt;
     private ShimmerRecyclerView commentRecyclerView;
+    private PlayerView exoPlayerView;
+    private SimpleExoPlayer exoPlayer;
     @Nullable
     private String likeReactionId = null;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private BottomSheetBehavior sheetBehavior;
     private RelativeLayout linkPreviewContainer;
+
+
 
     public static FeedPostFrag newInstance(String postId) {
         FeedPostFrag feedPostFrag = new FeedPostFrag();
@@ -141,6 +153,7 @@ public class FeedPostFrag extends Fragment {
 
         progressBar = view.findViewById(R.id.progressbar_post);
         textContentTv = view.findViewById(R.id.feed_text_content);
+        mediaLayout = view.findViewById(R.id.media_container);
         photoContentIv = view.findViewById(R.id.feed_photo_content);
         authorNameTv = view.findViewById(R.id.feed_author_name);
         groupNameTv = view.findViewById(R.id.tv_group_name);
@@ -168,6 +181,7 @@ public class FeedPostFrag extends Fragment {
         sheetBehavior = BottomSheetBehavior.from(replyBottomSheet);
         postId = requireArguments().getString(ARG_POST_ID);
         commentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        exoPlayerView = view.findViewById(R.id.exo_player_feed_content);
 
         if (postId == null) {
             throw new IllegalArgumentException("Missing ARG_POST_ID for FeedPostFrag");
@@ -230,6 +244,7 @@ public class FeedPostFrag extends Fragment {
                                         textContentTv.setMovementMethod(betterLinkMovementMethod);
                                     }
                                     if (extras.containsKey("photoLink")) {
+                                        mediaLayout.setVisibility(View.VISIBLE);
                                         photoContentIv.setVisibility(View.VISIBLE);
                                         String photoLink = extras.get("photoLink").toString();
                                         Glide.with(requireContext())
@@ -238,6 +253,15 @@ public class FeedPostFrag extends Fragment {
                                                 .into(photoContentIv);
                                         photoContentIv.setOnClickListener(v ->
                                                 FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp));
+                                    }
+                                    if(extras.containsKey("videoLink")){
+                                        mediaLayout.setVisibility(View.VISIBLE);
+                                        String vidUrl = extras.get("videoLink").toString();
+                                        exoPlayerView.setVisibility(View.VISIBLE);
+                                        prepareExoPlayerFromFileUri(Uri.parse(vidUrl));
+                                        exoPlayer.setPlayWhenReady(true);
+                                        exoPlayerView.setOnClickListener(v->
+                                            FullScreenVideoActivity.open(getActivity(), requireContext(), vidUrl,"",""));
                                     }
 
                                     if (extras.containsKey("authorName")) {
@@ -325,6 +349,30 @@ public class FeedPostFrag extends Fragment {
         }
     }
 
+    private void prepareExoPlayerFromFileUri(Uri uri) {
+        exoPlayer = new SimpleExoPlayer.Builder(getContext()).build();
+        DataSpec dataSpec = new DataSpec(uri);
+        final FileDataSource fileDataSource = new FileDataSource();
+        try {
+            fileDataSource.open(dataSpec);
+        } catch (FileDataSource.FileDataSourceException e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
+
+        com.google.android.exoplayer2.upstream.DataSource.Factory factory = new com.google.android.exoplayer2.upstream.DataSource.Factory() {
+            @Override
+            public com.google.android.exoplayer2.upstream.DataSource createDataSource() {
+                return fileDataSource;
+            }
+        };
+        /*todo deprecated MediaSource videosource = new ExtractorMediaSource(fileDataSource.getUri(),
+                factory, new DefaultExtractorsFactory(), null, null);*/
+        exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
+        exoPlayerView.setPlayer(exoPlayer);
+        exoPlayer.prepare();
+
+    }
     private void openMorePopupMenu(String activityId, Data actorData, Map<String, Object> extras) {
         PopupMenu popupMenu = new PopupMenu(requireContext(), moreMenuIv);
 

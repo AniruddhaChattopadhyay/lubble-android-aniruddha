@@ -3,6 +3,7 @@ package in.lubble.app.feed_user;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -71,7 +72,6 @@ public class AddPostForFeed extends BaseActivity {
     private FeedPostData feedPostData;
     private RelativeLayout linkPreviewContainer;
     private TextView addPhotoToFeedTv, linkTitleTv, linkDescTv;
-    private Uri imageUri = null;
     private String uploadPath = "feed_photos/";
     public static String QnAString = "QandA";
     private String prevUrl = "";
@@ -81,6 +81,8 @@ public class AddPostForFeed extends BaseActivity {
     private PlayerView exoPlayerView;
     private SimpleExoPlayer exoPlayer;
     private static final int PERMITTED_VIDEO_SIZE = 30;
+    private String videoLink = null;
+    private String photoLink = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,8 +117,11 @@ public class AddPostForFeed extends BaseActivity {
         postSubmitBtn.setOnClickListener(v -> {
             if (postText.getText().toString().trim().length() > 0) {
                 feedPostData.setText(postText.getText().toString());
-                if (imageUri != null) {
-                    feedPostData.setImgUri(imageUri.toString());
+                if (photoLink != null) {
+                    feedPostData.setImgUri(photoLink);
+                }
+                if(videoLink!=null){
+                    feedPostData.setVidUri(videoLink);
                 }
                 openGroupSelectionActivity(feedPostData);
 
@@ -226,14 +231,12 @@ public class AddPostForFeed extends BaseActivity {
                 imageFile = getFileFromInputStreamUri(this, uri);
             }
             if (type!=null && (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) ) {//returnValue != null && !returnValue.isEmpty()
-                //uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
+                exoPlayerView.setVisibility(View.GONE);
                 imageFile = getFileFromInputStreamUri(this, uri);
                 uri = Uri.fromFile(imageFile);
 
-                addPhotoToFeedTv.setText("Change Photo");
-                imageUri = uri;
-
-                feedPostData.setImgUri(uri.toString());
+                addPhotoToFeedTv.setText("Change Media");
+                photoLink = uri.toString();
 
                 attachedPicIv.setVisibility(View.VISIBLE);
                 GlideApp.with(this)
@@ -242,8 +245,9 @@ public class AddPostForFeed extends BaseActivity {
                         .into(attachedPicIv);
             }
             else if(returnValue != null && (type.contains("video") || type.contains("mp4"))){
-                //uri = data.getData();
+                attachedPicIv.setVisibility(View.GONE);
                 String extension = FileUtils.getFileExtension(this, uri);
+                addPhotoToFeedTv.setText("Change Media");
                 if (!TextUtils.isEmpty(extension) && extension.contains("mov")) {
                     Toast.makeText(this, "Unsupported File type", Toast.LENGTH_LONG).show();
                 } else {
@@ -255,7 +259,7 @@ public class AddPostForFeed extends BaseActivity {
                         videoFile.delete();
                     } else {
                         final Uri vidUri = Uri.fromFile(videoFile);
-                        feedPostData.setVidUri(vidUri.toString());
+                        videoLink = vidUri.toString();
                         exoPlayerView.setVisibility(View.VISIBLE);
                         prepareExoPlayerFromFileUri(vidUri);
                         exoPlayer.setPlayWhenReady(false);

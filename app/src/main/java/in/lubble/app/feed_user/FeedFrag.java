@@ -46,6 +46,7 @@ import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.FeedViewModel;
 import in.lubble.app.utils.FullScreenImageActivity;
+import in.lubble.app.utils.FullScreenVideoActivity;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.VisibleState;
 import in.lubble.app.widget.PostReplySmoothScroller;
@@ -366,6 +367,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void onImageClicked(String imgPath, ImageView imageView) {
         FullScreenImageActivity.open(getActivity(), requireContext(), imgPath, imageView, null, R.drawable.ic_cancel_black_24dp);
+    }
+
+    @Override
+    public void onVideoClicked(String vidPath) {
+        FullScreenVideoActivity.open(getActivity(), requireContext(), vidPath,"","");
     }
 
     @Override

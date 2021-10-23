@@ -96,73 +96,71 @@
         android:visibility="gone"
         tools:visibility="gone" />
 
-<!--    <LinearLayout-->
-<!--        android:orientation="vertical"-->
-<!--        android:id="@+id/media_container"-->
-<!--        android:visibility="gone"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_below="@+id/cont_link_preview"-->
-<!--        >-->
-<!--        <ImageView-->
-<!--            android:id="@+id/feed_photo_content"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_below="@id/cont_link_preview"-->
-<!--            android:layout_marginTop="8dp"-->
-<!--            android:adjustViewBounds="true"-->
-<!--            android:foreground="?attr/selectableItemBackground"-->
-<!--            android:maxHeight="500dp"-->
-<!--            android:scaleType="centerCrop"-->
-<!--            android:transitionName="fullscreen_image"-->
-<!--            android:visibility="gone"-->
-<!--            tools:src="@drawable/explore_default"-->
-<!--            tools:visibility="gone" />-->
-
-<!--        <com.google.android.exoplayer2.ui.PlayerView-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="200dp"-->
-<!--            android:layout_below="@+id/cont_link_preview"-->
-<!--            android:layout_marginTop="8dp"-->
-<!--            android:adjustViewBounds="true"-->
-<!--            android:foreground="?attr/selectableItemBackground"-->
-<!--            android:maxHeight="500dp"-->
-<!--            android:scaleType="centerCrop"-->
-<!--            android:transitionName="fullscreen_image"-->
-<!--            android:visibility="gone"-->
-<!--            tools:visibility="gone"-->
-<!--            tools:src="@drawable/explore_default"-->
-<!--            android:id="@+id/exo_player_feed_content" />-->
-<!--    </LinearLayout>-->
-    <ImageView
-        android:id="@+id/feed_photo_content"
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:id="@+id/media_container"
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/cont_link_preview"
-        android:layout_marginTop="8dp"
-        android:adjustViewBounds="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:maxHeight="500dp"
-        android:scaleType="centerCrop"
-        android:transitionName="fullscreen_image"
-        android:visibility="gone"
-        tools:src="@drawable/explore_default"
-        tools:visibility="gone" />
+        >
+        <ImageView
+            android:id="@+id/feed_photo_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:adjustViewBounds="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:maxHeight="500dp"
+            android:scaleType="centerCrop"
+            android:transitionName="fullscreen_image"
+            android:visibility="gone"
+            tools:src="@drawable/explore_default"
+            tools:visibility="visible" />
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="8dp"
+            android:adjustViewBounds="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:maxHeight="500dp"
+            android:scaleType="centerCrop"
+            android:transitionName="fullscreen_image"
+            android:visibility="gone"
+            tools:visibility="gone"
+            tools:src="@drawable/explore_default"
+            android:id="@+id/exo_player_feed_content" />
 
-    <com.google.android.exoplayer2.ui.PlayerView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_below="@+id/cont_link_preview"
-        android:layout_marginTop="8dp"
-        android:adjustViewBounds="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:maxHeight="500dp"
-        android:scaleType="centerCrop"
-        android:transitionName="fullscreen_image"
-        android:visibility="gone"
-        tools:visibility="gone"
-        tools:src="@drawable/explore_default"
-        android:id="@+id/exo_player_feed_content" />
+    </RelativeLayout>
+<!--    <ImageView-->
+<!--        android:id="@+id/feed_photo_content"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@+id/cont_link_preview"-->
+<!--        android:layout_marginTop="8dp"-->
+<!--        android:adjustViewBounds="true"-->
+<!--        android:foreground="?attr/selectableItemBackground"-->
+<!--        android:maxHeight="500dp"-->
+<!--        android:scaleType="centerCrop"-->
+<!--        android:transitionName="fullscreen_image"-->
+<!--        android:visibility="gone"-->
+<!--        tools:src="@drawable/explore_default"-->
+<!--        tools:visibility="gone" />-->
+
+<!--    <com.google.android.exoplayer2.ui.PlayerView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="200dp"-->
+<!--        android:layout_below="@+id/cont_link_preview"-->
+<!--        android:layout_marginTop="8dp"-->
+<!--        android:adjustViewBounds="true"-->
+<!--        android:foreground="?attr/selectableItemBackground"-->
+<!--        android:maxHeight="500dp"-->
+<!--        android:scaleType="centerCrop"-->
+<!--        android:transitionName="fullscreen_image"-->
+<!--        android:visibility="gone"-->
+<!--        tools:visibility="gone"-->
+<!--        tools:src="@drawable/explore_default"-->
+<!--        android:id="@+id/exo_player_feed_content" />-->
 
 
     <LinearLayout
@@ -170,7 +168,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignWithParentIfMissing="true"
-        android:layout_below="@id/exo_player_feed_content"
+        android:layout_below="@id/media_container"
         android:orientation="horizontal">
 
         <LinearLayout

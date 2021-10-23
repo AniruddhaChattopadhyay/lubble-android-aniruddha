@@ -97,9 +97,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private GlideRequests glide;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
-    private String photoLink = null;
+    private String photoLink = null,videoLink=null;
     private GestureDetector gestureDetector;
-    private SimpleExoPlayer exoPlayer;
+
 
     public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
         super(diffCallback);
@@ -130,7 +130,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
-            holder.photoContentIv.setVisibility(View.GONE);
+            holder.mediaLayout.setVisibility(GONE);
+            holder.photoContentIv.setVisibility(GONE);
             holder.exoPlayerView.setVisibility(GONE);
             holder.groupNameTv.setVisibility(View.GONE);
             holder.lubbleNameTv.setVisibility(View.GONE);
@@ -156,27 +157,47 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
                     int itemViewHeight = holder.itemView.getMeasuredHeight();
                     float targetHeight = Math.min(displayHeight - itemViewHeight - dpToPx(80), itemWidth / aspectRatio); //80->sum of heights for joined groups & new post btns
-                    holder.photoContentIv.setVisibility(View.VISIBLE);
-                    ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
-                    if (targetHeight < 300) {
-                        float delta = 300 - targetHeight;
-                        int linesToPurge = (int) Math.ceil(delta / UiUtils.spToPx(14));
-                        holder.textContentTv.setMaxLines(Math.max(9 - linesToPurge, 5));
-                        targetHeight = 300;
-                    } else {
-                        holder.textContentTv.setMaxLines(9);
+                    if(extras.containsKey("photoLink")){
+                        holder.mediaLayout.setVisibility(View.VISIBLE);
+                        holder.photoContentIv.setVisibility(View.VISIBLE);
+                        ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
+                        if (targetHeight < 300) {
+                            float delta = 300 - targetHeight;
+                            int linesToPurge = (int) Math.ceil(delta / UiUtils.spToPx(14));
+                            holder.textContentTv.setMaxLines(Math.max(9 - linesToPurge, 5));
+                            targetHeight = 300;
+                        } else {
+                            holder.textContentTv.setMaxLines(9);
+                        }
+                        lp.height = Math.round(targetHeight);
+                        holder.photoContentIv.setLayoutParams(lp);
+                        holder.photoContentIv.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
                     }
-                    lp.height = Math.round(targetHeight);
-                    holder.photoContentIv.setLayoutParams(lp);
-                    holder.photoContentIv.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
+                    if(extras.containsKey("videoLink")) {
+                        holder.mediaLayout.setVisibility(View.VISIBLE);
+                        holder.exoPlayerView.setVisibility(View.VISIBLE);
+                        ViewGroup.LayoutParams lp = holder.exoPlayerView.getLayoutParams();
+                        if (targetHeight < 300) {
+                            float delta = 300 - targetHeight;
+                            int linesToPurge = (int) Math.ceil(delta / UiUtils.spToPx(14));
+                            holder.textContentTv.setMaxLines(Math.max(9 - linesToPurge, 5));
+                            targetHeight = 300;
+                        } else {
+                            holder.textContentTv.setMaxLines(9);
+                        }
+                        lp.height = Math.round(targetHeight);
+                        holder.exoPlayerView.setLayoutParams(lp);
+                        holder.exoPlayerView.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
+                    }
                 }
             } else {
                 // photoContentIv.visibility = GONE already at top
+                // exoPlayerView.visibility = GONE already at top
                 holder.textContentTv.setMaxLines(9);
             }
 
             if (extras.containsKey("photoLink")) {
-//                holder.mediaLayout.setVisibility(View.VISIBLE);
+                holder.mediaLayout.setVisibility(View.VISIBLE);
                 holder.photoContentIv.setVisibility(View.VISIBLE);
                 photoLink = extras.get("photoLink").toString();
                 glide
@@ -198,11 +219,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             }
 
             if(extras.containsKey("videoLink")){
-//                holder.mediaLayout.setVisibility(View.VISIBLE);
+                //holder.photoContentIv.setVisibility(GONE);
+                holder.mediaLayout.setVisibility(View.VISIBLE);
                 String vidUrl = extras.get("videoLink").toString();
                 holder.exoPlayerView.setVisibility(View.VISIBLE);
                 prepareExoPlayerFromFileUri(holder,Uri.parse(vidUrl));
-                exoPlayer.setPlayWhenReady(false);
             }
 
             if (extras.containsKey("authorName")) {
@@ -255,8 +276,25 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
     }
 
+    @Override
+    public void onViewAttachedToWindow(@NonNull @NotNull FeedAdaptor.MyViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        if(holder.exoPlayer != null){
+            holder.exoPlayer.setPlayWhenReady(true);
+        }
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull @NotNull FeedAdaptor.MyViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        if(holder.exoPlayer != null){
+            holder.exoPlayer.setPlayWhenReady(false);
+            holder.exoPlayer.stop();
+        }
+    }
+
     private void prepareExoPlayerFromFileUri(MyViewHolder holder, Uri uri) {
-        exoPlayer = new SimpleExoPlayer.Builder(context).build();
+        holder.exoPlayer = new SimpleExoPlayer.Builder(context).build();
         DataSpec dataSpec = new DataSpec(uri);
         final FileDataSource fileDataSource = new FileDataSource();
         try {
@@ -274,9 +312,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         };
         /*todo deprecated MediaSource videosource = new ExtractorMediaSource(fileDataSource.getUri(),
                 factory, new DefaultExtractorsFactory(), null, null);*/
-        exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
-        holder.exoPlayerView.setPlayer(exoPlayer);
-        exoPlayer.prepare();
+        holder.exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
+        holder.exoPlayerView.setPlayer(holder.exoPlayer);
+        holder.exoPlayer.prepare();
 
     }
 
@@ -384,6 +422,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         void onReplyClicked(String activityId, String foreignId, String postActorUid, int position);
 
         void onImageClicked(String imgPath, ImageView imageView);
+
+        void onVideoClicked(String vidPath);
 
         void onLiked(String foreignID);
 
@@ -608,7 +648,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private final RecyclerView commentRecyclerView;
         private final RelativeLayout linkPreviewContainer;
         private final PlayerView exoPlayerView;
-        //private final LinearLayout mediaLayout;
+        private SimpleExoPlayer exoPlayer;
+        private final RelativeLayout mediaLayout;
         private View touchView;
         private EnrichedActivity activity;
         private Map<String, Object> extras;
@@ -697,6 +738,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                     case R.id.tv_view_all_replies:
                         feedListener.openPostActivity(activity.getID());
                         break;
+
+                    case R.id.exo_player_feed_content:
+                        videoLink = extras.get("videoLink").toString();
+                        feedListener.onVideoClicked(videoLink);
+                        break;
                 }
                 return true;
             }
@@ -730,7 +776,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             linkImageIv = view.findViewById(R.id.iv_link_image);
             linkTitleTv = view.findViewById(R.id.tv_link_title);
             linkDescTv = view.findViewById(R.id.tv_link_desc);
-            //mediaLayout = view.findViewById(R.id.media_container);
+            mediaLayout = view.findViewById(R.id.media_container);
             exoPlayerView = view.findViewById(R.id.exo_player_feed_content);
             ImageView moreMenuIv = view.findViewById(R.id.iv_more_menu);
             moreMenuIv.setVisibility(GONE);
@@ -746,6 +792,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             commentEdtText.setOnTouchListener(this);
             viewAllRepliesTv.setOnTouchListener(this);
             authorNameTv.setOnTouchListener(this);
+            exoPlayerView.setOnTouchListener(this);
             itemView.setOnTouchListener(this);
 
         }

@@ -85,7 +85,7 @@
         android:drawablePadding="8dp"
         android:gravity="center"
         android:padding="8dp"
-        android:text="Add Photo"
+        android:text="Add Media"
         android:textColor="@color/black"
         app:drawableLeftCompat="@drawable/ic_image_gallery" />
 

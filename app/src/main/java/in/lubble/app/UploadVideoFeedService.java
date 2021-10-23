@@ -48,6 +48,7 @@ import in.lubble.app.utils.FileUtils;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
 import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
 import static in.lubble.app.utils.FileUtils.getUriFromTempBitmap;
 
 public class UploadVideoFeedService extends BaseTaskService {
@@ -148,9 +149,8 @@ public class UploadVideoFeedService extends BaseTaskService {
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference photoRef = mStorageRef.child(uploadPath)
                 .child(fileName);
-        // uploadFile(fileUri, photoRef, metadata, toTransmit, caption, groupId, dmInfoData);
-        uploadFile(fileUri, photoRef, groupName, feedName,feedPostData);
-        //compressAndUpload(fileUri, fileName, photoRef,uploadPath, groupName, feedName, feedPostData);
+        //uploadFile(fileUri, photoRef, groupName, feedName,feedPostData);
+        compressAndUpload(fileUri, fileName, photoRef,uploadPath, groupName, feedName, feedPostData);
 
     }
 
@@ -163,26 +163,6 @@ public class UploadVideoFeedService extends BaseTaskService {
             new VideoCompressAsyncTask(this,this, fileUri, fileName, photoRef,uploadPath, groupName, feedName, feedPostData).execute(fileUri.toString(), f.getPath());
         }
     }
-
-//    private void compressAndUpload(final Uri fileUri, final String fileName, int targetWidth, int targetHeight, final StorageReference photoRef, final String groupName, final String feedName, FeedPostData feedPostData) {
-//        GlideApp.with(this).asBitmap()
-//                .override(targetWidth, targetHeight)
-//                .diskCacheStrategy(DiskCacheStrategy.NONE)
-//                .skipMemoryCache(true)
-//                .load(fileUri)
-//                .into(new CustomTarget<Bitmap>() {
-//                    @Override
-//                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-//                        final Uri compressedFileUri = getUriFromTempBitmap(UploadImageFeedService.this, resource, fileName, MimeTypeMap.getFileExtensionFromUrl(fileUri.toString()));
-//                        uploadFile(compressedFileUri, photoRef, groupName, feedName, (float) targetWidth / targetHeight, feedPostData);
-//                    }
-//
-//                    @Override
-//                    public void onLoadCleared(@Nullable Drawable placeholder) {
-//
-//                    }
-//                });
-//    }
 
 
     private void uploadFile(final Uri compressedFileUri, final StorageReference photoRef, final String groupName, final String feedName, FeedPostData feedPostData) {
@@ -254,7 +234,7 @@ public class UploadVideoFeedService extends BaseTaskService {
      *
      * @return true if a running receiver received the broadcast.
      */
-    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, @Nullable Uri fileUri, boolean toTransmit, final String groupName, final String feedName, FeedPostData feedPostData) {
+    private boolean broadcastUploadFinished(@Nullable Uri downloadUrl, Uri fileUri, boolean toTransmit, final String groupName, final String feedName, FeedPostData feedPostData) {
         boolean success = downloadUrl != null;
 
         String action = success ? UPLOAD_COMPLETED : UPLOAD_ERROR;
@@ -264,7 +244,16 @@ public class UploadVideoFeedService extends BaseTaskService {
                 .putExtra(EXTRA_FILE_URI, fileUri);
 
         if (toTransmit && success) {
-            FeedServices.post(feedPostData, groupName, feedName, null,downloadUrl.toString(), 0,isGroupJoined, null);
+            File videoFile;
+            videoFile = getFileFromInputStreamUri(this, fileUri);
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(videoFile.getAbsolutePath());
+            int width = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+            int height = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+            retriever.release();
+            videoFile.delete();
+            float aspectRatio = (float) width/height;
+            FeedServices.post(feedPostData, groupName, feedName, null,downloadUrl.toString(), aspectRatio,isGroupJoined, null);
         }
 
         return LocalBroadcastManager.getInstance(getApplicationContext())
