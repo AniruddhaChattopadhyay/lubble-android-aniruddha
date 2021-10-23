@@ -32,9 +32,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.freshchat.consumer.sdk.Freshchat;
@@ -70,25 +70,18 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.chat.BlockedChatsActiv;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
-import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.feed_groups.FeedExploreActiv;
-import in.lubble.app.feed_groups.FeedGroupsFrag;
-import in.lubble.app.feed_user.FeedCombinedFragment;
-import in.lubble.app.feed_user.FeedFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.ChatGroupListActivity;
 import in.lubble.app.groups.ChatSearchListener;
-import in.lubble.app.groups.GroupsCombinedFrag;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.ItemListActiv;
-import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.MainUtils;
@@ -417,32 +410,27 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
         bottomNavigation = findViewById(R.id.navigation);
-        NavHostFragment navHostFragment = (NavHostFragment)getSupportFragmentManager()
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
-        NavigationUI.setupWithNavController(bottomNavigation,
-                navHostFragment.getNavController());
+        NavController navController = navHostFragment.getNavController();
 
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupWithNavController(
-                 bottomNavigation,navController);
-        //bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
         bottomNavigation.getMenu().clear();
 
         String lubbleId = LubbleSharedPrefs.getInstance().getLubbleId();
-        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId)) {
+        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId) || BuildConfig.DEBUG) {
             // for existing users show chat-first menu
+            navController.setGraph(R.navigation.nav_graph_chats);
             bottomNavigation.inflateMenu(R.menu.navigation_chat_n_feed);
-            switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
             if (isNewUserInThisLubble) {
                 // new signup
                 ExploreActiv.open(this, true);
             }
         } else {
+            navController.setGraph(R.navigation.nav_graph);
             // Feed-first menu for new n'hoods
             bottomNavigation.inflateMenu(R.menu.navigation_menu_feed);
-            //switchFrag(FeedFrag.newInstance());
             if (isNewUserInThisLubble) {
                 // new signup; open Feed Explore
                 startActivityForResult(FeedExploreActiv.getIntent(MainActivity.this, true, false), REQ_CODE_JOIN_GROUPS);
@@ -451,6 +439,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 fetchNewFeedUserStatus();
             }
         }
+        NavigationUI.setupWithNavController(bottomNavigation, navController);
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));

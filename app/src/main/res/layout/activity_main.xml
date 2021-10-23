@@ -19,6 +19,17 @@
             android:id="@+id/lubble_toolbar"
             layout="@layout/lubble_toolbar" />
 
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/navigation"
+            android:layout_below="@id/lubble_toolbar"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_graph_chats"
+            />
+
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/navigation"
             android:layout_width="match_parent"
@@ -32,23 +43,6 @@
             app:itemTextColor="@color/bottom_nav_selector"
             app:labelVisibilityMode="labeled"
             app:menu="@menu/navigation_chat_n_feed" />
-
-        <fragment
-            android:id="@+id/nav_host_fragment"
-            android:name="androidx.navigation.fragment.NavHostFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/navigation"
-            android:layout_below="@id/lubble_toolbar"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/nav_graph"
-            />
-        <!--        <FrameLayout-->
-<!--            android:id="@+id/tv_book_author"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:layout_above="@id/navigation"-->
-<!--            android:layout_below="@id/lubble_toolbar" />-->
 
         <ImageView
             android:layout_width="match_parent"

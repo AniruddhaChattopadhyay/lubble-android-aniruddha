@@ -41,7 +41,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -106,18 +105,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private Trace groupTrace;
     private int queryCounter = 0;
     private boolean isPublicGroupsLoading;
-    private boolean isNewUser = true;
-    private Map<String, ?> newUserGroupsMap;
 
     public GroupListFragment() {
+        // Required empty public constructor
     }
 
-    public static GroupListFragment newInstance(boolean isNewUserInThisLubble) {
-        GroupListFragment groupListFragment = new GroupListFragment();
-        Bundle bundle = new Bundle();
-        bundle.putBoolean("isNewUserInThisLubble", isNewUserInThisLubble);
-        groupListFragment.setArguments(bundle);
-        return groupListFragment;
+    public static GroupListFragment newInstance() {
+        return new GroupListFragment();
     }
 
     @Override
@@ -144,8 +138,6 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         tabLayout = view.findViewById(R.id.tab_dots);
         viewPager.setClipChildren(false);
         viewPager.setOffscreenPageLimit(4);
-
-        isNewUser = getArguments().getBoolean("isNewUserInThisLubble", false);
 
         groupInvitedByMap = new HashMap<>();
         userGroupDataMap = new HashMap<>();

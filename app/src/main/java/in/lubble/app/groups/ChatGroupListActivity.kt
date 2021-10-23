@@ -30,7 +30,7 @@ class ChatGroupListActivity : BaseActivity() {
         title = LubbleSharedPrefs.getInstance().lubbleName + " Chats"
 
         supportFragmentManager.beginTransaction()
-                .replace(R.id.container, GroupsCombinedFrag.newInstance(false))
+                .replace(R.id.container, GroupsCombinedFrag.newInstance())
                 .commitNow()
     }
 
