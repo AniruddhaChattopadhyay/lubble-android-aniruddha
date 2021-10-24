@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,10 +28,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -90,6 +89,8 @@ import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import it.sephiroth.android.library.xtooltip.ClosePolicy;
+import it.sephiroth.android.library.xtooltip.Tooltip;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -427,6 +428,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 // new signup
                 ExploreActiv.open(this, true);
             }
+            showFeedTooltip();
         } else {
             navController.setGraph(R.navigation.nav_graph);
             // Feed-first menu for new n'hoods
@@ -452,7 +454,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 overridePendingTransition(R.anim.slide_in_from_top, R.anim.none);
             }
         });
-        //showBottomNavBadge();
         fetchAndPersistAppFeatures();
         initFirebaseRemoteConfig();
         initDrawer();
@@ -748,11 +749,22 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
     }
 
-    private void showBottomNavBadge() {
+    private void showFeedTooltip() {
         if (!LubbleSharedPrefs.getInstance().getIsFeedVisited()) {
-            BadgeDrawable badge = bottomNavigation.getOrCreateBadge(R.id.navigation_feed);
-            badge.setBackgroundColor(ContextCompat.getColor(this, R.color.md_yellow_600));
-            badge.setVisible(true);
+            BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+            View feedView = bottomNavigationMenuView.getChildAt(1);
+            feedView.post(() -> {
+                Tooltip tooltip = new Tooltip.Builder(MainActivity.this)
+                        .anchor(feedView, 0, -UiUtils.dpToPx(16), false)
+                        .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
+                        .showDuration(45000)
+                        .overlay(true)
+                        .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
+                        .styleId(R.style.FeedTooltipLayout)
+                        .text("NEW: View nearby posts")
+                        .create();
+                tooltip.show(feedView, Tooltip.Gravity.TOP, true);
+            });
         }
     }
 
@@ -841,7 +853,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
         showRatingsDialog();
-        showBottomNavBadge();
     }
 
     @Override
@@ -1061,11 +1072,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
         }
-    }
-
-    public void removeFeedBadge() {
-        bottomNavigation.removeBadge(R.id.navigation_feed);
-        LubbleSharedPrefs.getInstance().setIsFeedVisited(true);
     }
 
     public void removeServicesBadge() {
