@@ -69,6 +69,9 @@ buildscript {
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
+    maven{
+        url 'https://sdk.uxcam.com/android/'
+    }
     mavenCentral()
 }
 
@@ -119,6 +122,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.7'
     implementation "androidx.work:work-runtime:2.5.0"
     implementation 'org.jsoup:jsoup:1.13.1'
+    implementation 'com.uxcam:uxcam:3.3.6@aar'
     // Retrofit & OkHttp
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.clevertap.android:clevertap-android-sdk:4.1.1'

@@ -18,7 +18,9 @@ import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.segment.analytics.Analytics;
+import com.uxcam.UXCam;
 
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.database.DbSingleton;
@@ -30,6 +32,8 @@ import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
 
 import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
+import static in.lubble.app.Constants.UXCAM_DEV_CHAABI;
+import static in.lubble.app.Constants.UXCAM_PROD_CHAABI;
 
 /**
  * Created by ishaan on 20/1/18.
@@ -135,6 +139,13 @@ public class LubbleApp extends MultiDexApplication {
         StreamAnalytics streamAnalytics = StreamAnalyticsImpl.getInstance(auth);
         streamAnalytics.setUserId(FirebaseAuth.getInstance().getUid());
         streamAnalytics.setDebug(BuildConfig.DEBUG);*/
+
+        UXCam.startWithKey(BuildConfig.DEBUG ? UXCAM_DEV_CHAABI : UXCAM_PROD_CHAABI);
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_UXCAM_ENABLED)) {
+            UXCam.optInOverall();
+        } else {
+            UXCam.optOutOverall();
+        }
     }
 
     public static LubbleApp getAppContext() {
