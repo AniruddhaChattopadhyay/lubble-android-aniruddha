@@ -183,7 +183,7 @@ public class FeedPostFrag extends Fragment {
         try {
             progressBar.setVisibility(View.VISIBLE);
             commentRecyclerView.showShimmerAdapter();
-            FeedServices.getTimelineClient().flatFeed("timeline")
+            FeedServices.getTimelineClient().flatFeed("timeline", userId)
                     .getEnrichedActivities(
                             new Limit(1), new Filter().idLessThanEqual(postId),
                             new EnrichmentFlags()
