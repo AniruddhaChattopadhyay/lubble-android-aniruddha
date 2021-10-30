@@ -755,7 +755,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             View feedView = bottomNavigationMenuView.getChildAt(1);
             feedView.post(() -> {
                 Tooltip tooltip = new Tooltip.Builder(MainActivity.this)
-                        .anchor(feedView, 0, -UiUtils.dpToPx(16), false)
+                        .anchor(feedView, 0, 0, false)
                         .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
                         .showDuration(45000)
                         .overlay(true)
