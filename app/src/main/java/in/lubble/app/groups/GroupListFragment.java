@@ -530,7 +530,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     userGroupDataMap.put(dataSnapshot.getKey(), userGroupData);
                     if (userGroupData.isJoined()) {
                         adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                    } else {
+                    } else if (userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() > 0) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
                         //syncInvitedGroups(dataSnapshot.getKey());
                         adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
