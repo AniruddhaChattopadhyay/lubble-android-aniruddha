@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -137,7 +139,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         viewPager = view.findViewById(R.id.viewpager);
         tabLayout = view.findViewById(R.id.tab_dots);
         viewPager.setClipChildren(false);
-        viewPager.setOffscreenPageLimit(4);
+        viewPager.setSaveEnabled(false);
 
         groupInvitedByMap = new HashMap<>();
         userGroupDataMap = new HashMap<>();
