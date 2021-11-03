@@ -4,6 +4,8 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.Menu;
@@ -12,9 +14,15 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
+import androidx.palette.graphics.Palette;
 
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -36,6 +44,7 @@ import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.UiUtils;
 import io.getstream.cloud.CloudFlatFeed;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -77,9 +86,32 @@ public class GroupFeedActivity extends BaseActivity {
             collapsingToolbarLayout.setTitle(feedGroupData.getName());
             ImageView imageView = findViewById(R.id.collapsing_toolbar_feed_group_background);
             GlideApp.with(this)
+                    .asBitmap()
                     .load(feedGroupData.getPhotoUrl())
                     .error(R.drawable.ic_circle_group_24dp)
-                    .into(imageView);
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            Palette.from(resource)
+                                    .maximumColorCount(8)
+                                    .addFilter(UiUtils.DEFAULT_FILTER)
+                                    .generate(p -> {
+                                        // Use generated instance
+                                        Drawable normalDrawable = ContextCompat.getDrawable(GroupFeedActivity.this, R.drawable.rounded_rect_gray);
+                                        if (normalDrawable != null && p != null) {
+                                            Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
+                                            DrawableCompat.setTint(wrapDrawable, p.getDominantColor(ContextCompat.getColor(GroupFeedActivity.this, R.color.fb_color)));
+                                            DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
+                                            imageView.setBackground(wrapDrawable);
+                                        }
+                                        imageView.setImageBitmap(resource);
+                                    });
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                        }
+                    });
             singleGroupFeed = SingleGroupFeed.newInstance(feedGroupData.getFeedName());
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.container, singleGroupFeed)

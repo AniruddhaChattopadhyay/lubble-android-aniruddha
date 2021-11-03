@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,7 +23,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -78,7 +76,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     private MaterialButton postBtn;
     private MaterialButton postQandABtn;
     private LinearLayout postBtnRv;
-    private ShimmerRecyclerView feedRV;
+    private RecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
     private TextView emptyHintTv;
@@ -131,15 +129,14 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
         postBtn.setOnClickListener(v -> {
             startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
         });
-        postQandABtn.setOnClickListener(v->{
+        postQandABtn.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), AddPostForFeed.class);
-            intent.putExtra(AddPostForFeed.QnAString,true);
+            intent.putExtra(AddPostForFeed.QnAString, true);
             startActivityForResult(intent, REQUEST_CODE_NEW_POST);
         });
 
         layoutManager = new LinearLayoutManager(getContext());
         feedRV.setLayoutManager(layoutManager);
-        feedRV.showShimmerAdapter();
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 
@@ -251,15 +248,10 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     public void onRefreshLoading(@NotNull LoadState refresh) {
         if (refresh == LoadState.Loading.INSTANCE) {
             if (!swipeRefreshLayout.isRefreshing()) {
-                //show shimmer only on first load, not when user pulled to refresh
-                feedRV.showShimmerAdapter();
+                //show loader only on first load, not when user pulled to refresh
+                swipeRefreshLayout.setRefreshing(true);
             }
         } else {
-            if (feedRV.getActualAdapter() != feedRV.getAdapter()) {
-                // recycler view is currently holding shimmer adapter so hide it
-                // without this condition pagination will break!!
-                feedRV.hideShimmerAdapter();
-            }
             swipeRefreshLayout.setRefreshing(false);
         }
     }

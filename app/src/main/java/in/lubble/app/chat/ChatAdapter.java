@@ -483,15 +483,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     Palette.from(resource)
                             .maximumColorCount(8)
                             .addFilter(UiUtils.DEFAULT_FILTER)
-                            .generate(new Palette.PaletteAsyncListener() {
-                                public void onGenerated(Palette p) {
-                                    // Use generated instance
-                                    Drawable normalDrawable = context.getResources().getDrawable(R.drawable.rounded_rect_gray);
-                                    Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
-                                    DrawableCompat.setTint(wrapDrawable, p.getDarkVibrantColor(ContextCompat.getColor(context, R.color.fb_color)));
-                                    DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
-                                    linkContainer.setBackground(wrapDrawable);
-                                }
+                            .generate(p -> {
+                                // Use generated instance
+                                Drawable normalDrawable = ContextCompat.getDrawable(context, R.drawable.rounded_rect_gray);
+                                Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
+                                DrawableCompat.setTint(wrapDrawable, p.getDarkVibrantColor(ContextCompat.getColor(context, R.color.fb_color)));
+                                DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
+                                linkContainer.setBackground(wrapDrawable);
                             });
                 }
 
