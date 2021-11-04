@@ -214,12 +214,29 @@
             android:paddingRight="8dp"
             android:paddingBottom="8dp">
 
-            <ImageView
-                android:id="@+id/like_imageview"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                app:srcCompat="@drawable/ic_favorite_border_24dp" />
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center">
 
+                <ImageView
+                    android:id="@+id/like_imageview"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    app:srcCompat="@drawable/ic_favorite_border_24dp" />
+
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/anim_feed_like"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="center"
+                    android:scaleType="centerCrop"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="false"
+                    app:lottie_rawRes="@raw/feed_like_anim"
+                    android:visibility="gone"
+                    tools:visibility="visible"/>
+            </RelativeLayout>
             <TextView
                 android:id="@+id/tv_like"
                 android:layout_width="wrap_content"
