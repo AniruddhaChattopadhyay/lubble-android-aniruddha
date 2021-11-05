@@ -185,7 +185,7 @@ public class FeedPostFrag extends Fragment {
             commentRecyclerView.showShimmerAdapter();
             FeedServices.getTimelineClient().flatFeed("timeline", userId)
                     .getEnrichedActivities(
-                            new Limit(1), new Filter().idLessThanEqual(postId),
+                            new Limit(1), new Filter().idGreaterThanEqual(postId),
                             new EnrichmentFlags()
                                     .withReactionCounts()
                                     .withOwnReactions()
