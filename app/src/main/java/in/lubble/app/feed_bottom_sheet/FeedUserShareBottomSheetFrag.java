@@ -12,7 +12,6 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
 import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,6 +36,7 @@ import in.lubble.app.user_search.OnUserSelectedListener;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrlForFeedGroup;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntentForFeedGroup;
 
 
@@ -63,7 +63,7 @@ public class FeedUserShareBottomSheetFrag extends BottomSheetDialogFragment {
     private LinearLayout inviteLinksContainer;
     private View selectedMembersDiv;
 
-    public FeedUserShareBottomSheetFrag( String feedGroupId, FeedGroupData feedGroupData) {
+    public FeedUserShareBottomSheetFrag(String feedGroupId, FeedGroupData feedGroupData) {
         // Required empty public constructor
         this.feedGroupId = feedGroupId;
         //lubbleId = lubbleId;
@@ -88,7 +88,10 @@ public class FeedUserShareBottomSheetFrag extends BottomSheetDialogFragment {
         moreContainer = view.findViewById(R.id.container_more);
         copyLinkContainer = view.findViewById(R.id.container_copy_link);
         sharingProgressDialog = new ProgressDialog(getContext());
+
+        generateBranchUrlForFeedGroup(requireContext(), linkCreateListener, feedGroupData);
         initClickHandlers(feedGroupData);
+
         return view;
     }
 
