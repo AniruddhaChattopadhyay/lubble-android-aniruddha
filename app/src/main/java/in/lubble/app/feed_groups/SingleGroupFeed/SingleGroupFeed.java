@@ -357,7 +357,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     @Override
     public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
-        // do nothing
+        GroupFeedActivity.open(requireContext(), feedGroupData);
     }
 
     @Override
