@@ -81,9 +81,7 @@ public class FeedCombinedFragment extends Fragment {
             fetchNewFeedUserStatus();
         }
 
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) requireActivity()).removeFeedBadge();
-        }
+        LubbleSharedPrefs.getInstance().setIsFeedVisited(true);
         return view;
     }
 

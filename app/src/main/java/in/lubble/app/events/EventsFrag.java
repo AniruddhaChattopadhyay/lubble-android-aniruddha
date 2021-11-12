@@ -70,21 +70,16 @@ public class EventsFrag extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new EventsAdapter(getContext());
+        adapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
+
         recyclerView.setAdapter(adapter);
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                NewEventActivity.open(getContext());
-            }
-        });
+        fab.setOnClickListener(v -> NewEventActivity.open(getContext()));
 
         LubbleSharedPrefs.getInstance().setEventSet(null);
-        adapter.clear();
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -140,7 +135,6 @@ public class EventsFrag extends Fragment {
     public void onResume() {
         super.onResume();
         endpoints = ServiceGenerator.createService(Endpoints.class);
-        //endpoints = retrofit.create(Endpoints.class);
 
         String maintenanceText = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_TEXT);
         String maintenanceImageUrl = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_IMG);

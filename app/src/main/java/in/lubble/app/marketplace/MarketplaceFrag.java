@@ -106,7 +106,7 @@ public class MarketplaceFrag extends Fragment {
         pagerContainer = view.findViewById(R.id.pager_container);
         viewPager = view.findViewById(R.id.viewpager);
         viewPager.setClipChildren(false);
-        viewPager.setOffscreenPageLimit(4);
+        viewPager.setSaveEnabled(false);
 
         cat1cv = view.findViewById(R.id.layout_cat1);
         cat2cv = view.findViewById(R.id.layout_cat2);

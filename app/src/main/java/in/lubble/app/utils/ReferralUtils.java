@@ -20,7 +20,6 @@ import io.branch.indexing.BranchUniversalObject;
 import io.branch.referral.Branch;
 import io.branch.referral.util.ContentMetadata;
 import io.branch.referral.util.LinkProperties;
-import io.getstream.client.Feed;
 
 public class ReferralUtils {
 
@@ -106,9 +105,9 @@ public class ReferralUtils {
                 .setLocalIndexMode(BranchUniversalObject.CONTENT_INDEX_MODE.PUBLIC)
                 .setContentMetadata(new ContentMetadata().addCustomMetadata("referrer_uid", FirebaseAuth.getInstance().getUid())
                         .addCustomMetadata("feed_group_feed_name", feedGroupData.getFeedName())
-                        .addCustomMetadata("feed_group_photo_url",feedGroupData.getPhotoUrl())
-                        .addCustomMetadata("feed_group_name",feedGroupData.getName())
-                        );
+                        .addCustomMetadata("feed_group_photo_url", feedGroupData.getPhotoUrl())
+                        .addCustomMetadata("feed_group_name", feedGroupData.getName())
+                );
 
         final LinkProperties linkProperties = new LinkProperties()
                 .setChannel("Android")
@@ -147,7 +146,7 @@ public class ReferralUtils {
             sharingProgressDialog.setTitle("Generating Invite Link");
             sharingProgressDialog.setMessage(context.getString(R.string.all_please_wait));
             sharingProgressDialog.show();
-            generateBranchUrlForFeedGroup(context,callback,feedGroupData);
+            generateBranchUrlForFeedGroup(context, callback, feedGroupData);
             return null;
         } else {
             // URL is ready to be wrapped in an Intent

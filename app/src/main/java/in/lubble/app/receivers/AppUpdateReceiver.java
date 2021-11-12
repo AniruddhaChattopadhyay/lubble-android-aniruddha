@@ -6,9 +6,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.uxcam.UXCam;
+
 import java.io.File;
 
 import in.lubble.app.BuildConfig;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.utils.FileUtils;
@@ -40,6 +44,13 @@ public class AppUpdateReceiver extends BroadcastReceiver {
                 Log.d(TAG, "is_deleted: " + isDeleted);
                 Analytics.triggerEvent(AnalyticsEvents.RTDB_PRUNED, bundle1, context);
             }
+        }
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        if (firebaseAuth.getUid() != null && BuildConfig.VERSION_CODE < 310) {
+            UXCam.setUserIdentity(firebaseAuth.getUid());
+            UXCam.setUserProperty("uid", firebaseAuth.getUid());
+            UXCam.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+            UXCam.setUserProperty("name", firebaseAuth.getCurrentUser().getDisplayName());
         }
     }
 }

@@ -27,19 +27,16 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.clevertap.android.sdk.CleverTapAPI;
 import com.codemybrainsout.ratingdialog.RatingDialog;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatMessage;
-import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -70,25 +67,18 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.chat.BlockedChatsActiv;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
-import in.lubble.app.events.EventsFrag;
 import in.lubble.app.explore.ExploreActiv;
 import in.lubble.app.feed_groups.FeedExploreActiv;
-import in.lubble.app.feed_groups.FeedGroupsFrag;
-import in.lubble.app.feed_user.FeedCombinedFragment;
-import in.lubble.app.feed_user.FeedFrag;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.groups.ChatGroupListActivity;
 import in.lubble.app.groups.ChatSearchListener;
-import in.lubble.app.groups.GroupsCombinedFrag;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
 import in.lubble.app.marketplace.ItemListActiv;
-import in.lubble.app.marketplace.MarketplaceFrag;
 import in.lubble.app.models.ProfileInfo;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
-import in.lubble.app.quiz.GamesFrag;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.MainUtils;
@@ -97,6 +87,8 @@ import in.lubble.app.utils.UiUtils;
 import in.lubble.app.utils.UserUtils;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import it.sephiroth.android.library.xtooltip.ClosePolicy;
+import it.sephiroth.android.library.xtooltip.Tooltip;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -111,6 +103,7 @@ import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
 import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
 import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
 import static in.lubble.app.Constants.IS_TIME_SHOWN;
+import static in.lubble.app.Constants.IS_UXCAM_ENABLED;
 import static in.lubble.app.Constants.MAP_BTN_URL;
 import static in.lubble.app.Constants.MAP_HTML;
 import static in.lubble.app.Constants.MAP_SHARE_TEXT;
@@ -417,32 +410,28 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         branch.setIdentity(FirebaseAuth.getInstance().getUid());
 
         bottomNavigation = findViewById(R.id.navigation);
-        NavHostFragment navHostFragment = (NavHostFragment)getSupportFragmentManager()
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
-        NavigationUI.setupWithNavController(bottomNavigation,
-                navHostFragment.getNavController());
+        NavController navController = navHostFragment.getNavController();
 
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-        NavigationUI.setupWithNavController(
-                 bottomNavigation,navController);
-        //bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         addDebugActivOpener(toolbar);
 
         bottomNavigation.getMenu().clear();
 
         String lubbleId = LubbleSharedPrefs.getInstance().getLubbleId();
-        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId)) {
+        if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId) || BuildConfig.DEBUG) {
             // for existing users show chat-first menu
+            navController.setGraph(R.navigation.nav_graph_chats);
             bottomNavigation.inflateMenu(R.menu.navigation_chat_n_feed);
-            switchFrag(GroupsCombinedFrag.newInstance(isNewUserInThisLubble));
             if (isNewUserInThisLubble) {
                 // new signup
                 ExploreActiv.open(this, true);
             }
+            showFeedTooltip();
         } else {
+            navController.setGraph(R.navigation.nav_graph);
             // Feed-first menu for new n'hoods
             bottomNavigation.inflateMenu(R.menu.navigation_menu_feed);
-            //switchFrag(FeedFrag.newInstance());
             if (isNewUserInThisLubble) {
                 // new signup; open Feed Explore
                 startActivityForResult(FeedExploreActiv.getIntent(MainActivity.this, true, false), REQ_CODE_JOIN_GROUPS);
@@ -451,6 +440,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 fetchNewFeedUserStatus();
             }
         }
+        NavigationUI.setupWithNavController(bottomNavigation, navController);
 
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         lbm.registerReceiver(receiver, new IntentFilter(LOGOUT_ACTION));
@@ -463,7 +453,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 overridePendingTransition(R.anim.slide_in_from_top, R.anim.none);
             }
         });
-        //showBottomNavBadge();
         fetchAndPersistAppFeatures();
         initFirebaseRemoteConfig();
         initDrawer();
@@ -749,6 +738,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(IS_TIME_SHOWN, true);
         map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
         map.put(WIKI_URL, "https://lubble.in/neighbourhoods/");
+        map.put(IS_UXCAM_ENABLED, true);
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaultsAsync(map);
@@ -759,11 +749,22 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
     }
 
-    private void showBottomNavBadge() {
+    private void showFeedTooltip() {
         if (!LubbleSharedPrefs.getInstance().getIsFeedVisited()) {
-            BadgeDrawable badge = bottomNavigation.getOrCreateBadge(R.id.navigation_feed);
-            badge.setBackgroundColor(ContextCompat.getColor(this, R.color.md_yellow_600));
-            badge.setVisible(true);
+            BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
+            View feedView = bottomNavigationMenuView.getChildAt(1);
+            feedView.post(() -> {
+                Tooltip tooltip = new Tooltip.Builder(MainActivity.this)
+                        .anchor(feedView, 0, 0, false)
+                        .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
+                        .showDuration(45000)
+                        .overlay(true)
+                        .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
+                        .styleId(R.style.FeedTooltipLayout)
+                        .text("NEW: View nearby posts")
+                        .create();
+                tooltip.show(feedView, Tooltip.Gravity.TOP, true);
+            });
         }
     }
 
@@ -852,7 +853,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
         });
         showRatingsDialog();
-        showBottomNavBadge();
     }
 
     @Override
@@ -871,6 +871,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 try {
+                    LubbleSharedPrefs.getInstance().setUserFlair(profileInfo.getBadge());
                     GlideApp.with(MainActivity.this)
                             .load(profileInfo == null ? "" : profileInfo.getThumbnail())
                             .circleCrop()
@@ -1022,41 +1023,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
         getUserInfoRef(firebaseAuth.getUid()).removeEventListener(dpEventListener);
     }
-//
-//    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-//            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-//
-//        @Override
-//        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-//            switch (item.getItemId()) {
-//                case R.id.navigation_chats:
-//                    switchFrag(GroupsCombinedFrag.newInstance(false));
-//                    return true;
-//                case R.id.navigation_feed:
-//                    switchFrag(FeedCombinedFragment.newInstance());
-//                    return true;
-//                case R.id.navigation_feed_home:
-//                    switchFrag(FeedFrag.newInstance());
-//                    return true;
-//                case R.id.navigation_feed_groups:
-//                    switchFrag(FeedGroupsFrag.newInstance());
-//                    return true;
-//                case R.id.navigation_market:
-//                    switchFrag(MarketplaceFrag.newInstance());
-//                    return true;
-//                /*case R.id.navigation_map:
-//                    switchFrag(MapFragment.newInstance());
-//                    return true;*/
-//                case R.id.navigation_events:
-//                    switchFrag(EventsFrag.newInstance());
-//                    return true;
-//                case R.id.navigation_fun:
-//                    switchFrag(GamesFrag.newInstance());
-//                    return true;
-//            }
-//            return false;
-//        }
-//    };
 
     public void setRefreshListener(SwipeRefreshLayout.OnRefreshListener listener) {
         this.feedRefreshListener = listener;
@@ -1085,11 +1051,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         return true;
     }
 
-    private void switchFrag(Fragment fragment) {
-        FragmentManager fm = getSupportFragmentManager();
-        fm.beginTransaction().replace(R.id.tv_book_author, fragment).commitAllowingStateLoss();
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -1104,10 +1065,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         return true;
     }
 
-    private void openProfile() {
-        ProfileActivity.open(this, FirebaseAuth.getInstance().getUid());
-    }
-
     public void removeMplaceBadge() {
         BottomNavigationMenuView bottomNavigationMenuView = (BottomNavigationMenuView) bottomNavigation.getChildAt(0);
         View v = bottomNavigationMenuView.getChildAt(2);
@@ -1115,11 +1072,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         if (itemView != null && itemView.getChildAt(2) != null) {
             itemView.removeViewAt(2);
         }
-    }
-
-    public void removeFeedBadge() {
-        bottomNavigation.removeBadge(R.id.navigation_feed);
-        LubbleSharedPrefs.getInstance().setIsFeedVisited(true);
     }
 
     public void removeServicesBadge() {
@@ -1177,14 +1129,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         } else {
             super.onBackPressed();
         }
-
-//        if(bottomNavigation.getSelectedItemId()==R.id.navigation_feed_home){
-//            super.onBackPressed();
-//            finish();
-//        }
-//        else{
-//            bottomNavigation.setSelectedItemId(R.id.navigation_feed_home);
-//        }
     }
 
     @Override

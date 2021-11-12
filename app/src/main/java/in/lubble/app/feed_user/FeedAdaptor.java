@@ -149,8 +149,18 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 bundle.putString("author_uid", activity.getActor().getID());
                 Analytics.triggerEvent(AnalyticsEvents.POST_LINK_CLICKED, bundle, context);
             });
-            if (extras.containsKey("aspectRatio") && extras.get("aspectRatio") instanceof Double) {
-                float aspectRatio = ((Double) extras.get("aspectRatio")).floatValue();
+            if (extras.containsKey("aspectRatio")) {
+                float aspectRatio;
+                Object aspectRatioObj = extras.get("aspectRatio");
+                if (aspectRatioObj instanceof Double) {
+                    aspectRatio = ((Double) aspectRatioObj).floatValue();
+                } else if (aspectRatioObj instanceof Float) {
+                    aspectRatio = ((Float) aspectRatioObj);
+                } else if (aspectRatioObj instanceof Integer) {
+                    aspectRatio = ((Integer) aspectRatioObj).floatValue();
+                } else {
+                    aspectRatio = 0;
+                }
                 if (aspectRatio > 0) {
                     holder.itemView.measure(
                             View.MeasureSpec.makeMeasureSpec(itemWidth, View.MeasureSpec.EXACTLY),

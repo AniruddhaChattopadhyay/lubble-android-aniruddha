@@ -101,7 +101,6 @@ import in.lubble.app.firebase.FirebaseStorageHelper;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.ChatData;
 import in.lubble.app.models.ChoiceData;
-import in.lubble.app.models.GroupData;
 import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.models.ProfileInfo;
@@ -484,15 +483,13 @@ public class ChatAdapter extends RecyclerView.Adapter {
                     Palette.from(resource)
                             .maximumColorCount(8)
                             .addFilter(UiUtils.DEFAULT_FILTER)
-                            .generate(new Palette.PaletteAsyncListener() {
-                                public void onGenerated(Palette p) {
-                                    // Use generated instance
-                                    Drawable normalDrawable = context.getResources().getDrawable(R.drawable.rounded_rect_gray);
-                                    Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
-                                    DrawableCompat.setTint(wrapDrawable, p.getDarkVibrantColor(ContextCompat.getColor(context, R.color.fb_color)));
-                                    DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
-                                    linkContainer.setBackground(wrapDrawable);
-                                }
+                            .generate(p -> {
+                                // Use generated instance
+                                Drawable normalDrawable = ContextCompat.getDrawable(context, R.drawable.rounded_rect_gray);
+                                Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
+                                DrawableCompat.setTint(wrapDrawable, p.getDarkVibrantColor(ContextCompat.getColor(context, R.color.fb_color)));
+                                DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
+                                linkContainer.setBackground(wrapDrawable);
                             });
                 }
 
@@ -1167,42 +1164,44 @@ public class ChatAdapter extends RecyclerView.Adapter {
     }
 
     private void showDpAndName(final RecvdChatViewHolder recvdChatViewHolder, ChatData chatData) {
-        if (profileDataMap.containsKey(chatData.getAuthorUid())) {
-            recvdChatViewHolder.authorNameTv.setVisibility(VISIBLE);
-            recvdChatViewHolder.dpIv.setVisibility(VISIBLE);
-            final ProfileData profileData = profileDataMap.get(chatData.getAuthorUid());
-            final ProfileInfo profileInfo = profileData.getInfo();
-            String dpUrl;
-            if(chatData.getAuthorDpUrl()!=null){
-                dpUrl = chatData.getAuthorDpUrl();
-            }
-            else{
-                dpUrl = profileInfo.getThumbnail();
-            }
-            glide.load(dpUrl)
+        recvdChatViewHolder.badgeTextTv.setVisibility(GONE);
+        if (chatData.getAuthorName() != null) {
+            // chatData object contains profile info
+            recvdChatViewHolder.authorNameTv.setText(chatData.getAuthorName());
+            glide.load(chatData.getAuthorDpUrl())
                     .circleCrop()
                     .placeholder(R.drawable.ic_account_circle_black_no_padding)
                     .error(R.drawable.ic_account_circle_black_no_padding)
                     .into(recvdChatViewHolder.dpIv);
-            if(chatData.getAuthorName()!=null) {
-                recvdChatViewHolder.authorNameTv.setText(chatData.getAuthorName());
-            }
-            else{
-                recvdChatViewHolder.authorNameTv.setText(profileInfo.getName().split(" ")[0]);
-            }
-            recvdChatViewHolder.badgeTextTv.setVisibility(GONE);
-            if (!TextUtils.isEmpty(profileInfo.getBadge())) {
-//                String flair = !TextUtils.isEmpty(profileData.getGroupFlair()) ? profileData.getGroupFlair() : profileInfo.getBadge();
-                String flair = profileInfo.getBadge();
-                recvdChatViewHolder.editStatusLayout.setVisibility(VISIBLE);
-                recvdChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
-                recvdChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
-                recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
-            } else {
-                recvdChatViewHolder.editStatusLayout.setVisibility(GONE);
-            }
+
+            showFlair(recvdChatViewHolder, chatData.getFlair());
+        } else if (profileDataMap.containsKey(chatData.getAuthorUid())) {
+            // we have profile info in hashmap
+            recvdChatViewHolder.authorNameTv.setVisibility(VISIBLE);
+            recvdChatViewHolder.dpIv.setVisibility(VISIBLE);
+            final ProfileData profileData = profileDataMap.get(chatData.getAuthorUid());
+            final ProfileInfo profileInfo = profileData.getInfo();
+            glide.load(profileInfo.getThumbnail())
+                    .circleCrop()
+                    .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                    .error(R.drawable.ic_account_circle_black_no_padding)
+                    .into(recvdChatViewHolder.dpIv);
+            recvdChatViewHolder.authorNameTv.setText(profileInfo.getName().split(" ")[0]);
+
+            showFlair(recvdChatViewHolder, profileInfo.getBadge());
         } else {
             updateProfileInfoMap(getUserRef(chatData.getAuthorUid()), chatData.getAuthorUid(), recvdChatViewHolder.getAdapterPosition());
+        }
+    }
+
+    private void showFlair(RecvdChatViewHolder recvdChatViewHolder, String flair) {
+        if (!TextUtils.isEmpty(flair)) {
+            recvdChatViewHolder.editStatusLayout.setVisibility(VISIBLE);
+            recvdChatViewHolder.badgeTextTv.setVisibility(VISIBLE);
+            recvdChatViewHolder.badgeTextTv.setText("\u2022 " + flair);
+            recvdChatViewHolder.badgeTextTv.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+        } else {
+            recvdChatViewHolder.editStatusLayout.setVisibility(GONE);
         }
     }
 

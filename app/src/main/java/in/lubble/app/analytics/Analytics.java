@@ -19,6 +19,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.segment.analytics.Properties;
 import com.segment.analytics.Traits;
+import com.uxcam.UXCam;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -50,6 +51,7 @@ public class Analytics {
         Bundle attributes = new Bundle();
         setupDefaultAttributes(context, attributes);
         com.segment.analytics.Analytics.with(context).screen(simpleName, bundleToSegmentProperties(attributes));
+        UXCam.tagScreenName(simpleName);
     }
 
     public static void triggerScreenEvent(Context context, Object className, Bundle attributes) {
@@ -58,6 +60,7 @@ public class Analytics {
         triggerEvent(simpleName, attributes, context);
         FirebaseAnalytics.getInstance(context).setCurrentScreen((Activity) context, simpleName, null);
         com.segment.analytics.Analytics.with(context).screen(simpleName, bundleToSegmentProperties(attributes));
+        UXCam.tagScreenName(simpleName);
     }
 
     public static void triggerEvent(String title, Context context) {
@@ -67,6 +70,7 @@ public class Analytics {
             FirebaseAnalytics.getInstance(context).logEvent(title, attributes);
             //CleverTapAPI.getDefaultInstance(context).pushEvent(title, bundleToMap(attributes));
             com.segment.analytics.Analytics.with(context).track(title, bundleToSegmentProperties(attributes));
+            UXCam.logEvent(title);
         }
     }
 
@@ -76,6 +80,7 @@ public class Analytics {
             FirebaseAnalytics.getInstance(context).logEvent(title, attributes);
             //CleverTapAPI.getDefaultInstance(context).pushEvent(title, bundleToMap(attributes));
             com.segment.analytics.Analytics.with(context).track(title, bundleToSegmentProperties(attributes));
+            UXCam.logEvent(title, bundleToMap(attributes));
         }
     }
 
@@ -87,6 +92,7 @@ public class Analytics {
         com.segment.analytics.Analytics.with(context).track("LOGIN", bundleToSegmentProperties(attributes));
         setUser(context);
         setAnalyticsUser(context);
+        UXCam.logEvent("LOGIN", bundleToMap(attributes));
     }
 
     public static void triggerSignUpEvent(Context context) {
@@ -97,6 +103,7 @@ public class Analytics {
         com.segment.analytics.Analytics.with(context).track("SIGNUP", bundleToSegmentProperties(attributes));
         setUser(context);
         setAnalyticsUser(context);
+        UXCam.logEvent("SIGNUP", bundleToMap(attributes));
     }
 
     private static void setUser(Context context) {
@@ -133,16 +140,7 @@ public class Analytics {
             //CleverTapAPI.getDefaultInstance(context).pushEvent("LOGOUT", bundleToMap(attributes));
             com.segment.analytics.Analytics.with(context).track("LOGOUT", bundleToSegmentProperties(attributes));
             unSetUser(context);
-        }
-    }
-    public static void triggerFeedInviteClicked(Context context){
-        if (context != null) {
-            Bundle attributes = new Bundle();
-            setupDefaultAttributes(context, attributes);
-            FirebaseAnalytics firebaseAnalytics = FirebaseAnalytics.getInstance(context);
-            firebaseAnalytics.logEvent(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, attributes);
-            com.segment.analytics.Analytics.with(context).track(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, bundleToSegmentProperties(attributes));
-            unSetUser(context);
+            UXCam.logEvent("LOGOUT", bundleToMap(attributes));
         }
     }
 
@@ -208,6 +206,10 @@ public class Analytics {
                 e.printStackTrace();
             }
             com.segment.analytics.Analytics.with(context).identify(FirebaseAuth.getInstance().getUid(), traits, null);
+            UXCam.setUserIdentity(firebaseAuth.getUid());
+            UXCam.setUserProperty("uid", firebaseAuth.getUid());
+            UXCam.setUserProperty("lubble_id", LubbleSharedPrefs.getInstance().getLubbleId());
+            UXCam.setUserProperty("name", currentUser.getDisplayName());
             /**
              * Upload installed apps list
              */

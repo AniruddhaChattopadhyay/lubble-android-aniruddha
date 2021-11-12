@@ -47,3 +47,5 @@
 # please KEEP ALL THE NAMES
 -keepnames class ** { *; }
 -keep class io.getstream.core.models.** { *; }
+-keep class com.uxcam.** { *; }
+-dontwarn com.uxcam.**

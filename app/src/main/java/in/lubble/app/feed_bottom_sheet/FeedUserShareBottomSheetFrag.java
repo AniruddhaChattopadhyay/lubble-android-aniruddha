@@ -12,7 +12,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +26,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import java.util.List;
 
 import in.lubble.app.LubbleApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
@@ -35,6 +36,7 @@ import in.lubble.app.user_search.OnUserSelectedListener;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrlForFeedGroup;
 import static in.lubble.app.utils.ReferralUtils.getReferralIntentForFeedGroup;
 
 
@@ -61,17 +63,12 @@ public class FeedUserShareBottomSheetFrag extends BottomSheetDialogFragment {
     private LinearLayout inviteLinksContainer;
     private View selectedMembersDiv;
 
-
-
-
-    public FeedUserShareBottomSheetFrag( String feedGroupId, FeedGroupData feedGroupData) {
+    public FeedUserShareBottomSheetFrag(String feedGroupId, FeedGroupData feedGroupData) {
         // Required empty public constructor
         this.feedGroupId = feedGroupId;
         //lubbleId = lubbleId;
         this.feedGroupData = feedGroupData;
     }
-
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -91,7 +88,10 @@ public class FeedUserShareBottomSheetFrag extends BottomSheetDialogFragment {
         moreContainer = view.findViewById(R.id.container_more);
         copyLinkContainer = view.findViewById(R.id.container_copy_link);
         sharingProgressDialog = new ProgressDialog(getContext());
+
+        generateBranchUrlForFeedGroup(requireContext(), linkCreateListener, feedGroupData);
         initClickHandlers(feedGroupData);
+
         return view;
     }
 
@@ -100,7 +100,9 @@ public class FeedUserShareBottomSheetFrag extends BottomSheetDialogFragment {
             Intent referralIntent = getReferralIntentForFeedGroup(getContext(), sharingUrl, sharingProgressDialog, feedGroupData, linkCreateListener);
             if (referralIntent != null) {
                 ClipboardManager clipboard = (ClipboardManager) LubbleApp.getAppContext().getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("lubble_share_link", sharingUrl);
+                ClipData clip = ClipData.newPlainText("lubble_share_link", Html.fromHtml(String.format(
+                        requireContext().getString(R.string.refer_msg_group), feedGroupData.getName(), LubbleSharedPrefs.getInstance().getLubbleName()
+                )) + sharingUrl);
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(requireContext(), "LINK COPIED", Toast.LENGTH_SHORT).show();
                 Analytics.triggerEvent(AnalyticsEvents.REFERRAL_COPY_LINK, getContext());
