@@ -12,6 +12,15 @@ public class FeedPostData implements Serializable {
     private String linkDesc;
     private String linkImageUrl;
     private String linkUrl;
+    private String vidUri;
+
+    public String getVidUri() {
+        return vidUri;
+    }
+
+    public void setVidUri(String vidUri) {
+        this.vidUri = vidUri;
+    }
 
     public String getImgUri() {
         return imgUri;
