@@ -58,10 +58,11 @@ public class LubbleSharedPrefs {
     private final String FEED_API_KEY = "FEED_API_KEY";
     private final String FEED_USER_TOKEN = "FEED_USER_TOKEN";
     private final String REPLY_BOTTOM_SHEET = "REPLY_BOTTOM_SHEET";
-    private final String CHECK_IF_FEED_GROUPS_JOINED= "CHECK_IF_FEED_GROUPS_JOINED";
+    private final String CHECK_IF_FEED_GROUPS_JOINED = "CHECK_IF_FEED_GROUPS_JOINED";
     private final String IS_FEED_VISITED = "IS_FEED_VISITED";
     private final String PROFILE_PIC_URL = "PROFILE_PIC_URL";
     private final String FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG = "FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG";
+    private final String USER_FLAIR = "USER_FLAIR";
 
     private LubbleSharedPrefs(Context context) {
         preferences = context.getSharedPreferences(LUBBLE_SHARED_PREFERENCE_KEY, Context.MODE_PRIVATE);
@@ -401,6 +402,7 @@ public class LubbleSharedPrefs {
     public boolean setFeedUserToken(String userToken) {
         return preferences.edit().putString(FEED_USER_TOKEN, userToken).commit();
     }
+
     @Nullable
     public String getReplyBottomSheet() {
         return preferences.getString(REPLY_BOTTOM_SHEET, null);
@@ -436,10 +438,19 @@ public class LubbleSharedPrefs {
     }
 
     public boolean getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG() {
-        return preferences.getBoolean(FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG,false);
+        return preferences.getBoolean(FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG, false);
     }
 
     public void setFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG() {
         preferences.edit().putBoolean(FEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG, true).apply();
     }
+
+    public String getUserFlair() {
+        return preferences.getString(USER_FLAIR, "");
+    }
+
+    public void setUserFlair(String flair) {
+        preferences.edit().putString(USER_FLAIR, flair).apply();
+    }
+
 }

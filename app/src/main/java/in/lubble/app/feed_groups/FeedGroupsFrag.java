@@ -9,13 +9,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
-import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +35,8 @@ import retrofit2.Response;
 
 public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListFragmentInteractionListener {
 
-    private ShimmerRecyclerView groupRecyclerView;
+    private RecyclerView groupRecyclerView;
+    private ProgressBar progressbar;
     private List<FeedGroupData> feedGroupDataList;
     private TextView joinedAllTv;
     private FeedGroupAdapter.OnListFragmentInteractionListener mListener;
@@ -74,12 +75,12 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
         titleTv = rootView.findViewById(R.id.tv_title);
         descTv = rootView.findViewById(R.id.tv_desc);
         groupRecyclerView = rootView.findViewById(R.id.feed_group_recyclerview);
+        progressbar = rootView.findViewById(R.id.progress_feed_groups);
         searchContainer = rootView.findViewById(R.id.container_search);
         searchEt = rootView.findViewById(R.id.et_search);
 
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         groupRecyclerView.setLayoutManager(layoutManager);
-        groupRecyclerView.showShimmerAdapter();
 
         searchEt.addTextChangedListener(new TextWatcher() {
             @Override
@@ -122,6 +123,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
     }
 
     private void getFeedGroups() {
+        progressbar.setVisibility(View.VISIBLE);
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         Call<List<FeedGroupData>> call = endpoints.getExploreFeedGroupList();
         call.enqueue(new Callback<List<FeedGroupData>>() {
@@ -138,10 +140,7 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
                         descTv.setVisibility(View.VISIBLE);
                     }
                 } else if (isAdded()) {
-                    if (groupRecyclerView.getActualAdapter() != groupRecyclerView.getAdapter()) {
-                        // recycler view is currently holding shimmer adapter so hide it
-                        groupRecyclerView.hideShimmerAdapter();
-                    }
+                    progressbar.setVisibility(View.GONE);
                     if (feedGroupDataList != null && feedGroupDataList.isEmpty()) {
                         if (isOnboarding) {
                             // exit the explore activity if opened during onboarding & there are no unjoined groups to be shown
@@ -165,21 +164,16 @@ public class FeedGroupsFrag extends Fragment implements FeedGroupAdapter.OnListF
             public void onFailure(Call<List<FeedGroupData>> call, Throwable t) {
                 if (isAdded()) {
                     Toast.makeText(requireContext(), R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
-                    if (groupRecyclerView.getActualAdapter() != groupRecyclerView.getAdapter()) {
-                        // recycler view is currently holding shimmer adapter so hide it
-                        groupRecyclerView.hideShimmerAdapter();
-                    }
+                    progressbar.setVisibility(View.GONE);
                 }
             }
         });
     }
 
     private void initRecyclerView() {
-        if (groupRecyclerView.getActualAdapter() != groupRecyclerView.getAdapter()) {
-            // recycler view is currently holding shimmer adapter so hide it
-            groupRecyclerView.hideShimmerAdapter();
-        }
+        progressbar.setVisibility(View.GONE);
         adapter = new FeedGroupAdapter(feedGroupDataList, mListener, GlideApp.with(requireContext()), isOnboarding);
+        adapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         groupRecyclerView.setAdapter(adapter);
     }
 

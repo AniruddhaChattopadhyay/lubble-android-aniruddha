@@ -2,30 +2,32 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph"
-    app:startDestination="@id/navigation_feed_home">
+    android:id="@+id/nav_graph_chats"
+    app:startDestination="@id/navigation_chats">
 
     <fragment
-        android:id="@+id/navigation_feed_home"
-        android:name="in.lubble.app.feed_user.FeedFrag"
-        tools:layout="@layout/fragment_feed" />
+        android:id="@+id/navigation_chats"
+        android:name="in.lubble.app.groups.GroupsCombinedFrag"
+        tools:layout="@layout/frag_groups_combined"/>
+
     <fragment
-        android:id="@+id/navigation_feed_groups"
-        android:name="in.lubble.app.feed_groups.FeedGroupsFrag"
-        tools:layout="@layout/fragment_feed_groups" />
+        android:id="@+id/navigation_feed"
+        android:name="in.lubble.app.feed_user.FeedCombinedFragment"
+        tools:layout="@layout/frag_feed_combined"/>
+
     <fragment
         android:id="@+id/navigation_market"
         android:name="in.lubble.app.marketplace.MarketplaceFrag"
-        tools:layout="@layout/fragment_marketplace" />
+        tools:layout="@layout/fragment_marketplace"/>
 
     <fragment
         android:id="@+id/navigation_fun"
         android:name="in.lubble.app.quiz.GamesFrag"
-        tools:layout="@layout/fragment_games" />
+        tools:layout="@layout/fragment_games"/>
 
     <fragment
         android:id="@+id/navigation_events"
         android:name="in.lubble.app.events.EventsFrag"
-        tools:layout="@layout/fragment_events" />
+        tools:layout="@layout/fragment_events"/>
 
 </navigation>

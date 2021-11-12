@@ -197,6 +197,21 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="FeedTooltipLayout" parent="ToolTipLayoutDefaultStyle">
+        <item name="ttlm_strokeColor">@color/white</item>
+        <item name="ttlm_strokeWeight">2dp</item>
+        <item name="ttlm_backgroundColor">@color/md_deep_orange_A700</item>
+        <item name="android:elevation">8dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAppearance">@style/ToolTipTextStyle</item>
+        <item name="ttlm_overlayStyle">@style/FeedTooltipOverlayStyle</item>
+    </style>
+
+    <style name="FeedTooltipOverlayStyle" parent="ToolTipOverlayDefaultStyle">
+        <item name="android:color">@color/md_yellow_500</item>
+        <item name="android:alpha">0.3</item>
+    </style>
+
     <style name="Theme.Freshchat.SelectedTheme" parent="@style/Theme.Freshchat.Light.DarkActionBar">
         <item name="freshchatTeamMemberAvatarIcon">@drawable/ic_support</item>
     </style>

@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import in.lubble.app.LubbleApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.firebase.RealtimeDbHelper;
@@ -54,6 +55,7 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
     private MaterialButton inviteBtn;
     private TextView hintTv;
     private String receiverUid, receiverName, receiverProfilePic, authorProfilePic, sellerPhoneNumber;
+    private String thisUserFlair = LubbleSharedPrefs.getInstance().getUserFlair();
     private boolean isSeller;
 
     public static DmIntroBottomSheet newInstance(String receiverUid, String receiverName, String receiverProfilePic, @Nullable String sellerPhoneNumber) {
@@ -132,13 +134,14 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
             dismiss();
         }
 
-        // get updated author DP
+        // get updated author DP & flair
         getUserInfoRef(FirebaseAuth.getInstance().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 if (profileInfo != null) {
                     authorProfilePic = profileInfo.getThumbnail();
+                    thisUserFlair = profileInfo.getBadge();
                 } else {
                     authorProfilePic = String.valueOf(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl());
                 }
@@ -198,7 +201,7 @@ public class DmIntroBottomSheet extends BottomSheetDialogFragment {
         chatData.setAuthorUid(authorId);
         chatData.setAuthorIsSeller(false);
         chatData.setMessage(introMsgTil.getEditText().getText().toString());
-        ChatUtils.addAuthorNameandDp(chatData);
+        ChatUtils.addAuthorNameandDp(chatData, thisUserFlair);
         chatData.setCreatedTimestamp(System.currentTimeMillis());
         chatData.setServerTimestamp(ServerValue.TIMESTAMP);
         chatData.setIsDm(true);

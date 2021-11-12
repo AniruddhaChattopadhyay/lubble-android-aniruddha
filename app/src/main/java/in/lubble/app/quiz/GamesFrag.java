@@ -25,7 +25,6 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.map.LubbleMapActivity;
-import in.lubble.app.models.ProfileData;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
@@ -43,7 +42,7 @@ public class GamesFrag extends Fragment {
     private RelativeLayout whereTonightContainer;
     private RelativeLayout mapContainer;
     private ValueEventListener coinsListener;
-    private long currentCoins = 0;
+    private Long currentCoins = 0L;
 
     public GamesFrag() {
         // Required empty public constructor
@@ -120,18 +119,19 @@ public class GamesFrag extends Fragment {
         coinsListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                currentCoins = profileData.getCoins();
-                currentCoinsTv.setText(String.valueOf(currentCoins));
-                if (!isFreePlayEnabled) {
-                    playContainer.setAlpha(1f);
-                    earnCoinsTv.setVisibility(View.GONE);
-                    whereTonightContainer.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            startQuiz();
-                        }
-                    });
+                currentCoins = dataSnapshot.getValue(Long.class);
+                if (currentCoins != null) {
+                    currentCoinsTv.setText(String.valueOf(currentCoins));
+                    if (!isFreePlayEnabled) {
+                        playContainer.setAlpha(1f);
+                        earnCoinsTv.setVisibility(View.GONE);
+                        whereTonightContainer.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startQuiz();
+                            }
+                        });
+                    }
                 }
             }
 
@@ -140,7 +140,7 @@ public class GamesFrag extends Fragment {
 
             }
         };
-        getThisUserRef().addValueEventListener(coinsListener);
+        getThisUserRef().child("coins").addValueEventListener(coinsListener);
     }
 
     private void enableFreePlay() {

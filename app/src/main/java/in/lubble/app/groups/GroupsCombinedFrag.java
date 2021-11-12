@@ -20,22 +20,12 @@ import static in.lubble.app.utils.UiUtils.reduceDragSensitivity;
 
 public class GroupsCombinedFrag extends Fragment {
 
-    private static boolean isNewUser;
-
     public GroupsCombinedFrag() {
         // Required empty public constructor
     }
 
-    /**
-     * @param isNewUserInThisLubble used to sort joined-groups list after a delay,
-     *                              to allow bulk group sync via explore to complete
-     */
-    public static GroupsCombinedFrag newInstance(boolean isNewUserInThisLubble) {
-        GroupsCombinedFrag groupsCombinedFrag = new GroupsCombinedFrag();
-        Bundle bundle = new Bundle();
-        bundle.putBoolean("isNewUserInThisLubble", isNewUserInThisLubble);
-        groupsCombinedFrag.setArguments(bundle);
-        return groupsCombinedFrag;
+    public static GroupsCombinedFrag newInstance() {
+        return new GroupsCombinedFrag();
     }
 
     @Override
@@ -44,8 +34,6 @@ public class GroupsCombinedFrag extends Fragment {
         View view = inflater.inflate(R.layout.frag_groups_combined, container, false);
         TabLayout tabLayout = view.findViewById(R.id.tabLayout_groups);
         ViewPager2 viewPager = view.findViewById(R.id.tab_pager);
-
-        isNewUser = requireArguments().getBoolean("isNewUserInThisLubble", false);
 
         MyTabPagerAdapter tabPager = new MyTabPagerAdapter(this);
         viewPager.setAdapter(tabPager);
@@ -68,7 +56,7 @@ public class GroupsCombinedFrag extends Fragment {
         public Fragment createFragment(int position) {
             switch (position) {
                 case 0:
-                    return GroupListFragment.newInstance(isNewUser);
+                    return GroupListFragment.newInstance();
                 case 1:
                     return new ExploreFrag();
                 default:

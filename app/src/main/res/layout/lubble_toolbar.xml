@@ -53,15 +53,17 @@
             android:drawableTint="@color/dark_gray"
             android:gravity="center"
             android:textAllCaps="true"
+            android:drawablePadding="4dp"
             android:textColor="@color/darker_gray"
             android:visibility="gone"
-            app:drawableRightCompat="@drawable/ic_arrow_drop_down_black_24dp"
+            app:drawableRightCompat="@drawable/ic_outline_info_12"
             tools:text="Saraswati vihar"
             tools:visibility="visible" />
 
         <View
             android:id="@+id/lubble_click_target"
             android:layout_width="match_parent"
+            android:foreground="?attr/selectableItemBackground"
             android:layout_height="match_parent"
             android:layout_toLeftOf="@id/tv_toolbar_search"
             android:layout_toRightOf="@id/container_dp" />
@@ -125,6 +127,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:foreground="?attr/selectableItemBackground">
             <ImageView
                 android:id="@+id/iv_chats"

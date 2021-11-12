@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,7 +43,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -106,18 +107,13 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
     private Trace groupTrace;
     private int queryCounter = 0;
     private boolean isPublicGroupsLoading;
-    private boolean isNewUser = true;
-    private Map<String, ?> newUserGroupsMap;
 
     public GroupListFragment() {
+        // Required empty public constructor
     }
 
-    public static GroupListFragment newInstance(boolean isNewUserInThisLubble) {
-        GroupListFragment groupListFragment = new GroupListFragment();
-        Bundle bundle = new Bundle();
-        bundle.putBoolean("isNewUserInThisLubble", isNewUserInThisLubble);
-        groupListFragment.setArguments(bundle);
-        return groupListFragment;
+    public static GroupListFragment newInstance() {
+        return new GroupListFragment();
     }
 
     @Override
@@ -143,9 +139,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
         viewPager = view.findViewById(R.id.viewpager);
         tabLayout = view.findViewById(R.id.tab_dots);
         viewPager.setClipChildren(false);
-        viewPager.setOffscreenPageLimit(4);
-
-        isNewUser = getArguments().getBoolean("isNewUserInThisLubble", false);
+        viewPager.setSaveEnabled(false);
 
         groupInvitedByMap = new HashMap<>();
         userGroupDataMap = new HashMap<>();
@@ -538,7 +532,7 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                     userGroupDataMap.put(dataSnapshot.getKey(), userGroupData);
                     if (userGroupData.isJoined()) {
                         adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);
-                    } else {
+                    } else if (userGroupData.getInvitedBy() != null && userGroupData.getInvitedBy().size() > 0) {
                         groupInvitedByMap.put(dataSnapshot.getKey(), userGroupData.getInvitedBy().keySet());
                         //syncInvitedGroups(dataSnapshot.getKey());
                         adapter.updateUserGroupData(dataSnapshot.getKey(), userGroupData);

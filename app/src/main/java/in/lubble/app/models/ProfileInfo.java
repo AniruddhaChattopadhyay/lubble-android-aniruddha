@@ -14,6 +14,7 @@ public class ProfileInfo {
     private String id;
     private String name;
     private String thumbnail;
+    // user flair
     private String badge;
     @Exclude
     private String username;
@@ -56,6 +57,7 @@ public class ProfileInfo {
         this.thumbnail = thumbnail;
     }
 
+    // user flair
     public String getBadge() {
         return badge;
     }

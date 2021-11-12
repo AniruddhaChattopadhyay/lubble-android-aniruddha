@@ -44,8 +44,6 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     public EventsAdapter(Context context) {
         eventDataList = new ArrayList<>();
-        POS_DIV = 0;
-        eventDataList.add(POS_DIV, null);
         this.context = context;
     }
 
