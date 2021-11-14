@@ -99,7 +99,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private GlideRequests glide;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
-    private String photoLink = null,videoLink=null;
+    private String photoLink = null, videoLink = null;
     private GestureDetector gestureDetector;
 
 
@@ -132,11 +132,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
-            holder.mediaLayout.setVisibility(GONE);
-            holder.photoContentIv.setVisibility(GONE);
-            holder.exoPlayerView.setVisibility(GONE);
-            holder.groupNameTv.setVisibility(View.GONE);
-            holder.lubbleNameTv.setVisibility(View.GONE);
+        holder.mediaLayout.setVisibility(GONE);
+        holder.photoContentIv.setVisibility(GONE);
+        holder.exoPlayerView.setVisibility(GONE);
+        holder.groupNameTv.setVisibility(View.GONE);
+        holder.lubbleNameTv.setVisibility(View.GONE);
         if (extras != null) {
             holder.textContentTv.setVisibility(View.VISIBLE);
             final String message = String.valueOf(extras.get("message") == null ? "" : extras.get("message"));
@@ -169,7 +169,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
                     int itemViewHeight = holder.itemView.getMeasuredHeight();
                     float targetHeight = Math.min(displayHeight - itemViewHeight - dpToPx(80), itemWidth / aspectRatio); //80->sum of heights for joined groups & new post btns
-                    if(extras.containsKey("photoLink")){
+                    if (extras.containsKey("photoLink")) {
                         holder.mediaLayout.setVisibility(View.VISIBLE);
                         holder.photoContentIv.setVisibility(View.VISIBLE);
                         ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
@@ -185,7 +185,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         holder.photoContentIv.setLayoutParams(lp);
                         holder.photoContentIv.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
                     }
-                    if(extras.containsKey("videoLink")) {
+                    if (extras.containsKey("videoLink")) {
                         holder.mediaLayout.setVisibility(View.VISIBLE);
                         holder.exoPlayerView.setVisibility(View.VISIBLE);
                         ViewGroup.LayoutParams lp = holder.exoPlayerView.getLayoutParams();
@@ -230,12 +230,12 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         .into(holder.photoContentIv);
             }
 
-            if(extras.containsKey("videoLink")){
+            if (extras.containsKey("videoLink")) {
                 //holder.photoContentIv.setVisibility(GONE);
                 holder.mediaLayout.setVisibility(View.VISIBLE);
                 String vidUrl = extras.get("videoLink").toString();
                 holder.exoPlayerView.setVisibility(View.VISIBLE);
-                prepareExoPlayerFromFileUri(holder,Uri.parse(vidUrl));
+                prepareExoPlayerFromFileUri(holder, Uri.parse(vidUrl));
             }
 
             if (extras.containsKey("authorName")) {
@@ -271,9 +271,14 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
         List<Reaction> userLikes = activity.getOwnReactions().get("like");
         if (userLikes != null && userLikes.size() > 0) {
-            holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+            //holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+            holder.likeIv.setVisibility(GONE);
+            holder.likeAnimation.setVisibility(View.VISIBLE);
+            holder.likeAnimation.setProgress(1f);
             likedMap.put(position, userLikes.get(0).getId());
         } else {
+            holder.likeIv.setVisibility(View.VISIBLE);
+            holder.likeAnimation.setVisibility(GONE);
             holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
             likedMap.remove(position);
         }
@@ -291,7 +296,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     @Override
     public void onViewAttachedToWindow(@NonNull @NotNull FeedAdaptor.MyViewHolder holder) {
         super.onViewAttachedToWindow(holder);
-        if(holder.exoPlayer != null){
+        if (holder.exoPlayer != null) {
             holder.exoPlayer.setPlayWhenReady(true);
         }
     }
@@ -299,7 +304,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     @Override
     public void onViewDetachedFromWindow(@NonNull @NotNull FeedAdaptor.MyViewHolder holder) {
         super.onViewDetachedFromWindow(holder);
-        if(holder.exoPlayer != null){
+        if (holder.exoPlayer != null) {
             holder.exoPlayer.setPlayWhenReady(false);
             holder.exoPlayer.stop();
         }
@@ -498,17 +503,17 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     }
 
 
-    private void toggleLike(ImageView likeIv,LottieAnimationView likeAnimation, TextView likeTv, int position) {
+    private void toggleLike(ImageView likeIv, LottieAnimationView likeAnimation, TextView likeTv, int position) {
         EnrichedActivity activity = getItem(position);
         if (!likedMap.containsKey(position)) {
             // like
             likeIv.setVisibility(GONE);
+            likeAnimation.setVisibility(View.VISIBLE);
             Reaction like = new Reaction.Builder()
                     .kind("like")
                     .id(userId + activity.getID())
                     .activityID(activity.getID())
                     .build();
-            likeAnimation.setVisibility(View.VISIBLE);
             likeAnimation.playAnimation();
             likeAnimation.addAnimatorListener(new Animator.AnimatorListener() {
                 @Override
@@ -657,7 +662,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                toggleLike(likeIv,likeAnimation, likeTv, getAbsoluteAdapterPosition());
+                toggleLike(likeIv, likeAnimation, likeTv, getAbsoluteAdapterPosition());
                 return true;
             }
 
@@ -691,7 +696,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         break;
 
                     case R.id.cont_like:
-                        toggleLike(likeIv,likeAnimation, likeTv, getAbsoluteAdapterPosition());
+                        toggleLike(likeIv, likeAnimation, likeTv, getAbsoluteAdapterPosition());
                         break;
 
                     case R.id.cont_reply:

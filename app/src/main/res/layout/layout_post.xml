@@ -230,7 +230,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_alignParentTop="true"
-                    app:lottie_autoPlay="true"
+                    app:lottie_autoPlay="false"
                     app:lottie_loop="false"
                     app:lottie_rawRes="@raw/feed_like_anim"
                     android:visibility="gone"
