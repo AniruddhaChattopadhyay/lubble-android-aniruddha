@@ -266,12 +266,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
-        String photoUrl = null;
-        for(FeedGroupData elem : feedGroupDataList)
-            if (elem.getName().equals(feedGroupData.getName()))
-                photoUrl = elem.getPhotoUrl();
-        feedGroupData.setPhotoUrl(photoUrl);
-        GroupFeedActivity.open(requireContext(), feedGroupData);
+        GroupFeedActivity.open(requireContext(), feedGroupData.getFeedName());
     }
 
     @Override

@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +30,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,15 +38,18 @@ import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
+import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.feed_bottom_sheet.FeedUserShareBottomSheetFrag;
+import in.lubble.app.feed_groups.FeedExploreActiv;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.UiUtils;
+import io.getstream.client.Feed;
 import io.getstream.cloud.CloudFlatFeed;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -55,15 +60,33 @@ import static in.lubble.app.Constants.MEDIA_TYPE;
 
 public class GroupFeedActivity extends BaseActivity {
 
+    private static final String TAG = "GroupFeedActivity";
     private static final String EXTRA_FEED_GROUP_DATA = "LBL_EXTRA_FEED_GROUP_DATA";
     private FeedGroupData feedGroupData;
     private boolean isJoined;
     private SingleGroupFeed singleGroupFeed;
     private ProgressDialog sharingProgressDialog;
-    private static final String TAG = "GroupFeedActivity";
     private String sharingUrl;
     private MaterialButton joinInviteBtn;
 
+    public static void open(Context context,String feedGroupName){
+        Log.d(TAG, "2nd Open function called");
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.getFeedGroupInfo(feedGroupName).enqueue(new Callback<FeedGroupData>() {
+            @Override
+            public void onResponse(Call<FeedGroupData> call, Response<FeedGroupData> response) {
+                FeedGroupData feedGroupData = response.body();
+                Intent intent = new Intent(context, GroupFeedActivity.class);
+                intent.putExtra(EXTRA_FEED_GROUP_DATA, feedGroupData);
+                context.startActivity(intent);
+            }
+
+            @Override
+            public void onFailure(Call<FeedGroupData> call, Throwable t) {
+
+            }
+        });
+    }
     public static void open(Context context, FeedGroupData feedGroupData) {
         Intent intent = new Intent(context, GroupFeedActivity.class);
         intent.putExtra(EXTRA_FEED_GROUP_DATA, feedGroupData);
