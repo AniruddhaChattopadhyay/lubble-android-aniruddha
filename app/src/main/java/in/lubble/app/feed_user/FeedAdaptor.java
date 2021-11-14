@@ -518,9 +518,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
                 @Override
                 public void onAnimationEnd(Animator animator) {
-                    likeAnimation.setVisibility(GONE);
-                    likeIv.setVisibility(View.VISIBLE);
-                    likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 }
 
                 @Override
