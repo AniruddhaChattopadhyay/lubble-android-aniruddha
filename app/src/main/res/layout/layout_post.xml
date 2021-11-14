@@ -219,16 +219,16 @@
 
                 <ImageView
                     android:id="@+id/like_imageview"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="11dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:padding="15dp"
                     android:layout_centerInParent="true"
                     app:srcCompat="@drawable/ic_favorite_border_24dp" />
 
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/anim_feed_like"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:layout_alignParentTop="true"
                     app:lottie_autoPlay="true"
                     app:lottie_loop="false"
@@ -242,6 +242,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:minEms="1"
+                android:layout_marginLeft="-12dp"
                 tools:text="8" />
 
         </LinearLayout>
