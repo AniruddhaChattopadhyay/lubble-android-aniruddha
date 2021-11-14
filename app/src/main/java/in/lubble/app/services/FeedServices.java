@@ -82,7 +82,7 @@ public class FeedServices {
         }
     }
 
-    public static void post(FeedPostData feedPostData, String groupName, String feedName, @Nullable String imgUrl, float aspectRatio,boolean isGroupJoined, @Nullable Callback<Void> callback) {
+    public static void post(FeedPostData feedPostData, String groupName, String feedName, @Nullable String imgUrl,@Nullable String vidUrl, float aspectRatio,boolean isGroupJoined, @Nullable Callback<Void> callback) {
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
@@ -97,6 +97,9 @@ public class FeedServices {
             jsonObject.put("isGroupJoined",isGroupJoined);
             if (imgUrl != null) {
                 jsonObject.put("photoLink", imgUrl);
+            }
+            if(vidUrl!=null){
+                jsonObject.put("videoLink", vidUrl);
             }
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
             Call<Void> call = endpoints.addFeedPost(body);
