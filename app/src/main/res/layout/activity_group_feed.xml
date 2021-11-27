@@ -28,8 +28,8 @@
                 android:id="@+id/collapsing_toolbar_feed_group_background"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:scaleType="centerCrop"
                 android:background="@color/very_light_gray"
+                android:scaleType="centerCrop"
                 tools:srcCompat="@drawable/ic_circle_group_24dp" />
 
             <View
@@ -48,29 +48,37 @@
                 android:id="@+id/btn_join_invite"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:icon="@drawable/ic_add_circle_black_24dp"
-                app:iconSize="16dp"
-                app:iconPadding="4dp"
-                app:iconTint="@color/colorAccent"
-                app:cornerRadius="24dp"
-                app:backgroundTint="@color/white"
                 android:layout_gravity="bottom|right"
                 android:layout_marginEnd="8dp"
-                android:elevation="6dp"
-                android:textColor="@color/colorAccent"
                 android:layout_marginBottom="4dp"
-                android:textSize="12sp"
-                android:visibility="gone"
+                android:elevation="6dp"
                 android:paddingLeft="4dp"
                 android:paddingEnd="8dp"
+                android:text="JOIN GROUP"
+                android:textColor="@color/colorAccent"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:backgroundTint="@color/white"
+                app:cornerRadius="24dp"
+                app:icon="@drawable/ic_add_circle_black_24dp"
+                app:iconPadding="4dp"
+                app:iconSize="16dp"
+                app:iconTint="@color/colorAccent"
                 app:layout_anchor="@id/container_groups"
                 app:layout_anchorGravity="bottom|right|end"
-                tools:visibility="visible"
-                android:text="JOIN GROUP"/>
+                tools:visibility="visible" />
+
+            <ProgressBar
+                android:id="@+id/pb_toolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_gravity="center" />
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
+                app:layout_collapseMode="pin"
                 android:layout_height="?attr/actionBarSize" />
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
