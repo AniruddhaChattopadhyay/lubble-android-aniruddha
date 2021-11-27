@@ -363,7 +363,7 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
 
     @Override
     public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
-        // do nothing
+        //do nothing here
     }
 
     @Override

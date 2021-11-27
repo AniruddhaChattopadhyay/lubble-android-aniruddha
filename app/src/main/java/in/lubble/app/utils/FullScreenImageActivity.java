@@ -101,7 +101,7 @@ public class FullScreenImageActivity extends BaseActivity {
             progressbar.setVisibility(View.VISIBLE);
             GlideApp.with(this)
                     .load(imgPath)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .error(errorPic)
                     .fitCenter()
                     .listener(new RequestListener<Drawable>() {

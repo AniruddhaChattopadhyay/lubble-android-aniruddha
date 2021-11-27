@@ -267,7 +267,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void openGroupFeed(@NotNull FeedGroupData feedGroupData) {
-        GroupFeedActivity.open(requireContext(), feedGroupData);
+        GroupFeedActivity.open(requireContext(), feedGroupData.getFeedName());
     }
 
     @Override

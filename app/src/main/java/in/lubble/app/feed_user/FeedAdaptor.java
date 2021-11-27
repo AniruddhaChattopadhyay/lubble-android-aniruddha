@@ -215,6 +215,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                 glide
                         .load(photoLink)
                         .transform(new RoundedCornersTransformation(dpToPx(8), 0))
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .listener(new RequestListener<Drawable>() {
                             @Override
                             public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {

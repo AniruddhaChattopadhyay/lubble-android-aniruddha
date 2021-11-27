@@ -240,6 +240,9 @@ public interface Endpoints {
     @GET("lubbles/{lubble_id}/groups/{group_id}/groupInfo.json")
     Call<GroupInfoData> fetchGroupInfo(@Path("lubble_id") String lubbleId, @Path("group_id") String groupId, @Query("auth") String token);
 
+    @GET("marketplace/getFeedGroupInfo/")
+    Call<FeedGroupData> getFeedGroupInfo(@Query("feedName")String feedName);
+
     public class StreamCredentials{
         private String api_key;
         private String user_token;
