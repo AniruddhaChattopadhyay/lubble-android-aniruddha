@@ -1,5 +1,6 @@
 package in.lubble.app.feed_user;
 
+import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
@@ -35,6 +36,7 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.airbnb.lottie.LottieAnimationView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -45,6 +47,11 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.curios.textformatter.FormatText;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.upstream.FileDataSource;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
@@ -92,8 +99,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private GlideRequests glide;
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
-    private String photoLink = null;
+    private String photoLink = null, videoLink = null;
     private GestureDetector gestureDetector;
+
 
     public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
         super(diffCallback);
@@ -124,7 +132,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
         String postDateDisplay = getPostDateDisplay(activity.getTime());
         Map<String, Object> extras = activity.getExtra();
-        holder.photoContentIv.setVisibility(View.GONE);
+        holder.mediaLayout.setVisibility(GONE);
+        holder.photoContentIv.setVisibility(GONE);
+        holder.exoPlayerView.setVisibility(GONE);
         holder.groupNameTv.setVisibility(View.GONE);
         holder.lubbleNameTv.setVisibility(View.GONE);
         if (extras != null) {
@@ -159,26 +169,47 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
                     int itemViewHeight = holder.itemView.getMeasuredHeight();
                     float targetHeight = Math.min(displayHeight - itemViewHeight - dpToPx(80), itemWidth / aspectRatio); //80->sum of heights for joined groups & new post btns
-                    holder.photoContentIv.setVisibility(View.VISIBLE);
-                    ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
-                    if (targetHeight < 300) {
-                        float delta = 300 - targetHeight;
-                        int linesToPurge = (int) Math.ceil(delta / UiUtils.spToPx(14));
-                        holder.textContentTv.setMaxLines(Math.max(9 - linesToPurge, 5));
-                        targetHeight = 300;
-                    } else {
-                        holder.textContentTv.setMaxLines(9);
+                    if (extras.containsKey("photoLink")) {
+                        holder.mediaLayout.setVisibility(View.VISIBLE);
+                        holder.photoContentIv.setVisibility(View.VISIBLE);
+                        ViewGroup.LayoutParams lp = holder.photoContentIv.getLayoutParams();
+                        if (targetHeight < 300) {
+                            float delta = 300 - targetHeight;
+                            int linesToPurge = (int) Math.ceil(delta / UiUtils.spToPx(14));
+                            holder.textContentTv.setMaxLines(Math.max(9 - linesToPurge, 5));
+                            targetHeight = 300;
+                        } else {
+                            holder.textContentTv.setMaxLines(9);
+                        }
+                        lp.height = Math.round(targetHeight);
+                        holder.photoContentIv.setLayoutParams(lp);
+                        holder.photoContentIv.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
                     }
-                    lp.height = Math.round(targetHeight);
-                    holder.photoContentIv.setLayoutParams(lp);
-                    holder.photoContentIv.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
+                    if (extras.containsKey("videoLink")) {
+                        holder.mediaLayout.setVisibility(View.VISIBLE);
+                        holder.exoPlayerView.setVisibility(View.VISIBLE);
+                        ViewGroup.LayoutParams lp = holder.exoPlayerView.getLayoutParams();
+                        if (targetHeight < 300) {
+                            float delta = 300 - targetHeight;
+                            int linesToPurge = (int) Math.ceil(delta / UiUtils.spToPx(14));
+                            holder.textContentTv.setMaxLines(Math.max(9 - linesToPurge, 5));
+                            targetHeight = 300;
+                        } else {
+                            holder.textContentTv.setMaxLines(9);
+                        }
+                        lp.height = Math.round(targetHeight);
+                        holder.exoPlayerView.setLayoutParams(lp);
+                        holder.exoPlayerView.setBackgroundColor(ContextCompat.getColor(context, R.color.md_grey_200));
+                    }
                 }
             } else {
                 // photoContentIv.visibility = GONE already at top
+                // exoPlayerView.visibility = GONE already at top
                 holder.textContentTv.setMaxLines(9);
             }
 
             if (extras.containsKey("photoLink")) {
+                holder.mediaLayout.setVisibility(View.VISIBLE);
                 holder.photoContentIv.setVisibility(View.VISIBLE);
                 photoLink = extras.get("photoLink").toString();
                 glide
@@ -197,6 +228,14 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                             }
                         })
                         .into(holder.photoContentIv);
+            }
+
+            if (extras.containsKey("videoLink")) {
+                //holder.photoContentIv.setVisibility(GONE);
+                holder.mediaLayout.setVisibility(View.VISIBLE);
+                String vidUrl = extras.get("videoLink").toString();
+                holder.exoPlayerView.setVisibility(View.VISIBLE);
+                prepareExoPlayerFromFileUri(holder, Uri.parse(vidUrl));
             }
 
             if (extras.containsKey("authorName")) {
@@ -232,9 +271,14 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
         List<Reaction> userLikes = activity.getOwnReactions().get("like");
         if (userLikes != null && userLikes.size() > 0) {
-            holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+            //holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
+            holder.likeIv.setVisibility(GONE);
+            holder.likeAnimation.setVisibility(View.VISIBLE);
+            holder.likeAnimation.setProgress(1f);
             likedMap.put(position, userLikes.get(0).getId());
         } else {
+            holder.likeIv.setVisibility(View.VISIBLE);
+            holder.likeAnimation.setVisibility(GONE);
             holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
             likedMap.remove(position);
         }
@@ -247,6 +291,48 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         if (holder.getAbsoluteAdapterPosition() == 0 && !LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG()) {
             prepareDoubleTapToLikeTooltip(holder, extras);
         }
+    }
+
+    @Override
+    public void onViewAttachedToWindow(@NonNull @NotNull FeedAdaptor.MyViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        if (holder.exoPlayer != null) {
+            holder.exoPlayer.setPlayWhenReady(true);
+        }
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(@NonNull @NotNull FeedAdaptor.MyViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        if (holder.exoPlayer != null) {
+            holder.exoPlayer.setPlayWhenReady(false);
+            holder.exoPlayer.stop();
+        }
+    }
+
+    private void prepareExoPlayerFromFileUri(MyViewHolder holder, Uri uri) {
+        holder.exoPlayer = new SimpleExoPlayer.Builder(context).build();
+        DataSpec dataSpec = new DataSpec(uri);
+        final FileDataSource fileDataSource = new FileDataSource();
+        try {
+            fileDataSource.open(dataSpec);
+        } catch (FileDataSource.FileDataSourceException e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
+        }
+
+        com.google.android.exoplayer2.upstream.DataSource.Factory factory = new com.google.android.exoplayer2.upstream.DataSource.Factory() {
+            @Override
+            public com.google.android.exoplayer2.upstream.DataSource createDataSource() {
+                return fileDataSource;
+            }
+        };
+        /*todo deprecated MediaSource videosource = new ExtractorMediaSource(fileDataSource.getUri(),
+                factory, new DefaultExtractorsFactory(), null, null);*/
+        holder.exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
+        holder.exoPlayerView.setPlayer(holder.exoPlayer);
+        holder.exoPlayer.prepare();
+
     }
 
     private void prepareDoubleTapToLikeTooltip(MyViewHolder holder, Map<String, Object> extras) {
@@ -354,6 +440,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
         void onImageClicked(String imgPath, ImageView imageView);
 
+        void onVideoClicked(String vidPath);
+
         void onLiked(String foreignID);
 
         void onRefreshLoading(@NotNull LoadState refresh);
@@ -414,15 +502,39 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
     }
 
-    private void toggleLike(MyViewHolder holder, int position) {
+
+    private void toggleLike(ImageView likeIv, LottieAnimationView likeAnimation, TextView likeTv, int position) {
         EnrichedActivity activity = getItem(position);
         if (!likedMap.containsKey(position)) {
             // like
+            likeIv.setVisibility(GONE);
+            likeAnimation.setVisibility(View.VISIBLE);
             Reaction like = new Reaction.Builder()
                     .kind("like")
                     .id(userId + activity.getID())
                     .activityID(activity.getID())
                     .build();
+            likeAnimation.playAnimation();
+            likeAnimation.addAnimatorListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+                    likeIv.setVisibility(GONE);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
             try {
                 String notificationUserFeedId = "notification:" + activity.getActor().getID();
                 FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
@@ -430,50 +542,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
                 });
-                holder.likeIv.setImageResource(R.drawable.ic_favorite_24dp);
-                likedMap.put(position, like.getId());
-                extractReactionCount(activity, "like", holder.likeTv, 1);
-                feedListener.onLiked(activity.getForeignID());
-            } catch (StreamException e) {
-                e.printStackTrace();
-                FirebaseCrashlytics.getInstance().recordException(e);
-            }
-        } else {
-            // unlike
-            try {
-                FeedServices.getTimelineClient().reactions().delete(likedMap.get(position)).whenComplete((aVoid, throwable) -> {
-                    if (throwable != null) {
-                        FirebaseCrashlytics.getInstance().recordException(throwable);
-                    }
-                });
-                holder.likeIv.setImageResource(R.drawable.ic_favorite_border_24dp);
-                likedMap.remove(position);
-                extractReactionCount(activity, "like", holder.likeTv, -1);
-            } catch (StreamException e) {
-                e.printStackTrace();
-                FirebaseCrashlytics.getInstance().recordException(e);
-            }
-        }
-    }
-
-
-    private void toggleLike2(ImageView likeIv, TextView likeTv, int position) {
-        EnrichedActivity activity = getItem(position);
-        if (!likedMap.containsKey(position)) {
-            // like
-            Reaction like = new Reaction.Builder()
-                    .kind("like")
-                    .id(userId + activity.getID())
-                    .activityID(activity.getID())
-                    .build();
-            try {
-                String notificationUserFeedId = "notification:" + activity.getActor().getID();
-                FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
-                    if (throwable != null) {
-                        FirebaseCrashlytics.getInstance().recordException(throwable);
-                    }
-                });
-                likeIv.setImageResource(R.drawable.ic_favorite_24dp);
                 likedMap.put(position, like.getId());
                 extractReactionCount(activity, "like", likeTv, 1);
                 feedListener.onLiked(activity.getForeignID());
@@ -483,6 +551,8 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             }
         } else {
             // unlike
+            likeAnimation.setVisibility(GONE);
+            likeIv.setVisibility(View.VISIBLE);
             try {
                 FeedServices.getTimelineClient().reactions().delete(likedMap.get(position)).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
@@ -576,9 +646,13 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private final TextView commentEdtText, likeTv, replyTv;
         private final RecyclerView commentRecyclerView;
         private final RelativeLayout linkPreviewContainer;
+        private final PlayerView exoPlayerView;
+        private SimpleExoPlayer exoPlayer;
+        private final RelativeLayout mediaLayout;
         private View touchView;
         private EnrichedActivity activity;
         private Map<String, Object> extras;
+        private LottieAnimationView likeAnimation;
 
         private final GestureDetector gestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -588,7 +662,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                toggleLike2(likeIv, likeTv, getAbsoluteAdapterPosition());
+                toggleLike(likeIv, likeAnimation, likeTv, getAbsoluteAdapterPosition());
                 return true;
             }
 
@@ -622,7 +696,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         break;
 
                     case R.id.cont_like:
-                        toggleLike2(likeIv, likeTv, getAbsoluteAdapterPosition());
+                        toggleLike(likeIv, likeAnimation, likeTv, getAbsoluteAdapterPosition());
                         break;
 
                     case R.id.cont_reply:
@@ -664,6 +738,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                     case R.id.tv_view_all_replies:
                         feedListener.openPostActivity(activity.getID());
                         break;
+
+                    case R.id.exo_player_feed_content:
+                        videoLink = extras.get("videoLink").toString();
+                        feedListener.onVideoClicked(videoLink);
+                        break;
                 }
                 return true;
             }
@@ -697,6 +776,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             linkImageIv = view.findViewById(R.id.iv_link_image);
             linkTitleTv = view.findViewById(R.id.tv_link_title);
             linkDescTv = view.findViewById(R.id.tv_link_desc);
+            mediaLayout = view.findViewById(R.id.media_container);
+            exoPlayerView = view.findViewById(R.id.exo_player_feed_content);
+            likeAnimation = view.findViewById(R.id.anim_feed_like);
             ImageView moreMenuIv = view.findViewById(R.id.iv_more_menu);
             moreMenuIv.setVisibility(GONE);
 
@@ -711,6 +793,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             commentEdtText.setOnTouchListener(this);
             viewAllRepliesTv.setOnTouchListener(this);
             authorNameTv.setOnTouchListener(this);
+            exoPlayerView.setOnTouchListener(this);
             itemView.setOnTouchListener(this);
 
         }
