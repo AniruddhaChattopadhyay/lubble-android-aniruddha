@@ -98,12 +98,12 @@
 
     <RelativeLayout
         android:id="@+id/media_container"
-        android:visibility="gone"
-        tools:visibility="visible"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/cont_link_preview"
-        >
+        android:visibility="gone"
+        tools:visibility="visible">
+
         <ImageView
             android:id="@+id/feed_photo_content"
             android:layout_width="match_parent"
@@ -117,7 +117,9 @@
             android:visibility="gone"
             tools:src="@drawable/explore_default"
             tools:visibility="visible" />
+
         <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/exo_player_feed_content"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="8dp"
@@ -127,41 +129,10 @@
             android:scaleType="centerCrop"
             android:transitionName="fullscreen_image"
             android:visibility="gone"
-            tools:visibility="gone"
             tools:src="@drawable/explore_default"
-            android:id="@+id/exo_player_feed_content" />
+            tools:visibility="gone" />
 
     </RelativeLayout>
-<!--    <ImageView-->
-<!--        android:id="@+id/feed_photo_content"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_below="@+id/cont_link_preview"-->
-<!--        android:layout_marginTop="8dp"-->
-<!--        android:adjustViewBounds="true"-->
-<!--        android:foreground="?attr/selectableItemBackground"-->
-<!--        android:maxHeight="500dp"-->
-<!--        android:scaleType="centerCrop"-->
-<!--        android:transitionName="fullscreen_image"-->
-<!--        android:visibility="gone"-->
-<!--        tools:src="@drawable/explore_default"-->
-<!--        tools:visibility="gone" />-->
-
-<!--    <com.google.android.exoplayer2.ui.PlayerView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="200dp"-->
-<!--        android:layout_below="@+id/cont_link_preview"-->
-<!--        android:layout_marginTop="8dp"-->
-<!--        android:adjustViewBounds="true"-->
-<!--        android:foreground="?attr/selectableItemBackground"-->
-<!--        android:maxHeight="500dp"-->
-<!--        android:scaleType="centerCrop"-->
-<!--        android:transitionName="fullscreen_image"-->
-<!--        android:visibility="gone"-->
-<!--        tools:visibility="gone"-->
-<!--        tools:src="@drawable/explore_default"-->
-<!--        android:id="@+id/exo_player_feed_content" />-->
-
 
     <LinearLayout
         android:id="@+id/social_layout"
@@ -221,8 +192,8 @@
                     android:id="@+id/like_imageview"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
-                    android:padding="15dp"
                     android:layout_centerInParent="true"
+                    android:padding="15dp"
                     app:srcCompat="@drawable/ic_favorite_border_24dp" />
 
                 <com.airbnb.lottie.LottieAnimationView
@@ -230,19 +201,20 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_alignParentTop="true"
+                    android:visibility="gone"
                     app:lottie_autoPlay="false"
                     app:lottie_loop="false"
                     app:lottie_rawRes="@raw/feed_like_anim"
-                    android:visibility="gone"
-                    tools:visibility="visible"/>
+                    tools:visibility="visible" />
             </RelativeLayout>
+
             <TextView
                 android:id="@+id/tv_like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="-12dp"
                 android:gravity="center"
                 android:minEms="1"
-                android:layout_marginLeft="-12dp"
                 tools:text="8" />
 
         </LinearLayout>

@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,18 +38,15 @@ import java.util.MissingFormatArgumentException;
 
 import in.lubble.app.BaseActivity;
 import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.feed_bottom_sheet.FeedUserShareBottomSheetFrag;
-import in.lubble.app.feed_groups.FeedExploreActiv;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.services.FeedServices;
 import in.lubble.app.utils.UiUtils;
-import io.getstream.client.Feed;
 import io.getstream.cloud.CloudFlatFeed;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -62,31 +59,20 @@ public class GroupFeedActivity extends BaseActivity {
 
     private static final String TAG = "GroupFeedActivity";
     private static final String EXTRA_FEED_GROUP_DATA = "LBL_EXTRA_FEED_GROUP_DATA";
+    private static final String EXTRA_FEED_GROUP_NAME = "LBL_EXTRA_FEED_GROUP_NAME";
     private FeedGroupData feedGroupData;
     private boolean isJoined;
     private SingleGroupFeed singleGroupFeed;
-    private ProgressDialog sharingProgressDialog;
-    private String sharingUrl;
     private MaterialButton joinInviteBtn;
+    private ProgressBar toolbarProgressBar;
 
-    public static void open(Context context,String feedGroupName){
+    public static void open(Context context, String feedGroupName) {
         Log.d(TAG, "2nd Open function called");
-        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.getFeedGroupInfo(feedGroupName).enqueue(new Callback<FeedGroupData>() {
-            @Override
-            public void onResponse(Call<FeedGroupData> call, Response<FeedGroupData> response) {
-                FeedGroupData feedGroupData = response.body();
-                Intent intent = new Intent(context, GroupFeedActivity.class);
-                intent.putExtra(EXTRA_FEED_GROUP_DATA, feedGroupData);
-                context.startActivity(intent);
-            }
-
-            @Override
-            public void onFailure(Call<FeedGroupData> call, Throwable t) {
-
-            }
-        });
+        Intent intent = new Intent(context, GroupFeedActivity.class);
+        intent.putExtra(EXTRA_FEED_GROUP_NAME, feedGroupName);
+        context.startActivity(intent);
     }
+
     public static void open(Context context, FeedGroupData feedGroupData) {
         Intent intent = new Intent(context, GroupFeedActivity.class);
         intent.putExtra(EXTRA_FEED_GROUP_DATA, feedGroupData);
@@ -99,49 +85,75 @@ public class GroupFeedActivity extends BaseActivity {
         setContentView(R.layout.activity_group_feed);
         Toolbar toolbar = findViewById(R.id.toolbar);
         joinInviteBtn = findViewById(R.id.btn_join_invite);
+        toolbarProgressBar = findViewById(R.id.pb_toolbar);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("");
 
-        if (getIntent().hasExtra(EXTRA_FEED_GROUP_DATA)) {
-            feedGroupData = (FeedGroupData) getIntent().getSerializableExtra(EXTRA_FEED_GROUP_DATA);
-            CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_feed_group);
-            collapsingToolbarLayout.setTitle(feedGroupData.getName());
-            ImageView imageView = findViewById(R.id.collapsing_toolbar_feed_group_background);
-            GlideApp.with(this)
-                    .asBitmap()
-                    .load(feedGroupData.getPhotoUrl())
-                    .error(R.drawable.ic_circle_group_24dp)
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            Palette.from(resource)
-                                    .maximumColorCount(8)
-                                    .addFilter(UiUtils.DEFAULT_FILTER)
-                                    .generate(p -> {
-                                        // Use generated instance
-                                        Drawable normalDrawable = ContextCompat.getDrawable(GroupFeedActivity.this, R.drawable.rounded_rect_gray);
-                                        if (normalDrawable != null && p != null) {
-                                            Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
-                                            DrawableCompat.setTint(wrapDrawable, p.getDominantColor(ContextCompat.getColor(GroupFeedActivity.this, R.color.fb_color)));
-                                            DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
-                                            imageView.setBackground(wrapDrawable);
-                                        }
-                                        imageView.setImageBitmap(resource);
-                                    });
-                        }
+        if (getIntent().hasExtra(EXTRA_FEED_GROUP_NAME)) {
+            // fetch feed data from API
+            toolbarProgressBar.setVisibility(View.VISIBLE);
+            String feedGroupName = getIntent().getStringExtra(EXTRA_FEED_GROUP_NAME);
+            final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+            endpoints.getFeedGroupInfo(feedGroupName).enqueue(new Callback<FeedGroupData>() {
+                @Override
+                public void onResponse(Call<FeedGroupData> call, Response<FeedGroupData> response) {
+                    feedGroupData = response.body();
+                    toolbarProgressBar.setVisibility(View.GONE);
+                    init();
+                }
 
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                        }
-                    });
-            singleGroupFeed = SingleGroupFeed.newInstance(feedGroupData.getFeedName());
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, singleGroupFeed)
-                    .commitNow();
+                @Override
+                public void onFailure(Call<FeedGroupData> call, Throwable t) {
+                    toolbarProgressBar.setVisibility(View.GONE);
+                    Toast.makeText(GroupFeedActivity.this, "Network Issue. Please try again", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            });
+        } else if (getIntent().hasExtra(EXTRA_FEED_GROUP_DATA)) {
+            feedGroupData = (FeedGroupData) getIntent().getSerializableExtra(EXTRA_FEED_GROUP_DATA);
+            init();
         } else {
             throw new MissingFormatArgumentException("no EXTRA_FEED_NAME passed while opening GroupFeedActivity");
         }
+    }
+
+    private void init() {
+        CollapsingToolbarLayout collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar_feed_group);
+        collapsingToolbarLayout.setTitle(feedGroupData.getName());
+        ImageView imageView = findViewById(R.id.collapsing_toolbar_feed_group_background);
+        GlideApp.with(this)
+                .asBitmap()
+                .load(feedGroupData.getPhotoUrl())
+                .error(R.drawable.ic_circle_group_24dp)
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        Palette.from(resource)
+                                .maximumColorCount(8)
+                                .addFilter(UiUtils.DEFAULT_FILTER)
+                                .generate(p -> {
+                                    // Use generated instance
+                                    Drawable normalDrawable = ContextCompat.getDrawable(GroupFeedActivity.this, R.drawable.rounded_rect_gray);
+                                    if (normalDrawable != null && p != null) {
+                                        Drawable wrapDrawable = DrawableCompat.wrap(normalDrawable);
+                                        DrawableCompat.setTint(wrapDrawable, p.getDominantColor(ContextCompat.getColor(GroupFeedActivity.this, R.color.fb_color)));
+                                        DrawableCompat.setTintMode(wrapDrawable, PorterDuff.Mode.MULTIPLY);
+                                        imageView.setBackground(wrapDrawable);
+                                    }
+                                    imageView.setImageBitmap(resource);
+                                });
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                    }
+                });
+        singleGroupFeed = SingleGroupFeed.newInstance(feedGroupData.getFeedName());
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, singleGroupFeed)
+                .commitNow();
     }
 
     void toggleContextMenu(boolean isJoined) {
@@ -153,12 +165,7 @@ public class GroupFeedActivity extends BaseActivity {
         joinInviteBtn.setText(joinText);
         joinInviteBtn.setOnClickListener(v -> {
             if (isJoined) {
-                FeedUserShareBottomSheetFrag feedUserShareBottomSheetFrag = new FeedUserShareBottomSheetFrag(feedGroupData.getFeedName(), feedGroupData);
-                feedUserShareBottomSheetFrag.show(getSupportFragmentManager(), feedUserShareBottomSheetFrag.getTag());
-                Bundle bundle = new Bundle();
-                bundle.putInt("group_id", feedGroupData.getId());
-                bundle.putString("group_name", feedGroupData.getName());
-                Analytics.triggerEvent(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, bundle, this);
+                invite();
             } else {
                 CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedGroupData.getFeedName());
                 singleGroupFeed.joinGroup(groupFeed);
@@ -166,6 +173,15 @@ public class GroupFeedActivity extends BaseActivity {
         });
         if (isJoined)
             invalidateOptionsMenu();
+    }
+
+    private void invite() {
+        FeedUserShareBottomSheetFrag feedUserShareBottomSheetFrag = new FeedUserShareBottomSheetFrag(feedGroupData.getFeedName(), feedGroupData);
+        feedUserShareBottomSheetFrag.show(getSupportFragmentManager(), feedUserShareBottomSheetFrag.getTag());
+        Bundle bundle = new Bundle();
+        bundle.putInt("group_id", feedGroupData.getId());
+        bundle.putString("group_name", feedGroupData.getName());
+        Analytics.triggerEvent(AnalyticsEvents.FEED_GROUP_INVITE_CLICKED, bundle, this);
     }
 
     @Override
@@ -179,9 +195,11 @@ public class GroupFeedActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         menu.clear();
         if (isJoined) {
-            menu.add(0, R.id.leave, 0, "Leave Group");
+            menu.add(0, R.id.invite, 0, "Invite Friends");
+            menu.add(0, R.id.leave, 1, "Leave Group");
         } else {
             menu.removeItem(R.id.leave);
+            menu.removeItem(R.id.invite);
         }
         return super.onPrepareOptionsMenu(menu);
     }
@@ -195,6 +213,11 @@ public class GroupFeedActivity extends BaseActivity {
             return true;
         } else if (itemId == R.id.leave) {
             leaveGroup();
+            return true;
+        } else if (itemId == R.id.invite) {
+            if (isJoined) {
+                invite();
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);
