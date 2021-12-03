@@ -65,5 +65,6 @@ public class Constants {
     public static final String IS_UXCAM_ENABLED = "IS_UXCAM_ENABLED";
     public static final String UXCAM_DEV_CHAABI = "1yo34nnyl85mnzv";
     public static final String UXCAM_PROD_CHAABI = "6dl8m9y0uc2q0dy";
+    public static final String IS_MAP_SHOWN = "IS_MAP_SHOWN";
 
 }
