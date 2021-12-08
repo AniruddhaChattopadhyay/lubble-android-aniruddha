@@ -179,6 +179,9 @@ public interface Endpoints {
     @GET("marketplace/events/list/")
     Call<List<EventData>> getEvents(@Query("lubble_id") String lubble_id);
 
+    @GET("marketplace/events/list/")
+    Call<List<EventData>> getEvents(@Query("lat") double latitude,@Query("long") double longitude);
+
     @GET("marketplace/events/")
     Call<List<EventData>> getEvent(@Query("event_id") String event_id);
 
