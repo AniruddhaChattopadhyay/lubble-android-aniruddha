@@ -116,7 +116,10 @@ public class EventsFrag extends Fragment {
                 // Logic to handle location object
                 getEvents(location);
             } else {
-                getEventsWithoutLocation();
+                final Location dummyLoc = new Location("dummy");
+                dummyLoc.setLatitude(LubbleSharedPrefs.getInstance().getCenterLati());
+                dummyLoc.setLongitude(LubbleSharedPrefs.getInstance().getCenterLongi());
+                getEventsWithoutLocation(dummyLoc);
             }
         });
     }
@@ -152,38 +155,8 @@ public class EventsFrag extends Fragment {
         });
     }
 
-    private void getEventsWithoutLocation() {
-        Call<List<EventData>> call = endpoints.getEvents(LubbleSharedPrefs.getInstance().getLubbleId());
-        call.enqueue(new Callback<List<EventData>>() {
-            @Override
-            public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
-                if (response.isSuccessful()) {
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                    adapter.clear();
-                    List<EventData> data = response.body();
-                    for (EventData eventData : data) {
-                        if (eventData != null) {
-                            eventData.setId(eventData.getEvent_id());
-                            adapter.addEvent(eventData);
-                        }
-                    }
-                } else {
-                    if (getContext() != null) {
-                        Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<EventData>> call, Throwable t) {
-                if (progressBar != null && getContext() != null) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), "Please check your internet connection & try again.", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+    private void getEventsWithoutLocation(Location dummyLoc) {
+        getEvents(dummyLoc);
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
