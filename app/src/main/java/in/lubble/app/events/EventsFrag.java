@@ -1,5 +1,8 @@
 package in.lubble.app.events;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -15,9 +18,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -30,13 +38,19 @@ import in.lubble.app.models.EventData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.UiUtils;
+import okhttp3.RequestBody;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
+import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.events.EventsFragPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
 
+@RuntimePermissions
 public class EventsFrag extends Fragment {
     private static final String TAG = "EventsFrag";
     private RecyclerView recyclerView;
@@ -94,9 +108,25 @@ public class EventsFrag extends Fragment {
         return view;
     }
 
-    private void getEvents() {
-        Call<List<EventData>> call = endpoints.getEvents(LubbleSharedPrefs.getInstance().getLubbleId());
-        call.enqueue(new Callback<List<EventData>>() {
+    @SuppressLint("MissingPermission")
+    @NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    public void fetchLastKnownLocation() {
+        LocationServices.getFusedLocationProviderClient(getContext()).getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                // Logic to handle location object
+                getEvents(location);
+            } else {
+                final Location dummyLoc = new Location("dummy");
+                dummyLoc.setLatitude(LubbleSharedPrefs.getInstance().getCenterLati());
+                dummyLoc.setLongitude(LubbleSharedPrefs.getInstance().getCenterLongi());
+                getEventsWithoutLocation(dummyLoc);
+            }
+        });
+    }
+
+    private void getEvents(Location location){
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.getEvents(location.getLatitude(),location.getLongitude()).enqueue(new Callback<List<EventData>>() {
             @Override
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
                 if (response.isSuccessful()) {
@@ -120,12 +150,13 @@ public class EventsFrag extends Fragment {
 
             @Override
             public void onFailure(Call<List<EventData>> call, Throwable t) {
-                if (progressBar != null && getContext() != null) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(getContext(), "Please check your internet connection & try again.", Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void getEventsWithoutLocation(Location dummyLoc) {
+        getEvents(dummyLoc);
         if (getActivity() != null && getActivity() instanceof MainActivity) {
             ((MainActivity) getActivity()).toggleSearchInToolbar(false);
         }
@@ -149,7 +180,7 @@ public class EventsFrag extends Fragment {
             recyclerView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
 
-            getEvents();
+            fetchLastKnownLocationWithPermissionCheck(this);
         }
     }
 

@@ -17,7 +17,9 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
@@ -28,6 +30,7 @@ import in.lubble.app.map.LubbleMapActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
+import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
@@ -73,6 +76,9 @@ public class GamesFrag extends Fragment {
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
         currentCoinsContainer.setOnClickListener(v -> ReferralActivity.open(requireContext(), true));
+        Boolean a = FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_MAP_SHOWN);
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_MAP_SHOWN))
+            mapContainer.setVisibility(View.VISIBLE);
 
         earnCoinsTv.setOnClickListener(v -> {
             Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, getContext());
