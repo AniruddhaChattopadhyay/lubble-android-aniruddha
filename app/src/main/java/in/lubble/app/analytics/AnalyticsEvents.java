@@ -171,4 +171,5 @@ public class AnalyticsEvents {
 
     public static final String FEED_GROUP_INVITE_CLICKED = "FEED_GROUP_INVITE_CLICKED";
 
+    public static final String GAMES_LOCKED_INVITE_CLICK = "GAMES_LOCKED_INVITE_CLICK";
 }

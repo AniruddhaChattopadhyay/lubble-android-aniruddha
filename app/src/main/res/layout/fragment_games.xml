@@ -1,4 +1,4 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,11 +7,11 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_marginBottom="16dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:paddingBottom="32dp"
-        android:layout_height="match_parent">
+        android:layout_marginBottom="16dp"
+        android:paddingBottom="32dp">
 
         <TextView
             android:id="@+id/tv_quizzes_title"
@@ -52,8 +52,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                app:tint="@color/dark_gray"
-                app:srcCompat="@drawable/ic_add_circle_black_24dp" />
+                app:srcCompat="@drawable/ic_add_circle_black_24dp"
+                app:tint="@color/dark_gray" />
 
         </LinearLayout>
 
@@ -164,8 +164,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/rect_rounded_border"
-            android:orientation="vertical"
             android:foreground="?attr/selectableItemBackground"
+            android:orientation="vertical"
             android:padding="8dp">
 
             <ImageView
@@ -215,4 +215,66 @@
 
     </RelativeLayout>
 
-</ScrollView>
+    <View
+        android:id="@+id/view_lock_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#AE000000"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/mcv_locked_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="64dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="8dp"
+        app:contentPadding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_locked_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="4dp"
+                android:text="Unlocks when your Neighbourhood reaches 100 members!"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                android:textColor="@color/black"
+                app:drawableTopCompat="@drawable/ic_lock_black_24dp"/>
+
+            <TextView
+                android:id="@+id/tv_locked_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Your locality needs 100 members to unlock specially curated local games &amp; quizzes!\n\nInvite your friends &amp; neighbours to unlock faster\n👇"
+                android:textAlignment="center"
+                android:textColor="@color/black" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_invite"
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Invite Now"
+                android:theme="@style/MaterialButton"
+                app:backgroundTint="@color/colorAccent"
+                app:icon="@drawable/ic_person_add_24dp" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</FrameLayout>

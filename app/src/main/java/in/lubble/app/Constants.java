@@ -48,6 +48,7 @@ public class Constants {
     public static final String IS_TIME_SHOWN = "IS_TIME_SHOWN";
     public static final String MSG_WATERMARK_TEXT = "MSG_WATERMARK_TEXT";
     public static final String WIKI_URL = "WIKI_URL";
+    public static final String IS_GAMES_ENABLED = "IS_GAMES_ENABLED";
 
     public static final double SVR_LATI = 28.696660;
     public static final double SVR_LONGI = 77.124772;

@@ -98,6 +98,7 @@ import static in.lubble.app.Constants.DELIVERY_FEE;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
 import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
 import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.Constants.IS_GAMES_ENABLED;
 import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
 import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
 import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
@@ -739,6 +740,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
         map.put(WIKI_URL, "https://lubble.in/neighbourhoods/");
         map.put(IS_UXCAM_ENABLED, true);
+        map.put(IS_GAMES_ENABLED, false);
 
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaultsAsync(map);
