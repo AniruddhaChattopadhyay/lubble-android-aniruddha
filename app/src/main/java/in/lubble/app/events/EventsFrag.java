@@ -1,5 +1,9 @@
 package in.lubble.app.events;
 
+import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
+import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
+import static in.lubble.app.events.EventsFragPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.location.Location;
@@ -19,13 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.List;
 
@@ -38,17 +38,11 @@ import in.lubble.app.models.EventData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.utils.UiUtils;
-import okhttp3.RequestBody;
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
-import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
-import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.events.EventsFragPermissionsDispatcher.fetchLastKnownLocationWithPermissionCheck;
 
 @RuntimePermissions
 public class EventsFrag extends Fragment {
@@ -60,7 +54,6 @@ public class EventsFrag extends Fragment {
     private EventsAdapter adapter;
     private ChildEventListener childEventListener;
     private ProgressBar progressBar;
-    private Endpoints endpoints;
 
     public EventsFrag() {
         // Required empty public constructor
@@ -108,64 +101,10 @@ public class EventsFrag extends Fragment {
         return view;
     }
 
-    @SuppressLint("MissingPermission")
-    @NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-    public void fetchLastKnownLocation() {
-        LocationServices.getFusedLocationProviderClient(getContext()).getLastLocation().addOnSuccessListener(location -> {
-            if (location != null) {
-                // Logic to handle location object
-                getEvents(location);
-            } else {
-                final Location dummyLoc = new Location("dummy");
-                dummyLoc.setLatitude(LubbleSharedPrefs.getInstance().getCenterLati());
-                dummyLoc.setLongitude(LubbleSharedPrefs.getInstance().getCenterLongi());
-                getEventsWithoutLocation(dummyLoc);
-            }
-        });
-    }
-
-    private void getEvents(Location location){
-        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.getEvents(location.getLatitude(),location.getLongitude()).enqueue(new Callback<List<EventData>>() {
-            @Override
-            public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
-                if (response.isSuccessful()) {
-                    if (progressBar != null) {
-                        progressBar.setVisibility(View.GONE);
-                    }
-                    adapter.clear();
-                    List<EventData> data = response.body();
-                    for (EventData eventData : data) {
-                        if (eventData != null) {
-                            eventData.setId(eventData.getEvent_id());
-                            adapter.addEvent(eventData);
-                        }
-                    }
-                } else {
-                    if (getContext() != null) {
-                        Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<EventData>> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void getEventsWithoutLocation(Location dummyLoc) {
-        getEvents(dummyLoc);
-        if (getActivity() != null && getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
-        }
-    }
-
     @Override
     public void onResume() {
         super.onResume();
-        endpoints = ServiceGenerator.createService(Endpoints.class);
+        Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
 
         String maintenanceText = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_TEXT);
         String maintenanceImageUrl = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_IMG);
@@ -182,6 +121,62 @@ public class EventsFrag extends Fragment {
 
             fetchLastKnownLocationWithPermissionCheck(this);
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    @NeedsPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    public void fetchLastKnownLocation() {
+        LocationServices.getFusedLocationProviderClient(requireContext()).getLastLocation().addOnSuccessListener(location -> {
+            if (location != null) {
+                // Logic to handle location object
+                getEvents(location);
+            } else {
+                final Location dummyLoc = new Location("dummy");
+                dummyLoc.setLatitude(LubbleSharedPrefs.getInstance().getCenterLati());
+                dummyLoc.setLongitude(LubbleSharedPrefs.getInstance().getCenterLongi());
+                getEvents(dummyLoc);
+            }
+        });
+        if (getActivity() != null && getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).toggleSearchInToolbar(false);
+        }
+    }
+
+    private void getEvents(@NonNull Location location) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        endpoints.getEvents(location.getLatitude(), location.getLongitude()).enqueue(new Callback<List<EventData>>() {
+            @Override
+            public void onResponse(@NonNull Call<List<EventData>> call, @NonNull Response<List<EventData>> response) {
+                if (response.isSuccessful()) {
+                    if (progressBar != null) {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                    List<EventData> data = response.body();
+                    if (data != null) {
+                        adapter.clear();
+                        for (EventData eventData : data) {
+                            if (eventData != null) {
+                                eventData.setId(eventData.getEvent_id());
+                                adapter.addEvent(eventData);
+                            }
+                        }
+                    } else {
+                        if (getContext() != null) {
+                            Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                } else {
+                    if (getContext() != null) {
+                        Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<EventData>> call, @NonNull Throwable t) {
+                Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
