@@ -124,9 +124,9 @@ public class EventsFrag extends Fragment {
         });
     }
 
-    private void getEvents(Location location){
+    private void getEvents(Location location) {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.getEvents(location.getLatitude(),location.getLongitude()).enqueue(new Callback<List<EventData>>() {
+        endpoints.getEvents(location.getLatitude(), location.getLongitude()).enqueue(new Callback<List<EventData>>() {
             @Override
             public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
                 if (response.isSuccessful()) {
@@ -135,12 +135,7 @@ public class EventsFrag extends Fragment {
                     }
                     adapter.clear();
                     List<EventData> data = response.body();
-                    for (EventData eventData : data) {
-                        if (eventData != null) {
-                            eventData.setId(eventData.getEvent_id());
-                            adapter.addEvent(eventData);
-                        }
-                    }
+                    adapter.addEvents(data);
                 } else {
                     if (getContext() != null) {
                         Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
