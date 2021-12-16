@@ -1,5 +1,40 @@
 package in.lubble.app;
 
+import static in.lubble.app.Constants.DEFAULT_SHOP_PIC;
+import static in.lubble.app.Constants.DELIVERY_FEE;
+import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
+import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
+import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
+import static in.lubble.app.Constants.IS_GAMES_ENABLED;
+import static in.lubble.app.Constants.IS_MAP_SHOWN;
+import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
+import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
+import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
+import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
+import static in.lubble.app.Constants.IS_TIME_SHOWN;
+import static in.lubble.app.Constants.IS_UXCAM_ENABLED;
+import static in.lubble.app.Constants.MAP_BTN_URL;
+import static in.lubble.app.Constants.MAP_HTML;
+import static in.lubble.app.Constants.MAP_SHARE_TEXT;
+import static in.lubble.app.Constants.MARKET_MAINTENANCE_TEXT;
+import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
+import static in.lubble.app.Constants.QUIZ_RESULT_UI;
+import static in.lubble.app.Constants.REFER_MSG;
+import static in.lubble.app.Constants.REWARDS_EXPLAINER;
+import static in.lubble.app.Constants.WIKI_URL;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM_YES;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_SHOWN;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_STARS;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG_NEVER;
+import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG_YES;
+import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
+import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
+import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
+
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -92,40 +127,6 @@ import it.sephiroth.android.library.xtooltip.Tooltip;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static in.lubble.app.Constants.DEFAULT_SHOP_PIC;
-import static in.lubble.app.Constants.DELIVERY_FEE;
-import static in.lubble.app.Constants.EVENTS_MAINTENANCE_IMG;
-import static in.lubble.app.Constants.EVENTS_MAINTENANCE_TEXT;
-import static in.lubble.app.Constants.GROUP_QUES_ENABLED;
-import static in.lubble.app.Constants.IS_MAP_SHOWN;
-import static in.lubble.app.Constants.IS_NOTIF_SNOOZE_ON;
-import static in.lubble.app.Constants.IS_QUIZ_SHOWN;
-import static in.lubble.app.Constants.IS_RATING_DIALOG_ACTIVE;
-import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
-import static in.lubble.app.Constants.IS_TIME_SHOWN;
-import static in.lubble.app.Constants.IS_UXCAM_ENABLED;
-import static in.lubble.app.Constants.MAP_BTN_URL;
-import static in.lubble.app.Constants.MAP_HTML;
-import static in.lubble.app.Constants.MAP_SHARE_TEXT;
-import static in.lubble.app.Constants.MARKET_MAINTENANCE_TEXT;
-import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
-import static in.lubble.app.Constants.QUIZ_RESULT_UI;
-import static in.lubble.app.Constants.REFER_MSG;
-import static in.lubble.app.Constants.REWARDS_EXPLAINER;
-import static in.lubble.app.Constants.WIKI_URL;
-import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM;
-import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_FORM_YES;
-import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_SHOWN;
-import static in.lubble.app.analytics.AnalyticsEvents.RATING_DIALOG_STARS;
-import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG;
-import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG_NEVER;
-import static in.lubble.app.analytics.AnalyticsEvents.RATING_STORE_DIALOG_YES;
-import static in.lubble.app.firebase.FcmService.LOGOUT_ACTION;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
-import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
-import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -740,7 +741,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         map.put(MSG_WATERMARK_TEXT, "-via Lubble, the local app for {lubble}. Download: ");
         map.put(WIKI_URL, "https://lubble.in/neighbourhoods/");
         map.put(IS_UXCAM_ENABLED, true);
-        map.put(IS_MAP_SHOWN,false);
+        map.put(IS_GAMES_ENABLED, false);
+        map.put(IS_MAP_SHOWN, false);
         map.put(DEFAULT_SHOP_PIC, "https://i.imgur.com/thqJQxg.png");
         firebaseRemoteConfig.setDefaultsAsync(map);
         if (firebaseRemoteConfig.getBoolean(IS_REWARDS_SHOWN)) {
