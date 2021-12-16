@@ -1,5 +1,9 @@
 package in.lubble.app.quiz;
 
+import static in.lubble.app.Constants.IS_GAMES_ENABLED;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.utils.UiUtils.dpToPx;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +18,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -30,10 +36,6 @@ import in.lubble.app.map.LubbleMapActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
-import static in.lubble.app.Constants.IS_REWARDS_SHOWN;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.utils.UiUtils.dpToPx;
-
 public class GamesFrag extends Fragment {
 
     private TextView currentCoinsTv;
@@ -45,6 +47,10 @@ public class GamesFrag extends Fragment {
     private RelativeLayout whereTonightContainer;
     private RelativeLayout mapContainer;
     private ValueEventListener coinsListener;
+    private View lockedBg;
+    private MaterialCardView lockedCardView;
+    private TextView lockedTitleTv, lockedSubtitleTv;
+    private MaterialButton inviteBtn;
     private Long currentCoins = 0L;
 
     public GamesFrag() {
@@ -71,15 +77,42 @@ public class GamesFrag extends Fragment {
         ImageView whereTonightPicIv = view.findViewById(R.id.iv_wheretonight_pic);
         earnCoinsTv = view.findViewById(R.id.tv_earn_more);
         mapContainer = view.findViewById(R.id.container_map);
+        lockedBg = view.findViewById(R.id.view_lock_bg);
+        lockedCardView = view.findViewById(R.id.mcv_locked_card);
+        lockedTitleTv = view.findViewById(R.id.tv_locked_title);
+        lockedSubtitleTv = view.findViewById(R.id.tv_locked_subtitle);
+        inviteBtn = view.findViewById(R.id.btn_invite);
         final LinearLayout currentCoinsContainer = view.findViewById(R.id.container_current_coins);
 
         Analytics.triggerScreenEvent(getContext(), this.getClass());
 
-        currentCoinsContainer.setOnClickListener(v -> ReferralActivity.open(requireContext(), true));
-        Boolean a = FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_MAP_SHOWN);
-        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_MAP_SHOWN))
-            mapContainer.setVisibility(View.VISIBLE);
+        if (FirebaseRemoteConfig.getInstance().getBoolean(IS_GAMES_ENABLED)) {
+            // games tab is enabled
+            lockedBg.setVisibility(View.GONE);
+            lockedCardView.setVisibility(View.GONE);
+        } else {
+            // lock games tab
+            lockedBg.setVisibility(View.VISIBLE);
+            lockedCardView.setVisibility(View.VISIBLE);
+            String lubbleName = LubbleSharedPrefs.getInstance().getLubbleName();
+            lockedTitleTv.setText(String.format(getString(R.string.new_nhood_locked_title), lubbleName));
+            lockedSubtitleTv.setText(String.format(getString(R.string.new_nhood_locked_subtitle), lubbleName));
+            lockedBg.setOnClickListener(v -> {
+                // just consume all clicks
+            });
+            inviteBtn.setOnClickListener(btnView -> {
+                ReferralActivity.open(requireContext(), true);
+                Analytics.triggerEvent(AnalyticsEvents.GAMES_LOCKED_INVITE_CLICK, requireContext());
+            });
+        }
 
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_MAP_SHOWN)) {
+            mapContainer.setVisibility(View.VISIBLE);
+        } else {
+            mapContainer.setVisibility(View.GONE);
+        }
+
+        currentCoinsContainer.setOnClickListener(v -> ReferralActivity.open(requireContext(), true));
         earnCoinsTv.setOnClickListener(v -> {
             Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, getContext());
             ReferralActivity.open(requireContext(), true);

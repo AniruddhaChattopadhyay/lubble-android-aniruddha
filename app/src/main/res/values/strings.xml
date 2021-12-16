@@ -238,6 +238,8 @@
 
 
     <string name="fetch_test_event" translatable="false">http://10.145.205.136:8000/</string>
+    <string name="new_nhood_locked_subtitle">%s needs 100 members to unlock specially curated local games &amp; quizzes!\n\nInvite your friends &amp; neighbours to unlock faster\n👇</string>
+    <string name="new_nhood_locked_title">Unlocks when %s reaches 100 members!</string>
     <string-array name="login_server_url_array">
         <item>@string/profile</item>
         <item>@string/profile</item>
