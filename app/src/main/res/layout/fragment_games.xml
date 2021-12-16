@@ -164,9 +164,11 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             android:background="@drawable/rect_rounded_border"
-            android:foreground="?attr/selectableItemBackground"
             android:orientation="vertical"
-            android:padding="8dp">
+            android:foreground="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <ImageView
                 android:id="@+id/iv_map"

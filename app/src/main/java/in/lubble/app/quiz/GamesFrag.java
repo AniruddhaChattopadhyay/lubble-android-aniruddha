@@ -25,13 +25,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
+import in.lubble.app.Constants;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.feed_bottom_sheet.FeedUserShareBottomSheetFrag;
 import in.lubble.app.map.LubbleMapActivity;
 import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
@@ -106,8 +106,13 @@ public class GamesFrag extends Fragment {
             });
         }
 
-        currentCoinsContainer.setOnClickListener(v -> ReferralActivity.open(requireContext(), true));
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_MAP_SHOWN)) {
+            mapContainer.setVisibility(View.VISIBLE);
+        } else {
+            mapContainer.setVisibility(View.GONE);
+        }
 
+        currentCoinsContainer.setOnClickListener(v -> ReferralActivity.open(requireContext(), true));
         earnCoinsTv.setOnClickListener(v -> {
             Analytics.triggerEvent(AnalyticsEvents.QUIZ_EARN_COINS, getContext());
             ReferralActivity.open(requireContext(), true);

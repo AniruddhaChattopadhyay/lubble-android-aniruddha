@@ -1,11 +1,7 @@
 package in.lubble.app.network;
 
-import android.service.autofill.UserData;
-
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -179,6 +175,9 @@ public interface Endpoints {
     @GET("marketplace/events/list/")
     Call<List<EventData>> getEvents(@Query("lubble_id") String lubble_id);
 
+    @GET("marketplace/events/list/")
+    Call<List<EventData>> getEvents(@Query("lat") double latitude, @Query("long") double longitude);
+
     @GET("marketplace/events/")
     Call<List<EventData>> getEvent(@Query("event_id") String event_id);
 
@@ -195,7 +194,7 @@ public interface Endpoints {
     Call<Void> superLikeMsg(@Body RequestBody params);
 
     @GET("marketplace/getFeedUserToken/")
-    Call<StreamCredentials> getStreamCredentials(@Query("feed_id")String feed_id);
+    Call<StreamCredentials> getStreamCredentials(@Query("feed_id") String feed_id);
 
     @GET("marketplace/getFeedGroupList/")
     Call<List<FeedGroupData>> getFeedGroupList();
@@ -241,25 +240,25 @@ public interface Endpoints {
     Call<GroupInfoData> fetchGroupInfo(@Path("lubble_id") String lubbleId, @Path("group_id") String groupId, @Query("auth") String token);
 
     @GET("marketplace/getFeedGroupInfo/")
-    Call<FeedGroupData> getFeedGroupInfo(@Query("feedName")String feedName);
+    Call<FeedGroupData> getFeedGroupInfo(@Query("feedName") String feedName);
 
-    public class StreamCredentials{
+    public class StreamCredentials {
         private String api_key;
         private String user_token;
 
-        public String getApi_key(){
+        public String getApi_key() {
             return api_key;
         }
 
-        public String getUser_token(){
+        public String getUser_token() {
             return user_token;
         }
 
-        public void setUser_token(String user_token){
+        public void setUser_token(String user_token) {
             this.user_token = user_token;
         }
 
-        public void setApi_key(String api_key){
+        public void setApi_key(String api_key) {
             this.api_key = api_key;
         }
 

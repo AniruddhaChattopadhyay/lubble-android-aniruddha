@@ -339,6 +339,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void onRefresh() {
         initRecyclerView();
+        initJoinedGroupRecyclerView();
     }
 
     @Override

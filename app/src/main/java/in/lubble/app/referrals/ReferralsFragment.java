@@ -1,5 +1,9 @@
 package in.lubble.app.referrals;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
+import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
+
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.ClipData;
@@ -44,11 +48,6 @@ import in.lubble.app.models.ProfileData;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserRef;
-import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
-import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
 
 public class ReferralsFragment extends Fragment {
 
