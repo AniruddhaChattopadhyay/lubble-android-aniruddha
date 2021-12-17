@@ -1,5 +1,10 @@
 package in.lubble.app;
 
+import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
+import static in.lubble.app.Constants.UXCAM_DEV_CHAABI;
+import static in.lubble.app.Constants.UXCAM_PROD_CHAABI;
+import static in.lubble.app.utils.UserUtils.isAdminAccount;
+
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.os.Build;
@@ -16,7 +21,6 @@ import com.clevertap.android.sdk.CleverTapAPI;
 import com.freshchat.consumer.sdk.Freshchat;
 import com.freshchat.consumer.sdk.FreshchatNotificationConfig;
 import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Logger;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
@@ -31,11 +35,6 @@ import in.lubble.app.notifications.SnoozedGroupsSharedPrefs;
 import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.quiz.AnswerSharedPrefs;
 import io.branch.referral.Branch;
-
-import static in.lubble.app.Constants.CHAT_NOTIF_CHANNEL;
-import static in.lubble.app.Constants.UXCAM_DEV_CHAABI;
-import static in.lubble.app.Constants.UXCAM_PROD_CHAABI;
-import static in.lubble.app.utils.UserUtils.isAdminAccount;
 
 /**
  * Created by ishaan on 20/1/18.
@@ -143,7 +142,8 @@ public class LubbleApp extends MultiDexApplication {
         streamAnalytics.setDebug(BuildConfig.DEBUG);*/
 
         UXCam.startWithKey(BuildConfig.DEBUG ? UXCAM_DEV_CHAABI : UXCAM_PROD_CHAABI);
-        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_UXCAM_ENABLED) && !isAdminAccount()) {
+        if (FirebaseRemoteConfig.getInstance().getBoolean(Constants.IS_UXCAM_ENABLED) && !isAdminAccount()
+                && !BuildConfig.DEBUG) {
             UXCam.optInOverall();
         } else {
             UXCam.optOutOverall();
