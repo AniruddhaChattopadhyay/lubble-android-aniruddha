@@ -157,4 +157,10 @@ public class UserUtils {
         }
     }
 
+    public static boolean isAdminAccount() {
+        String supportUid = LubbleSharedPrefs.getInstance().getSupportUid();
+        String currUid = FirebaseAuth.getInstance().getUid();
+        return currUid != null & supportUid != null && currUid.equalsIgnoreCase(supportUid);
+    }
+
 }

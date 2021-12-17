@@ -1,5 +1,9 @@
 package in.lubble.app.events;
 
+import static in.lubble.app.utils.DateTimeUtils.EVENT_DATE_TIME;
+import static in.lubble.app.utils.DateTimeUtils.getTimeFromLong;
+import static in.lubble.app.utils.UiUtils.dpToPx;
+
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
@@ -20,18 +24,12 @@ import com.bumptech.glide.request.target.Target;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import in.lubble.app.GlideApp;
-import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.models.EventData;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.StringUtils;
-
-import static in.lubble.app.utils.DateTimeUtils.EVENT_DATE_TIME;
-import static in.lubble.app.utils.DateTimeUtils.getTimeFromLong;
-import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -118,9 +116,10 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             viewHolder.titleTv.setText(R.string.past_events);
         }
     }
-    void addEvents(List<EventData> eventData){
+
+    void addEvents(List<EventData> eventData) {
         List<EventData> pastEventList = new ArrayList<>();
-        for(EventData tempEventData: eventData ) {
+        for (EventData tempEventData : eventData) {
             long timestampToCompare = tempEventData.getEndTimestamp() == 0L ? tempEventData.getStartTimestamp() : tempEventData.getEndTimestamp();
             if (System.currentTimeMillis() < timestampToCompare) {
                 eventDataList.add(tempEventData);
@@ -138,7 +137,6 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void clear() {
         eventDataList.clear();
         POS_DIV = 0;
-        eventDataList.add(POS_DIV, null);
         notifyDataSetChanged();
     }
 
@@ -146,9 +144,6 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public int getItemCount() {
         return eventDataList.size();
     }
-
-
-
 
     class EventViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         final View mView;
@@ -171,11 +166,11 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         @Override
         public void onClick(View v) {
-            EventInfoActivity.open(context, eventDataList.get(getAdapterPosition()).getEvent_id());
+            EventInfoActivity.open(context, eventDataList.get(getAbsoluteAdapterPosition()).getEvent_id());
         }
     }
 
-    class DividerViewHolder extends RecyclerView.ViewHolder {
+    static class DividerViewHolder extends RecyclerView.ViewHolder {
         final View mView;
         final TextView titleTv;
 

@@ -104,18 +104,18 @@ public class EventsFrag extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-
         String maintenanceText = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_TEXT);
         String maintenanceImageUrl = FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_IMG);
         if (!TextUtils.isEmpty(maintenanceText)) {
             maintenanceTv.setVisibility(View.VISIBLE);
+            maintenanceAnim.setVisibility(View.VISIBLE);
             maintenanceTv.setText(maintenanceText.replace("\\n", "\n"));
             maintenanceAnim.setAnimationFromUrl(maintenanceImageUrl);
             recyclerView.setVisibility(View.GONE);
             progressBar.setVisibility(View.GONE);
         } else {
             maintenanceTv.setVisibility(View.GONE);
+            maintenanceAnim.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
             progressBar.setVisibility(View.VISIBLE);
 
@@ -144,26 +144,39 @@ public class EventsFrag extends Fragment {
 
     private void getEvents(Location location) {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.getEvents(location.getLatitude(),location.getLongitude()).enqueue(new Callback<List<EventData>>() {
+        endpoints.getEvents(location.getLatitude(), location.getLongitude()).enqueue(new Callback<List<EventData>>() {
             @Override
-            public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
-                if (response.isSuccessful()) {
+            public void onResponse(@NonNull Call<List<EventData>> call, @NonNull Response<List<EventData>> response) {
+                if (response.isSuccessful() && isAdded()) {
                     if (progressBar != null) {
                         progressBar.setVisibility(View.GONE);
                     }
                     adapter.clear();
-                    List<EventData> data = response.body();
-                    adapter.addEvents(data);
+                    List<EventData> dataList = response.body();
+                    if (dataList != null & !dataList.isEmpty()) {
+                        adapter.addEvents(dataList);
+                        maintenanceTv.setVisibility(View.GONE);
+                        maintenanceAnim.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                    } else {
+                        maintenanceTv.setVisibility(View.VISIBLE);
+                        maintenanceAnim.setVisibility(View.VISIBLE);
+                        maintenanceTv.setText("Be the first to add events!");
+                        maintenanceAnim.setAnimationFromUrl(FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_IMG));
+                        recyclerView.setVisibility(View.GONE);
+                    }
                 } else {
-                    if (getContext() != null) {
-                        Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
+                    if (isAdded()) {
+                        Toast.makeText(requireContext(), "Failed: " + response.message(), Toast.LENGTH_SHORT).show();
                     }
                 }
             }
 
             @Override
-            public void onFailure(Call<List<EventData>> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
+            public void onFailure(@NonNull Call<List<EventData>> call, @NonNull Throwable t) {
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), "Failed:" + t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
