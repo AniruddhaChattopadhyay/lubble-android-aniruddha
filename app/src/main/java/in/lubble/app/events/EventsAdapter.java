@@ -118,42 +118,21 @@ public class EventsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             viewHolder.titleTv.setText(R.string.past_events);
         }
     }
-
-    void addEvent(EventData eventData) {
-        if (!eventDataList.contains(eventData)) {
-            long timestampToCompare = eventData.getEndTimestamp() == 0L ? eventData.getStartTimestamp() : eventData.getEndTimestamp();
+    void addEvents(List<EventData> eventData){
+        List<EventData> pastEventList = new ArrayList<>();
+        for(EventData tempEventData: eventData ) {
+            long timestampToCompare = tempEventData.getEndTimestamp() == 0L ? tempEventData.getStartTimestamp() : tempEventData.getEndTimestamp();
             if (System.currentTimeMillis() < timestampToCompare) {
-                // upcoming event
-                insertWithSort(eventData, POS_DIV);
+                eventDataList.add(tempEventData);
                 POS_DIV++;
-                // persist read event id
-                final LubbleSharedPrefs sharedPrefs = LubbleSharedPrefs.getInstance();
-                final Set<String> readEventSet = sharedPrefs.getEventSet();
-                readEventSet.add(eventData.getId());
-                sharedPrefs.setEventSet(readEventSet);
             } else {
-                // past event
-                eventDataList.add(POS_DIV + 1, eventData);
+                pastEventList.add(tempEventData);
             }
-            notifyDataSetChanged();
         }
-    }
-
-    private void insertWithSort(EventData eventData, int pos) {
-        int prevPos = pos - 1 < 0 ? 0 : pos - 1;
-        if (prevPos == eventDataList.size()) {
-            prevPos = eventDataList.size() - 1;
-        }
-        final EventData prevEventData = eventDataList.get(prevPos);
-        if (prevEventData != null) {
-            if (eventData.getStartTimestamp() >= prevEventData.getStartTimestamp() || pos == 0) {
-                eventDataList.add(pos, eventData);
-            } else {
-                insertWithSort(eventData, --pos);
-            }
-        } else {
-            eventDataList.add(pos, eventData);
-        }
+        eventDataList.add(null);
+        POS_DIV++;
+        eventDataList.addAll(pastEventList);
+        notifyDataSetChanged();
     }
 
     public void clear() {

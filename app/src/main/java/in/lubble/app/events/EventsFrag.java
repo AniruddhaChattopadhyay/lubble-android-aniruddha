@@ -142,29 +142,18 @@ public class EventsFrag extends Fragment {
         }
     }
 
-    private void getEvents(@NonNull Location location) {
+    private void getEvents(Location location) {
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
-        endpoints.getEvents(location.getLatitude(), location.getLongitude()).enqueue(new Callback<List<EventData>>() {
+        endpoints.getEvents(location.getLatitude(),location.getLongitude()).enqueue(new Callback<List<EventData>>() {
             @Override
-            public void onResponse(@NonNull Call<List<EventData>> call, @NonNull Response<List<EventData>> response) {
+            public void onResponse(Call<List<EventData>> call, Response<List<EventData>> response) {
                 if (response.isSuccessful()) {
                     if (progressBar != null) {
                         progressBar.setVisibility(View.GONE);
                     }
+                    adapter.clear();
                     List<EventData> data = response.body();
-                    if (data != null) {
-                        adapter.clear();
-                        for (EventData eventData : data) {
-                            if (eventData != null) {
-                                eventData.setId(eventData.getEvent_id());
-                                adapter.addEvent(eventData);
-                            }
-                        }
-                    } else {
-                        if (getContext() != null) {
-                            Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
+                    adapter.addEvents(data);
                 } else {
                     if (getContext() != null) {
                         Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
@@ -173,7 +162,7 @@ public class EventsFrag extends Fragment {
             }
 
             @Override
-            public void onFailure(@NonNull Call<List<EventData>> call, @NonNull Throwable t) {
+            public void onFailure(Call<List<EventData>> call, Throwable t) {
                 Toast.makeText(getContext(), "Failed to load events! Please try again.", Toast.LENGTH_SHORT).show();
             }
         });
