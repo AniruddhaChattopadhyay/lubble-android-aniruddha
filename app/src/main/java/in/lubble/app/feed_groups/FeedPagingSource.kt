@@ -1,5 +1,6 @@
 package `in`.lubble.app.feed_groups
 
+import `in`.lubble.app.LubbleSharedPrefs
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import io.getstream.cloud.CloudFlatFeed
@@ -51,7 +52,7 @@ class FeedPagingSource(
                     EnrichmentFlags()
                             .withReactionCounts()
                             .withOwnReactions()
-                            .withRecentReactions())
+                            .withRecentReactions(), "lbl_" + LubbleSharedPrefs.getInstance().lubbleId)
                     .get()
         }
     }

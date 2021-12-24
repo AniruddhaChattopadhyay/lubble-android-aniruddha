@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -162,7 +163,7 @@ public class EventsFrag extends Fragment {
                         maintenanceTv.setVisibility(View.VISIBLE);
                         maintenanceAnim.setVisibility(View.VISIBLE);
                         maintenanceTv.setText("Be the first to add events!");
-                        maintenanceAnim.setAnimationFromUrl(FirebaseRemoteConfig.getInstance().getString(EVENTS_MAINTENANCE_IMG));
+                        maintenanceAnim.setImageDrawable(AppCompatResources.getDrawable(requireContext(), R.drawable.ic_undraw_events_2p66));
                         recyclerView.setVisibility(View.GONE);
                     }
                 } else {
