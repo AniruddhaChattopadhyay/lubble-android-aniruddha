@@ -205,11 +205,6 @@ public class FullScreenVideoActivity extends BaseActivity {
                 public void onPlayWhenReadyChanged(boolean playWhenReady, int reason) {
 
                 }
-
-                @Override
-                public void onPlayerError(ExoPlaybackException error) {
-                    FirebaseCrashlytics.getInstance().recordException(error);
-                }
             });
             DefaultDataSourceFactory dataSourceFactory = new DefaultDataSourceFactory(this, "ua");
             ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
