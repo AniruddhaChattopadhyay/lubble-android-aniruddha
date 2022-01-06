@@ -509,9 +509,12 @@ public class FeedPostFrag extends Fragment {
         Bundle bundle = new Bundle();
         ArrayList<String> foreignIdList = new ArrayList<>();
         foreignIdList.add(enrichedActivity.getForeignID());
-        bundle.putStringArrayList("foreignIdList", foreignIdList);
+        bundle.putStringArrayList("foreignId", foreignIdList);
         bundle.putString("feedName", "timeline:" + userId);
         bundle.putString("location", FeedPostFrag.class.getSimpleName());
+        bundle.putString("activityId", postId);
+        Map<String, Object> extras = enrichedActivity.getExtra();
+        bundle.putString("postText", String.valueOf(extras.get("message") == null ? "" : extras.get("message")));
         Analytics.triggerEvent(AnalyticsEvents.FEED_POST_IMPRESSION, bundle, getContext());
     }
 

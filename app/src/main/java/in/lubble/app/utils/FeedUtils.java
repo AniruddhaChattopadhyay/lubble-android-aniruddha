@@ -124,9 +124,10 @@ public class FeedUtils {
                 int firstPos = visibleState.getFirstCompletelyVisible();
                 int lastPos = visibleState.getLastCompletelyVisible();
                 if (firstPos > 0 && lastPos > 0) {
+                    EnrichedActivity firstActivity = enrichedActivities.get(firstPos);
                     if (firstPos == lastPos) {
-                        contentList.add(new Content(enrichedActivities.get(firstPos).getForeignID()));
-                        foreignIdList.add(enrichedActivities.get(firstPos).getForeignID());
+                        contentList.add(new Content(firstActivity.getForeignID()));
+                        foreignIdList.add(firstActivity.getForeignID());
                     } else {
                         List<EnrichedActivity> subList = enrichedActivities.subList(firstPos, lastPos);
                         contentList.addAll(Lists.transform(subList, input -> new Content(input.getForeignID())));
@@ -134,9 +135,12 @@ public class FeedUtils {
                     }
                     Analytics.triggerFeedImpression(contentList, feedName, location);
                     Bundle bundle = new Bundle();
-                    bundle.putStringArrayList("foreignIdList", foreignIdList);
+                    bundle.putStringArrayList("foreignId", foreignIdList);
                     bundle.putString("feedName", feedName);
                     bundle.putString("location", location);
+                    bundle.putString("activityId", firstActivity.getID());
+                    Map<String, Object> extras = firstActivity.getExtra();
+                    bundle.putString("postText", String.valueOf(extras.get("message") == null ? "" : extras.get("message")));
                     Analytics.triggerEvent(AnalyticsEvents.FEED_POST_IMPRESSION, bundle, LubbleApp.getAppContext());
                 }
             } catch (Exception e) {
