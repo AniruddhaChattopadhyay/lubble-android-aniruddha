@@ -362,6 +362,22 @@ public class AddPostForFeed extends BaseActivity {
     public void onBackPressed() {
         super.onBackPressed();
         overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
+        if (exoPlayer != null)
+            exoPlayer.release();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (exoPlayer != null)
+            exoPlayer.release();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (exoPlayer != null)
+            exoPlayer.release();
     }
 
 }
