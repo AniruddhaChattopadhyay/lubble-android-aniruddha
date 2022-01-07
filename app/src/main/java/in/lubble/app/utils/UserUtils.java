@@ -23,7 +23,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
-import in.lubble.app.auth.LoginActivity;
+//import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.auth.WelcomeActivity;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.models.ProfileData;
 import in.lubble.app.notifications.GroupMappingSharedPrefs;
@@ -81,7 +82,7 @@ public class UserUtils {
                                             AnswerSharedPrefs.getInstance().clearAll();
                                             FeedServices.clearAll();
                                             Branch.getInstance().logout();
-                                            Intent intent = new Intent(activity, LoginActivity.class);
+                                            Intent intent = new Intent(activity, WelcomeActivity.class);
                                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                             activity.startActivity(intent);
                                             activity.finishAffinity();
@@ -123,7 +124,7 @@ public class UserUtils {
                                         AnswerSharedPrefs.getInstance().clearAll();
                                         FeedServices.clearAll();
                                         Branch.getInstance().logout();
-                                        Intent intent = new Intent(context, LoginActivity.class);
+                                        Intent intent = new Intent(context, WelcomeActivity.class);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                         context.startActivity(intent);
