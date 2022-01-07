@@ -13,6 +13,14 @@ public class SliderData implements Serializable {
     @SerializedName("deep_link")
     private String deepLink;
 
+    public SliderData(){
+
+    }
+
+    public SliderData(String url){
+        url = url;
+    }
+
     public String getUrl() {
         return url;
     }
