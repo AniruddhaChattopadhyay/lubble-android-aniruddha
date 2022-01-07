@@ -18,7 +18,7 @@ public class SliderData implements Serializable {
     }
 
     public SliderData(String url){
-        url = url;
+        this.url = url;
     }
 
     public String getUrl() {
