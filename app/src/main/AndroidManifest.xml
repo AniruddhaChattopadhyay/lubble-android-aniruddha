@@ -68,6 +68,11 @@
             android:parentActivityName=".MainActivity"
             android:screenOrientation="portrait" />
         <activity
+            android:name=".auth.WelcomeActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"
+            android:exported="true" />
+        <activity
             android:name=".feed_groups.SingleGroupFeed.GroupFeedActivity"
             android:configChanges="orientation"
             android:parentActivityName=".MainActivity"
