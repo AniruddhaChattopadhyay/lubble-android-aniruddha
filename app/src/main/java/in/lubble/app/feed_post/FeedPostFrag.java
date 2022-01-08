@@ -375,6 +375,7 @@ public class FeedPostFrag extends Fragment {
         exoPlayer.prepare();
 
     }
+
     private void openMorePopupMenu(String activityId, Data actorData, Map<String, Object> extras) {
         PopupMenu popupMenu = new PopupMenu(requireContext(), moreMenuIv);
 
@@ -784,6 +785,22 @@ public class FeedPostFrag extends Fragment {
             startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
         }
         Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, requireContext());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(exoPlayer!=null) {
+            exoPlayer.pause();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(exoPlayer!=null) {
+            exoPlayer.release();
+        }
     }
 
 }
