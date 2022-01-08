@@ -1,13 +1,21 @@
 package in.lubble.app.groups;
 
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
+import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
+import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupInfoRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.groups.GroupRecyclerAdapter.TYPE_HEADER;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,16 +74,6 @@ import me.crosswall.lib.coverflow.core.PagerContainer;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
-import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.firebase.RealtimeDbHelper.getDmsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getLubbleGroupInfoRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getSellerRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserDmsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
-import static in.lubble.app.groups.GroupRecyclerAdapter.TYPE_HEADER;
 
 public class GroupListFragment extends Fragment implements OnListFragmentInteractionListener, ChatSearchListener {
 
@@ -628,10 +626,10 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
 
     @Override
     public void toggleSliderVisibility(boolean isShown) {
-        if (isShown) {
+        if (isShown && pagerContainer != null) {
             pagerContainer.setVisibility(View.VISIBLE);
             tabLayout.setVisibility(View.VISIBLE);
-        } else {
+        } else if (pagerContainer != null) {
             pagerContainer.setVisibility(View.GONE);
             tabLayout.setVisibility(View.GONE);
         }
