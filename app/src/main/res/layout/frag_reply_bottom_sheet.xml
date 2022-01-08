@@ -4,7 +4,7 @@
     android:id="@+id/bottomsheet_reply"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/transparent"
+    android:background="@color/white"
     android:orientation="vertical"
     app:behavior_hideable="false"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -19,6 +19,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal">
 
         <in.lubble.app.widget.ReplyEditText
@@ -44,6 +46,7 @@
             android:paddingLeft="8dp"
             android:paddingTop="8dp"
             android:paddingRight="16dp"
+            android:layout_gravity="bottom"
             android:paddingBottom="8dp"
             app:srcCompat="@drawable/ic_send_white_24dp"
             app:tint="@color/colorAccent" />
