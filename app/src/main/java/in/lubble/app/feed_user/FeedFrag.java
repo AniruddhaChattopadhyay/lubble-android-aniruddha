@@ -1,5 +1,9 @@
 package in.lubble.app.feed_user;
 
+import static android.app.Activity.RESULT_OK;
+import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
+import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -54,10 +58,6 @@ import io.getstream.core.models.Reaction;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static android.app.Activity.RESULT_OK;
-import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
-import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, ReplyListener, SwipeRefreshLayout.OnRefreshListener, JoinedGroupsStoriesAdapter.JoinedGroupsListener {
 
@@ -349,7 +349,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void onVideoClicked(String vidPath) {
-        FullScreenVideoActivity.open(getActivity(), requireContext(), vidPath,"","");
+        FullScreenVideoActivity.open(getActivity(), requireContext(), vidPath, "", "");
     }
 
     @Override
@@ -386,11 +386,22 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         if (getActivity() instanceof MainActivity) {
             ((MainActivity) requireActivity()).toggleChatInToolbar(false);
         }
+        if (adapter != null) {
+            adapter.pauseAllVideos();
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
         LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (adapter != null) {
+            adapter.clearAllVideos();
+        }
     }
 }
