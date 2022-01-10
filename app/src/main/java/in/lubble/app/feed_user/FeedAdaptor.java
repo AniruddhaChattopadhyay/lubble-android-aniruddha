@@ -1,5 +1,10 @@
 package in.lubble.app.feed_user;
 
+import static android.view.View.GONE;
+import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
+import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
+import static in.lubble.app.utils.UiUtils.dpToPx;
+
 import android.animation.Animator;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
@@ -47,8 +52,8 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.curios.textformatter.FormatText;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
@@ -85,11 +90,6 @@ import io.getstream.core.models.Reaction;
 import it.sephiroth.android.library.xtooltip.ClosePolicy;
 import it.sephiroth.android.library.xtooltip.Tooltip;
 
-import static android.view.View.GONE;
-import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
-import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
-import static in.lubble.app.utils.UiUtils.dpToPx;
-
 public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor.MyViewHolder> {
 
     private static final String TAG = "FeedAdaptor";
@@ -100,7 +100,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     private final HashMap<Integer, String> likedMap = new HashMap<>();
     private final String userId = FirebaseAuth.getInstance().getUid();
     private String photoLink = null, videoLink = null;
-    private GestureDetector gestureDetector;
+    private final HashMap<Integer, ExoPlayer> exoplayerMap = new HashMap<>();
 
 
     public FeedAdaptor(@NotNull DiffUtil.ItemCallback<EnrichedActivity> diffCallback) {
@@ -307,12 +307,12 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         super.onViewDetachedFromWindow(holder);
         if (holder.exoPlayer != null) {
             holder.exoPlayer.setPlayWhenReady(false);
-            holder.exoPlayer.stop();
+            holder.exoPlayer.pause();
         }
     }
 
     private void prepareExoPlayerFromFileUri(MyViewHolder holder, Uri uri) {
-        holder.exoPlayer = new SimpleExoPlayer.Builder(context).build();
+        holder.exoPlayer = new ExoPlayer.Builder(context).build();
         DataSpec dataSpec = new DataSpec(uri);
         final FileDataSource fileDataSource = new FileDataSource();
         try {
@@ -333,7 +333,24 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         holder.exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
         holder.exoPlayerView.setPlayer(holder.exoPlayer);
         holder.exoPlayer.prepare();
+        exoplayerMap.put(holder.getBindingAdapterPosition(), holder.exoPlayer);
+    }
 
+    public void pauseAllVideos() {
+        if (!exoplayerMap.isEmpty()) {
+            for (ExoPlayer exoplayer : exoplayerMap.values()) {
+                exoplayer.pause();
+            }
+        }
+    }
+
+    public void clearAllVideos() {
+        if (!exoplayerMap.isEmpty()) {
+            for (ExoPlayer exoplayer : exoplayerMap.values()) {
+                exoplayer.release();
+            }
+            exoplayerMap.clear();
+        }
     }
 
     private void prepareDoubleTapToLikeTooltip(MyViewHolder holder, Map<String, Object> extras) {
@@ -648,7 +665,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private final RecyclerView commentRecyclerView;
         private final RelativeLayout linkPreviewContainer;
         private final PlayerView exoPlayerView;
-        private SimpleExoPlayer exoPlayer;
+        private ExoPlayer exoPlayer;
         private final RelativeLayout mediaLayout;
         private View touchView;
         private EnrichedActivity activity;

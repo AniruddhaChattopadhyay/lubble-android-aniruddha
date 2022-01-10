@@ -394,9 +394,25 @@ public class SingleGroupFeed extends Fragment implements FeedAdaptor.FeedListene
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        if (adapter != null) {
+            adapter.pauseAllVideos();
+        }
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (adapter != null) {
+            adapter.clearAllVideos();
+        }
     }
 
 }

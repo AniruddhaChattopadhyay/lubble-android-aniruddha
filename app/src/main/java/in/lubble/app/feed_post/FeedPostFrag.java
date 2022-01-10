@@ -42,6 +42,7 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.curios.textformatter.FormatText;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
@@ -128,7 +129,7 @@ public class FeedPostFrag extends Fragment {
     private ReplyEditText replyEt;
     private ShimmerRecyclerView commentRecyclerView;
     private PlayerView exoPlayerView;
-    private SimpleExoPlayer exoPlayer;
+    private ExoPlayer exoPlayer;
     @Nullable
     private String likeReactionId = null;
     private final String userId = FirebaseAuth.getInstance().getUid();
@@ -249,12 +250,13 @@ public class FeedPostFrag extends Fragment {
                                         String photoLink = extras.get("photoLink").toString();
                                         Glide.with(requireContext())
                                                 .load(photoLink)
+                                                .placeholder(R.color.md_grey_200)
                                                 .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                                                 .into(photoContentIv);
                                         photoContentIv.setOnClickListener(v ->
                                                 FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp));
                                     }
-                                    if(extras.containsKey("videoLink")){
+                                    if (extras.containsKey("videoLink")){
                                         mediaLayout.setVisibility(View.VISIBLE);
                                         String vidUrl = extras.get("videoLink").toString();
                                         exoPlayerView.setVisibility(View.VISIBLE);
@@ -350,7 +352,7 @@ public class FeedPostFrag extends Fragment {
     }
 
     private void prepareExoPlayerFromFileUri(Uri uri) {
-        exoPlayer = new SimpleExoPlayer.Builder(getContext()).build();
+        exoPlayer = new ExoPlayer.Builder(requireContext()).build();
         DataSpec dataSpec = new DataSpec(uri);
         final FileDataSource fileDataSource = new FileDataSource();
         try {
@@ -373,6 +375,7 @@ public class FeedPostFrag extends Fragment {
         exoPlayer.prepare();
 
     }
+
     private void openMorePopupMenu(String activityId, Data actorData, Map<String, Object> extras) {
         PopupMenu popupMenu = new PopupMenu(requireContext(), moreMenuIv);
 
@@ -782,6 +785,22 @@ public class FeedPostFrag extends Fragment {
             startActivity(Intent.createChooser(sharingIntent, getString(R.string.refer_share_title)));
         }
         Analytics.triggerEvent(AnalyticsEvents.POST_SHARED, requireContext());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(exoPlayer!=null) {
+            exoPlayer.pause();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(exoPlayer!=null) {
+            exoPlayer.release();
+        }
     }
 
 }
