@@ -8,9 +8,6 @@
     tools:context=".auth.WelcomeActivity">
 
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
     <me.crosswall.lib.coverflow.core.PagerContainer
         android:id="@+id/pager_container"
         android:layout_width="match_parent"
@@ -28,16 +25,16 @@
             android:layout_gravity="center"/>
 
     </me.crosswall.lib.coverflow.core.PagerContainer>
-    </RelativeLayout>
 
-    <Button
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/login_signup_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="LOGIN/SIGN UP"
+        android:text="@string/login_sign_up"
         android:layout_alignParentBottom="true"
         android:textColor="@color/white"
-        android:background="@color/black"
+        app:backgroundTint="@color/black"
         />
 
 </RelativeLayout>

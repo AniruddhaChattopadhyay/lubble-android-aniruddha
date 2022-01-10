@@ -28,6 +28,7 @@ import com.firebase.ui.auth.AuthMethodPickerLayout;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FacebookAuthProvider;
@@ -50,10 +51,12 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import in.lubble.app.BaseActivity;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
@@ -74,8 +77,9 @@ public class WelcomeFrag extends Fragment {
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
     static final int REQUEST_LOCATION = 636;
     private String link = null;
-    private Button login_signup;
+    private MaterialButton login_signup;
     private View v;
+    private Timer timer;
 
     public WelcomeFrag() {
         // Required empty public constructor
@@ -95,6 +99,7 @@ public class WelcomeFrag extends Fragment {
         if (getArguments() != null) {
             link = getArguments().getString("link");
         }
+        Analytics.triggerScreenEvent(getContext(), this.getClass());
     }
 
     @Override
@@ -117,6 +122,7 @@ public class WelcomeFrag extends Fragment {
         sliderDataList.add(sliderData4);
         setupSlider();
         login_signup.setOnClickListener(v->{
+            Analytics.triggerEvent(AnalyticsEvents.LOGIN_BUTTON_CLICKED_FROM_WELCOME_SCREEN, getContext());
             Intent intent = new Intent(getActivity(),LoginActivity.class);
             intent.putExtra("Link",link);
             startActivity(intent);
@@ -150,14 +156,27 @@ public class WelcomeFrag extends Fragment {
 
             }
         });
-
-        new Timer().schedule(new TimerTask() {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 handler.post(update);
             }
         }, 100, 5000);
 
+    }
+
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        timer = new Timer();
+//
+//    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        timer.cancel();
     }
 
     private Runnable update = new Runnable() {

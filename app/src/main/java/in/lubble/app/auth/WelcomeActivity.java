@@ -17,7 +17,4 @@ public class WelcomeActivity extends BaseActivity {
         setContentView(R.layout.activity_welcome);
         FragUtils.replaceFrag(getSupportFragmentManager(), WelcomeFrag.newInstance(getIntent().getStringExtra("Link")), R.id.frame_fragContainer);
     }
-
-
-
 }

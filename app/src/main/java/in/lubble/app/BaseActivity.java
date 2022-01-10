@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.auth.LocationActivity;
+import in.lubble.app.auth.LoginActivity;
 import in.lubble.app.auth.WelcomeActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.utils.ReferralUtils;
@@ -64,7 +65,7 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!(this instanceof MainActivity) && !(this instanceof WelcomeActivity) && !(this instanceof LocationActivity) &&
+        if (!(this instanceof MainActivity) && !(this instanceof WelcomeActivity) && !(this instanceof LoginActivity) && !(this instanceof LocationActivity) &&
                 (FirebaseAuth.getInstance().getCurrentUser() == null || TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId()))) {
             // user is not signed in, start login flow
             startActivity(new Intent(this, WelcomeActivity.class));
@@ -73,7 +74,7 @@ public class BaseActivity extends AppCompatActivity {
         }
         FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
         crashlytics.setUserId(FirebaseAuth.getInstance().getUid());
-        if (FirebaseAuth.getInstance().getCurrentUser() != null && !(this instanceof WelcomeActivity) && !(this instanceof LocationActivity)) {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null && !(this instanceof WelcomeActivity) && !(this instanceof LoginActivity) &&  !(this instanceof LocationActivity)) {
             // logged in
             try {
                 appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
