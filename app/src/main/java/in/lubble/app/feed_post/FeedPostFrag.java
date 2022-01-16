@@ -1,5 +1,12 @@
 package in.lubble.app.feed_post;
 
+import static android.view.View.GONE;
+import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
+import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
+import static in.lubble.app.utils.FeedUtils.getMsgSuffix;
+import static in.lubble.app.utils.UiUtils.dpToPx;
+
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -44,7 +51,6 @@ import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.curios.textformatter.FormatText;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
@@ -58,6 +64,7 @@ import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,13 +78,13 @@ import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
-import in.lubble.app.feed_user.FeedAdaptor;
 import in.lubble.app.models.FeedGroupData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
 import in.lubble.app.profile.ProfileActivity;
 import in.lubble.app.receivers.ShareSheetReceiver;
 import in.lubble.app.services.FeedServices;
+import in.lubble.app.utils.CompleteListener;
 import in.lubble.app.utils.DateTimeUtils;
 import in.lubble.app.utils.FeedUtils;
 import in.lubble.app.utils.FullScreenImageActivity;
@@ -85,6 +92,7 @@ import in.lubble.app.utils.FullScreenVideoActivity;
 import in.lubble.app.utils.RoundedCornersTransformation;
 import in.lubble.app.utils.UiUtils;
 import in.lubble.app.widget.ReplyEditText;
+import io.getstream.cloud.CloudClient;
 import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
 import io.getstream.core.models.Content;
@@ -100,13 +108,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static android.view.View.GONE;
-import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
-import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
-import static in.lubble.app.utils.FeedUtils.getMsgSuffix;
-import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedPostFrag extends Fragment {
 
@@ -135,8 +136,7 @@ public class FeedPostFrag extends Fragment {
     private final String userId = FirebaseAuth.getInstance().getUid();
     private BottomSheetBehavior sheetBehavior;
     private RelativeLayout linkPreviewContainer;
-
-
+    private CloudClient timelineClient;
 
     public static FeedPostFrag newInstance(String postId) {
         FeedPostFrag feedPostFrag = new FeedPostFrag();
@@ -188,7 +188,19 @@ public class FeedPostFrag extends Fragment {
             throw new IllegalArgumentException("Missing ARG_POST_ID for FeedPostFrag");
         }
 
-        fetchPost();
+        timelineClient = FeedServices.getTimelineClient();
+        if (timelineClient != null) {
+            fetchPost();
+        } else {
+            initFeedCreds((CompleteListener) isSuccess -> {
+                if (isSuccess) {
+                    fetchPost();
+                } else {
+                    Toast.makeText(LubbleApp.getAppContext(), "Failed to fetch post, plz try again", Toast.LENGTH_LONG).show();
+                    requireActivity().finish();
+                }
+            });
+        }
 
         Analytics.triggerScreenEvent(requireContext(), this.getClass());
         return view;
@@ -198,7 +210,7 @@ public class FeedPostFrag extends Fragment {
         try {
             progressBar.setVisibility(View.VISIBLE);
             commentRecyclerView.showShimmerAdapter();
-            FeedServices.getTimelineClient().flatFeed("timeline", userId)
+            timelineClient.flatFeed("timeline", userId)
                     .getEnrichedActivities(
                             new Limit(1), new Filter().idGreaterThanEqual(postId),
                             new EnrichmentFlags()
@@ -256,14 +268,14 @@ public class FeedPostFrag extends Fragment {
                                         photoContentIv.setOnClickListener(v ->
                                                 FullScreenImageActivity.open(getActivity(), requireContext(), photoLink, photoContentIv, null, R.drawable.ic_cancel_black_24dp));
                                     }
-                                    if (extras.containsKey("videoLink")){
+                                    if (extras.containsKey("videoLink")) {
                                         mediaLayout.setVisibility(View.VISIBLE);
                                         String vidUrl = extras.get("videoLink").toString();
                                         exoPlayerView.setVisibility(View.VISIBLE);
                                         prepareExoPlayerFromFileUri(Uri.parse(vidUrl));
                                         exoPlayer.setPlayWhenReady(true);
-                                        exoPlayerView.setOnClickListener(v->
-                                            FullScreenVideoActivity.open(getActivity(), requireContext(), vidUrl,"",""));
+                                        exoPlayerView.setOnClickListener(v ->
+                                                FullScreenVideoActivity.open(getActivity(), requireContext(), vidUrl, "", ""));
                                     }
 
                                     if (extras.containsKey("authorName")) {
@@ -348,6 +360,40 @@ public class FeedPostFrag extends Fragment {
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
+        }
+    }
+
+    private void initFeedCreds(CompleteListener callback) {
+        final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
+        String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
+        String feedApiKey = LubbleSharedPrefs.getInstance().getFeedApiKey();
+        if (TextUtils.isEmpty(feedApiKey) || TextUtils.isEmpty(feedUserToken)) {
+            Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(FirebaseAuth.getInstance().getUid());
+            call.enqueue(new Callback<Endpoints.StreamCredentials>() {
+                @Override
+                public void onResponse(@NonNull Call<Endpoints.StreamCredentials> call, @NonNull Response<Endpoints.StreamCredentials> response) {
+                    if (response.isSuccessful()) {
+                        final Endpoints.StreamCredentials credentials = response.body();
+                        try {
+                            if (credentials != null) {
+                                FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
+                                callback.onComplete(true);
+                            } else {
+                                callback.onComplete(false);
+                            }
+                        } catch (MalformedURLException e) {
+                            FirebaseCrashlytics.getInstance().recordException(e);
+                            e.printStackTrace();
+                            callback.onComplete(false);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
+                    callback.onComplete(false);
+                }
+            });
         }
     }
 
@@ -589,7 +635,7 @@ public class FeedPostFrag extends Fragment {
                     .extraField("timestamp", System.currentTimeMillis())
                     .build();
             String notificationUserFeedId = "notification:" + postActorUid;
-            FeedServices.getTimelineClient().reactions().add(comment, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
+            timelineClient.reactions().add(comment, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                 if (isAdded() && getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
                         replyProgressBar.setVisibility(View.GONE);
@@ -683,7 +729,7 @@ public class FeedPostFrag extends Fragment {
 
     private void initCommentRecyclerView(EnrichedActivity activity) {
         try {
-            FeedServices.getTimelineClient().reactions()
+            timelineClient.reactions()
                     .filter(LookupKind.ACTIVITY, activity.getID(), new Limit(50), "comment")
                     .whenComplete((reactions, throwable) -> {
                         if (isAdded() && getActivity() != null) {
@@ -741,8 +787,7 @@ public class FeedPostFrag extends Fragment {
                     .build();
             try {
                 String notificationUserFeedId = "notification:" + enrichedActivity.getActor().getID();
-                ;
-                FeedServices.getTimelineClient().reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
+                timelineClient.reactions().add(like, new FeedID(notificationUserFeedId)).whenComplete((reaction, throwable) -> {
                     if (throwable != null) {
                         FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
@@ -758,7 +803,7 @@ public class FeedPostFrag extends Fragment {
         } else {
             // unlike
             try {
-                FeedServices.getTimelineClient().reactions().delete(likeReactionId).whenComplete((aVoid, throwable) -> {
+                timelineClient.reactions().delete(likeReactionId).whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
                         FirebaseCrashlytics.getInstance().recordException(throwable);
                     }
@@ -790,7 +835,7 @@ public class FeedPostFrag extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if(exoPlayer!=null) {
+        if (exoPlayer != null) {
             exoPlayer.pause();
         }
     }
@@ -798,7 +843,7 @@ public class FeedPostFrag extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(exoPlayer!=null) {
+        if (exoPlayer != null) {
             exoPlayer.release();
         }
     }

@@ -931,7 +931,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private void addDebugActivOpener(Toolbar toolbar) {
         if (BuildConfig.DEBUG) {
-            toolbar.setOnLongClickListener(new View.OnLongClickListener() {
+            lubbleClickTarget.setOnLongClickListener(new View.OnLongClickListener() {
 
                 @Override
                 public boolean onLongClick(View v) {

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".feed_groups.SingleGroupFeed.SingleGroupFeed">
+    tools:context=".feed_groups.SingleGroupFeed.GroupFeedFrag">
 
     <include
         layout="@layout/feed_layout"

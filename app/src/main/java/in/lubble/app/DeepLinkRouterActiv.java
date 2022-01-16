@@ -1,5 +1,7 @@
 package in.lubble.app;
 
+import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,7 +23,6 @@ import java.util.List;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.events.EventInfoActivity;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
-import in.lubble.app.feed_groups.SingleGroupFeed.SingleGroupFeed;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.leaderboard.LeaderboardActivity;
 import in.lubble.app.lubble_info.LubbleActivity;
@@ -35,8 +36,6 @@ import in.lubble.app.referrals.ReferralActivity;
 import in.lubble.app.services.ServiceCategoryDetailActiv;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
-
-import static in.lubble.app.MainActivity.EXTRA_TAB_NAME;
 
 public class DeepLinkRouterActiv extends BaseActivity {
 
@@ -106,14 +105,12 @@ public class DeepLinkRouterActiv extends BaseActivity {
                         final String feedGroupFeedName = referringParams.optString("feed_group_feed_name");
                         if (!TextUtils.isEmpty(groupId)) {
                             ChatActivity.openForGroup(DeepLinkRouterActiv.this, groupId, false, null);
-                        }
-                        else if(!TextUtils.isEmpty(feedGroupFeedName)){
+                        } else if (!TextUtils.isEmpty(feedGroupFeedName)) {
                             final String feedGroupName = referringParams.optString("feed_group_name");
                             final String feedGroupPhotoUrl = referringParams.optString("feed_group_photo_url");
-                            FeedGroupData feedGroupData = new FeedGroupData(feedGroupName,feedGroupFeedName,feedGroupPhotoUrl,"");
+                            FeedGroupData feedGroupData = new FeedGroupData(feedGroupName, feedGroupFeedName, feedGroupPhotoUrl, "");
                             GroupFeedActivity.open(DeepLinkRouterActiv.this, feedGroupData);
-                        }
-                        else {
+                        } else {
                             startActivity(new Intent(DeepLinkRouterActiv.this, MainActivity.class));
                         }
                     }
@@ -224,6 +221,20 @@ public class DeepLinkRouterActiv extends BaseActivity {
                     stackBuilder.startActivities();
                 } else {
                     startActivity(feedFallbackIntent);
+                }
+                break;
+            case "feed_group":
+                final String feedGroupName = uri.getQueryParameter("name");
+                final Intent feedIntent1 = new Intent(this, MainActivity.class);
+                feedIntent1.putExtra(EXTRA_TAB_NAME, "feed");
+                if (feedGroupName != null) {
+                    TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+                    stackBuilder.addParentStack(MainActivity.class);
+                    stackBuilder.addNextIntent(feedIntent1);
+                    stackBuilder.addNextIntent(GroupFeedActivity.getIntent(this, feedGroupName));
+                    stackBuilder.startActivities();
+                } else {
+                    startActivity(feedIntent1);
                 }
                 break;
             default:
