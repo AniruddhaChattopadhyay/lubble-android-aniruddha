@@ -149,8 +149,8 @@ public class UploadVideoFeedService extends BaseTaskService {
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference photoRef = mStorageRef.child(uploadPath)
                 .child(fileName);
-        //uploadFile(fileUri, photoRef, groupName, feedName,feedPostData);
-        compressAndUpload(fileUri, fileName, photoRef,uploadPath, groupName, feedName, feedPostData);
+        uploadFile(fileUri, photoRef, groupName, feedName,feedPostData);
+        //compressAndUpload(fileUri, fileName, photoRef,uploadPath, groupName, feedName, feedPostData);
 
     }
 

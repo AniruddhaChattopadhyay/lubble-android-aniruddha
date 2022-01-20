@@ -159,7 +159,10 @@ dependencies {
     implementation project(path: ':libraries:ratingdialog')
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4'
-    implementation 'com.googlecode.mp4parser:isoparser:1.1.22'//isoparser needed with silicompressor
+    //isoparser needed with silicompressor
+    implementation ('com.googlecode.mp4parser:isoparser:1.1.22') {
+        exclude group: 'org.aspectj', module: 'aspectjrt'
+    }
     // in app update
     implementation 'com.google.android.play:core:1.10.2'
 
