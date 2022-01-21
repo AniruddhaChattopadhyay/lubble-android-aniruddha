@@ -81,8 +81,8 @@ public class SearchActivity extends BaseActivity implements CompletionHandler {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s != null && s.length() >= 3) {
-                    String lubbleId = BuildConfig.DEBUG ? "koramangala" : LubbleSharedPrefs.getInstance().getLubbleName();
-                    index.searchAsync(new Query(s.toString()).setFilters("lubbleID:" + lubbleId + " OR lubbleID:all"), SearchActivity.this);
+                    String lubbleId = BuildConfig.FLAVOR.equalsIgnoreCase("dev") ? "koramangala" : LubbleSharedPrefs.getInstance().getLubbleName();
+                    index.searchAsync(new Query(s.toString()).setFilters("lubbleID:\"" + lubbleId + "\" OR lubbleID:all"), SearchActivity.this);
                 } else {
                     adapter.clearAll();
                 }
