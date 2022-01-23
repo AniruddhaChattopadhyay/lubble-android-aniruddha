@@ -18,7 +18,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.cooltechworks.views.shimmer.ShimmerRecyclerView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -41,6 +45,7 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedRef;
 
 public class GroupSelectionFrag extends Fragment {
 
@@ -54,9 +59,11 @@ public class GroupSelectionFrag extends Fragment {
     private FeedPostData feedPostData;
     @Nullable
     private GroupSelectionAdapter groupSelectionAdapter;
-    private List<FeedGroupData> feedGroupDataList,exploreGroupDataList;
+    private List<FeedGroupData> feedGroupDataList, exploreGroupDataList;
     private ProgressBar postProgressBar;
     private boolean isQnA;
+    private MaterialCardView introMcv;
+    private ValueEventListener feedIntroRefListener;
 
     public static GroupSelectionFrag newInstance(FeedPostData feedPostData,boolean isQnA) {
         GroupSelectionFrag groupSelectionFrag = new GroupSelectionFrag();
@@ -73,6 +80,7 @@ public class GroupSelectionFrag extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.frag_group_selection, container, false);
 
+        introMcv = view.findViewById(R.id.mcv_intro);
         groupsRv = view.findViewById(R.id.rv_groups);
         groupSv = view.findViewById(R.id.sv_group_selection);
         postSubmitBtn = view.findViewById(R.id.btn_post);
@@ -139,6 +147,7 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadImageFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(requireContext(), serviceIntent);
+                    Toast.makeText(requireContext(), "Uploading Photo", Toast.LENGTH_SHORT).show();
                     requireActivity().setResult(RESULT_OK);
                     requireActivity().finish();
                     getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
@@ -157,6 +166,7 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadVideoFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadVideoFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(requireContext(), serviceIntent);
+                    Toast.makeText(requireContext(), "Uploading Video", Toast.LENGTH_SHORT).show();
                     requireActivity().setResult(RESULT_OK);
                     requireActivity().finish();
                     getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
@@ -168,6 +178,7 @@ public class GroupSelectionFrag extends Fragment {
                         @Override
                         public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                             if (isAdded() && response.isSuccessful()) {
+                                Toast.makeText(requireContext(), "Posted successfully!", Toast.LENGTH_SHORT).show();
                                 requireActivity().setResult(RESULT_OK);
                                 requireActivity().finish();
                                 getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
@@ -190,6 +201,34 @@ public class GroupSelectionFrag extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        showIntroCard();
+    }
+
+    private void showIntroCard() {
+        feedIntroRefListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Object value = snapshot.getValue();
+                if (value == Boolean.TRUE) {
+                    //intro done
+                    introMcv.setVisibility(View.GONE);
+                } else {
+                    //value is null or false -> show intro card
+                    introMcv.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                introMcv.setVisibility(View.GONE);
+            }
+        };
+        getThisUserFeedRef().addValueEventListener(feedIntroRefListener);
     }
 
     private void getFeedGroups() {
@@ -226,6 +265,12 @@ public class GroupSelectionFrag extends Fragment {
                 }
             }
         });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        getThisUserFeedRef().removeEventListener(feedIntroRefListener);
     }
 
 }

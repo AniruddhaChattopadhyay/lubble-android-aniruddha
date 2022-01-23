@@ -188,6 +188,10 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("search").child("results");
     }
 
+    public static DatabaseReference getThisUserFeedRef() {
+        return FirebaseDatabase.getInstance().getReference("feed_user").child(FirebaseAuth.getInstance().getUid()).child("is_intro_done");
+    }
+
     @Nullable
     public static DatabaseReference getGroupTypingRef(String groupId, String dmId) {
         String chatId;

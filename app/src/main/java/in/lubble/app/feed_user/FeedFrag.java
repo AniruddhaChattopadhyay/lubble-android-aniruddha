@@ -2,6 +2,7 @@ package in.lubble.app.feed_user;
 
 import static android.app.Activity.RESULT_OK;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedRef;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 import android.content.Intent;
@@ -11,7 +12,6 @@ import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,7 +28,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -36,11 +41,13 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.feed_groups.SingleGroupFeed.GroupFeedActivity;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.models.FeedGroupData;
@@ -55,6 +62,8 @@ import in.lubble.app.utils.VisibleState;
 import in.lubble.app.widget.PostReplySmoothScroller;
 import io.getstream.cloud.CloudFlatFeed;
 import io.getstream.core.models.Reaction;
+import it.sephiroth.android.library.xtooltip.ClosePolicy;
+import it.sephiroth.android.library.xtooltip.Tooltip;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -66,10 +75,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private static final int REQUEST_CODE_NEW_POST = 800;
     private static final int REQ_CODE_POST_ACTIV = 226;
 
-    private MaterialButton postBtn;
-    private MaterialButton postQandABtn;
+    private MaterialButton postBtn, postQandABtn, startIntroBtn;
     private LinearLayout postBtnLL;
-    private TextView emptyHintTv;
+    private MaterialCardView introMcv;
+    private ImageView introCloseIv;
+    private TextView emptyHintTv, introTitleTv, introSubtitleTv;
     private RecyclerView feedRV;
     private final String userId = FirebaseAuth.getInstance().getUid();
     private FeedAdaptor adapter;
@@ -79,6 +89,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private LinearLayout joinedGroupStroriesLL;
     private RecyclerView joinedGroupStoriesRV;
     ArrayList<FeedGroupData> feedGroupDataList;
+    private ValueEventListener feedIntroRefListener;
 
     public FeedFrag() {
         // Required empty public constructor
@@ -119,6 +130,11 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             postQandABtn = view.findViewById(R.id.btn_QandA_new_post);
         }
         emptyHintTv = view.findViewById(R.id.tv_empty_hint);
+        introMcv = view.findViewById(R.id.mcv_intro);
+        introCloseIv = view.findViewById(R.id.iv_intro_close);
+        introTitleTv = view.findViewById(R.id.tv_intro_title);
+        introSubtitleTv = view.findViewById(R.id.tv_intro_subtitle);
+        startIntroBtn = view.findViewById(R.id.btn_start_intro);
         feedRV = view.findViewById(R.id.feed_recyclerview);
         swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_feed);
         joinedGroupStoriesRV = view.findViewById(R.id.joined_groups_stories_recycler_view);
@@ -144,6 +160,63 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        showIntroCard();
+    }
+
+    private void showIntroCard() {
+        feedIntroRefListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Object value = snapshot.getValue();
+                if (value == Boolean.TRUE) {
+                    //intro done
+                    introMcv.setVisibility(View.GONE);
+                } else {
+                    //value is null or false -> show intro card
+                    introMcv.setVisibility(View.VISIBLE);
+                    Analytics.triggerEvent(AnalyticsEvents.FEED_INTRO_SHOWN, requireContext());
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                introMcv.setVisibility(View.GONE);
+            }
+        };
+        getThisUserFeedRef().addValueEventListener(feedIntroRefListener);
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String name = (currentUser != null && currentUser.getDisplayName() != null) ? currentUser.getDisplayName().split(" ")[0] : "Neighbour";
+        introTitleTv.setText(String.format("Welcome %s!", name));
+        introSubtitleTv.setText(String.format("First things first: Let's introduce you to everyone in %s!\n\nWe'll help you write an awesome intro \uD83D\uDC47", LubbleSharedPrefs.getInstance().getLubbleName()));
+        startIntroBtn.setOnClickListener(v -> {
+            Analytics.triggerEvent(AnalyticsEvents.FEED_INTRO_START, requireContext());
+            introNewPostBtn();
+        });
+        introCloseIv.setOnClickListener(v -> {
+            Analytics.triggerEvent(AnalyticsEvents.FEED_INTRO_CANCELLED, requireContext());
+            getThisUserFeedRef().setValue(Boolean.TRUE);
+            introMcv.setVisibility(View.GONE);
+        });
+    }
+
+    private void introNewPostBtn() {
+        if (BuildConfig.DEBUG) {
+            Tooltip tooltip = new Tooltip.Builder(requireContext())
+                    .anchor(postBtn, 0, 0, false)
+                    .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
+                    .showDuration(10000)
+                    .overlay(true)
+                    .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
+                    .styleId(R.style.BlueTooltipLayout)
+                    .text("Tap \"NEW POST\" button")
+                    .create();
+            tooltip.show(postBtn, Tooltip.Gravity.TOP, false);
+        }
+    }
+
     private void initJoinedGroupRecyclerView() {
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         Call<List<FeedGroupData>> call = endpoints.getFeedGroupList();
@@ -154,16 +227,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                 if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
                     LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
                     joinedGroupStroriesLL.setVisibility(View.VISIBLE);
-                    final ViewTreeObserver observer = joinedGroupStroriesLL.getViewTreeObserver();
-                    observer.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @Override
-                        public void onGlobalLayout() {
-                            int heightOfLayout = joinedGroupStroriesLL.getHeight();
-                            if (observer.isAlive()) {
-                                observer.removeOnGlobalLayoutListener(this);
-                            }
-                        }
-                    });
                     joinedGroupStoriesRV.setLayoutManager(layoutManager);
                     JoinedGroupsStoriesAdapter adapter = new JoinedGroupsStoriesAdapter(getContext(), feedGroupDataList, FeedFrag.this);
                     joinedGroupStoriesRV.setAdapter(adapter);
@@ -373,9 +436,12 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_NEW_POST && resultCode == RESULT_OK) {
+            // Posted a new post -> refresh list
             initRecyclerView();
+            getThisUserFeedRef().setValue(Boolean.TRUE);
+            introMcv.setVisibility(View.GONE);
         } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
-            //refresh list
+            //Returned from individual post -> refresh list to update reactions
             initRecyclerView();
         }
     }
@@ -395,6 +461,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onStop() {
         super.onStop();
         LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
+        getThisUserFeedRef().removeEventListener(feedIntroRefListener);
     }
 
     @Override

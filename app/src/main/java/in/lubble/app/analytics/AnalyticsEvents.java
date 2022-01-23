@@ -172,4 +172,9 @@ public class AnalyticsEvents {
     public static final String FEED_GROUP_INVITE_CLICKED = "FEED_GROUP_INVITE_CLICKED";
 
     public static final String GAMES_LOCKED_INVITE_CLICK = "GAMES_LOCKED_INVITE_CLICK";
+
+    public static final String FEED_INTRO_SHOWN = "FEED_INTRO_SHOWN";
+    public static final String FEED_INTRO_START = "FEED_INTRO_START";
+    public static final String FEED_INTRO_CANCELLED = "FEED_INTRO_CANCELLED";
+
 }
