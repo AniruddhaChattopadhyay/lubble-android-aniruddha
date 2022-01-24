@@ -8,11 +8,13 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
@@ -39,7 +41,7 @@ public class AttachVideoActivity extends BaseActivity {
     private static final String EXTRA_IS_DM = BuildConfig.APPLICATION_ID + "_IS_DM";
     private static final String EXTRA_AUTHOR_ID = BuildConfig.APPLICATION_ID + "_AUTHOR_ID";
     private static final String EXTRA_IS_AUTHOR_SELLER = BuildConfig.APPLICATION_ID + "_IS_AUTHOR_SELLER";
-
+    private ImageButton muteBtn;
     PlayerView exoPlayerView;
     SimpleExoPlayer exoPlayer;
     private EditText captionEt;
@@ -71,6 +73,7 @@ public class AttachVideoActivity extends BaseActivity {
 
         captionEt = findViewById(R.id.et_vid_caption);
         sendIcon = findViewById(R.id.iv_send_btn_vid);
+        muteBtn = findViewById(R.id.exo_mute_btn);
         final Uri vidUri = getIntent().getParcelableExtra(EXTRA_VID_PATH);
         final String chatId = getIntent().getStringExtra(EXTRA_GROUP_ID);
         final String caption = getIntent().getStringExtra(EXTRA_CAPTION);
@@ -133,10 +136,22 @@ public class AttachVideoActivity extends BaseActivity {
                 factory, new DefaultExtractorsFactory(), null, null);*/
         exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
         exoPlayerView.setPlayer(exoPlayer);
-        exoPlayer.prepare();
 
+        exoPlayer.prepare();
+        muteVideo(exoPlayer);
     }
 
+
+    public void muteVideo(ExoPlayer exoPlayer){
+        if(exoPlayer.getVolume() == 0F) {
+            exoPlayer.setVolume(0.75F);
+            muteBtn.setImageResource(R.drawable.ic_mute);
+        }
+        else{
+            exoPlayer.setVolume(0F);
+            muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
+        }
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
