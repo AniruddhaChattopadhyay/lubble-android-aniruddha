@@ -38,6 +38,7 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.GlideApp;
@@ -110,6 +111,9 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             feedName = getArguments().getString(FEED_NAME_BUNDLE);
+            if (feedName.toLowerCase(Locale.ROOT).startsWith("introductions")) {
+                feedName = feedName + "-" + LubbleSharedPrefs.getInstance().getLubbleId();
+            }
             viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
         }
         Analytics.triggerScreenEvent(requireContext(), this.getClass());
@@ -178,7 +182,12 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
     }
 
     private void initRecyclerView() {
-        CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
+        CloudFlatFeed groupFeed;
+        if (feedName.toLowerCase(Locale.ROOT).startsWith("introductions")) {
+            groupFeed = FeedServices.client.flatFeed("group_locality", feedName);
+        } else {
+            groupFeed = FeedServices.client.flatFeed("group", feedName);
+        }
 
         if (adapter == null) {
             DisplayMetrics displayMetrics = new DisplayMetrics();
