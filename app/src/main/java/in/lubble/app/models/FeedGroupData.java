@@ -49,6 +49,8 @@ public class FeedGroupData implements Serializable {
     private String lubble;
     @SerializedName("groupPhotoUrl")
     private String photoUrl;
+    @SerializedName("followersCount")
+    private int followersCount;
     @Nullable
     @SerializedName("joined")
     private boolean groupJoined;
@@ -100,5 +102,13 @@ public class FeedGroupData implements Serializable {
 
     public void setGroupJoined(boolean groupJoined) {
         this.groupJoined = groupJoined;
+    }
+
+    public int getFollowersCount() {
+        return followersCount;
+    }
+
+    public void setFollowersCount(int followersCount) {
+        this.followersCount = followersCount;
     }
 }

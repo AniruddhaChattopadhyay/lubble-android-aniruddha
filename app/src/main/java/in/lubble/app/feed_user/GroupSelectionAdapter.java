@@ -63,6 +63,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         FeedGroupData feedGroupData = stringList.get(position);
 
         holder.titleTv.setText(feedGroupData.getName());
+        holder.followerCountTv.setText(Integer.toString(feedGroupData.getFollowersCount()));
         holder.selectionRb.setChecked(position == lastCheckedPos);
         holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
         holder.groupIv.setOnClickListener(v -> holder.selectionRb.performClick());
@@ -116,6 +117,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         final View mView;
         final TextView titleTv;
         final ImageView groupIv;
+        final TextView followerCountTv;
         final MaterialRadioButton selectionRb;
 
         GroupSelectionViewHolder(View view) {
@@ -124,6 +126,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
             groupIv = view.findViewById(R.id.iv_group_selection);
             titleTv = view.findViewById(R.id.tv_group_name);
             selectionRb = view.findViewById(R.id.rb_group_selection);
+            followerCountTv = view.findViewById(R.id.follower_count);
         }
 
     }
