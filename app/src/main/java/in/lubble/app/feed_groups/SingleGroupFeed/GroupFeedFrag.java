@@ -176,7 +176,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
             @Override
             public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
                 if (isAdded()) {
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
