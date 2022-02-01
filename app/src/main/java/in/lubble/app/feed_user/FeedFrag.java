@@ -2,7 +2,7 @@ package in.lubble.app.feed_user;
 
 import static android.app.Activity.RESULT_OK;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedIntroRef;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 import android.content.Intent;
@@ -29,6 +29,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -40,8 +41,8 @@ import org.jetbrains.annotations.NotNull;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-import in.lubble.app.BuildConfig;
 import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.MainActivity;
@@ -90,6 +91,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private RecyclerView joinedGroupStoriesRV;
     ArrayList<FeedGroupData> feedGroupDataList;
     private ValueEventListener feedIntroRefListener;
+    private boolean isIntroStarted;
 
     public FeedFrag() {
         // Required empty public constructor
@@ -146,12 +148,16 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         swipeRefreshLayout.setColorSchemeColors(ContextCompat.getColor(requireContext(), R.color.colorAccent));
 
         postBtn.setOnClickListener(v -> {
-            startActivityForResult(new Intent(getContext(), AddPostForFeed.class), REQUEST_CODE_NEW_POST);
+            Intent intent = new Intent(getContext(), AddPostForFeed.class);
+            if (isIntroStarted) {
+                intent.putExtra(AddPostForFeed.ARG_POST_TYPE, AddPostForFeed.TYPE_INTRO);
+            }
+            startActivityForResult(intent, REQUEST_CODE_NEW_POST);
             getActivity().overridePendingTransition(R.anim.slide_from_bottom_fast, R.anim.none);
         });
         postQandABtn.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), AddPostForFeed.class);
-            intent.putExtra(AddPostForFeed.QnAString, true);
+            intent.putExtra(AddPostForFeed.ARG_POST_TYPE, AddPostForFeed.TYPE_QNA);
             startActivityForResult(intent, REQUEST_CODE_NEW_POST);
         });
 
@@ -186,7 +192,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                 introMcv.setVisibility(View.GONE);
             }
         };
-        getThisUserFeedRef().addValueEventListener(feedIntroRefListener);
+        getThisUserFeedIntroRef().addValueEventListener(feedIntroRefListener);
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String name = (currentUser != null && currentUser.getDisplayName() != null) ? currentUser.getDisplayName().split(" ")[0] : "Neighbour";
         introTitleTv.setText(String.format("Welcome %s!", name));
@@ -197,24 +203,23 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         });
         introCloseIv.setOnClickListener(v -> {
             Analytics.triggerEvent(AnalyticsEvents.FEED_INTRO_CANCELLED, requireContext());
-            getThisUserFeedRef().setValue(Boolean.TRUE);
+            getThisUserFeedIntroRef().setValue(Boolean.TRUE);
             introMcv.setVisibility(View.GONE);
         });
     }
 
     private void introNewPostBtn() {
-        if (BuildConfig.DEBUG) {
-            Tooltip tooltip = new Tooltip.Builder(requireContext())
-                    .anchor(postBtn, 0, 0, false)
-                    .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
-                    .showDuration(10000)
-                    .overlay(true)
-                    .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
-                    .styleId(R.style.BlueTooltipLayout)
-                    .text("Tap \"NEW POST\" button")
-                    .create();
-            tooltip.show(postBtn, Tooltip.Gravity.TOP, false);
-        }
+        isIntroStarted = true;
+        Tooltip tooltip = new Tooltip.Builder(requireContext())
+                .anchor(postBtn, 0, 0, false)
+                .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
+                .showDuration(10000)
+                .overlay(true)
+                .floatingAnimation(Tooltip.Animation.Companion.getDEFAULT())
+                .styleId(R.style.BlueTooltipLayout)
+                .text("Tap \"NEW POST\" button")
+                .create();
+        tooltip.show(postBtn, Tooltip.Gravity.TOP, false);
     }
 
     private void initJoinedGroupRecyclerView() {
@@ -438,12 +443,38 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         if (requestCode == REQUEST_CODE_NEW_POST && resultCode == RESULT_OK) {
             // Posted a new post -> refresh list
             initRecyclerView();
-            getThisUserFeedRef().setValue(Boolean.TRUE);
+            getThisUserFeedIntroRef().setValue(Boolean.TRUE);
             introMcv.setVisibility(View.GONE);
+            isIntroStarted = false;
+            if (data != null && data.hasExtra("post_medium")) {
+                showPostSuccessSnackbar(data);
+            }
         } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
             //Returned from individual post -> refresh list to update reactions
             initRecyclerView();
         }
+    }
+
+    private void showPostSuccessSnackbar(@NonNull Intent data) {
+        String groupTitle = data.getStringExtra("group_title");
+        String feedName = data.getStringExtra("feed_name");
+        String postMedium = data.getStringExtra("post_medium");
+        String text = "Posted Successfully!";
+        if (postMedium.equalsIgnoreCase("img")) {
+            text = "Uploading Photo...";
+        } else if (postMedium.equalsIgnoreCase("vid")) {
+            text = "Uploading Video...";
+        }
+        Snackbar snackbar = Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT);
+        if (groupTitle != null && groupTitle.toLowerCase(Locale.ROOT).startsWith("introduction")) {
+            text += " View " + groupTitle + " group";
+            snackbar.setText(text);
+            snackbar.setAction("View", v -> {
+                Analytics.triggerEvent(AnalyticsEvents.FEED_INTRO_GROUP_VIA_SNACKBAR, requireContext());
+                GroupFeedActivity.open(requireContext(), feedName);
+            });
+        }
+        snackbar.show();
     }
 
     @Override
@@ -461,7 +492,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onStop() {
         super.onStop();
         LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
-        getThisUserFeedRef().removeEventListener(feedIntroRefListener);
+        getThisUserFeedIntroRef().removeEventListener(feedIntroRefListener);
     }
 
     @Override

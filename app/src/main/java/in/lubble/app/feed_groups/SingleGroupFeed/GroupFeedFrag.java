@@ -2,6 +2,7 @@ package in.lubble.app.feed_groups.SingleGroupFeed;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedIntroRef;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 import android.content.Intent;
@@ -137,7 +138,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         });
         postQandABtn.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), AddPostForFeed.class);
-            intent.putExtra(AddPostForFeed.QnAString, true);
+            intent.putExtra(AddPostForFeed.ARG_POST_TYPE, AddPostForFeed.TYPE_QNA);
             startActivityForResult(intent, REQUEST_CODE_NEW_POST);
         });
 
@@ -401,11 +402,27 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_NEW_POST && resultCode == RESULT_OK) {
+            // Posted a new post -> refresh list
             onRefresh();
+            getThisUserFeedIntroRef().setValue(Boolean.TRUE);
+            if (data != null && data.hasExtra("post_medium")) {
+                showPostSuccessSnackbar(data);
+            }
         } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
-            //refresh list
+            //Returned from individual post -> refresh list to update reactions
             onRefresh();
         }
+    }
+
+    private void showPostSuccessSnackbar(@NonNull Intent data) {
+        String postMedium = data.getStringExtra("post_medium");
+        String text = "Posted Successfully!";
+        if (postMedium.equalsIgnoreCase("img")) {
+            text = "Uploading Photo...";
+        } else if (postMedium.equalsIgnoreCase("vid")) {
+            text = "Uploading Video...";
+        }
+        Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override

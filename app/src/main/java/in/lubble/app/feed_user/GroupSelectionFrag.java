@@ -1,5 +1,11 @@
 package in.lubble.app.feed_user;
 
+import static android.app.Activity.RESULT_OK;
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
+import static in.lubble.app.feed_user.AddPostForFeed.ARG_POST_TYPE;
+import static in.lubble.app.feed_user.AddPostForFeed.TYPE_INTRO;
+import static in.lubble.app.feed_user.AddPostForFeed.TYPE_QNA;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -26,7 +32,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.MissingFormatArgumentException;
 
@@ -43,14 +48,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static android.app.Activity.RESULT_OK;
-import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedRef;
-
 public class GroupSelectionFrag extends Fragment {
 
     private static final String ARG_POST_DATA = "LBL_ARG_POST_DATA";
-    private static final String ARG_IS_QnA = "LBL_ARG_IS_QnA";
     private static final String TAG = "GroupSelectionFrag";
 
     private ShimmerRecyclerView groupsRv;
@@ -61,15 +61,14 @@ public class GroupSelectionFrag extends Fragment {
     private GroupSelectionAdapter groupSelectionAdapter;
     private List<FeedGroupData> feedGroupDataList, exploreGroupDataList;
     private ProgressBar postProgressBar;
-    private boolean isQnA;
+    private boolean isQnA, isIntro;
     private MaterialCardView introMcv;
-    private ValueEventListener feedIntroRefListener;
 
-    public static GroupSelectionFrag newInstance(FeedPostData feedPostData,boolean isQnA) {
+    public static GroupSelectionFrag newInstance(FeedPostData feedPostData, String argPostType) {
         GroupSelectionFrag groupSelectionFrag = new GroupSelectionFrag();
         Bundle bundle = new Bundle();
         bundle.putSerializable(ARG_POST_DATA, feedPostData);
-        bundle.putSerializable(ARG_IS_QnA,isQnA);
+        bundle.putSerializable(ARG_POST_TYPE, argPostType);
         groupSelectionFrag.setArguments(bundle);
         return groupSelectionFrag;
     }
@@ -97,10 +96,10 @@ public class GroupSelectionFrag extends Fragment {
             throw new MissingFormatArgumentException("no ARG_POST_DATA passed while opening GroupSelectionFrag");
         }
 
-        if (getArguments() != null && getArguments().containsKey(ARG_IS_QnA)) {
-            isQnA = (boolean) getArguments().getSerializable(ARG_IS_QnA);
-        } else {
-            throw new MissingFormatArgumentException("no ARG_IS_QnA passed while opening GroupSelectionFrag");
+        if (TYPE_QNA.equalsIgnoreCase(getArguments().getString(ARG_POST_TYPE))) {
+            isQnA = true;
+        } else if (TYPE_INTRO.equalsIgnoreCase(getArguments().getString(ARG_POST_TYPE))) {
+            isIntro = true;
         }
 
         groupSv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -128,11 +127,14 @@ public class GroupSelectionFrag extends Fragment {
                 Toast.makeText(requireContext(), "Please select a group for this post", Toast.LENGTH_SHORT).show();
                 return;
             }
+            Intent resultIntent = new Intent();
             boolean isGroupJoined = feedGroupDataList.get(lastCheckedPos).isGroupJoined();
             FeedGroupData selectedGroupData = feedGroupDataList.get(lastCheckedPos);
             String groupNameText = selectedGroupData.getName();
             String feedNameText = selectedGroupData.getFeedName();
             String uploadPath = "feed_photos";
+            resultIntent.putExtra("group_title", groupNameText);
+            resultIntent.putExtra("feed_name", feedNameText);
             if (text != null) {
                 if (feedPostData.getImgUri() != null) {
                     Uri imgUri = Uri.parse(feedPostData.getImgUri());
@@ -147,12 +149,11 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadImageFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadImageFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(requireContext(), serviceIntent);
-                    Toast.makeText(requireContext(), "Uploading Photo", Toast.LENGTH_SHORT).show();
-                    requireActivity().setResult(RESULT_OK);
+                    resultIntent.putExtra("post_medium", "img");
+                    requireActivity().setResult(RESULT_OK, resultIntent);
                     requireActivity().finish();
                     getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
-                }
-                else if(feedPostData.getVidUri() != null){
+                } else if (feedPostData.getVidUri() != null) {
                     uploadPath = "feed_videos";
                     Uri vidUri = Uri.parse(feedPostData.getVidUri());
                     Intent serviceIntent = new Intent(getContext(), UploadVideoFeedService.class)
@@ -166,20 +167,19 @@ public class GroupSelectionFrag extends Fragment {
                             .putExtra(UploadVideoFeedService.EXTRA_FEED_POST_DATA, feedPostData)
                             .setAction(UploadVideoFeedService.ACTION_UPLOAD);
                     ContextCompat.startForegroundService(requireContext(), serviceIntent);
-                    Toast.makeText(requireContext(), "Uploading Video", Toast.LENGTH_SHORT).show();
-                    requireActivity().setResult(RESULT_OK);
+                    resultIntent.putExtra("post_medium", "vid");
+                    requireActivity().setResult(RESULT_OK, resultIntent);
                     requireActivity().finish();
                     getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
-                }
-                else {
+                } else {
                     postSubmitBtn.setVisibility(View.GONE);
                     postProgressBar.setVisibility(View.VISIBLE);
-                    FeedServices.post(feedPostData, groupNameText, feedNameText, null,null, 0, isGroupJoined,new Callback<Void>() {
+                    FeedServices.post(feedPostData, groupNameText, feedNameText, null, null, 0, isGroupJoined, new Callback<Void>() {
                         @Override
                         public void onResponse(@NotNull Call<Void> call, @NotNull Response<Void> response) {
                             if (isAdded() && response.isSuccessful()) {
-                                Toast.makeText(requireContext(), "Posted successfully!", Toast.LENGTH_SHORT).show();
-                                requireActivity().setResult(RESULT_OK);
+                                resultIntent.putExtra("post_medium", "txt");
+                                requireActivity().setResult(RESULT_OK, resultIntent);
                                 requireActivity().finish();
                                 getActivity().overridePendingTransition(R.anim.none, R.anim.slide_to_bottom_fast);
                             } else if (isAdded()) {
@@ -210,25 +210,11 @@ public class GroupSelectionFrag extends Fragment {
     }
 
     private void showIntroCard() {
-        feedIntroRefListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Object value = snapshot.getValue();
-                if (value == Boolean.TRUE) {
-                    //intro done
-                    introMcv.setVisibility(View.GONE);
-                } else {
-                    //value is null or false -> show intro card
-                    introMcv.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                introMcv.setVisibility(View.GONE);
-            }
-        };
-        getThisUserFeedRef().addValueEventListener(feedIntroRefListener);
+        if (isIntro) {
+            introMcv.setVisibility(View.VISIBLE);
+        } else {
+            introMcv.setVisibility(View.GONE);
+        }
     }
 
     private void getFeedGroups() {
@@ -246,7 +232,7 @@ public class GroupSelectionFrag extends Fragment {
                     groupsRv.hideShimmerAdapter();
                 }
                 if (response.isSuccessful() && isAdded() && feedGroupDataList != null && !feedGroupDataList.isEmpty()) {
-                    groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList,postSubmitBtn,isQnA);
+                    groupSelectionAdapter = new GroupSelectionAdapter(feedGroupDataList, postSubmitBtn, isQnA);
                     groupsRv.setAdapter(groupSelectionAdapter);
                     postSubmitBtn.setEnabled(true);
                 } else if (isAdded()) {
@@ -265,12 +251,6 @@ public class GroupSelectionFrag extends Fragment {
                 }
             }
         });
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        getThisUserFeedRef().removeEventListener(feedIntroRefListener);
     }
 
 }

@@ -188,7 +188,7 @@ public class RealtimeDbHelper {
         return FirebaseDatabase.getInstance().getReference("search").child("results");
     }
 
-    public static DatabaseReference getThisUserFeedRef() {
+    public static DatabaseReference getThisUserFeedIntroRef() {
         return FirebaseDatabase.getInstance().getReference("feed_user").child(FirebaseAuth.getInstance().getUid()).child("is_intro_done");
     }
 

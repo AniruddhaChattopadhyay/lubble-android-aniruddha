@@ -176,5 +176,6 @@ public class AnalyticsEvents {
     public static final String FEED_INTRO_SHOWN = "FEED_INTRO_SHOWN";
     public static final String FEED_INTRO_START = "FEED_INTRO_START";
     public static final String FEED_INTRO_CANCELLED = "FEED_INTRO_CANCELLED";
+    public static final String FEED_INTRO_GROUP_VIA_SNACKBAR = "FEED_INTRO_GROUP_VIA_SNACKBAR";
 
 }
