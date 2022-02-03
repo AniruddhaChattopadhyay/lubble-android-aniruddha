@@ -79,7 +79,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     private MaterialButton postBtn;
     private MaterialButton postQandABtn;
-    private LinearLayout postBtnRv;
+    private LinearLayout postBtnLl;
     private RecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
@@ -128,7 +128,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         emptyHintTv = rootView.findViewById(R.id.tv_empty_hint);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         postQandABtn = rootView.findViewById(R.id.btn_QandA_new_post);
-        postBtnRv = rootView.findViewById(R.id.post_btn_LL);
+        postBtnLl = rootView.findViewById(R.id.post_btn_LL);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
         joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
         swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_feed);
@@ -236,14 +236,14 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
                 if (!followed.isEmpty()) {
                     // joined
                     joinGroupTv.setVisibility(View.GONE);
-                    postBtnRv.setVisibility(View.VISIBLE);
+                    postBtnLl.setVisibility(View.VISIBLE);
                     if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
                         ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
                     }
                 } else {
                     // not joined
                     joinGroupTv.setVisibility(View.VISIBLE);
-                    postBtnRv.setVisibility(View.GONE);
+                    postBtnLl.setVisibility(View.GONE);
                     ((GroupFeedActivity) getActivity()).toggleContextMenu(false);
                     joinGroupTv.setOnClickListener(v -> {
                         joinGroup(groupFeed);
@@ -278,9 +278,9 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
             if (dy > 0) {
-                UiUtils.animateSlideDownHide(getContext(), postBtnRv);
+                UiUtils.animateSlideDownHide(getContext(), postBtnLl);
             } else {
-                UiUtils.animateSlideUpShow(getContext(), postBtnRv);
+                UiUtils.animateSlideUpShow(getContext(), postBtnLl);
             }
 
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
@@ -304,7 +304,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
                     if (response.isSuccessful() && isAdded()) {
                         Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
                         joinGroupTv.setVisibility(View.GONE);
-                        postBtnRv.setVisibility(View.VISIBLE);
+                        postBtnLl.setVisibility(View.VISIBLE);
                         joinGroupProgressBar.setVisibility(View.GONE);
                         if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
                             ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
@@ -342,7 +342,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     @Override
     public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
-        postBtnRv.setVisibility(View.GONE);
+        postBtnLl.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
@@ -352,7 +352,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     @Override
     public void onReplied(String activityId, String foreignId, Reaction reaction) {
-        postBtnRv.setVisibility(View.VISIBLE);
+        postBtnLl.setVisibility(View.VISIBLE);
         adapter.addUserReply(activityId, reaction);
         Analytics.triggerFeedEngagement(foreignId, "comment", 10, "group:" + feedName, GroupFeedFrag.class.getSimpleName());
     }
@@ -395,7 +395,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     @Override
     public void onDismissed() {
-        postBtnRv.setVisibility(View.VISIBLE);
+        postBtnLl.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -422,7 +422,9 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         } else if (postMedium.equalsIgnoreCase("vid")) {
             text = "Uploading Video...";
         }
-        Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT).show();
+        Snackbar snackbar = Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT);
+        snackbar.setAnchorView(postBtnLl);
+        snackbar.show();
     }
 
     @Override
