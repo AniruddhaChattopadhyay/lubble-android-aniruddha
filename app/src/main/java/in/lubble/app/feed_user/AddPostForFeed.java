@@ -1,9 +1,14 @@
 package in.lubble.app.feed_user;
 
+import static in.lubble.app.utils.FileUtils.Video_Size;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.FileUtils.getMimeType;
+import static in.lubble.app.utils.StringUtils.extractFirstLink;
+import static in.lubble.app.utils.UiUtils.dpToPx;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,14 +31,16 @@ import androidx.core.content.FileProvider;
 import com.fxn.pix.Options;
 import com.fxn.pix.Pix;
 import com.fxn.utility.PermUtil;
-import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.upstream.FileDataSource;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.File;
@@ -46,38 +53,34 @@ import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.chat.AttachVideoActivity;
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.network.LinkMetaAsyncTask;
 import in.lubble.app.network.LinkMetaListener;
 import in.lubble.app.utils.FileUtils;
 import in.lubble.app.utils.RoundedCornersTransformation;
 
-import static in.lubble.app.utils.FileUtils.Video_Size;
-import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
-import static in.lubble.app.utils.FileUtils.getMimeType;
-import static in.lubble.app.utils.StringUtils.extractFirstLink;
-import static in.lubble.app.utils.UiUtils.dpToPx;
-
 
 public class AddPostForFeed extends BaseActivity {
 
     private static final int REQ_CODE_GROUPS_SELECT = 853;
     private static final int REQUEST_CODE_MEDIA_ATTACH = 820;
+    public static final String ARG_POST_TYPE = "ARG_FEED_POST_TYPE";
+    public static final String TYPE_QNA = "TYPE_QNA";
+    public static final String TYPE_INTRO = "TYPE_INTRO";
 
     private Button postSubmitBtn;
     private EditText postText;
     private ImageView dpIv, attachedPicIv, linkImageIv, linkCloseIv;
     private View parentLayout;
     private FeedPostData feedPostData;
+    private MaterialCardView introMcv;
     private RelativeLayout linkPreviewContainer;
-    private TextView addPhotoToFeedTv, linkTitleTv, linkDescTv;
+    private TextView addPhotoToFeedTv, linkTitleTv, linkDescTv, introTitleTv, introSubtitleTv;
     private String uploadPath = "feed_photos/";
-    public static String QnAString = "QandA";
     private String prevUrl = "";
     private LinkMetaAsyncTask linkMetaAsyncTask;
     private boolean isLinkPreviewClosedByUser;
-    private boolean isQandA;
+    private boolean isQandA, isIntro;
     private PlayerView exoPlayerView;
     private SimpleExoPlayer exoPlayer;
     private static final int PERMITTED_VIDEO_SIZE = 30;
@@ -108,11 +111,19 @@ public class AddPostForFeed extends BaseActivity {
         linkTitleTv = findViewById(R.id.tv_link_title);
         linkDescTv = findViewById(R.id.tv_link_desc);
         linkCloseIv = findViewById(R.id.iv_link_close);
+        introMcv = findViewById(R.id.mcv_intro);
+        introTitleTv = findViewById(R.id.tv_intro_title);
+        introSubtitleTv = findViewById(R.id.tv_intro_subtitle);
         exoPlayerView = findViewById(R.id.exo_player_add_feed_post);
         linkCloseIv.setVisibility(View.VISIBLE);
 
         feedPostData = new FeedPostData();
-        isQandA = getIntent().getBooleanExtra(QnAString,false);
+        String stringExtra = getIntent().getStringExtra(ARG_POST_TYPE);
+        if (TYPE_QNA.equalsIgnoreCase(stringExtra)) {
+            isQandA = true;
+        } else if (TYPE_INTRO.equalsIgnoreCase(stringExtra)) {
+            isIntro = true;
+        }
         addTextChangeListener();
         postSubmitBtn.setOnClickListener(v -> {
             if (postText.getText().toString().trim().length() > 0) {
@@ -120,7 +131,7 @@ public class AddPostForFeed extends BaseActivity {
                 if (photoLink != null) {
                     feedPostData.setImgUri(photoLink);
                 }
-                if(videoLink!=null){
+                if (videoLink != null) {
                     feedPostData.setVidUri(videoLink);
                 }
                 openGroupSelectionActivity(feedPostData);
@@ -151,10 +162,30 @@ public class AddPostForFeed extends BaseActivity {
             isLinkPreviewClosedByUser = true;
             resetLinkPreview();
         });
-        if(isQandA) {
+
+        if (isQandA) {
             Editable edit = postText.getText();
             postText.setText("?");
             postText.setSelection(0);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        showIntroCard();
+    }
+
+    private void showIntroCard() {
+        if (isIntro) {
+            introMcv.setVisibility(View.VISIBLE);
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            String name = (currentUser != null && currentUser.getDisplayName() != null) ? currentUser.getDisplayName().split(" ")[0] : "Neighbour";
+            introTitleTv.setText(String.format("\uD83D\uDC4B Let's introduce you, %s!", name));
+            introSubtitleTv.setText(String.format("Start by mentioning things like\n\uD83C\uDFE1 Which area in %s you stay in\n⌚ For how long have you been in B'luru\n\uD83D\uDC83 What are your interests or hobbies\n\nWhen you're done, click 'POST' button at the bottom",
+                    LubbleSharedPrefs.getInstance().getLubbleName()));
+        } else {
+            introMcv.setVisibility(View.GONE);
         }
     }
 
@@ -208,8 +239,10 @@ public class AddPostForFeed extends BaseActivity {
 
     private void openGroupSelectionActivity(FeedPostData feedPostData) {
         Intent groupSelectionActivIntent = GroupSelectionActiv.getIntent(this, feedPostData);
-        if(isQandA){
-            groupSelectionActivIntent.putExtra(QnAString,true);
+        if (isQandA) {
+            groupSelectionActivIntent.putExtra(ARG_POST_TYPE, TYPE_QNA);
+        } else if (isIntro) {
+            groupSelectionActivIntent.putExtra(ARG_POST_TYPE, TYPE_INTRO);
         }
         startActivityForResult(groupSelectionActivIntent, REQ_CODE_GROUPS_SELECT);
     }
@@ -218,19 +251,19 @@ public class AddPostForFeed extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQ_CODE_GROUPS_SELECT && resultCode == RESULT_OK) {
-            setResult(RESULT_OK);
+            setResult(RESULT_OK, data);
             finish();
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_MEDIA_ATTACH) {
             ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);
-            Uri uri=null;
+            Uri uri = null;
             String type = null;
             File imageFile;
-            if (returnValue!=null) {
+            if (returnValue != null) {
                 uri = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".fileprovider", new File(returnValue.get(0)));
                 type = getMimeType(uri);
                 imageFile = getFileFromInputStreamUri(this, uri);
             }
-            if (type!=null && (type.contains("image") || type.contains("jpg") || type.contains("jpeg")) ) {//returnValue != null && !returnValue.isEmpty()
+            if (type != null && (type.contains("image") || type.contains("jpg") || type.contains("jpeg"))) {//returnValue != null && !returnValue.isEmpty()
                 exoPlayerView.setVisibility(View.GONE);
                 imageFile = getFileFromInputStreamUri(this, uri);
                 uri = Uri.fromFile(imageFile);
@@ -243,8 +276,7 @@ public class AddPostForFeed extends BaseActivity {
                         .load(uri)
                         .transform(new RoundedCornersTransformation(dpToPx(8), 0))
                         .into(attachedPicIv);
-            }
-            else if(returnValue != null && (type.contains("video") || type.contains("mp4"))){
+            } else if (returnValue != null && (type.contains("video") || type.contains("mp4"))) {
                 attachedPicIv.setVisibility(View.GONE);
                 String extension = FileUtils.getFileExtension(this, uri);
                 addPhotoToFeedTv.setText("Change Media");
@@ -265,8 +297,7 @@ public class AddPostForFeed extends BaseActivity {
                         exoPlayer.setPlayWhenReady(false);
                     }
                 }
-            }
-            else {
+            } else {
                 Toast.makeText(this, R.string.all_something_wrong_try_again, Toast.LENGTH_SHORT).show();
             }
         }
