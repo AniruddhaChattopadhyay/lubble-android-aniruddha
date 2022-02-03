@@ -251,7 +251,7 @@ public class AddPostForFeed extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQ_CODE_GROUPS_SELECT && resultCode == RESULT_OK) {
-            setResult(RESULT_OK);
+            setResult(RESULT_OK, data);
             finish();
         } else if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_MEDIA_ATTACH) {
             ArrayList<String> returnValue = data.getStringArrayListExtra(Pix.IMAGE_RESULTS);

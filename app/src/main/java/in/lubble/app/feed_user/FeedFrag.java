@@ -91,6 +91,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private RecyclerView joinedGroupStoriesRV;
     ArrayList<FeedGroupData> feedGroupDataList;
     private ValueEventListener feedIntroRefListener;
+    private View fragmentContainer;
     private boolean isIntroStarted;
 
     public FeedFrag() {
@@ -132,6 +133,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             postQandABtn = view.findViewById(R.id.btn_QandA_new_post);
         }
         emptyHintTv = view.findViewById(R.id.tv_empty_hint);
+        fragmentContainer = view.findViewById(R.id.fragment_container);
         introMcv = view.findViewById(R.id.mcv_intro);
         introCloseIv = view.findViewById(R.id.iv_intro_close);
         introTitleTv = view.findViewById(R.id.tv_intro_title);
@@ -465,7 +467,8 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         } else if (postMedium.equalsIgnoreCase("vid")) {
             text = "Uploading Video...";
         }
-        Snackbar snackbar = Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT);
+        Snackbar snackbar = Snackbar.make(fragmentContainer, text, Snackbar.LENGTH_SHORT);
+        snackbar.setAnchorView(postBtnLL);
         if (groupTitle != null && groupTitle.toLowerCase(Locale.ROOT).startsWith("introduction")) {
             text += " View " + groupTitle + " group";
             snackbar.setText(text);
