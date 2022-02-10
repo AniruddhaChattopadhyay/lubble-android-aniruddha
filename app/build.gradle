@@ -69,13 +69,17 @@ buildscript {
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
-    maven{
+    maven {
         url 'https://sdk.uxcam.com/android/'
     }
     mavenCentral()
 }
 
 dependencies {
+    androidTestImplementation 'androidx.test:rules:1.4.0'
+    androidTestImplementation('androidx.test.espresso:espresso-contrib:3.4.0') {
+        exclude module: "protobuf-lite"
+    }
     def paging_version = "3.0.1"
     def exoplayer_version = "2.16.1"
     def permission_dispatcher_version = "4.8.0"
@@ -160,7 +164,7 @@ dependencies {
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4'
     //isoparser needed with silicompressor
-    implementation ('com.googlecode.mp4parser:isoparser:1.1.22') {
+    implementation('com.googlecode.mp4parser:isoparser:1.1.22') {
         exclude group: 'org.aspectj', module: 'aspectjrt'
     }
     // in app update
@@ -177,7 +181,7 @@ dependencies {
     implementation 'com.github.AniruddhaChattopadhyay:TextFormatter:1.0.1'
 
     //media picker like telegram
-    implementation  'com.fxn769:pix:1.5.6'
+    implementation 'com.fxn769:pix:1.5.6'
 
     //getstream for lubble feed
     implementation 'io.getstream.client:stream-java:3.2.4'
