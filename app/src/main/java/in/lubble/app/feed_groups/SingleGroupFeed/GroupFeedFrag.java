@@ -2,6 +2,7 @@ package in.lubble.app.feed_groups.SingleGroupFeed;
 
 import static android.app.Activity.RESULT_OK;
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedIntroRef;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
 
 import android.content.Intent;
@@ -38,6 +39,7 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
 import in.lubble.app.GlideApp;
@@ -77,7 +79,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     private MaterialButton postBtn;
     private MaterialButton postQandABtn;
-    private LinearLayout postBtnRv;
+    private LinearLayout postBtnLl;
     private RecyclerView feedRV;
     private ProgressBar joinGroupProgressBar;
     private EmojiTextView joinGroupTv;
@@ -110,6 +112,9 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             feedName = getArguments().getString(FEED_NAME_BUNDLE);
+            if (feedName.toLowerCase(Locale.ROOT).startsWith("introductions")) {
+                feedName = feedName + "-" + LubbleSharedPrefs.getInstance().getLubbleId();
+            }
             viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
         }
         Analytics.triggerScreenEvent(requireContext(), this.getClass());
@@ -123,7 +128,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         emptyHintTv = rootView.findViewById(R.id.tv_empty_hint);
         postBtn = rootView.findViewById(R.id.btn_new_post);
         postQandABtn = rootView.findViewById(R.id.btn_QandA_new_post);
-        postBtnRv = rootView.findViewById(R.id.post_btn_LL);
+        postBtnLl = rootView.findViewById(R.id.post_btn_LL);
         feedRV = rootView.findViewById(R.id.feed_recyclerview);
         joinGroupProgressBar = rootView.findViewById(R.id.progressbar_joining);
         swipeRefreshLayout = rootView.findViewById(R.id.swipe_refresh_feed);
@@ -133,7 +138,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         });
         postQandABtn.setOnClickListener(v -> {
             Intent intent = new Intent(getContext(), AddPostForFeed.class);
-            intent.putExtra(AddPostForFeed.QnAString, true);
+            intent.putExtra(AddPostForFeed.ARG_POST_TYPE, AddPostForFeed.TYPE_QNA);
             startActivityForResult(intent, REQUEST_CODE_NEW_POST);
         });
 
@@ -171,14 +176,19 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
             @Override
             public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
                 if (isAdded()) {
-                    Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
 
     private void initRecyclerView() {
-        CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedName);
+        CloudFlatFeed groupFeed;
+        if (feedName.toLowerCase(Locale.ROOT).startsWith("introductions")) {
+            groupFeed = FeedServices.client.flatFeed("group_locality", feedName);
+        } else {
+            groupFeed = FeedServices.client.flatFeed("group", feedName);
+        }
 
         if (adapter == null) {
             DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -226,14 +236,14 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
                 if (!followed.isEmpty()) {
                     // joined
                     joinGroupTv.setVisibility(View.GONE);
-                    postBtnRv.setVisibility(View.VISIBLE);
+                    postBtnLl.setVisibility(View.VISIBLE);
                     if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
                         ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
                     }
                 } else {
                     // not joined
                     joinGroupTv.setVisibility(View.VISIBLE);
-                    postBtnRv.setVisibility(View.GONE);
+                    postBtnLl.setVisibility(View.GONE);
                     ((GroupFeedActivity) getActivity()).toggleContextMenu(false);
                     joinGroupTv.setOnClickListener(v -> {
                         joinGroup(groupFeed);
@@ -268,9 +278,9 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
             if (dy > 0) {
-                UiUtils.animateSlideDownHide(getContext(), postBtnRv);
+                UiUtils.animateSlideDownHide(getContext(), postBtnLl);
             } else {
-                UiUtils.animateSlideUpShow(getContext(), postBtnRv);
+                UiUtils.animateSlideUpShow(getContext(), postBtnLl);
             }
 
             VisibleState visibleState = new VisibleState(layoutManager.findFirstCompletelyVisibleItemPosition(),
@@ -294,7 +304,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
                     if (response.isSuccessful() && isAdded()) {
                         Snackbar.make(rootView, "Joined Group!", Snackbar.LENGTH_SHORT).show();
                         joinGroupTv.setVisibility(View.GONE);
-                        postBtnRv.setVisibility(View.VISIBLE);
+                        postBtnLl.setVisibility(View.VISIBLE);
                         joinGroupProgressBar.setVisibility(View.GONE);
                         if (getActivity() != null && getActivity() instanceof GroupFeedActivity) {
                             ((GroupFeedActivity) getActivity()).toggleContextMenu(true);
@@ -332,7 +342,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     @Override
     public void onReplyClicked(String activityId, String foreignId, String postActorUid, int position) {
-        postBtnRv.setVisibility(View.GONE);
+        postBtnLl.setVisibility(View.GONE);
         ReplyBottomSheetDialogFrag replyBottomSheetDialogFrag = ReplyBottomSheetDialogFrag.newInstance(activityId, foreignId, postActorUid);
         replyBottomSheetDialogFrag.show(getChildFragmentManager(), null);
         RecyclerView.SmoothScroller smoothScroller = new PostReplySmoothScroller(feedRV.getContext());
@@ -342,7 +352,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     @Override
     public void onReplied(String activityId, String foreignId, Reaction reaction) {
-        postBtnRv.setVisibility(View.VISIBLE);
+        postBtnLl.setVisibility(View.VISIBLE);
         adapter.addUserReply(activityId, reaction);
         Analytics.triggerFeedEngagement(foreignId, "comment", 10, "group:" + feedName, GroupFeedFrag.class.getSimpleName());
     }
@@ -385,18 +395,36 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     @Override
     public void onDismissed() {
-        postBtnRv.setVisibility(View.VISIBLE);
+        postBtnLl.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_NEW_POST && resultCode == RESULT_OK) {
+            // Posted a new post -> refresh list
             onRefresh();
+            getThisUserFeedIntroRef().setValue(Boolean.TRUE);
+            if (data != null && data.hasExtra("post_medium")) {
+                showPostSuccessSnackbar(data);
+            }
         } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
-            //refresh list
+            //Returned from individual post -> refresh list to update reactions
             onRefresh();
         }
+    }
+
+    private void showPostSuccessSnackbar(@NonNull Intent data) {
+        String postMedium = data.getStringExtra("post_medium");
+        String text = "Posted Successfully!";
+        if (postMedium.equalsIgnoreCase("img")) {
+            text = "Uploading Photo...";
+        } else if (postMedium.equalsIgnoreCase("vid")) {
+            text = "Uploading Video...";
+        }
+        Snackbar snackbar = Snackbar.make(requireView(), text, Snackbar.LENGTH_SHORT);
+        snackbar.setAnchorView(postBtnLl);
+        snackbar.show();
     }
 
     @Override
