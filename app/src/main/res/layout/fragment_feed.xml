@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<in.lubble.app.widget.NestedCoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -21,8 +21,8 @@
                 android:id="@+id/ll_joined_groups_stories"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:animateLayoutChanges="true"
                 android:layout_below="@id/sep_toolbar"
-                tools:visibility="visible"
                 android:orientation="vertical">
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -42,15 +42,93 @@
                     android:layout_width="match_parent"
                     android:layout_height="2dp" />
 
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/mcv_intro"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:visibility="gone"
+                    android:elevation="8dp"
+                    app:cardBackgroundColor="@color/md_blue_50"
+                    app:cardCornerRadius="8dp"
+                    app:contentPadding="8dp"
+                    app:strokeColor="@color/light_colorAccent"
+                    app:strokeWidth="1dp">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/iv_intro_wave"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="👋"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                            android:textColor="@color/black"
+                            android:textSize="40sp" />
+
+                        <ImageView
+                            android:id="@+id/iv_intro_close"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginTop="-8dp"
+                            android:layout_marginEnd="-8dp"
+                            android:padding="8dp"
+                            app:srcCompat="@drawable/ic_close_black_24dp"
+                            app:tint="@color/md_grey_400" />
+
+                        <TextView
+                            android:id="@+id/tv_intro_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/iv_intro_wave"
+                            android:layout_marginTop="4dp"
+                            android:text="Welcome Neighbour!"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:id="@+id/tv_intro_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/tv_intro_title"
+                            android:layout_marginTop="8dp"
+                            android:text="First things first: Let's introduce you to everyone in the neighbourhood!\n\nWe'll help you write an awesome intro 👇"
+                            android:textColor="@color/black"
+                            android:textSize="16sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_start_intro"
+                            style="@style/Widget.MaterialComponents.Button.Icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/tv_intro_subtitle"
+                            android:layout_alignParentRight="true"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            app:cornerRadius="32dp"
+                            android:text="Start my introduction"
+                            android:textSize="16sp"
+                            android:theme="@style/MaterialButton"
+                            app:backgroundTint="@color/colorAccent"
+                            app:icon="@drawable/ic_star_shine" />
+
+                    </RelativeLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
             </LinearLayout>
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <include
-        android:gravity="center"
         layout="@layout/feed_layout"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_width="match_parent" />
+        android:gravity="center" />
 
-</in.lubble.app.widget.NestedCoordinatorLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
