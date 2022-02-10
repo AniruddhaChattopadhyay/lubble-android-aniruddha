@@ -28,6 +28,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
     private final List<FeedGroupData> stringList;
     private final List<FeedGroupData> stringListCopy;
     private MaterialButton postSubmitBtn;
+    private FeedGroupData selectedFeedGroupData = null;
     private boolean isQnA;
 
 
@@ -78,8 +79,9 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
             lastCheckedPos = holder.getBindingAdapterPosition();
+            selectedFeedGroupData = stringList.get(lastCheckedPos);
             if(stringList.get(lastCheckedPos).isGroupJoined()){
-                postSubmitBtn.setText("Post");
+                postSubmitBtn.setText("Post");  
             }
             else{
                 postSubmitBtn.setText("Join and Post");
@@ -93,15 +95,32 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         return lastCheckedPos;
     }
 
+    FeedGroupData getLastSelectedGroup(){
+        return selectedFeedGroupData;
+    }
+
     public void filter(String text) {
         stringList.clear();
+        lastCheckedPos = -1;
         if (text.isEmpty()) {
             stringList.addAll(stringListCopy);
+            int i=0;
+            for(FeedGroupData groupData : stringListCopy){
+                if (selectedFeedGroupData!= null && groupData.getFeedName().equals(selectedFeedGroupData.getFeedName())){
+                    lastCheckedPos = i;
+                }
+                i++;
+            }
         } else {
             text = text.toLowerCase();
+            int i = 0;
             for (FeedGroupData groupData : stringListCopy) {
                 if (groupData.getName().toLowerCase().contains(text) || groupData.getName().toLowerCase().contains(text)) {
                     stringList.add(groupData);
+                    if (selectedFeedGroupData!= null && groupData.getFeedName().equals(selectedFeedGroupData.getFeedName())){
+                        lastCheckedPos = i;
+                    }
+                    i++;
                 }
             }
         }
