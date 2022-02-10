@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -83,6 +84,7 @@ public class AddPostForFeed extends BaseActivity {
     private boolean isQandA, isIntro;
     private PlayerView exoPlayerView;
     private SimpleExoPlayer exoPlayer;
+    private ImageButton muteBtn;
     private static final int PERMITTED_VIDEO_SIZE = 30;
     private String videoLink = null;
     private String photoLink = null;
@@ -116,7 +118,7 @@ public class AddPostForFeed extends BaseActivity {
         introSubtitleTv = findViewById(R.id.tv_intro_subtitle);
         exoPlayerView = findViewById(R.id.exo_player_add_feed_post);
         linkCloseIv.setVisibility(View.VISIBLE);
-
+        muteBtn = findViewById(R.id.exo_mute_btn);
         feedPostData = new FeedPostData();
         String stringExtra = getIntent().getStringExtra(ARG_POST_TYPE);
         if (TYPE_QNA.equalsIgnoreCase(stringExtra)) {
@@ -295,6 +297,7 @@ public class AddPostForFeed extends BaseActivity {
                         exoPlayerView.setVisibility(View.VISIBLE);
                         prepareExoPlayerFromFileUri(vidUri);
                         exoPlayer.setPlayWhenReady(false);
+                        muteVideo(exoPlayer);
                     }
                 }
             } else {
@@ -302,6 +305,18 @@ public class AddPostForFeed extends BaseActivity {
             }
         }
     }
+
+    public void muteVideo(ExoPlayer exoPlayer){
+        if(exoPlayer.getVolume() == 0F) {
+            exoPlayer.setVolume(0.75F);
+            muteBtn.setImageResource(R.drawable.ic_mute);
+        }
+        else{
+            exoPlayer.setVolume(0F);
+            muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
+        }
+    }
+
 
     private void prepareExoPlayerFromFileUri(Uri uri) {
         exoPlayer = new SimpleExoPlayer.Builder(this).build();

@@ -26,6 +26,7 @@ import android.text.util.Linkify;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -137,6 +138,7 @@ public class FeedPostFrag extends Fragment {
     private BottomSheetBehavior sheetBehavior;
     private RelativeLayout linkPreviewContainer;
     private CloudClient timelineClient;
+    private ImageButton muteBtn;
 
     public static FeedPostFrag newInstance(String postId) {
         FeedPostFrag feedPostFrag = new FeedPostFrag();
@@ -178,7 +180,7 @@ public class FeedPostFrag extends Fragment {
         linkTitleTv = view.findViewById(R.id.tv_link_title);
         linkDescTv = view.findViewById(R.id.tv_link_desc);
         moreMenuIv = view.findViewById(R.id.iv_more_menu);
-
+        muteBtn = view.findViewById(R.id.exo_mute_btn);
         sheetBehavior = BottomSheetBehavior.from(replyBottomSheet);
         postId = requireArguments().getString(ARG_POST_ID);
         commentRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -274,6 +276,7 @@ public class FeedPostFrag extends Fragment {
                                         exoPlayerView.setVisibility(View.VISIBLE);
                                         prepareExoPlayerFromFileUri(Uri.parse(vidUrl));
                                         exoPlayer.setPlayWhenReady(true);
+                                        muteVideo(exoPlayer);
                                         exoPlayerView.setOnClickListener(v ->
                                                 FullScreenVideoActivity.open(getActivity(), requireContext(), vidUrl, "", ""));
                                     }
@@ -360,6 +363,17 @@ public class FeedPostFrag extends Fragment {
         } catch (StreamException e) {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
+        }
+    }
+
+    public void muteVideo(ExoPlayer exoPlayer){
+        if(exoPlayer.getVolume() == 0F) {
+            exoPlayer.setVolume(0.75F);
+            muteBtn.setImageResource(R.drawable.ic_mute);
+        }
+        else{
+            exoPlayer.setVolume(0F);
+            muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
         }
     }
 

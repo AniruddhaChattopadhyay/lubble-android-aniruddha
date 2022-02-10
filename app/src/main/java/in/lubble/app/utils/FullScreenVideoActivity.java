@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -70,6 +71,7 @@ public class FullScreenVideoActivity extends BaseActivity {
     private Uri videourl = null;
     private Uri videoUrlHttp = null;
     private Long position = C.TIME_UNSET;
+    private ImageButton muteBtn;
     private final String lubble_vid_dir = "Lubble Videos";
     private File lubble_vid_file;
     File matchingFile = null;
@@ -94,6 +96,7 @@ public class FullScreenVideoActivity extends BaseActivity {
         setContentView(R.layout.activity_full_screen_video);
         progressBar = findViewById(R.id.progress_bar_full_vid);
         Toolbar toolbar = findViewById(R.id.transparent_toolbar);
+        muteBtn = findViewById(R.id.exo_mute_btn);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setTitle("");
@@ -216,6 +219,21 @@ public class FullScreenVideoActivity extends BaseActivity {
             if (position != C.TIME_UNSET) {
                 exoPlayer.seekTo(position);
             }
+
+            muteBtn.setOnClickListener(v->{
+                muteVideo(exoPlayer);
+            });
+        }
+    }
+
+    public void muteVideo(ExoPlayer exoPlayer){
+        if(exoPlayer.getVolume() == 0F) {
+            exoPlayer.setVolume(0.75F);
+            muteBtn.setImageResource(R.drawable.ic_mute);
+        }
+        else{
+            exoPlayer.setVolume(0F);
+            muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
         }
     }
 
