@@ -1,5 +1,7 @@
 package in.lubble.app.services;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
+
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -28,8 +30,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.Constants.MEDIA_TYPE;
-
 public class FeedServices {
     public static CloudClient client = null;
     private static CloudClient timelineClient = null;
@@ -53,6 +53,15 @@ public class FeedServices {
         return timelineClient;
     }
 
+    /**
+     *
+     * @return Null only when feed credetials havent been initialized for a user
+     * Only happens in rare cases when a user who has never opened app after feed updates, opens feed noif directly.
+     * REMOVE null return after min version is 3.0+, make it:
+    throw new IllegalStateException(FeedServices.class.getCanonicalName() +
+    ":timelineClient is not initialized, call initTimelineClient(..) method first.");
+     */
+    @Nullable
     public static CloudClient getTimelineClient() {
         if (timelineClient == null) {
             String feedUserToken = LubbleSharedPrefs.getInstance().getFeedUserToken();
@@ -60,8 +69,7 @@ public class FeedServices {
             if (!TextUtils.isEmpty(feedUserToken) && !TextUtils.isEmpty(feedApiKey)) {
                 recreateTimelineClient(feedUserToken, feedApiKey);
             } else {
-                throw new IllegalStateException(FeedServices.class.getCanonicalName() +
-                        ":timelineClient is not initialized, call initTimelineClient(..) method first.");
+                return null;
             }
         }
         return timelineClient;
@@ -82,7 +90,7 @@ public class FeedServices {
         }
     }
 
-    public static void post(FeedPostData feedPostData, String groupName, String feedName, @Nullable String imgUrl,@Nullable String vidUrl, float aspectRatio,boolean isGroupJoined, @Nullable Callback<Void> callback) {
+    public static void post(FeedPostData feedPostData, String groupName, String feedName, @Nullable String imgUrl, @Nullable String vidUrl, float aspectRatio, boolean isGroupJoined, @Nullable Callback<Void> callback) {
         Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         final JSONObject jsonObject = new JSONObject();
         try {
@@ -94,11 +102,11 @@ public class FeedServices {
             jsonObject.put("linkPicUrl", feedPostData.getLinkImageUrl());
             jsonObject.put("linkUrl", feedPostData.getLinkUrl());
             jsonObject.put("aspectRatio", Float.valueOf(aspectRatio));
-            jsonObject.put("isGroupJoined",isGroupJoined);
+            jsonObject.put("isGroupJoined", isGroupJoined);
             if (imgUrl != null) {
                 jsonObject.put("photoLink", imgUrl);
             }
-            if(vidUrl!=null){
+            if (vidUrl != null) {
                 jsonObject.put("videoLink", vidUrl);
             }
             RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());

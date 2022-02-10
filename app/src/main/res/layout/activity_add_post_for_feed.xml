@@ -18,11 +18,54 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/mcv_intro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:elevation="8dp"
+                app:cardBackgroundColor="@color/md_blue_50"
+                android:visibility="gone"
+                app:cardCornerRadius="8dp"
+                app:strokeColor="@color/light_colorAccent"
+                app:strokeWidth="1dp"
+                app:contentPadding="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_intro_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="👋 Let's introduce you, Neighbour!"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                        android:textColor="@color/black" />
+
+                    <TextView
+                        android:id="@+id/tv_intro_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:lineHeight="24dp"
+                        android:textSize="16sp"
+                        android:text="Start by mentioning things like\n🏡 Which area in this neighbourhood you stay in\n⌚ For how long have you been in B'luru\n💃 What are your interests or hobbies\n\nWhen you're done, click 'POST' button at the bottom"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:textColor="@color/black" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
             <ImageView
                 android:id="@+id/iv_profile_pic"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:layout_marginLeft="8dp"
+                android:layout_below="@id/mcv_intro"
                 android:layout_marginTop="14dp"
                 tools:src="@tools:sample/avatars" />
 
@@ -30,6 +73,7 @@
                 android:id="@+id/post_edt_txt"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/mcv_intro"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginBottom="8dp"
@@ -39,9 +83,9 @@
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:gravity="top|left"
-                android:maxLength="2000"
                 android:hint="What's happening around you?"
                 android:inputType="text|textCapSentences|textMultiLine"
+                android:maxLength="2000"
                 android:paddingTop="16dp"
                 android:scrollbars="vertical" />
 

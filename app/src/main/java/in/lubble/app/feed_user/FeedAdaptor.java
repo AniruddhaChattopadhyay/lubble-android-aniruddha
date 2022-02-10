@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -299,6 +300,28 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         super.onViewAttachedToWindow(holder);
         if (holder.exoPlayer != null) {
             holder.exoPlayer.setPlayWhenReady(true);
+            holder.muteBtn.setOnClickListener(v->{
+//                if(holder.exoPlayer.getVolume() == 0F) {
+//                    holder.exoPlayer.setVolume(0.75F);
+//                    holder.muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
+//                }
+//                else{
+//                    holder.exoPlayer.setVolume(0F);
+//                    holder.muteBtn.setImageResource(R.drawable.ic_mute);
+//                }
+                muteVideo(holder.muteBtn, holder.exoPlayer);
+            });
+        }
+    }
+
+    public void muteVideo(ImageButton muteBtn , ExoPlayer exoPlayer){
+        if(exoPlayer.getVolume() == 0F) {
+            exoPlayer.setVolume(0.75F);
+            muteBtn.setImageResource(R.drawable.ic_mute);
+        }
+        else{
+            exoPlayer.setVolume(0F);
+            muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
         }
     }
 
@@ -665,12 +688,14 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         private final RecyclerView commentRecyclerView;
         private final RelativeLayout linkPreviewContainer;
         private final PlayerView exoPlayerView;
+        private final ImageButton muteBtn;
         private ExoPlayer exoPlayer;
         private final RelativeLayout mediaLayout;
         private View touchView;
         private EnrichedActivity activity;
         private Map<String, Object> extras;
         private LottieAnimationView likeAnimation;
+
 
         private final GestureDetector gestureDetector = new GestureDetector(new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -797,6 +822,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             mediaLayout = view.findViewById(R.id.media_container);
             exoPlayerView = view.findViewById(R.id.exo_player_feed_content);
             likeAnimation = view.findViewById(R.id.anim_feed_like);
+            muteBtn = view.findViewById(R.id.exo_mute_btn);
             ImageView moreMenuIv = view.findViewById(R.id.iv_more_menu);
             moreMenuIv.setVisibility(GONE);
 

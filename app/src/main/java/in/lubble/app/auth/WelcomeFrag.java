@@ -1,70 +1,27 @@
 package in.lubble.app.auth;
 
-import static android.app.Activity.RESULT_OK;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.utils.FragUtils.addFrag;
-import static in.lubble.app.utils.FragUtils.replaceStack;
-import static in.lubble.app.utils.UserUtils.isNewUser;
-
-import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Handler;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
-import com.firebase.ui.auth.AuthMethodPickerLayout;
-import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.ErrorCodes;
-import com.firebase.ui.auth.IdpResponse;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.EmailAuthProvider;
-import com.google.firebase.auth.FacebookAuthProvider;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.auth.PhoneAuthProvider;
-import com.google.firebase.auth.UserInfo;
-import com.google.firebase.crashlytics.FirebaseCrashlytics;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.messaging.FirebaseMessaging;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import in.lubble.app.BaseActivity;
-import in.lubble.app.LubbleSharedPrefs;
-import in.lubble.app.MainActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.marketplace.SliderData;
 import in.lubble.app.marketplace.SliderViewPagerAdapter;
-import in.lubble.app.models.ProfileData;
-import in.lubble.app.models.ProfileInfo;
-import in.lubble.app.utils.StringUtils;
-import io.branch.referral.Branch;
-import io.branch.referral.BranchError;
 import me.crosswall.lib.coverflow.CoverFlow;
 import me.crosswall.lib.coverflow.core.PagerContainer;
 
@@ -88,7 +45,6 @@ public class WelcomeFrag extends Fragment {
     Bundle args = new Bundle();
     args.putString("link", link);
     WelcomeFrag fragment = new WelcomeFrag();
-    fragment.setArguments(args);
     fragment.setArguments(args);
     return fragment;
     }
@@ -122,7 +78,7 @@ public class WelcomeFrag extends Fragment {
         sliderDataList.add(sliderData4);
         setupSlider();
         login_signup.setOnClickListener(v->{
-            Analytics.triggerEvent(AnalyticsEvents.LOGIN_BUTTON_CLICKED_FROM_WELCOME_SCREEN, getContext());
+            Analytics.triggerEvent(AnalyticsEvents.WELCOME_SCREEN_LOGIN_BTN_CLICKED, getContext());
             Intent intent = new Intent(getActivity(),LoginActivity.class);
             intent.putExtra("Link",link);
             startActivity(intent);

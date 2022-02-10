@@ -69,18 +69,22 @@ buildscript {
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
-    maven{
+    maven {
         url 'https://sdk.uxcam.com/android/'
     }
     mavenCentral()
 }
 
 dependencies {
+    androidTestImplementation 'androidx.test:rules:1.4.0'
+    androidTestImplementation('androidx.test.espresso:espresso-contrib:3.4.0') {
+        exclude module: "protobuf-lite"
+    }
     def paging_version = "3.0.1"
     def exoplayer_version = "2.16.1"
     def permission_dispatcher_version = "4.8.0"
     def fragment_version = "1.4.0"
-    def nav_version = "2.4.0-beta02"
+    def nav_version = "2.4.0-rc01"
 
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"
@@ -88,7 +92,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     //implementation files('libs/stream-analytics-release-1.1.0.aar')
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.4'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.6'
     implementation 'androidx.appcompat:appcompat:1.3.1'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.multidex:multidex:2.0.1'
@@ -98,7 +102,7 @@ dependencies {
     implementation 'androidx.emoji:emoji:1.1.0'
     implementation 'androidx.core:core:1.6.0'
     implementation 'com.google.firebase:firebase-messaging:23.0.0'
-    implementation 'com.google.firebase:firebase-perf:20.0.3'
+    implementation 'com.google.firebase:firebase-perf:20.0.4'
     implementation 'com.github.sharish:ShimmerRecyclerView:v1.3'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
@@ -106,7 +110,7 @@ dependencies {
     implementation 'com.firebaseui:firebase-ui-auth:7.2.0'
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     implementation 'com.github.bumptech.glide:okhttp3-integration:4.12.0'
-    implementation 'com.google.firebase:firebase-database:20.0.2'
+    implementation 'com.google.firebase:firebase-database:20.0.3'
     implementation 'com.google.firebase:firebase-storage:20.0.0'
     implementation 'com.github.drawers:SpinnerDatePicker:2.0.1'
     implementation 'com.facebook.android:facebook-login:11.3.0'
@@ -159,7 +163,10 @@ dependencies {
     implementation project(path: ':libraries:ratingdialog')
     implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
     implementation 'com.iceteck.silicompressorr:silicompressor:2.2.4'
-    implementation 'com.googlecode.mp4parser:isoparser:1.1.22'//isoparser needed with silicompressor
+    //isoparser needed with silicompressor
+    implementation('com.googlecode.mp4parser:isoparser:1.1.22') {
+        exclude group: 'org.aspectj', module: 'aspectjrt'
+    }
     // in app update
     implementation 'com.google.android.play:core:1.10.2'
 
@@ -174,7 +181,7 @@ dependencies {
     implementation 'com.github.AniruddhaChattopadhyay:TextFormatter:1.0.1'
 
     //media picker like telegram
-    implementation  'com.fxn769:pix:1.5.6'
+    implementation 'com.fxn769:pix:1.5.6'
 
     //getstream for lubble feed
     implementation 'io.getstream.client:stream-java:3.2.4'

@@ -486,7 +486,9 @@ public class GroupListFragment extends Fragment implements OnListFragmentInterac
                                 }
                             }
                         }
-                        userGroupData.setUnreadCount(dmMap.get(dmGroupData.getId()));
+                        if (dmMap.get(dmGroupData.getId()) != null) {
+                            userGroupData.setUnreadCount(dmMap.get(dmGroupData.getId()));
+                        }
                         adapter.addGroupToTop(dmGroupData, userGroupData);
                     }
                 }

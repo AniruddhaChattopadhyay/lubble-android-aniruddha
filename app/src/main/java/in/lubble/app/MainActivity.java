@@ -64,6 +64,7 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
+import androidx.navigation.NavGraph;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -423,7 +424,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         String lubbleId = LubbleSharedPrefs.getInstance().getLubbleId();
         if ("koramangala".equalsIgnoreCase(lubbleId) || "saraswati_vihar".equalsIgnoreCase(lubbleId) || BuildConfig.DEBUG) {
             // for existing users show chat-first menu
-            navController.setGraph(R.navigation.nav_graph_chats);
+            NavGraph chatsNavGraph = navController.getNavInflater().inflate(R.navigation.nav_graph_chats);
+            navController.setGraph(chatsNavGraph);
             bottomNavigation.inflateMenu(R.menu.navigation_chat_n_feed);
             if (isNewUserInThisLubble) {
                 // new signup
@@ -431,7 +433,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             }
             showFeedTooltip();
         } else {
-            navController.setGraph(R.navigation.nav_graph);
+            NavGraph feedNavGraph = navController.getNavInflater().inflate(R.navigation.nav_graph);
+            navController.setGraph(feedNavGraph);
             // Feed-first menu for new n'hoods
             bottomNavigation.inflateMenu(R.menu.navigation_menu_feed);
             if (isNewUserInThisLubble) {
@@ -874,24 +877,26 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ProfileInfo profileInfo = dataSnapshot.getValue(ProfileInfo.class);
                 try {
-                    LubbleSharedPrefs.getInstance().setUserFlair(profileInfo.getBadge());
-                    GlideApp.with(MainActivity.this)
-                            .load(profileInfo == null ? "" : profileInfo.getThumbnail())
-                            .circleCrop()
-                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                            .error(R.drawable.ic_account_circle_black_no_padding)
-                            .into(profileIcon);
-                    GlideApp.with(MainActivity.this)
-                            .load(profileInfo == null ? "" : profileInfo.getThumbnail())
-                            .circleCrop()
-                            .placeholder(R.drawable.ic_account_circle_black_no_padding)
-                            .error(R.drawable.ic_account_circle_black_no_padding)
-                            .into(navHeaderIv);
-                    navHeaderNameTv.setText(StringUtils.getTitleCase(profileInfo != null ? profileInfo.getName() : ""));
-                    LubbleSharedPrefs.getInstance().setProfilePicUrl(profileInfo == null ? "" : profileInfo.getThumbnail());
+                    if (profileInfo != null) {
+                        LubbleSharedPrefs.getInstance().setUserFlair(profileInfo.getBadge());
+                        GlideApp.with(MainActivity.this)
+                                .load(profileInfo == null ? "" : profileInfo.getThumbnail())
+                                .circleCrop()
+                                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                                .error(R.drawable.ic_account_circle_black_no_padding)
+                                .into(profileIcon);
+                        GlideApp.with(MainActivity.this)
+                                .load(profileInfo == null ? "" : profileInfo.getThumbnail())
+                                .circleCrop()
+                                .placeholder(R.drawable.ic_account_circle_black_no_padding)
+                                .error(R.drawable.ic_account_circle_black_no_padding)
+                                .into(navHeaderIv);
+                        navHeaderNameTv.setText(StringUtils.getTitleCase(profileInfo != null ? profileInfo.getName() : ""));
+                        LubbleSharedPrefs.getInstance().setProfilePicUrl(profileInfo == null ? "" : profileInfo.getThumbnail());
 
-                    if (profileInfo != null && !isFinishing()) {
-                        com.segment.analytics.Analytics.with(MainActivity.this).identify(firebaseAuth.getUid(), new Traits().putAvatar(profileInfo.getThumbnail()), null);
+                        if (profileInfo != null && !isFinishing()) {
+                            com.segment.analytics.Analytics.with(MainActivity.this).identify(firebaseAuth.getUid(), new Traits().putAvatar(profileInfo.getThumbnail()), null);
+                        }
                     }
                 } catch (IllegalArgumentException e) {
                     FirebaseCrashlytics.getInstance().recordException(e);
@@ -931,7 +936,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private void addDebugActivOpener(Toolbar toolbar) {
         if (BuildConfig.DEBUG) {
-            toolbar.setOnLongClickListener(new View.OnLongClickListener() {
+            lubbleClickTarget.setOnLongClickListener(new View.OnLongClickListener() {
 
                 @Override
                 public boolean onLongClick(View v) {

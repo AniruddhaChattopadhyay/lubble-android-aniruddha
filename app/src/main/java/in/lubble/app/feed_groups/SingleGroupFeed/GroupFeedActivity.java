@@ -1,6 +1,5 @@
 package in.lubble.app.feed_groups.SingleGroupFeed;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -62,15 +61,19 @@ public class GroupFeedActivity extends BaseActivity {
     private static final String EXTRA_FEED_GROUP_NAME = "LBL_EXTRA_FEED_GROUP_NAME";
     private FeedGroupData feedGroupData;
     private boolean isJoined;
-    private SingleGroupFeed singleGroupFeed;
+    private GroupFeedFrag groupFeedFrag;
     private MaterialButton joinInviteBtn;
     private ProgressBar toolbarProgressBar;
 
     public static void open(Context context, String feedGroupName) {
         Log.d(TAG, "2nd Open function called");
+        context.startActivity(getIntent(context, feedGroupName));
+    }
+
+    public static Intent getIntent(Context context, String feedGroupName) {
         Intent intent = new Intent(context, GroupFeedActivity.class);
         intent.putExtra(EXTRA_FEED_GROUP_NAME, feedGroupName);
-        context.startActivity(intent);
+        return intent;
     }
 
     public static void open(Context context, FeedGroupData feedGroupData) {
@@ -150,9 +153,9 @@ public class GroupFeedActivity extends BaseActivity {
                     public void onLoadCleared(@Nullable Drawable placeholder) {
                     }
                 });
-        singleGroupFeed = SingleGroupFeed.newInstance(feedGroupData.getFeedName());
+        groupFeedFrag = GroupFeedFrag.newInstance(feedGroupData.getFeedName());
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, singleGroupFeed)
+                .replace(R.id.container, groupFeedFrag)
                 .commitNow();
     }
 
@@ -168,7 +171,7 @@ public class GroupFeedActivity extends BaseActivity {
                 invite();
             } else {
                 CloudFlatFeed groupFeed = FeedServices.client.flatFeed("group", feedGroupData.getFeedName());
-                singleGroupFeed.joinGroup(groupFeed);
+                groupFeedFrag.joinGroup(groupFeed);
             }
         });
         if (isJoined)

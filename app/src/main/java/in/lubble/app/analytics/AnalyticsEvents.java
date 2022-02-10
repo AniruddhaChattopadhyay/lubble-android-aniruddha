@@ -172,5 +172,11 @@ public class AnalyticsEvents {
     public static final String FEED_GROUP_INVITE_CLICKED = "FEED_GROUP_INVITE_CLICKED";
 
     public static final String GAMES_LOCKED_INVITE_CLICK = "GAMES_LOCKED_INVITE_CLICK";
-    public static final String LOGIN_BUTTON_CLICKED_FROM_WELCOME_SCREEN = "LOGIN_BUTTON_CLICKED_FROM_WELCOME_SCREEN";
+
+    public static final String FEED_INTRO_SHOWN = "FEED_INTRO_SHOWN";
+    public static final String FEED_INTRO_START = "FEED_INTRO_START";
+    public static final String FEED_INTRO_CANCELLED = "FEED_INTRO_CANCELLED";
+    public static final String FEED_INTRO_GROUP_VIA_SNACKBAR = "FEED_INTRO_GROUP_VIA_SNACKBAR";
+
+    public static final String WELCOME_SCREEN_LOGIN_BTN_CLICKED = "WELCOME_SCREEN_LOGIN_BTN_CLICKED";
 }
