@@ -9,12 +9,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import in.lubble.app.GlideApp;
@@ -30,14 +29,14 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
     private MaterialButton postSubmitBtn;
     private boolean isQnA;
 
-    public GroupSelectionAdapter(List<FeedGroupData> stringList, MaterialButton postSubmitBtn,boolean isQnA) {
+    public GroupSelectionAdapter(List<FeedGroupData> stringList, MaterialButton postSubmitBtn, boolean isQnA) {
         this.stringList = stringList;
         this.postSubmitBtn = postSubmitBtn;
         stringListCopy = new ArrayList<>();
         stringListCopy.addAll(stringList);
         this.isQnA = isQnA;
         lastCheckedPos = -1;
-        if(isQnA) {
+        if (isQnA) {
             for (int i = 0; i < stringList.size(); i++) {
                 if (stringList.get(i).getName().equals("QnAs")) {
                     lastCheckedPos = i;
@@ -64,6 +63,7 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         holder.selectionRb.setChecked(position == lastCheckedPos);
         holder.titleTv.setOnClickListener(v -> holder.selectionRb.performClick());
         holder.groupIv.setOnClickListener(v -> holder.selectionRb.performClick());
+        holder.followerCountTv.setOnClickListener(v -> holder.selectionRb.performClick());
 
         GlideApp.with(holder.itemView.getContext())
                 .load(feedGroupData.getPhotoUrl())
@@ -75,10 +75,9 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
         holder.selectionRb.setOnClickListener(v -> {
             int copyOfLastCheckedPosition = lastCheckedPos;
             lastCheckedPos = holder.getBindingAdapterPosition();
-            if(stringList.get(lastCheckedPos).isGroupJoined()){
+            if (stringList.get(lastCheckedPos).isGroupJoined()) {
                 postSubmitBtn.setText("Post");
-            }
-            else{
+            } else {
                 postSubmitBtn.setText("Join and Post");
             }
             notifyItemChanged(copyOfLastCheckedPosition);
