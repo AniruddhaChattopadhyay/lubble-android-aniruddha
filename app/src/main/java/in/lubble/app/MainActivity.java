@@ -100,7 +100,7 @@ import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
-import in.lubble.app.auth.LoginActivity;
+import in.lubble.app.auth.WelcomeActivity;
 import in.lubble.app.chat.BlockedChatsActiv;
 import in.lubble.app.chat.GroupPromptSharedPrefs;
 import in.lubble.app.explore.ExploreActiv;
@@ -199,7 +199,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         FirebaseUser currentUser = firebaseAuth.getCurrentUser();
         if (currentUser == null || TextUtils.isEmpty(LubbleSharedPrefs.getInstance().getLubbleId())) {
             // user is not signed in, start login flow
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, WelcomeActivity.class));
             finish();
             return;
         }
