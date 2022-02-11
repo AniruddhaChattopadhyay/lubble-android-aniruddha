@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:clickable="true"
     android:focusable="true"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/rb_group_selection"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false"
+        android:foreground="?attr/selectableItemBackground"
+        android:text="" />
 
     <ImageView
         android:id="@+id/iv_group_selection"
@@ -31,17 +43,13 @@
         android:id="@+id/follower_count"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:drawablePadding="4dp"
         android:gravity="center"
-        android:text="200"/>
-
-    <com.google.android.material.radiobutton.MaterialRadioButton
-        android:id="@+id/rb_group_selection"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:clickable="false"
-        android:focusable="false"
-        android:foreground="?attr/selectableItemBackground"
-        android:paddingRight="16dp"
-        android:text="" />
+        android:paddingEnd="8dp"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:text="200"
+        app:drawableLeftCompat="@drawable/ic_group_black_14dp"
+        app:drawableTint="@color/default_text_color" />
 
 </LinearLayout>

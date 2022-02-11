@@ -32,6 +32,7 @@ import androidx.core.content.FileProvider;
 import com.fxn.pix.Options;
 import com.fxn.pix.Pix;
 import com.fxn.utility.PermUtil;
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.ui.PlayerView;

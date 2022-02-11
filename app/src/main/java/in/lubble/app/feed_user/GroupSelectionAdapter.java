@@ -30,9 +30,6 @@ public class GroupSelectionAdapter extends RecyclerView.Adapter<GroupSelectionAd
     private MaterialButton postSubmitBtn;
     private boolean isQnA;
 
-
-
-
     public GroupSelectionAdapter(List<FeedGroupData> stringList, MaterialButton postSubmitBtn,boolean isQnA) {
         this.stringList = stringList;
         this.postSubmitBtn = postSubmitBtn;
