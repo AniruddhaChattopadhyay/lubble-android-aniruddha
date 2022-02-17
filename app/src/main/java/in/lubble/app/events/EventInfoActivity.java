@@ -1,5 +1,13 @@
 package in.lubble.app.events;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
+import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
+import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
+import static in.lubble.app.utils.UiUtils.dpToPx;
+
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,6 +28,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,14 +80,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
-import static in.lubble.app.firebase.RealtimeDbHelper.getCreateOrJoinGroupRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getUserGroupsRef;
-import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
-import static in.lubble.app.utils.UiUtils.dpToPx;
-
 public class EventInfoActivity extends BaseActivity {
 
     public static final String KEY_EVENT_ID = "KEY_EVENT_ID";
@@ -90,7 +91,7 @@ public class EventInfoActivity extends BaseActivity {
     private ValueEventListener eventInfoListener;
     private ProgressBar progressBar;
     private EventData eventData;
-    private ImageView groupHeaderIv;
+    private ImageView groupHeaderIv, groupIcon;
     private TextView monthTv;
     private TextView dateTv;
     private TextView organizerTv;
@@ -101,11 +102,8 @@ public class EventInfoActivity extends BaseActivity {
     private ImageView goingPersonOne, goingPersonTwo, goingPersonThree;
     private TextView maybeHintTv;
     private TextView finalMarkedStatus;
-    private LinearLayout goingContainer;
-    private LinearLayout maybeContainer;
-    private LinearLayout shareContainer;
     private ImageView statsIcon;
-    private TextView statsTv;
+    private TextView statsTv, shareTv;
     private TextView timeTv;
     private TextView addressTv;
     private TextView linkedGroupTv;
@@ -114,6 +112,7 @@ public class EventInfoActivity extends BaseActivity {
     private ImageView ticketIv;
     private TextView ticketCountTv;
     private LinearLayout luckyDrawHint;
+    private RelativeLayout groupContainer;
     private EmojiTextView descTv;
     private WebView descWebView;
     private ProgressDialog progressDialog;
@@ -146,19 +145,16 @@ public class EventInfoActivity extends BaseActivity {
 
         progressBar = findViewById(R.id.progressBar_groupInfo);
         groupHeaderIv = findViewById(R.id.iv_group_image);
+        groupIcon = findViewById(R.id.iv_group);
 
         monthTv = findViewById(R.id.tv_month);
         dateTv = findViewById(R.id.tv_date);
+        shareTv = findViewById(R.id.tv_share_event);
         organizerTv = findViewById(R.id.tv_organizer_name);
         eventNameTv = findViewById(R.id.tv_event_name);
-        goingIcon = findViewById(R.id.iv_going);
         goingHintTv = findViewById(R.id.tv_going_hint);
-        maybeIcon = findViewById(R.id.iv_maybe);
         maybeHintTv = findViewById(R.id.tv_maybe_hint);
         finalMarkedStatus = findViewById(R.id.tv_final_marked_status);
-        goingContainer = findViewById(R.id.going_container);
-        maybeContainer = findViewById(R.id.maybe_container);
-        shareContainer = findViewById(R.id.share_container);
         statsIcon = findViewById(R.id.iv_stats);
         statsTv = findViewById(R.id.tv_stats);
         timeTv = findViewById(R.id.tv_phone);
@@ -174,6 +170,7 @@ public class EventInfoActivity extends BaseActivity {
         goingPersonOne = findViewById(R.id.iv_stats_one);
         goingPersonTwo = findViewById(R.id.iv_stats_two);
         goingPersonThree = findViewById(R.id.iv_stats_three);
+        groupContainer = findViewById(R.id.group_container);
 
         progressDialog = new ProgressDialog(this);
         progressDialog.setTitle(R.string.joining_group);
@@ -184,68 +181,56 @@ public class EventInfoActivity extends BaseActivity {
         //eventRef = getEventsRef().child(eventId);
         Analytics.triggerScreenEvent(this, this.getClass());
 
-        goingContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (eventData != null && !checkEventAdmin()) {
-                    if (oldResponse == EventData.GOING) {
-                        new AlertDialog.Builder(EventInfoActivity.this)
-                                .setTitle(R.string.event_not_going_confirm_title)
-                                .setMessage(R.string.event_not_going_confirm_subtitle)
-                                .setPositiveButton(R.string.event_not_going, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        changeStatus(EventData.NO);
-                                        dialog.dismiss();
-                                    }
-                                })
-                                .setNegativeButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                })
-                                .show();
-                    } else {
-                        changeStatus(EventData.GOING);
-                    }
+        goingHintTv.setOnClickListener(v -> {
+            if (eventData != null && !checkEventAdmin()) {
+                if (oldResponse == EventData.GOING) {
+                    new AlertDialog.Builder(EventInfoActivity.this)
+                            .setTitle(R.string.event_not_going_confirm_title)
+                            .setMessage(R.string.event_not_going_confirm_subtitle)
+                            .setPositiveButton(R.string.event_not_going, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    changeStatus(EventData.NO);
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setNegativeButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                            .show();
+                } else {
+                    changeStatus(EventData.GOING);
                 }
             }
         });
 
-        maybeContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (eventData != null && !checkEventAdmin()) {
-                    final int newResponse = oldResponse == EventData.MAYBE ? EventData.NO : EventData.MAYBE;
-                    changeStatus(newResponse);
-                }
+        maybeHintTv.setOnClickListener(v -> {
+            if (eventData != null && !checkEventAdmin()) {
+                final int newResponse = oldResponse == EventData.MAYBE ? EventData.NO : EventData.MAYBE;
+                changeStatus(newResponse);
             }
         });
 
-        linkedGroupOpenIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (eventData != null) {
-                    final Intent intent = new Intent(EventInfoActivity.this, ChatActivity.class);
-                    intent.putExtra(EXTRA_GROUP_ID, eventData.getGid());
-                    intent.putExtra(EXTRA_IS_JOINING, false);
-                    startActivity(intent);
-                }
+        linkedGroupOpenIcon.setOnClickListener(v -> {
+            if (eventData != null) {
+                final Intent intent = new Intent(EventInfoActivity.this, ChatActivity.class);
+                intent.putExtra(EXTRA_GROUP_ID, eventData.getGid());
+                intent.putExtra(EXTRA_IS_JOINING, false);
+                startActivity(intent);
             }
         });
 
-        mapContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (eventData != null) {
-                    Log.e(TAG, eventData.getLati() + "" + eventData.getLongi() + "" + eventData.getTitle());
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:" + eventData.getLati() +
-                            "," + eventData.getLongi() + "?q=" + eventData.getLati() + "," + eventData.getLongi() + "(" + eventData.getTitle() + ")"));
-                    startActivity(intent);
-                }
-                Log.e(TAG, "event data is null");
+        mapContainer.setOnClickListener(v -> {
+            if (eventData != null) {
+                Log.e(TAG, eventData.getLati() + "" + eventData.getLongi() + "" + eventData.getTitle());
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("geo:" + eventData.getLati() +
+                        "," + eventData.getLongi() + "?q=" + eventData.getLati() + "," + eventData.getLongi() + "(" + eventData.getTitle() + ")"));
+                startActivity(intent);
             }
+            Log.e(TAG, "event data is null");
         });
         try {
             Intent intent = this.getIntent();
@@ -264,12 +249,7 @@ public class EventInfoActivity extends BaseActivity {
             FirebaseCrashlytics.getInstance().recordException(e);
         }
 
-        shareContainer.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ShareActiv.open(EventInfoActivity.this, eventId, ShareActiv.ShareType.EVENT);
-            }
-        });
+        shareTv.setOnClickListener(v -> ShareActiv.open(EventInfoActivity.this, eventId, ShareActiv.ShareType.EVENT));
     }
 
     @Override
@@ -396,24 +376,28 @@ public class EventInfoActivity extends BaseActivity {
 
     private void toggleGoingButton(boolean isGoing) {
         if (isGoing) {
-            goingIcon.setImageResource(R.drawable.ic_check_circle_black_24dp);
-            goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_green), android.graphics.PorterDuff.Mode.SRC_IN);
+            Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_check_circle_black_24dp);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.dark_green), android.graphics.PorterDuff.Mode.SRC_IN);
+            goingHintTv.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
             goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.dark_green)));
         } else {
-            goingIcon.setImageResource(R.drawable.ic_check_circle_outline);
-            goingIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
+            Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_check_circle_outline);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
+            goingHintTv.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
             goingHintTv.setTextColor((ContextCompat.getColor(this, R.color.black)));
         }
     }
 
     private void toggleMaybeButton(boolean isMaybe) {
         if (isMaybe) {
-            maybeIcon.setImageResource(R.drawable.ic_help_black_24dp);
-            maybeIcon.setColorFilter(ContextCompat.getColor(this, R.color.dk_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+            Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_help_black_24dp);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.dk_colorAccent), android.graphics.PorterDuff.Mode.SRC_IN);
+            maybeHintTv.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
             maybeHintTv.setTextColor((ContextCompat.getColor(this, R.color.dk_colorAccent)));
         } else {
-            maybeIcon.setImageResource(R.drawable.ic_help_outline_black_24dp);
-            maybeIcon.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
+            Drawable drawable = ContextCompat.getDrawable(this, R.drawable.ic_help_outline_black_24dp);
+            drawable.setColorFilter(ContextCompat.getColor(this, R.color.dark_gray), android.graphics.PorterDuff.Mode.SRC_IN);
+            maybeHintTv.setCompoundDrawablesWithIntrinsicBounds(null, drawable, null, null);
             maybeHintTv.setTextColor((ContextCompat.getColor(this, R.color.black)));
         }
     }
@@ -517,8 +501,8 @@ public class EventInfoActivity extends BaseActivity {
                                 finalMarkedStatus.setVisibility(View.GONE);
                             } else {
                                 finalMarkedStatus.setVisibility(View.VISIBLE);
-                                goingContainer.setVisibility(View.GONE);
-                                maybeContainer.setVisibility(View.GONE);
+                                goingHintTv.setVisibility(View.GONE);
+                                maybeHintTv.setVisibility(View.GONE);
                             }
 
                             if (current_member != null) {
@@ -701,23 +685,30 @@ public class EventInfoActivity extends BaseActivity {
     }
 
     private void fetchLinkedGroupInfo(String gid) {
-        groupTitleRef = RealtimeDbHelper.getLubbleGroupInfoRef(gid).child("title");
-        groupTitleListener = groupTitleRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null) {
-                    final String title = dataSnapshot.getValue(String.class);
-                    if (StringUtils.isValidString(title)) {
-                        linkedGroupTv.setText(String.format(getString(R.string.event_linked_group_hint), title));
+        if (!TextUtils.isEmpty(gid)) {
+            groupContainer.setVisibility(View.VISIBLE);
+            groupIcon.setVisibility(View.VISIBLE);
+            groupTitleRef = RealtimeDbHelper.getLubbleGroupInfoRef(gid).child("title");
+            groupTitleListener = groupTitleRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        final String title = dataSnapshot.getValue(String.class);
+                        if (StringUtils.isValidString(title)) {
+                            linkedGroupTv.setText(String.format(getString(R.string.event_linked_group_hint), title));
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        } else {
+            groupContainer.setVisibility(View.GONE);
+            groupIcon.setVisibility(View.GONE);
+        }
     }
 
     private void setTitleWhenCollapsed() {
