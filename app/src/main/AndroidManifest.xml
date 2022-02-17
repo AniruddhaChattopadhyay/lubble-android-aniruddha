@@ -88,6 +88,7 @@
             android:name=".auth.WelcomeActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
+            android:launchMode="singleTop"
             android:exported="false" />
         <activity
             android:name=".feed_groups.SingleGroupFeed.GroupFeedActivity"
