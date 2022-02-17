@@ -196,6 +196,7 @@ public class FeedPostFrag extends Fragment {
         } else {
             initFeedCreds((CompleteListener) isSuccess -> {
                 if (isSuccess) {
+                    timelineClient = FeedServices.getTimelineClient();
                     fetchPost();
                 } else {
                     Toast.makeText(LubbleApp.getAppContext(), "Failed to fetch post, plz try again", Toast.LENGTH_LONG).show();
