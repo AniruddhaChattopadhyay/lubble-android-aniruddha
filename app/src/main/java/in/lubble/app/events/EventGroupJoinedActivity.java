@@ -1,8 +1,13 @@
 package in.lubble.app.events;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
+import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -32,7 +37,6 @@ import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.chat.ChatActivity;
 import in.lubble.app.firebase.RealtimeDbHelper;
 import in.lubble.app.models.EventData;
-import in.lubble.app.models.GroupData;
 import in.lubble.app.models.GroupInfoData;
 import in.lubble.app.network.Endpoints;
 import in.lubble.app.network.ServiceGenerator;
@@ -40,10 +44,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.chat.ChatActivity.EXTRA_GROUP_ID;
-import static in.lubble.app.chat.ChatActivity.EXTRA_IS_JOINING;
 
 public class EventGroupJoinedActivity extends BaseActivity {
 
@@ -63,7 +63,7 @@ public class EventGroupJoinedActivity extends BaseActivity {
     private TextView finalGuestCountTv;
     private Button confirmGuestsBtn;
     private ElegantNumberButton guestCounter;
-    private LinearLayout ticketShareLayout;
+    private LinearLayout ticketShareLayout, groupContainer;
     private Endpoints endpoints;
     private int status = 1;
     private String eventId;
@@ -89,6 +89,7 @@ public class EventGroupJoinedActivity extends BaseActivity {
         cancelIcon = findViewById(R.id.iv_cancel);
         titleTv = findViewById(R.id.tv_title);
         subtitleTv = findViewById(R.id.tv_subtitle);
+        groupContainer = findViewById(R.id.layout_open_group);
         groupIcon = findViewById(R.id.iv_group);
         openGroupBtn = findViewById(R.id.btn_open_group);
         finalGuestCountTv = findViewById(R.id.tv_final_guest_count);
@@ -108,77 +109,63 @@ public class EventGroupJoinedActivity extends BaseActivity {
         fetchLinkedGroupInfo(groupId);
         endpoints = ServiceGenerator.createService(Endpoints.class);
         //endpoints = retrofit.create(Endpoints.class);
-        guestCounter.setOnClickListener(new ElegantNumberButton.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (confirmGuestsBtn.getVisibility() != View.VISIBLE) {
-                    confirmGuestsBtn.setVisibility(View.VISIBLE);
-                }
+        guestCounter.setOnClickListener((ElegantNumberButton.OnClickListener) view -> {
+            if (confirmGuestsBtn.getVisibility() != View.VISIBLE) {
+                confirmGuestsBtn.setVisibility(View.VISIBLE);
             }
         });
 
-        confirmGuestsBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String guestCount = guestCounter.getNumber();
+        confirmGuestsBtn.setOnClickListener(v -> {
+            final String guestCount = guestCounter.getNumber();
 
-                final JSONObject jsonObject = new JSONObject();
-                try {
-                    jsonObject.put("event_id", eventId);
-                    jsonObject.put("uid", FirebaseAuth.getInstance().getUid());
-                    jsonObject.put("guests", guestCount);
-                    jsonObject.put("admin", "false");
-                    RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
+            final JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("event_id", eventId);
+                jsonObject.put("uid", FirebaseAuth.getInstance().getUid());
+                jsonObject.put("guests", guestCount);
+                jsonObject.put("admin", "false");
+                RequestBody body = RequestBody.create(MEDIA_TYPE, jsonObject.toString());
 
-                    //Call<List<EmptyPostResponse>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
-                    Call<Void> call = endpoints.uploadattendee(body);
-                    call.enqueue(new Callback<Void>() {
-                        @Override
-                        public void onResponse(Call<Void> call, Response<Void> response) {
-                            if (response.isSuccessful() && !isFinishing()) {
-                                guestCounter.setVisibility(View.GONE);
-                                confirmGuestsBtn.setVisibility(View.GONE);
-                                finalGuestCountTv.setVisibility(View.VISIBLE);
-                                finalGuestCountTv.setText(" + " + guestCount + " guests");
-                            } else if (!isFinishing()) {
-                                Toast.makeText(EventGroupJoinedActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
-                            }
+                //Call<List<EmptyPostResponse>> call = endpoints.uploadattendee("ayush_django_backend_token","ayush_django_backend",body);
+                Call<Void> call = endpoints.uploadattendee(body);
+                call.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful() && !isFinishing()) {
+                            guestCounter.setVisibility(View.GONE);
+                            confirmGuestsBtn.setVisibility(View.GONE);
+                            finalGuestCountTv.setVisibility(View.VISIBLE);
+                            finalGuestCountTv.setText(" + " + guestCount + " guests");
+                        } else if (!isFinishing()) {
+                            Toast.makeText(EventGroupJoinedActivity.this, "Please try again", Toast.LENGTH_SHORT).show();
                         }
+                    }
 
-                        @Override
-                        public void onFailure(Call<Void> call, Throwable t) {
-                            if (!isFinishing()) {
-                                Toast.makeText(EventGroupJoinedActivity.this, "Please check your internet connection & try again", Toast.LENGTH_SHORT).show();
-                            }
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        if (!isFinishing()) {
+                            Toast.makeText(EventGroupJoinedActivity.this, "Please check your internet connection & try again", Toast.LENGTH_SHORT).show();
                         }
-                    });
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    FirebaseCrashlytics.getInstance().recordException(e);
-                }
+                    }
+                });
+            } catch (JSONException e) {
+                e.printStackTrace();
+                FirebaseCrashlytics.getInstance().recordException(e);
             }
         });
 
-        openGroupBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Analytics.triggerEvent(AnalyticsEvents.EVENT_JOINED_OPEN_GROUP, EventGroupJoinedActivity.this);
-                final Intent intent = new Intent(EventGroupJoinedActivity.this, ChatActivity.class);
-                intent.putExtra(EXTRA_GROUP_ID, groupId);
-                intent.putExtra(EXTRA_IS_JOINING, false);
-                startActivity(intent);
-                finish();
-            }
+        openGroupBtn.setOnClickListener(v -> {
+            Analytics.triggerEvent(AnalyticsEvents.EVENT_JOINED_OPEN_GROUP, EventGroupJoinedActivity.this);
+            final Intent intent = new Intent(EventGroupJoinedActivity.this, ChatActivity.class);
+            intent.putExtra(EXTRA_GROUP_ID, groupId);
+            intent.putExtra(EXTRA_IS_JOINING, false);
+            startActivity(intent);
+            finish();
         });
 
         ticketShareLayout.setVisibility(View.GONE);
 
-        cancelIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        cancelIcon.setOnClickListener(v -> finish());
     }
 
 
@@ -197,30 +184,40 @@ public class EventGroupJoinedActivity extends BaseActivity {
 
 
     private void fetchLinkedGroupInfo(String gid) {
-        listener = RealtimeDbHelper.getLubbleGroupInfoRef(gid).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null) {
-                    final GroupInfoData groupInfoData = dataSnapshot.getValue(GroupInfoData.class);
-                    if (groupInfoData != null) {
+        if (!TextUtils.isEmpty(gid)) {
+            subtitleTv.setVisibility(View.VISIBLE);
+            groupContainer.setVisibility(View.VISIBLE);
+            openGroupBtn.setVisibility(View.VISIBLE);
 
-                        GlideApp.with(EventGroupJoinedActivity.this)
-                                .load(groupInfoData.getThumbnail())
-                                .placeholder(R.drawable.ic_circle_group_24dp)
-                                .error(R.drawable.ic_circle_group_24dp)
-                                .circleCrop()
-                                .into(groupIcon);
+            listener = RealtimeDbHelper.getLubbleGroupInfoRef(gid).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null) {
+                        final GroupInfoData groupInfoData = dataSnapshot.getValue(GroupInfoData.class);
+                        if (groupInfoData != null) {
 
-                        groupNameTv.setText(groupInfoData.getTitle());
+                            GlideApp.with(EventGroupJoinedActivity.this)
+                                    .load(groupInfoData.getThumbnail())
+                                    .placeholder(R.drawable.ic_circle_group_24dp)
+                                    .error(R.drawable.ic_circle_group_24dp)
+                                    .circleCrop()
+                                    .into(groupIcon);
+
+                            groupNameTv.setText(groupInfoData.getTitle());
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
+                }
+            });
+        } else {
+            subtitleTv.setVisibility(View.GONE);
+            groupContainer.setVisibility(View.GONE);
+            openGroupBtn.setVisibility(View.GONE);
+        }
     }
 
     @Override

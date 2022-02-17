@@ -187,19 +187,11 @@ public class EventInfoActivity extends BaseActivity {
                     new AlertDialog.Builder(EventInfoActivity.this)
                             .setTitle(R.string.event_not_going_confirm_title)
                             .setMessage(R.string.event_not_going_confirm_subtitle)
-                            .setPositiveButton(R.string.event_not_going, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    changeStatus(EventData.NO);
-                                    dialog.dismiss();
-                                }
+                            .setPositiveButton(R.string.event_not_going, (dialog, which) -> {
+                                changeStatus(EventData.NO);
+                                dialog.dismiss();
                             })
-                            .setNegativeButton(R.string.all_cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            })
+                            .setNegativeButton(R.string.all_cancel, (dialog, which) -> dialog.dismiss())
                             .show();
                 } else {
                     changeStatus(EventData.GOING);
