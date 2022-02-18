@@ -431,9 +431,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.firebase.ui.auth.ui.provider.GitHubLoginActivity"
-            tools:node="remove" />
-        <activity
             android:name=".events.EventsActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme" />

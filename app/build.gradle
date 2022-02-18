@@ -14,7 +14,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
-        resConfigs "en"
+        resConfigs 'en'
     }
     buildTypes {
         release {
@@ -80,29 +80,29 @@ dependencies {
     androidTestImplementation('androidx.test.espresso:espresso-contrib:3.4.0') {
         exclude module: "protobuf-lite"
     }
-    def paging_version = "3.0.1"
+    def paging_version = "3.1.0"
     def exoplayer_version = "2.16.1"
     def permission_dispatcher_version = "4.8.0"
     def fragment_version = "1.4.0"
-    def nav_version = "2.4.0-rc01"
+    def nav_version = "2.4.1"
+    def kotlin_version = "1.6.10"
 
     implementation "androidx.navigation:navigation-fragment:$nav_version"
     implementation "androidx.navigation:navigation-ui:$nav_version"
     implementation "androidx.fragment:fragment:$fragment_version"
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    //implementation files('libs/stream-analytics-release-1.1.0.aar')
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.6'
-    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.8'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     // FirebaseUI for Firebase Realtime Database
     implementation 'com.firebaseui:firebase-ui-database:7.2.0'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.emoji:emoji:1.1.0'
-    implementation 'androidx.core:core:1.6.0'
+    implementation 'androidx.core:core:1.7.0'
     implementation 'com.google.firebase:firebase-messaging:23.0.0'
-    implementation 'com.google.firebase:firebase-perf:20.0.4'
+    implementation 'com.google.firebase:firebase-perf:20.0.5'
     implementation 'com.github.sharish:ShimmerRecyclerView:v1.3'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
     implementation 'androidx.vectordrawable:vectordrawable:1.1.0'
@@ -119,12 +119,12 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.firebase:firebase-config:21.0.1'
     implementation 'androidx.palette:palette:1.0.0'
-    implementation 'com.google.android.gms:play-services-location:18.0.0'
-    implementation 'com.google.android.gms:play-services-maps:17.0.1'
-    implementation 'com.google.android.libraries.places:places:2.4.0'
+    implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'com.google.android.gms:play-services-maps:18.0.2'
+    implementation 'com.google.android.libraries.places:places:2.5.0'
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
-    implementation 'com.google.code.gson:gson:2.8.7'
-    implementation "androidx.work:work-runtime:2.5.0"
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation "androidx.work:work-runtime:2.7.1"
     implementation 'org.jsoup:jsoup:1.13.1'
     implementation 'com.uxcam:uxcam:3.3.6@aar'
     // Retrofit & OkHttp
@@ -134,10 +134,10 @@ dependencies {
     implementation 'com.algolia:algoliasearch-android:3.27.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.1'
     implementation 'com.github.sephiroth74:android-target-tooltip:2.0.4'
-    implementation 'com.github.freshdesk:freshchat-android:4.3.5'
+    implementation 'com.github.freshdesk:freshchat-android:5.0.4'
     implementation 'com.github.crosswall:Android-Coverflow:release-v1.0.5'
     implementation 'com.cepheuen.elegant-number-button:lib:1.0.3'
-    implementation 'io.branch.sdk.android:library:5.0.9'// test deeplinks
+    implementation 'io.branch.sdk.android:library:5.0.15'// test deeplinks
     implementation "com.google.android.exoplayer:exoplayer:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-core:$exoplayer_version"
     implementation "com.google.android.exoplayer:exoplayer-dash:$exoplayer_version"
@@ -150,13 +150,13 @@ dependencies {
         // if you don't use android.app.Fragment you can exclude support for them
         exclude module: "support-v13"
     }
-    implementation 'com.google.firebase:firebase-analytics:20.0.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
+    implementation 'com.google.firebase:firebase-analytics:20.1.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1'
     annotationProcessor "com.github.permissions-dispatcher:permissionsdispatcher-processor:$permission_dispatcher_version"
-    annotationProcessor 'androidx.annotation:annotation:1.2.0'
+    annotationProcessor 'androidx.annotation:annotation:1.3.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation files('libs/YouTubeAndroidPlayerApi.jar')
@@ -168,11 +168,11 @@ dependencies {
         exclude group: 'org.aspectj', module: 'aspectjrt'
     }
     // in app update
-    implementation 'com.google.android.play:core:1.10.2'
+    implementation 'com.google.android.play:core:1.10.3'
 
     //chrome custom tab
 
-    implementation 'androidx.browser:browser:1.3.0'
+    implementation 'androidx.browser:browser:1.4.0'
 
     //Lubble stories
     implementation 'com.github.OMARIHAMZA:StoryView:1.0.6-alpha'
@@ -187,8 +187,8 @@ dependencies {
     implementation 'io.getstream.client:stream-java:3.2.4'
 
     //implementation 'com.google.guava:guava:30.1.1-android'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0'
-    implementation "androidx.core:core-ktx:1.5.0"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2'
+    implementation "androidx.core:core-ktx:1.7.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "androidx.paging:paging-runtime:$paging_version"
     implementation "androidx.paging:paging-guava:$paging_version"
