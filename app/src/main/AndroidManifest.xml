@@ -88,6 +88,7 @@
             android:name=".auth.WelcomeActivity"
             android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity"
+            android:launchMode="singleTop"
             android:exported="false" />
         <activity
             android:name=".feed_groups.SingleGroupFeed.GroupFeedActivity"
@@ -429,9 +430,6 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.firebase.ui.auth.ui.provider.GitHubLoginActivity"
-            tools:node="remove" />
         <activity
             android:name=".events.EventsActivity"
             android:screenOrientation="portrait"

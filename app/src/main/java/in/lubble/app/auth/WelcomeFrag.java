@@ -2,16 +2,16 @@ package in.lubble.app.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-import androidx.viewpager.widget.ViewPager;
-
 import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
+
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -32,21 +32,21 @@ public class WelcomeFrag extends Fragment {
     private int currentPage = 0;
     private Handler handler = new Handler();
     private ArrayList<SliderData> sliderDataList = new ArrayList<>();
-    static final int REQUEST_LOCATION = 636;
     private String link = null;
-    private MaterialButton login_signup;
-    private View v;
+    private MaterialButton loginSignupBtn;
     private Timer timer;
+    private TabLayout tabLayout;
 
     public WelcomeFrag() {
         // Required empty public constructor
     }
+
     public static WelcomeFrag newInstance(String link) {
-    Bundle args = new Bundle();
-    args.putString("link", link);
-    WelcomeFrag fragment = new WelcomeFrag();
-    fragment.setArguments(args);
-    return fragment;
+        Bundle args = new Bundle();
+        args.putString("link", link);
+        WelcomeFrag fragment = new WelcomeFrag();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -64,7 +64,8 @@ public class WelcomeFrag extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_welcome, container, false);
         pagerContainer = view.findViewById(R.id.pager_container);
-        login_signup = view.findViewById(R.id.login_signup_btn);
+        loginSignupBtn = view.findViewById(R.id.login_signup_btn);
+        tabLayout = view.findViewById(R.id.tab_dots);
         viewPager = view.findViewById(R.id.viewpager);
         viewPager.setClipChildren(false);
         viewPager.setSaveEnabled(false);
@@ -76,16 +77,24 @@ public class WelcomeFrag extends Fragment {
         sliderDataList.add(sliderData2);
         sliderDataList.add(sliderData3);
         sliderDataList.add(sliderData4);
-        setupSlider();
-        login_signup.setOnClickListener(v->{
+        loginSignupBtn.setOnClickListener(v -> {
             Analytics.triggerEvent(AnalyticsEvents.WELCOME_SCREEN_LOGIN_BTN_CLICKED, getContext());
-            Intent intent = new Intent(getActivity(),LoginActivity.class);
-            intent.putExtra("Link",link);
+            Intent intent = new Intent(getActivity(), LoginActivity.class);
+            intent.putExtra("Link", link);
             startActivity(intent);
+
         });
         return view;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        setupSlider();
+    }
+
     private void setupSlider() {
+        tabLayout.setupWithViewPager(viewPager);
         viewPager.setAdapter(new SliderViewPagerAdapter(getChildFragmentManager(), sliderDataList, false));
 
         new CoverFlow.Builder()
@@ -105,6 +114,7 @@ public class WelcomeFrag extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 currentPage = position;
+                tabLayout.getTabAt(position).select();
             }
 
             @Override
@@ -118,16 +128,9 @@ public class WelcomeFrag extends Fragment {
             public void run() {
                 handler.post(update);
             }
-        }, 100, 5000);
+        }, 100, 2000);
 
     }
-
-//    @Override
-//    public void onStart() {
-//        super.onStart();
-//        timer = new Timer();
-//
-//    }
 
     @Override
     public void onStop() {
@@ -135,7 +138,7 @@ public class WelcomeFrag extends Fragment {
         timer.cancel();
     }
 
-    private Runnable update = new Runnable() {
+    private final Runnable update = new Runnable() {
         public void run() {
             if (currentPage == sliderDataList.size()) {
                 currentPage = 0;

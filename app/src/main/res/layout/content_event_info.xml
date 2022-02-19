@@ -73,84 +73,57 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_event_name"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:orientation="horizontal"
             android:weightSum="3">
 
             <TextView
                 android:id="@+id/tv_final_marked_status"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingTop="8dp"
+                android:gravity="center_vertical"
+                android:layout_weight="2"
+                android:paddingBottom="8dp"
                 android:text="Not Responded"
                 android:visibility="gone" />
 
-            <LinearLayout
-                android:id="@+id/going_container"
+            <TextView
+                android:id="@+id/tv_going_hint"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="Going"
+                android:textColor="@color/darker_gray"
+                app:drawableTopCompat="@drawable/ic_check_circle_outline" />
 
-                <ImageView
-                    android:id="@+id/iv_going"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_check_circle_outline" />
-
-                <TextView
-                    android:id="@+id/tv_going_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Going"
-                    android:textColor="@color/darker_gray" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/maybe_container"
+            <TextView
+                android:id="@+id/tv_maybe_hint"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:paddingBottom="8dp"
+                android:text="Maybe"
+                android:paddingTop="8dp"
+                android:textColor="@color/darker_gray"
+                app:drawableTopCompat="@drawable/ic_help_outline_black_24dp" />
 
-                <ImageView
-                    android:id="@+id/iv_maybe"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/ic_help_outline_black_24dp" />
-
-                <TextView
-                    android:id="@+id/tv_maybe_hint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Maybe"
-                    android:textColor="@color/darker_gray" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/share_container"
+            <TextView
+                android:id="@+id/tv_share_event"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:tint="@color/darker_gray"
-                    app:srcCompat="@drawable/ic_send_white_24dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Share"
-                    android:textColor="@color/darker_gray" />
-
-            </LinearLayout>
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:text="Share"
+                android:textColor="@color/darker_gray"
+                app:drawableTint="@color/darker_gray"
+                app:drawableTopCompat="@drawable/ic_send_white_24dp" />
 
         </LinearLayout>
 
@@ -159,7 +132,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_below="@id/action_container"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="4dp"
             android:background="@color/very_light_gray" />
 
         <LinearLayout
@@ -186,9 +159,9 @@
             android:layout_height="16dp"
             android:layout_below="@id/lucky_draw_hint"
             android:layout_marginTop="8dp"
-            app:tint="@color/colorAccent"
             android:visibility="gone"
-            app:srcCompat="@drawable/ic_ticket_24dp" />
+            app:srcCompat="@drawable/ic_ticket_24dp"
+            app:tint="@color/colorAccent" />
 
         <TextView
             android:id="@+id/tv_ticket_count"
@@ -256,15 +229,15 @@
 
         <TextView
             android:id="@+id/tv_view_all_attendees"
-            android:text="View all"
-            android:layout_marginLeft="2dp"
-            android:textColor="@color/link_blue"
-            android:layout_alignBottom="@id/iv_stats_one"
-            android:gravity="center_vertical"
-            android:layout_alignTop="@id/iv_stats_one"
-            android:layout_alignParentRight="true"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/iv_stats_one"
+            android:layout_alignBottom="@id/iv_stats_one"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="2dp"
+            android:gravity="center_vertical"
+            android:text="View all"
+            android:textColor="@color/link_blue" />
 
         <ImageView
             android:id="@+id/iv_time"
@@ -327,8 +300,8 @@
                 android:id="@+id/iv_map"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                app:tint="@color/dark_gray"
-                app:srcCompat="@drawable/ic_map_black_24dp" />
+                app:srcCompat="@drawable/ic_map_black_24dp"
+                app:tint="@color/dark_gray" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -377,23 +350,23 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:textColor="@color/colorAccent"
-                app:tint="@color/dark_gray"
-                app:srcCompat="@drawable/ic_open_in_new_black_24dp" />
+                app:srcCompat="@drawable/ic_open_in_new_black_24dp"
+                app:tint="@color/dark_gray" />
 
         </RelativeLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/ticketUrl"
-            android:layout_width="wrap_content"
-            android:layout_below="@id/group_container"
-            android:layout_height="wrap_content"
-            android:text="Get Tickets"
             style="@style/Widget.MaterialComponents.Button.Icon"
-            app:icon="@drawable/ic_ticket_24dp"
-            app:cornerRadius="24dp"
-            app:backgroundTint="@color/button_color_selector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/group_container"
             android:layout_marginTop="8dp"
-            android:theme="@style/MaterialButton" />
+            android:text="Get Tickets"
+            android:theme="@style/MaterialButton"
+            app:backgroundTint="@color/button_color_selector"
+            app:cornerRadius="24dp"
+            app:icon="@drawable/ic_ticket_24dp" />
 
         <TextView
             android:id="@+id/tv_desc_hint"
@@ -410,8 +383,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_desc_hint"
-            android:paddingBottom="40dp"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:paddingBottom="40dp" />
 
         <androidx.emoji.widget.EmojiTextView
             android:id="@+id/tv_desc"
