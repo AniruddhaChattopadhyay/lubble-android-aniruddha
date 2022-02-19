@@ -179,4 +179,7 @@ public class AnalyticsEvents {
     public static final String FEED_INTRO_GROUP_VIA_SNACKBAR = "FEED_INTRO_GROUP_VIA_SNACKBAR";
 
     public static final String WELCOME_SCREEN_LOGIN_BTN_CLICKED = "WELCOME_SCREEN_LOGIN_BTN_CLICKED";
+    public static final String FEED_VIDEO_COMPRESS_SUCCESS = "FEED_VIDEO_COMPRESS_SUCCESS";
+    public static final String FEED_VIDEO_COMPRESS_FAILED = "FEED_VIDEO_COMPRESS_FAILED";
+    public static final String FEED_VIDEO_COMPRESS_BLOATED = "FEED_VIDEO_COMPRESS_BLOATED";
 }
