@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
@@ -43,6 +44,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Field;
 
+import in.lubble.app.BaseActivity;
 import in.lubble.app.LubbleApp;
 import in.lubble.app.R;
 
@@ -51,7 +53,6 @@ import in.lubble.app.R;
  */
 
 public class UiUtils {
-
 
     public static void hideKeyboard(final Context ctx) {
         new Handler().post(new Runnable() {
@@ -351,6 +352,14 @@ public class UiUtils {
         circularProgressDrawable.setStyle(CircularProgressDrawable.DEFAULT);
         circularProgressDrawable.start();
         return circularProgressDrawable;
+    }
+
+    public static int determineYOffset(Context context) {
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.R && context instanceof BaseActivity) {
+            return -((BaseActivity) context).getStatusBarHeight();
+        } else {
+            return 0;
+        }
     }
 
     public static void reduceDragSensitivity(ViewPager2 viewPager) {

@@ -404,7 +404,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
             return;
 
         Tooltip tooltip = new Tooltip.Builder(context)
-                .anchor(view, 0, -dpToPx(24), true)
+                .anchor(view, 0, -dpToPx(25), true)
                 .closePolicy(ClosePolicy.Companion.getTOUCH_NONE())
                 .showDuration(5000)
                 .overlay(false)

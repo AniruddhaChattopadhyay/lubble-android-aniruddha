@@ -247,6 +247,19 @@ public class BaseActivity extends AppCompatActivity {
         appUpdateManager.startUpdateFlowForResult(appUpdateInfo, AppUpdateType.FLEXIBLE, BaseActivity.this, FLEXI_REQUEST_CODE);
     }
 
+    /**
+     * Invoke this after onCreate()
+     * @return status bar height, might be ZERO if invoked before views are drawn
+     */
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+
     @Override
     protected void onActivityResult(final int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

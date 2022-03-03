@@ -4,6 +4,7 @@ import static android.app.Activity.RESULT_OK;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedIntroRef;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
+import static in.lubble.app.utils.UiUtils.determineYOffset;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -213,7 +214,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private void introNewPostBtn() {
         isIntroStarted = true;
         Tooltip tooltip = new Tooltip.Builder(requireContext())
-                .anchor(postBtn, 0, 0, false)
+                .anchor(postBtn, 0, determineYOffset(requireActivity()), false)
                 .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
                 .showDuration(10000)
                 .overlay(true)
