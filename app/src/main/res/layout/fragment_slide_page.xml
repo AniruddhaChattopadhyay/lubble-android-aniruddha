@@ -1,14 +1,33 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="vertical"
     tools:context="in.lubble.app.marketplace.SlidePageFrag">
+
+    <TextView
+        android:id="@+id/tv_slider_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textSize="24sp"
+        android:layout_marginBottom="8dp"
+        android:drawablePadding="4dp"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title"
+        android:textColor="@color/black"
+        android:visibility="gone"
+        tools:text="This is a title!"
+        tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/iv_slide_image"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        tools:src="@tools:sample/backgrounds/scenic" />
 
-</RelativeLayout>
+</LinearLayout>

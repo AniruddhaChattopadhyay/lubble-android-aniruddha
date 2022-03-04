@@ -69,14 +69,18 @@ public class WelcomeFrag extends Fragment {
         viewPager = view.findViewById(R.id.viewpager);
         viewPager.setClipChildren(false);
         viewPager.setSaveEnabled(false);
-        SliderData sliderData1 = new SliderData("https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg");
-        SliderData sliderData2 = new SliderData("https://images.unsplash.com/photo-1453728013993-6d66e9c9123a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8dmlld3xlbnwwfHwwfHw%3D&w=1000&q=80");
-        SliderData sliderData3 = new SliderData("https://thumbs.dreamstime.com/b/imagination-girl-kiss-lion-love-nature-abstract-concept-young-steals-male-wildlife-children-like-to-imagine-play-129595579.jpg");
-        SliderData sliderData4 = new SliderData("https://images.ctfassets.net/hrltx12pl8hq/61DiwECVps74bWazF88Cy9/2cc9411d050b8ca50530cf97b3e51c96/Image_Cover.jpg?fit=fill&w=480&h=270");
+        SliderData sliderData1 = new SliderData("📰 Local News", "https://i.imgur.com/ydEeVAD.jpg");
+        SliderData sliderData2 = new SliderData("🥳 Local Events", "https://i.imgur.com/bPDz535.jpg");
+        SliderData sliderData3 = new SliderData("🙏 Local Help", "https://i.imgur.com/06xcbAJ.jpg");
+        SliderData sliderData4 = new SliderData("🔨 Find Local Services", "https://i.imgur.com/loMHM7F.jpg");
+        SliderData sliderData5 = new SliderData("🌟 Neighbourhood Recommendations", "https://i.imgur.com/DuIfSfY.jpg");
+        SliderData sliderData6 = new SliderData("🤑 Buy/Sell Nearby", "https://i.imgur.com/7VP5Rkv.jpeg");
         sliderDataList.add(sliderData1);
         sliderDataList.add(sliderData2);
         sliderDataList.add(sliderData3);
         sliderDataList.add(sliderData4);
+        sliderDataList.add(sliderData5);
+        sliderDataList.add(sliderData6);
         loginSignupBtn.setOnClickListener(v -> {
             Analytics.triggerEvent(AnalyticsEvents.WELCOME_SCREEN_LOGIN_BTN_CLICKED, getContext());
             Intent intent = new Intent(getActivity(), LoginActivity.class);
