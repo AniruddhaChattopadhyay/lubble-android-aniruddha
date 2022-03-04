@@ -123,7 +123,7 @@ public class FeedUtils {
                 ArrayList<String> foreignIdList = new ArrayList<>();
                 int firstPos = visibleState.getFirstCompletelyVisible();
                 int lastPos = visibleState.getLastCompletelyVisible();
-                if (firstPos > 0 && lastPos > 0) {
+                if (firstPos >= 0 && lastPos >= 0) {
                     EnrichedActivity firstActivity = enrichedActivities.get(firstPos);
                     if (firstPos == lastPos) {
                         contentList.add(new Content(firstActivity.getForeignID()));
