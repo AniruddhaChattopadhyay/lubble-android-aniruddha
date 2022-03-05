@@ -142,14 +142,13 @@ public class AttachVideoActivity extends BaseActivity {
     }
 
 
-    public void muteVideo(ExoPlayer exoPlayer){
-        if(exoPlayer.getVolume() == 0F) {
+    public void muteVideo(ExoPlayer exoPlayer) {
+        if (exoPlayer.getVolume() == 0F) {
             exoPlayer.setVolume(0.75F);
-            muteBtn.setImageResource(R.drawable.ic_mute);
-        }
-        else{
-            exoPlayer.setVolume(0F);
             muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
+        } else {
+            exoPlayer.setVolume(0F);
+            muteBtn.setImageResource(R.drawable.ic_mute);
         }
     }
 
