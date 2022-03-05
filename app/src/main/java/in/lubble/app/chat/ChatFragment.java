@@ -665,7 +665,8 @@ public class ChatFragment extends Fragment implements AttachmentClickListener, C
     }
 
     private void addGroupJoinPrompt() {
-        if (groupInfoData != null && !TextUtils.isEmpty(groupInfoData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)) {
+        if (groupInfoData != null && !TextUtils.isEmpty(groupInfoData.getQuestion()) && FirebaseRemoteConfig.getInstance().getBoolean(GROUP_QUES_ENABLED)
+                && LubbleSharedPrefs.getInstance().getSupportUid() != null) {
             final ChatData personalChatData = new ChatData();
             personalChatData.setId(groupInfoData.getQuestionChatId());
             personalChatData.setType(ChatData.GROUP_PROMPT);
