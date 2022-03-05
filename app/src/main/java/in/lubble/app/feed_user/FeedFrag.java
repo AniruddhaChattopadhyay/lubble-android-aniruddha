@@ -110,11 +110,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
-        if (getParentFragment() instanceof FeedCombinedFragment) {
-            ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
-        } else if (getActivity() instanceof MainActivity) {
-            ((MainActivity) requireActivity()).setRefreshListener(this);
-        }
         Analytics.triggerScreenEvent(requireContext(), this.getClass());
     }
 
@@ -122,6 +117,12 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_feed, container, false);
+
+        if (getParentFragment() instanceof FeedCombinedFragment) {
+            ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
+        } else if (getActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).setRefreshListener(this);
+        }
 
         if (getParentFragment() instanceof FeedCombinedFragment && getParentFragment().getView() != null) {
             View parentFragView = getParentFragment().getView();
