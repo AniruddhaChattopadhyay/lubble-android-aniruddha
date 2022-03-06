@@ -86,7 +86,7 @@ public class WelcomeFrag extends Fragment {
             Intent intent = new Intent(getActivity(), LoginActivity.class);
             intent.putExtra("Link", link);
             startActivity(intent);
-
+            requireActivity().finish();
         });
         return view;
     }
