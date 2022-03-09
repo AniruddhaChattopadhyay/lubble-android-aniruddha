@@ -192,9 +192,9 @@ public class FeedCombinedFragment extends Fragment {
         public Fragment createFragment(int position) {
             switch (position) {
                 case 0:
-                    return new FeedFrag();
+                    return FeedFrag.newInstance();
                 case 1:
-                    return new FeedGroupsFrag();
+                    return FeedGroupsFrag.newInstance();
                 default:
                     throw new IllegalArgumentException();
             }

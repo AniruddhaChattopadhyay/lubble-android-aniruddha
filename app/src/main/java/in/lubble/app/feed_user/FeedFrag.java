@@ -4,6 +4,7 @@ import static android.app.Activity.RESULT_OK;
 import static androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_IDLE;
 import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserFeedIntroRef;
 import static in.lubble.app.utils.FeedUtils.processTrackedPosts;
+import static in.lubble.app.utils.UiUtils.determineYOffset;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -109,11 +110,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         viewModel = new ViewModelProvider(this).get(FeedViewModel.class);
-        if (getParentFragment() instanceof FeedCombinedFragment) {
-            ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
-        } else if (getActivity() instanceof MainActivity) {
-            ((MainActivity) requireActivity()).setRefreshListener(this);
-        }
         Analytics.triggerScreenEvent(requireContext(), this.getClass());
     }
 
@@ -121,6 +117,12 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_feed, container, false);
+
+        if (getParentFragment() instanceof FeedCombinedFragment) {
+            ((FeedCombinedFragment) getParentFragment()).setRefreshListener(this);
+        } else if (getActivity() instanceof MainActivity) {
+            ((MainActivity) requireActivity()).setRefreshListener(this);
+        }
 
         if (getParentFragment() instanceof FeedCombinedFragment && getParentFragment().getView() != null) {
             View parentFragView = getParentFragment().getView();
@@ -213,7 +215,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     private void introNewPostBtn() {
         isIntroStarted = true;
         Tooltip tooltip = new Tooltip.Builder(requireContext())
-                .anchor(postBtn, 0, 0, false)
+                .anchor(postBtn, 0, determineYOffset(requireActivity()), false)
                 .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
                 .showDuration(10000)
                 .overlay(true)

@@ -34,6 +34,7 @@ import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 import static in.lubble.app.firebase.RealtimeDbHelper.getUserInfoRef;
 import static in.lubble.app.utils.AppNotifUtils.TRACK_NOTIF_ID;
 import static in.lubble.app.utils.MainUtils.fetchAndPersistAppFeatures;
+import static in.lubble.app.utils.UiUtils.determineYOffset;
 
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -761,7 +762,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             View feedView = bottomNavigationMenuView.getChildAt(1);
             feedView.post(() -> {
                 Tooltip tooltip = new Tooltip.Builder(MainActivity.this)
-                        .anchor(feedView, 0, 0, false)
+                        .anchor(feedView, 0, determineYOffset(this), false)
                         .closePolicy(ClosePolicy.Companion.getTOUCH_ANYWHERE_NO_CONSUME())
                         .showDuration(45000)
                         .overlay(true)

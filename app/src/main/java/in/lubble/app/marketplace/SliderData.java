@@ -12,12 +12,15 @@ public class SliderData implements Serializable {
     private String url;
     @SerializedName("deep_link")
     private String deepLink;
+    @SerializedName("title")
+    private String title;
 
     public SliderData(){
 
     }
 
-    public SliderData(String url){
+    public SliderData(String title, String url){
+        this.title = title;
         this.url = url;
     }
 
@@ -35,5 +38,13 @@ public class SliderData implements Serializable {
 
     public void setDeepLink(String deepLink) {
         this.deepLink = deepLink;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }

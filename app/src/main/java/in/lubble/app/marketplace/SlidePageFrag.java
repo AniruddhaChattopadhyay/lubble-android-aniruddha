@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
@@ -51,21 +52,28 @@ public class SlidePageFrag extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_slide_page, container, false);
 
         ImageView slideIv = view.findViewById(R.id.iv_slide_image);
+        TextView titleTv = view.findViewById(R.id.tv_slider_title);
 
         RequestOptions requestOptions = new RequestOptions();
-        requestOptions = requestOptions.transforms(new CenterCrop(), new RoundedCorners(UiUtils.dpToPx(8)));
-        GlideApp.with(getContext()).load(sliderData.getUrl()).placeholder(R.color.gray).error(R.color.gray)
+
+        if (!TextUtils.isEmpty(sliderData.getTitle())) {
+            titleTv.setVisibility(View.VISIBLE);
+            titleTv.setText(sliderData.getTitle());
+            requestOptions = requestOptions.transform(new RoundedCorners(UiUtils.dpToPx(8)));
+        } else {
+            titleTv.setVisibility(View.GONE);
+            requestOptions = requestOptions.transform(new CenterCrop(), new RoundedCorners(UiUtils.dpToPx(8)));
+        }
+
+        GlideApp.with(requireContext()).load(sliderData.getUrl()).placeholder(R.color.gray).error(R.color.gray)
                 .apply(requestOptions)
                 .into(slideIv);
 
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!TextUtils.isEmpty(sliderData.getDeepLink())) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(sliderData.getDeepLink()));
-                    startActivity(intent);
-                }
+        view.setOnClickListener(v -> {
+            if (!TextUtils.isEmpty(sliderData.getDeepLink())) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(sliderData.getDeepLink()));
+                startActivity(intent);
             }
         });
 
