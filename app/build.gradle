@@ -195,6 +195,9 @@ dependencies {
     implementation "androidx.viewpager2:viewpager2:1.0.0"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
+    implementation 'com.linkedin.android.litr:litr:1.4.18'
+
+
     //to solve the Duplicate class com.google.common.util.concurrent.ListenableFuture found in modules jetified-guava-20.0
 //    implementation 'com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava'
 
