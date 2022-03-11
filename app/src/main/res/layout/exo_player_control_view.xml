@@ -42,7 +42,7 @@
             android:id="@+id/exo_mute_btn"
             style="@style/ExoMediaButton"
             app:tint="@color/white"
-            app:srcCompat="@drawable/ic_volume_up_black_24dp" />
+            app:srcCompat="@drawable/ic_mute" />
 
     </LinearLayout>
 

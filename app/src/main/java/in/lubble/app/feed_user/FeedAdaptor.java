@@ -317,11 +317,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
     public void muteVideo(ImageButton muteBtn , ExoPlayer exoPlayer){
         if(exoPlayer.getVolume() == 0F) {
             exoPlayer.setVolume(0.75F);
-            muteBtn.setImageResource(R.drawable.ic_mute);
+            muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
         }
         else{
             exoPlayer.setVolume(0F);
-            muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
+            muteBtn.setImageResource(R.drawable.ic_mute);
         }
     }
 
@@ -336,24 +336,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
     private void prepareExoPlayerFromFileUri(MyViewHolder holder, Uri uri) {
         holder.exoPlayer = new ExoPlayer.Builder(context).build();
-        DataSpec dataSpec = new DataSpec(uri);
-        final FileDataSource fileDataSource = new FileDataSource();
-        try {
-            fileDataSource.open(dataSpec);
-        } catch (FileDataSource.FileDataSourceException e) {
-            FirebaseCrashlytics.getInstance().recordException(e);
-            e.printStackTrace();
-        }
-
-        com.google.android.exoplayer2.upstream.DataSource.Factory factory = new com.google.android.exoplayer2.upstream.DataSource.Factory() {
-            @Override
-            public com.google.android.exoplayer2.upstream.DataSource createDataSource() {
-                return fileDataSource;
-            }
-        };
-        /*todo deprecated MediaSource videosource = new ExtractorMediaSource(fileDataSource.getUri(),
-                factory, new DefaultExtractorsFactory(), null, null);*/
-        holder.exoPlayer.setMediaItem(MediaItem.fromUri(fileDataSource.getUri()));
+        holder.exoPlayer.setMediaItem(MediaItem.fromUri(uri));
         holder.exoPlayerView.setPlayer(holder.exoPlayer);
         holder.exoPlayer.prepare();
         exoplayerMap.put(holder.getBindingAdapterPosition(), holder.exoPlayer);

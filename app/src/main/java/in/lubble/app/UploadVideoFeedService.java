@@ -1,34 +1,29 @@
 package in.lubble.app;
 
-import static com.linkedin.android.litr.MediaTransformer.DEFAULT_KEY_FRAME_INTERVAL;
+import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
+import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
+import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
+import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
+import static in.lubble.app.utils.FileUtils.getFileNameFromUri;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.media.MediaExtractor;
 import android.media.MediaFormat;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.util.Log;
-import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -37,18 +32,14 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.perf.FirebasePerformance;
 import com.google.firebase.perf.metrics.Trace;
 import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.iceteck.silicompressorr.SiliCompressor;
 import com.linkedin.android.litr.MediaTransformer;
 import com.linkedin.android.litr.TransformationListener;
 import com.linkedin.android.litr.analytics.TrackTransformationInfo;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,13 +47,6 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.models.FeedPostData;
 import in.lubble.app.services.FeedServices;
-import in.lubble.app.utils.FileUtils;
-
-import static in.lubble.app.firebase.FirebaseStorageHelper.getConvoBucketRef;
-import static in.lubble.app.firebase.FirebaseStorageHelper.getDefaultBucketRef;
-import static in.lubble.app.firebase.FirebaseStorageHelper.getMarketplaceBucketRef;
-import static in.lubble.app.utils.FileUtils.getFileFromInputStreamUri;
-import static in.lubble.app.utils.FileUtils.getUriFromTempBitmap;
 
 public class UploadVideoFeedService extends BaseTaskService {
     private static final String TAG = "UploadFileService";
@@ -162,129 +146,131 @@ public class UploadVideoFeedService extends BaseTaskService {
         showProgressNotification(getString(R.string.progress_uploading), 0, 0);
         final StorageReference photoRef = mStorageRef.child(uploadPath)
                 .child(fileName);
-//        uploadFile(fileUri, photoRef, groupName, feedName, feedPostData);
-        compressAndUpload(fileUri, fileName, photoRef,uploadPath, groupName, feedName, feedPostData);
+        //uploadFile(fileUri, photoRef, groupName, feedName, feedPostData);
+        compressAndUpload(fileUri, fileName, photoRef, uploadPath, groupName, feedName, feedPostData);
 
     }
 
 
     private void compressAndUpload(final Uri fileUri, final String fileName, final StorageReference photoRef, final String uploadPath, final String groupName, final String feedName, FeedPostData feedPostData) {
-        File f = new File(getFilesDir().getAbsolutePath() + "/" + getPackageName() + "/media/videos");
         String requestId = UUID.randomUUID().toString();
-        File outputFile = new File(getFilesDir().getAbsolutePath() + "/" + getPackageName() + "/media/videos" + requestId + ".mp4");
-        if (f.mkdirs() || f.isDirectory()) {
-//            new VideoCompressAsyncTask(this, this, fileUri, fileName, photoRef, uploadPath, groupName, feedName, feedPostData).execute(fileUri.toString(), f.getPath());
-            TransformationListener listener;
-            listener = new TransformationListener() {
-                @Override
-                public void onStarted(@NonNull String id) {
-                    Log.d(TAG, "onStarted: ");
-                }
-
-                @Override
-                public void onProgress(@NonNull String id, float progress) {
-                    Log.d(TAG, "onStarted: ");
-                }
-
-                @Override
-                public void onCompleted(@NonNull String id, @Nullable List<TrackTransformationInfo> trackTransformationInfos) {
-                    Log.d(TAG, "onStarted: ");
-                    File fOutput = new File(outputFile.getPath());
-                    File fOriginal = new File(fileUri.getPath());
-                    long sizeOutput = fOutput.length();
-                    long sizeOriginal = fOriginal.length();
-                    if(sizeOriginal>sizeOutput){
-                        Analytics.triggerEvent(AnalyticsEvents.FEED_VIDEO_COMPRESS_SUCCESS, getApplicationContext());
-                        fOriginal.delete();
-                        uploadFile(Uri.fromFile(outputFile), photoRef, groupName, feedName, feedPostData);
-                    }
-                    else{
-                        fOutput.delete();
-                        Analytics.triggerEvent(AnalyticsEvents.FEED_VIDEO_COMPRESS_BLOATED, getApplicationContext());
-                        uploadFile(fileUri, photoRef, groupName, feedName, feedPostData);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull String id, @Nullable List<TrackTransformationInfo> trackTransformationInfos) {
-                    Analytics.triggerEvent(AnalyticsEvents.FEED_VIDEO_COMPRESS_FAILED, getApplicationContext());
-                    uploadFile(fileUri, photoRef, groupName, feedName, feedPostData);
-                }
-
-                @Override
-                public void onError(@NonNull String id, @Nullable Throwable cause, @Nullable List<TrackTransformationInfo> trackTransformationInfos) {
-                    Analytics.triggerEvent(AnalyticsEvents.FEED_VIDEO_COMPRESS_FAILED, getApplicationContext());
-                    uploadFile(fileUri, photoRef, groupName, feedName, feedPostData);
-
-                }
-            };
-            try {
-                MediaExtractor mediaExtractor = new MediaExtractor();
-                mediaExtractor.setDataSource(Uri.parse(fileUri.toString()).getPath());
-                MediaFormat inputVideoFormat = selectTrack(mediaExtractor,"video");
-                MediaFormat inputAudioFormat = selectTrack(mediaExtractor,"audio");
-
-                MediaFormat videoFormat = MediaFormat.createVideoFormat(
-                        MediaFormat.MIMETYPE_VIDEO_AVC,
-                        inputVideoFormat.getInteger(MediaFormat.KEY_WIDTH),
-                        inputVideoFormat.getInteger(MediaFormat.KEY_HEIGHT));
-
-                MediaFormat audioFormat = MediaFormat.createAudioFormat(
-                        MediaFormat.MIMETYPE_AUDIO_AAC,
-                        inputAudioFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE),
-                        inputAudioFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
-                );
-
-                int videoHeight = inputVideoFormat.getInteger(MediaFormat.KEY_HEIGHT);
-                int videoWidth = inputVideoFormat.getInteger(MediaFormat.KEY_WIDTH);
-                float aspectRatio = (float)videoWidth/videoHeight;
-                int outputHeight, outputWidth;
-                if(videoWidth <=720 && videoHeight <=720){
-                    outputHeight = videoHeight;
-                    outputWidth = videoWidth;
-                }
-                else if(videoHeight > videoWidth){
-                    outputHeight = 720;
-                    outputWidth = (int) (outputHeight * aspectRatio);
-                }
-                else{
-                    outputWidth = 720;
-                    outputHeight = (int) (outputWidth/aspectRatio);
-                }
-                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(fileUri.getPath());
-                int videoBitrate = Integer.parseInt(retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_BITRATE)));
-                int audioBitrate = inputAudioFormat.getInteger(MediaFormat.KEY_BIT_RATE);
-
-                Log.d(TAG, "OG bitrate is : " + videoBitrate);
-
-                int destBitrate = videoBitrate;
-                if (videoBitrate > 5 * 1024 * 1024 || new File(fileUri.toString()).length() > 10 * 1024 * 1024) {
-                    destBitrate = Math.min(videoBitrate / 2, 5 * 1024 * 1024); // max Bitrate allowed = 5Mbps
-                }
-
-                videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, destBitrate );
-                videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE,inputVideoFormat.getInteger(MediaFormat.KEY_FRAME_RATE));
-                videoFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);
-                videoFormat.setInteger(MediaFormat.KEY_WIDTH,outputWidth);
-                videoFormat.setInteger(MediaFormat.KEY_HEIGHT,outputHeight);
-                audioFormat.setInteger(MediaFormat.KEY_BIT_RATE,audioBitrate/2);
-
-                MediaTransformer mediaTransformer = new MediaTransformer(getApplicationContext());
-
-                mediaTransformer.transform(requestId,
-                        Uri.parse(fileUri.toString()),
-                        outputFile.getPath(),
-                        videoFormat,
-                        null,
-                        listener,
-                        null);
-
-
-            } catch (IOException e) {
-                FirebaseCrashlytics.getInstance().recordException(e);
-                e.printStackTrace();
+        File outputFile = new File(getFilesDir(), getFileNameFromUri(fileUri));
+        TransformationListener listener;
+        Trace compressTime = FirebasePerformance.getInstance().newTrace(TRACK_COMPRESS_TIME);
+        listener = new TransformationListener() {
+            @Override
+            public void onStarted(@NonNull String id) {
+                Log.d(TAG, "onStarted: ");
+                compressTime.start();
             }
+
+            @Override
+            public void onProgress(@NonNull String id, float progress) {
+                Log.d(TAG, "onStarted: ");
+            }
+
+            @Override
+            public void onCompleted(@NonNull String id, @Nullable List<TrackTransformationInfo> trackTransformationInfos) {
+                Log.d(TAG, "onStarted: ");
+                compressTime.stop();
+                File fOriginal = new File(fileUri.getPath());
+                long sizeOutput = outputFile.length();
+                long sizeOriginal = fOriginal.length();
+                if (sizeOutput < sizeOriginal) {
+                    Analytics.triggerEvent(AnalyticsEvents.FEED_VIDEO_COMPRESS_SUCCESS, getApplicationContext());
+                    fOriginal.delete();
+                    uploadFile(Uri.fromFile(outputFile), photoRef, groupName, feedName, feedPostData);
+                } else {
+                    outputFile.delete();
+                    Analytics.triggerEvent(AnalyticsEvents.FEED_VIDEO_COMPRESS_BLOATED, getApplicationContext());
+                    uploadFile(fileUri, photoRef, groupName, feedName, feedPostData);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull String id, @Nullable List<TrackTransformationInfo> trackTransformationInfos) {
+                Analytics.triggerEvent(AnalyticsEvents.FEED_VIDEO_COMPRESS_FAILED, getApplicationContext());
+                uploadFile(fileUri, photoRef, groupName, feedName, feedPostData);
+            }
+
+            @Override
+            public void onError(@NonNull String id, @Nullable Throwable cause, @Nullable List<TrackTransformationInfo> trackTransformationInfos) {
+                Analytics.triggerEvent(AnalyticsEvents.FEED_VIDEO_COMPRESS_FAILED, getApplicationContext());
+                FirebaseCrashlytics.getInstance().log("Feed video upload error");
+                FirebaseCrashlytics.getInstance().recordException(cause);
+                uploadFile(fileUri, photoRef, groupName, feedName, feedPostData);
+
+            }
+        };
+        try {
+            MediaExtractor mediaExtractor = new MediaExtractor();
+            mediaExtractor.setDataSource(Uri.parse(fileUri.toString()).getPath());
+            MediaFormat inputVideoFormat = selectTrack(mediaExtractor, "video");
+            MediaFormat inputAudioFormat = selectTrack(mediaExtractor, "audio");
+
+            MediaFormat videoFormat = MediaFormat.createVideoFormat(
+                    MediaFormat.MIMETYPE_VIDEO_AVC,
+                    inputVideoFormat.getInteger(MediaFormat.KEY_WIDTH),
+                    inputVideoFormat.getInteger(MediaFormat.KEY_HEIGHT));
+
+            MediaFormat audioFormat = MediaFormat.createAudioFormat(
+                    MediaFormat.MIMETYPE_AUDIO_AAC,
+                    inputAudioFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE),
+                    inputAudioFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+            );
+
+            int videoHeight = inputVideoFormat.getInteger(MediaFormat.KEY_HEIGHT);
+            int videoWidth = inputVideoFormat.getInteger(MediaFormat.KEY_WIDTH);
+            float aspectRatio = (float) videoWidth / videoHeight;
+            int outputHeight, outputWidth;
+            if (videoWidth <= 720 && videoHeight <= 720) {
+                outputHeight = videoHeight;
+                outputWidth = videoWidth;
+            } else if (videoHeight > videoWidth) {
+                outputHeight = 720;
+                outputWidth = (int) (outputHeight * aspectRatio);
+            } else {
+                outputWidth = 720;
+                outputHeight = (int) (outputWidth / aspectRatio);
+            }
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(fileUri.getPath());
+            int videoBitrate = Integer.parseInt(retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_BITRATE)));
+            int audioBitrate;
+            if (inputAudioFormat.containsKey(MediaFormat.KEY_BIT_RATE)) {
+                audioBitrate = inputAudioFormat.getInteger(MediaFormat.KEY_BIT_RATE);
+            } else {
+                audioBitrate = 0;
+            }
+
+            Log.d(TAG, "OG bitrate is : " + videoBitrate);
+
+            int destBitrate = videoBitrate;
+            if (videoBitrate > 5 * 1024 * 1024 || new File(fileUri.toString()).length() > 10 * 1024 * 1024) {
+                destBitrate = Math.min(videoBitrate / 2, 5 * 1024 * 1024); // max Bitrate allowed = 5Mbps
+            }
+
+            videoFormat.setInteger(MediaFormat.KEY_BIT_RATE, destBitrate);
+            videoFormat.setInteger(MediaFormat.KEY_FRAME_RATE, inputVideoFormat.getInteger(MediaFormat.KEY_FRAME_RATE));
+            videoFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5);
+            videoFormat.setInteger(MediaFormat.KEY_WIDTH, outputWidth);
+            videoFormat.setInteger(MediaFormat.KEY_HEIGHT, outputHeight);
+            audioFormat.setInteger(MediaFormat.KEY_BIT_RATE, audioBitrate / 2);
+
+            MediaTransformer mediaTransformer = new MediaTransformer(getApplicationContext());
+
+            mediaTransformer.transform(requestId,
+                    Uri.parse(fileUri.toString()),
+                    outputFile.getPath(),
+                    videoFormat,
+                    null,
+                    listener,
+                    null);
+
+
+        } catch (IOException e) {
+            FirebaseCrashlytics.getInstance().recordException(e);
+            e.printStackTrace();
         }
     }
 
@@ -407,111 +393,6 @@ public class UploadVideoFeedService extends BaseTaskService {
         showFinishedNotification(caption, intent, success);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
-
-    class VideoCompressAsyncTask extends AsyncTask<String, String, String> {
-        Trace compressTime = FirebasePerformance.getInstance().newTrace(TRACK_COMPRESS_TIME);
-        Context mContext;
-        UploadVideoFeedService uploadVideoFeedService;
-        Uri fileUri;
-        String fileName;
-        String uploadPath;
-        String groupName;
-        String feedName;
-        FeedPostData feedPostData;
-        StorageReference photoRef;
-        Uri cachevid = null;
-        Uri compressedUri = null;
-        double compessed_video_size = 0;
-
-        public VideoCompressAsyncTask(Context context, UploadVideoFeedService uploadVideoFeedService, final Uri fileUri, final String fileName, final StorageReference photoRef, final String uploadPath, final String groupName, final String feedName, FeedPostData feedPostData) {
-            mContext = context;
-            this.uploadVideoFeedService = uploadVideoFeedService;
-            this.fileUri = fileUri;
-            this.fileName = fileName;
-            this.photoRef = photoRef;
-            this.uploadPath = uploadPath;
-            this.groupName = groupName;
-            this.feedName = feedName;
-            this.feedPostData = feedPostData;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            compressTime.start();
-        }
-
-        @Override
-        protected String doInBackground(String... paths) {
-
-            String filePath = null;
-            try {
-                Log.d(TAG, "path0 = " + paths[0] + " path1=" + paths[1] + "from file " + Uri.fromFile(new File(paths[1])).toString());
-                Log.d(TAG, "path0 = " + Uri.parse(paths[0]).getPath() + " path1=" + paths[1] + "from file " + Uri.fromFile(new File(paths[1])).getPath());
-
-                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-                retriever.setDataSource(Uri.parse(paths[0]).getPath());
-
-                int bitrate = Integer.parseInt(retriever.extractMetadata((MediaMetadataRetriever.METADATA_KEY_BITRATE)));
-
-                Log.d(TAG, "OG bitrate is : " + bitrate);
-
-                int destBitrate = bitrate;
-                if (bitrate > 5 * 1024 * 1024 || new File(paths[0]).length() > 10 * 1024 * 1024) {
-                    destBitrate = Math.min(bitrate / 2, 5 * 1024 * 1024); // max Bitrate allowed = 5Mbps
-                }
-                filePath = SiliCompressor.with(mContext).compressVideo(Uri.parse(paths[0]).getPath(), Uri.fromFile(new File(paths[1])).getPath(), 0, 0, destBitrate);
-                cachevid = Uri.parse(paths[0]);
-
-
-            } catch (URISyntaxException e) {
-                FirebaseCrashlytics.getInstance().recordException(e);
-                e.printStackTrace();
-            }
-            return filePath;
-
-        }
-
-
-        @Override
-        protected void onPostExecute(String compressedFilePath) {
-            super.onPostExecute(compressedFilePath);
-            File imageFile = new File(compressedFilePath);
-            compessed_video_size = imageFile.length() / (1024f * 1024f);
-            compressTime.stop();
-            compressedUri = Uri.fromFile(imageFile);
-            Log.i(TAG, "Path: " + compressedFilePath);
-            File file = new File(cachevid.getPath());
-
-            Log.d(TAG, "OG SIZE: " + file.length() / (1024f * 1024f));
-            Log.d(TAG, "compressed size: " + compessed_video_size);
-
-            if (compessed_video_size <= FileUtils.Video_Size) {
-                //delete image in cache
-                if (cachevid != null) {
-                    file.delete();
-                    if (file.exists()) {
-                        try {
-                            file.getCanonicalFile().delete();
-                            if (file.exists()) {
-                                getApplicationContext().deleteFile(file.getName());
-                            }
-                        } catch (IOException e) {
-                            FirebaseCrashlytics.getInstance().recordException(e);
-                            e.printStackTrace();
-                        }
-                    }
-                }
-                uploadVideoFeedService.uploadFile(compressedUri, photoRef, groupName, feedName, feedPostData);
-            } else
-                uploadVideoFeedService.uploadFile(cachevid, photoRef, groupName, feedName, feedPostData);
-        }
-    }
-
     private MediaFormat selectTrack(MediaExtractor mediaExtractor, String mime) {
         for (int track = 0; track < mediaExtractor.getTrackCount(); track++) {
             MediaFormat mediaFormat = mediaExtractor.getTrackFormat(track);
@@ -519,7 +400,7 @@ public class UploadVideoFeedService extends BaseTaskService {
             if (mimeType == null) {
                 continue;
             }
-            if (mimeType.startsWith(mime)){
+            if (mimeType.startsWith(mime)) {
                 return mediaExtractor.getTrackFormat(track);
             }
         }
