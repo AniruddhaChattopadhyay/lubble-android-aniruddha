@@ -297,6 +297,7 @@ public class LoginActivity extends BaseActivity {
         FirebaseMessaging.getInstance().getToken().addOnCompleteListener(this, task -> {
             if (task.isSuccessful()) {
                 profileData.setToken(task.getResult());
+                profileData.setTokenTimestamp(System.currentTimeMillis());
                 profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
 
                 getThisUserRef().setValue(profileData)

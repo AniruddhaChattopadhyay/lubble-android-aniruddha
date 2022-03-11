@@ -1,5 +1,14 @@
 package in.lubble.app.firebase;
 
+import static in.lubble.app.Constants.NEW_CHAT_ACTION;
+import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.marketplace.SellerDashActiv.ACTION_IMG_DONE;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_ID;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_TYPE;
+import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_URL;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +30,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import in.lubble.app.BuildConfig;
@@ -32,15 +42,6 @@ import in.lubble.app.notifications.UnreadChatsSharedPrefs;
 import in.lubble.app.utils.AppNotifUtils;
 import in.lubble.app.utils.NotifUtils;
 import in.lubble.app.utils.StringUtils;
-
-import static in.lubble.app.Constants.NEW_CHAT_ACTION;
-import static in.lubble.app.firebase.RealtimeDbHelper.getAnnouncementsRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getMessagesRef;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.marketplace.SellerDashActiv.ACTION_IMG_DONE;
-import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_ID;
-import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_TYPE;
-import static in.lubble.app.marketplace.SellerDashActiv.EXTRA_IMG_URL;
 
 /**
  * Created by ishaan on 26/1/18.
@@ -187,7 +188,10 @@ public class FcmService extends FirebaseMessagingService {
         CleverTapAPI.getDefaultInstance(this).pushFcmRegistrationId(token, true);
         Freshchat.getInstance(this).setPushRegistrationToken(token);
         try {
-            getThisUserRef().child("token").setValue(token);
+            Map<String, Object> childUpdates = new HashMap<>();
+            childUpdates.put("token", token);
+            childUpdates.put("tokenTimestamp", System.currentTimeMillis());
+            getThisUserRef().updateChildren(childUpdates);
         } catch (Exception e) {
             FirebaseCrashlytics.getInstance().recordException(e);
         }

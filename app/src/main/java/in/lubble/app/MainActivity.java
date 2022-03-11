@@ -97,6 +97,7 @@ import org.json.JSONObject;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import in.lubble.app.analytics.Analytics;
@@ -958,8 +959,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             FirebaseMessaging.getInstance().getToken().addOnCompleteListener(this, task -> {
                 if (task.isSuccessful()) {
                     String token = task.getResult();
-                    getThisUserRef().child("token")
-                            .setValue(token);
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    childUpdates.put("token", token);
+                    childUpdates.put("tokenTimestamp", System.currentTimeMillis());
+                    getThisUserRef().updateChildren(childUpdates);
                     CleverTapAPI.getDefaultInstance(MainActivity.this).pushFcmRegistrationId(token, true);
                     Freshchat.getInstance(MainActivity.this).setPushRegistrationToken(token);
                 } else {

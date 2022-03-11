@@ -114,6 +114,7 @@ public class NameFrag extends Fragment {
                                     FirebaseMessaging.getInstance().getToken().addOnCompleteListener(task1 -> {
                                         if (task1.isSuccessful()) {
                                             profileData.setToken(task1.getResult());
+                                            profileData.setTokenTimestamp(System.currentTimeMillis());
                                             profileData.setReferredBy(LubbleSharedPrefs.getInstance().getReferrerUid());
 
                                             getThisUserRef().setValue(profileData)

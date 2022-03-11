@@ -27,6 +27,7 @@ public class ProfileData {
     private String school;
     private String phone;
     private String token;
+    private Long tokenTimestamp;
     private String referredBy;
     private long birthdate = 0L;
     private boolean isOwner;
@@ -278,5 +279,14 @@ public class ProfileData {
 
     public void setLubbles(HashMap<String, HashMap<String, HashMap<String, Object>>> lubbles) {
         this.lubbles = lubbles;
+    }
+
+    @Nullable
+    public Long getTokenTimestamp() {
+        return tokenTimestamp;
+    }
+
+    public void setTokenTimestamp(Long tokenTimestamp) {
+        this.tokenTimestamp = tokenTimestamp;
     }
 }
