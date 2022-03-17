@@ -1,5 +1,7 @@
 package in.lubble.app.referrals;
 
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -20,11 +22,8 @@ import com.google.firebase.database.ValueEventListener;
 import in.lubble.app.BaseActivity;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
-import in.lubble.app.models.ProfileData;
 import in.lubble.app.rewards.RewardsFrag;
 import in.lubble.app.utils.FragUtils;
-
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
 
 public class ReferralActivity extends BaseActivity {
     private static final String TAG = "ReferralActivity";
@@ -78,12 +77,12 @@ public class ReferralActivity extends BaseActivity {
     }
 
     private void fetchCoins() {
-        thisUserListener = getThisUserRef().addValueEventListener(new ValueEventListener() {
+        thisUserListener = getThisUserRef().child("coins").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null) {
-                    myCoinsTv.setText(String.valueOf(profileData.getCoins()));
+                final Long coins = dataSnapshot.getValue(Long.class);
+                if (coins != null) {
+                    myCoinsTv.setText(String.valueOf(coins));
                 }
             }
 
@@ -102,7 +101,7 @@ public class ReferralActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         if (thisUserListener != null) {
-            getThisUserRef().removeEventListener(thisUserListener);
+            getThisUserRef().child("coins").removeEventListener(thisUserListener);
         }
     }
 

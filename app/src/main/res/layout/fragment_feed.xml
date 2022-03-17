@@ -21,9 +21,19 @@
                 android:id="@+id/ll_joined_groups_stories"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:animateLayoutChanges="true"
                 android:layout_below="@id/sep_toolbar"
+                android:animateLayoutChanges="true"
                 android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="4dp"
+                    android:text="My Groups"
+                    android:textStyle="italic"
+                    android:textColor="@color/black"
+                    android:textSize="12sp" />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/joined_groups_stories_recycler_view"
@@ -31,7 +41,7 @@
                     android:layout_height="wrap_content"
                     android:background="@color/white"
                     android:orientation="horizontal"
-                    android:paddingTop="8dp"
+                    android:paddingTop="4dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     tools:itemCount="5"
                     tools:listitem="@layout/layout_joined_groups" />
@@ -47,8 +57,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    android:visibility="gone"
                     android:elevation="8dp"
+                    android:visibility="gone"
                     app:cardBackgroundColor="@color/md_blue_50"
                     app:cardCornerRadius="8dp"
                     app:contentPadding="8dp"
@@ -109,11 +119,11 @@
                             android:layout_alignParentRight="true"
                             android:layout_marginTop="8dp"
                             android:layout_marginBottom="8dp"
-                            app:cornerRadius="32dp"
                             android:text="Start my introduction"
                             android:textSize="16sp"
                             android:theme="@style/MaterialButton"
                             app:backgroundTint="@color/colorAccent"
+                            app:cornerRadius="32dp"
                             app:icon="@drawable/ic_star_shine" />
 
                     </RelativeLayout>
