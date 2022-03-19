@@ -157,7 +157,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         call.enqueue(new Callback<Endpoints.StreamCredentials>() {
             @Override
             public void onResponse(Call<Endpoints.StreamCredentials> call, Response<Endpoints.StreamCredentials> response) {
-                if (response.isSuccessful()) {
+                if (response.isSuccessful() && isAdded()) {
                     //Toast.makeText(getContext(), R.string.upload_success, Toast.LENGTH_SHORT).show();
                     assert response.body() != null;
                     final Endpoints.StreamCredentials credentials = response.body();
@@ -168,7 +168,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
                         e.printStackTrace();
                     }
 
-                } else {
+                } else if (isAdded()) {
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }

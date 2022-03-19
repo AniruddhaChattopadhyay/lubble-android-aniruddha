@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="in.lubble.app"
-    android:versionCode="313"
-    android:versionName="3.3-1">
+    android:versionCode="314"
+    android:versionName="3.3-2">
 
     <uses-sdk tools:overrideLibrary="com.fxn.pix" />
 
