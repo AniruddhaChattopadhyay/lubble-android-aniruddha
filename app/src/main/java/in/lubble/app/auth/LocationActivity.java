@@ -1,10 +1,14 @@
 package in.lubble.app.auth;
 
+import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
+import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
+import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
+
 import android.Manifest;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -13,8 +17,9 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -46,8 +51,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -81,18 +84,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static in.lubble.app.Constants.MEDIA_TYPE;
-import static in.lubble.app.firebase.RealtimeDbHelper.getThisUserRef;
-import static in.lubble.app.utils.ReferralUtils.generateBranchUrl;
-import static in.lubble.app.utils.ReferralUtils.getReferralIntent;
-
 public class LocationActivity extends BaseActivity {
 
     private static final String TAG = "LocationActivity";
     private static final int REQUEST_SYSTEM_LOCATION = 859;
     private static final int REQUEST_LOCATION_ON = 150;
 
-    private static final float LOCATION_ACCURACY_THRESHOLD = 150;
+    private static final float LOCATION_ACCURACY_THRESHOLD = 400;
     private static int RETRY_COUNT = 0;
     private FusedLocationProviderClient fusedLocationClient;
     private RelativeLayout rootview, invalidLocContainer;
@@ -139,12 +137,7 @@ public class LocationActivity extends BaseActivity {
 
         Analytics.triggerScreenEvent(this, this.getClass());
 
-        shareBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onInviteClicked();
-            }
-        });
+        shareBtn.setOnClickListener(v -> onInviteClicked());
         pulseIv.setVisibility(View.GONE);
         locIv.setVisibility(View.GONE);
         checkSystemLocPerm();
@@ -181,56 +174,35 @@ public class LocationActivity extends BaseActivity {
             });
         }
 
-        phoneBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!TextUtils.isEmpty(phoneEt.getText()) && phoneEt.getText().toString().length() == 10) {
-                    getThisUserRef().child("phone").setValue(phoneEt.getText().toString());
-                    shareContainer.setVisibility(View.VISIBLE);
-                    phoneContainer.setVisibility(View.GONE);
-                    Analytics.triggerEvent(AnalyticsEvents.LOC_FAIL_PHONE_SUBMIT, LocationActivity.this);
-                    UiUtils.hideKeyboard(LocationActivity.this);
-                } else {
-                    Toast.makeText(LocationActivity.this, "Please enter correct Phone Number, no country code", Toast.LENGTH_SHORT).show();
-                    Animation shake = AnimationUtils.loadAnimation(LocationActivity.this, R.anim.shake);
-                    phoneEt.startAnimation(shake);
-                }
+        phoneBtn.setOnClickListener(v -> {
+            if (!TextUtils.isEmpty(phoneEt.getText()) && phoneEt.getText().toString().length() == 10) {
+                getThisUserRef().child("phone").setValue(phoneEt.getText().toString());
+                shareContainer.setVisibility(View.VISIBLE);
+                phoneContainer.setVisibility(View.GONE);
+                Analytics.triggerEvent(AnalyticsEvents.LOC_FAIL_PHONE_SUBMIT, LocationActivity.this);
+                UiUtils.hideKeyboard(LocationActivity.this);
+            } else {
+                Toast.makeText(LocationActivity.this, "Please enter correct Phone Number, no country code", Toast.LENGTH_SHORT).show();
+                Animation shake = AnimationUtils.loadAnimation(LocationActivity.this, R.anim.shake);
+                phoneEt.startAnimation(shake);
             }
         });
 
-        logoutTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                UserUtils.logout(LocationActivity.this);
-            }
-        });
+        logoutTv.setOnClickListener(v -> UserUtils.logout(LocationActivity.this));
 
-        supportTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Freshchat.showConversations(LocationActivity.this);
-            }
-        });
+        supportTv.setOnClickListener(v -> Freshchat.showConversations(LocationActivity.this));
 
-        retryTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkSystemLocPerm();
-            }
-        });
+        retryTv.setOnClickListener(v -> checkSystemLocPerm());
 
         foundingMemberCtaTv.setText(StringUtils.underlineText(foundingMemberCtaTv.getText().toString()));
-        foundingMemberCtaTv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
-                intentBuilder.setToolbarColor(ContextCompat.getColor(LocationActivity.this, R.color.colorAccent));
-                intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(LocationActivity.this, R.color.dk_colorAccent));
-                intentBuilder.enableUrlBarHiding();
-                intentBuilder.setShowTitle(true);
-                CustomTabsIntent customTabsIntent = intentBuilder.build();
-                customTabsIntent.launchUrl(LocationActivity.this, Uri.parse("https://mplace.typeform.com/to/mLq7hrC5#name=" + currentUser.getDisplayName() + "&uid=" + currentUser.getUid()));
-            }
+        foundingMemberCtaTv.setOnClickListener(v -> {
+            CustomTabsIntent.Builder intentBuilder = new CustomTabsIntent.Builder();
+            intentBuilder.setToolbarColor(ContextCompat.getColor(LocationActivity.this, R.color.colorAccent));
+            intentBuilder.setSecondaryToolbarColor(ContextCompat.getColor(LocationActivity.this, R.color.dk_colorAccent));
+            intentBuilder.enableUrlBarHiding();
+            intentBuilder.setShowTitle(true);
+            CustomTabsIntent customTabsIntent = intentBuilder.build();
+            customTabsIntent.launchUrl(LocationActivity.this, Uri.parse("https://mplace.typeform.com/to/mLq7hrC5#name=" + currentUser.getDisplayName() + "&uid=" + currentUser.getUid()));
         });
     }
 
@@ -293,14 +265,9 @@ public class LocationActivity extends BaseActivity {
                 // sees the explanation, try again to request the permission.
                 final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
                 alertDialog.setMessage(getString(R.string.loc_perm_rationale));
-                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_ok), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        ActivityCompat.requestPermissions(LocationActivity.this,
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                REQUEST_SYSTEM_LOCATION);
-                    }
-                });
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.all_ok), (dialog, which) -> ActivityCompat.requestPermissions(LocationActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_SYSTEM_LOCATION));
                 alertDialog.setCancelable(false);
                 alertDialog.show();
             } else {
@@ -323,29 +290,23 @@ public class LocationActivity extends BaseActivity {
         SettingsClient client = LocationServices.getSettingsClient(this);
         Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
 
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                // All location settings are satisfied. The client can initialize
-                // location requests here.
-                getLocation();
-            }
+        task.addOnSuccessListener(this, locationSettingsResponse -> {
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            getLocation();
         });
 
-        task.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
-                    try {
-                        // Show the dialog by calling startResolutionForResult(),
-                        // and check the result in onActivityResult().
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(LocationActivity.this, REQUEST_LOCATION_ON);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error.
-                    }
+        task.addOnFailureListener(this, e -> {
+            if (e instanceof ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    ResolvableApiException resolvable = (ResolvableApiException) e;
+                    resolvable.startResolutionForResult(LocationActivity.this, REQUEST_LOCATION_ON);
+                } catch (IntentSender.SendIntentException sendEx) {
+                    // Ignore the error.
                 }
             }
         });
@@ -353,6 +314,7 @@ public class LocationActivity extends BaseActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_SYSTEM_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
@@ -373,52 +335,50 @@ public class LocationActivity extends BaseActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_LOCATION_ON) {
-            if (resultCode == Activity.RESULT_OK) {
-                //fetch current location
-                getLocation();
-            } else {
-                checkLocationSettings();
-            }
+            new Handler().postDelayed(() -> {
+                if (!isFinishing()) {
+                    checkLocationSettings();
+                }
+            }, 600);
         }
     }
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
+        fusedLocationClient.removeLocationUpdates(locationCallback);
         pulseIv.setVisibility(View.VISIBLE);
         locIv.setVisibility(View.VISIBLE);
         startAnims();
         // get fresh loc
-        fusedLocationClient.requestLocationUpdates(getLocationRequest().setNumUpdates(1), new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    getLocation();
-                    return;
-                }
-                validateUserLocation(locationResult.getLastLocation());
-            }
-        }, null);
+        fusedLocationClient.requestLocationUpdates(getLocationRequest(), locationCallback, Looper.getMainLooper());
     }
 
-    private void validateUserLocation(final Location location) {
-
-        if (location.isFromMockProvider() && !BuildConfig.DEBUG) {
-            showMockLocationDialog();
-            return;
+    private final LocationCallback locationCallback = new LocationCallback() {
+        @Override
+        public void onLocationResult(@NonNull LocationResult locationResult) {
+            Log.d(TAG, "onLocationResult list size: " + locationResult.getLocations().size());
+            for (Location location : locationResult.getLocations()) {
+                if (location != null) {
+                    if (location.isFromMockProvider() && !BuildConfig.DEBUG) {
+                        showMockLocationDialog();
+                        return;
+                    }
+                    if (location.hasAccuracy() && (location.getAccuracy() < LOCATION_ACCURACY_THRESHOLD || retryCount > 10)) {
+                        Log.d(TAG, String.format("onLocationResult: validating loc with acc %s and retyCount: %d", location.getAccuracy(), retryCount));
+                        fusedLocationClient.removeLocationUpdates(this);
+                        validateUserLocation(location);
+                        return;
+                    }
+                    Log.d(TAG, "location bad accuracy of " + location.getAccuracy() + " @ retry: " + retryCount);
+                    retryCount++;
+                }
+            }
         }
+    };
 
-        if ((!location.hasAccuracy() || location.getAccuracy() == 0.0 || location.getAccuracy() > LOCATION_ACCURACY_THRESHOLD)
-                && retryCount < 10) {
-            // bad location, refresh
-            Log.d(TAG, "location bad accuracy of " + location.getAccuracy() + " @ retry: " + retryCount);
-            retryCount++;
-            getLocation();
-            return;
-        }
+    private void validateUserLocation(@NonNull final Location location) {
         currLocation = location;
-
         HashMap<String, Object> params = new HashMap<>();
-
         try {
             final JSONObject locationObject = new JSONObject();
             locationObject.put("loc_lati", location.getLatitude());
@@ -461,12 +421,7 @@ public class LocationActivity extends BaseActivity {
                 } else {
                     locationCheckFailed();
                     if (!isFinishing()) {
-                        Snackbar snackbar = Snackbar.make(rootview, R.string.all_try_again, Snackbar.LENGTH_INDEFINITE).setAction("RETRY", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                checkSystemLocPerm();
-                            }
-                        });
+                        Snackbar snackbar = Snackbar.make(rootview, R.string.all_try_again, Snackbar.LENGTH_INDEFINITE).setAction("RETRY", v -> checkSystemLocPerm());
                         snackbar.setActionTextColor(getResources().getColor(R.color.light_colorAccent));
                         snackbar.show();
                     }
@@ -477,12 +432,7 @@ public class LocationActivity extends BaseActivity {
             public void onFailure(Call<ArrayList<LocationsData>> call, Throwable t) {
                 Log.e(TAG, "onFailure: ");
                 locationCheckFailed();
-                Snackbar snackbar = Snackbar.make(rootview, R.string.check_internet, Snackbar.LENGTH_INDEFINITE).setAction("RETRY", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        checkSystemLocPerm();
-                    }
-                });
+                Snackbar snackbar = Snackbar.make(rootview, R.string.check_internet, Snackbar.LENGTH_INDEFINITE).setAction("RETRY", v -> checkSystemLocPerm());
                 snackbar.setActionTextColor(getResources().getColor(R.color.light_colorAccent));
                 snackbar.show();
             }
@@ -494,40 +444,30 @@ public class LocationActivity extends BaseActivity {
         alertDialog.setTitle("Disable Mock Locations");
         alertDialog.setMessage("We verify your location to ensure only residents get access to their neighbourhood. Please disable fake GPS or Mock Locations");
         alertDialog.setCancelable(false);
-        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Open Settings", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                ComponentName componentName = intent.resolveActivity(getPackageManager());
-                if (componentName == null) {
-                    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-                } else {
-                    startActivity(intent);
-                }
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Open Settings", (dialog, which) -> {
+            final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+            ComponentName componentName = intent.resolveActivity(getPackageManager());
+            if (componentName == null) {
+                startActivity(new Intent(Settings.ACTION_SETTINGS));
+            } else {
+                startActivity(intent);
             }
         });
-        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.all_retry), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                getLocation();
-            }
-        });
+        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.all_retry), (dialog, which) -> getLocation());
         alertDialog.show();
-        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                ComponentName componentName = intent.resolveActivity(getPackageManager());
-                if (componentName == null) {
-                    startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-                } else {
-                    startActivity(intent);
-                }
+        alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            final Intent intent = new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+            ComponentName componentName = intent.resolveActivity(getPackageManager());
+            if (componentName == null) {
+                startActivity(new Intent(Settings.ACTION_SETTINGS));
+            } else {
+                startActivity(intent);
             }
         });
     }
 
     private void locationCheckSuccess(ArrayList<LocationsData> locationsData) {
+        fusedLocationClient.removeLocationUpdates(locationCallback);
         Intent intent = new Intent();
         intent.putExtra("lubbleDataList", locationsData);
         setResult(RESULT_OK, intent);
@@ -535,6 +475,7 @@ public class LocationActivity extends BaseActivity {
     }
 
     private void locationCheckFailed() {
+        fusedLocationClient.removeLocationUpdates(locationCallback);
         pulseIv.setVisibility(View.GONE);
         locIv.setVisibility(View.GONE);
         locHintTv.setVisibility(View.GONE);
@@ -548,11 +489,17 @@ public class LocationActivity extends BaseActivity {
         Analytics.triggerEvent(AnalyticsEvents.LOC_CHECK_FAILED, bundle, this);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        fusedLocationClient.removeLocationUpdates(locationCallback);
+    }
+
     private LocationRequest getLocationRequest() {
-        LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
+        LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(1000);
+        locationRequest.setWaitForAccurateLocation(true);
         return locationRequest;
     }
 
