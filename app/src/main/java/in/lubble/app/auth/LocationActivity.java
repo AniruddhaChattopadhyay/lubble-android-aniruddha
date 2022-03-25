@@ -112,6 +112,7 @@ public class LocationActivity extends BaseActivity {
     private String sharingUrl;
     private ProgressDialog sharingProgressDialog;
     private FirebaseUser currentUser;
+    private boolean isAccurateLocRecvd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -345,6 +346,7 @@ public class LocationActivity extends BaseActivity {
 
     @SuppressLint("MissingPermission")
     private void getLocation() {
+        isAccurateLocRecvd = false;
         fusedLocationClient.removeLocationUpdates(locationCallback);
         pulseIv.setVisibility(View.VISIBLE);
         locIv.setVisibility(View.VISIBLE);
@@ -358,13 +360,15 @@ public class LocationActivity extends BaseActivity {
         public void onLocationResult(@NonNull LocationResult locationResult) {
             Log.d(TAG, "onLocationResult list size: " + locationResult.getLocations().size());
             for (Location location : locationResult.getLocations()) {
-                if (location != null) {
+                if (location != null && !isFinishing()) {
+                    if (isAccurateLocRecvd) return;
                     if (location.isFromMockProvider() && !BuildConfig.DEBUG) {
                         showMockLocationDialog();
                         return;
                     }
                     if (location.hasAccuracy() && (location.getAccuracy() < LOCATION_ACCURACY_THRESHOLD || retryCount > 10)) {
                         Log.d(TAG, String.format("onLocationResult: validating loc with acc %s and retyCount: %d", location.getAccuracy(), retryCount));
+                        isAccurateLocRecvd = true;
                         fusedLocationClient.removeLocationUpdates(this);
                         validateUserLocation(location);
                         return;
