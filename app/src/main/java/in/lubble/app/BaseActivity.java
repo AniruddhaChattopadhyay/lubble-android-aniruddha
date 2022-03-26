@@ -74,7 +74,7 @@ public class BaseActivity extends AppCompatActivity {
         }
         FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
         crashlytics.setUserId(FirebaseAuth.getInstance().getUid());
-        if (FirebaseAuth.getInstance().getCurrentUser() != null && !(this instanceof WelcomeActivity) && !(this instanceof LoginActivity) &&  !(this instanceof LocationActivity)) {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null && !(this instanceof WelcomeActivity) && !(this instanceof LoginActivity) && !(this instanceof LocationActivity)) {
             // logged in
             try {
                 appUpdateManager = AppUpdateManagerFactory.create(BaseActivity.this);
@@ -84,7 +84,7 @@ public class BaseActivity extends AppCompatActivity {
                     ReferralUtils.generateBranchUrl(this, "msg_copy", false, new Branch.BranchLinkCreateListener() {
                         @Override
                         public void onLinkCreate(String url, BranchError error) {
-                            if (url != null) {
+                            if (url != null && error == null) {
                                 LubbleSharedPrefs.getInstance().setMsgCopyShareUrl(url);
                             }
                         }
@@ -95,7 +95,7 @@ public class BaseActivity extends AppCompatActivity {
                     ReferralUtils.generateBranchUrl(this, "msg_share", false, new Branch.BranchLinkCreateListener() {
                         @Override
                         public void onLinkCreate(String url, BranchError error) {
-                            if (url != null) {
+                            if (url != null && error == null) {
                                 LubbleSharedPrefs.getInstance().setMsgShareUrl(url);
                             }
                         }
@@ -249,6 +249,7 @@ public class BaseActivity extends AppCompatActivity {
 
     /**
      * Invoke this after onCreate()
+     *
      * @return status bar height, might be ZERO if invoked before views are drawn
      */
     public int getStatusBarHeight() {

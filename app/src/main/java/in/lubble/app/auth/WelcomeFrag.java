@@ -132,7 +132,7 @@ public class WelcomeFrag extends Fragment {
             public void run() {
                 handler.post(update);
             }
-        }, 100, 2000);
+        }, 2000, 2000);
 
     }
 
