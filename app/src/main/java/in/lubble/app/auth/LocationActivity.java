@@ -137,8 +137,11 @@ public class LocationActivity extends BaseActivity {
         phoneProgressBar = findViewById(R.id.progressbar_phone_reg);
 
         Analytics.triggerScreenEvent(this, this.getClass());
+    }
 
-        shareBtn.setOnClickListener(v -> onInviteClicked());
+    @Override
+    protected void onStart() {
+        super.onStart();shareBtn.setOnClickListener(v -> onInviteClicked());
         pulseIv.setVisibility(View.GONE);
         locIv.setVisibility(View.GONE);
         checkSystemLocPerm();
