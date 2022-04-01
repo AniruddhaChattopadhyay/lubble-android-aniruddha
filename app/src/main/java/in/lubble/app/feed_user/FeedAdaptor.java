@@ -64,7 +64,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.jetbrains.annotations.NotNull;
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -620,7 +621,13 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         long diffInDays = TimeUnit.MILLISECONDS.toDays(duration);
 
         if (diffInDays > 0) {
-            return diffInDays + "d";
+            if(diffInDays > 7){
+                DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
+                String strDate = dateFormat.format(timePosted);
+                return strDate;
+            }
+            else
+                return diffInDays + "d";
         } else if (diffInHours > 0) {
             return diffInHours + "hr";
         } else if (diffInMinutes > 0) {
