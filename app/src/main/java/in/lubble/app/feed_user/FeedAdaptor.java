@@ -63,8 +63,10 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import org.jetbrains.annotations.NotNull;
 import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -609,7 +611,9 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         });
         return new ConcatAdapter(FeedAdaptor.this, footer);
     }
-
+//    public String getMonth(int month) {
+//        return
+//    }
     private String getPostDateDisplay(Date timePosted) {
         Date timeNow = new Date(System.currentTimeMillis());
         long duration = timeNow.getTime() - timePosted.getTime();
@@ -621,8 +625,15 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
         if (diffInDays > 0) {
             if(diffInDays > 7){
-                DateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
-                String strDate = dateFormat.format(timePosted);
+//                DateFormat dateFormat = new SimpleDateFormat("dd");
+//                String strDay = dateFormat.format(timePosted);
+//                DateFormat dateFormat = new SimpleDateFormat("mm");
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(timePosted);
+                int month = cal.get(Calendar.MONTH);
+                int day = cal.get(Calendar.DAY_OF_MONTH);
+                String postMonth = new DateFormatSymbols().getMonths()[month];
+                String strDate = Integer.toString(day) + " " + postMonth.substring(0,3);
                 return strDate;
             }
             else
