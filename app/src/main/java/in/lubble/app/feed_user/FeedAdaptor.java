@@ -625,9 +625,6 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
         if (diffInDays > 0) {
             if(diffInDays > 7){
-//                DateFormat dateFormat = new SimpleDateFormat("dd");
-//                String strDay = dateFormat.format(timePosted);
-//                DateFormat dateFormat = new SimpleDateFormat("mm");
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(timePosted);
                 int month = cal.get(Calendar.MONTH);
