@@ -1,6 +1,7 @@
 package in.lubble.app.feed_user;
 
 import static android.view.View.GONE;
+import static androidx.recyclerview.widget.RecyclerView.NO_POSITION;
 import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
 import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
 import static in.lubble.app.utils.UiUtils.dpToPx;
@@ -28,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -290,7 +292,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         handleLinkPreview(activity, holder);
 
         //setting the tooltip for the first post
-        if (holder.getAbsoluteAdapterPosition() == 0 && !LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG()) {
+        if (holder.getBindingAdapterPosition() == 0 && !LubbleSharedPrefs.getInstance().getFEED_DOUBLE_TAP_LIKE_TOOLTIP_FLAG()) {
             prepareDoubleTapToLikeTooltip(holder, extras);
         }
     }
@@ -300,7 +302,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         super.onViewAttachedToWindow(holder);
         if (holder.exoPlayer != null) {
             holder.exoPlayer.setPlayWhenReady(true);
-            holder.muteBtn.setOnClickListener(v->{
+            holder.muteBtn.setOnClickListener(v -> {
 //                if(holder.exoPlayer.getVolume() == 0F) {
 //                    holder.exoPlayer.setVolume(0.75F);
 //                    holder.muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
@@ -314,12 +316,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
         }
     }
 
-    public void muteVideo(ImageButton muteBtn , ExoPlayer exoPlayer){
-        if(exoPlayer.getVolume() == 0F) {
+    public void muteVideo(ImageButton muteBtn, ExoPlayer exoPlayer) {
+        if (exoPlayer.getVolume() == 0F) {
             exoPlayer.setVolume(0.75F);
             muteBtn.setImageResource(R.drawable.ic_volume_up_black_24dp);
-        }
-        else{
+        } else {
             exoPlayer.setVolume(0F);
             muteBtn.setImageResource(R.drawable.ic_mute);
         }
@@ -688,13 +689,17 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                toggleLike(likeIv, likeAnimation, likeTv, getAbsoluteAdapterPosition());
+                toggleLike(likeIv, likeAnimation, likeTv, getBindingAdapterPosition());
                 return true;
             }
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                activity = getItem(getAbsoluteAdapterPosition());
+                if (getBindingAdapterPosition() == NO_POSITION) {
+                    Toast.makeText(context, R.string.all_try_again, Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                activity = getItem(getBindingAdapterPosition());
                 if (activity == null)
                     return false;
                 extras = activity.getExtra();
@@ -722,11 +727,11 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         break;
 
                     case R.id.cont_like:
-                        toggleLike(likeIv, likeAnimation, likeTv, getAbsoluteAdapterPosition());
+                        toggleLike(likeIv, likeAnimation, likeTv, getBindingAdapterPosition());
                         break;
 
                     case R.id.cont_reply:
-                        feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), getAbsoluteAdapterPosition());
+                        feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), getBindingAdapterPosition());
                         break;
 
                     case R.id.feed_author_photo:
@@ -758,7 +763,7 @@ public class FeedAdaptor extends PagingDataAdapter<EnrichedActivity, FeedAdaptor
                         break;
 
                     case R.id.comment_edit_text:
-                        feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), getAbsoluteAdapterPosition());
+                        feedListener.onReplyClicked(activity.getID(), activity.getForeignID(), activity.getActor().getID(), getBindingAdapterPosition());
                         break;
 
                     case R.id.tv_view_all_replies:
