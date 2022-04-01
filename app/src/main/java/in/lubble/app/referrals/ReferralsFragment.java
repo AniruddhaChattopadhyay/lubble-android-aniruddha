@@ -124,13 +124,12 @@ public class ReferralsFragment extends Fragment {
 
             }
         });
-
-        thisUserListener = getThisUserRef().addValueEventListener(new ValueEventListener() {
+        thisUserListener = getThisUserRef().child("coins").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                final ProfileData profileData = dataSnapshot.getValue(ProfileData.class);
-                if (profileData != null) {
-                    myCoinsTv.setText(String.valueOf(profileData.getCoins()));
+                final Long coins = dataSnapshot.getValue(Long.class);
+                if (coins != null) {
+                    myCoinsTv.setText(String.valueOf(coins));
                 }
             }
 
