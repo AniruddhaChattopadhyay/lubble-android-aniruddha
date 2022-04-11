@@ -173,7 +173,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     @Override
     public void onStart() {
         super.onStart();
-        showIntroCard();
+        //showIntroCard();
     }
 
     private void showIntroCard() {
@@ -497,7 +497,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
     public void onStop() {
         super.onStop();
         LubbleSharedPrefs.getInstance().setReplyBottomSheet(null);
-        getThisUserFeedIntroRef().removeEventListener(feedIntroRefListener);
+        if (feedIntroRefListener != null) {
+            getThisUserFeedIntroRef().removeEventListener(feedIntroRefListener);
+        }
     }
 
     @Override

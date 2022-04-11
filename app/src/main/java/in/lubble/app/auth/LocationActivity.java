@@ -141,7 +141,8 @@ public class LocationActivity extends BaseActivity {
 
     @Override
     protected void onStart() {
-        super.onStart();shareBtn.setOnClickListener(v -> onInviteClicked());
+        super.onStart();
+        shareBtn.setOnClickListener(v -> onInviteClicked());
         pulseIv.setVisibility(View.GONE);
         locIv.setVisibility(View.GONE);
         checkSystemLocPerm();
@@ -499,7 +500,9 @@ public class LocationActivity extends BaseActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        fusedLocationClient.removeLocationUpdates(locationCallback);
+        if (fusedLocationClient != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
+        }
     }
 
     private LocationRequest getLocationRequest() {

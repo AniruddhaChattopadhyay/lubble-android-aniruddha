@@ -152,6 +152,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
     }
 
     void getCredentials() {
+        swipeRefreshLayout.setRefreshing(true);
         final Endpoints endpoints = ServiceGenerator.createService(Endpoints.class);
         Call<Endpoints.StreamCredentials> call = endpoints.getStreamCredentials(feedName);//feedName
         call.enqueue(new Callback<Endpoints.StreamCredentials>() {
@@ -166,9 +167,12 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
                         initRecyclerView();
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
+                        swipeRefreshLayout.setRefreshing(false);
+                        Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                     }
 
                 } else if (isAdded()) {
+                    swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(getContext(), R.string.all_try_again, Toast.LENGTH_SHORT).show();
                 }
             }
@@ -176,6 +180,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
             @Override
             public void onFailure(Call<Endpoints.StreamCredentials> call, Throwable t) {
                 if (isAdded()) {
+                    swipeRefreshLayout.setRefreshing(false);
                     Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
