@@ -278,7 +278,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                         final Endpoints.StreamCredentials credentials = response.body();
                         try {
                             FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
-                            initRecyclerView();
+                            initRecyclerView(false);
                             initJoinedGroupRecyclerView();
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
@@ -296,13 +296,13 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                 }
             });
         } else {
-            initRecyclerView();
+            initRecyclerView(false);
             initJoinedGroupRecyclerView();
         }
 
     }
 
-    private void initRecyclerView() {
+    private void initRecyclerView(boolean isRefresh) {
         CloudFlatFeed timelineFeed = FeedServices.getTimelineClient().flatFeed("timeline", userId);
         if (adapter == null) {
             DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -325,7 +325,8 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         ));
         feedRV.clearOnScrollListeners();
         feedRV.addOnScrollListener(scrollListener);
-        viewModel.loadPaginatedActivities(timelineFeed, 10).observe(getViewLifecycleOwner(), pagingData -> {
+        String algo = isRefresh ? null : "lbl_" + LubbleSharedPrefs.getInstance().getLubbleId();
+        viewModel.loadPaginatedActivities(timelineFeed, 10, algo).observe(getViewLifecycleOwner(), pagingData -> {
             //layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
@@ -410,8 +411,9 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
 
     @Override
     public void onRefresh() {
-        initRecyclerView();
+        initRecyclerView(true);
         initJoinedGroupRecyclerView();
+        Analytics.triggerEvent(AnalyticsEvents.FEED_REFRESHED, requireContext());
     }
 
     @Override
@@ -446,7 +448,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_NEW_POST && resultCode == RESULT_OK) {
             // Posted a new post -> refresh list
-            initRecyclerView();
+            initRecyclerView(false);
             getThisUserFeedIntroRef().setValue(Boolean.TRUE);
             introMcv.setVisibility(View.GONE);
             isIntroStarted = false;
@@ -455,7 +457,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             }
         } else if (requestCode == REQ_CODE_POST_ACTIV && resultCode == RESULT_OK) {
             //Returned from individual post -> refresh list to update reactions
-            initRecyclerView();
+            initRecyclerView(false);
         }
     }
 

@@ -46,6 +46,7 @@ import in.lubble.app.GlideApp;
 import in.lubble.app.LubbleSharedPrefs;
 import in.lubble.app.R;
 import in.lubble.app.analytics.Analytics;
+import in.lubble.app.analytics.AnalyticsEvents;
 import in.lubble.app.feed_post.FeedPostActivity;
 import in.lubble.app.feed_user.AddPostForFeed;
 import in.lubble.app.feed_user.FeedAdaptor;
@@ -164,7 +165,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
                     final Endpoints.StreamCredentials credentials = response.body();
                     try {
                         FeedServices.init(credentials.getApi_key(), credentials.getUser_token());
-                        initRecyclerView();
+                        initRecyclerView(false);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                         swipeRefreshLayout.setRefreshing(false);
@@ -187,7 +188,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
         });
     }
 
-    private void initRecyclerView() {
+    private void initRecyclerView(boolean isRefresh) {
         CloudFlatFeed groupFeed;
         if (feedName.toLowerCase(Locale.ROOT).startsWith("introductions")) {
             groupFeed = FeedServices.client.flatFeed("group_locality", feedName);
@@ -215,7 +216,8 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
                 processTrackedPosts(adapter.snapshot().getItems(), visibleState, "group:" + feedName, GroupFeedFrag.class.getSimpleName());
             });
         }
-        viewModel.loadPaginatedActivities(groupFeed, 10).observe(this, pagingData -> {
+        String algo = isRefresh ? null : "lbl_" + LubbleSharedPrefs.getInstance().getLubbleId();
+        viewModel.loadPaginatedActivities(groupFeed, 10, algo).observe(this, pagingData -> {
             layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
@@ -342,7 +344,8 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
 
     @Override
     public void onRefresh() {
-        initRecyclerView();
+        initRecyclerView(true);
+        Analytics.triggerEvent(AnalyticsEvents.FEED_REFRESHED, requireContext());
     }
 
     @Override

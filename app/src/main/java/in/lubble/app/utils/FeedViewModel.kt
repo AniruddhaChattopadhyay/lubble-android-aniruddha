@@ -34,10 +34,10 @@ class FeedViewModel : ViewModel() {
         liveData.postValue(visibleState)
     }
 
-    fun loadPaginatedActivities(cloudFlatFeed: CloudFlatFeed, limit: Int): LiveData<PagingData<EnrichedActivity>> {
+    fun loadPaginatedActivities(cloudFlatFeed: CloudFlatFeed, limit: Int, rankingAlgo: String?): LiveData<PagingData<EnrichedActivity>> {
         val pager: Pager<Int, EnrichedActivity> = Pager(
-                PagingConfig(limit, 1), null,
-                { FeedPagingSource(cloudFlatFeed, limit) })
+                PagingConfig(limit, 1), null
+        ) { FeedPagingSource(cloudFlatFeed, limit, rankingAlgo) }
 
         return pager.liveData.cachedIn(viewModelScope)
     }
