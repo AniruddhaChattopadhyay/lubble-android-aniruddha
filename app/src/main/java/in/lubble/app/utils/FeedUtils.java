@@ -1,5 +1,9 @@
 package in.lubble.app.utils;
 
+import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
+import static in.lubble.app.utils.FileUtils.saveImageInGallery;
+import static in.lubble.app.utils.UiUtils.dpToPx;
+
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -14,9 +18,7 @@ import androidx.core.content.FileProvider;
 
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
@@ -32,10 +34,6 @@ import in.lubble.app.analytics.Analytics;
 import in.lubble.app.analytics.AnalyticsEvents;
 import io.getstream.core.models.Content;
 import io.getstream.core.models.EnrichedActivity;
-
-import static in.lubble.app.Constants.MSG_WATERMARK_TEXT;
-import static in.lubble.app.utils.FileUtils.saveImageInGallery;
-import static in.lubble.app.utils.UiUtils.dpToPx;
 
 public class FeedUtils {
 
