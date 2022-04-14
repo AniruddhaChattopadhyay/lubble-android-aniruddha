@@ -344,7 +344,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
         feedRV.addOnScrollListener(scrollListener);
         String algo = isRefresh ? null : "lbl_" + LubbleSharedPrefs.getInstance().getLubbleId();
         viewModel.loadPaginatedActivities(timelineFeed, 10, algo).observe(getViewLifecycleOwner(), pagingData -> {
-            layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
         //layoutManager.scrollToPosition(0);
@@ -379,6 +378,7 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             }
         } else {
             swipeRefreshLayout.setRefreshing(false);
+            layoutManager.scrollToPosition(0);
         }
     }
 

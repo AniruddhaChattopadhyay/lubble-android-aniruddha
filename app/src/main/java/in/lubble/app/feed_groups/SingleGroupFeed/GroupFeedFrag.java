@@ -229,13 +229,11 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
             feedRV.clearOnScrollListeners();
             feedRV.addOnScrollListener(scrollListener);
             viewModel.getDistinctLiveData().observe(this, visibleState -> {
-                layoutManager.scrollToPosition(0);
                 processTrackedPosts(adapter.snapshot().getItems(), visibleState, "group:" + feedName, GroupFeedFrag.class.getSimpleName());
             });
         }
         String algo = isRefresh ? null : "lbl_" + LubbleSharedPrefs.getInstance().getLubbleId();
         viewModel.loadPaginatedActivities(groupFeed, 10, algo).observe(this, pagingData -> {
-            layoutManager.scrollToPosition(0);
             adapter.submitData(getViewLifecycleOwner().getLifecycle(), pagingData);
         });
         layoutManager.scrollToPosition(0);
@@ -294,6 +292,7 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
             }
         } else {
             swipeRefreshLayout.setRefreshing(false);
+            layoutManager.scrollToPosition(0);
         }
     }
 
