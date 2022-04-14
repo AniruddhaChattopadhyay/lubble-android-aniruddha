@@ -76,7 +76,6 @@ public class FeedUtils {
 
                                 @Override
                                 public void onLoadCleared(@Nullable Drawable placeholder) {
-                                    shareListener.onShareReady(sharingIntent);
                                 }
                             });
                 } else {

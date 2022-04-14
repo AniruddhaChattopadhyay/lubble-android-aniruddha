@@ -2,11 +2,14 @@ package in.lubble.app.feed_post;
 
 import static android.view.View.GONE;
 import static in.lubble.app.Constants.MEDIA_TYPE;
+import static in.lubble.app.feed_post.FeedPostFragPermissionsDispatcher.startShareWithPermissionCheck;
 import static in.lubble.app.utils.DateTimeUtils.SERVER_DATE_TIME;
 import static in.lubble.app.utils.DateTimeUtils.stringTimeToEpoch;
 import static in.lubble.app.utils.FeedUtils.getMsgSuffix;
+import static in.lubble.app.utils.FileUtils.showStoragePermRationale;
 import static in.lubble.app.utils.UiUtils.dpToPx;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
@@ -106,10 +109,17 @@ import io.getstream.core.options.Filter;
 import io.getstream.core.options.Limit;
 import me.saket.bettermovementmethod.BetterLinkMovementMethod;
 import okhttp3.RequestBody;
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@RuntimePermissions
 public class FeedPostFrag extends Fragment {
 
     private static final String ARG_POST_ID = "LBL_ARG_POST_ID";
@@ -342,9 +352,7 @@ public class FeedPostFrag extends Fragment {
                                     trackPostImpression(enrichedActivity);
 
                                     shareLayout.setOnClickListener(v -> {
-                                        FeedUtils.requestPostShareIntent(GlideApp.with(requireContext()),
-                                                enrichedActivity, extras,
-                                                this::startShareFlow);
+                                        startShareWithPermissionCheck(FeedPostFrag.this, enrichedActivity, extras);
                                     });
 
                                     moreMenuIv.setOnClickListener(v -> {
@@ -367,6 +375,11 @@ public class FeedPostFrag extends Fragment {
             FirebaseCrashlytics.getInstance().recordException(e);
             e.printStackTrace();
         }
+    }
+
+    @NeedsPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    public void startShare(EnrichedActivity enrichedActivity, Map<String, Object> extras) {
+        FeedUtils.requestPostShareIntent(GlideApp.with(requireContext()), enrichedActivity, extras, this::startShareFlow);
     }
 
     public void muteVideo(ExoPlayer exoPlayer) {
@@ -864,4 +877,25 @@ public class FeedPostFrag extends Fragment {
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // NOTE: delegate the permission handling to generated method
+        FeedPostFragPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    @OnShowRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showRationaleForCamera(final PermissionRequest request) {
+        showStoragePermRationale(getContext(), request);
+    }
+
+    @OnPermissionDenied(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showDeniedForCamera() {
+        Toast.makeText(getContext(), R.string.storage_perm_denied_text, Toast.LENGTH_SHORT).show();
+    }
+
+    @OnNeverAskAgain(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    void showNeverAskForCamera() {
+        Toast.makeText(getContext(), R.string.storage_perm_never_text, Toast.LENGTH_LONG).show();
+    }
 }
