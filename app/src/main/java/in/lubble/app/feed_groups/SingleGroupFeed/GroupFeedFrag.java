@@ -292,7 +292,6 @@ public class GroupFeedFrag extends Fragment implements FeedAdaptor.FeedListener,
             }
         } else {
             swipeRefreshLayout.setRefreshing(false);
-            layoutManager.scrollToPosition(0);
         }
     }
 

@@ -378,7 +378,6 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
             }
         } else {
             swipeRefreshLayout.setRefreshing(false);
-            layoutManager.scrollToPosition(0);
         }
     }
 
