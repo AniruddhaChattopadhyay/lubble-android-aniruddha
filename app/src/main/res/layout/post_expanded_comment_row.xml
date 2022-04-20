@@ -43,4 +43,14 @@
         android:textColor="@color/black"
         tools:text="@tools:sample/lorem/random" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/like_on_comment_tv"
+        android:layout_below="@+id/comment_textView"
+        android:text="0 likes"
+        android:textSize="12sp"
+        android:padding="4dp"
+        app:drawableLeftCompat="@drawable/ic_favorite_border_light"
+        android:drawablePadding="10dp"/>
 </RelativeLayout>
