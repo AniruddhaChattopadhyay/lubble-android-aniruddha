@@ -295,8 +295,10 @@ public class FeedFrag extends Fragment implements FeedAdaptor.FeedListener, Repl
                         final Endpoints.StreamCredentials credentials = response.body();
                         try {
                             FeedServices.initTimelineClient(credentials.getApi_key(), credentials.getUser_token());
-                            initRecyclerView(false);
-                            initJoinedGroupRecyclerView();
+                            if (isAdded()) {
+                                initRecyclerView(false);
+                                initJoinedGroupRecyclerView();
+                            }
                         } catch (MalformedURLException e) {
                             e.printStackTrace();
                         }
