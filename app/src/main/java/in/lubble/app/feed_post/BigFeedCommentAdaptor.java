@@ -170,6 +170,7 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
         if(!toogleLikeList.get(position)){
             likeIv.setVisibility(View.GONE);
             likeAnimation.setVisibility(View.VISIBLE);
+            likeAnimation.playAnimation();
             likeAnimation.addAnimatorListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animator) {
