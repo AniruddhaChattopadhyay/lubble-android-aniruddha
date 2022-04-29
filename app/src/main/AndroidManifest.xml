@@ -525,6 +525,8 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDPTz-m602NrCQSXijKXL6v_BOUdJNeOHg" /> <!-- This is for removing Firebase conflict for verification of app links -->
+        <meta-data android:name= "delivery_metrics_exported_to_big_query_enabled"
+            android:value="true"/>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
