@@ -2,12 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/comment_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:id="@+id/comment_layout">
+    android:paddingBottom="8dp">
 
     <ImageView
         android:id="@+id/iv_comment_profile_pic"
@@ -20,8 +20,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
-        android:textColor="@color/black"
         android:layout_toRightOf="@id/iv_comment_profile_pic"
+        android:textColor="@color/black"
         android:textStyle="bold"
         tools:text="User Name" />
 
@@ -29,8 +29,8 @@
         android:id="@+id/tv_comment_timestamp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="12sp"
         android:layout_alignParentRight="true"
+        android:textSize="12sp"
         tools:text="4hr ago" />
 
     <androidx.emoji.widget.EmojiTextView
@@ -42,20 +42,21 @@
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:textColor="@color/black"
+        tools:maxLines="8"
         tools:text="@tools:sample/lorem/random" />
 
     <LinearLayout
         android:id="@+id/cont_like_on_comment"
-        android:layout_below="@id/comment_textView"
-        android:layout_toRightOf="@+id/iv_comment_profile_pic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/comment_textView"
         android:layout_gravity="center"
-        android:layout_weight="1"
+        android:layout_marginStart="-8dp"
+        android:layout_marginTop="-6dp"
+        android:layout_toEndOf="@+id/iv_comment_profile_pic"
         android:gravity="center"
         android:orientation="horizontal"
         android:paddingLeft="2dp"
-        android:layout_marginLeft="-12dp"
         android:paddingRight="2dp">
 
         <RelativeLayout
@@ -65,16 +66,16 @@
 
             <ImageView
                 android:id="@+id/like_imageview"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_centerInParent="true"
-                android:padding="15dp"
+                android:padding="12dp"
                 app:srcCompat="@drawable/ic_favorite_border_24dp" />
 
             <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/anim_comment_like"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_alignParentTop="true"
                 android:layout_centerInParent="true"
                 android:visibility="gone"
@@ -88,23 +89,13 @@
             android:id="@+id/tv_like"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="-8dp"
             android:gravity="center"
             android:minEms="1"
+            android:text="Like"
             android:textSize="12sp"
             android:visibility="visible"
-            android:layout_marginLeft="-12dp"
-            android:text="like"
             tools:text="Like" />
 
     </LinearLayout>
-<!--    <TextView-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:id="@+id/like_on_comment_tv"-->
-<!--        android:layout_below="@+id/comment_textView"-->
-<!--        android:text="0 likes"-->
-<!--        android:textSize="12sp"-->
-<!--        android:padding="4dp"-->
-<!--        app:drawableLeftCompat="@drawable/ic_favorite_border_light"-->
-<!--        android:drawablePadding="10dp"/>-->
 </RelativeLayout>
