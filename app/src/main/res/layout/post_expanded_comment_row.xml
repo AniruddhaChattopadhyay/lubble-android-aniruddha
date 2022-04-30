@@ -6,7 +6,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingBottom="8dp"
+    android:id="@+id/comment_layout">
 
     <ImageView
         android:id="@+id/iv_comment_profile_pic"
@@ -36,11 +37,74 @@
         android:id="@+id/comment_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@id/comment_user_display_name"
         android:layout_below="@id/comment_user_display_name"
+        android:layout_alignLeft="@id/comment_user_display_name"
         android:ellipsize="end"
         android:gravity="center_vertical"
         android:textColor="@color/black"
         tools:text="@tools:sample/lorem/random" />
 
+    <LinearLayout
+        android:id="@+id/cont_like_on_comment"
+        android:layout_below="@id/comment_textView"
+        android:layout_toRightOf="@+id/iv_comment_profile_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingLeft="2dp"
+        android:layout_marginLeft="-12dp"
+        android:paddingRight="2dp">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/like_imageview"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerInParent="true"
+                android:padding="15dp"
+                app:srcCompat="@drawable/ic_favorite_border_24dp" />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/anim_comment_like"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                app:lottie_autoPlay="false"
+                app:lottie_loop="false"
+                app:lottie_rawRes="@raw/feed_like_anim"
+                tools:visibility="visible" />
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:minEms="1"
+            android:textSize="12sp"
+            android:visibility="visible"
+            android:layout_marginLeft="-12dp"
+            android:text="like"
+            tools:text="Like" />
+
+    </LinearLayout>
+<!--    <TextView-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:id="@+id/like_on_comment_tv"-->
+<!--        android:layout_below="@+id/comment_textView"-->
+<!--        android:text="0 likes"-->
+<!--        android:textSize="12sp"-->
+<!--        android:padding="4dp"-->
+<!--        app:drawableLeftCompat="@drawable/ic_favorite_border_light"-->
+<!--        android:drawablePadding="10dp"/>-->
 </RelativeLayout>
