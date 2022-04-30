@@ -182,4 +182,6 @@ public class AnalyticsEvents {
     public static final String FEED_VIDEO_COMPRESS_SUCCESS = "FEED_VIDEO_COMPRESS_SUCCESS";
     public static final String FEED_VIDEO_COMPRESS_FAILED = "FEED_VIDEO_COMPRESS_FAILED";
     public static final String FEED_VIDEO_COMPRESS_BLOATED = "FEED_VIDEO_COMPRESS_BLOATED";
+
+    public static final String FEED_REFRESHED = "FEED_REFRESHED";
 }
