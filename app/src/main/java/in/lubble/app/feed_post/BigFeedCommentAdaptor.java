@@ -51,6 +51,7 @@ import in.lubble.app.utils.DateTimeUtils;
 import io.getstream.cloud.CloudClient;
 import io.getstream.core.LookupKind;
 import io.getstream.core.exceptions.StreamException;
+import io.getstream.core.models.FeedID;
 import io.getstream.core.models.Reaction;
 import io.getstream.core.options.Limit;
 
@@ -193,12 +194,12 @@ public class BigFeedCommentAdaptor extends RecyclerView.Adapter<BigFeedCommentAd
                 }
             });
             try {
-                newReactionList.add(position,timelineClient.reactions().addChild(uid,"like", reaction.getId()).get());
+                String notificationUserFeedId = "notification:" + reaction.getUserID();
+                timelineClient.reactions().addChild(uid,"like", reaction.getId(),
+                        new FeedID(notificationUserFeedId)).whenComplete((reactionHere,throwable)->{
+                    newReactionList.add(position,reactionHere);
+                });
             } catch (StreamException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             numOfLikes++;
